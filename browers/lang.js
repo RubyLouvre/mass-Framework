@@ -2,7 +2,7 @@
 // 类型扩展模块 by 司徒正美
 //=========================================
 
-mass.define("lang",  function(){
+dom.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
     //dom.log("已加载lang模块");
     var global = this,
     rascii = /[^\x00-\xff]/g,
@@ -15,14 +15,14 @@ mass.define("lang",  function(){
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
-    mass.mix(mass,{
+    dom.mix(dom,{
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject : function (obj){
-            if(!mass.type(obj,"Object") || mass.isNative(obj,"reload") ){
+            if(!dom.type(obj,"Object") || dom.isNative(obj,"reload") ){
                 return false;
-            }
+            }     
             try{//不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
-                for(var key in obj)//只有一个方法是来自其原型立即返回flase
+                for(var key in obj)//只有一个方法是来自其原型立即返回flase   
                     if(!String2.hasOwnProperty.call(obj,key)){//不能用obj.hasOwnProperty自己查自己
                         return false
                     }
@@ -51,14 +51,14 @@ mass.define("lang",  function(){
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
         isArrayLike :  function (obj) {
-            if(!obj || obj.document || obj.nodeType || mass.type(obj,"Function")) return false;
+            if(!obj || obj.document || obj.nodeType || dom.type(obj,"Function")) return false;
             return isFinite(obj.length) ;
         },
 
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
         format : function(str, object){
-            var array = mass.slice(arguments,1);
+            var array = dom.slice(arguments,1);
             return str.replace(rformat, function(match, name){
                 if (match.charAt(0) == '\\')
                     return match.slice(1);
@@ -167,7 +167,7 @@ mass.define("lang",  function(){
                 //使用new Function生成一个JSON对象
                 return (new Function( "return " + data ))();
             }
-            mass.error( "Invalid JSON: " + data );
+            dom.error( "Invalid JSON: " + data );
         },
 
         // Cross-browser xml parsing
@@ -185,24 +185,24 @@ mass.define("lang",  function(){
                 xml = undefined;
             }
             if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
-                mass.log( "Invalid XML: " + data );
+                dom.log( "Invalid XML: " + data );
             }
             return xml;
         }
 
     }, false);
 
-    "Array,Function".replace(mass.rword,function(name){
-        mass["is"+name] = function(obj){
+    "Array,Function".replace(dom.rword,function(name){
+        dom["is"+name] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+name+"]";
         }
     });
 
     if(Array.isArray){
-        mass.isArray = Array.isArray;
+        dom.isArray = Array.isArray;
     }
-    var rescape = /([-.*+?^${}()|[\]\/\\])/g
-    var String2 = mass.String = {
+
+    var String2 = dom.String = {
         //判断一个字符串是否包含另一个字符
         contains: function(string, separator){
             return (separator) ? !!~(separator + this + separator).indexOf(separator + string + separator) : !!~this.indexOf(string);
@@ -261,20 +261,20 @@ mass.define("lang",  function(){
             return parseFloat(this);
         },
         //dom.lang("é").toHex() ==> \xE9
-        toHex: function() {
+        toHex: function() { 
             var txt = '',str = this;
             for (var i = 0; i < str.length; i++) {
                 if (str.charCodeAt(i).toString(16).toUpperCase().length < 2) {
-                    txt += '\\x0' + str.charCodeAt(i).toString(16).toUpperCase() ;
+                    txt += '\\x0' + str.charCodeAt(i).toString(16).toUpperCase() ; 
                 } else {
                     txt += '\\x' + str.charCodeAt(i).toString(16).toUpperCase() ;
                 }
             }
-            return txt;
+            return txt; 
         },
         //http://stevenlevithan.com/regex/xregexp/
         escapeRegExp: function(){
-            return this.replace(rescape, '\\$1');
+            return this.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
@@ -309,7 +309,7 @@ mass.define("lang",  function(){
         }
     };
 
-    var Array2 = mass.Array  = {
+    var Array2 = dom.Array  = {
         //深拷贝当前数组
         clone: function(){
             var i = this.length, result = [];
@@ -317,7 +317,7 @@ mass.define("lang",  function(){
             return result;
         },
         first: function(fn,scope){
-            if(mass.type(fn,"Function")){
+            if(dom.type(fn,"Function")){
                 for(var i=0, n = this.length;i < n;i++){
                     if(fn.call(scope,this[i],i,this)){
                         return this[i];
@@ -329,7 +329,7 @@ mass.define("lang",  function(){
             }
         },
         last: function(fn, scope) {
-            if(mass.type(fn,"Function")){
+            if(dom.type(fn,"Function")){
                 for (var i=this.length-1; i > -1; i--) {
                     if (fn.call(scope, this[i], i, this)) {
                         return this[i];
@@ -376,7 +376,7 @@ mass.define("lang",  function(){
         },
         //只有原数组不存在才添加它
         ensure: function() {
-            var args = mass.slice(arguments);
+            var args = dom.slice(arguments);
             args.forEach(function(el){
                 if (!~this.indexOf(el) ) this.push(el);
             },this);
@@ -429,7 +429,7 @@ mass.define("lang",  function(){
         union :function(array){
             var arr = this;
             arr = arr.concat(array);
-            return mass.Array.unique.call(arr);
+            return dom.Array.unique.call(arr);
         },
         //取交集
         intersect:function(array){
@@ -454,7 +454,7 @@ mass.define("lang",  function(){
         flatten: function() {
             var result = [],self = Array2.flatten;
             this.forEach(function(value) {
-                if (mass.isArray(value)) {
+                if (dom.isArray(value)) {
                     result = result.concat(self.call(value));
                 } else {
                     result.push(value);
@@ -464,8 +464,8 @@ mass.define("lang",  function(){
         }
     }
     Array2.without = Array2.diff;
-    var Math2 = "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".match(mass.rword);
-    var Number2 = mass.Number ={
+    var Math2 = "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".match(dom.rword);
+    var Number2 = dom.Number ={
         times: function(fn, bind) {
             for (var i=0; i < this; i++)
                 fn.call(bind, i);
@@ -519,7 +519,7 @@ mass.define("lang",  function(){
     });
 
     function cloneOf(item){
-        switch(mass.type(item)){
+        switch(dom.type(item)){
             case "Array":
                 return Array2.clone.call(item);
             case "Object":
@@ -538,7 +538,7 @@ mass.define("lang",  function(){
         return source;
     };
 
-    var Object2 = mass.Object = {
+    var Object2 = dom.Object = {
         //根据传入数组取当前对象相关的键值对组成一个新对象返回
         subset: function(keys){
             var results = {};
@@ -553,8 +553,8 @@ mass.define("lang",  function(){
             for(var name in this){
                 fn.call(scope,this[name],name,this);
             }
-            if(mass.DONT_ENUM && this.hasOwnProperty){
-                for(var i = 0; name = mass.DONT_ENUM[i++]; ){
+            if(dom.DONT_ENUM && this.hasOwnProperty){
+                for(var i = 0; name = dom.DONT_ENUM[i++]; ){
                     this.hasOwnProperty(name) &&  fn.call(scope,this[name],name,this);
                 }
             }
@@ -602,12 +602,12 @@ mass.define("lang",  function(){
         Number : ["toLocaleString", "toFixed", "toExponential", "toPrecision", "toJSON"],
         Object : ["toLocaleString", "hasOwnerProperty", "isPrototypeOf", "propertyIsEnumerable" ]
     }
-    var adjustOne = mass.oneObject("String,Array,Number,Object"),
-    arrayLike = mass.oneObject("NodeList,Arguments,Object")
-    var Lang = mass.lang = function(obj){
-        var type = mass.type(obj), chain = this;
+    var adjustOne = dom.oneObject("String,Array,Number,Object"),
+    arrayLike = dom.oneObject("NodeList,Arguments,Object")
+    var Lang = dom.lang = function(obj){
+        var type = dom.type(obj), chain = this;
         if(arrayLike[type] &&  isFinite(obj.length)){
-            obj = mass.slice(obj);
+            obj = dom.slice(obj);
             type = "Array";
         }
         if(adjustOne[type]){
@@ -631,24 +631,24 @@ mass.define("lang",  function(){
         }
     };
     function force(type){
-        var methods = inner[type].concat(Object.keys(mass[type]));
+        var methods = inner[type].concat(Object.keys(dom[type]));
         methods.forEach(function(name){
             proto[name] = function(){
                 var obj = this.target;
-                var method = obj[name] ? obj[name] : mass[this.type][name];
+                var method = obj[name] ? obj[name] : dom[this.type][name];
                 var result = method.apply(obj,arguments);
                 return result;
             }
             proto[name+"X"] = function(){
                 var obj = this.target;
-                var method = obj[name] ? obj[name] : mass[this.type][name];
+                var method = obj[name] ? obj[name] : dom[this.type][name];
                 var result = method.apply(obj,arguments);
                 return Lang.call(this,result) ;
             }
         });
         return force;
     };
-    Lang.force = force("Array")("String")("Number")("Object");
+    force("Array")("String")("Number")("Object");
     return Lang;
 });
 
