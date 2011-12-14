@@ -17,7 +17,56 @@ mass Framework
 <li>CSS3 transform2D支持。</li>
 </ol>
 <p>后端部分，核心功能是手脚架，热部署，拦截器群集，MVC，ORM。它正在编写中，前三大功能基本成型。。。。</p>
-
+<h3>mass的合并</h3>
+<ol>
+<li>将模块加载模块dom.js里面的内容先复制到一个临时文件</li>
+<li>在其最后一行"})(this,this.document);" 与倒数第二行" dom.exports("dom"+postfix);"插入标识模块已加域的代码。
+其代码如下：<br/>
+<pre>
+    var module_value = {
+        state:2
+    };
+    var list = "ecma,lang,spec,support,class,data,query,node,css_ie,css,dispatcher,event,attr,fx,ajax".match(dom.rword);
+    for(var i=0, module;module = list[i++];){
+        map["@"+module] = module_value;
+    }
+</pre>
+list里面的为要合并的模块名
+</li>
+<li>将其他模块里面的内容直接拷到上面的代码之下。</li>
+</ol>
+<p>成功后，整个代码结构如下：</p>
+<pre>
+(function(global , DOC){
+//这是最核心的模块加载模块
+//XXXXXXXXXXX
+ //然后加上这样一段
+    var module_value = {
+        state:2
+    };
+    var list = "ecma,lang,spec,support,class,data,query,node,css_ie,css,dispatcher,event,attr,fx,ajax".match(dom.rword);
+    for(var i=0, module;module = list[i++];){
+        map["@"+module] = module_value;
+    }
+//然后把要合并的JS文件的内容直接抽取出来放在下面
+   dom.define("ecma", function(){
+//XXXXXXXXXXXXXX
+});
+   dom.define("lang", function(){
+//XXXXXXXXXXXXXX
+})
+   dom.define("class", function(){
+//XXXXXXXXXXXXXX
+})
+   dom.define("data", function(){
+//XXXXXXXXXXXXXX
+})
+   dom.define("node", function(){
+//XXXXXXXXXXXXXX
+})
+//....
+})(this,this.document)
+</pre>
 <p>by 司徒正美 （zhongqincheng）</p>
-<p>2012.11.15</p>
+<p>2011.11.15</p>
  <a href="http://www.cnblogs.com/rubylouvre/">http://www.cnblogs.com/rubylouvre/</a>
