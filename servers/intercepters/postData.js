@@ -4,14 +4,15 @@ mass.define("intercepters/postData","querystring",function(qs){
         console.log("进入postData回调");
         req.body = req.body || {};
         if ( req._body ||  /GET|HEAD/.test(req.method) || 'application/x-www-form-urlencoded' !== req.mime ){
-            req.emit("next_intercepter",req,res)
+            return true;
         }
         var buf = '';
         req.setEncoding('utf8');
-        req.on('data', function(chunk){
+        function buildBuffer(chunk){
             buf += chunk
-        });
-        req.on('end', function(){
+        }
+        req.on('data', buildBuffer);
+        req.once('end',function(){
             try {
                 if(buf != ""){
                     req.body = qs.parse(buf);
@@ -20,8 +21,9 @@ mass.define("intercepters/postData","querystring",function(qs){
                 req.emit("next_intercepter",req,res)
             } catch (err){
                 req.emit("next_intercepter",req,res,err)
+            }finally{
+                req.removeListener("data",buildBuffer)
             }
-        });
-    })
-})
-
+        })
+    });
+});
