@@ -369,7 +369,9 @@
                 }
             });
             req.emit("next_intercepter",req, res);
+          
         }).listen(8888);
+           console.log("start server in 8888 port")
     });
  
 })();
