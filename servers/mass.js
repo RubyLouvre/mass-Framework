@@ -68,6 +68,7 @@
             }
         },
         mkdirSync:function(url,mode,cb){
+            url = url.replace(/\\/g,"/")
             var path = require("path"), arr = url.split("/");
             mode = mode || 0755;
             cb = cb || mass.noop;
@@ -79,7 +80,8 @@
             }
             function inner(cur){
                 if(!path.existsSync(cur)){//不存在就创建一个
-                    fs.mkdirSync(cur, mode)
+                    fs.mkdirSync(cur, mode);
+                    mass.log("<code style='color:green'>创建目录"+cur+"成功</code>",true);
                 }
                 if(arr.length){
                     inner(cur + "/"+arr.shift());
@@ -320,62 +322,56 @@
         md5: function(str, encoding){
             return require('crypto').createHash('md5').update(str).digest(encoding || 'hex');
         },
-        configs:{}
+        settings:{}
     });
     
     exports.mass = global.mass = mass;
-    //--------开始创建网站---------
-    //你想建立的网站的名字（请修正这里）
-    mass.appname = "jslouvre";
-    //在哪个目录下建立网站（请修正这里）
-    mass.approot = process.cwd();
-    //用于修正路径的方法,可以传N个参数
-    mass.adjustPath = function(){
-        [].unshift.call(arguments,mass.approot, mass.appname);
-        return require("path").join.apply(null,arguments)
-    }
-    var dir = mass.adjustPath("")
-    mass.rmdirSync(dir);//......
-    mass.require("http,fs,path,scaffold,intercepters",function(http,fs,path,scaffold,intercepters){
-        mass.log("<code style='color:blue;'>=========================</code>",true)
-        if(path.existsSync(dir)){
-            mass.log("<code style='color:red'>此网站已存在</code>",true);
-        }else{
-            fs.mkdir(dir,0755)
-            mass.log("<code style='color:green'>开始利用内部模板建立您的网站……</code>",true);
-        }
-        global.mapper = scaffold(dir);//取得路由系统
-        http.createServer(function(req, res) {
-            var arr = intercepters.concat();
-            //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-            req.on("err500",function(err){
-                res.writeHead(500, {
-                    "Content-Type": "text/html"
+    //必须先加载settings模块
+    mass.require("settings,construct",function(settings,construct ){
+        mass.settings = settings;
+        var dir = mass.adjustPath("")
+        mass.rmdirSync(dir);//......
+        mass.require("http,fs,path,scaffold,intercepters",function(http,fs,path,scaffold,intercepters){
+            if(path.existsSync(dir)){
+                mass.log("<code style='color:red'>此网站已存在</code>",true);
+            }else{
+                fs.mkdir(dir,0755)
+                mass.log("<code style='color:green'>开始利用内部模板建立您的网站……</code>",true);
+            }
+            global.mapper = scaffold(dir);//取得路由系统
+            http.createServer(function(req, res) {
+                console.log("req.url  :  "+req.url)
+                var arr = intercepters.concat();
+                //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
+                req.on("err500",function(err){
+                    res.writeHead(500, {
+                        "Content-Type": "text/html"
+                    });
+                    var html = fs.readFileSync(mass.adjustPath("public/500.html"))
+                    var arr = []
+                    for(var i in err){
+                        arr.push("<li>"+i+"  :   "+err[i]+" </li>")
+                    }
+                    res.write((html+"").replace("{{url}}",arr.join("")));
+                    res.end();
                 });
-                var html = fs.readFileSync(mass.adjustPath("public/500.html"))
-                var arr = []
-                for(var i in err){
-                    arr.push("<li>"+i+"  :   "+err[i]+" </li>")
-                }
-                res.write((html+"").replace("{{url}}",arr.join("")));
-                res.end();
-            });
-            req.on("next_intercepter",function(){
-                try{
-                    var next = arr.shift();
-                    next && next.apply(null,arguments)
-                }catch(err){
-                    req.emit("err500",err);
-                }
-            });
-            req.emit("next_intercepter",req, res);
+                req.on("next_intercepter",function(){
+                    try{
+                        var next = arr.shift();
+                        next && next.apply(null,arguments)
+                    }catch(err){
+                        req.emit("err500",err);
+                    }
+                });
+                req.emit("next_intercepter",req, res);
           
-        }).listen(8888);
-           console.log("start server in 8888 port")
-    });
- 
+            }).listen(settings.port);
+            mass.log("start server in "+settings.port+" port")
+        });
+    })
+//--------开始创建网站---------
 })();
-//mass.app("yyy")
+
 
 
 
