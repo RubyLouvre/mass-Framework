@@ -1,18 +1,15 @@
-mass.define("scaffold","fs,path,router",function(fs,path,Router){
-    var dirs = [ 'app/',
+mass.define("scaffold","fs,path,router,heredocument",function(fs,path,Router){
+    var dirs = [ 
     'app/models/',
     'app/controllers/',
     'app/observers/',
     'app/helpers/',
-    'app/views/',
     'app/views/layouts/',
     'db/',
     'log/',
-    'public/',
     'public/stylesheets/',
     'public/javascripts/',
     'node_modules/',
-    'config/',
     'config/locales/',
     'config/initializers/',
     'config/environments/'
@@ -36,9 +33,11 @@ mass.define("scaffold","fs,path,router",function(fs,path,Router){
         return createFile(filename, text);
     }
     function createFile(filename, contents) {
-
-        var fullPath = mass.adjustPath(filename);
-       
+        var fullPath = mass.adjustPath(filename).replace(/\\/g,"/");
+        var match = fullPath.match(/(.*)\//);
+        if(match){
+            mass.mkdirSync(match[1]);
+        }
         if (path.existsSync(fullPath)) {
             mass.log("<code style='color:red'>创建文件"+filename+"失败</code>",true);
         } else {
@@ -52,17 +51,17 @@ mass.define("scaffold","fs,path,router",function(fs,path,Router){
     }
     
     function createDir(dir) {
-
         var fullPath = mass.adjustPath(dir);
-        if (path.existsSync(fullPath)) {
-            mass.log("<code style='color:red'>创建目录"+dir+"失败</code>",true);
-        } else {
-            fs.mkdirSync(fullPath,0755);
-            mass.log("<code style='color:green'>创建目录"+dir+"成功</code>",true);
-        }
+        mass.mkdirSync(fullPath)
     }
     return function(name){
-        name = name.replace(/\\/,"/")
+        var a  = mass.hereDoc(function(){
+         /*
+          var b = c;
+          */   
+        })
+        console.log(a)
+        name = name.replace(/\\/g,"/");
         dirs.forEach(function(dir){
             createDir(dir)
         });
@@ -75,36 +74,36 @@ mass.define("scaffold","fs,path,router",function(fs,path,Router){
         createFile('app/controllers/application_controller.js', 'before(\'protect from forgery\', function () {\n    protectFromForgery(\'' + secret + '\');\n});\n');
         
         var routes_url = mass.adjustPath('config/routes.js'),
-        action_url = "app/controllers/",
-        view_url = "app/views/",
-        mapper = new Router
+
+        mapper = new Router;
 
         mass.require("routes("+routes_url+")",function(fn){//读取routes.js配置文件
-            fn(mapper)
+            fn(mapper);
         });
-        console.log(mapper.controllers)
-          console.log(mapper.GET)
+
         for(var controller in mapper.controllers){
             var object = mapper.controllers[controller];
             if(object.namespace){//如果存在命名空间,则需要创建对应的文件夹
-                action_url = action_url + object.namespace;
-                view_url = view_url + object.namespace;
-                createDir(action_url)
-                createDir(view_url)
+                "controllers,views,models".replace(mass.rword,function(word){
+                    createDir(path.join("app",word,object.namespace))
+                });
             }
             //创建控制器
             var contents = ["mass.define(\"",controller ,"_controller\",function(){\n", "\treturn {\n"]
+            //创建动作
             contents.push( object.actions.map(function(action){
                 return "\t\t\""+action + "\":function(){}"
             }).join(",\n"));
             contents.push("\n\t}\n });") ;
-            createFile(path.join(action_url, controller +"_controller.js") ,contents.join("") )
+            createFile(path.join("app","controllers", controller +"_controller.js") ,contents.join("") )
             //创建视图
             object.views.forEach(function(view){
-                createFile(path.join(view_url, view +".html") ,controller+"#"+view )
+                createFile(path.join("app","views",object.namespace, controller ,view +".html") ,controller+"#"+view )
             });
-            action_url = "app/controllers/"//还原
-            view_url = "app/views/";
+            //创建模型
+           // console.log(path.join("app","models",object.namespace, object.model_name +".js"))
+            createFile(path.join("app","models",object.namespace, object.model_name +".js") ,"// "+ object.model_name)
+
         }
         //添加控制器的相关模板
         return mapper;
