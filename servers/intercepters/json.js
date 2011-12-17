@@ -1,4 +1,4 @@
-mass.define("intercepters/json",function(){
+mass.define("json",function(){
     console.log("本模块处理前端发过来的JSON数据");
     return mass.intercepter(function(req, res, err){
         req.body = req.body || {};

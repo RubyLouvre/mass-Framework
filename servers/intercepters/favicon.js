@@ -1,4 +1,4 @@
-mass.define("intercepters/favicon","fs,path",function(fs){
+mass.define("favicon","fs,path",function(fs){
     console.log("处理favicon.ico请求");
     var icon;
     return mass.intercepter(function(req, res){

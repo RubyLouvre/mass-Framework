@@ -1,4 +1,4 @@
-mass.define("intercepters/handle404","fs",function(fs){
+mass.define("handle404","fs",function(fs){
     console.log("本模块用于处理404错误");
     return function(req, res, err){
         console.log("进入handle404回调");

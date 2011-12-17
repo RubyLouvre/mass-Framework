@@ -1,4 +1,4 @@
-mass.define("intercepters/matcher","url",function(URL){
+mass.define("matcher","url",function(URL){
     console.log("用于匹配请求过来的回调")
     return  mass.intercepter(function(req,res){
         console.log("进入matcher回调");
