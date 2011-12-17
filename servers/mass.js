@@ -68,8 +68,7 @@
             }
         },
         mkdirSync:function(url,mode,cb){
-            url = url.replace(/\\/g,"/")
-            var path = require("path"), arr = url.split("/");
+            var path = require("path"), arr = url.replace(/\\/g,"/").split("/");
             mode = mode || 0755;
             cb = cb || mass.noop;
             if(arr[0]==="."){//处理 ./aaa
@@ -207,24 +206,24 @@
     var map = mass["@modules"] = {};
     //执行并移除所有依赖都具备的模块或回调
     function resolveCallbacks(){
-        loop:
-        for (var i = names.length,repeat, name; name = names[--i]; ) {
-            var  obj = map[name], deps = obj.deps;
-            for(var key in deps){
-                if(deps.hasOwnProperty(key) && map[key].state != 2 ){
-                    continue loop;
+            loop:
+            for (var i = names.length,repeat, name; name = names[--i]; ) {
+                var  obj = map[name], deps = obj.deps;
+                for(var key in deps){
+                    if(deps.hasOwnProperty(key) && map[key].state != 2 ){
+                        continue loop;
+                    }
+                }
+                //如果deps是空对象或者其依赖的模块的状态都是2
+                if( obj.state != 2){
+                    names.splice(i,1);//必须先移除再执行
+                    var fn = obj.callback;
+                    rets[fn._name] = fn.apply(null,incarnate(obj.args));//只收集模块的返回值
+                    obj.state = 2;
+                    repeat = true;
                 }
             }
-            //如果deps是空对象或者其依赖的模块的状态都是2
-            if( obj.state != 2){
-                names.splice(i,1);//必须先移除再执行
-                var fn = obj.callback;
-                rets[fn._name] = fn.apply(null,incarnate(obj.args));//只收集模块的返回值
-                obj.state = 2;
-                repeat = true;
-            }
-        }
-    repeat &&  resolveCallbacks();
+        repeat &&  resolveCallbacks();
     }
     function incarnate(args){//传入一组模块名，返回对应模块的返回值
         for(var i = 0,ret = [], name; name = args[i++];){
@@ -269,9 +268,19 @@
             }
         }
     }
+
     mass.mix(mass,{
         stack : deferred(),
         define:function(name,deps,callback){//模块名,依赖列表,模块本身
+            var str = "/"+name;
+            for(var prop in map){
+                if(map.hasOwnProperty(prop) ){
+                    if(prop.substring(prop.length - str.length) === str && map[prop].state !== 2){
+                        name = prop.slice(1);//自动修正模块名(加上必要的目录)
+                        break;
+                    }
+                }
+            }
             if(typeof deps == "function"){//处理只有两个参数的情况
                 callback = deps;
                 deps = "";
@@ -296,7 +305,7 @@
                     _deps[name] = "司徒正美";//去重
                 }
             });
-            var cbname = callback._name;
+            var cbname = callback._name
             if(dn === cn ){//在依赖都已执行过或没有依赖的情况下
                 if(cbname && !(cbname in rets)){
                     map[cbname].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
@@ -306,7 +315,6 @@
                 }
             }
             cbname = cbname || "@cb"+ (cbi++).toString(32);
-
             if(errback){
                 mass.stack(errback);//压入错误堆栈
             }
@@ -372,6 +380,9 @@
 //--------开始创建网站---------
 })();
 
-
+//2011.12.17 mass.define再也不用指定模块所在的目录了,
+//如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
+//才能用mass.require("intercepters/favicon",callback)请求得到
+//现在可以直接mass.define("favicon",module)了
 
 
