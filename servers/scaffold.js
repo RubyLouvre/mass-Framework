@@ -1,4 +1,4 @@
-mass.define("scaffold","fs,path,router,heredocument",function(fs,path,Router){
+mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
     var dirs = [ 
     'app/models/',
     'app/controllers/',
@@ -55,12 +55,6 @@ mass.define("scaffold","fs,path,router,heredocument",function(fs,path,Router){
         mass.mkdirSync(fullPath)
     }
     return function(name){
-        var a  = mass.hereDoc(function(){
-         /*
-          var b = c;
-          */   
-        })
-        console.log(a)
         name = name.replace(/\\/g,"/");
         dirs.forEach(function(dir){
             createDir(dir)
@@ -71,7 +65,11 @@ mass.define("scaffold","fs,path,router,heredocument",function(fs,path,Router){
         createFileByTemplate('public/500.html', 'public/500.html');
         var secret = require('crypto').createHash('sha1').update(Math.random().toString()).digest('hex');
 
-        createFile('app/controllers/application_controller.js', 'before(\'protect from forgery\', function () {\n    protectFromForgery(\'' + secret + '\');\n});\n');
+        createFile('app/controllers/application_controller.js',  mass.hereDoc(function(){/*
+        before('protect from forgery',function(){
+            protectFromForgery("#{0}")
+        }) */   
+            },secret));
         
         var routes_url = mass.adjustPath('config/routes.js'),
 
@@ -89,19 +87,22 @@ mass.define("scaffold","fs,path,router,heredocument",function(fs,path,Router){
                 });
             }
             //创建控制器
-            var contents = ["mass.define(\"",controller ,"_controller\",function(){\n", "\treturn {\n"]
-            //创建动作
-            contents.push( object.actions.map(function(action){
-                return "\t\t\""+action + "\":function(){}"
-            }).join(",\n"));
-            contents.push("\n\t}\n });") ;
-            createFile(path.join("app","controllers", controller +"_controller.js") ,contents.join("") )
+            var contents = mass.hereDoc(function(){/*
+            mass.define("#{0}_controller",function(){
+                return {
+                   #{1}
+                }
+            });*/
+                },controller,object.actions.map(function(action){ //创建动作
+                    return "\t\t\""+action + "\":function(){}"
+                }).join(",\n"));
+            createFile(path.join("app","controllers", controller +"_controller.js") ,contents )
             //创建视图
             object.views.forEach(function(view){
                 createFile(path.join("app","views",object.namespace, controller ,view +".html") ,controller+"#"+view )
             });
             //创建模型
-           // console.log(path.join("app","models",object.namespace, object.model_name +".js"))
+
             createFile(path.join("app","models",object.namespace, object.model_name +".js") ,"// "+ object.model_name)
 
         }
