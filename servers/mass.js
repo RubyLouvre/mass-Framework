@@ -38,7 +38,7 @@
         inverse   : [7, 27],
         strike    : [9, 29]
     };
-    var colors = {},fs = require("fs");
+    var colors = {},fs = require("fs"), path = require("path");
     ['black', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white'].forEach(function(word,i){
         colors[word] = i
     });
@@ -67,6 +67,7 @@
                 return result;
             }
         },
+        //提供三组对文件夹的批处理:创建文件(夹),创建某一目录的东西到新目录,删除文件(夹)
         mkdirSync:function(url,mode,cb){
             var path = require("path"), arr = url.replace(/\\/g,"/").split("/");
             mode = mode || 0755;
@@ -90,6 +91,25 @@
             }
             arr.length && inner(arr.shift());
         } ,
+        cpdirSync:function() {
+            return function cpdirSync( old, neo ) {
+                var arr = fs.readdirSync(old), folder, stat;
+                if(!path.existsSync(neo)){//创建新文件
+                    fs.mkdirSync(neo, 0755);
+                    mass.log("<code style='color:green'>创建目录"+neo + "/" + el+"成功</code>",true);
+                }
+                for(var i = 0, el ; el = arr[i++];){
+                    folder = old + "/" + el
+                    stat = fs.statSync(folder);
+                    if(stat.isDirectory()){
+                        cpdirSync(folder, neo + "/" + el)
+                    }else{
+                        fs.writeFileSync(neo + "/" + el,fs.readFileSync(folder));
+                        mass.log("<code style='color:magenta'>创建文件"+neo + "/" + el+"成功</code>",true);
+                    }
+                }
+            }
+        }(),
         rmdirSync : (function(){
             function iterator(url,dirs){
                 var stat = fs.statSync(url);
@@ -121,11 +141,11 @@
             }
         })(),
         /**
-         * 用于取得数据的类型或判定数据的类型
-         * @param {Any} obj 要检测的东西
-         * @param {String} str 要比较的类型
-         * @return {String|Boolean}
-         */
+             * 用于取得数据的类型或判定数据的类型
+             * @param {Any} obj 要检测的东西
+             * @param {String} str 要比较的类型
+             * @return {String|Boolean}
+             */
         type : function (obj, str){
             var result = class2type[ (obj == null || obj !== obj )? obj : toString.call(obj) ] || "#";
             if( result.charAt(0) === "#"){
@@ -141,11 +161,11 @@
             return result;
         },
         /**
-         * 用于调试
-         * @param {String} s 要打印的内容
-         * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
-         * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
-         */
+             * 用于调试
+             * @param {String} s 要打印的内容
+             * @param {Boolean} color 进行各种颜色的高亮，使用<code style="format:blod;color:red;background:green">
+             * format的值可以为formats中五个之一或它们的组合（以空格隔开），背景色与字体色只能为colors之一
+             */
         log:function (s, color){
             if(color){
                 s = s.replace(rformat,function(a,b,style,ret){
@@ -175,11 +195,11 @@
             console.log(s);
         },
         /**
-         * 生成键值统一的对象，用于高速化判定
-         * @param {Array|String} array 如果是字符串，请用","或空格分开
-         * @param {Number} val 可选，默认为1
-         * @return {Object}
-         */
+             * 生成键值统一的对象，用于高速化判定
+             * @param {Array|String} array 如果是字符串，请用","或空格分开
+             * @param {Number} val 可选，默认为1
+             * @return {Object}
+             */
         oneObject : function(array, val){
             if(typeof array == "string"){
                 array = array.match(mass.rword) || [];
@@ -206,24 +226,24 @@
     var map = mass["@modules"] = {};
     //执行并移除所有依赖都具备的模块或回调
     function resolveCallbacks(){
-            loop:
-            for (var i = names.length,repeat, name; name = names[--i]; ) {
-                var  obj = map[name], deps = obj.deps;
-                for(var key in deps){
-                    if(deps.hasOwnProperty(key) && map[key].state != 2 ){
-                        continue loop;
-                    }
-                }
-                //如果deps是空对象或者其依赖的模块的状态都是2
-                if( obj.state != 2){
-                    names.splice(i,1);//必须先移除再执行
-                    var fn = obj.callback;
-                    rets[fn._name] = fn.apply(null,incarnate(obj.args));//只收集模块的返回值
-                    obj.state = 2;
-                    repeat = true;
+        loop:
+        for (var i = names.length,repeat, name; name = names[--i]; ) {
+            var  obj = map[name], deps = obj.deps;
+            for(var key in deps){
+                if(deps.hasOwnProperty(key) && map[key].state != 2 ){
+                    continue loop;
                 }
             }
-        repeat &&  resolveCallbacks();
+            //如果deps是空对象或者其依赖的模块的状态都是2
+            if( obj.state != 2){
+                names.splice(i,1);//必须先移除再执行
+                var fn = obj.callback;
+                rets[fn._name] = fn.apply(null,incarnate(obj.args));//只收集模块的返回值
+                obj.state = 2;
+                repeat = true;
+            }
+        }
+    repeat &&  resolveCallbacks();
     }
     function incarnate(args){//传入一组模块名，返回对应模块的返回值
         for(var i = 0,ret = [], name; name = args[i++];){
@@ -374,15 +394,15 @@
                 req.emit("next_intercepter",req, res);
           
             }).listen(settings.port);
-            mass.log("start server in "+settings.port+" port")
+            mass.log("Server running at "+settings.port+" port")
         });
     })
 //--------开始创建网站---------
 })();
 
-//2011.12.17 mass.define再也不用指定模块所在的目录了,
-//如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
-//才能用mass.require("intercepters/favicon",callback)请求得到
-//现在可以直接mass.define("favicon",module)了
+    //2011.12.17 mass.define再也不用指定模块所在的目录了,
+    //如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
+    //才能用mass.require("intercepters/favicon",callback)请求得到
+    //现在可以直接mass.define("favicon",module)了
 
 
