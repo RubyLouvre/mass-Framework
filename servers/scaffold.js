@@ -1,19 +1,5 @@
 mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
-    var dirs = [ 
-    'app/models/',
-    'app/controllers/',
-    'app/observers/',
-    'app/helpers/',
-    'app/views/layouts/',
-    'db/',
-    'log/',
-    'public/stylesheets/',
-    'public/javascripts/',
-    'node_modules/',
-    'config/locales/',
-    'config/initializers/',
-    'config/environments/'
-    ]
+
     function createFileByTemplate(filename, template, prepare) {
         if (!template.match(/\..+$/)) {
             var fileExtension =  '.js';
@@ -56,13 +42,9 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
     }
     return function(name){
         name = name.replace(/\\/g,"/");
-        dirs.forEach(function(dir){
-            createDir(dir)
-        });
-        createFileByTemplate('config/routes.js', 'config/routes.js');
-        createFileByTemplate('public/favicon.ico', 'public/favicon.ico');
-        createFileByTemplate('public/404.html', 'public/404.html');
-        createFileByTemplate('public/500.html', 'public/500.html');
+        //将模板文件全部复制到新网站的目录之下
+        mass.cpdirSync("./templates",mass.adjustPath(""))     
+
         var secret = require('crypto').createHash('sha1').update(Math.random().toString()).digest('hex');
 
         createFile('app/controllers/application_controller.js',  mass.hereDoc(function(){/*
