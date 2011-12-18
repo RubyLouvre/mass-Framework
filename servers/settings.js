@@ -1,8 +1,7 @@
 mass.define("settings", function(){
-    
     return mass.settings = {
         //栏截器
-        intercepters :["favicon","mime","postData","query","methodOverride","json","index","matcher","handle404"],
+        intercepters :["favicon","mime","location","static","postData","methodOverride","json","index","matcher","handle404"],
         view_engine:"ejs",
         //你想建立的网站的名字（请修正这里）
         appname:"jslouvre",
