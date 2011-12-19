@@ -1,9 +1,6 @@
 //=========================================
 // 模块加载模块（核心模块）2011.11.11 by 司徒正美
 //=========================================
-//=========================================
-// 模块加载模块（核心模块）2011.11.11 by 司徒正美
-//=========================================
 (function(global , DOC){
     var
     _dom = global.dom, //保存已有同名变量
@@ -210,7 +207,7 @@
         (global.opera ? "this.ownerDocument.x = 1;" : " dom._checkFail('"+name+"');"),
         '} " ' , (w3c ? 'onerror="dom._checkFail(\''+name+'\',true);" ' : ""),' ><\/script>' ];
         iframe.style.display = "none";
-       //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
+        //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if(!"1"[0]){//IE6 iframe在https协议下没有的指定src会弹安全警告框
             iframe.src = "javascript:false"
         }
@@ -284,7 +281,7 @@
                     cn++;
                 }
                 if(!_deps[name] ){
-                   args.push(name);
+                    args.push(name);
                     _deps[name] = "司徒正美";//去重，去掉@ready
                 }
                 
@@ -318,11 +315,20 @@
         },
         //定义模块
         define:function(name,deps,callback){//模块名,依赖列表,模块本身
+            var str = "/"+name;
+            for(var prop in map){
+                if(map.hasOwnProperty(prop) ){
+                    if(prop.substring(prop.length - str.length) === str && map[prop].state !== 2){
+                        name = prop.slice(1);//自动修正模块名(加上必要的目录)
+                        break;
+                    }
+                }
+            }
             if(typeof deps == "function"){//处理只有两个参数的情况
                 callback = deps;
                 deps = "";
             }
-            callback._name =  "@"+name;  //模块名
+            callback._name = "@"+name; //模块名
             this.require(deps,callback);
         },
         //执行并移除所有依赖都具备的模块或回调
@@ -359,7 +365,7 @@
     var readylist = deferred();
     function fireReady(){
         map["@ready"].state = 2;
-         dom._resolveCallbacks();
+        dom._resolveCallbacks();
         readylist.complete = function(fn){
             dom.type(fn, "Function") &&  fn()
         }
@@ -393,7 +399,7 @@
         dom.exports();
     });
     dom.exports("dom"+postfix);//防止不同版本的命名空间冲突
-     /*combine modules*/
+/*combine modules*/
 
 })(this,this.document);
 /**
@@ -431,10 +437,11 @@ dom.namespace改为dom["@name"]
 2011.10.20 添加error方法，重构log方法
 2011.11.6  重构uuid的相关设施
 2011.11.11 多版本共存
-
+2011.12.19 增加define方法
 
 
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
  */
+
 
