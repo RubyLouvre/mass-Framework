@@ -313,7 +313,12 @@
             (deps +"").replace(mass.rword,function(url,name,match){
                 dn++;
                 match = url.match(rmodule);
+              
                 name = "@"+ match[1];//取得模块名
+                if(match[2]){
+                    console.log(name);
+                    console.log(match[2])
+                }
                 if(!map[name]){ //防止重复生成节点与请求
                     map[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
                     useNativeRequire(name,match[2],errback);//加载模块
@@ -354,11 +359,12 @@
     });
     
     exports.mass = global.mass = mass;
+    mass.cache = {};
     //必须先加载settings模块
     mass.require("settings,construct",function(settings,construct ){
         mass.settings = settings;
         var dir = mass.adjustPath("")
-        mass.rmdirSync(dir);//......
+        mass.rmdirSync(dir);//用于删掉原来的网站重建
         mass.require("http,fs,path,scaffold,intercepters",function(http,fs,path,scaffold,intercepters){
             if(path.existsSync(dir)){
                 mass.log("<code style='color:red'>此网站已存在</code>",true);
