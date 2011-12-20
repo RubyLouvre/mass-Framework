@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>测试我的框架</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+        <%= javascript_include_tag("dom/dom") %>
+        //http://localhost:8888
+    </script>
+    <script>
+        dom.require("more/random",function(obj){
+            dom.log(obj.str(10))
+        })
+    </script>
+</head>
+<body>
+    <!--         <script src="/javascripts/dom/dom.js">-->
+    <div>测试我的框架</div>
+
+</body>
+</html>
