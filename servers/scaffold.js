@@ -40,6 +40,23 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
         var fullPath = mass.adjustPath(dir);
         mass.mkdirSync(fullPath)
     }
+    var actiontmpls = {
+        index:function(req,res){
+            res.render("tmpl",{})
+        },
+        show:function(req,res){
+            res.render("tmpl",{})
+        },
+        "new":function(req,res){
+            res.render("tmpl",{})
+        },
+        edit:function(req,res){
+            res.render("tmpl",{})
+        },
+        create:function(req,res){/* POST */ },
+        update:function(req,res){ /* PUT */},
+        destroy:function(req,res){ /* DELETE */}
+    }
     return function(name){
         name = name.replace(/\\/g,"/");
         //将模板文件全部复制到新网站的目录之下
@@ -60,7 +77,7 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
         mass.require("routes("+routes_url+")",function(fn){//读取routes.js配置文件
             fn(mapper);
         });
-
+        var ejstmpl = fs.readFileSync("ejs/index.html")
         for(var controller in mapper.controllers){
             var object = mapper.controllers[controller];
             if(object.namespace){//如果存在命名空间,则需要创建对应的文件夹
@@ -68,6 +85,7 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
                     createDir(path.join("app",word,object.namespace))
                 });
             }
+
             //创建控制器
             var contents = mass.hereDoc(function(){/*
             mass.define("#{0}_controller",function(){
@@ -76,12 +94,14 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
                 }
             });*/
                 },controller,object.actions.map(function(action){ //创建动作
-                    return "\t\t\""+action + "\":function(){}"
+                    return "\t\t\""+action + "\":"+actiontmpls[action]
                 }).join(",\n"));
-            createFile(path.join("app","controllers", controller +"_controller.js") ,contents )
+                
+    
+            createFile(path.join("app","controllers",object.namespace, controller +"_controller.js") ,contents )
             //创建视图
             object.views.forEach(function(view){
-                createFile(path.join("app","views",object.namespace, controller ,view +".html") ,controller+"#"+view )
+                createFile(path.join("app","views",object.namespace, controller ,view +".html") ,ejstmpl )
             });
             //创建模型
 
