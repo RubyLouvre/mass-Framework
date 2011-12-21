@@ -4,7 +4,7 @@
   
 dom.define("dispatcher","data", function(){
     // dom.log("已加载dispatcher模块")
-    var global = this, DOC = global.document, fireType = "", blank = "", rhoverHack =  /\bhover(\.\S+)?/,
+    var global = this, DOC = global.document, fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
     function addHandler(handlers, obj){
         var check = true, fn = obj.handler;
@@ -191,7 +191,8 @@ dom.define("dispatcher","data", function(){
             return false;
         },
         handle: function( e ) {
-            var event = system.fix( e || event ),
+            var win = (this.ownerDocument || this.document || this).parentWindow || window,
+            event = system.fix( e || win.event ),
             handlers = dom._data(this,"events");
             if (  handlers ) {
                 handlers = handlers[event.type]||[]
@@ -374,6 +375,8 @@ dom.define("dispatcher","data", function(){
     //2011.10.23 简化system.handle与fire
     //2011.10.26 更改命名空间的检测方法
     //2011.11.23 重构system.fix与quickIs
+    //2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
+    //2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
 
 
 
