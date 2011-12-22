@@ -1,19 +1,19 @@
 /**
  * 延迟加载模块
  */
-dom.define("lazyload","lang,node,css",function($$){
+mass.define("lazyload","lang,node,css",function($$){
     var nodes = [], now = new Date;
     function loading() {
-        var st = $(window).scrollTop(), sth = st + $(window).height();
+        var st = mass(window).scrollTop(), sth = st + mass(window).height();
         for(var i = 0; i < nodes.length; i++){
-            var obj = nodes[i], el = obj.el , top = dom(el).offset().top();//取得元素相对于整个页面的Y位置
+            var obj = nodes[i], el = obj.el , top = mass(el).offset().top();//取得元素相对于整个页面的Y位置
             if(sth > top ) { //如果页面的滚动条拖动要处理的元素所在的位置
                 obj.callback(el);//重设图片的SRC或用HTML来填充当前的元素
                 nodes.splice( i--, 1 );
             } 
         }	
     };
-    $(window).bind("scroll", function(){
+    mass(window).bind("scroll", function(){
         var time = new Date;
         if(time - now > 30){
             now = time;
@@ -24,7 +24,7 @@ dom.define("lazyload","lang,node,css",function($$){
      *@params  {Dom|NodeList|Array} instance
      *@params  {Function} fn
      */
-    return function(instance,fn){//比如 dom("img")
+    return function(instance,fn){//比如 mass("img")
         $$(instance).forEach(function(el){
             nodes.push({
                 el: el,
