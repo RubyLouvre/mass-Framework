@@ -202,10 +202,10 @@
     function loadModule(name, url, ver){
         url = url  || dom["@path"] +"/"+ name.slice(1) + ".js" + (dom["@debug"] ? "?timestamp="+(new Date-0) : "");
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ["<script> document.xxx = 'iframe';var dom = parent[document.URL.replace(/(#.+|\\W)/g,'')][", ver,'] ; var mass = dom;<\/script><script src="',url,'" ',
-        (DOC.uniqueID ? "onreadystatechange" : "onload"),'="', "if(/loaded|complete|undefined/i.test(this.readyState)){  dom._resolveCallbacks();",
-        (global.opera ? "this.ownerDocument.x = 1;" : " dom._checkFail('"+name+"');"),
-        '} " ' , (w3c ? 'onerror="dom._checkFail(\''+name+'\',true);" ' : ""),' ><\/script>' ];
+        codes = ["<script> var mass = parent[document.URL.replace(/(#.+|\\W)/g,'')][", ver,'] ;console.log(4444444);var dom = mass ;<\/script><script src="',url,'" ',
+        (DOC.uniqueID ? "onreadystatechange" : "onload"),'="', "if(/loaded|complete|undefined/i.test(this.readyState)){  mass._resolveCallbacks();",
+        (global.opera ? "this.ownerDocument.x = 1;" : " mass._checkFail('"+name+"');"),
+        '} " ' , (w3c ? 'onerror="mass._checkFail(\''+name+'\',true);" ' : ""),' ><\/script>' ];
         iframe.style.display = "none";
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if(!"1"[0]){//IE6 iframe在https协议下没有的指定src会弹安全警告框
@@ -232,7 +232,9 @@
         if(fn instanceof Function){
             return fn.apply(global,argv);
         }
-        return  Function("b","return " +(str || fn) +".apply(window,b)" )(argv);
+    //    var mass = dom;
+      //  alert(Function("b","return " +(str || fn) +".apply(window,b)" ))
+        return  Function("b","var mass = dom;return " +(str || fn) +".apply(window,b)" )(argv);
     }
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
@@ -438,10 +440,9 @@ dom.namespace改为dom["@name"]
 2011.11.6  重构uuid的相关设施
 2011.11.11 多版本共存
 2011.12.19 增加define方法
-
+2011.12.22 加载用iframe内增加mass变量,用作过渡.
 
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
  */
-
 
