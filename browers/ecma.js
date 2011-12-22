@@ -1,7 +1,7 @@
 //=========================================
 //  ECMA262v5新扩展模块
 //==========================================
-dom.define("ecma", function(){
+mass.define("ecma", function(){
     //dom.log("已加载ECMA262v5新扩展模块")
     //Object扩展
     //fix ie for..in bug
@@ -14,7 +14,7 @@ dom.define("ecma", function(){
         DONT_ENUM = false;
     }
     //第二个参数仅在浏览器支持Object.defineProperties时可用
-    dom.mix(Object,{
+    mass.mix(Object,{
         //取得其所有键名以数组形式返回
         keys: function(obj){//ecma262v5 15.2.3.14
             var result = [];
@@ -45,7 +45,7 @@ dom.define("ecma", function(){
         +'}'+ret
         return new Function("fn,scope",fun);
     }
-    dom.mix(Array[P],{
+    mass.mix(Array[P],{
         //定位类 返回指定项首次出现的索引。
         indexOf: function (el, index) {
             var n = this.length, i = ~~index;
@@ -104,7 +104,7 @@ dom.define("ecma", function(){
         };
     }
     //String扩展
-    dom.mix(String[P],{
+    mass.mix(String[P],{
         //ecma262v5 15.5.4.20
         //http://www.cnblogs.com/rubylouvre/archive/2009/09/18/1568794.html
         //'      dfsd '.trim() === 'dfsd''
@@ -113,7 +113,7 @@ dom.define("ecma", function(){
         }
     },false);
 
-    dom.mix(Function[P],{
+    mass.mix(Function[P],{
         //ecma262v5 15.3.4.5
         bind:function(scope) {
             if (arguments.length < 2 && scope===void 0) return this;
@@ -147,3 +147,5 @@ dom.define("ecma", function(){
 //移除Object.create方法,添加Object.getPrototypeOf方法
 //2011.11.16
 //重构Array.prototype.unshift (thx @abcd)
+//2011.12.22
+//修正命名空间
