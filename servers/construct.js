@@ -1,9 +1,9 @@
-mass.define("construct", function(){
+mass.define("construct","endError", function(endError){
     mass.mix(mass,{
         intercepter : function(fn){//拦截器的外壳
             return function(req, res, err){
                 if(err ){
-                    req.emit("next_intercepter", req, res, err);
+                    endError(err,req,res)
                 }else if(fn(req,res) === true){
                     req.emit("next_intercepter", req, res)
                 }
