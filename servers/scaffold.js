@@ -111,5 +111,67 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
         //添加控制器的相关模板
         return mapper;
     }
-})
+});
+////转换成一个字符串
+//utils.serializeCookie = function (name, val, options) {
+//    var ret = name + '=' + escape(val) + ';';
+//    if (options.path)
+//        ret += ' path=' + options.path + ';';
+//    if (options.expires)
+//        ret += ' expires=' + options.expires.toGMTString() + ';';
+//    if (options.domain)
+//        ret += ' domain=' + options.domain + ';';
+//    if (options.secure)
+//        ret += ' secure';
+//    return ret;
+//};
+////将它转换为一个对象
+//utils.unserializeCookie = function (cookies) {
+//    if (!cookies)
+//        return {}
+//    var cookieline = cookies.toString().split(';');
+//    var ret = {};
+//    for (i in cookieline) {
+//        var line = cookieline[i].trim().split('=');
+//        if (line.length > 1) {
+//            var k = line[0].trim();
+//            var v = unescape(line[1].trim());
+//            ret[k] = v;
+//        }
+//    }
+//    return ret;
+//};
+//
 
+//            
+//            exports.parse = function(cookie, name) {
+//  var cookies = {};
+//  if (typeof cookie == 'string') {
+//    // Copied from: [cookie-sessions](http://github.com/caolan/cookie-sessions/blob/master/lib/cookie-sessions.js)
+//    cookies = cookie.split(/\s*;\s*/g).map(
+//        function(x) {
+//          return x.split('=');
+//        }).reduce(function(a, x) {
+//          a[unescape(x[0])] = unescape(x[1]);
+//          return a;
+//        }, {});
+//  }
+//  return name ? cookies[name] : cookies;
+//};
+//
+//exports.stringify = function(name, value, options) {
+//  var cookie = name + "=" + escape(value);
+//  if (options) {
+//    options.expires && (cookie += "; expires=" + options.expires.toUTCString());
+//    options.path && (cookie += "; path=" + options.path);
+//    options.domain && (cookie += "; domain=" + options.domain);
+//    options.secure && (cookie += "; secure=" + options.secure);
+//    options.httponly && (cookie += "; httponly=" + options.httponly);
+//  }
+//  return cookie;
+//};
+//
+//exports.checkLength = function(cookieStr) {
+//  // recommended in [RFC2109](http://tools.ietf.org/html/rfc2109.html) Section `6.3 Implementation Limits`
+//  return cookieStr.length <= 4096;
+//};
