@@ -360,8 +360,9 @@
     
     exports.mass = global.mass = mass;
     mass.cache = {};
+
     //必须先加载settings模块
-    mass.require("settings,construct",function(settings,construct ){
+    mass.require("settings,construct,endError",function(settings,construct,endError ){
         mass.settings = settings;
         var dir = mass.adjustPath("")
         mass.rmdirSync(dir);//用于删掉原来的网站重建
@@ -377,24 +378,13 @@
                 console.log("req.url  :  "+req.url)
                 var arr = intercepters.concat();
                 //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-                req.on("err500",function(err){
-                    res.writeHead(500, {
-                        "Content-Type": "text/html"
-                    });
-                    var html = fs.readFileSync(mass.adjustPath("public/500.html"))
-                    var arr = []
-                    for(var i in err){
-                        arr.push("<li>"+i+"  :   "+err[i]+" </li>")
-                    }
-                    res.write((html+"").replace("{{url}}",arr.join("")));
-                    res.end();
-                });
                 req.on("next_intercepter",function(){
                     try{
                         var next = arr.shift();
                         next && next.apply(null,arguments)
                     }catch(err){
-                        req.emit("err500",err);
+                        err.statusCode = 500;
+                        endError(err, req, res)
                     }
                 });
                 req.emit("next_intercepter",req, res);
@@ -402,7 +392,7 @@
             }).listen(settings.port);
             mass.log("Server running at "+settings.port+" port")
         });
-    })
+    });
 //--------开始创建网站---------
 })();
 
