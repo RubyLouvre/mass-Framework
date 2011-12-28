@@ -60,16 +60,20 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
     return function(name){
         name = name.replace(/\\/g,"/");
         //将模板文件全部复制到新网站的目录之下
-        mass.cpdirSync("./templates",mass.adjustPath(""))     
+        var hasBuilt = mass.settings.hasBuilt;
+        if(!hasBuilt){
+            mass.cpdirSync("./templates",mass.adjustPath(""))     
 
-        var secret = require('crypto').createHash('sha1').update(Math.random().toString()).digest('hex');
+            var secret = require('crypto').createHash('sha1').update(Math.random().toString()).digest('hex');
 
-        createFile('app/controllers/application_controller.js',  mass.hereDoc(function(){/*
+            createFile('app/controllers/application_controller.js',  mass.hereDoc(function(){/*
         before('protect from forgery',function(){
             protectFromForgery("#{0}")
         }) */   
-            },secret));
-        
+                },secret));
+        }
+
+     
         var routes_url = mass.adjustPath('config/routes.js'),
 
         mapper = new Router;
@@ -77,36 +81,39 @@ mass.define("scaffold","fs,path,router,here_document",function(fs,path,Router){
         mass.require("routes("+routes_url+")",function(fn){//读取routes.js配置文件
             fn(mapper);
         });
-        var ejstmpl = fs.readFileSync("ejs/index.html")
-        for(var controller in mapper.controllers){
-            var object = mapper.controllers[controller];
-            if(object.namespace){//如果存在命名空间,则需要创建对应的文件夹
-                "controllers,views,models".replace(mass.rword,function(word){
-                    createDir(path.join("app",word,object.namespace))
-                });
-            }
+        if(!hasBuilt){
+            var ejstmpl = fs.readFileSync("ejs/index.html")
+            for(var controller in mapper.controllers){
+                var object = mapper.controllers[controller];
+                if(object.namespace){//如果存在命名空间,则需要创建对应的文件夹
+                    "controllers,views,models".replace(mass.rword,function(word){
+                        createDir(path.join("app",word,object.namespace))
+                    });
+                }
 
-            //创建控制器
-            var contents = mass.hereDoc(function(){/*
+                //创建控制器
+                var contents = mass.hereDoc(function(){/*
             mass.define("#{0}_controller",function(){
                 return {
                    #{1}
                 }
             });*/
-                },controller,object.actions.map(function(action){ //创建动作
-                    return "\t\t\""+action + "\":"+actiontmpls[action]
-                }).join(",\n"));
+                    },controller,object.actions.map(function(action){ //创建动作
+                        return "\t\t\""+action + "\":"+actiontmpls[action]
+                    }).join(",\n"));
+                contents =  require('./js_beautify.js').js_beautify(contents)
                 
     
-            createFile(path.join("app","controllers",object.namespace, controller +"_controller.js") ,contents )
-            //创建视图
-            object.views.forEach(function(view){
-                createFile(path.join("app","views",object.namespace, controller ,view +".html") ,ejstmpl )
-            });
-            //创建模型
+                createFile(path.join("app","controllers",object.namespace, controller +"_controller.js") ,contents )
+                //创建视图
+                object.views.forEach(function(view){
+                    createFile(path.join("app","views",object.namespace, controller ,view +".html") ,ejstmpl )
+                });
+                //创建模型
 
-            createFile(path.join("app","models",object.namespace, object.model_name +".js") ,"// "+ object.model_name)
+                createFile(path.join("app","models",object.namespace, object.model_name +".js") ,"// "+ object.model_name)
 
+            }
         }
         //添加控制器的相关模板
         return mapper;
