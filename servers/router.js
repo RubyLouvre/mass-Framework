@@ -1,4 +1,4 @@
-mass.define("router","lang,url,plural",function($$,urls){
+mass.define("router","lang,plural",function($$){
 
     var Router = function(){
         this.PATH = "/";
@@ -43,7 +43,7 @@ mass.define("router","lang,url,plural",function($$,urls){
                 }
             }
         }else {
-            for (var action in availableRoutes) {
+            for ( action in availableRoutes) {
                 activeRoutes[action] = availableRoutes[action];
             }
         }
@@ -115,6 +115,7 @@ DELETE     /photos/1      Photos          destroy  用于删除photo的POST请�
             object = controllers[name] || (controllers[name] = {
                 actions:[],
                 views:[],
+                model_name:$$(name).singularize(),
                 namespace:""
             });
             if(this._namespace){
@@ -133,38 +134,39 @@ DELETE     /photos/1      Photos          destroy  用于删除photo的POST请�
                 if (typeof handle == 'function') {// users/:user_id
                     this.subroutes(name + '/:' + $$(name).singularize() + '_id', handle);
                 }
-                for (var key in activeRoutes) {
-                    (function(action,options, prefix){
-                        var route = activeRoutes[action].split(/\s+/);
-                        var method = route[0].toUpperCase()
-                        var path = route[1]
-                        // append format
-                        if (path == '/') {//'GET /' ---> 'GET ／ .:format?'
-                            path = '.:format?';
-                        } else {
-                            path += '.:format?';
-                        }
-                        adobes.push(mass.mix({},options,{
-                            controller:name,
-                            action:action,
-                            method:method,
-                            namespace:prefix,
-                            //处理map.resources('posts', {path: 'articles'});的情形 articles.:format?
-                            url: prefix + (options.path || name) + path
-                        }));
-                        object.actions.push(action);
-                        if(method === "GET"){
-                            object.views.push(action);
-                        }
-                    })(key,options,this.PATH )
+                var  prefix = this.PATH
+                for (var action in activeRoutes) {
+                    //   (function(action,options, prefix){
+                    var route = activeRoutes[action].split(/\s+/);
+                    var method = route[0].toUpperCase()
+                    var path = route[1]
+                    // append format
+                    if (path == '/') {//'GET /' ---> 'GET ／ .:format?'
+                        path = '.:format?';
+                    } else {
+                        path += '.:format?';
+                    }
+                    adobes.push(mass.mix({},options,{
+                        controller:name,
+                        action:action,
+                        method:method,
+                        namespace:prefix,
+                        //处理map.resources('posts', {path: 'articles'});的情形 articles.:format?
+                        url: prefix + (options.path || name) + path
+                    }));
+                    object.actions.push(action);
+                    if(method === "GET"){
+                        object.views.push(action);
+                    }
+                //  })(key,options,this.PATH )
                 }
             }
-         
             adobes.forEach(function(obj){
                 var path = obj.url.replace(/\.:format\??$/, '').replace(/^\/|\/$/g, '');
                 if ( path  === '') {
                     obj.helper = "root";
                     obj.matcher = /^\/$/;
+                    this[obj.method].push(obj);
                     return 
                 }
                 var ahelper = [],amatcher = [];
