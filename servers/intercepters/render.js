@@ -5,9 +5,11 @@ mass.define("render","fs,path,ejs,helpers",function(fs,path,ejs,helpers){
         data = data || {}
         switch(type){
             case "tmpl" :
-                var filename = res.view_url,
+            case "file"://file可以指定文件位置
+                var filename = type === "tmpl" ?  res.view_url : mass.adjustPath(data),
                 headers = (res.req || {}).headers || {},
                 buffer = cache[filename] ||  path.existsSync(filename) && fs.readFileSync(filename);
+                data = type === "tmpl" ? data :  (arguments[2] || {});
                 if (!buffer) {
                     headers[ 'Content-Type'] = 'text/plain'
                     res.writeHead(404, headers);
@@ -18,6 +20,13 @@ mass.define("render","fs,path,ejs,helpers",function(fs,path,ejs,helpers){
                     res.write(ejs(buffer.toString("utf8"),mass.mix({},data, helpers,false)));
                     res.end();
                 }
+                break
+            case "json":
+                headers[ 'Content-Type'] = 'application/json'
+                res.writeHead(200, headers);
+                res.end(data);
+                break;
+                    
         }
     }
     return mass.intercepter(function(req, res){
