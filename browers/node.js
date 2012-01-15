@@ -5,7 +5,13 @@
   
 dom.define("node", "lang,support,class,query,data,ready",function(lang,support){
     dom.log("已加载node模块");
+
     var global = this, DOC = global.document, rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName";
+    var html5 ="abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+    "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video";
+    html5.replace($.rword,function(tag){//让IE678支持HTML5的新标签
+        DOC.createElement(tag);
+    })
     function getDoc(){
         for(var i  = 0 , el; i < arguments.length; i++){
             if(el = arguments[i]){
