@@ -2,7 +2,7 @@
 // 类型扩展模块 by 司徒正美
 //=========================================
 
-$.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
+$.define("lang", Array.isArray ? "" : "ecma", function(){
     $.log("已加载lang模块");
     var global = this,
     rascii = /[^\x00-\xff]/g,
