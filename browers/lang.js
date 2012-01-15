@@ -2,8 +2,8 @@
 // 类型扩展模块 by 司徒正美
 //=========================================
 
-mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
-    mass.log("已加载lang模块");
+$.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
+    $.log("已加载lang模块");
     var global = this,
     rascii = /[^\x00-\xff]/g,
     rformat = /\\?\#{([^{}]+)\}/gm,
@@ -15,10 +15,10 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
-    mass.mix(mass,{
+    $.mix($,{
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject : function (obj){
-            if(!mass.type(obj,"Object") || mass.isNative(obj,"reload") ){
+            if(!$.type(obj,"Object") || $.isNative(obj,"reload") ){
                 return false;
             }     
             try{//不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
@@ -32,7 +32,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
             return true;
         },
 
-        //判定method是否为obj的原生方法，如dom.isNative(window,"JSON")
+        //判定method是否为obj的原生方法，如$.isNative(window,"JSON")
         isNative : function(obj, method) {
             var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
             return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
@@ -51,14 +51,14 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
         isArrayLike :  function (obj) {
-            if(!obj || obj.document || obj.nodeType || mass.type(obj,"Function")) return false;
+            if(!obj || obj.document || obj.nodeType || $.type(obj,"Function")) return false;
             return isFinite(obj.length) ;
         },
 
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
         format : function(str, object){
-            var array = mass.slice(arguments,1);
+            var array = $.slice(arguments,1);
             return str.replace(rformat, function(match, name){
                 if (match.charAt(0) == '\\')
                     return match.slice(1);
@@ -167,7 +167,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
                 //使用new Function生成一个JSON对象
                 return (new Function( "return " + data ))();
             }
-            mass.error( "Invalid JSON: " + data );
+            $.error( "Invalid JSON: " + data );
         },
 
         // Cross-browser xml parsing
@@ -185,24 +185,24 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
                 xml = undefined;
             }
             if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
-                mass.log( "Invalid XML: " + data );
+                $.log( "Invalid XML: " + data );
             }
             return xml;
         }
 
     }, false);
 
-    "Array,Function".replace(mass.rword,function(name){
-        mass["is"+name] = function(obj){
+    "Array,Function".replace($.rword,function(name){
+        $["is"+name] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+name+"]";
         }
     });
 
     if(Array.isArray){
-        mass.isArray = Array.isArray;
+        $.isArray = Array.isArray;
     }
 
-    var String2 = mass.String = {
+    var String2 = $.String = {
         //判断一个字符串是否包含另一个字符
         contains: function(string, separator){
             return (separator) ? !!~(separator + this + separator).indexOf(separator + string + separator) : !!~this.indexOf(string);
@@ -260,7 +260,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         toFloat: function() {
             return parseFloat(this);
         },
-        //mass.lang("é").toHex() ==> \xE9
+        //$.lang("é").toHex() ==> \xE9
         toHex: function() { 
             var txt = '',str = this;
             for (var i = 0; i < str.length; i++) {
@@ -309,7 +309,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         }
     };
 
-    var Array2 = mass.Array  = {
+    var Array2 = $.Array  = {
         //深拷贝当前数组
         clone: function(){
             var i = this.length, result = [];
@@ -317,7 +317,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
             return result;
         },
         first: function(fn,scope){
-            if(mass.type(fn,"Function")){
+            if($.type(fn,"Function")){
                 for(var i=0, n = this.length;i < n;i++){
                     if(fn.call(scope,this[i],i,this)){
                         return this[i];
@@ -329,7 +329,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
             }
         },
         last: function(fn, scope) {
-            if(mass.type(fn,"Function")){
+            if($.type(fn,"Function")){
                 for (var i=this.length-1; i > -1; i--) {
                     if (fn.call(scope, this[i], i, this)) {
                         return this[i];
@@ -376,7 +376,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         },
         //只有原数组不存在才添加它
         ensure: function() {
-            var args = mass.slice(arguments);
+            var args = $.slice(arguments);
             args.forEach(function(el){
                 if (!~this.indexOf(el) ) this.push(el);
             },this);
@@ -429,7 +429,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         union :function(array){
             var arr = this;
             arr = arr.concat(array);
-            return mass.Array.unique.call(arr);
+            return $.Array.unique.call(arr);
         },
         //取交集
         intersect:function(array){
@@ -454,7 +454,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         flatten: function() {
             var result = [],self = Array2.flatten;
             this.forEach(function(value) {
-                if (mass.isArray(value)) {
+                if ($.isArray(value)) {
                     result = result.concat(self.call(value));
                 } else {
                     result.push(value);
@@ -464,8 +464,8 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         }
     }
     Array2.without = Array2.diff;
-    var Math2 = "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".match(mass.rword);
-    var Number2 = mass.Number ={
+    var Math2 = "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".match($.rword);
+    var Number2 = $.Number ={
         times: function(fn, bind) {
             for (var i=0; i < this; i++)
                 fn.call(bind, i);
@@ -519,7 +519,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
     });
 
     function cloneOf(item){
-        switch(mass.type(item)){
+        switch($.type(item)){
             case "Array":
                 return Array2.clone.call(item);
             case "Object":
@@ -538,7 +538,7 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         return source;
     };
 
-    var Object2 = mass.Object = {
+    var Object2 = $.Object = {
         //根据传入数组取当前对象相关的键值对组成一个新对象返回
         subset: function(keys){
             var results = {};
@@ -553,13 +553,13 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
             for(var name in this){
                 fn.call(scope,this[name],name,this);
             }
-            if(mass.DONT_ENUM && this.hasOwnProperty){
-                for(var i = 0; name = mass.DONT_ENUM[i++]; ){
+            if($.DONT_ENUM && this.hasOwnProperty){
+                for(var i = 0; name = $.DONT_ENUM[i++]; ){
                     this.hasOwnProperty(name) &&  fn.call(scope,this[name],name,this);
                 }
             }
         },
-        //进行深拷贝，返回一个新对象，如果是拷贝请使用mass.mix
+        //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
         clone: function(){
             var clone = {};
             for (var key in this) {
@@ -602,12 +602,12 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
         Number : ["toLocaleString", "toFixed", "toExponential", "toPrecision", "toJSON"],
         Object : ["toLocaleString", "hasOwnerProperty", "isPrototypeOf", "propertyIsEnumerable" ]
     }
-    var adjustOne = mass.oneObject("String,Array,Number,Object"),
-    arrayLike = mass.oneObject("NodeList,Arguments,Object")
-    var Lang = mass.lang = function(obj){
-        var type = mass.type(obj), chain = this;
+    var adjustOne = $.oneObject("String,Array,Number,Object"),
+    arrayLike = $.oneObject("NodeList,Arguments,Object")
+    var Lang = $.lang = function(obj){
+        var type = $.type(obj), chain = this;
         if(arrayLike[type] &&  isFinite(obj.length)){
-            obj = mass.slice(obj);
+            obj = $.slice(obj);
             type = "Array";
         }
         if(adjustOne[type]){
@@ -657,18 +657,19 @@ mass.define("lang", (Array.isArray && Object.create ? "" : "ecma"), function(){
 //2011.7.26 去掉toArray方法,添加globalEval,parseJSON,parseXML方法
 //2011.8.6  增加tag方法
 //2011.8.14 更新隐藏的命名空间,重构range方法,将node模块的parseHTML方法移到此处并大幅强化
-//2011.8.16 dom.String2,dom.Number2,dom.Array2,dom.Object2,globalEval 更名为dom.String,dom.Number,dom.Array,dom.Object,parseJS
-//2011.8.18 dom.Object.merge不再设置undefined的值
+//2011.8.16 $.String2,$.Number2,$.Array2,$.Object2,globalEval 更名为$.String,$.Number,$.Array,$.Object,parseJS
+//2011.8.18 $.Object.merge不再设置undefined的值
 //2011.8.28 重构Array.unique
-//2011.9.11 重构dom.isArray dom.isFunction
-//2011.9.16 修复dom.format BUG
-//2011.10.2 优化dom.lang
-//2011.10.3 重写dom.isPlainObject与jQuery的保持一致, 优化parseJS，
+//2011.9.11 重构$.isArray $.isFunction
+//2011.9.16 修复$.format BUG
+//2011.10.2 优化$.lang
+//2011.10.3 重写$.isPlainObject与jQuery的保持一致, 优化parseJS，
 //2011.10.4 去掉array.without（功能与array.diff相仿），更改object.widthout的参数
 //2011.10.6 使用位反操作代替 === -1, 添加array.intersect,array.union
 //2011.10.16 添加返回值
 //2011.10.21 修复Object.keys BUG
-//2011.10.26 优化quote ;将parseJSON parseXML中dom.log改为dom.error; FIX isPlainObject BUG;
+//2011.10.26 优化quote ;将parseJSON parseXML中$.log改为$.error; FIX isPlainObject BUG;
 //2011.11.6 对parseXML中的IE部分进行强化
 //2011.12.22 修正命名空间
+//2012.1.15 修正命名空间
 //键盘控制物体移动 http://www.wushen.biz/move/
