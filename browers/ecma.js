@@ -1,11 +1,11 @@
 //=========================================
 //  ECMA262v5新扩展模块
 //==========================================
-mass.define("ecma", function(){
-    //dom.log("已加载ECMA262v5新扩展模块")
+$.define("ecma", function(){
+    //$.log("已加载ECMA262v5新扩展模块")
     //Object扩展
     //fix ie for..in bug
-    var DONT_ENUM = dom.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
+    var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
     P = "prototype",
     hasOwn = ({}).hasOwnProperty;
     for (var i in {
@@ -14,7 +14,7 @@ mass.define("ecma", function(){
         DONT_ENUM = false;
     }
     //第二个参数仅在浏览器支持Object.defineProperties时可用
-    mass.mix(Object,{
+    $.mix(Object,{
         //取得其所有键名以数组形式返回
         keys: function(obj){//ecma262v5 15.2.3.14
             var result = [];
@@ -45,7 +45,7 @@ mass.define("ecma", function(){
         +'}'+ret
         return new Function("fn,scope",fun);
     }
-    mass.mix(Array[P],{
+    $.mix(Array[P],{
         //定位类 返回指定项首次出现的索引。
         indexOf: function (el, index) {
             var n = this.length, i = ~~index;
@@ -104,7 +104,7 @@ mass.define("ecma", function(){
         };
     }
     //String扩展
-    mass.mix(String[P],{
+    $.mix(String[P],{
         //ecma262v5 15.5.4.20
         //http://www.cnblogs.com/rubylouvre/archive/2009/09/18/1568794.html
         //'      dfsd '.trim() === 'dfsd''
@@ -113,7 +113,7 @@ mass.define("ecma", function(){
         }
     },false);
 
-    mass.mix(Function[P],{
+    $.mix(Function[P],{
         //ecma262v5 15.3.4.5
         bind:function(scope) {
             if (arguments.length < 2 && scope===void 0) return this;
