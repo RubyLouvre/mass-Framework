@@ -1,6 +1,6 @@
 mass Framework
 ==================
-<p>这是一个前后通吃的框架。browers部分用于前端，从零开始建起，不依赖于其他框架。servers则构建在node.js，需要node.js的环境支持。<p>
+<p>这是一个前后端一体化的javascript框架。browers部分用于前端，从零开始建起，不依赖于其他框架。servers则构建在node.js，需要node.js的环境支持。<p>
 <p>前后端通用的部分是其模块加载机制，虽然内部实现有点不一致，但调用是一致的。另，许多不基于DOM API与node.js API的模块也是前后端共用的。</p>
 <p>前端是从模块加载开始，通过选择器构建<em>节点链对象</em>实现jQuery式的各种操作(数据缓存，样式操作，事件绑定，ajax调用，dom操作，属性操作），许多API都与jQuery非常相近。在语言底层，通过对ecma262v5新API的检测与补丁支持确保连IE6也能使用 String.prototype.trim, Array.prototype.forEach, Array.prototype.map,Array.prototype.filter, Array.prototype.reduce, Function.prototype.bind 等高级API， 享受Prototype.js那种编程快感。另，还通过dom.lang(aaa)生成<em>语言链对象</em>对字符串，数字，数组，类数组,对象这几种数据类型提供更多便捷操作, 这在保证不污染原型的同时, 亦能够进行链式操作。</p>
 <p>在大规模开发过程，mass Framework提供以下特征确保迅敏开发：</p>
