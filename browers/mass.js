@@ -89,7 +89,7 @@
         exports: function (name) {
             _$ && (global.$ = _$);//多库共存
             name = name || mass["@name"];//取得当前简短的命名空间
-            mass["@name"] = name + postfix;
+            mass["@name"] = name 
             global[namespace] = commonNs;
             return global[name]  = this;
         },
@@ -399,7 +399,7 @@
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
         mass.exports();
     });
-    mass.exports();//防止不同版本的命名空间冲突
+    mass.exports("$"+ postfix);//防止不同版本的命名空间冲突
 /*combine modules*/
 
 })(this,this.document);
