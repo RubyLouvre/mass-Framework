@@ -233,7 +233,7 @@
         if(fn instanceof Function){
             return fn.apply(global,argv);
         }
-        return  Function("b","var mass = dom;return " +(str || fn) +".apply(window,b)" )(argv);
+        return  Function("b","var mass = $;return " +(str || fn) +".apply(window,b)" )(argv);
     }
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
@@ -356,7 +356,7 @@
         //用于检测这模块有没有加载成功
         _checkFail : function(name, error){
             if(error || !map[name].state ){
-                this.stack(new Function('mass.log("fail to load module [ '+name+' ]")'));
+                this.stack(new Function('$.log("fail to load module [ '+name+' ]")'));
                 this.stack.fire();//打印错误堆栈
             }
         }
