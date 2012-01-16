@@ -75,7 +75,7 @@
         mapSeries(full, fs.readFile,function(e,bf){
             bf.unshift(patch);
             var ret = text.replace("/*combine modules*/", bf.join("\n") );
-            fs.writeFile("mass_merge.js",ret,function(e){//生成新的js文件！
+            fs.writeFile("js/mass_merge.js",ret,function(e){//生成新的js文件！
                 if(e) {
                     console.log();
                 }else{
