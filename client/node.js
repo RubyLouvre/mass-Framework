@@ -483,12 +483,14 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         target.clearAttributes && target.clearAttributes();
     }
     function shimCloneNode( elem ) {
-	var div = document.createElement( "div" );
-	div.innerHTML = elem.outerHTML;
-	return div.firstChild;
-}
+        var div = DOC.createElement( "div" );
+        div.innerHTML = elem.outerHTML;
+        return div.firstChild;
+    }
+    var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var neo = $.support.cloneAll ? shimCloneNode( node ): node.cloneNode(true), src, neos, i;
+        var neo = node.outerHTML && (node.outerHTML.indexOf(unknownTag) === 0) ?
+            shimCloneNode( node ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1){
             if($.support.cloneAll ){
