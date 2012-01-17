@@ -141,6 +141,48 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
+        dump : function(obj, indent) {
+            indent = indent || "";
+            if (obj === null)
+                return indent + "null";
+            if (obj === void 0)
+                return indent + "undefined";
+            if (obj.nodeType === 9)
+                return indent + "[object Document]";
+            if (obj.nodeType)
+                return indent + "[object " + (obj.tagName || "Node") +"]";
+            var arr = [],type = $.type(obj),self = arguments.callee,next = indent +  "\t";
+            switch (type) {
+                case "Boolean":
+                case "Number":
+                case "NaN":
+                case "RegExp":
+                    return indent + obj;
+                case "String":
+                    return indent + $.quote(obj);
+                case "Function":
+                    return (indent + obj).replace(/\n/g, "\n" + indent);
+                case "Date":
+                    return indent + '(new Date(' + obj.valueOf() + '))';
+                case "Window" :
+                    return indent + "[object "+type +"]";
+                case "NodeList":
+                case "Arguments":
+                case "Array":
+                    for (var i = 0, n = obj.length; i < n; ++i)
+                        arr.push(self(obj[i], next).replace(/^\s* /g, next));
+                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
+                default:
+                    if($.isPlainObject(obj)){
+                        for ( i in obj) {
+                            arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
+                        }
+                        return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
+                    }else{
+                        return indent + "[object "+type +"]";
+                    }
+            }
+        },
         //http://www.schillmania.com/content/projects/javascript-animation-1/
         //http://www.cnblogs.com/rubylouvre/archive/2010/04/09/1708419.html
         parseJS: function( code ) {
@@ -671,5 +713,5 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
 //2011.10.26 优化quote ;将parseJSON parseXML中$.log改为$.error; FIX isPlainObject BUG;
 //2011.11.6 对parseXML中的IE部分进行强化
 //2011.12.22 修正命名空间
-//2012.1.15 修正命名空间
+//2012.1.17 添加dump方法
 //键盘控制物体移动 http://www.wushen.biz/move/
