@@ -482,9 +482,9 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         target.uniqueNumber && $.removeData(target);
         target.clearAttributes && target.clearAttributes();
     }
-    function shimCloneNode( elem ) {
+    function shimCloneNode( node ) {
         var div = DOC.createElement( "div" );
-        div.innerHTML = elem.outerHTML;
+        div.innerHTML = node.outerHTML;
         return div.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"

@@ -1,18 +1,17 @@
 //=========================================
 // 类工厂模块
 //==========================================
- 
-dom.define("class", "lang",function(){
-    dom.log("已加载class模块")
+$.define("class", "lang",function(){
+    $.log("已加载class模块")
     var
     P = "prototype",  C = "constructor", I = "@init",S = "_super",
-    unextend = dom.oneObject([S,P, 'extend', 'implement','_class']),
+    unextend = $.oneObject([S,P, 'extend', 'implement','_class']),
     exclusive = new RegExp([S,I,C].join("|")),ron = /on([A-Z][A-Za-z]+)/,
-    classOne = dom.oneObject('Object,Array,Function');
+    classOne = $.oneObject('Object,Array,Function');
     function expand(klass,props){
-        'extend,implement'.replace(dom.rword, function(name){
+        'extend,implement'.replace($.rword, function(name){
             var modules = props[name];
-            if(classOne[dom.type(modules)]){
+            if(classOne[$.type(modules)]){
                 klass[name].apply(klass,[].concat(modules));
                 delete props[name];
             }
@@ -20,7 +19,7 @@ dom.define("class", "lang",function(){
         return klass
     }
     function setOptions(){
-        var options = this.options = dom.Object.merge.apply(this.options || {}, arguments),key,match
+        var options = this.options = $.Object.merge.apply(this.options || {}, arguments),key,match
         if (typeof this.bind == "function") {
             for (key in options) {
                 if ((match = key.match(ron))) {
@@ -41,7 +40,7 @@ dom.define("class", "lang",function(){
             throw name + " no super method!"
         }
     }
-    dom["@class"] =  {
+    $["@class"] =  {
         inherit : function(parent,init) {
             var bridge = function() { }
             if(typeof parent == "function"){
@@ -83,7 +82,7 @@ dom.define("class", "lang",function(){
         extend: function(){//扩展类成员
             var bridge = {}
             for(var i = 0, module; module = arguments[i++]; ){
-                dom.mix(bridge, module);
+                $.mix(bridge, module);
             }
             for(var key in bridge){
                 if(!unextend[key]){
@@ -93,7 +92,7 @@ dom.define("class", "lang",function(){
             return this;
         }
     };
-    dom.factory = function(obj){
+    $.factory = function(obj){
         obj = obj || {};
         var parent  = obj.inherit //父类
         var init = obj.init ; //构造器
@@ -104,7 +103,7 @@ dom.define("class", "lang",function(){
                 init.apply(this, arguments);
             }
         };
-        dom.mix(klass,dom["@class"]).inherit(parent, init);//添加更多类方法
+        $.mix(klass,$["@class"]).inherit(parent, init);//添加更多类方法
         return expand(klass,obj).implement(obj);
     }
 });
