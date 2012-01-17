@@ -1,8 +1,8 @@
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
-dom.define("support", function(){
-    dom.log("已加载support模块");
+$.define("support", function(){
+    $.log("已加载support模块");
     var global = this, DOC = global.document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
     div.setAttribute("className", "t");
     div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
@@ -11,7 +11,7 @@ dom.define("support", function(){
     select = DOC.createElement("select"),
   
     opt = select.appendChild( DOC.createElement("option") );
-    var support = dom.support = {
+    var support = $.support = {
         //是否支持自动插入tbody
         insertTbody: !!div[TAGS]("tbody").length,
         // checkbox的value默认为on，唯有Chrome 返回空字符串
@@ -83,7 +83,7 @@ dom.define("support", function(){
         background: "none"
     };
     if ( body ) {
-        dom.mix( testElementStyle, {
+        $.mix( testElementStyle, {
             position: "absolute",
             left: "-1000px",
             top: "-1000px"
@@ -93,7 +93,7 @@ dom.define("support", function(){
         testElement.style[ i ] = testElementStyle[ i ];
     }
     testElement.appendChild( div );//将DIV加入DOM树
-    var testElementParent = body || dom.html;
+    var testElementParent = body || $.html;
     testElementParent.insertBefore( testElement, testElementParent.firstChild );
  
     support.boxModel = div.offsetWidth === 2;
@@ -110,6 +110,13 @@ dom.define("support", function(){
         div.style.display = "";
         div.innerHTML = "<div style='width:4px;'></div>";
         support.shrinkWrapBlocks = div.offsetWidth !== 2;
+        if( global.getComputedStyle ) {
+            div.style.marginTop = "1%";
+            support.pixelMargin = ( global.getComputedStyle( div, null ) || {
+                marginTop: 0
+            } ).marginTop !== "1%";
+        }
+
     }
     div.innerHTML = "";
     testElementParent.removeChild( testElement );
