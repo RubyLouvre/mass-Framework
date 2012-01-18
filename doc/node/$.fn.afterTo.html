@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.before</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                dom('<strong>(しとうなさみ)</strong>').afterTo(".inner");
+            }
+            var exec2 = function(){
+                dom("#aaa").afterTo(".inner");
+            }
+            var exec3 = function(){
+                dom("<tfoot><tr><th>表脚</th><th>表脚</th></tr></tfoot>").afterTo( dom(".table1 tbody"));
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.before(content)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>把匹配的元素插入到另一个指定的元素集合的后面。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>content</dt>
+            <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，CSS选择器或dom对象。</dd>
+        </dl>
+
+        <p><span class="stress">返回值：</span></p>
+        <p>原dom实例</p>
+
+        <fieldset><legend>例子</legend>
+            <p id="aaa"><strong>Ruby Louvre</strong></p>
+            <div class="container">
+                <div class="inner">司徒正美</div>
+                <div class="inner">司徒正美</div>
+            </div>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+      &lt;p id="aaa"&gt;&lt;strong&gt;Ruby Louvre&lt;/strong&gt;&lt;/p&gt;
+      &lt;div class="container"&gt;
+        &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+        &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+      &lt;/div&gt;
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+      dom('&lt;strong&gt;(しとうなさみ)&lt;/strong&gt;').afterTo(".inner");
+            </pre>
+            <button onclick="exec1()">点我，执行代码</button>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+      dom("#aaa").afterTo(".inner");
+            </pre>
+            <button onclick="exec2()">点我，执行代码</button>
+        </fieldset>
+        <fieldset><legend>例子</legend>
+            <table class="table1">
+                <tbody>
+                    <tr><td>append</td><td>appendTo</td></tr>
+                    <tr><td>prepend</td><td>prependTo</td></tr>
+                    <tr><td>before</td><td>insertBefore</td></tr>
+                    <tr><td>after</td><td>insertAfter</td></tr>
+                </tbody>
+            </table>
+
+            <pre class="brush:xml;gutter:false;toolbar:false">
+       &lt;table class="table1"&gt;
+        &lt;tbody&gt;
+          &lt;tr&gt;&lt;td&gt;append&lt;/td&gt;&lt;td&gt;appendTo&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr&gt;&lt;td&gt;prepend&lt;/td&gt;&lt;td&gt;prependTo&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr&gt;&lt;td&gt;before&lt;/td&gt;&lt;td&gt;insertBefore&lt;/td&gt;&lt;/tr&gt;
+          &lt;tr&gt;&lt;td&gt;after&lt;/td&gt;&lt;td&gt;insertAfter&lt;/td&gt;&lt;/tr&gt;
+        &lt;/tbody&gt;
+      &lt;/table&gt;
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+  dom("&lt;tfoot&gt;&lt;tr&gt;&lt;th&gt;表脚&lt;/th&gt;&lt;th&gt;表脚&lt;/th&gt;&lt;/tr&gt;&lt;/tfoot&gt;").afterTo( dom(".table1 tbody"));
+            </pre>
+            <button onclick="exec3()">点我，执行代码</button>
+        </fieldset>
+
+    </article>
+</body>
+</html>

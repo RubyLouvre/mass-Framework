@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.replaceTo</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+               dom(".inner").replace("<dir>新的内容</dir>")
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.replaceTo(content)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>replace的反转操作，通过当前选中的节点去替换content。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>content</dt>
+            <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，CSS选择器或dom对象。</dd>
+        </dl>
+
+        <p><span class="stress">返回值：</span></p>
+        <p>原dom实例</p>
+
+        <fieldset><legend>例子</legend>
+            <div class="container">
+                <div class="inner">司徒正美</div>
+                <div class="inner">司徒正美</div>
+                <div class="inner">司徒正美</div>
+            </div>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+&lt;div class="container"&gt;
+  &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+  &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+  &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+&lt;/div&gt;
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+               dom("&lt;dir&gt;新的内容&lt;/dir&gt;").replace(".inner")
+            </pre>
+            <button onclick="exec1()">点我，执行代码</button>
+
+
+        </fieldset>
+
+    </article>
+</body>
+</html>

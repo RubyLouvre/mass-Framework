@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.odd</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+          var exec1 = function(){
+              $.require("ready,node,css",function(){
+                  dom("#sample li").even().css("backgroundColor","red")
+              })
+          }
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.even()</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>取得原实例中索引值为偶数的元素组成新实例返回。</p>
+
+            <p><span class="stress">返回值：</span></p>
+            <p>新的dom实例</p>
+            <fieldset><legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+              $.require("ready,node,css",function(){
+                  dom("#sample li").even().css("backgroundColor","red")
+              })
+                </pre>
+                <ul id="sample">
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                </ul>
+
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+</html>

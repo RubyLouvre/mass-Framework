@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.contents</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("ready,node",function(){
+                    $.log(dom(".sample1").children().length,true);
+                    $.log(dom(".sample1").contents().length,true);
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.contents( )</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>取得匹配元素的所有节点，去重排序组成新dom实例返回。</p>
+            <p>此方法与children方法相似，但它比后者能获取更多的节点，如文本节点，注释节点。如果是一个iframe元素则取得其对应的文档对象。 </p>
+            <p><span class="stress">返回值：</span></p>
+            <p>新dom实例。</p>
+            <fieldset><legend>例子</legend>
+                <ul class="sample1">
+                    <li>list item 1</li>
+                    <li>list item 2
+                        <ul>
+                            <li>list item 2-a</li>
+                            <li>list item 2-b</li>
+                        </ul>
+                    </li>
+                    <li><b>list item 3</b></li>
+                    <li>list item 4</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;ul class="sample1"&gt;
+                    &lt;li&gt;list item 1&lt;/li&gt;
+                    &lt;li&gt;list item 2
+                        &lt;ul&gt;
+                            &lt;li&gt;list item 2-a&lt;/li&gt;
+                            &lt;li&gt;list item 2-b&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/li&gt;
+                    &lt;li&gt;&lt;b&gt;list item 3&lt;/b&gt;&lt;/li&gt;
+                    &lt;li&gt;list item 4&lt;/li&gt;
+                &lt;/ul&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,node",function(){
+               $.log(dom(".sample1").children().length,true);
+               $.log(dom(".sample1").contents().length,true);
+            });
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+
+            </fieldset>
+        </article>
+    </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.prevAll</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("ready,node",function(){
+                    dom(".third-item").prevAll().css("background-color","red");
+                });
+            }
+
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.prevAll([expr])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>获取每个匹配元素之前所有的同辈元素，去重排序组成新dom实例返回。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>expr</dt>
+                <dd>可选，String，用于进一步过滤的CSS选择器。</dd>
+            </dl>
+
+            <p><span class="stress">返回值：</span></p>
+            <p>新dom实例</p>
+            <fieldset><legend>例子</legend>
+                <p>将.third-item的所有兄长的背景变红。</p>
+                <ul> 
+                    <li>list item 0</li>
+                    <li>list item 1</li>
+                    <li>list item 2</li>
+                    <li class="third-item">list item 3</li>
+                    <li>list item 4</li>
+                    <li>list item 5</li>
+                    <li>list item 6</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;ul&gt;
+                    &lt;li&gt;list item 1&lt;/li&gt;
+                    &lt;li&gt;list item 1&lt;/li&gt;
+                    &lt;li&gt;list item 2&lt;/li&gt;
+                    &lt;li class="third-item"&gt;list item 3&lt;/li&gt;
+                    &lt;li&gt;list item 4&lt;/li&gt;
+                    &lt;li&gt;list item 5&lt;/li&gt;
+                    &lt;li&gt;list item 6&lt;/li&gt;
+                &lt;/ul&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("ready,node",function(){
+                    dom(".third-item").prevAll().css("background-color","red");
+                });
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+
+
+        </article>
+    </body>
+</html>

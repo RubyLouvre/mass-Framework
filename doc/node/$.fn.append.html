@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.append</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                dom(".inner").append('<strong>(しとうなさみ)</strong>');
+            }
+            var exec2 = function(){
+                dom(".inner").append('<em>aaa</em><script>alert("内嵌脚本")<\/script>');
+            }
+            var exec3 = function(){
+                dom("#bbb").append(dom("#aaa strong"));
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.append(content)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>向每个匹配的元素内部追加内容。</p>
+        <p>这个操作与对指定的元素执行appendChild方法，将它们添加到文档中的情况类似。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>content</dt>
+            <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，CSS选择器或dom对象。</dd>
+        </dl>
+
+        <p><span class="stress">返回值：</span></p>
+        <p>原dom实例</p>
+
+        <fieldset><legend>例子</legend>
+            <div class="container">
+                <div class="inner">司徒正美</div>
+                <div class="inner">司徒正美</div>
+            </div>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+&lt;div class="container"&gt;
+  &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+  &lt;div class="inner"&gt;司徒正美&lt;/div&gt;
+&lt;/div&gt;
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+      dom(".inner").append('<strong>(しとうなさみ)</strong>')
+            </pre>
+            <button onclick="exec1()">点我，执行代码</button>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+    dom(".inner").append('&lt;em&gt;aaa&lt;/em&gt;&lt;script&gt;alert("内嵌脚本")&lt;\/script&gt;');
+            </pre>
+            <button onclick="exec2()">点我，执行代码</button>
+
+        </fieldset>
+        <fieldset><legend>例子</legend>
+            <p id="aaa"><strong>Ruby Louvre</strong></p>
+            <p id="bbb">我的博客名为: </p
+            <pre class="brush:xml;gutter:false;toolbar:false">
+       &lt;p id="aaa"&gt;&lt;strong&gt;Ruby Louvre&lt;/strong&gt;&lt;/p&gt;
+       &lt;p id="bbb"&gt;我的博客名为: &lt;/p
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+      dom("#bbb").append(dom("#aaa strong"));
+            </pre>
+            <button onclick="exec3()">点我，执行代码</button>
+        </fieldset>
+
+    </article>
+</body>
+</html>

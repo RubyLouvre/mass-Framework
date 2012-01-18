@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.closest</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .sample1 { margin: 3px; padding: 3px; }
+            .hilight { color:#00CED1 ; }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,attr,event",function(){
+                dom(document).bind("click", function (e) {
+                    dom(e.target).closest("li").toggleClass("hilight");
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.closest(expr, [context])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>取得匹配节点中所有第一个匹配expr的最近祖先，去重排序后构成新实例返回。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。String。CSS表达式。</dd>
+                <dt>context</dt>
+                <dd>可选。元素节点。</dd>
+            </dl>
+            <p><span class="stress">返回值：</span></p>
+            <p>新dom实例。</p>
+            <fieldset><legend>例子</legend>
+                <p>closest最大的用处是实现自己的事件代理，虽然事件代理在dom Framework中提供支持。</p>
+
+                <ul class="sample1">
+                    <li>list item 1</li>
+                    <li>list item 2
+                        <ul>
+                            <li>list item 2-a</li>
+                            <li>list item 2-b</li>
+                        </ul>
+                    </li>
+                    <li><b>list item 3</b></li>
+                    <li>list item 4</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;ul class="sample1"&gt;
+                    &lt;li&gt;list item 1&lt;/li&gt;
+                    &lt;li&gt;list item 2
+                        &lt;ul&gt;
+                            &lt;li&gt;list item 2-a&lt;/li&gt;
+                            &lt;li&gt;list item 2-b&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/li&gt;
+                    &lt;li&gt;&lt;b&gt;list item 3&lt;/b&gt;&lt;/li&gt;
+                    &lt;li&gt;list item 4&lt;/li&gt;
+                &lt;/ul&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,attr,event",function(){
+                dom(document).bind("click", function (e) {
+                    dom(e.target).closest("li").toggleClass("hilight");
+                });
+            });
+                </pre>
+
+
+            </fieldset>
+        </article>
+    </body>
+</html>
