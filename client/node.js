@@ -482,15 +482,16 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         target.uniqueNumber && $.removeData(target);
         target.clearAttributes && target.clearAttributes();
     }
-    function shimCloneNode( node ) {
+    function shimCloneNode( outerHTML) {
         var div = DOC.createElement( "div" );
-        div.innerHTML = node.outerHTML;
+        div.innerHTML = outerHTML;
         return div.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var neo = node.outerHTML && (node.outerHTML.indexOf(unknownTag) === 0) ?
-            shimCloneNode( node ): node.cloneNode(true), src, neos, i;
+        var outerHTML = node.outerHTML;
+        var neo = outerHTML && (outerHTML.indexOf(unknownTag) === 0) ?
+            shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1){
             if($.support.cloneAll ){
