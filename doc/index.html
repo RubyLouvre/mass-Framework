@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>dom Framework</title>
+        <script src="public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="public/js/common.js" type="text/javascript" ></script>
+        <style >
+            html,body{
+                background:#ddc;
+            }
+            #leftsection dl,#leftsection dd{
+                margin:0;
+                padding:2px 5px 2px 0;
+                background:#eed;
+                cursor:pointer;
+            }
+            #leftsection dl{
+                padding:0;
+            }
+            #leftsection dt{
+                padding:2px 5px 2px 0;
+                text-indent:5px;
+                margin:0;
+                background:#cc9;
+                color:#770000;
+                cursor:pointer;
+            }
+            .dhighlight{
+                background:#252d37!important;
+                color:#fff;
+            }
+            #leftsection dl{
+                border-left:1px solid #252d37;
+                border-right:1px solid #252d37;
+                border-bottom:1px solid #252d37;
+            }
+            .first_dl{
+                border-top:1px solid #252d37;
+            }
+        </style>
+        <script type="text/javascript">
+            window.onload = function(){
+                var iframe = document.getElementById("iframe");
+                //收叠与跳转
+                var dds = document.getElementsByTagName("DD");
+                function closeMenu(target){
+                    for(var i = 0, dd ; dd = dds[i++];){
+                        dd.style.display = "none";
+                    }
+                    target.style.display = "block";
+                }
+                closeMenu(dds[0])
+                function openMenu(target){
+                    for(var i = 0, dd ; dd = dds[i++];){
+                        dd.style.display = "none";
+                    }
+                    var els = target.parentNode.getElementsByTagName("DD");
+                    for(var i = 0, el ; el = els[i++];){
+                        el.style.display = "block";
+                    }
+                }
+                $.bind(document.body,"click",function(e){
+                    e = e || window.event;
+                    var target = e.target || e.srcElement;
+                    if(target.nodeName === "DD"){
+                        iframe.src = ("/doc/"+target.getAttribute("path"));
+                        closeMenu(target)
+                    }else if(target.nodeName === "DT"){
+                        iframe.src = ("/doc/"+target.getAttribute("path"));
+                        openMenu(target)
+                    }
+                });
+                //掠过变色
+                $.bind(document.body,"mouseover",function(e){
+                    e = e || window.event;
+                    var target = e.target || e.srcElement;
+                    if(target.nodeName === "DD" ){
+                        target.className = "dhighlight";
+                    }
+                });
+                $.bind(document.body,"mouseout",function(e){
+                    e = e || window.event;
+                    var target = e.target || e.srcElement;
+                    if(target.nodeName === "DD" ){
+                        target.className = "";
+                    }
+                })
+            }
+            //符号体系的运用。毫无疑问符号体系的简洁有助于理解难，在用语言来表达将使头脑负担过重。
+        </script>
+    </head>
+    <body>
+        <div style="float:left;width:14%" id="leftsection">
+            <dl class="first_dl">
+                <dt path="core/$.html">模块加载模块</dt>
+                <dd path="core/$.bind.html">$.bind</dd>
+                <dd path="core/$.define.html">$.define</dd>
+                <dd path="core/$.exports.html">$.exports</dd>
+                <dd path="core/$.head.html">$.head</dd>
+                <dd path="core/$.html.html">$.html</dd>
+                <dd path="core/$.getUid.html">$.getUid.html</dd>
+                <dd path="core/$.log.html">$.log</dd>
+                <dd path="core/$.mix.html">$.mix</dd>
+                <dd path="core/$.noop.html">$.noop</dd>
+                <dd path="core/$.oneObject.html">$.oneObject</dd>
+                <dd path="core/$.require.html">$.require</dd>
+                <dd path="core/$.rword.html">$.rword</dd>
+                <dd path="core/$.slice.html">$.slice</dd>
+                <dd path="core/$.type.html">$.type</dd>
+                <dd path="core/$.unbind.html">$.unbind</dd>
+            </dl>
+            <dl>
+                <dt path="support/support.html">特征嗅探模块</dt>
+            </dl>
+            <dl>
+                <dt path="ecma/ecma.html">ECMA扩展模块</dt>
+            </dl>
+            <dl>
+                <dt path="lang/lang.html">语言扩展模块</dt>
+                <dd path="lang/array.clone.html">array.clone</dd>
+                <dd path="lang/array.compact.html">array.compact</dd>
+                <dd path="lang/array.contains.html">array.contains</dd>
+                <dd path="lang/array.diff.html">array.diff</dd>
+                <dd path="lang/array.ensure.html">array.ensure</dd>
+                <dd path="lang/array.first.html">array.first</dd>
+                <dd path="lang/array.flatten.html">array.flatten</dd>
+                <dd path="lang/array.intersect.html">array.intersect</dd>
+                <dd path="lang/array.last.html">array.last</dd>
+                <dd path="lang/array.max.html">array.max</dd>
+                <dd path="lang/array.min.html">array.min</dd>
+                <dd path="lang/array.pluck.html">array.pluck</dd>
+                <dd path="lang/array.ran$.html">array.random</dd>
+                <dd path="lang/array.remove.html">array.remove</dd>
+                <dd path="lang/array.removeAt.html">array.removeAt</dd>
+                <dd path="lang/array.shuffle.html">array.shuffle</dd>
+                <dd path="lang/array.sortBy.html">array.sortBy</dd>
+                <dd path="lang/array.union.html">array.union</dd>
+                <dd path="lang/array.unique.html">array.unique</dd>
+                <dd path="lang/$.format.html">$.format</dd>
+                <dd path="lang/$.isArray.html">$.isArray</dd>
+                <dd path="lang/$.isArrayLike.html">$.isArrayLike</dd>
+                <dd path="lang/$.isEmptyObject.html">$.isEmptyObject</dd>
+                <dd path="lang/$.isFunction.html">$.isFunction</dd>
+                <dd path="lang/$.isNative.html">$.isNative</dd>
+                <dd path="lang/$.isPlainObject.html">$.isPlainObject</dd>
+                <dd path="lang/$.parseJS.html">$.parseJS</dd>
+                <dd path="lang/$.parseJSON.html">$.parseJSON</dd>
+                <dd path="lang/$.parseXML.html">$.parseXML</dd>
+                <dd path="lang/$.quote.html">$.quote</dd>
+                <dd path="lang/$.range.html">$.range</dd>
+                <dd path="lang/$.tag.html">$.tag</dd>
+                <dd path="lang/number.constrain.html">number.constrain</dd>
+                <dd path="lang/number.downto.html">number.downto</dd>
+                <dd path="lang/number.nearer.html">number.nearer</dd>
+                <dd path="lang/number.padLeft.html">number.padLeft</dd>
+                <dd path="lang/number.padRight.html">number.padRight</dd>
+                <dd path="lang/number.round.html">number.round</dd>
+                <dd path="lang/number.times.html">number.times</dd>
+                <dd path="lang/number.upto.html">number.upto</dd>
+                <dd path="lang/object.clone.html">object.clone</dd>
+                <dd path="lang/object.forEach.html">object.forEach</dd>
+                <dd path="lang/object.merge.html">object.merge</dd>
+                <dd path="lang/object.subset.html">object.subset</dd>
+                <dd path="lang/object.without.html">object.without</dd>
+                <dd path="lang/string.blank.html">string.blank</dd>
+                <dd path="lang/string.byteLen.html">string.byteLen</dd>
+                <dd path="lang/string.camelize.html">string.camelize</dd>
+                <dd path="lang/string.capitalize.html">string.capitalize</dd>
+                <dd path="lang/string.contains.html">string.contains</dd>
+                <dd path="lang/string.empty.html">string.empty</dd>
+                <dd path="lang/string.endsWith.html">string.endsWith</dd>
+                <dd path="lang/string.escapeRegExp.html">string.escapeRegExp</dd>
+                <dd path="lang/string.padLeft.html">string.padLeft</dd>
+                <dd path="lang/string.padRight.html">string.padRight</dd>
+                <dd path="lang/string.startsWith.html">string.startsWith</dd>
+                <dd path="lang/string.times.html">string.times</dd>
+                <dd path="lang/string.toFloat.html">string.toFloat</dd>
+                <dd path="lang/string.toInt.html">string.toInt</dd>
+                <dd path="lang/string.truncate.html">string.truncate</dd>
+                <dd path="lang/string.underscored.html">string.underscored</dd>
+            </dl>
+            <dl>
+                <dt path="class/class.html">类工厂模块</dt>
+            </dl>
+            <dl>
+                <dt path="data/data.html">数据缓存模块</dt>
+                <dd path="data/$.data.html">$.data</dd>
+                <dd path="data/$.mergeData.html">$.mergeData</dd>
+                <dd path="data/$.removeData.html">$.removeData</dd>
+            </dl>
+            <dl>
+                <dt path="query/query.html">选择器模块</dt>
+                <dd path="query/query.class.html">类选择器</dd>
+                <dd path="query/query.combine.html">并联选择器</dd>
+                <dd path="query/query.tag.html">标签选择器</dd>
+                <dd path="query/query.tags.html">标签伪类</dd>
+                <dd path="query/query.lang.html">语言伪类</dd>
+                <dd path="query/query.general.html">兄长选择器</dd>
+                <dd path="query/query.id.html">ID选择器</dd>
+                <dd path="query/query.child.html">亲子选择器</dd>
+                <dd path="query/query.attribute.html">属性选择器</dd>
+                <dd path="query/query.descendant.html">后代选择器</dd>
+                <dd path="query/query.not.html">反选伪类</dd>
+                <dd path="query/query.target.html#target">目标伪类</dd>
+                <dd path="query/query.visibility.html">可见性伪类</dd>
+                <dd path="query/query.root.html">根伪类</dd>
+                <dd path="query/query.state.html">状态伪类</dd>
+                <dd path="query/query.parent.html">父伪类</dd>
+                <dd path="query/query.focus.html">聚焦伪类</dd>
+                <dd path="query/query.contains.html">内容包含伪类</dd>
+                <dd path="query/query.has.html">元素包含伪类</dd>
+                <dd path="query/query.order.html">位置伪类</dd>
+                <dd path="query/query.childFilter.html">子元素过滤伪类1</dd>
+                <dd path="query/query.childFilter2.html">子元素过滤伪类2</dd>
+            </dl>
+            <dl>
+                <dt path="node/node.html">节点操作模块</dt>
+                <dd path="node/$.html">dom</dd>
+                <dd path="node/$.fn.after.html">$.fn.after</dd>
+                <dd path="node/$.fn.afterTo.html">$.fn.afterTo</dd>
+                <dd path="node/$.fn.append.html">$.fn.append</dd>
+                <dd path="node/$.fn.appendTo.html">$.fn.appendTo</dd>
+                <dd path="node/$.fn.before.html">$.fn.before</dd>
+                <dd path="node/$.fn.beforeTo.html">$.fn.beforeTo</dd>
+                <dd path="node/$.fn.children.html">$.fn.children</dd>
+                <dd path="node/$.fn.closest.html">$.fn.closest</dd>
+                <dd path="node/$.fn.clone.html">$.fn.clone</dd>
+                <dd path="node/$.fn.collect.html">$.fn.collect</dd>
+                <dd path="node/$.fn.contents.html">$.fn.contents</dd>
+                <dd path="node/$.fn.data.html">$.fn.data</dd>
+                <dd path="node/$.fn.each.html">$.fn.each</dd>
+                <dd path="node/$.fn.empty.html">$.fn.empty</dd>
+                <dd path="node/$.fn.eq.html">$.fn.eq</dd>
+                <dd path="node/$.fn.even.html">$.fn.even</dd>
+                <dd path="node/$.fn.filter.html">$.fn.filter</dd>
+                <dd path="node/$.fn.find.html">$.fn.find</dd>
+                <dd path="node/$.fn.first.html">$.fn.first</dd>
+                <dd path="node/$.fn.gt.html">$.fn.gt</dd>
+                <dd path="node/$.fn.has.html">$.fn.has</dd>
+                <dd path="node/$.fn.html.html">$.fn.html</dd>
+                <dd path="node/$.fn.is.html">$.fn.is</dd>
+                <dd path="node/$.fn.last.html">$.fn.last</dd>
+                <dd path="node/$.fn.lt.html">$.fn.lt</dd>
+                <dd path="node/$.fn.map.html">$.fn.map</dd>
+                <dd path="node/$.fn.next.html">$.fn.next</dd>
+                <dd path="node/$.fn.nextAll.html">$.fn.nextAll</dd>
+                <dd path="node/$.fn.nextUntil.html">$.fn.nextUntil</dd>
+                <dd path="node/$.fn.not.html">$.fn.not</dd>
+                <dd path="node/$.fn.odd.html">$.fn.odd</dd>
+                <dd path="node/$.fn.outerHTML.html">$.fn.outerHTML</dd>
+                <dd path="node/$.fn.parent.html">$.fn.parent</dd>
+                <dd path="node/$.fn.parents.html">$.fn.parents</dd>
+                <dd path="node/$.fn.parentUntil.html">$.fn.parentUntil</dd>
+                <dd path="node/$.fn.prepend.html">$.fn.prepend</dd>
+                <dd path="node/$.fn.prependTo.html">$.fn.prependTo</dd>
+                <dd path="node/$.fn.prev.html">$.fn.prev</dd>
+                <dd path="node/$.fn.prevAll.html">$.fn.prevAll</dd>
+                <dd path="node/$.fn.prevUntil.html">$.fn.prevUntil</dd>
+                <dd path="node/$.fn.remove.html">$.fn.remove</dd>
+                <dd path="node/$.fn.removeData.html">$.fn.removeData</dd>
+                <dd path="node/$.fn.replace.html">$.fn.replace</dd>
+                <dd path="node/$.fn.replaceTo.html">$.fn.replaceTo</dd>
+                <dd path="node/$.fn.siblings.html">$.fn.siblings</dd>
+                <dd path="node/$.fn.slice.html">$.fn.slice</dd>
+                <dd path="node/$.fn.text.html">$.fn.text</dd>
+                <dd path="node/$.fn.toString.html">$.fn.toString</dd>
+                <dd path="node/$.fn.valueOf.html">$.fn.valueOf</dd>
+                <dd path="node/$.parseHTML.html">$.parseHTML</dd>
+                <dd path="node/$.contains.html">$.contains</dd>
+            </dl>
+            <dl>
+                <dt path="css/css.html">样式操作模块</dt>
+                <dd path="css/$.cssName.html">$.cssName</dd>
+                <dd path="css/$.css.html">$.css</dd>
+                <dd path="css/$.fn.css.html">$.fn.css</dd>
+                <dd path="css/$.fn.offset.html">$.fn.offset</dd>
+                <dd path="css/$.fn.position.html">$.fn.position</dd>
+                <dd path="css/$.fn.offsetParent.html">$.fn.offsetParent</dd>
+                <dd path="css/$.fn.rotate.html">$.fn.rotate</dd>
+                <dd path="css/$.fn.scrollLeft.html">$.fn.scrollLeft</dd>
+                <dd path="css/$.fn.scrollTop.html">$.fn.scrollTop</dd>
+                <dd path="css/$.fn.height.html">$.fn.height</dd>
+                <dd path="css/$.fn.width.html">$.fn.width</dd>
+                <dd path="css/$.fn.innerHeight.html">$.fn.innerHeight</dd>
+                <dd path="css/$.fn.innerWidth.html">$.fn.innerWidth</dd>
+                <dd path="css/$.fn.outerHeight.html">$.fn.outerHeight</dd>
+                <dd path="css/$.fn.outerWidth.html">$.fn.outerWidth</dd>
+            </dl>
+            <dl>
+                <dt path="attr/attr.html">属性操作模块</dt>
+                <dd path="attr/$.fn.addClass.html">$.fn.addClass</dd>
+                <dd path="attr/$.fn.hasClass.html">$.fn.hasClass</dd>
+                <dd path="attr/$.fn.removeClass.html">$.fn.removeClass</dd>
+                <dd path="attr/$.fn.toggleClass.html">$.fn.toggleClass</dd>
+                <dd path="attr/$.fn.replaceClass.html">$.fn.replaceClass</dd>
+                <dd path="attr/$.fn.val.html">$.fn.val</dd>
+                <dd path="attr/$.fn.removeAttr.html">$.fn.removeAttr</dd>
+                <dd path="attr/$.fn.removeProp.html">$.fn.removeProp</dd>
+                <dd path="attr/$.fn.attr.html">$.fn.attr</dd>
+                <dd path="attr/$.fn.prop.html">$.fn.prop</dd>
+            </dl>
+            <dl>
+                <dt path="dispatcher/dispatcher.html">事件派发器模块</dt>
+                <dd path="dispatcher/event.namespace.html">event.namespace</dd>
+            </dl>
+            <dl>
+                <dt path="event/event.html">DOM事件模块</dt>
+                <dd path="event/$.fn.bind.html">$.fn.bind</dd>
+                <dd path="event/$.fn.blur.html">$.fn.blur</dd>
+                <dd path="event/$.fn.change.html">$.fn.change</dd>
+                <dd path="event/$.fn.click.html">$.fn.click</dd>
+                <dd path="event/$.fn.dblclick.html">$.fn.dblclick</dd>
+                <dd path="event/$.fn.delegate.html">$.fn.delegate</dd>
+                <dd path="event/$.fn.die.html">$.fn.die</dd>
+                <dd path="event/$.fn.fire.html">$.fn.fire</dd>
+                <dd path="event/$.fn.focus.html">$.fn.focus</dd>
+                <dd path="event/$.fn.focusin.html">$.fn.focusin</dd>
+                <dd path="event/$.fn.focusout.html">$.fn.focusout</dd>
+                <dd path="event/$.fn.hover.html">$.fn.hover</dd>
+                <dd path="event/$.fn.keydown.html">$.fn.keydown</dd>
+                <dd path="event/$.fn.keypress.html">$.fn.keypress</dd>
+                <dd path="event/$.fn.keyup.html">$.fn.keyup</dd>
+                <dd path="event/$.fn.live.html">$.fn.live</dd>
+                <dd path="event/$.fn.mousedown.html">$.fn.mousedown</dd>
+                <dd path="event/$.fn.mouseup.html">$.fn.mouseup</dd>
+                <dd path="event/$.fn.mousemove.html">$.fn.mousemove</dd>
+                <dd path="event/$.fn.mouseout.html">$.fn.mousemove</dd>
+                <dd path="event/$.fn.mouseover.html">$.fn.mousemove</dd>
+                <dd path="event/$.fn.mouseenter.html">$.fn.mouseenter</dd>
+                <dd path="event/$.fn.mouseleave.html">$.fn.mouseleave</dd>
+                <dd path="event/$.fn.mousewheel.html">$.fn.mousewheel</dd>
+                <dd path="event/$.fn.off.html">$.fn.off</dd>
+                <dd path="event/$.fn.on.html">$.fn.on</dd>
+                <dd path="event/$.fn.one.html">$.fn.one</dd>
+                <dd path="event/$.fn.scroll.html">$.fn.mousemove</dd>
+                <dd path="event/$.fn.toggle.html">$.fn.toggle</dd>
+                <dd path="event/$.fn.unbind.html">$.fn.unbind</dd>
+                <dd path="event/$.fn.undelegate.html">$.fn.undelegate</dd>
+            </dl>
+            <dl>
+                <dt path="fx/fx.html">特效模块</dt>
+                <dd path="fx/$.fn.fx.html">$.fn.fx</dd>
+                <dd path="fx/$.fn.delay.html">$.fn.delay</dd>
+                <dd path="fx/$.fn.stop.html">$.fn.stop</dd>
+                <dd path="fx/$.fn.slideUp.html">$.fn.slideUp</dd>
+                <dd path="fx/$.fn.slideDown.html">$.fn.slideDown</dd>
+                <dd path="fx/$.fn.slideToggle.html">$.fn.slideToggle</dd>
+                <dd path="fx/$.fn.fadeIn.html">$.fn.fadeIn</dd>
+                <dd path="fx/$.fn.fadeOut.html">$.fn.fadeOut</dd>
+                <dd path="fx/$.fn.fadeToggle.html">$.fn.fadeToggle</dd>
+                <dd path="fx/$.fn.show.html">$.fn.show</dd>
+                <dd path="fx/$.fn.hide.html">$.fn.hide</dd>
+                <dd path="fx/$.fn.toggle.html">$.fn.toggle</dd>
+                <dd path="fx/$.fn.puff.html">$.fn.puff</dd>
+            </dl>
+        </div>
+        <div style="float:left;width:85%">
+            <iframe id="iframe" src="/doc/core/ad.html" width="100%" frameborder="0">
+
+            </iframe>
+        </div>
+    </body>
+</html>
