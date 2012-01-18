@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>query.adjacent</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            dom(function(){
+                dom(".clicktable tbody td").click(function(){
+                    $.parseJS(this.innerHTML.replace("&gt;",">").trim())
+                });
+            })
+        </script>
+    </head>
+    <body>
+        <article>
+            <p>相邻选择器，亦即CSS表达式中的"+"，取得与当前元素相邻的下一个元素节点（nextElementSibling）。</p>
+
+            <fieldset><legend>例子</legend>
+                <table class="clicktable" cellspacing="0" width="700" rules="cols" >
+                    <thead>
+                        <tr>
+                            <th>
+                                请点击下面表格
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="www">
+                                dom("span + span").css("background-color","red");
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                dom("h2+p").css("background-color","darkorchid");
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+    &lt;div id="games"&gt;
+      &lt;p id="fanalfantasy"class="bbb"&gt; 最终幻想 | &lt;span class="aaa"&gt;勇者斗恶龙 |&lt;/span&gt;&lt;span class="ccc"&gt;女神转生| &lt;/span&gt;&lt;span class="bbb"&gt;传说系列 &lt;/span&gt;&lt;/p&gt;
+      &lt;p class="aaa"&gt;荒野兵器 |&lt;span title="hello"&gt;北欧女神 &lt;/span&gt;&lt;/p&gt;
+      &lt;p title="aaa"&gt;浪漫沙加|&lt;span title="bye"&gt;王国之心 &lt;/span&gt;&lt;/p&gt;
+      &lt;p id="legend "&gt;圣剑传说 |&lt;span class="ccc eee" title="goodbye"&gt;幻想水浒传| &lt;/span&gt;&lt;em&gt;影之心 |&lt;span class="aaa"&gt;格兰蒂亚 &lt;/span&gt;&lt;/em&gt;&lt;/p&gt;
+    &lt;/div&gt;
+                </pre>
+                <div id="games">
+                    <p id="fanalfantasy"class="bbb"> 最终幻想 | <span class="aaa">勇者斗恶龙 |</span><span class="ccc">女神转生| </span><span class="bbb">传说系列 </span></p>
+                    <p class="aaa">荒野兵器 |<span title="hello">北欧女神 </span></p>
+                    <p title="aaa">浪漫沙加|<span title="bye">王国之心 </span></p>
+                    <p id="legend ">圣剑传说 |<span class="ccc eee" title="goodbye">幻想水浒传| </span><em>影之心 |<span class="aaa">格兰蒂亚 </span></em></p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+</html>
