@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.position</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,node,css,event",function(){
+                var el = dom("#getpositon"); 
+                var coords = el.position();
+                el.html("left : "+coords.left+"<br/>top : "+coords.top);
+            })
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.position()</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>取得第一个元素相对其offsetParent的坐标。</p>
+            <p><span class="note">这只是一个读方法。</p>
+            <p><span class="note">它也不支持获取隐藏元素的偏移坐标。</p>
+
+            <p><span class="stress">返回值：</span></p>
+            <p>一个包含top与left属性的对象。</p>
+
+            <fieldset><legend>例子</legend>
+                <div style="position:relative;border:1px solid #00CED1;">
+                    <div id="getpositon" style="position:relative;margin:5px;padding:5px;background: #FF6347;top:1px;left:1px"></div>
+                </div>
+
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,node,css,event",function(){
+                var el = dom("#getpositon");
+                var coords = el.position();
+                el.html("left : "+coords.left+"&lt;br/&gt;top : "+coords.top)
+            })
+                </pre>
+            </fieldset>
+
+        </article>
+    </body>
+</html>

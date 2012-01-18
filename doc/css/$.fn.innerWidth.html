@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>$.fn.innerWidth</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+           
+            
+            $.require("ready,node,css,event",function(){
+                dom("#getp").click(function () { 
+                    var a = dom(".innerWidth");
+                    a.html("它的innerWidth为"+a.innerWidth()+"px");
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.innerWidth( )</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>取得第一个元素的当前宽度,包括padding，但是不包括border。</p>
+            <p><span class="note">此方法是个只读文法。</span></p>
+            <p><span class="note">此方法不适用于window 与 document对象，可以使用.width()代替。</span></p>
+            <p>w3c的盒子模型</p>
+            <img src="../public/styles/innerwidth.png" />
+            <fieldset><legend>例子</legend>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+ &lt;style&gt;   
+      .innerWidth { margin:10px;padding:5px;border:2px solid #666; }
+&lt;/style&gt;
+&lt;dvi id="innerWidth"&gt;&nbsp;&lt;/div&gt;
+                </pre>
+                <style>   
+                    .innerWidth { margin:10px;padding:5px;border:2px solid #666; }
+                </style>
+                <div class="innerWidth">&nbsp;</div>
+
+
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+             $.require("ready,node,css,event",function(){
+                dom("#getp").click(function () { 
+                   var a = dom(".innerWidth");
+                   a.html("它的innerWidth为"+a.innerWidth()+"px");
+                });
+            });
+                </pre>
+                <button id="getp">取得其innerWidth</button>
+            </fieldset>
+        </article>
+    </body>
+</html>

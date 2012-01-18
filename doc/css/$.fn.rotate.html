@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.rorate</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,css",function(){
+                dom("fieldset img").lt(2).rotate(-7);
+                dom("fieldset img").gt(2).rotate(7);
+            })
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.rorate([ degree ])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>用于旋转匹配的元素节点。</p>
+            <p><span class="note">这是一个set all get one方法。</span></p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>degree</dt>
+                <dd>
+                    可选，可以是数值，数值时默认单位是deg，或者是字符串，可选单位为deg rad grad。负数为逆时针旋转。
+                </dd>
+            </dl>
+            <p>如果是读取操作，返回的数字（对应单位是deg）</p>
+            <p><span class="note">CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。</span></p>
+            <fieldset><legend>例子</legend>
+                <img class="image_test_1" src="../public/styles/css_dom_fn_rotate_mm1.jpg" />
+                <img class="image_test_2" src="../public/styles/css_dom_fn_rotate_mm2.jpg" />
+                <img class="image_test_3" src="../public/styles/css_dom_fn_rotate_mm3.jpg" />
+                <img class="image_test_4" src="../public/styles/css_dom_fn_rotate_mm4.jpg" />
+                <img class="image_test_5" src="../public/styles/css_dom_fn_rotate_mm5.jpg" />
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,css",function(){
+
+                dom("fieldset img").lt(2).rotate(-7);
+                dom("fieldset img").gt(2).rotate(7);
+            })
+                </pre>
+            </fieldset>
+
+        </article>
+    </body>
+</html>
