@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>$.fn.fx</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <style type="text/css">
+            .test{
+                background: red;
+                width:10px;
+                height:10px;
+                margin: 5px;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,event,fx",function(){
+                var box = dom(".test");
+                dom("#start").click(function(){
+                    box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
+                });
+                dom("#reset").click(function(){
+                    box.width(10).height(10);
+                });
+                dom("#stop0").click(function(){
+                    box.stop(false,false);
+                });
+                dom("#stop1").click(function(){
+                    box.stop(false,true);
+                });
+                dom("#stop2").click(function(){
+                    box.stop(true,false);
+                });
+                dom("#stop3").click(function(){
+                    box.stop(true,true);
+                });
+            });
+
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.stop([clearQueue],[jumpToEnd])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>dom Framework支持四种形式的中止动画的方式，通过这两个参数的有机组合。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>obj</dt>
+                <dd>可选。Boolean。默认为false。是否清空列队。</dd>
+                <dt>name</dt>
+                <dd>可选。Boolean。默认为false。是否跳到此动画最后一帧</dd>
+            </dl>
+            <p><span class="stress">返回值：</span></p>
+            <p>dom实例</p>
+            <p><span class="stress">源码：</span></p>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+        $.fn.stop =function(clearQueue,jumpToEnd){
+            clearQueue = clearQueue ? "1" : "";
+            jumpToEnd =  jumpToEnd ? "1" : "0";
+            var stopCode = parseInt(clearQueue+jumpToEnd,2);//返回0 1 2 3
+            return this.each(function(node){
+                var fxs = $._data( node,"fx");
+                if(fxs && fxs.run){
+                    fxs.stopCode = stopCode;
+                }
+            });
+        }
+            </pre>
+            <fieldset><legend>例子</legend>
+                <button id="start" type="button">开始</button>
+                <button id="stop0" type="button">停止false,false</button>
+                <button id="stop1" type="button">停止false,true</button>
+                <button id="stop2" type="button">停止true,true</button>
+                <button id="stop3" type="button">停止true,true</button>
+                <button id="reset" type="button">重置</button>
+
+                <div class="container">
+                    <div class="test">
+                        TEXT
+                    </div>
+                    <br/>
+                    <div class="test">
+                        TEXT2
+                    </div>
+                </div>
+                <p>由上面的演示我们可以看到以下效果： </p>
+                <ul>
+                    <li>false,false:跳过了宽的渐变动画，直接执行高的渐变动画。</li>
+                    <li>false,true:立即把宽设为最终值，然后执行高的渐变动画。</li>
+                    <li>true,false:停止了宽与高的动画。</li>
+                    <li>true,true:停止了宽与高的动画，并把它们的值设到最终值。</li>
+                </ul>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+      $.require("ready,event,fx",function(){
+        var box = dom(".test");
+        dom("#start").click(function(){
+          box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
+        });
+        dom("#reset").click(function(){
+          box.width(10).height(10);
+        });
+        dom("#stop0").click(function(){
+          box.stop(false,false);
+        });
+        dom("#stop1").click(function(){
+          box.stop(false,true);
+        });
+        dom("#stop2").click(function(){
+          box.stop(true,false);
+        });
+        dom("#stop3").click(function(){
+          box.stop(true,true);
+        });
+      });
+
+                </pre>
+            </fieldset>
+        </article>
+    </body>
+</html>

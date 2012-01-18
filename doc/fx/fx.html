@@ -1,0 +1,70 @@
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>fx module</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>fx模块</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>特效模块。所谓特效就是一个元素的大小样子位置在一个时间内发生平滑的改变。由此可见，特效是与时间息息相关。
+                本框架与大多数框架的特效机制是构筑在setInterval定时器之上，但与其他框架最大的不同时，只用一个setInterval。
+                如jQuery就会为每个节点每个特效各分配一个定时器，因此在同一时间内会出现N*N个定时器,对于单线程的javascript来说，
+                这就可能出现掉帧的情况。因此我只使用一个定时器()，我管它为heartbeat。下面详述一下我的特效机制</p>
+            <p>heartbeat函数是我效特机制的心脏，它的血液就是放进中央列队中等待执行动画的节点们（hearbeat.nodes），
+                它通过setInterval方法不断调用nextTick处理所有节点的动画。
+            </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+       //中央定时器，可以添加新节点到中央列队，然后通过setInterval方法不断调用nextTick处理所有节点的动画
+        function heartbeat( node) {
+            heartbeat.nodes.push( node);
+            if (heartbeat.id === null) {//如果浏览器支持JIT，那么把间隔设小点，让动画更加流畅
+                heartbeat.id = setInterval(nextTick, $.jit ? 4 : 12);
+            }
+            return true;
+        }
+        heartbeat.nodes = []; //中央列队
+        heartbeat.id = null;  //原始的setInterval id
+            </pre>
+            <p>我们再看nextTick API，它也是最核心的方法之一。它负责驱动中央列队的元素节点执行它们的动画，
+                如果某一动画执行完毕就把相对节点从列队中剔除，如果列队为空则中止心跳。这相当血流光了，心脏也活不了。 </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+        function nextTick() {
+            var nodes = heartbeat.nodes, i = 0, n = nodes.length;
+            for (; i < n; i++) {
+                if (animate(nodes[i]) === false) {//在这里操作元素的样式或属性进行渐变
+                    nodes.splice(i, 1);
+                    i -= 1;
+                    n -= 1;
+                }
+            }
+            nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
+        }
+            </pre>
+
+
+            永不停息地维护一个中央列队，列队里面都是节点（它们是可复添置的）。
+            然后每X毫秒执行tick
+        </p>
+    </article>
+</body>
+</html>
