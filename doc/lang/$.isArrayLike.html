@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+
+        <title>$.isArrayLike</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    $.log( $.isArrayLike([]),true);
+                    $.log( $.isArrayLike(arguments),true);
+                    $.log( $.isArrayLike(document.childNodes),true);
+                    $.log( $.isArrayLike(document.getElementsByTagName("*")),true);
+                    $.log( $.isArrayLike({0:1,1:2,2:3,length:3}),true);
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.isArrayLike</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>判定是否是类数组对象。类数组对象包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象，
+            form.elements,select.options集合（它们两个都有item与length属性）</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    $.log( $.isArrayLike([]),true);
+                    $.log( $.isArrayLike(arguments),true);
+                    $.log( $.isArrayLike(document.childNodes),true);
+                    $.log( $.isArrayLike(document.getElementsByTagName("*")),true);
+                    $.log( $.isArrayLike({0:1,1:2,2:3,length:3}),true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

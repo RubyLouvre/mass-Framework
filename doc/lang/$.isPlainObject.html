@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>$.isPlainObject</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    $.log( $.isPlainObject(new Date),true);//false
+                    var fn = function(){};
+                    $.log( $.isPlainObject(fn),true);//false
+                    var plainobj = fn.prototype = {someMethod: function(){},prop:1};
+                    $.log( $.isPlainObject(new fn),true);//false
+                    var A = function(){}
+                    A.prototype = {
+                        hasOwnProperty:function(){
+                            return true;
+                        }
+                    }
+                    var a = new A;
+                    $.log( $.isPlainObject(a) ,true)//false
+                    window.test = {
+                        toString: function() {
+                            return '[function]';
+                        }
+                    };
+                    $.log( $.isPlainObject(window.test),true);//true
+                    $.log( $.isPlainObject(plainobj),true);//true
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.isPlainObject(obj)</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>判定是否是一个朴素的javascript对象（Object），不是DOM对象，不是BOM对象，不是自定义类的实例。</p>
+            <p><span class="stress">源码：</span></p>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+          isPlainObject : function (obj){
+                if(!$.type(obj,"Object"))
+                    return false;
+                try{//不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
+                    for(var key in obj)//只有一个方法是来自其原型立即返回flase
+                        if(!String2.hasOwnProperty.call(obj,key)){//不能用obj.hasOwnProperty自己查自己
+                            return false
+                        }
+                }catch(e){
+                    return false;
+                }
+                return true;
+            }
+            </pre>
+            <fieldset><legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    $.log( $.isPlainObject(new Date),true);//false
+                    var fn = function(){};
+                    $.log( $.isPlainObject(fn),true);//false
+                    var plainobj = fn.prototype = {someMethod: function(){},prop:1};
+                    $.log( $.isPlainObject(new fn),true);//false
+                    var A = function(){}
+                    A.prototype = {
+                        hasOwnProperty:function(){
+                            return true;
+                        }
+                    }
+                    var a = new A;
+                    $.log( $.isPlainObject(a) ,true)//false
+                    window.test = {
+                        toString: function() {
+                            return '[function]';
+                        }
+                    };
+                    $.log( $.isPlainObject(window.test),true);//true
+                    $.log( $.isPlainObject(plainobj),true);//true
+                });
+                </pre>
+
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+</html>

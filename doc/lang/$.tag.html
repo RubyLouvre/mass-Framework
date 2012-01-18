@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>$.tag</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+var exec1 = function(){
+
+                $.require("lang",function(){
+                    var T = $.tag;
+                    var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
+                    $.log(html+"",true);
+                });
+            
+}
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.tag(tag,inner)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>用于提供了一种高效拼接多行HTML片断的方式，免去写<与>与结束标签之苦。</p>
+        <dl>
+            <dt>tag</dt>
+            <dd>必需。String。开标签除去&lt;与&gt;的部分。如果是文本节点请传入""。</dd>
+            <dt>stop</dt>
+            <dd>必需。String。标签里面的innerHTML，我们可以传入另一个$.tag作为它的参数。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>Object。想要得到HTML片断，需要用String()或+""处理一下。</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var T = $.tag;
+                    var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
+                    $.log(html+"",true);
+                });
+            </pre>
+            
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>
