@@ -25,31 +25,31 @@
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.bind(obj,type,fn,[ phase ])</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>一个简单的事件绑定函数。</p>
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>obj</dt>
-                <dd>必需。原生的事件发送器，如window,document与元素节点。</dd>
-                <dt>type</dt>
-                <dd>必需。String。事件类型，注意不要使用onXXX的格式。</dd>
-                <dt>fn</dt>
-                <dd>必需。Function。</dd>
-                <dt>phase</dt>
-                <dd>可选。Boolean。是否使用捕获，默认false，与不支持捕获的IE678保持一致。</dd>
-            </dl>
-            <p><span class="stress">返回值：</span></p>
-            <p>用户传入的fn</p>
+    <article>
+        <h3>$.bind(obj,type,fn,[ phase ])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>一个简单的事件绑定函数。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>obj</dt>
+            <dd>必需。原生的事件发送器，如window,document与元素节点。</dd>
+            <dt>type</dt>
+            <dd>必需。String。事件类型，注意不要使用onXXX的格式。</dd>
+            <dt>fn</dt>
+            <dd>必需。Function。</dd>
+            <dt>phase</dt>
+            <dd>可选。Boolean。是否使用捕获，默认false，与不支持捕获的IE678保持一致。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>用户传入的fn</p>
 
-            <fieldset><legend>例子</legend>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.bind(document,"click",function(){
                     $.log("触发了点击事件",true);//打印在页面底部
                 });
-                </pre>
-            </fieldset>
-        </article>
-    </body>
+            </pre>
+        </fieldset>
+    </article>
+</body>
 </html>
