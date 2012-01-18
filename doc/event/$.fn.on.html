@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.on</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,node,event",function(){
+                dom(".container li").on("click",function(e){
+                    dom(".show").html(e.target.innerHTML)
+                });
+                
+                dom(".sample2")
+                .bind({
+                    click:function(event){
+                        var str = "( " + event.pageX + ", " + event.pageY + " )";
+                        dom(".show_b").text("Click happened! " + str);
+                    },
+                    dblclick:function(){
+                        dom(".show_b").text("Double-click happened in " + this.nodeName);
+                    }
+                })
+                .bind("mouseenter mouseleave", function(){
+                    dom(this).toggleClass("over");
+                });
+                var i = 0
+                dom(".sample3").on("submit",function(){
+                    this.number.value = ++i
+                },1)
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.on(types,[ fn ], [ selector ], [ times ])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>dom Framework实现事件绑定的入口函数, 通过它实现bind, live， delegate， one方法，
+                进而实现hover, toggle, click, mouseover等方法……</p>
+            <p>它支持多种形式的传参方式:</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+$.fn.on(obj, selector, times)
+$.fn.on(obj times)
+$.fn.on(obj)
+$.fn.on(str, fn, selector, times)
+$.fn.on(str, fn, selector)
+$.fn.on(str, fn, times)
+$.fn.on(str, times)
+            </pre>
+            <p>它拥有一个更语义化的别名方法，叫bind。 </p>
+             <p>可点击<a href="$.fn.bind">这里</a>，查看《bind，live，delegate方法的区别》。 </p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>types</dt>
+                <dd>
+                    <div>必需。String.事件类型,想同时绑定多个事件，可心用空格或逗号隔开，如"error load"或"DOMMouseScroll,mousewheel"。</div>
+                    <div>必需。Object.上面同时绑定多个事件，它们的回调都是相同的，如果相独自指定回调，
+                        则使用此法，如{ click:clickFn, mouseover:mouseFn}。</div>
+                </dd>
+                <dt>fn</dt>
+                <dd>
+                    <div>如果第一个参数为字符串，那么第二个参数则是必需的，如果是对象则它变为可选。</div>
+                    <div>第二个参数在必需的情况下为回调函数。</div>
+                    <div>在可选的情况下，则可为字符串或数字。</div>
+                </dd>
+                <dt>selector</dt>
+                <dd>
+                    可选，String，CSS选择器，用于事件代理。
+                </dd>
+                <dt>times</dt>
+                <dd>
+                    可选，正整数，表示可调用的次数。
+                </dd>
+            </dl>
+
+            <fieldset><legend>例子</legend>
+                <ul class="container">
+                    <li class="inner" >列表1</li>
+                    <li class="inner" >列表2</li>
+                    <li class="inner" >列表3</li>
+                    <li class="inner" >列表4</li>
+                </ul>
+                <p class="show" style="background: #8b0000;padding:5px;">请点击上面的列表。</p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+      &lt;ul class="container"&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+        &lt;li class="inner" &gt;列表2&lt;/li&gt;
+        &lt;li class="inner" &gt;列表3&lt;/li&gt;
+        &lt;li class="inner" &gt;列表4&lt;/li&gt;
+      &lt;/ul&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,node,event",function(){
+                dom(".container li").on("click",function(e){
+                    dom(".show").html(e.target.innerHTML);
+                })
+            });
+                </pre>
+            </fieldset>
+            <fieldset><legend>例子</legend>
+                <p> 同时绑定多个事件</p>
+                <style>
+                    .sample2 { background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000; }
+                    .sample2.over { background: #ccc; }
+                    .show_b { color:red; }
+                </style>
+                <p class="sample2" >请单击或双击这里</p>
+                <span class="show_b" ></span>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;style&gt;
+                    .sample2 { background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000; }
+                    .sample2.over { background: #ccc; }
+                    .show_b { color:red; }
+                &lt;/style&gt;
+                &lt;p class="sample2" &gt;请单击或双击这里&lt;/p&gt;
+                &lt;span class="show_b" &gt;&lt;/span&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,node,event",function(){             
+                dom(".sample2")
+                .bind({
+                    click:function(event){
+                        var str = "( " + event.pageX + ", " + event.pageY + " )";
+                        dom(".show_b").text("Click happened! " + str);
+                    },
+                    dblclick:function(){
+                        dom(".show_b").text("Double-click happened in " + this.nodeName);
+                    }
+                })
+                .bind("mouseenter mouseleave", function(){
+                    dom(this).toggleClass("over");
+                });
+            });
+                </pre>
+            </fieldset>
+
+            <fieldset><legend>例子</legend>
+                <p> 绑定带有调用次数限制的事件</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,node,event",function(){       
+                var i = 0;
+                dom(".sample3").on("submit",function(){
+                    this.number.value = ++i
+                },1);
+             });
+                </pre>
+                <form action="javascript:void(0)" class="sample3">
+                    <p><input name="number"/>随便填点什么</p>
+                    <button type="submit">只允许提交一次</button>
+                </form>
+            </fieldset>
+        </article>
+    </body>
+</html>

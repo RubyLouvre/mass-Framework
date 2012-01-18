@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.live</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            #sample1{
+                border-collapse: collapse;
+                border: 1px solid #fff;
+                width: 80%;
+            }
+            #sample1 caption{
+                color:#ff7b26;
+            }
+            #sample1 td{
+                padding: 5px;
+                border: 1px solid #fff;
+                text-align: center;
+            }
+            #sample1 .odd{
+                background: #000;
+                color:#fff;
+            }
+            #sample1 .even{
+                background: #558405;
+                color:#000;
+            }
+            #sample1 .hover{
+                background: #4B0082;
+            }
+            .sample2{
+                margin:0 5px 5px;
+                padding: 5px;
+                background: #47aed7;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,event,fx",function(){
+                function callback() {
+                    dom(".hide_div").show(1000);
+                }
+                dom("#bind").click(function () {
+                    dom("#theone").live( "click", callback).html("现在点击它下方会出现文字");
+                });
+                dom("#unbind").click(function () {
+                    dom("#theone").die( "click", callback).html("现在点击它一点反应也没有");
+                    dom(".hide_div").hide(1000);
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.live( types, fn, [times])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>通过监听器绑定到文档对象上，然后检测传播上来的事件源对象是否与现在匹配的节点的选择器相符，再决定是否触发事件。</p>
+            <p><span class="note">每一个dom实例都有一个selector属性，我们就是能过它检测事件源对象。</span></p>
+            <p><span class="note">此方法不但能对当前孩子有效，还能监听以后加入的新节点。</span></p>
+            <p>可点击<a href="$.fn.bind">这里</a>，查看《bind，live，delegate方法的区别》。 </p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>types</dt>
+                <dd>
+                    必需。String。一个包含一个或多个JavaScript事件类型的字符串，比如"click"或"keydown,"或自定义事件的名称。没有则清空此元素所绑定的所有回调。
+                </dd>
+                <dt>fn</dt>
+                <dd>
+                    必需。Funcion。回调函数。
+                </dd>
+                <dt>times</dt>
+                <dd>
+                    可选。正整数。限制此回调执行多少次就自动卸载。
+                </dd>
+            </dl>
+            <fieldset><legend>例子</legend>
+
+                <button id="theone">没有事件……</button>
+                <button id="bind">绑定点击事件</button>
+                <button id="unbind">移除点击事件</button>
+                <div style="display:none;color:#000;background:#FF8C00" class="hide_div">Click!</div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,event,fx",function(){
+                function callback() {
+                    dom(".hide_div").show(1000);
+                }
+                dom("#bind").click(function () {
+                    dom("#theone").live( "click", callback).html("现在点击它下方会出现文字");
+                });
+                dom("#unbind").click(function () {
+                    dom("#theone").die( "click", callback).html("现在点击它一点反应也没有");
+                    dom(".hide_div").hide(1000);
+                });
+            });
+                </pre>
+            </fieldset>
+
+
+        </article>
+    </body>
+</html>

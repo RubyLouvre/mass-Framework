@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        
+        <title>$.fn.hover</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .sample {
+                color:#000;
+                height:150px;
+                background: #FFE0BB;
+                padding: 5px;
+            }
+            .sample p {
+                color:#000;
+            }
+            p.hilite { background:yellow; }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,event,fx",function(){
+                dom(".sample p").click(function () { 
+                    dom(this).slideUp(function(){
+                        if(!dom(".sample p:visible").length){
+                            dom(".sample p").delay(1000).show(1000)
+                        }
+                    }); 
+                });
+                dom(".sample p").hover(function () {
+                    dom(this).toggleClass("hilite");
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.hover(fnIn, [fnOut])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>将二个事件函数绑定到匹配元素上，分别当鼠标指针进入和离开元素时被执行。如果只有一个函数，它会兼职第二个参数的工作。</p>
+            <p>.hover()方法是同时绑定 mouseenter和mouseleave事件。我们可以用它来简单地应用在鼠标在元素上活动行为。</p>
+            <p>调用dom(selector).hover(fnIn, fnOut)是以下写法的简写：</P>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                dom(selector).mouseenter(fnIn).mouseleave(fnOut || fnIn);
+            </pre>
+            <p>更多细节参见<a href="$.fn.mouseenter.html">.mouseenter()</a>和<a href="$.fn.mouseleave.html"> .mouseleave()</a>。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>type</dt>
+                <dd>
+                    必需。String.事件类型。
+                </dd>
+                <dt>args0</dt>
+                <dd>
+                    额外参数
+                </dd>
+                <dt>args1</dt>
+                <dd>
+                    额外参数
+                </dd>
+                <dt>argsn</dt>
+                <dd>
+                    额外参数
+                </dd>
+            </dl>
+            <fieldset><legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false;">
+            $.require("ready,event,fx",function(){
+                dom(".sample p").click(function () { 
+                    dom(this).slideUp(function(){
+                        if(!dom(".sample p:visible").length){
+                            dom(".sample p").delay(1000).show(1000)
+                        }
+                    }); 
+                });
+                dom(".sample p").hover(function () {
+                    dom(this).toggleClass("hilite");
+                });
+            });
+                </pre>
+                <div class="sample">
+                    <p>帕尔斯专注于未知的世界；</p>
+                    <p>琳瑟则着眼于已知的世界；</p>
+                    <p>爱特罗传承不可知的世界。</p>
+                </div>
+
+
+            </fieldset>
+
+
+
+        </article>
+    </body>
+</html>
