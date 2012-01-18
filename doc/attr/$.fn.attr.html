@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.attr</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .sample1 img {
+                padding:10px;
+                display:block;
+            }
+            .sample2 input{
+                margin-right: 1em;
+                display: inline-block;
+                zoom:1;
+                border: 1px solid greenyellow;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("ready,attr",function(){
+                    dom(".sample1 img").attr({ 
+                        src: "../public/styles/attr_rabbit.jpg",
+                        title: "流氓兔",
+                        alt: "流氓兔",
+                        width:"200px",
+                        height:"200px"
+                    });
+                    dom(".sample1 strong").text(dom("img").attr("alt"));
+                });
+            }
+            var exec2 = function(){
+                $.require("ready,attr",function(){
+                    dom(".sample2 input").gt(1).attr("disabled","disabled");
+                });
+            }
+            $.require("ready,event,attr",function(){
+                dom("#example3 :button").click(function () {
+                    var text = dom(this).text();
+                    dom("#example3 :text").val(text);
+                });
+            });
+
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.attr( name, [val] )</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>对元素节点的自定义属性进行读写操作。 </p>
+
+            <p><span class="stress">参数：</span></p>
+            <ul>
+                <li>如果只有一个字符串参数，则对第一个匹配节点进行读取操作。</li>
+                <li>如果有两个参数，第一个为字符串，第二个参数不为null, 则对所有匹配节点进行赋值操作，如果第二个参数为null则进行移除属性的操作。</li>
+                <li>如果只有一个对象参数，则依取取得里面的键值对，对所有匹配节点进行多个赋值操作。</li>
+            </ul>
+            <fieldset><legend>例子</legend>
+                <p>为页面中所有img元素设置一些属性。</p>
+
+                <div class="sample1">
+                    <img/>
+                    <img/>
+                    <img/>
+                    <p><strong>set by attr API</strong></p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;style&gt;
+                    .sample1 img {
+                        padding:10px;
+                        display:block;
+                    }
+                &lt;/style&gt;
+                &lt;div class="sample1"&gt;
+                    &lt;img/&gt;
+                    &lt;img/&gt;
+                    &lt;img/&gt;
+                    &lt;p&gt;&lt;strong&gt;set by attr API&lt;/strong&gt;&lt;/p&gt;
+                &lt;/div&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("ready,attr",function(){
+                    dom(".sample1 img").attr({ 
+                        src: "../public/styles/attr_rabbit.jpg",
+                        title: "流氓兔",
+                        alt: "流氓兔"
+                        width:"200px",
+                        height:"200px"
+                    });
+                    dom(".sample1 strong").text(dom("img").attr("alt"));
+                });
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+            <fieldset><legend>例子</legend>
+                <p>使第二个后面的按钮disabled</p>
+                <div class="sample2"> 
+                    <input><input><input><input><input>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div class="sample2"&gt;
+                   &lt;input&gt;&lt;input&gt;&lt;input&gt;&lt;input&gt;&lt;input&gt;
+                &lt;/div&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("ready,attr",function(){
+                   dom(".sample2 input").gt(1).attr("disabled","disabled");
+                });
+                </pre>
+                <button onclick="exec2()">点我，执行代码</button>
+            </fieldset>
+
+
+        </article>
+    </body>
+</html>

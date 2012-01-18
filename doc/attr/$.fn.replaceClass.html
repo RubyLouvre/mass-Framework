@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.replaceClass</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .sample{
+                border:1px solid #00CED1;
+                padding: 1em;
+            }
+            .selected {
+                background:#8B0000;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,event,attr",function(){
+                dom(".sample").click(function(){
+                    dom(this).replaceClass("sample","selected");
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.replaceClass( old, neo)</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>如果匹配元素存在old类名则将它替换为neo类名，不存在则不会做任何操作的。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>old</dt>
+                <dd>必须。String。要替换掉的类名。</dd>
+                <dt>neo</dt>
+                <dd>必须。String。用来替换的新类名。</dd>
+            </dl>
+            <fieldset><legend>例子</legend>
+                <div class="sample">请点击它</div>
+
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div class="sample"&gt;请点击它&lt;/div&gt;
+                &lt;style&gt;
+                    .selected {
+                       background:#8B0000;
+                    }
+                &lt;/style&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,event,attr",function(){
+                dom(".sample").click(function(){
+                     dom(this).replaceClass("sample","selected");
+                });
+            });
+                </pre>
+            </fieldset>
+        </article>
+    </body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.removeAttr</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+
+
+            var exec1 = function(){
+                $.require("ready,attr,event",function(){
+                    dom(".sample1 input").removeAttr("disabled").focus().val("editable now");
+                });
+            }
+
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.removeAttr( attrName )</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>为匹配的每一个元素节点移除指定的属性。 </p>
+            <p>.removeAttr() 方法使用原生的 JavaScript removeAttribute() 函数,但是它的优点是能够直接被jQuery对象访问调用。而且具有良好的浏览器兼容性。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>attrName</dt>
+                <dd>必需。String。要移除的属性名。</dd>
+            </dl>
+            <fieldset><legend>例子</legend>
+                <p>让下面的文本域可以编辑 。</p>
+
+                <div class="sample1">
+                    <input type="text" disabled="disabled" value="test" />
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div class="sample1"&gt;
+                    &lt;input type="text" disabled="disabled" value="test" /&gt;
+                &lt;/div&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("ready,attr,event",function(){
+                    dom(".sample1 input").removeAttr("disabled").focus().val("editable now");
+                });
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+
+
+        </article>
+    </body>
+</html>

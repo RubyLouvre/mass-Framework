@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.removeProp</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+
+
+            var exec1 = function(){
+                $.require("ready,attr",function(){                  
+                    var $para = dom(".sample1");
+                    $para.prop("number", 1234);
+                    $para.html("它拥有一个名为number的属性，其值为: "+ String($para.prop("number"))+ "， ");
+                    $para.removeProp("number");
+                    $para.append("经过removeProp操作之后，其值为: "+String($para.prop("number"))+ "。 ");
+                });
+            }
+
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.removeProp( propName )</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>为匹配的每一个元素节点移除指定的属性。此方法与removeAttr方法的区别在于，它可以删除window, document上自定义的属性。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>propName</dt>
+                <dd>必需。String。要移除的属性名。</dd>
+            </dl>
+            <fieldset><legend>例子</legend>
+                <p>设置一个段落数字属性，然后将其删除 。</p>
+
+                <div class="sample1">
+                    //////////////////////////
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div class="sample1"&gt;
+                  //////////////////////////
+                &lt;/div&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("ready,attr",function(){                  
+                    var $para = dom(".sample1");
+                    $para.prop("number", 1234);
+                    $para.html("它拥有一个名为number的属性，其值为: "+ String($para.prop("number"))+ "， ");
+                    $para.removeProp("number");
+                    $para.append("经过removeProp操作之后，其值为: "+String($para.prop("number"))+ "。 ");
+                });
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+
+
+        </article>
+    </body>
+</html>

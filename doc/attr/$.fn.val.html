@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.val</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.log(dom("#select1").val(),true);
+                $.log(dom("#select2").val(),true);  
+            }
+            var exec2 = function(){
+                $.log(dom(":checkbox").val(),true);
+            }
+            $.require("ready,event,attr",function(){
+                dom("#example3 :button").click(function () {
+                    var text = dom(this).text();
+                    dom("#example3 :text").val(text);
+                });
+            });
+            var exec3 = function(){
+                dom("#single").val("Single3");
+                dom("#multiple").val(["Multiple2", "Multiple3"]);
+                dom("#form4 input").val(["check1","check2", "radio1" ]);
+            }
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.val( [ stringOrArray ] )</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>对表单元素进行取值赋值操作。 </p>
+            <p><span class="stress">参数：</span></p>
+            <ul>
+                <li>如果没有参数，将取得第一个匹配元素的value值，对于 &lt;select multiple="multiple"&gt; 元素, 返回一个包含每个选中的option 的值的数组。</li>
+                <li>如果value为一个字符串，则对所有匹配元素赋以此值。</li>
+                <li>如果value为一个数组，则对匹配元素依次进行赋值，在赋值的同时还可能会改变selected、checked这样的状态值。</li>
+            </ul>
+            <fieldset><legend>例子</legend>
+                <form action="">
+                    <select id="select1">
+                        <option value="volvo">第一个</option>
+                        <option value="saab">第二个</option>
+                        <option value="mercedes" selected>第三个</option>
+                        <option value="audi">第四个</option>
+                    </select>
+                    <select id="select2" multiple>
+                        <option>第1个</option>
+                        <option selected>第2个</option>
+                        <option selected>第3个</option>
+                        <option>第4个</option>
+                    </select>
+                </form>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+      &lt;form action=""&gt;
+        &lt;select id="select1"&gt;
+          &lt;option value="volvo"&gt;第一个&lt;/option&gt;
+          &lt;option value="saab"&gt;第二个&lt;/option&gt;
+          &lt;option value="mercedes" selected&gt;第三个&lt;/option&gt;
+          &lt;option value="audi"&gt;第四个&lt;/option&gt;
+        &lt;/select&gt;
+        &lt;select id="select2" multiple&gt;
+          &lt;option&gt;第1个&lt;/option&gt;
+          &lt;option selected&gt;第2个&lt;/option&gt;
+          &lt;option selected&gt;第3个&lt;/option&gt;
+          &lt;option&gt;第4个&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/form&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+     $.log(dom("#select1").val(),true);
+     $.log(dom("#select2").val(),true);
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+            <fieldset><legend>例子</legend>
+                <input name="hotspring" type="checkbox" value="男汤" >男汤
+                <input name="hotspring" type="checkbox" value="女汤" checked >女汤
+                <input name="hotspring" type="checkbox" value="木下秀吉汤" >木下秀吉汤
+                <pre class="brush:xml;gutter:false;toolbar:false">
+      &lt;input name="hotspring" type="checkbox" value="男汤" &gt;男汤
+      &lt;input name="hotspring" type="checkbox" value="女汤" checked &gt;女汤
+      &lt;input name="hotspring" type="checkbox" value="木下秀吉汤" &gt;木下秀吉汤
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+      $.log(dom(":checkbox").val(),true)
+                </pre>
+                <button onclick="exec2()">点我，执行代码</button>
+            </fieldset>
+            <fieldset><legend>例子</legend>
+                <div id="example3">
+                    <button>おおかみかくし</button>
+                    <button>ソ·ラ·ノ·ヲ·ト</button>
+                    <button>君に届け</button><br/>
+                    <input type="text" value="一月新番" />
+                </div>
+
+                <pre class="brush:xml;gutter:false;toolbar:true;collapse:true;">
+    &lt;div id="example3"&gt;
+      &lt;button&gt;おおかみかくし&lt;/button&gt;
+      &lt;button&gt;ソ·ラ·ノ·ヲ·ト&lt;/button&gt;
+      &lt;button&gt;君に届け&lt;/button&gt;&lt;br/&gt;
+      &lt;input type="text" value="一月新番" /&gt;
+    &lt;/div&gt;
+   
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+      $.require("ready,event,attr",function(){
+        dom("#example3 :button").click(function () {
+          var text = dom(this).text();
+          dom("#example3 :text").val(text);
+        });
+      });
+                </pre>
+            </fieldset>
+            <fieldset><legend>例子</legend>
+                <p>我们可以通过赋值勤改变控件的selected或checked的状态。</p>
+                <form id="form4" action="">
+                    <select id="single">
+                        <option>Single</option>
+                        <option>Single2</option>
+                        <option>Single3</option>
+                        <option>Single4</option>
+                    </select>
+                    <select id="multiple" multiple="multiple">
+                        <option selected="selected">Multiple</option>
+                        <option>Multiple2</option>
+                        <option selected="selected">Multiple3</option>
+                    </select>
+                    <input type="checkbox" name="checkboxname" value="check1"/> check1
+                    <input type="checkbox" name="checkboxname" value="check2"/> check2
+                    <input type="radio"  name="r" value="radio1"/> radio1
+                    <input type="radio"  name="r" value="radio2"/> radio2
+                </form>
+                <pre class="brush:xml;gutter:false;toolbar:true;collapse:true;">
+      &lt;form id="form4" action=""&gt;
+        &lt;select id="single"&gt;
+          &lt;option&gt;Single&lt;/option&gt;
+          &lt;option&gt;Single2&lt;/option&gt;
+          &lt;option&gt;Single3&lt;/option&gt;
+          &lt;option&gt;Single4&lt;/option&gt;
+        &lt;/select&gt;
+        &lt;select id="multiple" multiple="multiple"&gt;
+          &lt;option selected="selected"&gt;Multiple&lt;/option&gt;
+          &lt;option&gt;Multiple2&lt;/option&gt;
+          &lt;option selected="selected"&gt;Multiple3&lt;/option&gt;
+        &lt;/select&gt;
+        &lt;input type="checkbox" name="checkboxname" value="check1"/&gt; check1
+        &lt;input type="checkbox" name="checkboxname" value="check2"/&gt; check2
+        &lt;input type="radio"  name="r" value="radio1"/&gt; radio1
+        &lt;input type="radio"  name="r" value="radio2"/&gt; radio2
+      &lt;/form&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+        dom("#single").val("Single3");
+        dom("#multiple").val(["Multiple2", "Multiple3"]);
+        dom("#form4 input").val(["check1","check2", "radio1" ]);
+                </pre>
+                <button onclick="exec3()">点我，执行代码</button>
+            </fieldset>
+
+        </article>
+    </body>
+</html>
