@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        
+
         <title>$.quote</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
@@ -19,14 +19,14 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
+            var exec1 = function(){
 
                 $.require("lang",function(){
                     $.log($.quote("aaa\veee"),true);
                     $.log("aaa\veee",true);
                 });
             
-}
+            }
         </script>
     </head>
     <body>
@@ -45,7 +45,7 @@ var exec1 = function(){
                     $.log("aaa\veee",true);
                 });
             </pre>
-            
+
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
     </article>

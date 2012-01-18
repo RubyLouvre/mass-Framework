@@ -18,15 +18,13 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
-
+            var exec1 = function(){
                 $.require("lang",function(){
                     var a = $.lang([3, 5, 6, 1, 9]);
                     $.log(a.first(),true);
                     $.log(a.first(function(el){return el > 5}),true)
                 });
-            
-}
+            }
         </script>
     </head>
     <body>
@@ -43,13 +41,13 @@ var exec1 = function(){
         </dl>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("lang",function(){
-        var a = $.lang([3, 5, 6, 1, 9]);
-        $.log(a.first(),true);
-        $.log(a.first(function(el){return el > 5}),true)
-});
+                $.require("lang",function(){
+                    var a = $.lang([3, 5, 6, 1, 9]);
+                    $.log(a.first(),true);
+                    $.log(a.first(function(el){return el > 5}),true)
+                });
             </pre>
-            
+
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
     </article>

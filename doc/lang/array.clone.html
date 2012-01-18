@@ -18,7 +18,7 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
+            var exec1 = function(){
 
                 $.require("lang",function(){
                     var arr = [3,5,6,1,[20,2,[1,0],7]]
@@ -28,7 +28,7 @@ var exec1 = function(){
                     $.log(ret,true);
                 })
             
-}
+            }
         </script>
     </head>
     <body>
@@ -39,15 +39,15 @@ var exec1 = function(){
 
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("lang",function(){
-    var arr = [3,5,6,1,[20,2,[1,0],7]]
-    var ret = $.lang(arr).clone()
-    ret = $.dump(ret);//序列化
-    $.log(arr === ret,true);
-    $.log(ret,true);
-})
+                $.require("lang",function(){
+                    var arr = [3,5,6,1,[20,2,[1,0],7]]
+                    var ret = $.lang(arr).clone()
+                    ret = $.dump(ret);//序列化
+                    $.log(arr === ret,true);
+                    $.log(ret,true);
+                })
             </pre>
-            
+
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
     </article>

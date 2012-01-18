@@ -18,14 +18,12 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
-
+            var exec1 = function(){
                 $.require("lang",function(){
                     var a = $.lang([1,2,3,4,5,6,7,8,9,10]);
                     $.log(a.random(),true);
                 });
-            
-}
+            }
         </script>
     </head>
     <body>
@@ -40,7 +38,7 @@ var exec1 = function(){
                     $.log(a.random(),true);
                 });
             </pre>
-            
+
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
     </article>
