@@ -18,77 +18,29 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
-
-                $.require("data,spec",function(){
+            var exec1 = function(){
+                $.require("data",function(){
                     var val = $.data(document.body,"test1",[1,2,3]);
                     $.log(document.body.uniqueNumber,true);
                     $.log($.dump(val),true);
                 });
-            </script>
-            <button onclick="exec1()">点我，执行代码</button>
-        </fieldset>
-
-
-        <h3>$.data(obj,object)</h3>
-        <p><span class="stress">描述：</span></p>
-        <p>为obj添加同时添加多个数据。</p>
-        <p><span class="stress">参数：</span></p>
-        <dl>
-            <dt>obj</dt>
-            <dd>必需。见上。</dd>
-            <dt>object</dt>
-            <dd>必需。Object。一个数据包。</dd>
-        </dl>
-        <p><span class="stress">返回值：</span></p>
-        <p>obj在$.memcache或自身（如果是自定义对象）上的缓存体，它包含所有相关的数据。</p>
-        <fieldset><legend>例子</legend>
-            <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("data,spec",function(){
+            }
+            var exec2 = function(){
+                $.require("data",function(){
                     var val = $.data(document.body,{
                         aa:"aa",
                         bb:"bb"
                     });
                     $.log($.dump(val),true);
                 });
-            </pre>
-            <script id="exec2" type="html">
-                $.require("data,spec",function(){
-                    var val = $.data(document.body,{
-                        aa:"aa",
-                        bb:"bb"
-                    });
+            }
+            var exec3 = function(){
+                $.require("data",function(){
+                    var val = $.data(document.body,"test1",[1,2,3]);
+                    $.log(document.body.uniqueNumber,true);
                     $.log($.dump(val),true);
                 });
-            </script>
-            <button onclick="$.exec('exec2')">点我，执行代码</button>
-        </fieldset>
-        <h3>$.data(obj,name)</h3>
-        <p><span class="stress">描述：</span></p>
-        <p>取得与obj相关的名为name的数据。</p>
-        <p><span class="stress">参数：</span></p>
-        <dl>
-            <dt>obj</dt>
-            <dd>必需。见上。</dd>
-            <dt>name</dt>
-            <dd>必需。String。目标数据名。</dd>
-        </dl>
-        <p><span class="stress">返回值：</span></p>
-        <p>name的值，没有返回undefined。</p>
-        <fieldset><legend>例子</legend>
-            <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("data,spec",function(){
-                    var val = $.data(document.body,"aa" );
-                    $.log(val,true);
-                });
-            </pre>
-            <script id="exec3" type="html">
-                $.require("data,spec",function(){
-                    var val = $.data(document.body,"aa" );
-                    $.log(val,true);
-                });
-            
-}
+            }
         </script>
     </head>
     <body>
@@ -109,14 +61,58 @@ var exec1 = function(){
         <p>value</p>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("data,spec",function(){
+                $.require("data",function(){
                    var val = $.data(document.body,"test1",[1,2,3]);
                    $.log(document.body.uniqueNumber,true);
                    $.log($.dump(val),true);
                 });
             </pre>
-            
-            <button onclick="$.exec('exec3')">点我，执行代码</button>
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+        <h3>$.data(obj,object)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>为obj添加同时添加多个数据。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>obj</dt>
+            <dd>必需。见上。</dd>
+            <dt>object</dt>
+            <dd>必需。Object。一个数据包。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>obj在$.memcache或自身（如果是自定义对象）上的缓存体，它包含所有相关的数据。</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("data",function(){
+                    var val = $.data(document.body,{
+                        aa:"aa",
+                        bb:"bb"
+                    });
+                    $.log($.dump(val),true);
+                });
+            </pre>
+            <button onclick="exec2()">点我，执行代码</button>
+        </fieldset>
+        <h3>$.data(obj,name)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>取得与obj相关的名为name的数据。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>obj</dt>
+            <dd>必需。见上。</dd>
+            <dt>name</dt>
+            <dd>必需。String。目标数据名。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>name的值，没有返回undefined。</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("data",function(){
+                    var val = $.data(document.body,"aa" );
+                    $.log(val,true);
+                });
+            </pre>
+            <button onclick="exec2()">点我，执行代码</button>
         </fieldset>
     </article>
 </body>
