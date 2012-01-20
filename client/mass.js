@@ -1,4 +1,4 @@
-﻿//=========================================
+//=========================================
 // 模块加载模块（核心模块）2011.11.11 by 司徒正美
 //=========================================
 (function(global , DOC){
@@ -6,28 +6,27 @@
     _$ = global.$, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,'');
     /**
-     * @class mass
+     * @class $
      * mass Framework拥有两个命名空间,
      * 第一个是DOC.URL.replace(/(\W|(#.+))/g,'')，根据页面的地址动态生成
      * 第二个是$，我们可以使用别名机制重写它
-     * @namespace $
      */
-    function mass(expr,context){//新版本的基石
-        if(mass.type(expr,"Function")){ //注意在safari下,typeof nodeList的类型为function,因此必须使用dom.type
-            mass.require("ready,lang,attr,event,fx",expr);
+    function $(expr,context){//新版本的基石
+        if($.type(expr,"Function")){ //注意在safari下,typeof nodeList的类型为function,因此必须使用dom.type
+            $.require("ready,lang,attr,event,fx",expr);
         }else{
-            if(!mass.fn)
+            if(!$.fn)
                 throw "must load the 'node' module!"
-            return new mass.fn.init(expr,context);
+            return new $.fn.init(expr,context);
         }
     }
     //多版本共存
     var commonNs = global[namespace], version = 1.0, postfix = "";
     if( typeof commonNs !== "function"){
-        commonNs = mass;//公用命名空间对象
+        commonNs = $;//公用命名空间对象
     }
     if(commonNs.v !== version ){
-        commonNs[version] = mass;//保存当前版本的命名空间对象到公用命名空间对象上
+        commonNs[version] = $;//保存当前版本的命名空间对象到公用命名空间对象上
         if(commonNs.v) {
             postfix = (version + "").replace(".","_");
         }
@@ -67,12 +66,12 @@
         }
         return target;
     }
-    mix(mass,{//为此版本的命名空间对象添加成员
+    mix($,{//为此版本的命名空间对象添加成员
         html : DOC.documentElement,
         head : HEAD,
         rword : /[^, ]+/g,
         v : version,
-        "@name" : "$",
+        mass : "$",
         "@debug" : true,
         "@dispatcher" : w3c ? "addEventListener" : "attachEvent",
         "@path":(function(url, scripts, node){
@@ -87,8 +86,8 @@
          */
         exports: function (name) {
             _$ && (global.$ = _$);//多库共存
-            name = name || mass["@name"];//取得当前简短的命名空间
-            mass["@name"] = name 
+            name = name || $.mass;//取得当前简短的命名空间
+            $.mass = name
             global[namespace] = commonNs;
             return global[name]  = this;
         },
@@ -143,7 +142,7 @@
          */
         log:function (s, force){
             if(force){
-                mass.require("ready",function(){
+                $.require("ready",function(){
                     var div =  DOC.createElement("div");
                     div.innerHTML = s +"";//确保为字符串
                     DOC.body.appendChild(div)
@@ -154,11 +153,11 @@
         },
         uuid : 1,
         getUid:global.getComputedStyle ? function(node){//用于建立一个从元素到数据的引用，以及选择器去重操作
-            return node.uniqueNumber || (node.uniqueNumber = mass.uuid++);
+            return node.uniqueNumber || (node.uniqueNumber = $.uuid++);
         }: function(node){
             var uid = node.getAttribute("uniqueNumber");
             if (!uid){
-                uid = mass.uuid++;
+                uid = $.uuid++;
                 node.setAttribute("uniqueNumber", uid);
             }
             return uid;
@@ -171,7 +170,7 @@
          */
         oneObject : function(array, val){
             if(typeof array == "string"){
-                array = array.match(mass.rword) || [];
+                array = array.match($.rword) || [];
             }
             var result = {},value = val !== void 0 ? val :1;
             for(var i=0,n=array.length;i < n;i++){
@@ -180,9 +179,9 @@
             return result;
         }
     });
-    mass.noop = mass.error = function(){};
+    $.noop = $.error = function(){};
 
-    "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace(mass.rword,function(name){
+    "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace($.rword,function(name){
         class2type[ "[object " + name + "]" ] = name;
     });
     var
@@ -190,7 +189,7 @@
     names = [],//需要处理的模块名列表
     rets = {},//用于收集模块的返回值
     cbi = 1e4 ;//用于生成回调函数的名字
-    var map = mass["@modules"] = {
+    var map = $["@modules"] = {
         "@ready" : { }
     };
     /**
@@ -200,7 +199,7 @@
      * @param {String} ver  当前dom框架的版本
      */
     function loadModule(name, url, ver){
-        url = url  || mass["@path"] +"/"+ name.slice(1) + ".js" + (mass["@debug"] ? "?timestamp="+(new Date-0) : "");
+        url = url  || $["@path"] +"/"+ name.slice(1) + ".js" + ($["@debug"] ? "?timestamp="+(new Date-0) : "");
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ["<script> var $ = parent[document.URL.replace(/(#.+|\\W)/g,'')][", ver,'] ;<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),'="', "if(/loaded|complete|undefined/i.test(this.readyState)){  $._resolveCallbacks();",
@@ -215,9 +214,9 @@
         var d = iframe.contentDocument || iframe.contentWindow.document;
         d.write(codes.join(''));
         d.close();
-        mass.bind(iframe,"load",function(){
+        $.bind(iframe,"load",function(){
             if(global.opera && d.x == void 0){
-                mass._checkFail(name, true);//模拟opera的script onerror
+                $._checkFail(name, true);//模拟opera的script onerror
             }
             d.write("<body/>");//清空内容
             HEAD.removeChild(iframe);//移除iframe
@@ -229,10 +228,10 @@
         for(var i = 0,argv = [], name; name = args[i++];){
             argv.push(obj[name]);
         }//如果是同一执行环境下，就不用再eval了
-        if(fn instanceof Function){
+        if(fn instanceof Function){//合并时进入此分支
             return fn.apply(global,argv);
         }
-        return  Function("b","return " +(str || fn) +".apply(window,b)" )(argv);
+        return  Function("b"," return " +(str || fn) +".apply(window,b)" )(argv);
     }
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
@@ -246,13 +245,13 @@
             }
             return list.length ? self : self.complete();
         }
-        self.complete = mass.noop;
+        self.complete = $.noop;
         return self;
     }
 
-    var errorstack = mass.stack = deferred();
+    var errorstack = $.stack = deferred();
     errorstack.method = "pop";
-    mix(mass, {
+    mix($, {
         mix:mix,
         //绑定事件(简化版)
         bind : w3c ? function(el, type, fn, phase){
@@ -270,13 +269,13 @@
         //请求模块
         require:function(deps,callback,errback){//依赖列表,正向回调,负向回调
             var _deps = {}, args = [], dn = 0, cn = 0;
-            (deps +"").replace(mass.rword,function(url,name,match){
+            (deps +"").replace($.rword,function(url,name,match){
                 dn++;
                 match = url.match(rmodule);
                 name  = "@"+ match[1];//取得模块名
                 if(!map[name]){ //防止重复生成节点与请求
                     map[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    loadModule(name,match[2],mass.v);//加载JS文件
+                    loadModule(name,match[2],$.v);//加载JS文件
                 }else if(map[name].state === 2){
                     cn++;
                 }
@@ -295,11 +294,10 @@
                 }
             }
             cbname = cbname || "@cb"+ (cbi++).toString(32);
-
             if(errback){
                 errback = errback instanceof Function ? errback :
                 Function((errback+"").replace(/[^{]*\{([\d\D]*)\}$/,"$1")) ;
-                mass.stack(errback);//压入错误堆栈
+                $.stack(errback);//压入错误堆栈
             }
             map[cbname] = {//创建或更新模块的状态
                 callback:callback,
@@ -310,7 +308,7 @@
                 state: 1
             };//在正常情况下模块只能通过resolveCallbacks执行
             names.unshift(cbname);
-            mass._resolveCallbacks();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
+            $._resolveCallbacks();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
         define:function(name,deps,callback){//模块名,依赖列表,模块本身
@@ -349,7 +347,7 @@
                     repeat = true;
                 }
             }
-        repeat && mass._resolveCallbacks();
+        repeat && $._resolveCallbacks();
         },
         //用于检测这模块有没有加载成功
         _checkFail : function(name, error){
@@ -359,21 +357,21 @@
             }
         }
     });
-    //mass.log("已加载模块加载模块")
+    //$.log("已加载模块加载模块")
     //domReady机制
     var readylist = deferred();
     function fireReady(){
         map["@ready"].state = 2;
-        mass._resolveCallbacks();
+        $._resolveCallbacks();
         readylist.complete = function(fn){
-            mass.type(fn, "Function") &&  fn()
+            $.type(fn, "Function") &&  fn()
         }
         readylist.fire();
-        fireReady = mass.noop;
+        fireReady = $.noop;
     };
     function doScrollCheck() {
         try {
-            mass.html.doScroll("left");
+            $.html.doScroll("left");
             fireReady();
         } catch(e) {
             setTimeout( doScrollCheck, 1);
@@ -383,21 +381,21 @@
     if ( DOC.readyState === "complete" ) {
         fireReady();
     }else {
-        mass.bind(DOC, (w3c ? "DOMContentLoaded" : "readystatechange"), function(){
+        $.bind(DOC, (w3c ? "DOMContentLoaded" : "readystatechange"), function(){
             if (w3c || DOC.readyState === "complete") {
                 fireReady();
             }
         });
-        if ( mass.html.doScroll && self.eval === top.eval ) {
+        if ( $.html.doScroll && self.eval === top.eval ) {
             doScrollCheck();
         }
     }
     //https://developer.mozilla.org/en/DOM/window.onpopstate
-    mass.bind(global,"popstate",function(){
+    $.bind(global,"popstate",function(){
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
-        mass.exports();
+        $.exports();
     });
-    mass.exports("$"+ postfix);//防止不同版本的命名空间冲突
+    $.exports("$"+ postfix);//防止不同版本的命名空间冲突
 /*combine modules*/
 
 })(this,this.document);
@@ -405,7 +403,7 @@
  2011.7.11
 @开头的为私有的系统变量，防止人们直接调用,
 dom.check改为dom["@emitter"]
-dom.namespace改为dom["@name"]
+dom.namespace改为dom["mass"]
 去掉无用的dom.modules
 优化exports方法
 2011.8.4
@@ -437,7 +435,7 @@ dom.namespace改为dom["@name"]
 2011.11.6  重构uuid的相关设施
 2011.11.11 多版本共存
 2011.12.19 增加define方法
-2011.12.22 加载用iframe内增加mass变量,用作过渡.
+2011.12.22 加载用iframe内增加$变量,用作过渡.
 2012.1.15  更换$为命名空间
 
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。

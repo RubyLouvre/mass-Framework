@@ -1,8 +1,8 @@
-﻿//=========================================
+//=========================================
 // 类型扩展模块 by 司徒正美
 //=========================================
-$.define("lang", Array.isArray ? "" : "ecma", function(){
-    $.log("已加载语言扩展模块");
+$.define("lang",function(){
+    console.log("已加载语言扩展模块");
     var global = this,
     rascii = /[^\x00-\xff]/g,
     rformat = /\\?\#{([^{}]+)\}/gm,
@@ -19,9 +19,9 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         isPlainObject : function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
                 return false;
-            }     
+            }
             try{//不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
-                for(var key in obj)//只有一个方法是来自其原型立即返回flase   
+                for(var key in obj)//只有一个方法是来自其原型立即返回flase
                     if(!({}).hasOwnProperty.call(obj, key)){//不能用obj.hasOwnProperty自己查自己
                         return false
                     }
@@ -236,22 +236,21 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return obj && ({}).toString.call(obj) === "[object "+name+"]";
         }
     });
-
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
     var adjustOne = $.oneObject("String,Array,Number,Object"),
-    arrayLike = $.oneObject("NodeList,Arguments,Object")
+    arrayLike = $.oneObject("NodeList,Arguments,Object");
     //语言链对象
-    var $$ = $.lang = function(obj){
+    $.lang = function(obj){
         var type = $.type(obj), chain = this;
         if(arrayLike[type] &&  isFinite(obj.length)){
             obj = $.slice(obj);
             type = "Array";
         }
         if(adjustOne[type]){
-            if(!(chain instanceof $$)){
-                chain = new $$;
+            if(!(chain instanceof $.lang)){
+                chain = new $.lang;
             }
             chain.target = obj;
             chain.type = type;
@@ -260,8 +259,9 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return obj
         }
     }
-    var proto = $$.prototype = {
-        constructor:$$,
+
+    $.lang.prototype = {
+        constructor:$.lang,
         valueOf:function(){
             return this.target;
         },
@@ -269,6 +269,8 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return this.target + "";
         }
     };
+    var proto = $.lang.prototype;
+    //  var $$ = $.lang
     //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
@@ -284,12 +286,12 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                     var obj = this.target;
                     var method = obj[name] || $[type][name];
                     var result = method.apply(obj, arguments);
-                    return $$.call(this, result) ;
+                    return $.lang.call(this, result) ;
                 }
             });
         }
     });
-    
+
     $.String({
         //判断一个字符串是否包含另一个字符
         contains: function(string, separator){
@@ -349,16 +351,16 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return parseFloat(this);
         },
         //转换为十六进制
-        toHex: function() { 
+        toHex: function() {
             var txt = '',str = this;
             for (var i = 0; i < str.length; i++) {
                 if (str.charCodeAt(i).toString(16).toUpperCase().length < 2) {
-                    txt += '\\x0' + str.charCodeAt(i).toString(16).toUpperCase() ; 
+                    txt += '\\x0' + str.charCodeAt(i).toString(16).toUpperCase() ;
                 } else {
                     txt += '\\x' + str.charCodeAt(i).toString(16).toUpperCase() ;
                 }
             }
-            return txt; 
+            return txt;
         },
         //http://stevenlevithan.com/regex/xregexp/
         //将字符串安全格式化为正则表达式的源码
@@ -397,6 +399,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return res;
         }
     });
+
     $.Array({
         //深拷贝当前数组
         clone: function(){
@@ -552,7 +555,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return result;
         }
     });
-    
+
     var NumberExt = {
         times: function(fn, bind) {
             for (var i=0; i < this; i++)
@@ -678,9 +681,8 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return result;
         }
     });
-    return $$;
+    return $.lang;
 });
-
 
 //2011.7.12 将toArray转移到lang模块下
 //2011.7.26 去掉toArray方法,添加globalEval,parseJSON,parseXML方法

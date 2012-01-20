@@ -9,7 +9,7 @@ $.define("support", function(){
     '<object><param/></object><table></table><input type="checkbox"/>';
     var a = div[TAGS]("a")[0], style = a.style,
     select = DOC.createElement("select"),
-  
+
     opt = select.appendChild( DOC.createElement("option") );
     var support = $.support = {
         //是否支持自动插入tbody
@@ -42,7 +42,7 @@ $.define("support", function(){
         innerHTML:false,
         fastFragment:false
     };
- 
+
     //当select元素设置为disabled后，其所有option子元素是否也会被设置为disabled
     select.disabled = true;
     support.optDisabled = !opt.disabled;
@@ -70,7 +70,7 @@ $.define("support", function(){
         table.innerHTML = "<tr><td>1</td></tr>";
         support.innerHTML = true;
     }catch(e){};
- 
+
     //有些特征嗅探必须连接到DOM树上才能进行
     var body = DOC[TAGS]( "body" )[ 0 ],i,
     testElement = DOC.createElement( body ? "div" : "body" ),
@@ -95,7 +95,7 @@ $.define("support", function(){
     testElement.appendChild( div );//将DIV加入DOM树
     var testElementParent = body || $.html;
     testElementParent.insertBefore( testElement, testElementParent.firstChild );
- 
+
     support.boxModel = div.offsetWidth === 2;
     if ( "zoom" in div.style ) {
         //IE7以下版本并不支持display: inline-block;样式，而是使用display: inline;
