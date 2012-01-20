@@ -1,10 +1,9 @@
-//=========================================
+﻿//=========================================
 // 模块加载模块（核心模块）2011.11.11 by 司徒正美
 //=========================================
 (function(global , DOC){
     var
     _$ = global.$, //保存已有同名变量
-    _mass = global.mass, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,'');
     /**
      * @class mass
@@ -203,10 +202,10 @@
     function loadModule(name, url, ver){
         url = url  || mass["@path"] +"/"+ name.slice(1) + ".js" + (mass["@debug"] ? "?timestamp="+(new Date-0) : "");
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ["<script> var mass = parent[document.URL.replace(/(#.+|\\W)/g,'')][", ver,'] ;<\/script><script src="',url,'" ',
-        (DOC.uniqueID ? "onreadystatechange" : "onload"),'="', "if(/loaded|complete|undefined/i.test(this.readyState)){  mass._resolveCallbacks();",
-        (global.opera ? "this.ownerDocument.x = 1;" : " mass._checkFail('"+name+"');"),
-        '} " ' , (w3c ? 'onerror="mass._checkFail(\''+name+'\',true);" ' : ""),' ><\/script>' ];
+        codes = ["<script> var $ = parent[document.URL.replace(/(#.+|\\W)/g,'')][", ver,'] ;<\/script><script src="',url,'" ',
+        (DOC.uniqueID ? "onreadystatechange" : "onload"),'="', "if(/loaded|complete|undefined/i.test(this.readyState)){  $._resolveCallbacks();",
+        (global.opera ? "this.ownerDocument.x = 1;" : " $._checkFail('"+name+"');"),
+        '} " ' , (w3c ? 'onerror="$._checkFail(\''+name+'\',true);" ' : ""),' ><\/script>' ];
         iframe.style.display = "none";
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if(!"1"[0]){//IE6 iframe在https协议下没有的指定src会弹安全警告框
