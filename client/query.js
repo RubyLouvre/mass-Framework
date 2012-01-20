@@ -1,7 +1,7 @@
-//dom.query v5 开发代号Icarus
-dom.define("query", function(){
+//$.query v5 开发代号Icarus
+$.define("query", function(){
     var global = this, DOC = global.document;
-    dom.mix(dom,{
+    $.mix($,{
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
         isXML : function(el){
             var doc = el.ownerDocument || el
@@ -178,18 +178,18 @@ dom.define("query", function(){
         }else{
             result = nodes;
         }
-        return  flag_multi ? dom.unique(result) : result;
+        return  flag_multi ? $.unique(result) : result;
     };
     //IE56789无法使用数组方法转换节点集合
     try {
-        slice.call( dom.html.childNodes, 0 )[0].nodeType;
+        slice.call( $.html.childNodes, 0 )[0].nodeType;
     } catch( e ) {
         makeArray = function ( nodes, result ,flag_multi) {
             var ret = result || [], ri = ret.length;
             for(var i = 0,el ; el = nodes[i++];){
                 ret[ri++] = el
             }
-            return flag_multi ? dom.unique(ret) : ret;
+            return flag_multi ? $.unique(ret) : ret;
         }
     }
     function _toHex(x, y) {
@@ -229,7 +229,7 @@ dom.define("query", function(){
                 for(i = 0, ri = 0; el = els[i++];){
                     var nodes = prefix ? el[method](prefix,tagName) : el[method](tagName)
                     for (var j = 0, node; node = nodes[j++];) {
-                        var uid = dom.getUid(node);
+                        var uid = $.getUid(node);
                            
                         if (!uniqResult[uid]) {
                             uniqResult[uid] = elems[ri++] = node;
@@ -240,14 +240,14 @@ dom.define("query", function(){
         }
     }
     //IE9 以下的XML文档不能直接设置自定义属性
-    var attrURL = dom.oneObject('action,cite,codebase,data,href,longdesc,lowsrc,src,usemap', 2);
-    var bools = dom["@bools"] = "autofocus,autoplay,async,checked,controls,declare,disabled,defer,defaultChecked,"+
+    var attrURL = $.oneObject('action,cite,codebase,data,href,longdesc,lowsrc,src,usemap', 2);
+    var bools = $["@bools"] = "autofocus,autoplay,async,checked,controls,declare,disabled,defer,defaultChecked,"+
     "contentEditable,ismap,loop,multiple,noshade,open,noresize,readOnly,selected"
-    var boolOne = dom.oneObject(bools.toLowerCase() ); 
+    var boolOne = $.oneObject(bools.toLowerCase() );
         
     //检测各种BUG（fixGetAttribute，fixHasAttribute，fixById，fixByTag）
     var fixGetAttribute,fixHasAttribute,fixById,fixByTag;
-    var getHTMLText = new Function("els","return els[0]."+ (dom.html.textContent ? "textContent" : "innerText") );
+    var getHTMLText = new Function("els","return els[0]."+ ($.html.textContent ? "textContent" : "innerText") );
 
     new function(){
         var select = DOC.createElement("select");
@@ -260,7 +260,7 @@ dom.define("query", function(){
         var all = DOC.getElementsByTagName("*"), node, nodeType, comments = [], i = 0, j = 0;
         while ( (node = all[i++]) ) {  
             nodeType = node.nodeType;
-            nodeType === 1 ? dom.getUid(node) : 
+            nodeType === 1 ? $.getUid(node) :
             nodeType === 8 ? comments.push(node) : 0;  
         }
         while ( (node = comments[j++]) ) {   
@@ -270,7 +270,7 @@ dom.define("query", function(){
         
         var form = DOC.createElement("div"),
         id = "fixId" + (new Date()).getTime(),
-        root = dom.html;
+        root = $.html;
         form.innerHTML = "<a name='" + id + "'/>";
         root.insertBefore( form, root.firstChild );
         fixById = !!DOC.getElementById( id ) ;
@@ -312,7 +312,7 @@ dom.define("query", function(){
          * @return {Array} result
          */
     //http://webbugtrack.blogspot.com/
-    var Icarus = dom.query = function(expr, contexts, result, lastResult, flag_xml,flag_multi,flag_dirty){
+    var Icarus = $.query = function(expr, contexts, result, lastResult, flag_xml,flag_multi,flag_dirty){
         result = result || [];
         contexts = contexts || DOC;
         var pushResult = makeArray;
@@ -333,7 +333,7 @@ dom.define("query", function(){
         //将这次得到的结果集放到最终结果集中
         //如果要从多个上下文中过滤孩子
         expr = expr.replace(trimLeft, "").replace(trimRight, "");  
-        flag_xml = flag_xml !== void 0 ? flag_xml : dom.isXML(doc);
+        flag_xml = flag_xml !== void 0 ? flag_xml : $.isXML(doc);
        
         if (!flag_xml && doc.querySelectorAll2) {
             var query = expr;
@@ -376,7 +376,7 @@ dom.define("query", function(){
             }else if ( key === "#" && contexts.length === 1){//ID，并且上下文只有1个
                 if( flag_xml){
                     nodes = getElementsByXPath("//*[@id='"+value+"']", context, doc);
-                //基于document的查找是不安全的，因为生成的节点可能还没有加入DOM树，比如dom("<div id=\"A'B~C.D[E]\"><p>foo</p></div>").find("p")
+                //基于document的查找是不安全的，因为生成的节点可能还没有加入DOM树，比如$("<div id=\"A'B~C.D[E]\"><p>foo</p></div>").find("p")
                 }else if(context.nodeType == 9){
                     node = doc.getElementById(value);
                     //IE67 opera混淆表单元素，object以及链接的ID与NAME
@@ -437,7 +437,7 @@ dom.define("query", function(){
                             while((node = lastResult[i++])){
                                 while((node = node.nextSibling)){
                                     if (node.nodeType === 1 && (flag_all || tagName === node.nodeName)) {
-                                        uid = dom.getUid(node);
+                                        uid = $.getUid(node);
                                         if (uniqResult[uid]){
                                             break;
                                         }else {
@@ -446,7 +446,7 @@ dom.define("query", function(){
                                     }
                                 }
                             }
-                            elems = dom.unique(elems);
+                            elems = $.unique(elems);
                             break;
                     }
                 }else if(match = expr.match(rtag)){//处理位于最开始的或并联选择器之后的标签选择器或通配符
@@ -485,9 +485,9 @@ dom.define("query", function(){
         }
         return elems;
     }
-    var onePosition = dom.oneObject("eq|gt|lt|first|last|even|odd".split("|"));
+    var onePosition = $.oneObject("eq|gt|lt|first|last|even|odd".split("|"));
 
-    dom.mix(Icarus, {
+    $.mix(Icarus, {
         //getAttribute总会返回字符串
         //http://reference.sitepoint.com/javascript/Element/getAttribute
         getAttribute : !fixGetAttribute ?
@@ -725,18 +725,18 @@ dom.define("query", function(){
                 var checkName = ofType ? "nodeName" : "nodeType";
                 for (; el = lastResult[i++];) {
                     var parent = el.parentNode;
-                    var pid =  dom.getUid(parent);
+                    var pid =  $.getUid(parent);
                     if (!lock[pid]){
                         count = lock[pid] = 1;
                         var checkValue = ofType ? el.nodeName : 1;
                         for(var node = parent[child];node;node = node[sibling]){
                             if(node[checkName] === checkValue){
-                                pid = dom.getUid(node);
+                                pid = $.getUid(node);
                                 cache[pid] = count++;
                             }
                         }
                     }
-                    diff = cache[dom.getUid(el)] - b;
+                    diff = cache[$.getUid(el)] - b;
                     found =  a === 0 ? diff === 0 : (diff % a === 0 && diff / a >= 0 );
                     (found ^ flag_not) && (result[ri++] = el);
                 }
@@ -821,9 +821,9 @@ dom.define("query", function(){
                 checked = {},
                 flag_not = flags.not;
                 for (var i = 0, ri = 0,elem; elem = links[i++];)
-                    checked[dom.getUid(elem) ] = 1;
+                    checked[$.getUid(elem) ] = 1;
                 for (i = 0; elem = elems[i++]; )
-                    if (checked[dom.getUid(elem)] ^ flag_not)
+                    if (checked[$.getUid(elem)] ^ flag_not)
                         result[ri++] = elem;
                 return result;
             }
@@ -857,7 +857,7 @@ dom.define("query", function(){
         checked:  filterProp("checked", true),//标准
         contains: {
             exec: function (flags, elems, arg) {
-                var res = [], elem = elems[0], fn = flags.xml ? dom.getText: getHTMLText,
+                var res = [], elem = elems[0], fn = flags.xml ? $.getText: getHTMLText,
                 flag_not = flags.not;
                 for (var i = 0, ri = 0, elem; elem = elems[i++]; ){
                     if ((!!~  fn( [elem] ).indexOf(arg)) ^ flag_not)
@@ -884,7 +884,7 @@ dom.define("query", function(){
             return !!el.firstChild;
         },
         has : function(el, expr){//孩子中是否拥有匹配expr的节点
-            return !!dom.query(expr,[el]).length;
+            return !!$.query(expr,[el]).length;
         },
         //与位置相关的过滤器
         first: function(index){
@@ -916,7 +916,7 @@ dom.define("query", function(){
         return  !Icarus.pseudoAdapter.hidden(el);
     }
 
-    "text,radio,checkbox,file,password,submit,image,reset".replace(dom.rword, function(name){
+    "text,radio,checkbox,file,password,submit,image,reset".replace($.rword, function(name){
         Icarus.pseudoAdapter[name] = function(el){
             return (el.getAttribute("type") || el.type) === name;//避开HTML5新增类型导致的BUG，不直接使用el.type === name;
         }
@@ -924,7 +924,7 @@ dom.define("query", function(){
        
 });
 
-//2011.10.25重构dom.unique
+//2011.10.25重构$.unique
 //2011.10.26支持对拥有name值为id的控件的表单元素的查找，添加labed语句，让元素不存在时更快跳出主循环
 //2011.10.30让属性选择器支持拥有多个中括号与转义符的属性表达式，如‘input[name=brackets\\[5\\]\\[\\]]’
 //2011.10.31重构属性选择器处理无操作部分，使用hasAttribute来判定用户是否显示使用此属性，并支持checked, selected, disabled等布尔属性

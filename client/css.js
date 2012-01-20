@@ -1,29 +1,29 @@
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
-var node$css_ie = this.getComputedStyle ?  "node" : "node,css_ie" ;
-dom.define("css", node$css_ie, function(){
+var node$css_fix = this.getComputedStyle ?  "node" : "node,css_fix" ;
+$.define("css", node$css_fix, function(){
     var global = this, DOC = global.document,
-    cssFloat = dom.support.cssFloat ? 'cssFloat': 'styleFloat',
+    cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
     rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI, deg2rad = Math.PI/180,
     rcap = /-([a-z])/g,capfn = function(_,$1){
         return $1.toUpperCase();
     },prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
-    adapter = dom.cssAdapter = dom.cssAdapter || {};
+    adapter = $.cssAdapter = $.cssAdapter || {};
     function cssCache(name){
         return cssCache[name] || (cssCache[name] = name == 'float' ? cssFloat : name.replace(rcap, capfn));
     }
 
     //http://www.w3.org/TR/2009/WD-css3-2d-transforms-20091201/#introduction
-    dom.mix(dom, {
+    $.mix($, {
         cssCache:cssCache,
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName : function(name, target, test){
             if(cssCache[name])
                 return name;
-            target = target || dom.html.style;
-            for (var i=0, l=prefixes.length; i < l; i++) {
+            target = target || $.html.style;
+            for (var i=0, n = prefixes.length; i < n; i++) {
                 test = (prefixes[i] + name).replace(rcap,capfn);
                 if(test in target){
                     return (cssCache[name] = test);
@@ -32,15 +32,15 @@ dom.define("css", node$css_ie, function(){
             return null;
         },
         scrollbarWidth:function (){
-            if(dom.scrollbarWidth.ret){
-                return dom.scrollbarWidth.ret
+            if($.scrollbarWidth.ret){
+                return $.scrollbarWidth.ret
             }
             var test =  dom('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body")
             var ret = test[0].offsetWidth - test[0].clientWidth;              
             test.remove();
-            return dom.scrollbarWidth.ret = ret
+            return $.scrollbarWidth.ret = ret
         },
-        cssNumber : dom.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
+        cssNumber : $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function(nodes, name, value){
             var props = {} , fn;
             nodes = nodes.nodeType == 1 ? [nodes] : nodes;
@@ -55,7 +55,7 @@ dom.define("css", node$css_ie, function(){
                 value = props[name];
                 name = cssCache(name);
                 fn = adapter[name+":set"] || adapter["_default:set"];
-                if ( isFinite( value ) && !dom.cssNumber[ name ] ) {
+                if ( isFinite( value ) && !$.cssNumber[ name ] ) {
                     value += "px";
                 }
                 for(var i = 0, node; node = nodes[i++];){
@@ -75,7 +75,7 @@ dom.define("css", node$css_ie, function(){
             parseFloat(value);
         },
         all2rad :function (value){
-            return dom.all2deg(value) * deg2rad;
+            return $.all2deg(value) * deg2rad;
         },
         //将 skewx(10deg) translatex(150px)这样的字符串转换成3*2的距阵
         _toMatrixArray: function(/*String*/ transform ) {
@@ -112,7 +112,7 @@ dom.define("css", node$css_ie, function(){
                         continue;
 
                     case "rotate":
-                        val = dom.all2rad(val) ;
+                        val = $.all2rad(val) ;
                         A_ = Math.cos(val);
                         B_ = Math.sin(val);
                         C_ = -Math.sin(val);
@@ -137,19 +137,19 @@ dom.define("css", node$css_ie, function(){
 
                     case "skewX":
                         A_ = D_ = 1;
-                        C_ = Math.tan( dom.all2rad(val));
+                        C_ = Math.tan( $.all2rad(val));
                         break;
 
                     case "skewY":
                         A_ = D_ = 1;
-                        B_ = Math.tan( dom.all2rad(val));
+                        B_ = Math.tan( $.all2rad(val));
                         break;
 
                     case "skew":
                         A_ = D_ = 1;
                         val = val.split(",");
-                        C_ = Math.tan( dom.all2rad(val[0]));
-                        B_ = Math.tan( dom.all2rad(val[1] || 0));
+                        C_ = Math.tan( $.all2rad(val[0]));
+                        B_ = Math.tan( $.all2rad(val[1] || 0));
                         break;
 
                     case "matrix":
@@ -223,31 +223,31 @@ dom.define("css", node$css_ie, function(){
       
     });
     //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
-    var cssTransfrom = dom.cssName("transform");
+    var cssTransfrom = $.cssName("transform");
     if(cssTransfrom){
         // gerrer(node) 返回一个包含 scaleX,scaleY, rotate, translateX,translateY, translateZ的对象
         // setter(node, { rotate: 30 })返回自身
-        dom.transform = function(node,  param){
-            var meta = dom._data(node,"transform"),arr = [1,0,0,1,0,0], m
+        $.transform = function(node,  param){
+            var meta = $._data(node,"transform"),arr = [1,0,0,1,0,0], m
             if(!meta){
                 //将CSS3 transform属性中的数值分解出来
-                var style = dom.css([node],cssTransfrom);
+                var style = $.css([node],cssTransfrom);
                 if(~style.indexOf("matrix")){
                     m = rmatrix.exec(style);
                     arr = [m[1], m[2], m[3], m[4], m[5], m[6]];
                 }else if(style.length > 6){
-                    arr = dom._toMatrixArray(style)
+                    arr = $._toMatrixArray(style)
                 }
-                meta = dom._toMatrixObject(arr);
+                meta = $._toMatrixObject(arr);
                 //保存到缓存系统，省得每次都计算
-                dom._data(node,"transform",meta);
+                $._data(node,"transform",meta);
             }
 
             if(arguments.length === 1){
                 return meta;//getter
             }
             //setter
-            meta = dom._data(node,"transform",{
+            meta = $._data(node,"transform",{
                 scaleX:     param.scaleX     === void 0 ? meta.scaleX     : param.scaleX,
                 scaleY:     param.scaleY     === void 0 ? meta.scaleY     : param.scaleY,
                 rotate:     param.rotate     === void 0 ? meta.rotate     : param.rotate,
@@ -256,12 +256,12 @@ dom.define("css", node$css_ie, function(){
             });
             node.style[cssTransfrom]  =
             "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
-            "rotate(" + dom.all2deg(meta.rotate)  + "deg) " +
+            "rotate(" + $.all2deg(meta.rotate)  + "deg) " +
             "translate(" + meta.translateX  + "px," + meta.translateY + "px)";
         }
     }
     //IE9 FF等支持getComputedStyle
-    dom.mix(adapter, {
+    $.mix(adapter, {
         "_default:get" :function( node, name){
             return node.style[ name ];
         },
@@ -269,10 +269,10 @@ dom.define("css", node$css_ie, function(){
             node.style[ name ] = value;
         },
         "rotate:get":function( node ){
-            return dom.all2deg((dom.transform(node) || {}).rotate) ;
+            return $.all2deg(($.transform(node) || {}).rotate) ;
         },
         "rotate:set":function( node, name, value){
-            dom.transform(node, {
+            $.transform(node, {
                 rotate:value
             });
         }
@@ -287,7 +287,7 @@ dom.define("css", node$css_ie, function(){
             var underscored = name == "cssFloat" ? "float" : name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase();
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle.getPropertyValue( underscored );
-                if ( ret === "" && !dom.contains( node.ownerDocument, node ) ) {
+                if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = node.style[name];//如果还没有加入DOM树，则取内联样式
                 }
             }
@@ -296,13 +296,13 @@ dom.define("css", node$css_ie, function(){
     }
 
     //=========================　处理　width height　=========================
-    var getter = dom.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
+    var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     cssPair = {
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
     }
     function getWH( node, name,extra  ) {//注意 name是首字母大写
-        var none = 0, getter = dom.cssAdapter["_default:get"], which = cssPair[name];
+        var none = 0, getter = $.cssAdapter["_default:get"], which = cssPair[name];
         if(getter(node,"display") === "none" ){
             none ++;
             node.style.display = "block";
@@ -322,8 +322,8 @@ dom.define("css", node$css_ie, function(){
         none && (node.style.display = "none");
         return val;
     }
-    "width,height".replace(dom.rword,function(name){
-        dom.cssAdapter[ name+":get" ] = function(node, name){
+    "width,height".replace($.rword,function(name){
+        $.cssAdapter[ name+":get" ] = function(node, name){
             return getWH(node, name == "width" ? "Width" : "Height") + "px";
         }
     });
@@ -350,13 +350,13 @@ dom.define("css", node$css_ie, function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
-    "Height,Width".replace(dom.rword, function(  name ) {
-        dom.fn[ name.toLowerCase() ] = function(size) {
+    "Height,Width".replace($.rword, function(  name ) {
+        $.fn[ name.toLowerCase() ] = function(size) {
             var target = this[0];
             if ( !target ) {
                 return size == null ? null : this;
             }
-            if ( dom.type(target, "Window")) {//取得浏览器工作区的大小
+            if ( $.type(target, "Window")) {//取得浏览器工作区的大小
                 var doc = target.document, prop = doc.documentElement[ "client" + name ], body = doc.body;
                 return doc.compatMode === "CSS1Compat" && prop || body && body[ "client" + name ] || prop;
             } else if ( target.nodeType === 9 ) {//取得页面的大小（包括不可见部分）
@@ -368,22 +368,22 @@ dom.define("css", node$css_ie, function(){
             } else if ( size === void 0 ) {
                 return getWH(target,name, 0) 
             } else {
-                return dom.css(this,name.toLowerCase(),size);
+                return $.css(this,name.toLowerCase(),size);
             }
         };
-        dom.fn[ "inner" + name ] = function() {
+        $.fn[ "inner" + name ] = function() {
             var node = this[0];
             return node && node.style ? getWH(node,name, 1) : null;
         };
         // outerHeight and outerWidth
-        dom.fn[ "outer" + name ] = function( margin ) {
+        $.fn[ "outer" + name ] = function( margin ) {
             var node = this[0], extra = margin === "margin" ? 3 : 2;
             return node && node.style ?  getWH(node,name, extra) : null;
         };
     });
         
     //=========================　处理　left top　=========================
-    "Left,Top".replace(dom.rword, function(name){
+    "Left,Top".replace($.rword, function(name){
         adapter[ name.toLowerCase() +":get"] =  function(node){
             var val = getter(node, name.toLowerCase()), offset;
             // 1. 当没有设置 style.left 时，getComputedStyle 在不同浏览器下，返回值不同
@@ -419,7 +419,7 @@ dom.define("css", node$css_ie, function(){
     //具体支持情况可见下面网址
     //http://help.dottoro.com/lcrlukea.php
     adapter[ "userSelect:set" ] = function( node, name, value ) {
-        name = dom.cssName(name);
+        name = $.cssName(name);
         if(typeof name === "string"){
             return node.style[name] = value
         }
@@ -433,14 +433,14 @@ dom.define("css", node$css_ie, function(){
     //=======================================================
     //获取body的offset
     function getBodyOffsetNoMargin(){
-        var el = DOC.body, ret = parseFloat(dom.css(el,"margin-top"))!== el.offsetTop;
+        var el = DOC.body, ret = parseFloat($.css(el,"margin-top"))!== el.offsetTop;
         function getBodyOffsetNoMargin(){
             return ret;//一次之后的执行结果
         }
         return ret;//第一次执行结果
     }
        
-    dom.fn.offset = function(){//取得第一个元素位于页面的坐标
+    $.fn.offset = function(){//取得第一个元素位于页面的坐标
         var node = this[0], owner = node && node.ownerDocument, pos = {
             left:0,
             top:0
@@ -457,15 +457,15 @@ dom.define("css", node$css_ie, function(){
                 pos.left += parseFloat( getter(node, "marginLeft")) || 0;
             }
             return pos;
-        }else if (dom.html[RECT]) { //如果支持getBoundingClientRect
+        }else if ($.html[RECT]) { //如果支持getBoundingClientRect
             //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
             //http://msdn.microsoft.com/en-us/library/ms536433.aspx
             var box = node[RECT](),win = getWindow(owner),
             root = owner.documentElement,body = owner.body,
             clientTop = root.clientTop || body.clientTop || 0,
             clientLeft = root.clientLeft || body.clientLeft || 0,
-            scrollTop  = win.pageYOffset || dom.support.boxModel && root.scrollTop  || body.scrollTop,
-            scrollLeft = win.pageXOffset || dom.support.boxModel && root.scrollLeft || body.scrollLeft;
+            scrollTop  = win.pageYOffset || $.support.boxModel && root.scrollTop  || body.scrollTop,
+            scrollLeft = win.pageXOffset || $.support.boxModel && root.scrollLeft || body.scrollLeft;
             // 加上document的scroll的部分尺寸到left,top中。
             // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
             // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
@@ -477,7 +477,7 @@ dom.define("css", node$css_ie, function(){
 
     
     var rroot = /^(?:body|html)$/i;
-    dom.implement({
+    $.implement({
         position: function() {
             var ret =  this.offset(), node = this[0];
             if ( node && node.nodeType ===1 ) {
@@ -506,9 +506,9 @@ dom.define("css", node$css_ie, function(){
         }
     });
 
-    "Left,Top".replace(dom.rword,function(  name ) {
+    "Left,Top".replace($.rword,function(  name ) {
         var method = "scroll" + name;
-        dom.fn[ method ] = function( val ) {
+        $.fn[ method ] = function( val ) {
             var node, win, i = name == "Top";
             if ( val === void 0 ) {
                 node = this[ 0 ];
@@ -518,7 +518,7 @@ dom.define("css", node$css_ie, function(){
                 win = getWindow( node );
                 // Return the scroll offset
                 return win ? ("pageXOffset" in win) ? win[ i ? "pageYOffset" : "pageXOffset" ] :
-                dom.support.boxModel && win.document.documentElement[ method ] ||
+                $.support.boxModel && win.document.documentElement[ method ] ||
                 win.document.body[ method ] :
                 node[ method ];
             }
@@ -537,16 +537,16 @@ dom.define("css", node$css_ie, function(){
         };
     });
     function getWindow( node ) {
-        return dom.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
+        return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
   
 
-    dom.implement({
+    $.implement({
         css : function(name, value){
-            return dom.css(this, name, value);
+            return $.css(this, name, value);
         },
         rotate : function(value){
-            return  dom.css(this, "rotate", value) ;
+            return  $.css(this, "rotate", value) ;
         }
     });
 
@@ -554,10 +554,10 @@ dom.define("css", node$css_ie, function(){
 
 //2011.9.5
 //将cssName改为隋性函数,修正msTransform Bug
-//2011.9.19 添加dom.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
+//2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 //2011.10.10 重构position offset保持这两者行为一致，
-//2011.10.14 Fix dom.css BUG，如果传入一个对象，它把到getter分支了。
-//2011.10.15 Fix dom.css BUG  添加transform rotate API
+//2011.10.14 Fix $.css BUG，如果传入一个对象，它把到getter分支了。
+//2011.10.15 Fix $.css BUG  添加transform rotate API
 //2011.10.20 getWH不能获取隐藏元素的BUG
 //2011.10.21 修正width height的BUG
 //2011.11.10 添加top,left到cssAdapter

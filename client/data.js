@@ -1,26 +1,26 @@
 //==================================================
 // 数据缓存模块
 //==================================================
-dom.define("data", "lang", function(){
-    dom.log("已加载data模块");
+$.define("data", "lang", function(){
+    $.log("已加载data模块");
     var remitter = /object|function/
-    dom.mix(dom,{
+    $.mix($,{
         memcache:{},
         // 读写数据
         data : function( target, name, data, pvt ) {
             if(target && remitter.test(typeof target)){//只处理HTML节点与普通对象
-                var id = target.uniqueNumber || (target.uniqueNumber = dom.uuid++);
+                var id = target.uniqueNumber || (target.uniqueNumber = $.uuid++);
                 if(name === "@uuid"){
                     return id;
                 }
-                var memcache = target.nodeType === 1 ? dom.memcache: target;
+                var memcache = target.nodeType === 1 ? $.memcache: target;
                 var table = memcache[ "@data_"+id ] || (memcache[ "@data_"+id ] = {});
                 if ( !pvt ) {
                     table = table.data || (table.data = {});
                 }
                 var getByName = typeof name === "string";
                 if ( name && typeof name == "object" ) {
-                    dom.mix(table, name);
+                    $.mix(table, name);
                 }else if(getByName && data !== void 0){
                     table[ name ] = data;
                 }
@@ -28,7 +28,7 @@ dom.define("data", "lang", function(){
             }
         },
         _data:function(target,name,data){
-            return dom.data(target, name, data, true)
+            return $.data(target, name, data, true)
         },
         //移除数据
         removeData : function(target, name, pvt){
@@ -37,7 +37,7 @@ dom.define("data", "lang", function(){
                 if (  !id ) {
                     return;
                 }
-                var memcache = target.nodeType === 1  ? dom.memcache : target;
+                var memcache = target.nodeType === 1  ? $.memcache : target;
                 var table = memcache["@data_"+id], clear = 1, ret = typeof name == "string" ;
                 if ( table && ret ) {
                     if(!pvt){
@@ -69,15 +69,15 @@ dom.define("data", "lang", function(){
         },
         //合并数据
         mergeData:function(neo, src){
-            var srcData = dom._data(src), neoData = dom._data(neo), events = srcData.events;
+            var srcData = $._data(src), neoData = $._data(neo), events = srcData.events;
             if(srcData && neoData){
-                dom.Object.merge.call(neoData, srcData);
+                $.Object.merge.call(neoData, srcData);
                 if(events){
                     delete neoData.handle;
                     neoData.events = {};
                     for ( var type in events ) {
                         for (var i = 0, obj ; obj =  events[ type ][i++]; ) {
-                            dom.event.bind.call( neo, type + ( obj.namespace ? "." : "" ) + obj.namespace, obj.handler, obj.selector, obj.times );
+                            $.event.bind.call( neo, type + ( obj.namespace ? "." : "" ) + obj.namespace, obj.handler, obj.selector, obj.times );
                         }
                     }
                 }
@@ -88,5 +88,5 @@ dom.define("data", "lang", function(){
 });
 
 //2011.9.27 uniqueID改为uniqueNumber 简化data与removeData
-//2011.9.28 添加dom._data处理内部数据
+//2011.9.28 添加$._data处理内部数据
 //2011.10.21 强化mergeData，可以拷贝事件
