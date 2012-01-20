@@ -2,7 +2,7 @@
 //  语言补丁模块
 //==========================================
 $.define("lang_fix", function(){
-    //$.log("已加载ECMA262v5新扩展模块")
+    //$.log("已加载语言补丁模块")
     //Object扩展
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
@@ -47,20 +47,20 @@ $.define("lang_fix", function(){
     }
     $.mix(Array[P],{
         //定位类 返回指定项首次出现的索引。
-        indexOf: function (el, index) {
+        indexOf: function (item, index) {
             var n = this.length, i = ~~index;
             if (i < 0) i += n;
             for (; i < n; i++)
-                if ( this[i] === el) return i;
+                if ( this[i] === item) return i;
             return -1;
         },
         //定位类 返回指定项最后一次出现的索引。
-        lastIndexOf: function (el, index) {
+        lastIndexOf: function (item, index) {
             var n = this.length,
             i = index == null ? n - 1 : index;
             if (i < 0) i = Math.max(0, n + i);
             for (; i >= 0; i--)
-                if (this[i] === el) return i;
+                if (this[i] === item) return i;
             return -1;
         },
         //迭代类 在数组中的每个项上运行一个函数。
