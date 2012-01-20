@@ -232,7 +232,7 @@
         if(fn instanceof Function){
             return fn.apply(global,argv);
         }
-        return  Function("b","var mass = $;return " +(str || fn) +".apply(window,b)" )(argv);
+        return  Function("b","return " +(str || fn) +".apply(window,b)" )(argv);
     }
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
@@ -284,7 +284,6 @@
                     args.push(name);
                     _deps[name] = "司徒正美";//去重，去掉@ready
                 }
-
             });
             var cbname = callback._name;
             if(dn === cn ){//在依赖都已执行过或没有依赖的情况下
@@ -443,5 +442,5 @@ dom.namespace改为dom["@name"]
 
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
- */
+*/
 
