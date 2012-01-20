@@ -1,9 +1,8 @@
 //=========================================
 // 类型扩展模块 by 司徒正美
 //=========================================
-
 $.define("lang", Array.isArray ? "" : "ecma", function(){
-    $.log("已加载lang模块");
+    $.log("已加载语言扩展模块");
     var global = this,
     rascii = /[^\x00-\xff]/g,
     rformat = /\\?\#{([^{}]+)\}/gm,
@@ -18,12 +17,12 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     $.mix($,{
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject : function (obj){
-            if(!$.type(obj,"Object") || $.isNative(obj,"reload") ){
+            if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
                 return false;
             }     
             try{//不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
                 for(var key in obj)//只有一个方法是来自其原型立即返回flase   
-                    if(!String2.hasOwnProperty.call(obj,key)){//不能用obj.hasOwnProperty自己查自己
+                    if(!({}).hasOwnProperty.call(obj, key)){//不能用obj.hasOwnProperty自己查自己
                         return false
                     }
             }catch(e){
@@ -31,17 +30,16 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return true;
         },
-
         //判定method是否为obj的原生方法，如$.isNative(window,"JSON")
         isNative : function(obj, method) {
             var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
             return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
         },
         /**
-             * 是否为空对象
-             * @param {Object} obj
-             * @return {Boolean}
-             */
+         * 是否为空对象
+         * @param {Object} obj
+         * @return {Boolean}
+         */
         isEmptyObject: function(obj ) {
             for ( var i in obj ){
                 return false;
@@ -54,7 +52,6 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             if(!obj || obj.document || obj.nodeType || $.type(obj,"Function")) return false;
             return isFinite(obj.length) ;
         },
-
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
         format : function(str, object){
@@ -71,17 +68,17 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             });
         },
         /**
-             * 用于拼接多行HTML片断,免去写<与>与结束标签之苦
-             * @param {String} tag 可带属性的开始标签
-             * @param {String} innerHTML 可选
-             * @param {Boolean} xml 可选 默认false,使用HTML模式,需要处理空标签
-             * @example var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
-             * console.log(html+"");
-             * @return {Function}
-             */
-        tag:function (start,content,xml){
+         * 用于拼接多行HTML片断,免去写<与>与结束标签之苦
+         * @param {String} tag 可带属性的开始标签
+         * @param {String} innerHTML 可选
+         * @param {Boolean} xml 可选 默认false,使用HTML模式,需要处理空标签
+         * @example var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
+         * console.log(html+"");
+         * @return {Function}
+         */
+        tag:function (start, content, xml){
             xml = !!xml
-            var chain = function(start,content,xml){
+            var chain = function(start, content, xml){
                 var html = arguments.callee.html;
                 start && html.push("<",start,">");
                 content = ''+(content||'');
@@ -217,7 +214,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             try {
                 if ( global.DOMParser ) { // Standard
                     tmp = new DOMParser();
-                    xml = tmp.parseFromString( data , "text/xml" );
+                    xml = tmp.parseFromString(data , "text/xml" );
                 } else { // IE
                     xml = new ActiveXObject("Microsoft.XMLDOM" );//"Microsoft.XMLDOM"
                     xml.async = "false";
@@ -234,7 +231,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
 
     }, false);
 
-    "Array,Function".replace($.rword,function(name){
+    "Array,Function".replace($.rword, function(name){
         $["is"+name] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+name+"]";
         }
@@ -243,30 +240,78 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-
-    var String2 = $.String = {
+    var adjustOne = $.oneObject("String,Array,Number,Object"),
+    arrayLike = $.oneObject("NodeList,Arguments,Object")
+    //语言链对象
+    var $$ = $.lang = function(obj){
+        var type = $.type(obj), chain = this;
+        if(arrayLike[type] &&  isFinite(obj.length)){
+            obj = $.slice(obj);
+            type = "Array";
+        }
+        if(adjustOne[type]){
+            if(!(chain instanceof $$)){
+                chain = new $$;
+            }
+            chain.target = obj;
+            chain.type = type;
+            return chain;
+        }else{// undefined boolean null
+            return obj
+        }
+    }
+    var proto = $$.prototype = {
+        constructor:Lang,
+        valueOf:function(){
+            return this.target;
+        },
+        toString:function(){
+            return this.target + "";
+        }
+    };
+    //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
+    "String,Array,Number,Object".replace($.rword, function(type){
+        $[type] = function(ext){
+            Object.keys(ext).forEach(function(name){
+                $[type][name] = ext[name];
+                proto[name] = function(){
+                    var obj = this.target;
+                    var method = obj[name] || $[type][name];
+                    var result = method.apply(obj, arguments);
+                    return result;
+                }
+                proto[name+"X"] = function(){
+                    var obj = this.target;
+                    var method = obj[name] || $[type][name];
+                    var result = method.apply(obj, arguments);
+                    return $$.call(this, result) ;
+                }
+            });
+        }
+    });
+    
+    $.String({
         //判断一个字符串是否包含另一个字符
         contains: function(string, separator){
             return (separator) ? !!~(separator + this + separator).indexOf(separator + string + separator) : !!~this.indexOf(string);
         },
-        //以XXX开头
+        //判定是否以给定字符串开头
         startsWith: function(string, ignorecase) {
             var start_str = this.substr(0, string.length);
             return ignorecase ? start_str.toLowerCase() === string.toLowerCase() :
             start_str === string;
         },
-
+        //判定是否以给定字符串结尾
         endsWith: function(string, ignorecase) {
             var end_str = this.substring(this.length - string.length);
             return ignorecase ? end_str.toLowerCase() === string.toLowerCase() :
             end_str === string;
         },
-
         //得到字节长度
         byteLen:function(){
             return this.replace(rascii,"--").length;
         },
-
+        //是否为空白节点
         empty: function () {
             return this.valueOf() === '';
         },
@@ -281,28 +326,29 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return this.length > length ?
             this.slice(0, length - truncation.length) + truncation :String(this);
         },
+        //转换为驼峰风格
         camelize:function(){
-            return this.replace(/-([a-z])/g, function($1,$2){
+            return this.replace(/-([a-z])/g, function($1, $2){
                 return $2.toUpperCase();
             });
+        },
+        //转换为连字符风格
+        underscored: function() {
+            return this.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-/g, '_').toLowerCase();
         },
         //首字母大写
         capitalize: function(){
             return this.charAt(0).toUpperCase() + this.substring(1).toLowerCase();
         },
-
-        underscored: function() {
-            return this.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-/g, '_').toLowerCase();
-        },
-
+        //转换为整数
         toInt: function(radix) {
             return parseInt(this, radix || 10);
         },
-
+        //转换为小数
         toFloat: function() {
             return parseFloat(this);
         },
-        //$.lang("é").toHex() ==> \xE9
+        //转换为十六进制
         toHex: function() { 
             var txt = '',str = this;
             for (var i = 0; i < str.length; i++) {
@@ -315,6 +361,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return txt; 
         },
         //http://stevenlevithan.com/regex/xregexp/
+        //将字符串安全格式化为正则表达式的源码
         escapeRegExp: function(){
             return this.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
@@ -349,16 +396,16 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return res;
         }
-    };
-
-    var Array2 = $.Array  = {
+    });
+    $.Array({
         //深拷贝当前数组
         clone: function(){
             var i = this.length, result = [];
             while (i--) result[i] = cloneOf(this[i]);
             return result;
         },
-        first: function(fn,scope){
+        //取得第一个元素或对它进行操作
+        first: function(fn, scope){
             if($.type(fn,"Function")){
                 for(var i=0, n = this.length;i < n;i++){
                     if(fn.call(scope,this[i],i,this)){
@@ -370,6 +417,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 return this[0];
             }
         },
+        //取得最后一个元素或对它进行操作
         last: function(fn, scope) {
             if($.type(fn,"Function")){
                 for (var i=this.length-1; i > -1; i--) {
@@ -383,14 +431,14 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
         },
         //判断数组是否包含此元素
-        contains: function (el) {
-            return !!~this.indexOf(el) ;
+        contains: function (item) {
+            return !!~this.indexOf(item) ;
         },
         //http://msdn.microsoft.com/zh-cn/library/bb383786.aspx
         //移除 Array 对象中某个元素的第一个匹配项。
         remove: function (item) {
             var index = this.indexOf(item);
-            if (~index ) return Array2.removeAt.call(this,index);
+            if (~index ) return $.Array.removeAt.call(this, index);
             return null;
         },
         //移除 Array 对象中指定位置的元素。
@@ -406,7 +454,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         },
         //从数组中随机抽选一个元素出来
         random: function () {
-            return Array2.shuffle.call(this)[0];
+            return $.Array.shuffle.call(this)[0];
         },
         //取得数字数组中值最小的元素
         min: function() {
@@ -426,9 +474,9 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         },
         //取得对象数组的每个元素的特定属性
         pluck:function(name){
-            var result = [],prop;
-            this.forEach(function(el){
-                prop = el[name];
+            var result = [], prop;
+            this.forEach(function(item){
+                prop = item[name];
                 if(prop != null)
                     result.push(prop);
             });
@@ -436,16 +484,16 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         },
         //根据对象的某个属性进行排序
         sortBy: function(fn, scope) {
-            var array =  this.map(function(el, index) {
+            var array =  this.map(function(item, index) {
                 return {
-                    el: el,
-                    re: fn.call(scope, el, index)
+                    el: item,
+                    re: fn.call(scope, item, index)
                 };
             }).sort(function(left, right) {
                 var a = left.re, b = right.re;
                 return a < b ? -1 : a > b ? 1 : 0;
             });
-            return Array2.pluck.call(array,'el');
+            return $.Array.pluck.call(array,'el');
         },
         // 以数组形式返回原数组中不为null与undefined的元素
         compact: function () {
@@ -490,44 +538,36 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                     ret.push(this[i]);
                 }
             return ret;
-
         },
         //对数组进行平坦化处理，返回一个一维数组
         flatten: function() {
-            var result = [],self = Array2.flatten;
-            this.forEach(function(value) {
-                if ($.isArray(value)) {
-                    result = result.concat(self.call(value));
+            var result = [],self = $.Array.flatten;
+            this.forEach(function(item) {
+                if ($.isArray(item)) {
+                    result = result.concat(self.call(item));
                 } else {
-                    result.push(value);
+                    result.push(item);
                 }
             });
             return result;
         }
-    }
-    Array2.without = Array2.diff;
-    var Math2 = "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".match($.rword);
-    var Number2 = $.Number ={
+    });
+    
+    var NumberExt = {
         times: function(fn, bind) {
             for (var i=0; i < this; i++)
                 fn.call(bind, i);
             return this;
         },
-        padLeft:function(digits, filling, radix){
-            return String2.padLeft.apply(this,[digits, filling, radix]);
-        },
-        padRight:function(digits, filling, radix){
-            return String2.padRight.apply(this,[digits, filling, radix]);
-        },
         //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
-        constrain:function(n1,n2){
-            var a = [n1,n2].sort(),num = Number(this);
+        constrain:function(n1, n2){
+            var a = [n1, n2].sort(),num = Number(this);
             if(num < a[0]) num = a[0];
             if(num > a[1]) num = a[1];
             return num;
         },
         //求出距离原数最近的那个数
-        nearer:function(n1,n2){
+        nearer:function(n1, n2){
             var num = Number(this),
             diff1 = Math.abs(num - n1),
             diff2 = Math.abs(num - n2);
@@ -538,7 +578,6 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 fn.call(scope, i);
             return this;
         },
-
         downto: function(number, fn, scope) {
             for (var i=this+0; i >= number; i--)
                 fn.call(scope, i);
@@ -553,19 +592,23 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
         }
     }
-
-    Math2.forEach(function(name){
-        Number2[name] = function(){
+    "padLeft,padRight".replace($.rword, function(name){
+        NumberExt[name] = function(){
+            return $.String[name].apply(this,arguments);
+        }
+    });
+    "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".replace($.rword,function(name){
+        NumberExt[name] = function(){
             return Math[name](this);
         }
     });
-
+    $.Number(NumberExt);
     function cloneOf(item){
-        switch($.type(item)){
+        var name = $.type(item);
+        switch(name){
             case "Array":
-                return Array2.clone.call(item);
             case "Object":
-                return Object2.clone.call(item);
+                return $[name].clone.call(item);
             default:
                 return item;
         }
@@ -573,14 +616,14 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     //使用深拷贝方法将多个对象或数组合并成一个
     function mergeOne(source, key, current){
         if(source[key] && typeof source[key] == "object"){
-            Object2.merge.call(source[key], current);
+            $.Object.merge.call(source[key], current);
         }else {
             source[key] = cloneOf(current)
         }
         return source;
     };
 
-    var Object2 = $.Object = {
+    $.Object({
         //根据传入数组取当前对象相关的键值对组成一个新对象返回
         subset: function(keys){
             var results = {};
@@ -591,15 +634,15 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return results;
         },
         //遍历对象的键值对
-        forEach: function(fn,scope){
-            for(var name in this){
-                fn.call(scope,this[name],name,this);
-            }
-            if($.DONT_ENUM && this.hasOwnProperty){
-                for(var i = 0; name = $.DONT_ENUM[i++]; ){
-                    this.hasOwnProperty(name) &&  fn.call(scope,this[name],name,this);
-                }
-            }
+        forEach: function(fn, scope){
+            Object.keys(this).forEach(function(name){
+                fn.call(scope, this[name], name, this);
+            }, this);
+        },
+        map: function(fn, scope){
+            return Object.keys(this).map(function(name){
+                fn.call(scope, this[name], name, this);
+            }, this);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
         clone: function(){
@@ -610,12 +653,12 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return clone;
         },
         merge: function(k, v){
-            var target = this,obj,key;
+            var target = this, obj, key;
             //为目标对象添加一个键值对
             if (typeof k === "string")
                 return mergeOne(target, k, v);
             //合并多个对象
-            for (var i = 0, l = arguments.length; i < l; i++){
+            for (var i = 0, n = arguments.length; i < n; i++){
                 obj = arguments[i];
                 for ( key in obj){
                     if(obj[key] !== void 0)
@@ -634,64 +677,8 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return result;
         }
-    }
-    var inner = {
-        String : ["charAt", "charCodeAt", "concat", "indexOf", "lastIndexOf", "localeCompare",
-        "match", "replace","search", "slice", "split", "substring", "toLowerCase",
-        "toLocaleLowerCase", "toUpperCase", "toLocaleUpperCase", "trim", "toJSON"],
-        Array : [ "toLocaleString","concat", "join", "pop", "push", "shift", "slice", "sort",  "reverse","splice", "unshift",
-        "indexOf", "lastIndexOf",  "every", "some", "forEach", "map","filter", "reduce", "reduceRight"],
-        Number : ["toLocaleString", "toFixed", "toExponential", "toPrecision", "toJSON"],
-        Object : ["toLocaleString", "hasOwnerProperty", "isPrototypeOf", "propertyIsEnumerable" ]
-    }
-    var adjustOne = $.oneObject("String,Array,Number,Object"),
-    arrayLike = $.oneObject("NodeList,Arguments,Object")
-    var Lang = $.lang = function(obj){
-        var type = $.type(obj), chain = this;
-        if(arrayLike[type] &&  isFinite(obj.length)){
-            obj = $.slice(obj);
-            type = "Array";
-        }
-        if(adjustOne[type]){
-            if(!(chain instanceof Lang)){
-                chain = new Lang;
-            }
-            chain.target = obj;
-            chain.type = type;
-            return chain;
-        }else{// undefined boolean null
-            return obj
-        }
-    }
-    var proto = Lang.prototype = {
-        constructor:Lang,
-        valueOf:function(){
-            return this.target;
-        },
-        toString:function(){
-            return this.target + "";
-        }
-    };
-    function force(type){
-        var methods = inner[type].concat(Object.keys(mass[type]));
-        methods.forEach(function(name){
-            proto[name] = function(){
-                var obj = this.target;
-                var method = obj[name] ? obj[name] : mass[this.type][name];
-                var result = method.apply(obj,arguments);
-                return result;
-            }
-            proto[name+"X"] = function(){
-                var obj = this.target;
-                var method = obj[name] ? obj[name] : mass[this.type][name];
-                var result = method.apply(obj,arguments);
-                return Lang.call(this,result) ;
-            }
-        });
-        return force;
-    };
-    Lang.force = force("Array")("String")("Number")("Object");
-    return Lang;
+    });
+    return $$;
 });
 
 
@@ -714,4 +701,5 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
 //2011.11.6 对parseXML中的IE部分进行强化
 //2011.12.22 修正命名空间
 //2012.1.17 添加dump方法
+//2012.1.20 重构$$.String, $$.Array, $$.Number, $$.Object, 让其变成一个函数
 //键盘控制物体移动 http://www.wushen.biz/move/
