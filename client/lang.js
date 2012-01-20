@@ -1,8 +1,8 @@
-//=========================================
-// ÀàĞÍÀ©Õ¹Ä£¿é by Ë¾Í½ÕıÃÀ
+ï»¿//=========================================
+// ç±»å‹æ‰©å±•æ¨¡å— by å¸å¾’æ­£ç¾
 //=========================================
 $.define("lang", Array.isArray ? "" : "ecma", function(){
-    $.log("ÒÑ¼ÓÔØÓïÑÔÀ©Õ¹Ä£¿é");
+    $.log("å·²åŠ è½½è¯­è¨€æ‰©å±•æ¨¡å—");
     var global = this,
     rascii = /[^\x00-\xff]/g,
     rformat = /\\?\#{([^{}]+)\}/gm,
@@ -15,14 +15,14 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
     $.mix($,{
-        //ÅĞ¶¨ÊÇ·ñÊÇÒ»¸öÆÓËØµÄjavascript¶ÔÏó£¨Object»òJSON£©£¬²»ÊÇDOM¶ÔÏó£¬²»ÊÇBOM¶ÔÏó£¬²»ÊÇ×Ô¶¨ÒåÀàµÄÊµÀı¡£
+        //åˆ¤å®šæ˜¯å¦æ˜¯ä¸€ä¸ªæœ´ç´ çš„javascriptå¯¹è±¡ï¼ˆObjectæˆ–JSONï¼‰ï¼Œä¸æ˜¯DOMå¯¹è±¡ï¼Œä¸æ˜¯BOMå¯¹è±¡ï¼Œä¸æ˜¯è‡ªå®šä¹‰ç±»çš„å®ä¾‹ã€‚
         isPlainObject : function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
                 return false;
             }     
-            try{//²»´æÔÚhasOwnProperty·½·¨µÄ¶ÔÏó¿Ï¶¨ÊÇIEµÄBOM¶ÔÏó»òDOM¶ÔÏó
-                for(var key in obj)//Ö»ÓĞÒ»¸ö·½·¨ÊÇÀ´×ÔÆäÔ­ĞÍÁ¢¼´·µ»Øflase   
-                    if(!({}).hasOwnProperty.call(obj, key)){//²»ÄÜÓÃobj.hasOwnProperty×Ô¼º²é×Ô¼º
+            try{//ä¸å­˜åœ¨hasOwnPropertyæ–¹æ³•çš„å¯¹è±¡è‚¯å®šæ˜¯IEçš„BOMå¯¹è±¡æˆ–DOMå¯¹è±¡
+                for(var key in obj)//åªæœ‰ä¸€ä¸ªæ–¹æ³•æ˜¯æ¥è‡ªå…¶åŸå‹ç«‹å³è¿”å›flase   
+                    if(!({}).hasOwnProperty.call(obj, key)){//ä¸èƒ½ç”¨obj.hasOwnPropertyè‡ªå·±æŸ¥è‡ªå·±
                         return false
                     }
             }catch(e){
@@ -30,13 +30,13 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return true;
         },
-        //ÅĞ¶¨methodÊÇ·ñÎªobjµÄÔ­Éú·½·¨£¬Èç$.isNative(window,"JSON")
+        //åˆ¤å®šmethodæ˜¯å¦ä¸ºobjçš„åŸç”Ÿæ–¹æ³•ï¼Œå¦‚$.isNative(window,"JSON")
         isNative : function(obj, method) {
             var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
             return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
         },
         /**
-         * ÊÇ·ñÎª¿Õ¶ÔÏó
+         * æ˜¯å¦ä¸ºç©ºå¯¹è±¡
          * @param {Object} obj
          * @return {Boolean}
          */
@@ -46,13 +46,13 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return true;
         },
-        //°üÀ¨Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeListÓë×Ô¶¨ÒåÀàÊı×é¶ÔÏó
-        //select.options¼¯ºÏ£¨ËüÃÇÁ½¸ö¶¼ÓĞitemÓëlengthÊôĞÔ£©
+        //åŒ…æ‹¬Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeListä¸è‡ªå®šä¹‰ç±»æ•°ç»„å¯¹è±¡
+        //select.optionsé›†åˆï¼ˆå®ƒä»¬ä¸¤ä¸ªéƒ½æœ‰itemä¸lengthå±æ€§ï¼‰
         isArrayLike :  function (obj) {
             if(!obj || obj.document || obj.nodeType || $.type(obj,"Function")) return false;
             return isFinite(obj.length) ;
         },
-        //½«×Ö·û´®ÖĞµÄÕ¼Î»·ûÌæ»»Îª¶ÔÓ¦µÄ¼üÖµ
+        //å°†å­—ç¬¦ä¸²ä¸­çš„å ä½ç¬¦æ›¿æ¢ä¸ºå¯¹åº”çš„é”®å€¼
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
         format : function(str, object){
             var array = $.slice(arguments,1);
@@ -68,11 +68,11 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             });
         },
         /**
-         * ÓÃÓÚÆ´½Ó¶àĞĞHTMLÆ¬¶Ï,ÃâÈ¥Ğ´<Óë>Óë½áÊø±êÇ©Ö®¿à
-         * @param {String} tag ¿É´øÊôĞÔµÄ¿ªÊ¼±êÇ©
-         * @param {String} innerHTML ¿ÉÑ¡
-         * @param {Boolean} xml ¿ÉÑ¡ Ä¬ÈÏfalse,Ê¹ÓÃHTMLÄ£Ê½,ĞèÒª´¦Àí¿Õ±êÇ©
-         * @example var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","Á½²ã")))("H1",T("span","33333"))('',"ÕâÊÇ´¿ÎÄ±¾");
+         * ç”¨äºæ‹¼æ¥å¤šè¡ŒHTMLç‰‡æ–­,å…å»å†™<ä¸>ä¸ç»“æŸæ ‡ç­¾ä¹‹è‹¦
+         * @param {String} tag å¯å¸¦å±æ€§çš„å¼€å§‹æ ‡ç­¾
+         * @param {String} innerHTML å¯é€‰
+         * @param {Boolean} xml å¯é€‰ é»˜è®¤false,ä½¿ç”¨HTMLæ¨¡å¼,éœ€è¦å¤„ç†ç©ºæ ‡ç­¾
+         * @example var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","ä¸¤å±‚")))("H1",T("span","33333"))('',"è¿™æ˜¯çº¯æ–‡æœ¬");
          * console.log(html+"");
          * @return {Function}
          */
@@ -83,7 +83,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 start && html.push("<",start,">");
                 content = ''+(content||'');
                 content && html.push(content);
-                var end = start.split(' ')[0];//È¡µÃ½áÊø±êÇ©
+                var end = start.split(' ')[0];//å–å¾—ç»“æŸæ ‡ç­¾
                 if(end && (xml || !rnoclose.test(end))){
                     html.push("</",end,">");
                 }
@@ -183,8 +183,8 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         //http://www.schillmania.com/content/projects/javascript-animation-1/
         //http://www.cnblogs.com/rubylouvre/archive/2010/04/09/1708419.html
         parseJS: function( code ) {
-            //IEÖĞ£¬window.eval()ºÍeval()Ò»ÑùÖ»ÔÚµ±Ç°×÷ÓÃÓòÉúĞ§¡£
-            //Firefox£¬Safari£¬OperaÖĞ£¬Ö±½Óµ÷ÓÃeval()Îªµ±Ç°×÷ÓÃÓò£¬window.eval()µ÷ÓÃÎªÈ«¾Ö×÷ÓÃÓò¡£
+            //IEä¸­ï¼Œwindow.eval()å’Œeval()ä¸€æ ·åªåœ¨å½“å‰ä½œç”¨åŸŸç”Ÿæ•ˆã€‚
+            //Firefoxï¼ŒSafariï¼ŒOperaä¸­ï¼Œç›´æ¥è°ƒç”¨eval()ä¸ºå½“å‰ä½œç”¨åŸŸï¼Œwindow.eval()è°ƒç”¨ä¸ºå…¨å±€ä½œç”¨åŸŸã€‚
             if ( code && /\S/.test(code) ) {
                 try{
                     global[str_eval](code);
@@ -197,13 +197,13 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             data = data.trim();
             if ( global.JSON && global.JSON.parse ) {
-                //Ê¹ÓÃÔ­ÉúµÄJSON.parse×ª»»×Ö·û´®Îª¶ÔÏó
+                //ä½¿ç”¨åŸç”Ÿçš„JSON.parseè½¬æ¢å­—ç¬¦ä¸²ä¸ºå¯¹è±¡
                 return global.JSON.parse( data );
             }
             if ( rvalidchars.test( data.replace( rvalidescape, "@" )
                 .replace( rvalidtokens, "]" )
                 .replace( rvalidbraces, "")) ) {
-                //Ê¹ÓÃnew FunctionÉú³ÉÒ»¸öJSON¶ÔÏó
+                //ä½¿ç”¨new Functionç”Ÿæˆä¸€ä¸ªJSONå¯¹è±¡
                 return (new Function( "return " + data ))();
             }
             $.error( "Invalid JSON: " + data );
@@ -242,7 +242,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     }
     var adjustOne = $.oneObject("String,Array,Number,Object"),
     arrayLike = $.oneObject("NodeList,Arguments,Object")
-    //ÓïÑÔÁ´¶ÔÏó
+    //è¯­è¨€é“¾å¯¹è±¡
     var $$ = $.lang = function(obj){
         var type = $.type(obj), chain = this;
         if(arrayLike[type] &&  isFinite(obj.length)){
@@ -269,7 +269,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return this.target + "";
         }
     };
-    //¹¹½¨ÓïÑÔÁ´¶ÔÏóµÄËÄ¸öÖØÒª¹¤¾ß:$.String, $.Array, $.Number, $.Object
+    //æ„å»ºè¯­è¨€é“¾å¯¹è±¡çš„å››ä¸ªé‡è¦å·¥å…·:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
             Object.keys(ext).forEach(function(name){
@@ -291,64 +291,64 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     });
     
     $.String({
-        //ÅĞ¶ÏÒ»¸ö×Ö·û´®ÊÇ·ñ°üº¬ÁíÒ»¸ö×Ö·û
+        //åˆ¤æ–­ä¸€ä¸ªå­—ç¬¦ä¸²æ˜¯å¦åŒ…å«å¦ä¸€ä¸ªå­—ç¬¦
         contains: function(string, separator){
             return (separator) ? !!~(separator + this + separator).indexOf(separator + string + separator) : !!~this.indexOf(string);
         },
-        //ÅĞ¶¨ÊÇ·ñÒÔ¸ø¶¨×Ö·û´®¿ªÍ·
+        //åˆ¤å®šæ˜¯å¦ä»¥ç»™å®šå­—ç¬¦ä¸²å¼€å¤´
         startsWith: function(string, ignorecase) {
             var start_str = this.substr(0, string.length);
             return ignorecase ? start_str.toLowerCase() === string.toLowerCase() :
             start_str === string;
         },
-        //ÅĞ¶¨ÊÇ·ñÒÔ¸ø¶¨×Ö·û´®½áÎ²
+        //åˆ¤å®šæ˜¯å¦ä»¥ç»™å®šå­—ç¬¦ä¸²ç»“å°¾
         endsWith: function(string, ignorecase) {
             var end_str = this.substring(this.length - string.length);
             return ignorecase ? end_str.toLowerCase() === string.toLowerCase() :
             end_str === string;
         },
-        //µÃµ½×Ö½Ú³¤¶È
+        //å¾—åˆ°å­—èŠ‚é•¿åº¦
         byteLen:function(){
             return this.replace(rascii,"--").length;
         },
-        //ÊÇ·ñÎª¿Õ°×½Úµã
+        //æ˜¯å¦ä¸ºç©ºç™½èŠ‚ç‚¹
         empty: function () {
             return this.valueOf() === '';
         },
-        //ÅĞ¶¨×Ö·û´®ÊÇ·ñÖ»ÓĞ¿Õ°×
+        //åˆ¤å®šå­—ç¬¦ä¸²æ˜¯å¦åªæœ‰ç©ºç™½
         blank: function () {
             return /^\s*$/.test(this);
         },
-        //length£¬ĞÂ×Ö·û´®³¤¶È£¬truncation£¬ĞÂ×Ö·û´®µÄ½áÎ²µÄ×Ö¶Î,·µ»ØĞÂ×Ö·û´®
+        //lengthï¼Œæ–°å­—ç¬¦ä¸²é•¿åº¦ï¼Œtruncationï¼Œæ–°å­—ç¬¦ä¸²çš„ç»“å°¾çš„å­—æ®µ,è¿”å›æ–°å­—ç¬¦ä¸²
         truncate :function(length, truncation) {
             length = length || 30;
             truncation = truncation === void(0) ? '...' : truncation;
             return this.length > length ?
             this.slice(0, length - truncation.length) + truncation :String(this);
         },
-        //×ª»»ÎªÍÕ·å·ç¸ñ
+        //è½¬æ¢ä¸ºé©¼å³°é£æ ¼
         camelize:function(){
             return this.replace(/-([a-z])/g, function($1, $2){
                 return $2.toUpperCase();
             });
         },
-        //×ª»»ÎªÁ¬×Ö·û·ç¸ñ
+        //è½¬æ¢ä¸ºè¿å­—ç¬¦é£æ ¼
         underscored: function() {
             return this.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-/g, '_').toLowerCase();
         },
-        //Ê××ÖÄ¸´óĞ´
+        //é¦–å­—æ¯å¤§å†™
         capitalize: function(){
             return this.charAt(0).toUpperCase() + this.substring(1).toLowerCase();
         },
-        //×ª»»ÎªÕûÊı
+        //è½¬æ¢ä¸ºæ•´æ•°
         toInt: function(radix) {
             return parseInt(this, radix || 10);
         },
-        //×ª»»ÎªĞ¡Êı
+        //è½¬æ¢ä¸ºå°æ•°
         toFloat: function() {
             return parseFloat(this);
         },
-        //×ª»»ÎªÊ®Áù½øÖÆ
+        //è½¬æ¢ä¸ºåå…­è¿›åˆ¶
         toHex: function() { 
             var txt = '',str = this;
             for (var i = 0; i < str.length; i++) {
@@ -361,12 +361,12 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return txt; 
         },
         //http://stevenlevithan.com/regex/xregexp/
-        //½«×Ö·û´®°²È«¸ñÊ½»¯ÎªÕıÔò±í´ïÊ½µÄÔ´Âë
+        //å°†å­—ç¬¦ä¸²å®‰å…¨æ ¼å¼åŒ–ä¸ºæ­£åˆ™è¡¨è¾¾å¼çš„æºç 
         escapeRegExp: function(){
             return this.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
-        //ÔÚ×ó±ß²¹ÉÏÒ»Ğ©×Ö·û,Ä¬ÈÏÎª0
+        //åœ¨å·¦è¾¹è¡¥ä¸Šä¸€äº›å­—ç¬¦,é»˜è®¤ä¸º0
         padLeft: function(digits, filling, radix){
             var num = this.toString(radix || 10);
             filling = filling || "0";
@@ -376,7 +376,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             return num;
         },
 
-        //ÔÚÓÒ±ß²¹ÉÏÒ»Ğ©×Ö·û,Ä¬ÈÏÎª0
+        //åœ¨å³è¾¹è¡¥ä¸Šä¸€äº›å­—ç¬¦,é»˜è®¤ä¸º0
         padRight: function(digits, filling, radix){
             var num = this.toString(radix || 10);
             filling = filling || "0";
@@ -398,13 +398,13 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         }
     });
     $.Array({
-        //Éî¿½±´µ±Ç°Êı×é
+        //æ·±æ‹·è´å½“å‰æ•°ç»„
         clone: function(){
             var i = this.length, result = [];
             while (i--) result[i] = cloneOf(this[i]);
             return result;
         },
-        //È¡µÃµÚÒ»¸öÔªËØ»ò¶ÔËü½øĞĞ²Ù×÷
+        //å–å¾—ç¬¬ä¸€ä¸ªå…ƒç´ æˆ–å¯¹å®ƒè¿›è¡Œæ“ä½œ
         first: function(fn, scope){
             if($.type(fn,"Function")){
                 for(var i=0, n = this.length;i < n;i++){
@@ -417,7 +417,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 return this[0];
             }
         },
-        //È¡µÃ×îºóÒ»¸öÔªËØ»ò¶ÔËü½øĞĞ²Ù×÷
+        //å–å¾—æœ€åä¸€ä¸ªå…ƒç´ æˆ–å¯¹å®ƒè¿›è¡Œæ“ä½œ
         last: function(fn, scope) {
             if($.type(fn,"Function")){
                 for (var i=this.length-1; i > -1; i--) {
@@ -430,41 +430,41 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 return this[this.length-1];
             }
         },
-        //ÅĞ¶ÏÊı×éÊÇ·ñ°üº¬´ËÔªËØ
+        //åˆ¤æ–­æ•°ç»„æ˜¯å¦åŒ…å«æ­¤å…ƒç´ 
         contains: function (item) {
             return !!~this.indexOf(item) ;
         },
         //http://msdn.microsoft.com/zh-cn/library/bb383786.aspx
-        //ÒÆ³ı Array ¶ÔÏóÖĞÄ³¸öÔªËØµÄµÚÒ»¸öÆ¥ÅäÏî¡£
+        //ç§»é™¤ Array å¯¹è±¡ä¸­æŸä¸ªå…ƒç´ çš„ç¬¬ä¸€ä¸ªåŒ¹é…é¡¹ã€‚
         remove: function (item) {
             var index = this.indexOf(item);
             if (~index ) return $.Array.removeAt.call(this, index);
             return null;
         },
-        //ÒÆ³ı Array ¶ÔÏóÖĞÖ¸¶¨Î»ÖÃµÄÔªËØ¡£
+        //ç§»é™¤ Array å¯¹è±¡ä¸­æŒ‡å®šä½ç½®çš„å…ƒç´ ã€‚
         removeAt: function (index) {
             return this.splice(index, 1);
         },
-        //¶ÔÊı×é½øĞĞÏ´ÅÆ,µ«²»Ó°ÏìÔ­¶ÔÏó
+        //å¯¹æ•°ç»„è¿›è¡Œæ´—ç‰Œ,ä½†ä¸å½±å“åŸå¯¹è±¡
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
         shuffle: function () {
             var shuff = (this || []).concat(), j, x, i = shuff.length;
             for (; i > 0; j = parseInt(Math.random() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
             return shuff;
         },
-        //´ÓÊı×éÖĞËæ»ú³éÑ¡Ò»¸öÔªËØ³öÀ´
+        //ä»æ•°ç»„ä¸­éšæœºæŠ½é€‰ä¸€ä¸ªå…ƒç´ å‡ºæ¥
         random: function () {
             return $.Array.shuffle.call(this)[0];
         },
-        //È¡µÃÊı×ÖÊı×éÖĞÖµ×îĞ¡µÄÔªËØ
+        //å–å¾—æ•°å­—æ•°ç»„ä¸­å€¼æœ€å°çš„å…ƒç´ 
         min: function() {
             return Math.min.apply(0, this);
         },
-        //È¡µÃÊı×ÖÊı×éÖĞÖµ×î´óµÄÔªËØ
+        //å–å¾—æ•°å­—æ•°ç»„ä¸­å€¼æœ€å¤§çš„å…ƒç´ 
         max: function() {
             return Math.max.apply(0, this);
         },
-        //Ö»ÓĞÔ­Êı×é²»´æÔÚ²ÅÌí¼ÓËü
+        //åªæœ‰åŸæ•°ç»„ä¸å­˜åœ¨æ‰æ·»åŠ å®ƒ
         ensure: function() {
             var args = $.slice(arguments);
             args.forEach(function(el){
@@ -472,7 +472,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             },this);
             return this;
         },
-        //È¡µÃ¶ÔÏóÊı×éµÄÃ¿¸öÔªËØµÄÌØ¶¨ÊôĞÔ
+        //å–å¾—å¯¹è±¡æ•°ç»„çš„æ¯ä¸ªå…ƒç´ çš„ç‰¹å®šå±æ€§
         pluck:function(name){
             var result = [], prop;
             this.forEach(function(item){
@@ -482,7 +482,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             });
             return result;
         },
-        //¸ù¾İ¶ÔÏóµÄÄ³¸öÊôĞÔ½øĞĞÅÅĞò
+        //æ ¹æ®å¯¹è±¡çš„æŸä¸ªå±æ€§è¿›è¡Œæ’åº
         sortBy: function(fn, scope) {
             var array =  this.map(function(item, index) {
                 return {
@@ -495,13 +495,13 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             });
             return $.Array.pluck.call(array,'el');
         },
-        // ÒÔÊı×éĞÎÊ½·µ»ØÔ­Êı×éÖĞ²»ÎªnullÓëundefinedµÄÔªËØ
+        // ä»¥æ•°ç»„å½¢å¼è¿”å›åŸæ•°ç»„ä¸­ä¸ä¸ºnullä¸undefinedçš„å…ƒç´ 
         compact: function () {
             return this.filter(function (el) {
                 return el != null;
             });
         },
-        //È¡²î¼¯(²¹¼¯)
+        //å–å·®é›†(è¡¥é›†)
         diff : function(array) {
             var result = this.slice();
             for ( var i = 0; i < result.length; i++ ) {
@@ -515,19 +515,19 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return result;
         },
-        //È¡²¢¼¯
+        //å–å¹¶é›†
         union :function(array){
             var arr = this;
             arr = arr.concat(array);
             return $.Array.unique.call(arr);
         },
-        //È¡½»¼¯
+        //å–äº¤é›†
         intersect:function(array){
             return this.filter(function(n) {
                 return ~array.indexOf(n)
             });
         },
-        // ·µ»ØÃ»ÓĞÖØ¸´ÖµµÄĞÂÊı×é
+        // è¿”å›æ²¡æœ‰é‡å¤å€¼çš„æ–°æ•°ç»„
         unique: function () {
             var ret = [];
                 o:for(var i = 0, n = this.length; i < n; i++) {
@@ -539,7 +539,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 }
             return ret;
         },
-        //¶ÔÊı×é½øĞĞÆ½Ì¹»¯´¦Àí£¬·µ»ØÒ»¸öÒ»Î¬Êı×é
+        //å¯¹æ•°ç»„è¿›è¡Œå¹³å¦åŒ–å¤„ç†ï¼Œè¿”å›ä¸€ä¸ªä¸€ç»´æ•°ç»„
         flatten: function() {
             var result = [],self = $.Array.flatten;
             this.forEach(function(item) {
@@ -559,14 +559,14 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 fn.call(bind, i);
             return this;
         },
-        //È·±£ÊıÖµÔÚ[n1,n2]±ÕÇø¼äÖ®ÄÚ,Èç¹û³¬³öÏŞ½ç,ÔòÖÃ»»ÎªÀëËü×î½üµÄ×î´óÖµ»ò×îĞ¡Öµ
+        //ç¡®ä¿æ•°å€¼åœ¨[n1,n2]é—­åŒºé—´ä¹‹å†…,å¦‚æœè¶…å‡ºé™ç•Œ,åˆ™ç½®æ¢ä¸ºç¦»å®ƒæœ€è¿‘çš„æœ€å¤§å€¼æˆ–æœ€å°å€¼
         constrain:function(n1, n2){
             var a = [n1, n2].sort(),num = Number(this);
             if(num < a[0]) num = a[0];
             if(num > a[1]) num = a[1];
             return num;
         },
-        //Çó³ö¾àÀëÔ­Êı×î½üµÄÄÇ¸öÊı
+        //æ±‚å‡ºè·ç¦»åŸæ•°æœ€è¿‘çš„é‚£ä¸ªæ•°
         nearer:function(n1, n2){
             var num = Number(this),
             diff1 = Math.abs(num - n1),
@@ -613,7 +613,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 return item;
         }
     }
-    //Ê¹ÓÃÉî¿½±´·½·¨½«¶à¸ö¶ÔÏó»òÊı×éºÏ²¢³ÉÒ»¸ö
+    //ä½¿ç”¨æ·±æ‹·è´æ–¹æ³•å°†å¤šä¸ªå¯¹è±¡æˆ–æ•°ç»„åˆå¹¶æˆä¸€ä¸ª
     function mergeOne(source, key, current){
         if(source[key] && typeof source[key] == "object"){
             $.Object.merge.call(source[key], current);
@@ -624,7 +624,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
     };
 
     $.Object({
-        //¸ù¾İ´«ÈëÊı×éÈ¡µ±Ç°¶ÔÏóÏà¹ØµÄ¼üÖµ¶Ô×é³ÉÒ»¸öĞÂ¶ÔÏó·µ»Ø
+        //æ ¹æ®ä¼ å…¥æ•°ç»„å–å½“å‰å¯¹è±¡ç›¸å…³çš„é”®å€¼å¯¹ç»„æˆä¸€ä¸ªæ–°å¯¹è±¡è¿”å›
         subset: function(keys){
             var results = {};
             for (var i = 0, l = keys.length; i < l; i++){
@@ -633,7 +633,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return results;
         },
-        //±éÀú¶ÔÏóµÄ¼üÖµ¶Ô
+        //éå†å¯¹è±¡çš„é”®å€¼å¯¹
         forEach: function(fn, scope){
             Object.keys(this).forEach(function(name){
                 fn.call(scope, this[name], name, this);
@@ -644,7 +644,7 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
                 fn.call(scope, this[name], name, this);
             }, this);
         },
-        //½øĞĞÉî¿½±´£¬·µ»ØÒ»¸öĞÂ¶ÔÏó£¬Èç¹ûÊÇ¿½±´ÇëÊ¹ÓÃ$.mix
+        //è¿›è¡Œæ·±æ‹·è´ï¼Œè¿”å›ä¸€ä¸ªæ–°å¯¹è±¡ï¼Œå¦‚æœæ˜¯æ‹·è´è¯·ä½¿ç”¨$.mix
         clone: function(){
             var clone = {};
             for (var key in this) {
@@ -654,10 +654,10 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
         },
         merge: function(k, v){
             var target = this, obj, key;
-            //ÎªÄ¿±ê¶ÔÏóÌí¼ÓÒ»¸ö¼üÖµ¶Ô
+            //ä¸ºç›®æ ‡å¯¹è±¡æ·»åŠ ä¸€ä¸ªé”®å€¼å¯¹
             if (typeof k === "string")
                 return mergeOne(target, k, v);
-            //ºÏ²¢¶à¸ö¶ÔÏó
+            //åˆå¹¶å¤šä¸ªå¯¹è±¡
             for (var i = 0, n = arguments.length; i < n; i++){
                 obj = arguments[i];
                 for ( key in obj){
@@ -667,10 +667,10 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
             }
             return target;
         },
-        //È¥µôÓë´«Èë²ÎÊıÏàÍ¬µÄÔªËØ
+        //å»æ‰ä¸ä¼ å…¥å‚æ•°ç›¸åŒçš„å…ƒç´ 
         without: function(arr) {
             var result = {}, key;
-            for (key in this) {//Ïàµ±ÓÚ¹¹½¨Ò»¸öĞÂ¶ÔÏó£¬°Ñ²»Î»ÓÚ´«ÈëÊı×éÖĞµÄÔªËØ¸³¸øËü
+            for (key in this) {//ç›¸å½“äºæ„å»ºä¸€ä¸ªæ–°å¯¹è±¡ï¼ŒæŠŠä¸ä½äºä¼ å…¥æ•°ç»„ä¸­çš„å…ƒç´ èµ‹ç»™å®ƒ
                 if (!~arr.indexOf(key) ) {
                     result[key] = this[key];
                 }
@@ -682,24 +682,24 @@ $.define("lang", Array.isArray ? "" : "ecma", function(){
 });
 
 
-//2011.7.12 ½«toArray×ªÒÆµ½langÄ£¿éÏÂ
-//2011.7.26 È¥µôtoArray·½·¨,Ìí¼ÓglobalEval,parseJSON,parseXML·½·¨
-//2011.8.6  Ôö¼Ótag·½·¨
-//2011.8.14 ¸üĞÂÒş²ØµÄÃüÃû¿Õ¼ä,ÖØ¹¹range·½·¨,½«nodeÄ£¿éµÄparseHTML·½·¨ÒÆµ½´Ë´¦²¢´ó·ùÇ¿»¯
-//2011.8.16 $.String2,$.Number2,$.Array2,$.Object2,globalEval ¸üÃûÎª$.String,$.Number,$.Array,$.Object,parseJS
-//2011.8.18 $.Object.merge²»ÔÙÉèÖÃundefinedµÄÖµ
-//2011.8.28 ÖØ¹¹Array.unique
-//2011.9.11 ÖØ¹¹$.isArray $.isFunction
-//2011.9.16 ĞŞ¸´$.format BUG
-//2011.10.2 ÓÅ»¯$.lang
-//2011.10.3 ÖØĞ´$.isPlainObjectÓëjQueryµÄ±£³ÖÒ»ÖÂ, ÓÅ»¯parseJS£¬
-//2011.10.4 È¥µôarray.without£¨¹¦ÄÜÓëarray.diffÏà·Â£©£¬¸ü¸Äobject.widthoutµÄ²ÎÊı
-//2011.10.6 Ê¹ÓÃÎ»·´²Ù×÷´úÌæ === -1, Ìí¼Óarray.intersect,array.union
-//2011.10.16 Ìí¼Ó·µ»ØÖµ
-//2011.10.21 ĞŞ¸´Object.keys BUG
-//2011.10.26 ÓÅ»¯quote ;½«parseJSON parseXMLÖĞ$.log¸ÄÎª$.error; FIX isPlainObject BUG;
-//2011.11.6 ¶ÔparseXMLÖĞµÄIE²¿·Ö½øĞĞÇ¿»¯
-//2011.12.22 ĞŞÕıÃüÃû¿Õ¼ä
-//2012.1.17 Ìí¼Ódump·½·¨
-//2012.1.20 ÖØ¹¹$$.String, $$.Array, $$.Number, $$.Object, ÈÃÆä±ä³ÉÒ»¸öº¯Êı
-//¼üÅÌ¿ØÖÆÎïÌåÒÆ¶¯ http://www.wushen.biz/move/
+//2011.7.12 å°†toArrayè½¬ç§»åˆ°langæ¨¡å—ä¸‹
+//2011.7.26 å»æ‰toArrayæ–¹æ³•,æ·»åŠ globalEval,parseJSON,parseXMLæ–¹æ³•
+//2011.8.6  å¢åŠ tagæ–¹æ³•
+//2011.8.14 æ›´æ–°éšè—çš„å‘½åç©ºé—´,é‡æ„rangeæ–¹æ³•,å°†nodeæ¨¡å—çš„parseHTMLæ–¹æ³•ç§»åˆ°æ­¤å¤„å¹¶å¤§å¹…å¼ºåŒ–
+//2011.8.16 $.String2,$.Number2,$.Array2,$.Object2,globalEval æ›´åä¸º$.String,$.Number,$.Array,$.Object,parseJS
+//2011.8.18 $.Object.mergeä¸å†è®¾ç½®undefinedçš„å€¼
+//2011.8.28 é‡æ„Array.unique
+//2011.9.11 é‡æ„$.isArray $.isFunction
+//2011.9.16 ä¿®å¤$.format BUG
+//2011.10.2 ä¼˜åŒ–$.lang
+//2011.10.3 é‡å†™$.isPlainObjectä¸jQueryçš„ä¿æŒä¸€è‡´, ä¼˜åŒ–parseJSï¼Œ
+//2011.10.4 å»æ‰array.withoutï¼ˆåŠŸèƒ½ä¸array.diffç›¸ä»¿ï¼‰ï¼Œæ›´æ”¹object.widthoutçš„å‚æ•°
+//2011.10.6 ä½¿ç”¨ä½åæ“ä½œä»£æ›¿ === -1, æ·»åŠ array.intersect,array.union
+//2011.10.16 æ·»åŠ è¿”å›å€¼
+//2011.10.21 ä¿®å¤Object.keys BUG
+//2011.10.26 ä¼˜åŒ–quote ;å°†parseJSON parseXMLä¸­$.logæ”¹ä¸º$.error; FIX isPlainObject BUG;
+//2011.11.6 å¯¹parseXMLä¸­çš„IEéƒ¨åˆ†è¿›è¡Œå¼ºåŒ–
+//2011.12.22 ä¿®æ­£å‘½åç©ºé—´
+//2012.1.17 æ·»åŠ dumpæ–¹æ³•
+//2012.1.20 é‡æ„$$.String, $$.Array, $$.Number, $$.Object, è®©å…¶å˜æˆä¸€ä¸ªå‡½æ•°
+//é”®ç›˜æ§åˆ¶ç‰©ä½“ç§»åŠ¨ http://www.wushen.biz/move/
