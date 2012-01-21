@@ -48,17 +48,17 @@
             SyntaxHighlighter.all();
             var highlight1 = function(){
                 var str = " .sample中不可见的元素有 : "
-                var array =  dom(".sample :hidden").collect(function(el){
+                var array =  $(".sample :hidden").collect(function(el){
                     return "<" +el.tagName.toLowerCase() + (el.type ? " "+el.type : "") +"/>"  ;
                 });
-                dom("#show_result").text(str+array.join(" , "));
+                $("#show_result").text(str+array.join(" , "));
             }
             var highlight2 = function(){
                 var str = " .sample中可见的元素有 : "
-                var array =  dom(".sample :visible").collect(function(el){
+                var array =  $(".sample :visible").collect(function(el){
                     return "<" +el.tagName.toLowerCase() + (el.type ? " "+el.type : "") +"/>"  ;
                 });
-                dom("#show_result").text(str+array.join(" , "));
+                $("#show_result").text(str+array.join(" , "));
             }
         </script>
     </head>
@@ -89,20 +89,20 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             var highlight1 = function(){
                 var str = " .sample中不可见的元素有 : "
-                var array =  dom(".sample :hidden").collect(function(el){
+                var array =  $(".sample :hidden").collect(function(el){
                     return "&lt;" +el.tagName.toLowerCase() + (el.type ? " "+el.type : "") +"/&gt;"  ;
                 });
-                dom("#show_result").text(str+array.join(" , "));
+                $("#show_result").text(str+array.join(" , "));
             }
                 </pre>
                 <button onclick="highlight1()">点我，显示结果</button>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             var highlight2 = function(){
                 var str = " .sample中可见的元素有 : "
-                var array =  dom(".sample :visible").collect(function(el){
+                var array =  $(".sample :visible").collect(function(el){
                     return "&lt;" +el.tagName.toLowerCase() + (el.type ? " "+el.type : "") +"/&gt;"  ;
                 });
-                dom("#show_result").text(str+array.join(" , "));
+                $("#show_result").text(str+array.join(" , "));
             }
                 </pre>
                 <button onclick="highlight2()">点我，显示结果</button>

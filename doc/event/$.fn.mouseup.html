@@ -24,10 +24,10 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
-                dom(".sample p").mouseup(function(){
-                    dom(this).append('<span style="color:#F00;">Mouse up.</span>');
+                $(".sample p").mouseup(function(){
+                    $(this).append('<span style="color:#F00;">Mouse up.</span>');
                 }).mousedown(function(){
-                    dom(this).append('<span style="color:#00F;">Mouse down.</span>');
+                    $(this).append('<span style="color:#00F;">Mouse down.</span>');
                 });
             });
         </script>
@@ -53,10 +53,10 @@
                 <p>测试onmousedown与onmouseup的执行顺序.</p>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event",function(){
-                dom(".sample p").mouseup(function(){
-                    dom(this).append('&lt;span style="color:#F00;"&gt;Mouse up.&lt;/span&gt;');
+                $(".sample p").mouseup(function(){
+                    $(this).append('&lt;span style="color:#F00;"&gt;Mouse up.&lt;/span&gt;');
                 }).mousedown(function(){
-                    dom(this).append('&lt;span style="color:#00F;"&gt;Mouse down.&lt;/span&gt;');
+                    $(this).append('&lt;span style="color:#00F;"&gt;Mouse down.&lt;/span&gt;');
                 });
             });
                 </pre>

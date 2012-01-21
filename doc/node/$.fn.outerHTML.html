@@ -20,7 +20,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    dom(".test").outerHTML('<span style="color:red">司徒正美</span>');
+                    $(".test").outerHTML('<span style="color:red">司徒正美</span>');
                 });
             }
         </script>
@@ -41,7 +41,7 @@
                 <div class="test"></div>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
       $.require("ready,node",function(){
-          dom(".test").outerHTML('&lt;span style="color:red"&gt;司徒正美&lt;/span&gt;')
+          $(".test").outerHTML('&lt;span style="color:red"&gt;司徒正美&lt;/span&gt;')
        });
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>

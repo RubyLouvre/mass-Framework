@@ -19,7 +19,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                     dom('li.item-a').parentsUntil('.level-1').css('background-color', 'red');
+                     $('li.item-a').parentsUntil('.level-1').css('background-color', 'red');
                 });
             }
 
@@ -78,7 +78,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node",function(){
-                     dom('li.item-a').parentsUntil('.level-1').css('background-color', 'red');
+                     $('li.item-a').parentsUntil('.level-1').css('background-color', 'red');
                 });
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>

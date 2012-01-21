@@ -19,8 +19,8 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    $.log(dom(".sample1").children().length,true);
-                    $.log(dom(".sample1").contents().length,true);
+                    $.log($(".sample1").children().length,true);
+                    $.log($(".sample1").contents().length,true);
                 });
             };
         </script>
@@ -60,8 +60,8 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node",function(){
-               $.log(dom(".sample1").children().length,true);
-               $.log(dom(".sample1").contents().length,true);
+               $.log($(".sample1").children().length,true);
+               $.log($(".sample1").contents().length,true);
             });
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>

@@ -19,7 +19,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,css",function(){
-                    dom(".sample1").find("span").css("color","red")
+                    $(".sample1").find("span").css("color","red")
                 });
             }
         </script>
@@ -37,7 +37,7 @@
             <p><span class="stress">返回值：</span></p>
             <p>新的mass实例</p>
             <fieldset><legend>例子</legend>
-                <p>搜索.sample1所有后代的span元素，和效果与dom(".sample1 span")一样</p>
+                <p>搜索.sample1所有后代的span元素，和效果与$(".sample1 span")一样</p>
                 <div class="sample1">
                     <p><span>Hello</span>, how are you?</p>
                     <p>Me? I'm <span>good</span>.</p>
@@ -50,7 +50,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,css",function(){
-                dom(".sample1").find("span").css("color","red")
+                $(".sample1").find("span").css("color","red")
             });
                 </pre>
 

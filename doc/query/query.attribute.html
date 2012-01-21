@@ -90,8 +90,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -181,47 +181,47 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("[style]").css("background-color","aqua");
+                                $("[style]").css("background-color","aqua");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class='second']").css("background-color","aquamarine");
+                                $("ul [class='second']").css("background-color","aquamarine");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class^='thi']").css("background-color","aquamarine");
+                                $("ul [class^='thi']").css("background-color","aquamarine");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class$='th']").css("background-color","blueviolet");
+                                $("ul [class$='th']").css("background-color","blueviolet");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class*='fourth']").css("background-color","burlywood");
+                                $("ul [class*='fourth']").css("background-color","burlywood");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class~='second']").css("background-color","chartreuse");
+                                $("ul [class~='second']").css("background-color","chartreuse");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [lang|='zh']").css("background-color","fuchsia");
+                                $("ul [lang|='zh']").css("background-color","fuchsia");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class!='second']").css("background-color","red");
+                                $("ul [class!='second']").css("background-color","red");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("ul [class='second'][title='second']").css("background-color","gold");
+                                $("ul [class='second'][title='second']").css("background-color","gold");
                             </td>
                         </tr>
                     </tbody>

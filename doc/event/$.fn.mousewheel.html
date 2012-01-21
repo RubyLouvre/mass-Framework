@@ -21,16 +21,16 @@
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
                 var counterDelta = 0;
-                dom(".sample1").mousewheel(function(e){
+                $(".sample1").mousewheel(function(e){
                     counterDelta += e.wheelDelta;
                     this.innerHTML = counterDelta + ": " + ( e.wheelDelta < 0 ? '向下滚 ' : '向上滚 ' )+e.type;
                 });
-                dom("#show_more").toggle(function(){
+                $("#show_more").toggle(function(){
                     this.innerHTML = "点我隐藏它"
-                    dom("#show_area").show(1000);
+                    $("#show_area").show(1000);
                 },function(){
                     this.innerHTML = "点我显示更多"
-                    dom("#show_area").hide(1000);
+                    $("#show_area").hide(1000);
                 })
                 
             });
@@ -63,7 +63,7 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,event",function(){
                 var counterDelta = 0;
-                dom(".sample1").mousewheel(function(e){
+                $(".sample1").mousewheel(function(e){
                     counterDelta += e.wheelDelta;
                     this.innerHTML = counterDelta + ": " + ( e.wheelDelta < 0 ? '向下滚 ' : '向上滚 ' )+e.type;
                 });

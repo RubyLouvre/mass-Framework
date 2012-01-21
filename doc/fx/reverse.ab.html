@@ -27,7 +27,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    dom(".box").fx(2000, { w: 300, chain:   1 }). // A
+                    $(".box").fx(2000, { w: 300, chain:   1 }). // A
                     fx(2000, { h: 300, reverse: 1 }); // B
                 });
             }
@@ -38,7 +38,7 @@
             <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
             <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    dom(".box").fx(2000, { w: 300, chain:   1 }). // A
+                    $(".box").fx(2000, { w: 300, chain:   1 }). // A
                     fx(2000, { h: 300, reverse: 1 }); // B
                 });
             </pre>

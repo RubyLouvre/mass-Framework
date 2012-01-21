@@ -42,8 +42,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -79,22 +79,22 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom(":text").css("background-color","blue");
+                                $(":text").css("background-color","blue");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom(":radio").css("border","1px solid green");
+                                $(":radio").css("border","1px solid green");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom(":checkbox").css("border","1px solid red");
+                                $(":checkbox").css("border","1px solid red");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom(":button").css("background-color","#FF6363");
+                                $(":button").css("background-color","#FF6363");
                             </td>
                         </tr>
                     </tbody>

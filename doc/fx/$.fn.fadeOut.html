@@ -23,18 +23,18 @@
             SyntaxHighlighter.all();
        
                 $.require("ready,fx,event",function(){
-                    dom("#btn1").click(function() {
+                    $("#btn1").click(function() {
                         function complete(el) {
-                            dom("<div/>").text(el.id).appendTo("#log");
+                            $("<div/>").text(el.id).appendTo("#log");
                         }
   
-                        dom("#box1").fadeOut(1600, { after:complete});
-                        dom("#box2").fadeOut(1600, { after:complete});
+                        $("#box1").fadeOut(1600, { after:complete});
+                        $("#box2").fadeOut(1600, { after:complete});
                     });
 
-                    dom("#btn2").click(function() {
-                        dom("#box1,#box2").show();
-                        dom("#log").empty();
+                    $("#btn2").click(function() {
+                        $("#box1,#box2").show();
+                        $("#log").empty();
                     });
                 });
       
@@ -63,17 +63,17 @@
             <fieldset ><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,fx,event",function(){
-                    dom("#btn1").click(function() {
+                    $("#btn1").click(function() {
                         function complete(el) {
-                            dom("&lt;div/&gt;").text(el.id).appendTo("#log");
+                            $("&lt;div/&gt;").text(el.id).appendTo("#log");
                         }
-                        dom("#box1").fadeOut(1600, { o:[0,"linear"],after:complete});
-                        dom("#box2").fadeOut(1600, { after:complete});
+                        $("#box1").fadeOut(1600, { o:[0,"linear"],after:complete});
+                        $("#box2").fadeOut(1600, { after:complete});
                     });
 
-                    dom("#btn2").click(function() {
-                        dom("#box1,#box2").show();
-                        dom("#log").empty();
+                    $("#btn2").click(function() {
+                        $("#box1,#box2").show();
+                        $("#log").empty();
                     });
                 });
                 </pre>

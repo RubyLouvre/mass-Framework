@@ -18,8 +18,8 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,node,event",function(){
-                dom(".container li").on("click",function(e){
-                    dom(".show").append(e.target.innerHTML+"<br/>");
+                $(".container li").on("click",function(e){
+                    $(".show").append(e.target.innerHTML+"<br/>");
                 }).fire("click").off("click");
             });
         </script>
@@ -68,8 +68,8 @@ $.fn.on(str)
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,event",function(){
-                dom(".container li").on("click",function(e){
-                     dom(".show").append(e.target.innerHTML+"&lt;br/&gt;");
+                $(".container li").on("click",function(e){
+                     $(".show").append(e.target.innerHTML+"&lt;br/&gt;");
                 }).fire("click").off("click");
             });
                 </pre>

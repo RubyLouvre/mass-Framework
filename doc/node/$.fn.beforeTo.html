@@ -18,13 +18,13 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom('<strong>(しとうなさみ)</strong>').beforeTo(dom(".inner").first());
+                $('<strong>(しとうなさみ)</strong>').beforeTo($(".inner").first());
             }
             var exec2 = function(){
-                dom("#aaa").beforeTo(dom(".inner").first());
+                $("#aaa").beforeTo($(".inner").first());
             }
             var exec3 = function(){
-                dom("<thead><tr><th>表头</th><th>表头</th></tr></thead>").beforeTo( dom(".table1 tbody"));
+                $("<thead><tr><th>表头</th><th>表头</th></tr></thead>").beforeTo( $(".table1 tbody"));
             }
         </script>
     </head>
@@ -56,11 +56,11 @@
       &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom('&lt;strong&gt;(しとうなさみ)&lt;/strong&gt;').beforeTo(dom(".inner").first());
+      $('&lt;strong&gt;(しとうなさみ)&lt;/strong&gt;').beforeTo($(".inner").first());
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom("#aaa").beforeTo(dom(".inner").first());
+      $("#aaa").beforeTo($(".inner").first());
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
         </fieldset>
@@ -85,7 +85,7 @@
       &lt;/table&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-  dom("&lt;thead&gt;&lt;tr&gt;&lt;th&gt;表头&lt;/th&gt;&lt;th&gt;表头&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;").beforeTo( dom(".table1 tbody"));
+  $("&lt;thead&gt;&lt;tr&gt;&lt;th&gt;表头&lt;/th&gt;&lt;th&gt;表头&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;").beforeTo( $(".table1 tbody"));
             </pre>
             <button onclick="exec3()">点我，执行代码</button>
         </fieldset>

@@ -23,11 +23,11 @@
         SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
         SyntaxHighlighter.all();
         $.require("ready,event",function(){
-            var spans = dom(".sample1 span")
-            var firstBtn = dom(".sample1 button").first().click(function () {
+            var spans = $(".sample1 span")
+            var firstBtn = $(".sample1 button").first().click(function () {
                 update(spans.first());
             });
-            dom(".sample1 button").last().click(function () {
+            $(".sample1 button").last().click(function () {
                 firstBtn.fire('click');
                 update(spans.last());
             });
@@ -36,8 +36,8 @@
                 var n = parseInt(el.text(), 10);
                 el.text(n + 1);
             }
-            dom(".sample2").click( function (e, a, b) {
-                dom(this).append(e.type+"  "+String(a)+"   "+String(b)+"<br/>")
+            $(".sample2").click( function (e, a, b) {
+                $(this).append(e.type+"  "+String(a)+"   "+String(b)+"<br/>")
             } ).fire("click", "foo", "bar");
             
             
@@ -90,11 +90,11 @@
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
         $.require("ready,event",function(){
-            var spans = dom(".sample1 span")
-            var firstBtn = dom(".sample1 button").first().click(function () {
+            var spans = $(".sample1 span")
+            var firstBtn = $(".sample1 button").first().click(function () {
                 update(spans.first());
             });
-            dom(".sample1 button").last().click(function () {
+            $(".sample1 button").last().click(function () {
                 firstBtn.fire('click');
                 update(spans.last());
             });
@@ -116,8 +116,8 @@
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
         $.require("ready,event",function(){
-            dom(".sample2").click( function (e, a, b) {
-                dom(this).append(e.type+"  "+String(a)+"   "+String(b)+"&lt;br/&gt;")
+            $(".sample2").click( function (e, a, b) {
+                $(this).append(e.type+"  "+String(a)+"   "+String(b)+"&lt;br/&gt;")
             } ).fire("click", "foo", "bar");
             
             

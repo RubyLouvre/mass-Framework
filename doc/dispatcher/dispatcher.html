@@ -24,20 +24,20 @@
                     var a  = $.a = {};
                     $.mix(a,$.dispatcher);
                     var repeat = function(){
-                        dom(".show_a").append("<div>已派发repeat事件</div>")
+                        $(".show_a").append("<div>已派发repeat事件</div>")
                     }
                     a.bind("repeat",repeat)
                     a.bind("repeat",repeat);
                     a.bind("repeat",repeat);
                     a.fire("repeat");
                     a.bind("data",function(){
-                        dom(".show_a").append("<div>已派发data事件</div>")
+                        $(".show_a").append("<div>已派发data事件</div>")
                     });
                     a.bind("data",function(e){
-                        dom(".show_a").append("<div>"+[].slice.call(arguments)+"</div>");
-                        dom(".show_a").append("<div>"+e.type+"</div>");
-                        dom(".show_a").append("<div>"+a.uniqueNumber+"</div>")
-                        dom(".show_a").append("<div>"+(a === e.target)+"</div>")
+                        $(".show_a").append("<div>"+[].slice.call(arguments)+"</div>");
+                        $(".show_a").append("<div>"+e.type+"</div>");
+                        $(".show_a").append("<div>"+a.uniqueNumber+"</div>")
+                        $(".show_a").append("<div>"+(a === e.target)+"</div>")
                     });
                     a.fire("data",3,5);
                     delete $.a;
@@ -48,13 +48,13 @@
                     var b  = $.b = {};
                     $.mix(b,$.dispatcher);
                     b.bind("write",function(){
-                        dom(".show_b").append("<div>"+[].slice.call(arguments)+"</div>");
+                        $(".show_b").append("<div>"+[].slice.call(arguments)+"</div>");
                     });
                     b.fire("write","第一次触发");
                     b.fire("write","第二次触发");
                     b.unbind("write");
                     b.fire("write","第三次触发");
-                    dom(".show_b").append("==========================");
+                    $(".show_b").append("==========================");
                     delete $.b;
                 });
             }
@@ -64,15 +64,15 @@
                     c.prop = "属性"
                     $.mix(c,$.dispatcher);
                     c.bind("first second",function(e){
-                        dom(".show_c").append("<div>"+e.target.prop+"</div>");
-                        dom(".show_c").append("<div>"+e.type+"</div>");
-                        dom(".show_c").append("<div>"+[].slice.call(arguments)+"</div>");
+                        $(".show_c").append("<div>"+e.target.prop+"</div>");
+                        $(".show_c").append("<div>"+e.type+"</div>");
+                        $(".show_c").append("<div>"+[].slice.call(arguments)+"</div>");
                     });
                     c.fire("first","FFFFF","AAAA","DDDDD");
                     c.fire("second","SSSS");
                     c.unbind("first second");
                     c.fire("first","more");
-                    dom(".show_c").append("==========================");
+                    $(".show_c").append("==========================");
                     delete $.c;
                 });
             }
@@ -82,33 +82,33 @@
                     $.mix(d,$.dispatcher);
                     d.defineEvents("slideUp,resize,destroy");
                     d.onSlideUp(function(e){
-                        dom(".show_d").append("<div>"+e.type+"</div>");
-                        dom(".show_d").append("<div>第一个slideUp回调</div>");
+                        $(".show_d").append("<div>"+e.type+"</div>");
+                        $(".show_d").append("<div>第一个slideUp回调</div>");
                     });
                     
                     d.bind("slideUp",function(e){
-                        dom(".show_d").append("<div>"+e.type+"</div>");
-                        dom(".show_d").append("<div>第二个slideUp回调</div>");
-                        dom(".show_d").append("<div>"+[].slice.call(arguments)+"</div>");
+                        $(".show_d").append("<div>"+e.type+"</div>");
+                        $(".show_d").append("<div>第二个slideUp回调</div>");
+                        $(".show_d").append("<div>"+[].slice.call(arguments)+"</div>");
                     });
                     d.onResize(function(e){
-                        dom(".show_d").append("<div>"+e.type+"</div>");
-                        dom(".show_d").append("<div>第一个resize回调</div>");
+                        $(".show_d").append("<div>"+e.type+"</div>");
+                        $(".show_d").append("<div>第一个resize回调</div>");
                     });
                     d.onResize(function(e){
-                        dom(".show_d").append("<div>"+e.type+"</div>");
-                        dom(".show_d").append("<div>第二个resize回调</div>");
+                        $(".show_d").append("<div>"+e.type+"</div>");
+                        $(".show_d").append("<div>第二个resize回调</div>");
                     });
                     d.onDestroy(function(e){
-                        dom(".show_d").append("<div>"+e.type+"</div>");
-                        dom(".show_d").append("<div>第一个destroy回调</div>");
+                        $(".show_d").append("<div>"+e.type+"</div>");
+                        $(".show_d").append("<div>第一个destroy回调</div>");
                     });
                     d.fire("slideUp","收起");
                     d.fire("resize");
                     d.fire("destroy");
                     d.fire("destroy");
                     d.unbind("slideUp,resize,destroy");
-                    dom(".show_d").append("==========================");
+                    $(".show_d").append("==========================");
                     delete $.d;
                 });
             }
@@ -117,8 +117,8 @@
                 var obj  = $.ee = {};
                 $.mix(obj,$.dispatcher);
                 obj.bind("oneone",function(event){
-                    dom(".show_e").append("<div>"+event.type+"</div>");
-                    dom(".show_e").append("<div>我只能调用一次</div>");
+                    $(".show_e").append("<div>"+event.type+"</div>");
+                    $(".show_e").append("<div>我只能调用一次</div>");
                 },1);
                 obj.fire("oneone");
                 obj.fire("oneone");
@@ -183,20 +183,20 @@
                     var a  = $.a = {};
                     $.mix(a,$.dispatcher);
                     var repeat = function(){
-                       dom(".show_a").append("&lt;div&gt;已派发repeat事件&lt;/div&gt;")
+                       $(".show_a").append("&lt;div&gt;已派发repeat事件&lt;/div&gt;")
                     }
                    a.bind("repeat",repeat)
                    a.bind("repeat",repeat);
                    a.bind("repeat",repeat);
                    a.fire("repeat");
                     a.bind("data",function(){
-                        dom(".show_a").append("&lt;div&gt;已派发data事件&lt;/div&gt;")
+                        $(".show_a").append("&lt;div&gt;已派发data事件&lt;/div&gt;")
                     });
                     a.bind("data",function(e){
-                        dom(".show_a").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
-                        dom(".show_a").append("&lt;div&gt;"+e.type+"&lt;/div&gt;")
-                        dom(".show_a").append("&lt;div&gt;"+a.uniqueNumber+"&lt;/div&gt;");
-                        dom(".show_a").append("&lt;div&gt;"+(a === e.target)+"&lt;/div&gt;")
+                        $(".show_a").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
+                        $(".show_a").append("&lt;div&gt;"+e.type+"&lt;/div&gt;")
+                        $(".show_a").append("&lt;div&gt;"+a.uniqueNumber+"&lt;/div&gt;");
+                        $(".show_a").append("&lt;div&gt;"+(a === e.target)+"&lt;/div&gt;")
                     });
                     a.fire("data",3,5);
                     delete $.a;
@@ -212,13 +212,13 @@
                     var b  = $.b = {};
                     $.mix(b,$.dispatcher);
                     b.bind("write",function(){
-                         dom(".show_b").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
+                         $(".show_b").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
                     });
                     b.fire("write","第一次触发");
                     b.fire("write","第二次触发");
                     b.unbind("write");
                     b.fire("write","第三次触发");
-                    dom(".show_b").append("==========================")
+                    $(".show_b").append("==========================")
                     delete $.b;
                 });
                 </pre>
@@ -233,15 +233,15 @@
                     c.prop = "属性"
                     $.mix(c,$.dispatcher);
                     c.bind("first second",function(e){
-                        dom(".show_c").append("&lt;div&gt;"+e.target.prop+"&lt;/div&gt;");
-                        dom(".show_c").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
-                        dom(".show_c").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
+                        $(".show_c").append("&lt;div&gt;"+e.target.prop+"&lt;/div&gt;");
+                        $(".show_c").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
+                        $(".show_c").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
                     });
                     c.fire("first","FFFFF","AAAA","DDDDD");
                     c.fire("second","SSSS");
                     c.unbind("first second");
                     c.fire("first","more");
-                    dom(".show_c").append("==========================");
+                    $(".show_c").append("==========================");
                     delete $.c;
                 });
                 </pre>
@@ -256,33 +256,33 @@
                     $.mix(d,$.dispatcher);
                     d.defineEvents("slideUp,resize,destroy");
                     d.onSlideUp(function(e){
-                        dom(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
-                        dom(".show_d").append("&lt;div&gt;第一个slideUp回调&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;第一个slideUp回调&lt;/div&gt;");
                     });
                     
                     d.bind("slideUp",function(e){
-                        dom(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
-                        dom(".show_d").append("&lt;div&gt;第二个slideUp回调&lt;/div&gt;");
-                        dom(".show_d").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;第二个slideUp回调&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
                     });
                     d.onResize(function(e){
-                        dom(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
-                        dom(".show_d").append("&lt;div&gt;第一个resize回调&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;第一个resize回调&lt;/div&gt;");
                     });
                     d.onResize(function(e){
-                        dom(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
-                        dom(".show_d").append("&lt;div&gt;第二个resize回调&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;第二个resize回调&lt;/div&gt;");
                     });
                     d.onDestroy(function(e){
-                        dom(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
-                        dom(".show_d").append("&lt;div&gt;第一个destroy回调&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
+                        $(".show_d").append("&lt;div&gt;第一个destroy回调&lt;/div&gt;");
                     });
                     d.fire("slideUp","收起");
                     d.fire("resize");
                     d.fire("destroy");
                     d.fire("destroy");
                     d.unbind("slideUp,resize,destroy");
-                    dom(".show_d").append("==========================");
+                    $(".show_d").append("==========================");
                     delete $.d;
                 });
                 </pre>
@@ -297,8 +297,8 @@
                     var obj  = $.ee = {};
                     $.mix(obj,$.dispatcher);
                     obj.bind("oneone",function(event){
-                        dom(".show_e").append("&lt;div&gt;"+event.type+"&lt;/div&gt;");
-                        dom(".show_e").append("&lt;div&gt;我只能调用一次&lt;/div&gt;");
+                        $(".show_e").append("&lt;div&gt;"+event.type+"&lt;/div&gt;");
+                        $(".show_e").append("&lt;div&gt;我只能调用一次&lt;/div&gt;");
                     },1);//设置第三个参数为正整数
                     obj.fire("oneone");
                     obj.fire("oneone");

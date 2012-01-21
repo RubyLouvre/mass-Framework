@@ -25,12 +25,12 @@
         <script type="text/javascript" charset="utf-8">
             $.require("ready,fx,event",function(){
   
-                dom("#wrap").fx(1000,{
+                $("#wrap").fx(1000,{
                     before:function(el){
-                        dom(el).find("div").css("backgroundColor","pink")
+                        $(el).find("div").css("backgroundColor","pink")
                     },
                     after:function(el){
-                        dom(el).find("div").css("backgroundColor","greenyellow")
+                        $(el).find("div").css("backgroundColor","greenyellow")
                     },
                     st:200,
                     reverse:1

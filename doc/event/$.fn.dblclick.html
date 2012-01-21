@@ -36,7 +36,7 @@
             SyntaxHighlighter.all();
 
             $.require("ready,event,css",function(){
-                var divdbl = dom(".sample div");
+                var divdbl = $(".sample div");
                 divdbl.dblclick(function () { 
                     divdbl.toggleClass('dbl'); 
                 });
@@ -71,7 +71,7 @@
             <fieldset><legend>例子</legend>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,css",function(){
-                var divdbl = dom(".sample div");
+                var divdbl = $(".sample div");
                 divdbl.dblclick(function () { 
                     divdbl.toggleClass('dbl'); 
                 });

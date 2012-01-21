@@ -42,8 +42,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -64,7 +64,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                alert(dom(":root")[0].nodeName)
+                                alert($(":root")[0].nodeName)
                             </td>
                         </tr>
                     </tbody>

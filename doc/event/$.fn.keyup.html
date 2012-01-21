@@ -25,9 +25,9 @@
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
                 var callback = function(e){
-                    dom(".sample").height(  dom(".sample div").append(e.type+"<br/>").height()+30)
+                    $(".sample").height(  $(".sample div").append(e.type+"<br/>").height()+30)
                 }
-                dom(".sample input").bind({
+                $(".sample input").bind({
                     keydown:callback,
                     keypress:callback,
                     keyup:callback
@@ -56,9 +56,9 @@
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event",function(){
                 var callback = function(e){
-                    dom(".sample").height(  dom(".sample div").append(e.type+"&lt;br/&gr;").height()+30)
+                    $(".sample").height(  $(".sample div").append(e.type+"&lt;br/&gr;").height()+30)
                 }
-                dom(".sample input").bind({
+                $(".sample input").bind({
                     keydown:callback,
                     keypress:callback,
                     keyup:callback

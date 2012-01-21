@@ -43,9 +43,9 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom("#show_url").text(location.href);
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $("#show_url").text(location.href);
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim());
                 });
             })
@@ -67,7 +67,7 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("fieldset :target").css("background-color","red");
+                                $("fieldset :target").css("background-color","red");
                             </td>
                         </tr>
                     </tbody>

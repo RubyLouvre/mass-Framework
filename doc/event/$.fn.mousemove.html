@@ -30,9 +30,9 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
-                var first =  dom(".first")
-                var last =  dom(".last")
-                dom(".move").mousemove(function(e){
+                var first =  $(".first")
+                var last =  $(".last")
+                $(".move").mousemove(function(e){
                     var pageCoords = "( " + e.pageX + ", " + e.pageY + " )";
                     var clientCoords = "( " + e.clientX + ", " + e.clientY + " )";
                     first.text("( e.pageX, e.pageY ) - " + pageCoords);
@@ -63,9 +63,9 @@
             <fieldset><legend>例子</legend>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event",function(){
-                var first =  dom(".first")
-                var last =  dom(".last")
-                dom(".move").mousemove(function(e){
+                var first =  $(".first")
+                var last =  $(".last")
+                $(".move").mousemove(function(e){
                     var pageCoords = "( " + e.pageX + ", " + e.pageY + " )";
                     var clientCoords = "( " + e.clientX + ", " + e.clientY + " )";
                     first.text("( e.pageX, e.pageY ) - " + pageCoords);

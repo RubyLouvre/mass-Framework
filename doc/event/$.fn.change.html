@@ -19,24 +19,24 @@
             SyntaxHighlighter.all();
             var dom = dom;
             $.require("ready,event,fx",function(){
-                dom("#sweets").change(function () {
+                $("#sweets").change(function () {
                     var str = "";
-                    dom("option:selected",this).each(function () {
-                        str += dom(this).text() + " ";
+                    $("option:selected",this).each(function () {
+                        str += $(this).text() + " ";
                     });
-                    dom("#show_result").text(str);
+                    $("#show_result").text(str);
                 })
                 .change();
                 
-                dom('body').delegate('.listOfOptions', 'change', function() {
-                    var selected = dom(this).find(':selected')
+                $('body').delegate('.listOfOptions', 'change', function() {
+                    var selected = $(this).find(':selected')
                     if (selected.prop('class') == 'customOption') {
-                        dom("#show_result2").text(selected.text()+" ！！！");
+                        $("#show_result2").text(selected.text()+" ！！！");
                     } else {
-                        dom("#show_result2").text(selected.text());
+                        $("#show_result2").text(selected.text());
                     }
                 });
-                dom("#checkbox").change(function(){
+                $("#checkbox").change(function(){
                     $.log("00000000000",true);
                 });
             });
@@ -60,24 +60,24 @@
             <fieldset><legend>例子</legend>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
-                dom("#sweets").change(function () {
+                $("#sweets").change(function () {
                     var str = "";
-                    dom("option:selected",this).each(function () {
-                        str += dom(this).text() + " ";
+                    $("option:selected",this).each(function () {
+                        str += $(this).text() + " ";
                     });
-                    dom("#show_result").text(str);
+                    $("#show_result").text(str);
                 })
                 .change();
                 
-                dom('body').delegate('.listOfOptions', 'change', function() {
-                    var selected = dom(this).find(':selected')
+                $('body').delegate('.listOfOptions', 'change', function() {
+                    var selected = $(this).find(':selected')
                     if (selected.prop('class') == 'customOption') {
-                        dom("#show_result2").text(selected.text()+" ！！！");
+                        $("#show_result2").text(selected.text()+" ！！！");
                     } else {
-                        dom("#show_result2").text(selected.text());
+                        $("#show_result2").text(selected.text());
                     }
                 });
-                dom("#checkbox").change(function(){
+                $("#checkbox").change(function(){
                     $.log("00000000000",true);
                 });
             });;

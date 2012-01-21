@@ -19,9 +19,9 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    dom(".sample1 *").each(function () {
-                        var parentTag = dom(this).parent()[0].tagName.toLowerCase();
-                        dom(this).prepend(document.createTextNode(parentTag + " > "));
+                    $(".sample1 *").each(function () {
+                        var parentTag = $(this).parent()[0].tagName.toLowerCase();
+                        $(this).prepend(document.createTextNode(parentTag + " > "));
                     });
                 });
             }
@@ -92,9 +92,9 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node",function(){
-                    dom(".sample1 *").each(function () {
-                        var parentTag = dom(this).parent()[0].tagName.toLowerCase();
-                        dom(this).prepend(document.createTextNode(parentTag + " > "));
+                    $(".sample1 *").each(function () {
+                        var parentTag = $(this).parent()[0].tagName.toLowerCase();
+                        $(this).prepend(document.createTextNode(parentTag + " > "));
                     });
                 });
                 </pre>

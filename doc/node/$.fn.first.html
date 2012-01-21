@@ -20,7 +20,7 @@
 var exec1 = function(){
 
                     $.require("ready,node",function(){
-                        var a = dom("article *");
+                        var a = $("article *");
                         $.log(a,true);
                         $.log(a.first(),true);
                     });
@@ -40,7 +40,7 @@ var exec1 = function(){
             <fieldset><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node",function(){
-                        var a = dom("article *");
+                        var a = $("article *");
                         $.log(a,true);
                         $.log(a.first(),true);
             });

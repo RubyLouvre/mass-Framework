@@ -19,7 +19,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    dom(".container li").each(function(el,i){
+                    $(".container li").each(function(el,i){
                         this.innerHTML = "update "+i
                     }) 
                 })
@@ -56,7 +56,7 @@
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node",function(){
-                    dom(".container li").each(function(el,i){
+                    $(".container li").each(function(el,i){
                         this.innerHTML = "update "+i
                     }) 
                 })

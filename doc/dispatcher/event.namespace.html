@@ -26,16 +26,16 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node,event",function(){
-                    dom(".sample").bind("click.aaa.bbb",function(){
+                    $(".sample").bind("click.aaa.bbb",function(){
                         $.log("has two namespaces!",true);
                         $.log([].slice.call(arguments),true);
                     });
-                    dom(".sample").fire("click.aaa",1,2,3,4,5,6);
-                    dom(".sample").unbind("click.eee");//没有用
-                    dom(".sample").fire("click.aaa","aaa","bbb","ccc");
-                    dom(".sample").fire("click.bbb","XXX","YYY","ZZZ");
-                    dom(".sample").unbind("click.bbb");//生效
-                    dom(".sample").fire("click.bbb","不能再fire");
+                    $(".sample").fire("click.aaa",1,2,3,4,5,6);
+                    $(".sample").unbind("click.eee");//没有用
+                    $(".sample").fire("click.aaa","aaa","bbb","ccc");
+                    $(".sample").fire("click.bbb","XXX","YYY","ZZZ");
+                    $(".sample").unbind("click.bbb");//生效
+                    $(".sample").fire("click.bbb","不能再fire");
                 });
             };
         </script>
@@ -69,8 +69,8 @@
             </pre>
             <p>使用方法：</p>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-                dom('div').clicked();//绑定事件
-                dom('div').unclicked();//卸载事件
+                $('div').clicked();//绑定事件
+                $('div').unclicked();//卸载事件
             </pre>
             <p>但这样做有一个问题，如果我有另一个插件也对点击事件进行改造，并恰恰这两个事件都绑定在同一组元素上时，
                 如果我这时调用unclicked方法，就会把另一个插件绑定的点击事件也卸载掉。</p>
@@ -97,16 +97,16 @@
             <fieldset><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,event",function(){
-                dom(".sample").bind("click.aaa.bbb",function(){
+                $(".sample").bind("click.aaa.bbb",function(){
                     $.log("has two namespaces!",true);
                     $.log([].slice.call(arguments),true)
                 });
-                dom(".sample").fire("click.aaa",1,2,3,4,5,6);
-                dom(".sample").unbind("click.eee");//没有用
-                dom(".sample").fire("click.aaa","aaa","bbb","ccc");
-                dom(".sample").fire("click.bbb","XXX","YYY","ZZZ");
-                dom(".sample").unbind("click.bbb");//生效
-                dom(".sample").fire("click.bbb","不能再fire");
+                $(".sample").fire("click.aaa",1,2,3,4,5,6);
+                $(".sample").unbind("click.eee");//没有用
+                $(".sample").fire("click.aaa","aaa","bbb","ccc");
+                $(".sample").fire("click.bbb","XXX","YYY","ZZZ");
+                $(".sample").unbind("click.bbb");//生效
+                $(".sample").fire("click.bbb","不能再fire");
             });
                 </pre>
                 <div class="sample"></div>

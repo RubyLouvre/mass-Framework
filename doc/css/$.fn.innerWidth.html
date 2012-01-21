@@ -21,8 +21,8 @@
            
             
             $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                    var a = dom(".innerWidth");
+                $("#getp").click(function () { 
+                    var a = $(".innerWidth");
                     a.html("它的innerWidth为"+a.innerWidth()+"px");
                 });
             });
@@ -52,8 +52,8 @@
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
              $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                   var a = dom(".innerWidth");
+                $("#getp").click(function () { 
+                   var a = $(".innerWidth");
                    a.html("它的innerWidth为"+a.innerWidth()+"px");
                 });
             });

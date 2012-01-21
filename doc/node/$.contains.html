@@ -20,7 +20,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    $.log($.contains(document.body,dom("h3")[0]),true);
+                    $.log($.contains(document.body,$("h3")[0]),true);
                 })
             }
         </script>
@@ -43,7 +43,7 @@
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node",function(){
-                   $.log($.contains(document.body,dom("h3")[0]),true);
+                   $.log($.contains(document.body,$("h3")[0]),true);
                 })
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>

@@ -48,16 +48,16 @@
 
             $.require("ready,event,fx",function(){
                 function callback() {
-                    dom(".hide_div").show(1000);
+                    $(".hide_div").show(1000);
                 }
-                dom("#bind").click(function () {
-                    dom("body").delegate( "#theone","click", callback)
-                    dom("#theone").html("现在点击它下方会出现文字");
+                $("#bind").click(function () {
+                    $("body").delegate( "#theone","click", callback)
+                    $("#theone").html("现在点击它下方会出现文字");
                 });
-                dom("#unbind").click(function () {
-                    dom("body").undelegate( "#theone","click")
-                    dom("#theone").html("现在点击它一点反应也没有");
-                    dom(".hide_div").hide(1000);
+                $("#unbind").click(function () {
+                    $("body").undelegate( "#theone","click")
+                    $("#theone").html("现在点击它一点反应也没有");
+                    $(".hide_div").hide(1000);
                 });
             });
         </script>
@@ -95,16 +95,16 @@
                 <pre class="brush:js;gutter:false;toolbar:false">
             $.require("ready,event,fx",function(){
                 function callback() {
-                    dom(".hide_div").show(1000);
+                    $(".hide_div").show(1000);
                 }
-                dom("#bind").click(function () {
-                    dom("body").delegate( "#theone","click", callback)
-                    dom("#theone").html("现在点击它下方会出现文字");
+                $("#bind").click(function () {
+                    $("body").delegate( "#theone","click", callback)
+                    $("#theone").html("现在点击它下方会出现文字");
                 });
-                dom("#unbind").click(function () {
-                    dom("body").undelegate( "#theone","click")
-                    dom("#theone").html("现在点击它一点反应也没有");
-                    dom(".hide_div").hide(1000);
+                $("#unbind").click(function () {
+                    $("body").undelegate( "#theone","click")
+                    $("#theone").html("现在点击它一点反应也没有");
+                    $(".hide_div").hide(1000);
                 });
             });
                 </pre>

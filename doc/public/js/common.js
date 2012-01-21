@@ -25,7 +25,7 @@
     if(self.eval !== top.eval){
        
 //        $.require("ready,node,css",function(){
-//            var iheight = dom("article").height() | 0; //取得其高
+//            var iheight = $("article").height() | 0; //取得其高
 //            if(iheight < 400)
 //                iheight = 400;
             

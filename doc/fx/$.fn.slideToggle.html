@@ -23,10 +23,10 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,fx,event",function(){
-                dom("#aa").click(function () {
-                    dom("#sample div:not(.still)").slideToggle(400,function () {
-                        var n = parseInt(dom("#sample span").text(), 10);
-                        dom("#sample span").text(n + 1);
+                $("#aa").click(function () {
+                    $("#sample div:not(.still)").slideToggle(400,function () {
+                        var n = parseInt($("#sample span").text(), 10);
+                        $("#sample span").text(n + 1);
                     });
                 });
             });
@@ -55,10 +55,10 @@
             <fieldset ><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,fx,event",function(){
-                dom("#aa").click(function () {
-                    dom("#sample div:not(.still)").slideToggle(400,function () {
-                        var n = parseInt(dom("#sample span").text(), 10);
-                        dom("#sample span").text(n + 1);
+                $("#aa").click(function () {
+                    $("#sample div:not(.still)").slideToggle(400,function () {
+                        var n = parseInt($("#sample span").text(), 10);
+                        $("#sample span").text(n + 1);
                     });
                 });
             });

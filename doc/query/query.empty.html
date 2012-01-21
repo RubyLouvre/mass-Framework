@@ -29,7 +29,7 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function($){
+            $(function($){
                 $( "#content" ).delegate( "*", "focus blur", function( event ) {
                     var elem = $( this );
                     setTimeout(function() {
@@ -54,7 +54,7 @@
                     <tbody>
                         <tr>
                             <td>
-                               dom("td:empty").text("Was empty!").css('background', 'rgb(255,220,200)');
+                               $("td:empty").text("Was empty!").css('background', 'rgb(255,220,200)');
                             </td>
                         </tr>
                     </tbody>

@@ -21,7 +21,7 @@
 
             var exec1 = function(){
                 $.require("ready,attr,event",function(){
-                    dom(".sample1 input").removeAttr("disabled").focus().val("editable now");
+                    $(".sample1 input").removeAttr("disabled").focus().val("editable now");
                 });
             }
 
@@ -51,7 +51,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,attr,event",function(){
-                    dom(".sample1 input").removeAttr("disabled").focus().val("editable now");
+                    $(".sample1 input").removeAttr("disabled").focus().val("editable now");
                 });
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>

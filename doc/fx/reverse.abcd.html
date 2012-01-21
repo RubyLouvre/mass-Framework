@@ -28,7 +28,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    dom(".box").fx(2000, { o: 0.5               }). // A
+                    $(".box").fx(2000, { o: 0.5               }). // A
                     fx(2000, { w: 300,   chain:   1 }). // B
                     fx(2000, { h: 300              }). // C
                     fx(2000, { fs: "*=3", reverse: 1 }); // D
@@ -46,7 +46,7 @@
             <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
             <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    dom(".box").fx(2000, { bgc: "red", reverse: 1 }).//背景由蓝变红，再由红退倒回蓝
+                    $(".box").fx(2000, { bgc: "red", reverse: 1 }).//背景由蓝变红，再由红退倒回蓝
                         fx(2000, { w: 300, chain:   1 }). // 宽度拉长到300
                         fx(2000, { h: 300, reverse: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
                 });

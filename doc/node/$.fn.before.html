@@ -18,13 +18,13 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom(".inner").before('<strong>(しとうなさみ)</strong>');
+                $(".inner").before('<strong>(しとうなさみ)</strong>');
             }
             var exec2 = function(){
-               dom(".inner").before(document.createTextNode('<em>aaa</em>'));
+               $(".inner").before(document.createTextNode('<em>aaa</em>'));
             }
             var exec3 = function(){
-                dom(".table1 tr").first().before("<tr><td>新的行</td><td>新的行</td></tr>");
+                $(".table1 tr").first().before("<tr><td>新的行</td><td>新的行</td></tr>");
             }
         </script>
     </head>
@@ -54,11 +54,11 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom(".inner").before('<strong>(しとうなさみ)</strong>')
+      $(".inner").before('<strong>(しとうなさみ)</strong>')
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom(".inner").before(document.createTextNode('<em>aaa</em>'));
+      $(".inner").before(document.createTextNode('<em>aaa</em>'));
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
 
@@ -84,7 +84,7 @@
       &lt;/table&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-       dom(".table1 tr").first().before("&lt;tr&gt;&lt;td&gt;新的行&lt;/td&gt;&lt;td&gt;新的行&lt;/td&gt;&lt;/tr&gt;");
+       $(".table1 tr").first().before("&lt;tr&gt;&lt;td&gt;新的行&lt;/td&gt;&lt;td&gt;新的行&lt;/td&gt;&lt;/tr&gt;");
             </pre>
             <button onclick="exec3()">点我，执行代码</button>
         </fieldset>

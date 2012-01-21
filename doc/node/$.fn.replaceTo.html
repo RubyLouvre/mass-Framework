@@ -18,7 +18,7 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-               dom(".inner").replace("<dir>新的内容</dir>")
+               $(".inner").replace("<dir>新的内容</dir>")
             }
         </script>
     </head>
@@ -50,7 +50,7 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-               dom("&lt;dir&gt;新的内容&lt;/dir&gt;").replace(".inner")
+               $("&lt;dir&gt;新的内容&lt;/dir&gt;").replace(".inner")
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
 

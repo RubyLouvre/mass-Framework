@@ -19,8 +19,8 @@
             SyntaxHighlighter.all();
            
             $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                    var a = dom(".outerWidth");
+                $("#getp").click(function () { 
+                    var a = $(".outerWidth");
                     a.html("它的outerWidth为"+a.outerWidth()+"px");
                     a.append("<br/>它的outerWidth(包括margin)为"+a.outerWidth(true)+"px");
                 });
@@ -54,8 +54,8 @@
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
              $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                   var a = dom(".outerWidth");
+                $("#getp").click(function () { 
+                   var a = $(".outerWidth");
                     a.html("它的outerWidth为"+a.outerWidth()+"px");
                     a.html("&lt;br/&gt;它的outerWidth(包括margin)为"+a.outerWidth(true)+"px");
                 });

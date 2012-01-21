@@ -37,19 +37,19 @@
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
                 var i = 0;
-                dom("div.overout").mouseover(function(){
-                    dom("p",this).eq(0).text("mouseover进入");
-                    dom("p",this).eq(-1).text(++i);
+                $("div.overout").mouseover(function(){
+                    $("p",this).eq(0).text("mouseover进入");
+                    $("p",this).eq(-1).text(++i);
                 }).mouseout(function(){
-                    dom("p",this).eq(0).text("mouseout离开");
+                    $("p",this).eq(0).text("mouseout离开");
                 });
 
                 var n = 0;
-                dom("div.enterleave").mouseenter(function(){ 
-                    dom("p",this).eq(0).text("mouseenter进入");
-                    dom("p",this).eq(-1).text(++n);
+                $("div.enterleave").mouseenter(function(){ 
+                    $("p",this).eq(0).text("mouseenter进入");
+                    $("p",this).eq(-1).text(++n);
                 }).mouseleave(function(){
-                    dom("p",this).eq(0).text("mouseleave离开");
+                    $("p",this).eq(0).text("mouseleave离开");
                 });
             });
         </script>
@@ -88,7 +88,7 @@
             <center><img src="../public/styles/event_dom_fn_mouseenter_zig0.png"/></center>
             <p>好了，我们现在把hover事件绑定在div上。</p>
             <pre class="brush:js;gutter:false;toolbar:false">
-dom("div").hover(function(e){
+$("div").hover(function(e){
     $.log([e.type, e.target]);
 },function(e){
    $.log([e.type, e.target]);

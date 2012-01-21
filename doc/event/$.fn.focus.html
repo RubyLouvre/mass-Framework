@@ -28,12 +28,12 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
-                dom(".sample input").focus(function () {
-                    dom(this).next("span").show().fadeOut(1000);
+                $(".sample input").focus(function () {
+                    $(this).next("span").show().fadeOut(1000);
                 });
 
-                dom("body").delegate("#sample1 input","focus",function(e){
-                    dom(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+                $("body").delegate("#sample1 input","focus",function(e){
+                    $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
                 });
             })
         </script>
@@ -70,7 +70,7 @@
             <p>这个事件处理函数可以绑定到第一个 input field：
             </p>
             <pre class="brush:js;gutter:false;toolbar:false;">
-dom('#target').focus(function() {
+$('#target').focus(function() {
   alert('已触发focus事件.');
 });
             </pre>
@@ -78,8 +78,8 @@ dom('#target').focus(function() {
             <p><span class="stress">focus的事件派发</span></p>
             <p>我们可以点击另一个元素时触发事件：</p>
             <pre class="brush:js;gutter:false;toolbar:false;">
-dom('#other').click(function() {
-  dom('#target').focus();
+$('#other').click(function() {
+  $('#target').focus();
 });
             </pre>
             <p>这些代码执行后，点击<span class="output">Trigger the handler</span>也会弹出alert。</p>
@@ -88,8 +88,8 @@ dom('#other').click(function() {
             <fieldset><legend>例子</legend>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
-                dom(".sample input").focus(function () {
-                    dom(this).next("span").show().fadeOut(1000);
+                $(".sample input").focus(function () {
+                    $(this).next("span").show().fadeOut(1000);
                 });
             })
                 </pre>
@@ -104,8 +104,8 @@ dom('#other').click(function() {
                 <p>事件代理。轮流点击两个文本域。</p>
                 <pre class="brush:js;gutter:false;toolbar:false;">
       $.require("ready,event,fx",function(){
-        dom("body").delegate("#sample1 input","focus",function(e){
-          dom(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+        $("body").delegate("#sample1 input","focus",function(e){
+          $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
         });
       });
                 </pre>

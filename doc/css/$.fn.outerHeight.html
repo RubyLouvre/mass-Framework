@@ -19,8 +19,8 @@
             SyntaxHighlighter.all();
            
             $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                    var a = dom(".outerHeight");
+                $("#getp").click(function () { 
+                    var a = $(".outerHeight");
                     a.html("它的outerHeight为"+a.outerHeight()+"px");
                     a.append("<br/>它的outerHeight(包括margin)为"+a.outerHeight(true)+"px");
                 });
@@ -53,8 +53,8 @@
                 <div class="outerHeight">&nbsp;</div>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
              $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                   var a = dom(".outerHeight");
+                $("#getp").click(function () { 
+                   var a = $(".outerHeight");
                     a.html("它的outerHeight为"+a.outerHeight()+"px");
                     a.html("&lt;br/&gt;它的outerHeight(包括margin)为"+a.outerHeight(true)+"px");
                 });

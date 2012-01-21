@@ -18,10 +18,10 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom("<strong> 司徒正美<script>alert('司徒正美')<\/script></strong>").appendTo(".inner");
+                $("<strong> 司徒正美<script>alert('司徒正美')<\/script></strong>").appendTo(".inner");
             }
             var exec2 = function(){
-                dom(".sss").appendTo(".mmm");
+                $(".sss").appendTo(".mmm");
             }
         </script>
     </head>
@@ -54,7 +54,7 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-       dom("&lt;strong&gt;司徒正美&lt;script&gt;alert('司徒正美')&lt;\/script&gt;&lt;/strong&gt;").appendTo(".inner");
+       $("&lt;strong&gt;司徒正美&lt;script&gt;alert('司徒正美')&lt;\/script&gt;&lt;/strong&gt;").appendTo(".inner");
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
@@ -72,7 +72,7 @@
             &lt;p&gt;&lt;span class="sss"&gt;貘&lt;/span&gt;&lt;/p&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-       dom(".sss").appendTo(".mmm");
+       $(".sss").appendTo(".mmm");
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
         </fieldset>

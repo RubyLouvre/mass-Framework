@@ -21,7 +21,7 @@
 
             var exec1 = function(){
                 $.require("ready,attr",function(){                  
-                    var $para = dom(".sample1");
+                    var $para = $(".sample1");
                     $para.prop("number", 1234);
                     $para.html("它拥有一个名为number的属性，其值为: "+ String($para.prop("number"))+ "， ");
                     $para.removeProp("number");
@@ -54,7 +54,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,attr",function(){                  
-                    var $para = dom(".sample1");
+                    var $para = $(".sample1");
                     $para.prop("number", 1234);
                     $para.html("它拥有一个名为number的属性，其值为: "+ String($para.prop("number"))+ "， ");
                     $para.removeProp("number");

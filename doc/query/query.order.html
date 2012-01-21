@@ -42,8 +42,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -66,37 +66,37 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("li:first").css("background-color","#FF9");
+                                $("li:first").css("background-color","#FF9");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("li:last").css("background-color","#6495ED");
+                                $("li:last").css("background-color","#6495ED");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("li:even").css("background-color","#FF1493");
+                                $("li:even").css("background-color","#FF1493");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("li:odd").css("background-color","#800080");
+                                $("li:odd").css("background-color","#800080");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("li:lt(4)").css("background-color","#E9967A");
+                                $("li:lt(4)").css("background-color","#E9967A");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("li:gt(5)").css("background-color","#98FB98");
+                                $("li:gt(5)").css("background-color","#98FB98");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("li:eq(3)").css("background-color","#FFF0F5");
+                                $("li:eq(3)").css("background-color","#FFF0F5");
                             </td>
                         </tr>
                     </tbody>

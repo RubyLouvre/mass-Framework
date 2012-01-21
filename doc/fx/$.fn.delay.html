@@ -25,9 +25,9 @@
             SyntaxHighlighter.all();
                
             $.require("ready,fx,event",function(){
-                dom("button").click(function() {
-                    dom("div.first").slideUp(300).delay(800).fadeIn(400).hide(1000).show(1000);
-                    dom("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
+                $("button").click(function() {
+                    $("div.first").slideUp(300).delay(800).fadeIn(400).hide(1000).show(1000);
+                    $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
                 });
             });
                
@@ -49,9 +49,9 @@
             <fieldset ><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,fx,event",function(){
-                dom("button").click(function() {
-                    dom("div.first").slideUp(300).delay(800).fadeIn(400).hide(1000).show(1000);
-                    dom("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
+                $("button").click(function() {
+                    $("div.first").slideUp(300).delay(800).fadeIn(400).hide(1000).show(1000);
+                    $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
                 });
             });
                 </pre>

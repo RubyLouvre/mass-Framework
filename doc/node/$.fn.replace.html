@@ -18,13 +18,13 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-               dom(".inner").replace("<dir>新的内容</dir>")
+               $(".inner").replace("<dir>新的内容</dir>")
             }
             var exec2 = function(){
-                dom("dir").each(function(el,i){
+                $("dir").each(function(el,i){
                     this.innerHTML = this.innerHTML + i
                 });
-                dom("dir:nth-child(1)").replace(dom("dir:nth-child(2)"));
+                $("dir:nth-child(1)").replace($("dir:nth-child(2)"));
             }
 
         </script>
@@ -57,14 +57,14 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-               dom(".inner").replace("&lt;dir&gt;新的内容&lt;/dir&gt;")
+               $(".inner").replace("&lt;dir&gt;新的内容&lt;/dir&gt;")
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-                dom("dir").each(function(el,i){
+                $("dir").each(function(el,i){
                     this.innerHTML = this.innerHTML + i
                 });
-                dom("dir:nth-child(1)").replace(dom("dir:nth-child(2)"));
+                $("dir:nth-child(1)").replace($("dir:nth-child(2)"));
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
            

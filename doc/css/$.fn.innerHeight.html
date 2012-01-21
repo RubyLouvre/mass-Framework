@@ -21,8 +21,8 @@
            
             
             $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                    var a = dom(".innerHeight");
+                $("#getp").click(function () { 
+                    var a = $(".innerHeight");
                     a.html("它的innerHeight为"+a.innerHeight()+"px");
                 });
             });
@@ -50,8 +50,8 @@
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
              $.require("ready,node,css,event",function(){
-                dom("#getp").click(function () { 
-                   var a = dom(".innerHeight");
+                $("#getp").click(function () { 
+                   var a = $(".innerHeight");
                    a.html("它的innerHeight为"+a.innerHeight()+"px");
                 });
             });

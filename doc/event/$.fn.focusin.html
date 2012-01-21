@@ -28,11 +28,11 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
-                dom(".sample p").focusin(function(e) {
-                    dom(this).find("span").html("fire "+e.type).show().fadeOut(1000);
+                $(".sample p").focusin(function(e) {
+                    $(this).find("span").html("fire "+e.type).show().fadeOut(1000);
                 });
-                dom("body").delegate("#sample1 input","focusin",function(e){
-                    dom(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+                $("body").delegate("#sample1 input","focusin",function(e){
+                    $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
                 });
             });
         </script>
@@ -57,8 +57,8 @@
             <fieldset><legend>例子</legend>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
-                dom(".sample p").focusin(function(e) {
-                    dom(this).find("span").html("fire "+e.type).show().fadeOut(1000);
+                $(".sample p").focusin(function(e) {
+                    $(this).find("span").html("fire "+e.type).show().fadeOut(1000);
                 });
             });
                 </pre>
@@ -73,8 +73,8 @@
                 <p>事件代理。轮流点击两个文本域。</p>
                 <pre class="brush:js;gutter:false;toolbar:false;">
       $.require("ready,event,fx",function(){
-        dom("body").delegate("#sample1 input","focusin",function(e){
-          dom(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+        $("body").delegate("#sample1 input","focusin",function(e){
+          $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
         });
       });
                 </pre>

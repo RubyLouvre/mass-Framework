@@ -19,8 +19,8 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,attr,event",function(){
-                dom(document).bind("click", function (e) {
-                    dom(e.target).closest("li").toggleClass("hilight");
+                $(document).bind("click", function (e) {
+                    $(e.target).closest("li").toggleClass("hilight");
                 });
             });
         </script>
@@ -68,8 +68,8 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,attr,event",function(){
-                dom(document).bind("click", function (e) {
-                    dom(e.target).closest("li").toggleClass("hilight");
+                $(document).bind("click", function (e) {
+                    $(e.target).closest("li").toggleClass("hilight");
                 });
             });
                 </pre>

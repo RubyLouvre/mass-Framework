@@ -48,14 +48,14 @@
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
                 function callback() {
-                    dom(".hide_div").show(1000);
+                    $(".hide_div").show(1000);
                 }
-                dom("#bind").click(function () {
-                    dom("#theone").live( "click", callback).html("现在点击它下方会出现文字");
+                $("#bind").click(function () {
+                    $("#theone").live( "click", callback).html("现在点击它下方会出现文字");
                 });
-                dom("#unbind").click(function () {
-                    dom("#theone").die( "click", callback).html("现在点击它一点反应也没有");
-                    dom(".hide_div").hide(1000);
+                $("#unbind").click(function () {
+                    $("#theone").die( "click", callback).html("现在点击它一点反应也没有");
+                    $(".hide_div").hide(1000);
                 });
             });
         </script>
@@ -85,14 +85,14 @@
                 <pre class="brush:js;gutter:false;toolbar:false">
             $.require("ready,event,fx",function(){
                 function callback() {
-                    dom(".hide_div").show(1000);
+                    $(".hide_div").show(1000);
                 }
-                dom("#bind").click(function () {
-                    dom("#theone").live( "click", callback).html("现在点击它下方会出现文字");
+                $("#bind").click(function () {
+                    $("#theone").live( "click", callback).html("现在点击它下方会出现文字");
                 });
-                dom("#unbind").click(function () {
-                    dom("#theone").die( "click", callback).html("现在点击它一点反应也没有");
-                    dom(".hide_div").hide(1000);
+                $("#unbind").click(function () {
+                    $("#theone").die( "click", callback).html("现在点击它一点反应也没有");
+                    $(".hide_div").hide(1000);
                 });
             });
                 </pre>

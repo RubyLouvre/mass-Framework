@@ -18,7 +18,7 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom("<thead><th>正向插入</th><th>反向插入</th></thead>").prependTo(".table1");
+                $("<thead><th>正向插入</th><th>反向插入</th></thead>").prependTo(".table1");
 
             }
 
@@ -59,7 +59,7 @@
     &lt;/table&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-     dom("&lt;thead&gt;&lt;th&gt;正向插入&lt;/th&gt;&lt;th&gt;反向插入&lt;/th&gt;&lt;/thead&gt;").prependTo(".table1");
+     $("&lt;thead&gt;&lt;th&gt;正向插入&lt;/th&gt;&lt;th&gt;反向插入&lt;/th&gt;&lt;/thead&gt;").prependTo(".table1");
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
 

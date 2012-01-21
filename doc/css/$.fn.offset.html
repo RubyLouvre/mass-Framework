@@ -18,7 +18,7 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,node,css,event",function(){
-                var el = dom("#getoffset");
+                var el = $("#getoffset");
                 var coords = el.offset();
                 el.html("left : "+coords.left+"<br/>top : "+coords.top)
             })
@@ -39,7 +39,7 @@
                 <div id="getoffset" style="margin:5px;padding:5px;background: #FF6347"></div>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,css,event",function(){
-                var el = dom("#getoffset");
+                var el = $("#getoffset");
                 var coords = el.offset();
                 el.html("left : "+coords.left+"&lt;br/&gt;top : "+coords.top)
             })

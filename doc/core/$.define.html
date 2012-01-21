@@ -139,27 +139,27 @@
         var uuid_arr =  '0123456789ABCDEFG'.split('');
         return {
             hex:function(){
-                return  '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
+                return  '#'+('00000'+(Math.ran$()*0x1000000<<0).toString(16)).slice(-6);
             },
             hsb:function(){//颜色比效鲜艳
-                return "hsb(" + Math.random()  + ", 1, 1)";
+                return "hsb(" + Math.ran$()  + ", 1, 1)";
             },
             rgb:function(){
-                return [Math.floor(Math.random() * 255),
-                Math.floor(Math.random() * 255),
-                Math.floor(Math.random() * 255)];
+                return [Math.floor(Math.ran$() * 255),
+                Math.floor(Math.ran$() * 255),
+                Math.floor(Math.ran$() * 255)];
             },
             str:function(len) {
                 if (!len) len = 10;
                 var s = '';
                 for (var i = 0; i < len; ++i) {
-                    var n = Math.random() * 1e6;
+                    var n = Math.ran$() * 1e6;
                     s += cs.charAt(n % cs.length);
                 }
                 return s;
             },
             num:function (min,max) {
-                return Math.floor(Math.random()*(max-min+1)) + min;
+                return Math.floor(Math.ran$()*(max-min+1)) + min;
             }
         }
     });

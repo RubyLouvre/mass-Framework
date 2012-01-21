@@ -68,8 +68,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -103,87 +103,87 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("#sample1 li:nth-child(even)").css("background-color","#FF9");
+                                $("#sample1 li:nth-child(even)").css("background-color","#FF9");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample1 li:nth-child(odd)").css("background-color","#FC3");
+                                $("#sample1 li:nth-child(odd)").css("background-color","#FC3");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample2 li:nth-child(3n+1)").css("background-color","#290");
+                                $("#sample2 li:nth-child(3n+1)").css("background-color","#290");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample2 li:nth-child(3n+2)").css("background-color","#2A2");
+                                $("#sample2 li:nth-child(3n+2)").css("background-color","#2A2");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample2 li:nth-child(3n+3)").css("background-color","#2A4");
+                                $("#sample2 li:nth-child(3n+3)").css("background-color","#2A4");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample3 li:nth-child(1)").css("background-color","fuchsia");
+                                $("#sample3 li:nth-child(1)").css("background-color","fuchsia");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample3 li:nth-child(2)").css("background-color","cyan");
+                                $("#sample3 li:nth-child(2)").css("background-color","cyan");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample3 li:nth-child(3)").css("background-color","chartreuse");
+                                $("#sample3 li:nth-child(3)").css("background-color","chartreuse");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample4 td:nth-child(3n+1)").css("background-color","#FCC");
+                                $("#sample4 td:nth-child(3n+1)").css("background-color","#FCC");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample4 td:nth-child(3n+2)").css("background-color","#F99");
+                                $("#sample4 td:nth-child(3n+2)").css("background-color","#F99");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample4 td:nth-child(3n+3)").css("background-color","#C6F");
+                                $("#sample4 td:nth-child(3n+3)").css("background-color","#C6F");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample5 dt:nth-child(odd)").css("background-color","#6CF");
+                                $("#sample5 dt:nth-child(odd)").css("background-color","#6CF");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample6 li:nth-last-child(2)").css("background-color","#FF5");
+                                $("#sample6 li:nth-last-child(2)").css("background-color","#FF5");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample7 :nth-last-child(2)").css("background-color","#369");
+                                $("#sample7 :nth-last-child(2)").css("background-color","#369");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("[class='only'] :only-child").css("background-color","#9932cc");
+                                $("[class='only'] :only-child").css("background-color","#9932cc");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample8 :first-of-type").css("background-color","#FF0");
+                                $("#sample8 :first-of-type").css("background-color","#FF0");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("p:only-of-type").css("background-color","#daa520");
+                                $("p:only-of-type").css("background-color","#daa520");
                             </td>
                         </tr>
                     </tbody>

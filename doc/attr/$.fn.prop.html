@@ -18,22 +18,22 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,attr,event",function(){
-                dom(".sample1 input").change(function() {
-                    var $input = dom(this);
-                    dom(".sample1 div").html(".attr('checked'): <b>" + $input.attr('checked') + "</b><br>"
+                $(".sample1 input").change(function() {
+                    var $input = $(this);
+                    $(".sample1 div").html(".attr('checked'): <b>" + $input.attr('checked') + "</b><br>"
                         + ".prop('checked'): <b>" + $input.prop('checked') + "</b><br>")
                 }).change();
             });
             var exec2 = function(){
                 $.require("ready,attr",function(){
-                    dom("input[type='checkbox']").prop({
+                    $("input[type='checkbox']").prop({
                         disabled: true
                     });
                 });
             }
             var exec3 = function(){
                 $.require("ready,attr",function(){
-                    dom(".sample2 input[type='checkbox']").prop({
+                    $(".sample2 input[type='checkbox']").prop({
                         disabled: false
                     });
                 });
@@ -82,9 +82,9 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,attr,event",function(){
-                dom(".sample1 input").change(function() {
-                    var $input = dom(this);
-                    dom(".sample1 div").html(".attr('checked'): &lt;b&gt;" + $input.attr('checked') + "&lt;/b&gt;&lt;br&gt;"
+                $(".sample1 input").change(function() {
+                    var $input = $(this);
+                    $(".sample1 div").html(".attr('checked'): &lt;b&gt;" + $input.attr('checked') + "&lt;/b&gt;&lt;br&gt;"
                         + ".prop('checked'): &lt;b&gt;" + $input.prop('checked') + "&lt;/b&gt;&lt;br&gt;")
                 }).change();
             });
@@ -107,12 +107,12 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,attr",function(){//禁用复选框
-                    dom(".sample2 input[type='checkbox']").prop({
+                    $(".sample2 input[type='checkbox']").prop({
                         disabled: true
                     });
                 });
                 $.require("ready,attr",function(){//启用复选框
-                    dom(".sample2 input[type='checkbox']").prop({
+                    $(".sample2 input[type='checkbox']").prop({
                         disabled: false
                     });
                 });

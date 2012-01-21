@@ -25,10 +25,10 @@
             SyntaxHighlighter.all();
             $.require("ready,event,css",function(){
                 var n = 0;
-                var divs = dom(".sample1 div").one("click", function(){
+                var divs = $(".sample1 div").one("click", function(){
                     var index = divs.index(this);
-                    dom(this).css({ borderStyle:"inset",cursor:"auto" });
-                    dom(".sample1 p").text("Div at index #" + index + " clicked." +
+                    $(this).css({ borderStyle:"inset",cursor:"auto" });
+                    $(".sample1 p").text("Div at index #" + index + " clicked." +
                         "  That's " + ++n + " total clicks.");
                 });
             });
@@ -75,10 +75,10 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,event,css",function(){
                 var n = 0;
-                var divs = dom(".sample1 div").one("click", function(){
+                var divs = $(".sample1 div").one("click", function(){
                     var index = divs.index(this);
-                    dom(this).css({ borderStyle:"inset",cursor:"auto" });
-                    dom(".sample1").text("Div at index #" + index + " clicked." +
+                    $(this).css({ borderStyle:"inset",cursor:"auto" });
+                    $(".sample1").text("Div at index #" + index + " clicked." +
                         "  That's " + ++n + " total clicks.");
                 });
             });

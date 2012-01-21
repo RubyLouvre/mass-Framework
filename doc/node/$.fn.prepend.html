@@ -18,10 +18,10 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-              dom(".inner").prepend(' <span style="color:red;">作者&nbsp;:&nbsp;</span>')
+              $(".inner").prepend(' <span style="color:red;">作者&nbsp;:&nbsp;</span>')
             }
             var exec2 = function(){
-                dom("#bbb").prepend(dom("#aaa strong"));
+                $("#bbb").prepend($("#aaa strong"));
             }
         </script>
     </head>
@@ -53,7 +53,7 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-       dom(".inner").prepend(' &lt;span style="color:red;"&gt;作者&nbsp;:&nbsp;&lt;/span&gt;');
+       $(".inner").prepend(' &lt;span style="color:red;"&gt;作者&nbsp;:&nbsp;&lt;/span&gt;');
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
@@ -66,7 +66,7 @@
        &lt;p id="bbb"&gt;为博客名！ &lt;/p&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom("#bbb").prepend(dom("#aaa strong"));
+      $("#bbb").prepend($("#aaa strong"));
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
         </fieldset>

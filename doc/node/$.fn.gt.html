@@ -19,7 +19,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    var a = dom("article *");
+                    var a = $("article *");
                     $.log(a,true);
                     $.log(a.gt(2),true);
                 });
@@ -41,7 +41,7 @@
             <fieldset><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node",function(){
-                    var a = dom("article *");
+                    var a = $("article *");
                     $.log(a,true);
                     $.log(a.gt(2),true);
                 });

@@ -42,8 +42,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -64,12 +64,12 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("p > span").css("background-color","red");
+                                $("p > span").css("background-color","red");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("p > [title]").css("background-color","darkorchid ");
+                                $("p > [title]").css("background-color","darkorchid ");
                             </td>
                         </tr>
                     </tbody>

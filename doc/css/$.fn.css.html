@@ -72,17 +72,17 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,node,css,event",function(){
-                dom(".skimover div").hover(function(){
-                    dom(this).css("backgroundColor","#008080")
+                $(".skimover div").hover(function(){
+                    $(this).css("backgroundColor","#008080")
                 },function(){ 
-                    dom(this).css("backgroundColor","transparent")
+                    $(this).css("backgroundColor","transparent")
                 });
                 
-                var p = dom("#highlightword")
+                var p = $("#highlightword")
                 var text = p.text().replace(/([\u2E80-\u9FFF])/g,'<span>$1</span>');
                 p.html(text);
                 p.click(function(e){
-                    dom(e.target).css({"background-color":"yellow",color:"#000"});
+                    $(e.target).css({"background-color":"yellow",color:"#000"});
                 });
                 
                 var styles = [ "border-top-width", "border-bottom-width",  "border-right-width",  
@@ -99,22 +99,22 @@
                         arr.push("<tr><td>",name,"</td><td></td></tr>")
                     }
                     arr.push("</table>");
-                    dom("#results").html(arr.join("")) ;
+                    $("#results").html(arr.join("")) ;
                 }
                 renderTable();
-                dom("#getcss").click(function(){
-                    var target = dom("#source");
+                $("#getcss").click(function(){
+                    var target = $("#source");
                     var arr = ["<table class=table1 style='width:450px;'><tr><td>样式名</td><td>当前值</td></tr>"]
                     for (var i= 0, name; name = styles[i++];) {
                         arr.push("<tr><td>",name,"</td><td>",target.css(name),"</td></tr>")
                     }
                     arr.push("</table>");
-                    dom("#results").html(arr.join("")) ;
+                    $("#results").html(arr.join("")) ;
                 });
             });
             var exec3 = function(){
                 $.require("ready,node,css",function(){
-                    dom(".fade").css("opacity",.1)
+                    $(".fade").css("opacity",.1)
                 })
             }
         </script>
@@ -168,10 +168,10 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("ready,node,css,event",function(){
-     dom(".skimover div").hover(function(){
-        dom(this).css("backgroundColor","#008080")
+     $(".skimover div").hover(function(){
+        $(this).css("backgroundColor","#008080")
      },function(){ 
-        dom(this).css("backgroundColor","transparent")
+        $(this).css("backgroundColor","transparent")
     });
 });
                 </pre>
@@ -185,11 +185,11 @@ $.require("ready,node,css,event",function(){
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,css,event",function(){     
-                var p = dom("#highlightword")
+                var p = $("#highlightword")
                 var text = p.text().replace(/([\u2E80-\u9FFF])/g,'&lt;span&gt;$1&lt;/span&gt;');
                 p.html(text);
                 p.click(function(e){
-                    dom(e.target).css({"background-color":"yellow",color:"#000"});
+                    $(e.target).css({"background-color":"yellow",color:"#000"});
                 });
             });
                 </pre>
@@ -242,7 +242,7 @@ border-bottom-color:black;"
                 <div class="fade">fade</div>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node,css",function(){
-                    dom(".fade").css("opacity",.1)
+                    $(".fade").css("opacity",.1)
                 })
                 </pre>
                 <button onclick="exec3()">点我，执行代码</button>

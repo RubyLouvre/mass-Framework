@@ -19,8 +19,8 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event,attr",function(){
-                dom(".sample").click(function(){
-                    var self = dom(this);
+                $(".sample").click(function(){
+                    var self = $(this);
                     if(self.hasClass("selected")){
                         self.removeClass("selected");
                     }else{
@@ -63,8 +63,8 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,event,attr",function(){
-                dom(".sample").click(function(e){
-                    var self = dom(this);
+                $(".sample").click(function(e){
+                    var self = $(this);
                     if(self.hasClass("selected")){
                         self.removeClass("selected");
                     }else{

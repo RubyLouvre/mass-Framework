@@ -18,16 +18,16 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,css,event",function(){
-                dom(".sample1").click(function(e) {
-                    var $target = dom(e.target);
+                $(".sample1").click(function(e) {
+                    var $target = $(e.target);
                     if ( $target.is("li") ) {
                         $target.css("background-color", "red");
                     }
                 });
-                dom(".sample2 li").click(function() {
-                    var $li = dom(this),
+                $(".sample2 li").click(function() {
+                    var $li = $(this),
                     isWithTwo = $li.is(function() {
-                        return dom('strong', this).length === 2;
+                        return $('strong', this).length === 2;
                     });
                     if ( isWithTwo ) {
                         $li.css("background-color", "green");
@@ -62,8 +62,8 @@
                 </pre>
                 <p>我们可以在UL元素绑定一个点击事件，然后限制的代码只有当列表项目本身时触发，并不是它的孩子之一，被点击：</p>
                 <pre class="brush:js;gutter:false;toolbar:false">
-                dom(".sample1").click(function(e) {
-                    var $target = dom(e.target);
+                $(".sample1").click(function(e) {
+                    var $target = $(e.target);
                     if ( $target.is("li") ) {
                         $target.css("background-color", "red");
                     }
@@ -91,10 +91,10 @@
                 </pre>
                 <p>点击元素在&lt;li&gt;在那个时候，您可以将每一个&lt;li&gt;单击处理程序计算结果&lt;strong&gt;的数量，像这样：</p>
                 <pre class="brush:js;gutter:false;toolbar:false">
-dom(".sample2 li").click(function() {
-  var $li = dom(this),
+$(".sample2 li").click(function() {
+  var $li = $(this),
     isWithTwo = $li.is(function() {
-      return dom('strong', this).length === 2;
+      return $('strong', this).length === 2;
     });
   if ( isWithTwo ) {
     $li.css("background-color", "green");

@@ -18,16 +18,16 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,css,event",function(){
-                var self = dom(".sample1 div").click(function() {
+                var self = $(".sample1 div").click(function() {
                     var index = self.index(this);
-                    dom(".show_index").text("点击第" + index+"个DIV");
+                    $(".show_index").text("点击第" + index+"个DIV");
                 });
             });
             var exec2 = function(){
                 $.require("ready,css,event",function(){
-                    var listItem = dom('#bar');
-                    dom('.result1').html( '方法1  ： ' + dom('.sample2 li').index(listItem) );
-                    dom('.result2').html( '方法2  ： ' + listItem.index() );
+                    var listItem = $('#bar');
+                    $('.result1').html( '方法1  ： ' + $('.sample2 li').index(listItem) );
+                    $('.result2').html( '方法2  ： ' + listItem.index() );
                 });
             }
         </script>
@@ -66,9 +66,9 @@
                 </pre>
                 <pre class="brush:js;gutter:false;toolbar:false">
             $.require("ready,css,event",function(){
-                var self = dom(".sample1 div").click(function() {
+                var self = $(".sample1 div").click(function() {
                     var index = self.index(this);
-                    dom(".show_index").text("点击第" + index+"个DIV");
+                    $(".show_index").text("点击第" + index+"个DIV");
                 });
             });
                 </pre>
@@ -93,9 +93,9 @@
                 </pre>
                 <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,css,event",function(){
-                    var listItem = dom('#bar');
-                    dom('.result1').html( '方法1  ： ' + dom('.sample2 li').index(listItem) );
-                    dom('.result2').html( '方法2  ： ' + listItem.index() );
+                    var listItem = $('#bar');
+                    $('.result1').html( '方法1  ： ' + $('.sample2 li').index(listItem) );
+                    $('.result2').html( '方法2  ： ' + listItem.index() );
                 });
                 </pre> 
                 <button onclick="exec2()">点我，执行代码</button>

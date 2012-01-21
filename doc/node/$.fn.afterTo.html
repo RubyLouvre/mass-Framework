@@ -18,13 +18,13 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom('<strong>(しとうなさみ)</strong>').afterTo(".inner");
+                $('<strong>(しとうなさみ)</strong>').afterTo(".inner");
             }
             var exec2 = function(){
-                dom("#aaa").afterTo(".inner");
+                $("#aaa").afterTo(".inner");
             }
             var exec3 = function(){
-                dom("<tfoot><tr><th>表脚</th><th>表脚</th></tr></tfoot>").afterTo( dom(".table1 tbody"));
+                $("<tfoot><tr><th>表脚</th><th>表脚</th></tr></tfoot>").afterTo( $(".table1 tbody"));
             }
         </script>
     </head>
@@ -56,11 +56,11 @@
       &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom('&lt;strong&gt;(しとうなさみ)&lt;/strong&gt;').afterTo(".inner");
+      $('&lt;strong&gt;(しとうなさみ)&lt;/strong&gt;').afterTo(".inner");
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom("#aaa").afterTo(".inner");
+      $("#aaa").afterTo(".inner");
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
         </fieldset>
@@ -85,7 +85,7 @@
       &lt;/table&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-  dom("&lt;tfoot&gt;&lt;tr&gt;&lt;th&gt;表脚&lt;/th&gt;&lt;th&gt;表脚&lt;/th&gt;&lt;/tr&gt;&lt;/tfoot&gt;").afterTo( dom(".table1 tbody"));
+  $("&lt;tfoot&gt;&lt;tr&gt;&lt;th&gt;表脚&lt;/th&gt;&lt;th&gt;表脚&lt;/th&gt;&lt;/tr&gt;&lt;/tfoot&gt;").afterTo( $(".table1 tbody"));
             </pre>
             <button onclick="exec3()">点我，执行代码</button>
         </fieldset>

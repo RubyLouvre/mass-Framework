@@ -18,25 +18,25 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,node,event",function(){
-                dom(".container li").on("click",function(e){
-                    dom(".show").html(e.target.innerHTML)
+                $(".container li").on("click",function(e){
+                    $(".show").html(e.target.innerHTML)
                 });
                 
-                dom(".sample2")
+                $(".sample2")
                 .bind({
                     click:function(event){
                         var str = "( " + event.pageX + ", " + event.pageY + " )";
-                        dom(".show_b").text("Click happened! " + str);
+                        $(".show_b").text("Click happened! " + str);
                     },
                     dblclick:function(){
-                        dom(".show_b").text("Double-click happened in " + this.nodeName);
+                        $(".show_b").text("Double-click happened in " + this.nodeName);
                     }
                 })
                 .bind("mouseenter mouseleave", function(){
-                    dom(this).toggleClass("over");
+                    $(this).toggleClass("over");
                 });
                 var i = 0
-                dom(".sample3").on("submit",function(){
+                $(".sample3").on("submit",function(){
                     this.number.value = ++i
                 },1)
             });
@@ -102,8 +102,8 @@ $.fn.on(str, times)
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,event",function(){
-                dom(".container li").on("click",function(e){
-                    dom(".show").html(e.target.innerHTML);
+                $(".container li").on("click",function(e){
+                    $(".show").html(e.target.innerHTML);
                 })
             });
                 </pre>
@@ -128,18 +128,18 @@ $.fn.on(str, times)
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,event",function(){             
-                dom(".sample2")
+                $(".sample2")
                 .bind({
                     click:function(event){
                         var str = "( " + event.pageX + ", " + event.pageY + " )";
-                        dom(".show_b").text("Click happened! " + str);
+                        $(".show_b").text("Click happened! " + str);
                     },
                     dblclick:function(){
-                        dom(".show_b").text("Double-click happened in " + this.nodeName);
+                        $(".show_b").text("Double-click happened in " + this.nodeName);
                     }
                 })
                 .bind("mouseenter mouseleave", function(){
-                    dom(this).toggleClass("over");
+                    $(this).toggleClass("over");
                 });
             });
                 </pre>
@@ -150,7 +150,7 @@ $.fn.on(str, times)
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,event",function(){       
                 var i = 0;
-                dom(".sample3").on("submit",function(){
+                $(".sample3").on("submit",function(){
                     this.number.value = ++i
                 },1);
              });

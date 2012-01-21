@@ -22,8 +22,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function($){
-                $( "#content" ).delegate( "*", "focus blur", function( event ) {
+            $(function($){
+                $( "#content" ).delegate( "*", "focus blur", function(  ) {
                     var elem = $( this );
                     setTimeout(function() {
                         elem.toggleClass( "focused", elem.is( ":focus" ) );
@@ -49,8 +49,8 @@
     &lt;/div&gt;
 &lt;/div&gt;
 &lt;script&gt;
-dom( "#content" ).delegate( "*", "focus blur", function( event ) {
-    var elem = dom( this );
+$( "#content" ).delegate( "*", "focus blur", function( event ) {
+    var elem = $( this );
     setTimeout(function() {
        elem.toggleClass( "focused", elem.is( ":focus" ) );
     }, 0);

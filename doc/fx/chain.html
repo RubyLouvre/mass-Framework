@@ -28,18 +28,18 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    dom("div").css({ o: 0.5 }).click(function() {
-                        dom("div").unbind("click"); // unclick all
+                    $("div").css({ o: 0.5 }).click(function() {
+                        $("div").unbind("click"); // unclick all
                         action();
                     }).fx(800, { o: 0.1 }).fx(800, { o: 0.5 });
                 });
             }
             function action() {
-                dom("div").each(function(node, i) {
-                    dom(node).fx( 1000, { tx: i * 100, ty: i * 100, chain: 1 });
+                $("div").each(function(node, i) {
+                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, chain: 1 });
                 }).fx(1000, { mbtx: 0, mbty: 0, chain: 1 }).each(function(node, i) {
-                    dom(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", chain: 1 });
-                    dom(node).fx( 1000, { tx: i * 100, ty: i * 100, chain: 1 });
+                    $(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", chain: 1 });
+                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, chain: 1 });
                 }).fx(1000, { tx: 0, ty: 0, reverse: 1 });
             }
 

@@ -1002,7 +1002,7 @@ $.define("lang",function(){
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
         shuffle: function () {
             var shuff = (this || []).concat(), j, x, i = shuff.length;
-            for (; i > 0; j = parseInt(Math.random() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
+            for (; i > 0; j = parseInt(Math.ran$() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
             return shuff;
         },
         //从数组中随机抽选一个元素出来
@@ -3338,7 +3338,7 @@ dom.namespace改为dom["mass"]
 2011.10.1
 更改dom.uuid为dom["@uuid"],dom.basePath为dom["@path"]，以示它们是系统变量
 修复dom.require BUG 如果所有依赖模块之前都加载执行过，则直接执行回调函数
-移除dom.ready 只提供dom(function(){})这种简捷形式
+移除dom.ready 只提供$(function(){})这种简捷形式
 2011.10.4 强化对IE window的判定, 修复dom.require BUG dn === cn --> dn === cn && !callback._name
 2011.10.9
 简化fixOperaError中伪dom命名空间对象

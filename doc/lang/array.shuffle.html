@@ -36,12 +36,12 @@
             //方法1
             Array.prototype.shuffle = function () {
                 var shuff = (this || []).concat(), j, x, i = shuff.length;
-                for (; i > 0; j = parseInt(Math.random() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
+                for (; i > 0; j = parseInt(Math.ran$() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
                 return shuff;
             }
             //方法2
-            function random(a, b){
-	             return Math.random() >.5 ? -1 : 1;
+            function ran$(a, b){
+	             return Math.ran$() >.5 ? -1 : 1;
             }
             Array.prototype.shuffle = function () {
                 return this.concat().sort(random);
@@ -51,7 +51,7 @@
                 var result = [],
                 len = this.length;
                 while(len--){
-                    result[result.length] = this.splice(Math.floor(Math.random()*(len+1)),1)[0];
+                    result[result.length] = this.splice(Math.floor(Math.ran$()*(len+1)),1)[0];
                 }
                 return result;
             }

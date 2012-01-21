@@ -18,22 +18,22 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                $.log(dom("#select1").val(),true);
-                $.log(dom("#select2").val(),true);  
+                $.log($("#select1").val(),true);
+                $.log($("#select2").val(),true);  
             }
             var exec2 = function(){
-                $.log(dom(":checkbox").val(),true);
+                $.log($(":checkbox").val(),true);
             }
             $.require("ready,event,attr",function(){
-                dom("#example3 :button").click(function () {
-                    var text = dom(this).text();
-                    dom("#example3 :text").val(text);
+                $("#example3 :button").click(function () {
+                    var text = $(this).text();
+                    $("#example3 :text").val(text);
                 });
             });
             var exec3 = function(){
-                dom("#single").val("Single3");
-                dom("#multiple").val(["Multiple2", "Multiple3"]);
-                dom("#form4 input").val(["check1","check2", "radio1" ]);
+                $("#single").val("Single3");
+                $("#multiple").val(["Multiple2", "Multiple3"]);
+                $("#form4 input").val(["check1","check2", "radio1" ]);
             }
         </script>
     </head>
@@ -80,8 +80,8 @@
       &lt;/form&gt;
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-     $.log(dom("#select1").val(),true);
-     $.log(dom("#select2").val(),true);
+     $.log($("#select1").val(),true);
+     $.log($("#select2").val(),true);
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>
             </fieldset>
@@ -95,7 +95,7 @@
       &lt;input name="hotspring" type="checkbox" value="木下秀吉汤" &gt;木下秀吉汤
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-      $.log(dom(":checkbox").val(),true)
+      $.log($(":checkbox").val(),true)
                 </pre>
                 <button onclick="exec2()">点我，执行代码</button>
             </fieldset>
@@ -118,9 +118,9 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
       $.require("ready,event,attr",function(){
-        dom("#example3 :button").click(function () {
-          var text = dom(this).text();
-          dom("#example3 :text").val(text);
+        $("#example3 :button").click(function () {
+          var text = $(this).text();
+          $("#example3 :text").val(text);
         });
       });
                 </pre>
@@ -164,9 +164,9 @@
       &lt;/form&gt;
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-        dom("#single").val("Single3");
-        dom("#multiple").val(["Multiple2", "Multiple3"]);
-        dom("#form4 input").val(["check1","check2", "radio1" ]);
+        $("#single").val("Single3");
+        $("#multiple").val(["Multiple2", "Multiple3"]);
+        $("#form4 input").val(["check1","check2", "radio1" ]);
                 </pre>
                 <button onclick="exec3()">点我，执行代码</button>
             </fieldset>

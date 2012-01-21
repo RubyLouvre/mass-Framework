@@ -18,13 +18,13 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom(".inner").append('<strong>(しとうなさみ)</strong>');
+                $(".inner").append('<strong>(しとうなさみ)</strong>');
             }
             var exec2 = function(){
-                dom(".inner").append('<em>aaa</em><script>alert("内嵌脚本")<\/script>');
+                $(".inner").append('<em>aaa</em><script>alert("内嵌脚本")<\/script>');
             }
             var exec3 = function(){
-                dom("#bbb").append(dom("#aaa strong"));
+                $("#bbb").append($("#aaa strong"));
             }
         </script>
     </head>
@@ -55,11 +55,11 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom(".inner").append('<strong>(しとうなさみ)</strong>')
+      $(".inner").append('<strong>(しとうなさみ)</strong>')
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-    dom(".inner").append('&lt;em&gt;aaa&lt;/em&gt;&lt;script&gt;alert("内嵌脚本")&lt;\/script&gt;');
+    $(".inner").append('&lt;em&gt;aaa&lt;/em&gt;&lt;script&gt;alert("内嵌脚本")&lt;\/script&gt;');
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
 
@@ -72,7 +72,7 @@
        &lt;p id="bbb"&gt;我的博客名为: &lt;/p
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-      dom("#bbb").append(dom("#aaa strong"));
+      $("#bbb").append($("#aaa strong"));
             </pre>
             <button onclick="exec3()">点我，执行代码</button>
         </fieldset>

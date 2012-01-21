@@ -19,7 +19,7 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,node",function(){
-                    var neo =  dom(".container li").collect(function(el,i){
+                    var neo =  $(".container li").collect(function(el,i){
                         return el.firstChild;
                     }) ;
                     $.log($.isArray(neo), true);
@@ -57,7 +57,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                  $.require("ready,node",function(){
-                   var neo =  dom(".container li").collect(function(el,i){
+                   var neo =  $(".container li").collect(function(el,i){
                         return el.firstChild;
                     }) ;
                     $.log($.isArray(neo), true);

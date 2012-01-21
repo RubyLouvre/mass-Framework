@@ -20,12 +20,12 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
-                dom('#target').submit(function() {
-                    dom(this).prepend('触发submit事件<br/>');
+                $('#target').submit(function() {
+                    $(this).prepend('触发submit事件<br/>');
                     return false;
                 });
-                dom('#other').click(function() {
-                    dom('#target').submit();
+                $('#other').click(function() {
+                    $('#target').submit();
                 });
             });
         </script>
@@ -64,12 +64,12 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,event",function(){
-                dom('#target').submit(function() {
-                    dom(this).prepend('触发submit事件&lt;br/&gt;');
+                $('#target').submit(function() {
+                    $(this).prepend('触发submit事件&lt;br/&gt;');
                     return false;
                 });
-                dom('#other').click(function() {
-                    dom('#target').submit();
+                $('#other').click(function() {
+                    $('#target').submit();
                 });
             });
                 </pre>

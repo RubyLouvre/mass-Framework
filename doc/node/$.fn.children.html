@@ -18,24 +18,24 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,attr,event",function(){
-                dom("#container").click(function (e) {
-                    dom(".hilite").removeClass("hilite");
-                    var $kids = dom(e.target).children();
+                $("#container").click(function (e) {
+                    $(".hilite").removeClass("hilite");
+                    var $kids = $(e.target).children();
                     var len = $kids.addClass("hilite").length;
-                    dom("#results span").first().text(len);
-                    dom("#results span").last().text(e.target.tagName);
+                    $("#results span").first().text(len);
+                    $("#results span").last().text(e.target.tagName);
                     e.preventDefault();
                     return false;
                 });
             });
             var exec2 = function(){
                 $.require("ready,css",function(){
-                    dom(".sample2 div").children().css("border-bottom", "3px double red")
+                    $(".sample2 div").children().css("border-bottom", "3px double red")
                 });
             }
             var exec3 = function(){
                 $.require("ready,css",function(){
-                    dom(".sample2").children(".selected").css("color", "blue");
+                    $(".sample2").children(".selected").css("color", "blue");
                 });
             }
         </script>
@@ -117,12 +117,12 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,attr,event",function(){
-                dom("#container").click(function (e) {
-                    dom(".hilite").removeClass("hilite");
-                    var $kids = dom(e.target).children();
+                $("#container").click(function (e) {
+                    $(".hilite").removeClass("hilite");
+                    var $kids = $(e.target).children();
                     var len = $kids.addClass("hilite").length;
-                    dom("#results span").first().text(len);
-                    dom("#results span").last().text(e.target.tagName);
+                    $("#results span").first().text(len);
+                    $("#results span").last().text(e.target.tagName);
                     e.preventDefault();
                     return false;
                 });
@@ -152,7 +152,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,css",function(){
-                    dom(".sample2 div").children().css("border-bottom", "3px double red")
+                    $(".sample2 div").children().css("border-bottom", "3px double red")
                 });
                 </pre>
                 <button onclick="exec2()">点我，执行代码</button>
@@ -176,7 +176,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,css",function(){
-                   dom(".sample2").children(".selected").css("color", "blue");
+                   $(".sample2").children(".selected").css("color", "blue");
                 });
                 </pre>
                 <button onclick="exec3()">点我，执行代码</button>

@@ -19,9 +19,9 @@
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
                 function log(el,text){
-                    dom(el).append("执行第"+text+"个回调函数<br/>");
+                    $(el).append("执行第"+text+"个回调函数<br/>");
                 }
-                dom(".sample1").toggle(function(){
+                $(".sample1").toggle(function(){
                     log(this,1)
                 },
                 function(){

@@ -21,11 +21,11 @@
                 SyntaxHighlighter.all();
                
                 $.require("ready,fx,event",function(){
-                    dom("#sample").click(function(){
-                        if (dom("#sample div").is(":hidden")) {
-                            dom("#sample div").slideDown(1000);
+                    $("#sample").click(function(){
+                        if ($("#sample div").is(":hidden")) {
+                            $("#sample div").slideDown(1000);
                         } else {
-                            dom("#sample div").hide(1000);
+                            $("#sample div").hide(1000);
                         }
                     });
                 });
@@ -54,11 +54,11 @@
             <fieldset ><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,fx,event",function(){
-                    dom("#sample").click(function(){
-                        if (dom("#sample div").is(":hidden")) {
-                            dom("#sample div").slideDown(1000);
+                    $("#sample").click(function(){
+                        if ($("#sample div").is(":hidden")) {
+                            $("#sample div").slideDown(1000);
                         } else {
-                            dom("#sample div").hide(1000);
+                            $("#sample div").hide(1000);
                         }
                     });
                 });

@@ -41,24 +41,24 @@
             
             $.require("ready,node,css,event",function(){
                 function showWidth(ele, h) {
-                    dom("#show_result").text(ele + h + "px.");
+                    $("#show_result").text(ele + h + "px.");
                 }
-                dom("#getp").click(function () { 
-                    showWidth("段落的宽为", dom("#test_p").width()); 
+                $("#getp").click(function () { 
+                    showWidth("段落的宽为", $("#test_p").width()); 
                 });
-                dom("#getd").click(function () { 
-                    showWidth("页面的宽为", dom(document).width()); 
+                $("#getd").click(function () { 
+                    showWidth("页面的宽为", $(document).width()); 
                 });
-                dom("#getw").click(function () { 
-                    showWidth("窗口的宽为", dom(window).width()); 
+                $("#getw").click(function () { 
+                    showWidth("窗口的宽为", $(window).width()); 
                 });
                 
-                dom("#aligning").click(function () {
-                    dom("#sample2 div").width(200).css( "backgroundColor","#a9ea00");
+                $("#aligning").click(function () {
+                    $("#sample2 div").width(200).css( "backgroundColor","#a9ea00");
                 });
-                dom("#show_none").click(function () {
-                    var a = dom("#sample3 div").width()+"px";
-                    dom("#sample3").append("<p>"+a+"</p>")
+                $("#show_none").click(function () {
+                    var a = $("#sample3 div").width()+"px";
+                    $("#sample3").append("<p>"+a+"</p>")
                 });
             });
         </script>
@@ -90,16 +90,16 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
              $.require("ready,node,css,event",function(){
                 function showHeight(ele, h) {
-                    dom("#show_result").text(ele + h + "px.");
+                    $("#show_result").text(ele + h + "px.");
                 }
-                dom("#getp").click(function () { 
-                    showHeight("段落的宽为", dom("#test_p").width()); 
+                $("#getp").click(function () { 
+                    showHeight("段落的宽为", $("#test_p").width()); 
                 });
-                dom("#getd").click(function () { 
-                    showHeight("页面的宽为", dom(document).width()); 
+                $("#getd").click(function () { 
+                    showHeight("页面的宽为", $(document).width()); 
                 });
-                dom("#getw").click(function () { 
-                    showHeight("窗口的宽为", dom(window).width()); 
+                $("#getw").click(function () { 
+                    showHeight("窗口的宽为", $(window).width()); 
                 });
             })
                 </pre>
@@ -113,8 +113,8 @@
                 </div>
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                dom("#aligning").click(function () {
-                    dom("#sample2 div").width(60).css( "backgroundColor","#a9ea00");
+                $("#aligning").click(function () {
+                    $("#sample2 div").width(60).css( "backgroundColor","#a9ea00");
                 });
                 </pre>
                 <button type="button" id="aligning">点我，执行代码</button>
@@ -126,9 +126,9 @@
                 </div>
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                dom("#show_none").click(function () {
-                   var a = dom("#sample3 div").width()+"px";
-                   dom("#sample3").append("&lt;p&gt;"+a+"&lt;/p&gt;")
+                $("#show_none").click(function () {
+                   var a = $("#sample3 div").width()+"px";
+                   $("#sample3").append("&lt;p&gt;"+a+"&lt;/p&gt;")
                 });
                 </pre>
                 <button type="button" id="show_none">点我，执行代码</button>

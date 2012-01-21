@@ -31,18 +31,18 @@
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
                 var fo = 0, b = 0;
-                dom(".inputs p").focusout(function() {
+                $(".inputs p").focusout(function() {
                     fo++;
-                    dom("#fo")
+                    $("#fo")
                     .text("focusout fired: " + fo + "x");
                 }).blur(function() {
                     b++;
-                    dom("#b")
+                    $("#b")
                     .text("blur fired: " + b + "x");
                 });
 
-                dom("body").delegate("#sample1 input","focusout",function(e){
-                    dom(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+                $("body").delegate("#sample1 input","focusout",function(e){
+                    $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
                 });
 
             });
@@ -69,13 +69,13 @@
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
                 var fo = 0, b = 0;
-                dom(".inputs p").focusout(function() {
+                $(".inputs p").focusout(function() {
                     fo++;
-                    dom("#fo")
+                    $("#fo")
                     .text("focusout fired: " + fo + "x");
                 }).blur(function() {
                     b++;
-                    dom("#b")
+                    $("#b")
                     .text("blur fired: " + b + "x");
                 });
             });
@@ -97,8 +97,8 @@
                 <p>事件代理。先在文本域内点一下，再在其他地方点一下。</p>
                 <pre class="brush:js;gutter:false;toolbar:false;">
       $.require("ready,event,fx",function(){
-        dom("body").delegate("#sample1 input","focusout",function(e){
-          dom(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+        $("body").delegate("#sample1 input","focusout",function(e){
+          $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
         });
       });
                 </pre>

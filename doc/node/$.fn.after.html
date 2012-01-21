@@ -18,10 +18,10 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                dom('.container .inner').after('<p>Test</p>');
+                $('.container .inner').after('<p>Test</p>');
             }
             var exec2 = function(){
-                dom('.sample').after(dom('.sample h2'));
+                $('.sample').after($('.sample h2'));
             }
         </script>
     </head>
@@ -54,7 +54,7 @@
 &lt;/div&gt;
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-    dom('.container .inner').after('&lt;p&gt;Test&lt;/p&gt;');
+    $('.container .inner').after('&lt;p&gt;Test&lt;/p&gt;');
             </pre>
             <button onclick="exec1()">点我，执行代码</button>
 
@@ -79,7 +79,7 @@
 
             </pre>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-    dom('.sample').after(dom('.sample h2'));
+    $('.sample').after($('.sample h2'));
             </pre>
             <button onclick="exec2()">点我，执行代码</button>
         </fieldset>

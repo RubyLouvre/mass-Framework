@@ -42,9 +42,9 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
-                    dom("input[type=checkbox]:first")[0].indeterminate = true;
+            $(function(){
+                $(".clicktable tbody td").click(function(){
+                    $("input[type=checkbox]:first")[0].indeterminate = true;
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -73,27 +73,27 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("input:enabled").css("background-color","#F542D7");
+                                $("input:enabled").css("background-color","#F542D7");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("input:disabled").css("background-color","#6495ED");
+                                $("input:disabled").css("background-color","#6495ED");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                alert(dom("input:checked").collect(function(){ return this.value }).join(" "));  //Daily Monthly
+                                alert($("input:checked").collect(function(){ return this.value }).join(" "));  //Daily Monthly
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                alert(dom("select option:selected").val())
+                                alert($("select option:selected").val())
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom(":indeterminate+span").css("background-color","limegreen");
+                                $(":indeterminate+span").css("background-color","limegreen");
                             </td>
                         </tr>
                     </tbody>
@@ -111,7 +111,7 @@
         &lt;option value="3"&gt;Trees&lt;/option&gt;
       &lt;/select&gt;
     &lt;/form&gt;
-    &lt;script&gt;  dom("input[type=checkbox]:first")[0].indeterminate = true;&lt;/script&gt;
+    &lt;script&gt;  $("input[type=checkbox]:first")[0].indeterminate = true;&lt;/script&gt;
                 </pre>
                 <form action="">
                     <input name="email" disabled="disabled" />

@@ -67,8 +67,8 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            dom(function(){
-                dom(".clicktable tbody td").click(function(){
+            $(function(){
+                $(".clicktable tbody td").click(function(){
                     $.parseJS(this.innerHTML.replace("&gt;",">").trim())
                 });
             })
@@ -89,43 +89,43 @@
                     <tbody>
                         <tr>
                             <td>
-                                dom("#sample6 li:nth-last-child(2)").css("background-color","#7CFC00");
+                                $("#sample6 li:nth-last-child(2)").css("background-color","#7CFC00");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample7 p:nth-last-child(2)").css("background-color","#00FF7F");
+                                $("#sample7 p:nth-last-child(2)").css("background-color","#00FF7F");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample8 div:nth-last-child(2) ").css("background-color","#5F9EA0");
+                                $("#sample8 div:nth-last-child(2) ").css("background-color","#5F9EA0");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample12 div:first-of-type").css("background-color","#FF00FF");
+                                $("#sample12 div:first-of-type").css("background-color","#FF00FF");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample12 div:last-of-type").css("background-color","#1E90FF");
+                                $("#sample12 div:last-of-type").css("background-color","#1E90FF");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample13 p em:only-child").css("background-color","#daa520");
+                                $("#sample13 p em:only-child").css("background-color","#daa520");
 
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample14 p em:only-of-type").css("background-color","#6CF");
+                                $("#sample14 p em:only-of-type").css("background-color","#6CF");
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                dom("#sample15 p:empty").html("司徒正美司徒正美司徒正美").css("background-color","#FA8072");
+                                $("#sample15 p:empty").html("司徒正美司徒正美司徒正美").css("background-color","#FA8072");
                             </td>
                         </tr>
                     </tbody>

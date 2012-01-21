@@ -21,20 +21,20 @@
             
             $.require("ready,node,css,event",function(){
                 function showHeight(ele, h) {
-                    dom("#show_result").text(ele + h + "px.");
+                    $("#show_result").text(ele + h + "px.");
                 }
-                dom("#getp").click(function () { 
-                    showHeight("段落的高为", dom("#test_p").height()); 
+                $("#getp").click(function () { 
+                    showHeight("段落的高为", $("#test_p").height()); 
                 });
-                dom("#getd").click(function () { 
-                    showHeight("页面的高为", dom(document).height()); 
+                $("#getd").click(function () { 
+                    showHeight("页面的高为", $(document).height()); 
                 });
-                dom("#getw").click(function () { 
-                    showHeight("窗口的高为", dom(window).height()); 
+                $("#getw").click(function () { 
+                    showHeight("窗口的高为", $(window).height()); 
                 });
                 
-                dom("#aligning").click(function () {
-                    dom("#sample2 div").height(60).css( "backgroundColor","#a9ea00");
+                $("#aligning").click(function () {
+                    $("#sample2 div").height(60).css( "backgroundColor","#a9ea00");
                 });
             });
         </script>
@@ -66,16 +66,16 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
              $.require("ready,node,css,event",function(){
                 function showHeight(ele, h) {
-                    dom("#show_result").text(ele + h + "px.");
+                    $("#show_result").text(ele + h + "px.");
                 }
-                dom("#getp").click(function () { 
-                    showHeight("段落的高为", dom("#test_p").height()); 
+                $("#getp").click(function () { 
+                    showHeight("段落的高为", $("#test_p").height()); 
                 });
-                dom("#getd").click(function () { 
-                    showHeight("页面的高为", dom(document).height()); 
+                $("#getd").click(function () { 
+                    showHeight("页面的高为", $(document).height()); 
                 });
-                dom("#getw").click(function () { 
-                    showHeight("窗口的高为", dom(window).height()); 
+                $("#getw").click(function () { 
+                    showHeight("窗口的高为", $(window).height()); 
                 });
             })
                 </pre>
@@ -107,8 +107,8 @@
                     }
                 </style>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                dom("#aligning").click(function () {
-                    dom("#sample2 div").height(60).css( "backgroundColor","#a9ea00");
+                $("#aligning").click(function () {
+                    $("#sample2 div").height(60).css( "backgroundColor","#a9ea00");
                 });
                 </pre>
                 <button type="button" id="aligning">点我，执行代码</button>

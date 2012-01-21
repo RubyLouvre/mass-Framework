@@ -28,25 +28,25 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,attr",function(){
-                    dom(".sample1 img").attr({ 
+                    $(".sample1 img").attr({ 
                         src: "../public/styles/attr_rabbit.jpg",
                         title: "流氓兔",
                         alt: "流氓兔",
                         width:"200px",
                         height:"200px"
                     });
-                    dom(".sample1 strong").text(dom("img").attr("alt"));
+                    $(".sample1 strong").text($("img").attr("alt"));
                 });
             }
             var exec2 = function(){
                 $.require("ready,attr",function(){
-                    dom(".sample2 input").gt(1).attr("disabled","disabled");
+                    $(".sample2 input").gt(1).attr("disabled","disabled");
                 });
             }
             $.require("ready,event,attr",function(){
-                dom("#example3 :button").click(function () {
-                    var text = dom(this).text();
-                    dom("#example3 :text").val(text);
+                $("#example3 :button").click(function () {
+                    var text = $(this).text();
+                    $("#example3 :text").val(text);
                 });
             });
 
@@ -89,14 +89,14 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,attr",function(){
-                    dom(".sample1 img").attr({ 
+                    $(".sample1 img").attr({ 
                         src: "../public/styles/attr_rabbit.jpg",
                         title: "流氓兔",
                         alt: "流氓兔"
                         width:"200px",
                         height:"200px"
                     });
-                    dom(".sample1 strong").text(dom("img").attr("alt"));
+                    $(".sample1 strong").text($("img").attr("alt"));
                 });
                 </pre>
                 <button onclick="exec1()">点我，执行代码</button>
@@ -113,7 +113,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,attr",function(){
-                   dom(".sample2 input").gt(1).attr("disabled","disabled");
+                   $(".sample2 input").gt(1).attr("disabled","disabled");
                 });
                 </pre>
                 <button onclick="exec2()">点我，执行代码</button>

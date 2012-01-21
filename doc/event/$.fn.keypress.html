@@ -24,12 +24,12 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event",function(){
-                dom(".sample input").keypress(function (e) { 
+                $(".sample input").keypress(function (e) { 
                     var html = ""
                     for(var i in e){
                         html+= i+"   :  "+e[i]+"<br/>"
                     }
-                    dom(".sample").height(  dom(".sample div").html(html).height()+40)
+                    $(".sample").height(  $(".sample div").html(html).height()+40)
                 });
             });
         </script>
@@ -66,12 +66,12 @@
                 <p> 当一个按键在文本框内被按下的时候显示事件对象的所有属性.</p>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event",function(){
-                dom(".sample input").keypress(function (e) { 
+                $(".sample input").keypress(function (e) { 
                     var html = ""
                     for(var i in e){
                         html+= i+"   :  "+e[i]+"&lt;br/&gt;"
                     }
-                    dom(".sample").height(  dom(".sample div").html(html).height()+40)
+                    $(".sample").height(  $(".sample div").html(html).height()+40)
                 });
             });
                 </pre>

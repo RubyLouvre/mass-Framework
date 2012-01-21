@@ -18,7 +18,7 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,node,css,event",function(){
-                var el = dom("#getpositon"); 
+                var el = $("#getpositon"); 
                 var coords = el.position();
                 el.html("left : "+coords.left+"<br/>top : "+coords.top);
             })
@@ -42,7 +42,7 @@
 
                 <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,css,event",function(){
-                var el = dom("#getpositon");
+                var el = $("#getpositon");
                 var coords = el.position();
                 el.html("left : "+coords.left+"&lt;br/&gt;top : "+coords.top)
             })

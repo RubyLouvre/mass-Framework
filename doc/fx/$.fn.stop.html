@@ -23,23 +23,23 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
-                var box = dom(".test");
-                dom("#start").click(function(){
+                var box = $(".test");
+                $("#start").click(function(){
                     box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
                 });
-                dom("#reset").click(function(){
+                $("#reset").click(function(){
                     box.width(10).height(10);
                 });
-                dom("#stop0").click(function(){
+                $("#stop0").click(function(){
                     box.stop(false,false);
                 });
-                dom("#stop1").click(function(){
+                $("#stop1").click(function(){
                     box.stop(false,true);
                 });
-                dom("#stop2").click(function(){
+                $("#stop2").click(function(){
                     box.stop(true,false);
                 });
-                dom("#stop3").click(function(){
+                $("#stop3").click(function(){
                     box.stop(true,true);
                 });
             });
@@ -100,23 +100,23 @@
                 </ul>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
       $.require("ready,event,fx",function(){
-        var box = dom(".test");
-        dom("#start").click(function(){
+        var box = $(".test");
+        $("#start").click(function(){
           box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
         });
-        dom("#reset").click(function(){
+        $("#reset").click(function(){
           box.width(10).height(10);
         });
-        dom("#stop0").click(function(){
+        $("#stop0").click(function(){
           box.stop(false,false);
         });
-        dom("#stop1").click(function(){
+        $("#stop1").click(function(){
           box.stop(false,true);
         });
-        dom("#stop2").click(function(){
+        $("#stop2").click(function(){
           box.stop(true,false);
         });
-        dom("#stop3").click(function(){
+        $("#stop3").click(function(){
           box.stop(true,true);
         });
       });

@@ -54,7 +54,7 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,node,event,css",function(){
-                dom("#sample1 tbody tr").each(function(){//隔行变色
+                $("#sample1 tbody tr").each(function(){//隔行变色
                     if(this.rowIndex %2 ){
                         this.className = "even"
                     }else{
@@ -62,51 +62,51 @@
                     }
                 });
                 //不能监听TR元素，只能怎么也选不中TR元素，只能监听TD，进而反选TR
-                dom("#sample1").delegate("tbody td","hover", function(e){//掠过变色
-                    dom(this).closest("tr").toggleClass("hover");
+                $("#sample1").delegate("tbody td","hover", function(e){//掠过变色
+                    $(this).closest("tr").toggleClass("hover");
                 });
                 
-                dom("fieldset").delegate(".sample2","click",function(e){
-                    dom(this).after('<p class="sample2">这是动态生成的段落！</p>');
+                $("fieldset").delegate(".sample2","click",function(e){
+                    $(this).after('<p class="sample2">这是动态生成的段落！</p>');
                 });
                 function log(first,type){
                     if(arguments.length == 1){
                         type = first;
                         first = "";
                     }
-                    dom(".show_c").append(first+"测试"+type+"的事件代理<br/>");
+                    $(".show_c").append(first+"测试"+type+"的事件代理<br/>");
                 }
-                dom("body").delegate(".test_submit","submit",function(e){
+                $("body").delegate(".test_submit","submit",function(e){
                     log(e.type);
                     return false;
                 });
-                dom("body").delegate(".textinputchange","change",function(e){
+                $("body").delegate(".textinputchange","change",function(e){
                     log('text',e.type);
                 });
-                dom("body").delegate(".passwordchange","change",function(e){
+                $("body").delegate(".passwordchange","change",function(e){
                     log('password',e.type);
                 });
-                dom("body").delegate(".textareachange","change",function(e){
+                $("body").delegate(".textareachange","change",function(e){
                     log('textarea',e.type);
                 });
 
-                dom("body").delegate(".radiochange","change",function(e){
+                $("body").delegate(".radiochange","change",function(e){
                     log('radio',e.type);
                 });
-                dom("body").delegate(".checkboxchange","change",function(e){
+                $("body").delegate(".checkboxchange","change",function(e){
                     log('checkbox',e.type);
                 });
-                dom("body").delegate(".test_submit","reset",function(e){
+                $("body").delegate(".test_submit","reset",function(e){
                     log('button',e.type);
                 });
-                dom("body").delegate(".addoption","click",function(e){
+                $("body").delegate(".addoption","click",function(e){
                     //  var opt = document.createElement("option");
-                    //  opt.text = opt.label = opt.value = Math.floor(Math.random()*16777215).toString(16);//label Fix IE  
-                    //  dom(".selectchange").append(opt)
-                    var rand = Math.floor(Math.random()*(-1>>>0)).toString(36) ;
-                    dom("<option>text</option>").appendTo(".selectchange").text(rand).val(rand)
+                    //  opt.text = opt.label = opt.value = Math.floor(Math.ran$()*16777215).toString(16);//label Fix IE  
+                    //  $(".selectchange").append(opt)
+                    var rand = Math.floor(Math.ran$()*(-1>>>0)).toString(36) ;
+                    $("<option>text</option>").appendTo(".selectchange").text(rand).val(rand)
                 });
-                dom("body").delegate(".selectchange","change",function(e){
+                $("body").delegate(".selectchange","change",function(e){
                     log('select',e.type);
                 });
                 
@@ -208,7 +208,7 @@
                 </table>
                 <pre class="brush:js;gutter:false;toolbar:false">
              $.require("ready,node,event,css",function(){
-                dom("#sample1 tbody tr").each(function(){//隔行变色
+                $("#sample1 tbody tr").each(function(){//隔行变色
                     if(this.rowIndex %2 ){
                         this.className = "even"
                     }else{
@@ -216,8 +216,8 @@
                     }
                 });
                 //不能监听TR元素，只能怎么也选不中TR元素，只能监听TD，进而反选TR
-                dom("#sample1").delegate("tbody td","hover", function(e){//掠过变色
-                    dom(this).closest("tr").toggleClass("hover");//this为匹配"tbody td"这个CSS表达式的元素节点
+                $("#sample1").delegate("tbody td","hover", function(e){//掠过变色
+                    $(this).closest("tr").toggleClass("hover");//this为匹配"tbody td"这个CSS表达式的元素节点
                 });
             });
                 </pre>
@@ -227,8 +227,8 @@
                 <p class="sample2"> 请点击我 </p>
                 <pre class="brush:js;gutter:false;toolbar:false">
            $.require("ready,node,event,css",function(){
-                dom("fieldset").delegate(".sample2","click",function(e){
-                     dom(this).after('&lt;p class="sample2"&gt;这是动态生成的段落！&lt;/p&gt;');
+                $("fieldset").delegate(".sample2","click",function(e){
+                     $(this).after('&lt;p class="sample2"&gt;这是动态生成的段落！&lt;/p&gt;');
                 });
             });
                 </pre>
@@ -267,28 +267,28 @@
                         type = first;
                         first = "";
                     }
-                    dom(".show_c").append(first+"测试"+type+"的事件代理&lt;br/&gt;");
+                    $(".show_c").append(first+"测试"+type+"的事件代理&lt;br/&gt;");
                 }
-                dom("body").delegate(".test_submit","submit",function(e){
+                $("body").delegate(".test_submit","submit",function(e){
                     log(e.type);
                     return false;
                 });
-                dom("body").delegate(".textinputchange","change",function(e){
+                $("body").delegate(".textinputchange","change",function(e){
                     log('text',e.type);
                 });
-                dom("body").delegate(".passwordchange","change",function(e){
+                $("body").delegate(".passwordchange","change",function(e){
                     log('password',e.type);
                 });
-                dom("body").delegate(".textareachange","change",function(e){
+                $("body").delegate(".textareachange","change",function(e){
                     log('textarea',e.type);
                 });
-                dom("body").delegate(".selectchange","change",function(e){
+                $("body").delegate(".selectchange","change",function(e){
                     log('select',e.type);
                 });
-                dom("body").delegate(".radiochange","change",function(e){
+                $("body").delegate(".radiochange","change",function(e){
                     log('radio',e.type);
                 });
-                dom("body").delegate(".checkboxchange","change",function(e){
+                $("body").delegate(".checkboxchange","change",function(e){
                     log('checkbox',e.type);
                 });
             });

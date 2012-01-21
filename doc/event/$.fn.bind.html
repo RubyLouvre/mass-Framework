@@ -32,7 +32,7 @@
 
             <p>然后我们为里面的A链接绑定一个单击事件</p>
             <pre class="brush:js;gutter:false;toolbar:false">
-                dom('a').bind('click', function() { alert("发生点击事件!") });
+                $('a').bind('click', function() { alert("发生点击事件!") });
             </pre>
             <p>然后单击它</p>
             <center><img src="../public/styles/event_dom_fn_bind_click.png"/></center>
@@ -41,25 +41,25 @@
             <p>好了，我们再看看这几个方法是怎么实现的</p>
             <h4>.bind()</h4>
             <pre class="brush:js;gutter:false;toolbar:false">
-                dom('a').bind('click', function() { alert("发生点击事件!") });
+                $('a').bind('click', function() { alert("发生点击事件!") });
             </pre>
             <p>它会把当前文档中的所有a链接找出来，逐个绑定单击事件，如果页面上有十个a链接，它会绑定十次。</p>
             <h4>.live()</h4>
             <pre class="brush:js;gutter:false;toolbar:false">
-                dom('a').live('click', function() { alert("发生点击事件!") });
+                $('a').live('click', function() { alert("发生点击事件!") });
             </pre>
             <p>它会把这个单击事件绑定到文档对象上,然后把a作为匹配器，每当页面发生事件时，如果这事件能传播到文档对象（不管是通过冒泡还是捕获），
                 总之，我们能取得事件消息对象就行了，然后再取得其中的事件源对象，然后看它的事件类型是否为click，
                 元素本身是否匹配a这个CSS表达式，如果都满足则触发这个回调。因此无论页面上有多少个链接，只需要绑定一个监听器。</p>
             <h4>.delegate()</h4>
             <pre class="brush:js;gutter:false;toolbar:false">
-               dom('.container').delegate('a', 'click', function() {alert("发生点击事件!") });
+               $('.container').delegate('a', 'click', function() {alert("发生点击事件!") });
             </pre>
             <p>它会把单击事件绑定到.container元素上，然后把a作为匹配器，每当页面发生事件时，如果这事件能传播到这些类名为
                 container元素（不管是通过冒泡还是捕获），
                 总之，我们能取得事件消息对象就行了，然后再取得其中的事件源对象，然后看它的事件类型是否为click，
                 元素本身是否匹配a这个CSS表达式，如果都满足则触发这个回调。因此delegate与live的行为是极其相似的， 
-                dom('a').live('click', fn) 相当于dom(document).live('a','click',fn)。由于delegate能同时指定两个CSS表达式，因此它更为灵活。
+                $('a').live('click', fn) 相当于$(document).live('a','click',fn)。由于delegate能同时指定两个CSS表达式，因此它更为灵活。
                 由于delegate是把监听器绑定到DOM树中间，而不是顶层的文档对象上，因此冒泡（或捕获）的路径更短，
                 需要检测的节点就更少。因此对非常复杂的页面，使用它来添加事件，能大大提高性能。
             </p>
@@ -68,22 +68,22 @@
                 但delegate不能绑定在head来监听。因为页面的内容都是由body的孩子传播上来的。 </p>
             <p>但要注意，live方法要求我们提供一个明确的CSS表达式用于匹配。如下面的例子，能正常工作：</p>
             <pre class="brush:js;gutter:false;toolbar:false">
-                dom("li a").live(...)
-                dom("li a").slice(3).live(...);
-                dom("li a").first().live(...)
-                dom("li a").gt(1).live(...)//slice first last eq gt lt都是切片操作，不会改变内部的selector属性
+                $("li a").live(...)
+                $("li a").slice(3).live(...);
+                $("li a").first().live(...)
+                $("li a").gt(1).live(...)//slice first last eq gt lt都是切片操作，不会改变内部的selector属性
             </pre>
             <p>但下面几种就不行了:</p>
             <pre class="brush:js;gutter:false;toolbar:false">
-                dom("a", someElement).live(...)
-                dom("a").parent().live(...)
-                dom("a").next().live(...)
-                dom("a").children().live(...)//这些操作会寻找近邻节点构建交的实例，其selector已不是a了！
+                $("a", someElement).live(...)
+                $("a").parent().live(...)
+                $("a").next().live(...)
+                $("a").children().live(...)//这些操作会寻找近邻节点构建交的实例，其selector已不是a了！
             </pre>
             <p>但不管怎么说，在doc Framework中，事件代理已发展得很完善，通过事件冒充得手段，成功模块老式IE那些不能冒泡的事件
                 如change, submit, reset，focus, blur。并且delegate的第一个参数并不限是一个CSS表达式，可以为函数。可以让用户制定规则
                 来匹配元素。因此强烈建议使用delegate与live代替bind(on)。</p>
-            <p>虽然delegate是基于bind(on)上实现的，但它内部还是做了一些工作，让它比dom('.container').on( 'click', fn, 'a' })快。</p>
+            <p>虽然delegate是基于bind(on)上实现的，但它内部还是做了一些工作，让它比$('.container').on( 'click', fn, 'a' })快。</p>
             <p> 相应源码：</p>
             <pre class="brush:javascript;gutter:false;toolbar:true;collapse:true;">
              on: function( types, fn, selector, times ) {
@@ -108,7 +108,7 @@
             },
 
             live: function( types,  fn, times ) {
-                dom( this.ownerDocument ).on( types, fn, this.selector,times );
+                $( this.ownerDocument ).on( types, fn, this.selector,times );
                 return this;
             },
 

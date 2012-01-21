@@ -13,11 +13,11 @@
         <p>Paragraph - <span>Scroll happened!</span></p>
         <script>
             $.require("ready,event,fx",function(){
-                dom("p").clone().appendTo("body");
-                dom("p").clone().appendTo("body");
-                dom("p").clone().appendTo("body");
-                dom(window).scroll(function () { 
-                    dom("span").show().fadeOut(2000); 
+                $("p").clone().appendTo("body");
+                $("p").clone().appendTo("body");
+                $("p").clone().appendTo("body");
+                $(window).scroll(function () { 
+                    $("span").show().fadeOut(2000); 
                 });
             })
            

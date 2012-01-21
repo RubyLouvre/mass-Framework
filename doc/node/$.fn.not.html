@@ -22,19 +22,19 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,css",function(){
-                    dom(".sample1 li").not(":nth-child(even)").css("color","red")
+                    $(".sample1 li").not(":nth-child(even)").css("color","red")
                 });
             }
             var exec2 = function(){
                 $.require("ready,css",function(){
-                    dom(".sample2 li").not(function(el,i){
-                        return dom("strong", el).length ;
+                    $(".sample2 li").not(function(el,i){
+                        return $("strong", el).length ;
                     }).css("color","red")
                 });
             }
             var exec3 = function(){
                 $.require("ready,css",function(){
-                    dom(".sample3 div")
+                    $(".sample3 div")
                     .css("background", "#c8ebcc")
                     .not(".middle")
                     .css("border-color", "red");
@@ -80,7 +80,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,css",function(){
-                    dom(".sample1 li").not(":nth-child(even)").css("color","red")
+                    $(".sample1 li").not(":nth-child(even)").css("color","red")
                 });
                 </pre>
 
@@ -112,8 +112,8 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,css",function(){
-                    dom(".sample2 li").not(function(el,i){
-                         return dom("strong", el).length 
+                    $(".sample2 li").not(function(el,i){
+                         return $("strong", el).length 
                     }).css("color","red")
                 });
                 </pre>
@@ -146,7 +146,7 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,css",function(){
-                    dom(".sample3 div")
+                    $(".sample3 div")
                     .css("background", "#c8ebcc")
                     .not(".middle")
                     .css("border-color", "red");
