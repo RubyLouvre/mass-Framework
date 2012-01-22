@@ -7,14 +7,28 @@ $.define("css", node$css_fix, function(){
     cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
     rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI, deg2rad = Math.PI/180,
-    rcap = /-([a-z])/g,capfn = function(_,$1){
-        return $1.toUpperCase();
-    },prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
+    prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
     adapter = $.cssAdapter = $.cssAdapter || {};
     function cssCache(name){
-        return cssCache[name] || (cssCache[name] = name == 'float' ? cssFloat : name.replace(rcap, capfn));
+        return cssCache[name] || (cssCache[name] = name == 'float' ? cssFloat : $.String.camelize.call(name));
     }
-
+    var shortcuts = {
+        c:          "color",
+        h:          "height",
+        o:          "opacity",
+        r:          "rotate",
+        w:          "width",
+        x:          "left",
+        y:          "top",
+        fs:         "fontSize",
+        st:         "scrollTop",
+        sl:         "scrollLeft",
+        sx:         "scaleX",
+        sy:         "scaleY",
+        tx:         "translateX",
+        ty:         "translateY",
+        bgc:        "backgroundColor"
+    }
     //http://www.w3.org/TR/2009/WD-css3-2d-transforms-20091201/#introduction
     $.mix($, {
         cssCache:cssCache,
@@ -24,7 +38,7 @@ $.define("css", node$css_fix, function(){
                 return name;
             target = target || $.html.style;
             for (var i=0, n = prefixes.length; i < n; i++) {
-                test = (prefixes[i] + name).replace(rcap,capfn);
+                test = $.String.camelize.call(prefixes[i] + name)
                 if(test in target){
                     return (cssCache[name] = test);
                 }
@@ -53,6 +67,7 @@ $.define("css", node$css_fix, function(){
             }
             for(name in props){
                 value = props[name];
+                name = shortcuts[name];
                 name = cssCache(name);
                 fn = adapter[name+":set"] || adapter["_default:set"];
                 if ( isFinite( value ) && !$.cssNumber[ name ] ) {
@@ -284,13 +299,27 @@ $.define("css", node$css_fix, function(){
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-            var underscored = name == "cssFloat" ? "float" : name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase();
+            var underscored = name == "cssFloat" ? "float" :
+            name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
+            rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
+            rmargin = /^margin/, style = node.style ;
+
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
-                    ret = node.style[name];//如果还没有加入DOM树，则取内联样式
+                    ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
             }
+            // A tribute to the "awesome hack by Dean Edwards"
+            // WebKit uses "computed value (percentage if specified)" instead of "used value" for margins
+            // which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
+            if ( !$.support.pixelMargin && computedStyle && rmargin.test( name ) && rnumnonpx.test( ret ) ) {
+                var width = style.width;
+                style.width = ret;
+                ret = computedStyle.width;
+                style.width = width;
+            }
+
             return ret === "" ? "auto" : ret;
         };
     }
@@ -549,6 +578,9 @@ $.define("css", node$css_fix, function(){
             return  $.css(this, "rotate", value) ;
         }
     });
+    "margin,padding,borderWidth".replace(/([a-z]+)([^,]*)/g,function(s,a,b){
+        // console.log([a,b])
+        })
 
 });
 

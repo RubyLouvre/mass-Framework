@@ -1,6 +1,6 @@
 
-dom.define("attr","support,node", function(support){
-   // dom.log("已加载attr模块")
+$.define("attr","support,node", function(support){
+   // $.log("已加载attr模块")
     var global = this, DOC = global.document, rclass = /(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
@@ -13,10 +13,10 @@ dom.define("attr","support,node", function(support){
     getValType = function(node){
         return "form" in node && (valOne[node.tagName] || node.type)
     }
-    dom.implement({
+    $.implement({
         /**
              *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
-             *  如dom("body").addClass("aaa");dom("body").addClass("aaa bbb");
+             *  如$("body").addClass("aaa");$("body").addClass("aaa bbb");
              *  <a href="http://www.cnblogs.com/rubylouvre/archive/2011/01/27/1946397.html">相关链接</a>
              */
         addClass:function(value){
@@ -37,7 +37,7 @@ dom.define("attr","support,node", function(support){
         hasClass: function( value, every ) {
             var method = every === true ? "every" : "some"
             var rclass = new RegExp('(\\s|^)'+value+'(\\s|$)');//判定多个元素，正则比indexOf快点
-            return dom.slice(this)[method](function(el){
+            return $.slice(this)[method](function(el){
                 return "classList" in el ? el.classList.contains(value):
                 (el.className || "").match(rclass);
             });
@@ -69,7 +69,7 @@ dom.define("attr","support,node", function(support){
             return this.each(function(el) {
                 i = 0;
                 if(el.nodeType === 1){
-                    var self = dom(el);
+                    var self = $(el);
                     if(type == "string" ){
                         while ( (className = classNames[ i++ ]) ) {
                             self[ self.hasClass( className ) ? "removeClass" : "addClass" ]( className );
@@ -97,11 +97,11 @@ dom.define("attr","support,node", function(support){
             return this;
         },
         val : function( value ) {
-            var  node = this[0], adapter = dom.valAdapter, fn =  dom.valAdapter["option:get"];
+            var  node = this[0], adapter = $.valAdapter, fn =  $.valAdapter["option:get"];
             if ( !arguments.length ) {//读操作
                 if ( node && node.nodeType == 1 ) {
                     //处理select-multiple, select-one,option,button
-                    var ret =  (adapter[ getValType(node)+":get" ] || dom.propAdapter[ "@xml:get" ])(node, "value" ,fn);
+                    var ret =  (adapter[ getValType(node)+":get" ] || $.propAdapter[ "@xml:get" ])(node, "value" ,fn);
                     return  typeof ret === "string" ? ret.replace(rreturn, "") : ret == null ? "" : ret;
                 }
                 return undefined;
@@ -118,21 +118,21 @@ dom.define("attr","support,node", function(support){
             }
             return this.each(function(node) {//写操作
                 if ( node.nodeType == 1 ) {
-                    (adapter[ getValType(node)+":set" ] || dom.propAdapter[ "@xml:set" ])(node,"value",value , fn);
+                    (adapter[ getValType(node)+":set" ] || $.propAdapter[ "@xml:set" ])(node,"value",value , fn);
                 }
             });
         },
         removeAttr: function( name ) {
-            name = dom.attrMap[ name ] || name;
+            name = $.attrMap[ name ] || name;
             var isBool = boolOne[name];
             return this.each(function(node) {
                 if(node.nodeType === 1){
-                    dom["@remove_attr"]( node, name, isBool );
+                    $["@remove_attr"]( node, name, isBool );
                 }
             });
         },
         removeProp: function( name ) {
-            name = dom.propMap[ name ] || name;
+            name = $.propMap[ name ] || name;
             return this.each(function() {
                 // try/catch handles cases where IE balks (such as removing a property on window)
                 try {
@@ -143,23 +143,23 @@ dom.define("attr","support,node", function(support){
         }
     });
         
-    "attr,prop".replace(dom.rword,function(method){
-        dom[method] = function( node, name, value ) { 
-            if(node  && (dom["@dispatcher"] in node )){
+    "attr,prop".replace($.rword,function(method){
+        $[method] = function( node, name, value ) {
+            if(node  && ($["@dispatcher"] in node )){
                 var isElement = "setAttribute" in node;
           
                 if ( !isElement ) {
                     method = "prop"
                 }
-                var notxml = !isElement || !dom.isXML(node);
+                var notxml = !isElement || !$.isXML(node);
                 //对于HTML元素节点，我们需要对一些属性名进行映射
                 var orig = name.toLowerCase()
-                name = notxml && dom[boolOne[name] ? "propMap" : method+"Map"][ name ] || name;
+                name = notxml && $[boolOne[name] ? "propMap" : method+"Map"][ name ] || name;
                   
-                var adapter = dom[method+"Adapter"];
+                var adapter = $[method+"Adapter"];
                 if ( value !== void 0 ){
                     if( method === "attr" && value === null){  //为元素节点移除特性
-                        return  dom["@remove_"+method]( node, name );
+                        return  $["@remove_"+method]( node, name );
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ (notxml ? "html" : "xml")+":set"])( node, name, value, orig );
                     }
@@ -168,13 +168,12 @@ dom.define("attr","support,node", function(support){
                 return (adapter[name+":get"] || adapter["@"+ (notxml ? "html" : "xml")+":get"])( node, name, '', orig );
             }
         };
-        dom.fn[method] = function( name, value ) {
-                
-            return dom.access( this, name, value, dom[method], dom[method]);
+        $.fn[method] = function( name, value ) {     
+            return $.access( this, name, value, $[method], $[method]);
         }
     });
         
-    dom.extend({
+    $.extend({
         attrMap:{
             tabindex: "tabIndex"
         },
@@ -190,12 +189,12 @@ dom.define("attr","support,node", function(support){
         //内部函数，原则上拒绝用户的调用
         "@remove_attr": function( node, name, isBool ) {
             var propName;
-            name = dom.attrMap[ name ] || name;
+            name = $.attrMap[ name ] || name;
             //如果支持removeAttribute，则使用removeAttribute
-            dom.attr( node, name, "" );
+            $.attr( node, name, "" );
             node.removeAttribute( name );
             // 确保bool属性的值为bool
-            if ( isBool && (propName = dom.propMap[ name ] || name) in node ) {
+            if ( isBool && (propName = $.propMap[ name ] || name) in node ) {
                 node[ propName ] = false;
             }
         },
@@ -253,7 +252,7 @@ dom.define("attr","support,node", function(support){
                     option = options[ i ];
                     //过滤所有disabled的option元素或其父亲是disabled的optgroup元素的孩子
                     if ( option.selected && (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) &&
-                        (!option.parentNode.disabled || !dom.type( option.parentNode, "OPTGROUP" )) ) {
+                        (!option.parentNode.disabled || !$.type( option.parentNode, "OPTGROUP" )) ) {
                         value = valOpt( option );
                         if ( one ) {
                             return value;
@@ -269,7 +268,7 @@ dom.define("attr","support,node", function(support){
                 return values;
             },
             "select:set": function( node, name, values, fn ) {
-                dom.slice(node.options).forEach(function(el){
+                $.slice(node.options).forEach(function(el){
                     el.selected = !!~values.indexOf( fn(el) );
                 });
                 if ( !values.length ) {
@@ -278,19 +277,19 @@ dom.define("attr","support,node", function(support){
             }
         }
     });
-    var attrAdapter = dom.attrAdapter,propAdapter = dom.propAdapter, valAdapter = dom.valAdapter;//attr方法只能获得两种值 string undefined
-    "get,set".replace(dom.rword,function(method){
+    var attrAdapter = $.attrAdapter,propAdapter = $.propAdapter, valAdapter = $.valAdapter;//attr方法只能获得两种值 string undefined
+    "get,set".replace($.rword,function(method){
         attrAdapter["@html:"+method] = attrAdapter["@xml:"+method];
         propAdapter["@html:"+method] = propAdapter["@xml:"+method];
         propAdapter["tabIndex:"+method] = attrAdapter["tabIndex:"+method];
     });
                
     //========================propAdapter 的相关修正==========================
-    var propMap = dom.propMap;
+    var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
     "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
     "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
-    prop.replace(dom.rword, function(name){
+    prop.replace($.rword, function(name){
         propMap[name.toLowerCase()] = name;
     });
 
@@ -300,7 +299,7 @@ dom.define("attr","support,node", function(support){
     propAdapter["tabIndex:get"] = attrAdapter["tabIndex:get"]
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.attrSelected ) {
-        dom.propAdapter[ "selected:get" ] = function( node ) {
+        $.propAdapter[ "selected:get" ] = function( node ) {
             var parent = node
             for(;!parent.add; parent.selectedIndex, parent = parent.parentNode){};
             return node.selected;
@@ -308,9 +307,9 @@ dom.define("attr","support,node", function(support){
     }    
         
     //========================attrAdapter 的相关修正==========================
-    var bools = dom["@bools"]
-    var boolOne = dom.oneObject( support.attrProp ? bools.toLowerCase() : bools );
-    bools.replace(dom.rword,function(method) {
+    var bools = $["@bools"]
+    var boolOne = $.oneObject( support.attrProp ? bools.toLowerCase() : bools );
+    bools.replace($.rword,function(method) {
         //bool属性在attr方法中只会返回与属性同名的值或undefined
         attrAdapter[method+":get"] = function(node, name){
             var attrNode, property =  node[ name ];
@@ -320,7 +319,7 @@ dom.define("attr","support,node", function(support){
         }
         attrAdapter[method+":set"] = function(node, name, value){
             if ( value === false ) {//value只有等于false才移除此属性，其他一切值都当作赋为true
-                dom["@remove_attr"]( node, name, true );
+                $["@remove_attr"]( node, name, true );
             } else {
                 if ( name in node ) {
                     node[ name ] = true;
@@ -334,7 +333,7 @@ dom.define("attr","support,node", function(support){
         //IE的getAttribute支持第二个参数，可以为 0,1,2,4
         //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效)。
         //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
-        "href,src,width,height,colSpan,rowSpan".replace(dom.rword,function(method ) {//
+        "href,src,width,height,colSpan,rowSpan".replace($.rword,function(method ) {//
             attrAdapter[ method + ":get" ] =  function( node,name ) {
                 var ret = node.getAttribute( name, 2 );
                 return ret === null ? undefined : ret;
@@ -354,17 +353,17 @@ dom.define("attr","support,node", function(support){
     if(!support.attrProp){
         //如果我们不能通过el.getAttribute("class")取得className,必须使用el.getAttribute("className")
         //又如formElement[name] 相等于formElement.elements[name]，会返回其辖下的表单元素， 这时我们就需要用到特性节点了
-        dom.mix( dom.attrMap , dom.propMap);//使用更全面的映射包
-        var fixSpecified = dom.oneObject("name,id")
+        $.mix( $.attrMap , $.propMap);//使用更全面的映射包
+        var fixSpecified = $.oneObject("name,id")
         valAdapter['button:get'] = attrAdapter["@html:get"] =  function( node, name,_,orig ) {//用于IE6/7
-            if(orig in dom.propMap){
+            if(orig in $.propMap){
                 return node[name];
             }
             var ret = node.getAttributeNode( name );//id与name的特性节点没有specified描述符，只能通过nodeValue判定
             return ret && (fixSpecified[ name ] ? ret.nodeValue !== "" : ret.specified) ?  ret.nodeValue : undefined;
         }
         valAdapter['button:set'] = attrAdapter["@html:set"] =  function( node, name,value,orig ) {
-            if(orig in dom.propMap){
+            if(orig in $.propMap){
                 return (node[name] = value);
             }
             var ret = node.getAttributeNode( name );
@@ -380,7 +379,7 @@ dom.define("attr","support,node", function(support){
             }
             attrAdapter["@html:set"]( node, name, value );
         };
-        "width,height".replace(dom.rword,function(attr){
+        "width,height".replace($.rword,function(attr){
             attrAdapter[attr+":set"] = function(node, name, value){
                 node.setAttribute( attr, value === "" ? "auto" : value+"");
             }
@@ -390,15 +389,15 @@ dom.define("attr","support,node", function(support){
     //=========================valAdapter 的相关修正==========================
     //checkbox的value默认为on，唯有Chrome 返回空字符串
     if ( !support.checkOn ) {
-        "radio,checkbox".replace(dom.rword,function(name) {
-            dom.valAdapter[ name + ":get" ] = function( node ) {
+        "radio,checkbox".replace($.rword,function(name) {
+            $.valAdapter[ name + ":get" ] = function( node ) {
                 return node.getAttribute("value") === null ? "on" : node.value;
             }
         });
     }
     //处理单选框，复选框在设值后checked的值
-    "radio,checkbox".replace(dom.rword,function(name) {
-        dom.valAdapter[ name + ":set" ] = function( node, name, value) {
+    "radio,checkbox".replace($.rword,function(name) {
+        $.valAdapter[ name + ":set" ] = function( node, name, value) {
             if ( Array.isArray( value ) ) {
                 return node.checked = !!~value.indexOf(node.value ) ;
             }
