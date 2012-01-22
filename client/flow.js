@@ -1,4 +1,4 @@
-dom.define("flow", function(){
+$.define("flow", function(){
     //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
     function OperateFlow(names,callback,reload){
         this.core = {};
@@ -9,7 +9,7 @@ dom.define("flow", function(){
         constructor:OperateFlow,
         bind:function(names,callback,reload){
             var  core = this.core, deps = {},args = [];
-            names.replace(dom.rword,function(name){
+            names.replace($.rword,function(name){
                 name = "####"+name
                 if(!core[name]){
                     core[name] ={
@@ -28,10 +28,10 @@ dom.define("flow", function(){
             callback.args = args;
             callback.reload = !!reload;//默认每次重新加载
         },
-        unbind : function(array,fn){//dom.multiUnind("aaa,bbb")
+        unbind : function(array,fn){//$.multiUnind("aaa,bbb")
             if(/string|number/.test(typeof array) ){
                 var tmp = []
-                (array+"").replace(dom.rword,function(name){
+                (array+"").replace($.rword,function(name){
                     tmp.push( "####"+name)
                 });
                 array = tmp;
@@ -93,7 +93,7 @@ dom.define("flow", function(){
             }
         }
     }
-    dom.flow  = function(names,callback,reload){//一个工厂方法
+    $.flow  = function(names,callback,reload){//一个工厂方法
         return new OperateFlow(names,callback,reload)
     }
 })

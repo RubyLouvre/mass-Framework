@@ -1,7 +1,7 @@
-﻿//数据请求模块
+//数据请求模块
 
-dom.define("ajax","node,dispatcher", function(){
-    //dom.log("已加载ajax模块");
+$.define("ajax","node,dispatcher", function(){
+    //$.log("已加载ajax模块");
     var global = this, DOC = global.document, r20 = /%20/g,
     rCRLF = /\r?\n/g,
     encode = global.encodeURIComponent,
@@ -32,16 +32,16 @@ dom.define("ajax","node,dispatcher", function(){
             return text != undefined ? text : ("xml" in xml ?  xml.xml: new XMLSerializer().serializeToString(xml));
         },
         xml : function(dummyXHR,text,xml){
-            return xml != undefined ? xml : dom.parseXML(text);
+            return xml != undefined ? xml : $.parseXML(text);
         },
         html : function(dummyXHR,text,xml){
-            return  dom.parseHTML(text);
+            return  $.parseHTML(text);
         },
         json : function(dummyXHR,text,xml){
-            return  dom.parseJSON(text);
+            return  $.parseJSON(text);
         },
         script: function(dummyXHR,text,xml){
-            dom.parseJS(text);
+            $.parseJS(text);
         }
     },
     accepts  = {
@@ -62,7 +62,7 @@ dom.define("ajax","node,dispatcher", function(){
  
     function normalizeOptions(o) {
         // deep mix
-        o = dom.Object.merge.call( {},defaultOptions, o);
+        o = $.Object.merge.call( {},defaultOptions, o);
         //判定是否跨域
         if (o.crossDomain == null) {
             var parts = rurl.exec(o.url.toLowerCase());
@@ -75,7 +75,7 @@ dom.define("ajax","node,dispatcher", function(){
         }
         //转换data为一个字符串
         if ( o.data && o.data !== "string") {
-            o.data = dom.param( o.data );
+            o.data = $.param( o.data );
         }
         //type必须为大写
         o.type = o.type.toUpperCase();
@@ -92,15 +92,15 @@ dom.define("ajax","node,dispatcher", function(){
         return o;
     }
  
-    "get post".replace(dom.rword,function(method){
-        dom[ method ] = function( url, data, callback, type ) {
+    "get post".replace($.rword,function(method){
+        $[ method ] = function( url, data, callback, type ) {
             // shift arguments if data argument was omitted
-            if ( dom.isFunction( data ) ) {
+            if ( $.isFunction( data ) ) {
                 type = type || callback;
                 callback = data;
                 data = undefined;
             }
-            return dom.ajax({
+            return $.ajax({
                 type: method,
                 url: url,
                 data: data,
@@ -111,21 +111,21 @@ dom.define("ajax","node,dispatcher", function(){
  
     });
  
-    dom.mix(dom,{
+    $.mix(dom,{
         getScript: function( url, callback ) {
-            return dom.get( url, null, callback, "script" );
+            return $.get( url, null, callback, "script" );
         },
  
         getJSON: function( url, data, callback ) {
-            return dom.get( url, data, callback, "json" );
+            return $.get( url, data, callback, "json" );
         },
         upload: function(url, form, data, callback, dataType) {
-            if (dom.isFunction(data)) {
+            if ($.isFunction(data)) {
                 dataType = callback;
                 callback = data;
                 data = undefined;
             }
-            return dom.ajax({
+            return $.ajax({
                 url:url,
                 type:'post',
                 dataType:dataType,
@@ -135,14 +135,14 @@ dom.define("ajax","node,dispatcher", function(){
             });
         },
         serialize : function(form) {
-            return dom.param(dom.serializeArray(form));
+            return $.param($.serializeArray(form));
         },
         serializeArray : function(form){
             // 不直接转换form.elements，防止以下情况：   <form > <input name="elements"/><input name="test"/></form>
-            var elements = dom.slice(form||[]), ret = []
+            var elements = $.slice(form||[]), ret = []
             elements.forEach(function(elem){
                 if( elem.name && !elem.disabled && ( "checked" in elem ? elem.checked : 1 )){
-                    var val = dom( elem ).val();
+                    var val = $( elem ).val();
                     if(Array.isArray(val)){
                         val.forEach(function(value){
                             ret.push({
@@ -175,13 +175,13 @@ dom.define("ajax","node,dispatcher", function(){
                         for ( var i = 0, length = obj.length; i < length; i++ ) {
                             buildParams( obj[i], prefix );
                         }
-                    } else if( dom.isPlainObject(obj) ) {
+                    } else if( $.isPlainObject(obj) ) {
                         for ( var j in obj ) {
                             var postfix = ((j.indexOf("[]") > 0) ? "[]" : ""); // move the brackets to the end (if applicable)
                             buildParams(obj[j], (prefix ? (prefix+"["+j.replace("[]", "")+"]"+postfix) : j) );
                         }
                     } else {
-                        add( prefix, dom.isFunction(obj) ? obj() : obj );
+                        add( prefix, $.isFunction(obj) ? obj() : obj );
                     }
                 }
                 buildParams(object);
@@ -190,13 +190,13 @@ dom.define("ajax","node,dispatcher", function(){
         }
     });
  
-    var ajax = dom.ajax = function(object) {
+    var ajax = $.ajax = function(object) {
         if (!object.url) {
             return undefined;
         }
         var options = normalizeOptions(object),//规整化参数对象
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
-        dummyXHR = new dom.jXHR(options),
+        dummyXHR = new $.jXHR(options),
         dataType = options.dataType;
  
         if(options.form && options.form.nodeType ==1){
@@ -223,7 +223,7 @@ dom.define("ajax","node,dispatcher", function(){
             dummyXHR.setRequestHeader(i, options.headers[ i ]);
         }
  
-        "Complete Success Error".replace(dom.rword, function(name){
+        "Complete Success Error".replace($.rword, function(name){
             var method = name.toLowerCase();
             dummyXHR[method] = dummyXHR["on"+name];
             if(typeof options[method] === "function"){
@@ -247,22 +247,22 @@ dom.define("ajax","node,dispatcher", function(){
             if (dummyXHR.status < 2) {
                 dummyXHR.callback(-1, e);
             } else {
-                dom.log(e);
+                $.log(e);
             }
         }
  
         return dummyXHR;
     }
  //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    dom.mix(ajax, dom.dispatcher);
+    $.mix(ajax, $.dispatcher);
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
          * jXHR类,用于模拟原生XMLHttpRequest的所有行为
          */
-    dom.jXHR = dom.factory({
-        implement:dom.dispatcher,
+    $.jXHR = $.factory({
+        implement:$.dispatcher,
         init:function(option){
-            dom.mix(this, {
+            $.mix(this, {
                 responseData:null,
                 timeoutID:null,
                 responseText:null,
@@ -283,7 +283,7 @@ dom.define("ajax","node,dispatcher", function(){
         },
  
         fire: function(type){
-            var target = this, table = dom._data( target,"events") ,args = dom.slice(arguments,1);
+            var target = this, table = $._data( target,"events") ,args = $.slice(arguments,1);
             if(!table) return;
             var queue = table[type];
             if (  queue ) {
@@ -353,13 +353,13 @@ dom.define("ajax","node,dispatcher", function(){
                 } else {
                     var text = this.responseText, xml = this.responseXML,dataType = this.options.dataType;
                     try{
-                        dom.log(text)
+                        $.log(text)
                         this.responseData = converters[dataType](this, text, xml);
                         statusText = "success";
                         isSuccess = true;
-                        dom.log("dummyXHR.callback success");
+                        $.log("dummyXHR.callback success");
                     } catch(e) {
-                        dom.log("dummyXHR.callback parsererror")
+                        $.log("dummyXHR.callback parsererror")
                         statusText = "parsererror : " + e;
                     }
                 }
@@ -399,30 +399,30 @@ dom.define("ajax","node,dispatcher", function(){
     for(var i = 0 ,axo;axo = s[i++];){
         try{
             if(eval("new "+ axo)){
-                dom.xhr = new Function( "return new "+axo);
+                $.xhr = new Function( "return new "+axo);
                 break;
             }
         }catch(e){}
     }
-    if (dom.xhr) {
-        var nativeXHR = new dom.xhr(), allowCrossDomain = false;
+    if ($.xhr) {
+        var nativeXHR = new $.xhr(), allowCrossDomain = false;
         if ("withCredentials" in nativeXHR) {
             allowCrossDomain = true;
         }
         //添加通用XMLHttpRequest传送器
-        transports._default =  dom.factory({
+        transports._default =  $.factory({
             //发送请求
             send:function() {
                 var self = this,
                 dummyXHR = self.dummyXHR,
                 options = dummyXHR.options;
-                dom.log("XhrTransport.sending.....");
+                $.log("XhrTransport.sending.....");
                 if (options.crossDomain && !allowCrossDomain) {
-                    dom.error("do not allow crossdomain xhr !");
+                    $.error("do not allow crossdomain xhr !");
                     return;
                 }
  
-                var nativeXHR = new dom.xhr(), i;
+                var nativeXHR = new $.xhr(), i;
                 self.xhr = nativeXHR;
                 if (options.username) {
                     nativeXHR.open(options.type, options.url, options.async, options.username, options.password)
@@ -442,7 +442,7 @@ dom.define("ajax","node,dispatcher", function(){
                         nativeXHR.setRequestHeader(i, dummyXHR.requestHeaders[ i ]);
                     }
                 } catch(e) {
-                    dom.log(" nativeXHR setRequestHeader occur error ");
+                    $.log(" nativeXHR setRequestHeader occur error ");
                 }
  
                 nativeXHR.send(options.hasContent && options.data || null);
@@ -465,7 +465,7 @@ dom.define("ajax","node,dispatcher", function(){
                 try {
                     var self = this,nativeXHR = self.xhr, dummyXHR = self.dummyXHR;
                     if (isAbort || nativeXHR.readyState == 4) {
-                        nativeXHR.onreadystatechange = dom.noop;
+                        nativeXHR.onreadystatechange = $.noop;
                         if (isAbort) {
                             // 完成以后 abort 不要调用
                             if (nativeXHR.readyState !== 4) {
@@ -502,8 +502,8 @@ dom.define("ajax","node,dispatcher", function(){
                         }
                     }
                 } catch (firefoxAccessException) {
-                    dom.log(firefoxAccessException)
-                    nativeXHR.onreadystatechange = dom.noop;
+                    $.log(firefoxAccessException)
+                    nativeXHR.onreadystatechange = $.noop;
                     if (!isAbort) {
                         dummyXHR.callback(-1, firefoxAccessException);
                     }
@@ -513,15 +513,15 @@ dom.define("ajax","node,dispatcher", function(){
  
     }
     //【script节点】传送器，只用于跨域的情况
-    transports.script = dom.factory({
+    transports.script = $.factory({
         send:function() {
             var self = this,
             dummyXHR = self.dummyXHR,
             options = dummyXHR.options,
-            head = dom.head,
+            head = $.head,
             script = self.script = DOC.createElement("script");
             script.async = "async";
-            dom.log("ScriptTransport.sending.....");
+            $.log("ScriptTransport.sending.....");
             if (options.charset) {
                 script.charset = options.charset
             }
@@ -537,7 +537,7 @@ dom.define("ajax","node,dispatcher", function(){
         _callback:function(event, isAbort) {
             var node = this.script,
             dummyXHR = this.dummyXHR;
-            if (isAbort || dom.rreadystate.test(node.readyState)  || event == "error"  ) {
+            if (isAbort || $.rreadystate.test(node.readyState)  || event == "error"  ) {
                 node.onerror = node.onload = node.onreadystatechange = null;
                 var parent = node.parentNode;
                 if(parent && parent.nodeType === 1){
@@ -559,16 +559,16 @@ dom.define("ajax","node,dispatcher", function(){
     //http://www.decimage.com/web/javascript-cross-domain-solution-with-jsonp.html
     //JSONP请求，借用【script节点】传送器
     converters["script json"] = function(dummyXHR){
-        return dom["jsonp"+ dummyXHR.uniqueID ]();
+        return $["jsonp"+ dummyXHR.uniqueID ]();
     }
     ajax.bind("start", function(e, dummyXHR, url, jsonp) {
-        dom.log("jsonp start...");
+        $.log("jsonp start...");
         var jsonpCallback = "jsonp"+dummyXHR.uniqueID;
         dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + DOC.URL.replace(/(#.+|\W)/g,'')+"."+jsonpCallback;
         dummyXHR.options.dataType = "script json";
         //将后台返回的json保存在惰性函数中
-        global.dom[jsonpCallback]= function(json) {
-            global.dom[jsonpCallback] = function(){
+        global.$[jsonpCallback]= function(json) {
+            global.$[jsonpCallback] = function(){
                 return json;
             };
         };
@@ -576,7 +576,7 @@ dom.define("ajax","node,dispatcher", function(){
  
     function createIframe(dummyXHR, transport) {
         var id = "iframe-upload-"+dummyXHR.uniqueID;
-        var iframe = dom.parseHTML("<iframe " +
+        var iframe = $.parseHTML("<iframe " +
             " id='" + id + "'" +
             " name='" + id + "'" +
             " style='display:none'/>").firstChild;
@@ -587,7 +587,7 @@ dom.define("ajax","node,dispatcher", function(){
     function addDataToForm(data, form) {
         var input = DOC.createElement("input"), ret = [];
         input.type = 'hidden';
-        dom.serializeArray(data).forEach(function(obj){
+        $.serializeArray(data).forEach(function(obj){
             var elem =  input.cloneNode(true);
             elem.name = obj.name;
             elem.value = obj.value;
@@ -598,7 +598,7 @@ dom.define("ajax","node,dispatcher", function(){
     }
     //【iframe】传送器，专门用于上传
     //http://www.profilepicture.co.uk/tutorials/ajax-file-upload-xmlhttprequest-level-2/ 上传
-    transports.iframe = dom.factory({
+    transports.iframe = $.factory({
         send:function() {
             var self = this,
             dummyXHR = self.dummyXHR,
@@ -625,8 +625,8 @@ dom.define("ajax","node,dispatcher", function(){
             form.enctype = "multipart/form-data";
             this.fields = options.data ? addDataToForm(options.data, form) : [];
             this.form = form;//一个表单元素
-            dom.log("iframe transport...");
-            dom(iframe).bind("load",this._callback).bind("error",this._callback);
+            $.log("iframe transport...");
+            $(iframe).bind("load",this._callback).bind("error",this._callback);
             form.submit();
         },
  
@@ -637,7 +637,7 @@ dom.define("ajax","node,dispatcher", function(){
             if (!transport) {
                 return;
             }
-            dom.log("transports.iframe _callback")
+            $.log("transports.iframe _callback")
             var form = transport.form,
             eventType = event.type,
             dummyXHR = transport.dummyXHR;
@@ -670,12 +670,12 @@ dom.define("ajax","node,dispatcher", function(){
             transport.fields.forEach(function(elem){
                 elem.parentNode.removeChild(elem);
             });
-            dom(iframe).unbind("load",transport._callback).unbind("error",transport._callback);
+            $(iframe).unbind("load",transport._callback).unbind("error",transport._callback);
             iframe.clearAttributes &&  iframe.clearAttributes();
             setTimeout(function() {
                 // Fix busy state in FF3
                 iframe.parentNode.removeChild(iframe);
-                dom.log("iframe.parentNode.removeChild(iframe)")
+                $.log("iframe.parentNode.removeChild(iframe)")
             }, 0);
  
         }
@@ -684,6 +684,6 @@ dom.define("ajax","node,dispatcher", function(){
 });
 
 //2011.8.31
-//将会传送器的abort方法上传到dom.jXHR.abort去处理
+//将会传送器的abort方法上传到$.jXHR.abort去处理
 //修复serializeArray的bug
 //对XMLHttpRequest.abort进行try...catch

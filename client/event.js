@@ -1,4 +1,4 @@
-﻿//http://davidwalsh.name/snackjs
+//http://davidwalsh.name/snackjs
 //http://microjs.com/
 //http://westcoastlogic.com/lawnchair/
 //https://github.com/madrobby/emile
@@ -7,11 +7,11 @@
 //  事件模块（包括伪事件对象，事件绑定与事件代理）
 //==========================================
    
-dom.define("event", "node,target",function(){
-    // dom.log("加载event模块成功");
+$.define("event", "node,target",function(){
+    // $.log("加载event模块成功");
     var global = this, DOC = global.document, types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
-    dom.eventSupport = function( eventName,el ) {
+    $.eventSupport = function( eventName,el ) {
         el = el || DOC.createElement("div");
         eventName = "on" + eventName;
         var ret = eventName in el;
@@ -23,7 +23,7 @@ dom.define("event", "node,target",function(){
         return ret;
     };
 
-    var system = dom.event, specials = system.special = {
+    var system = $.event, specials = system.special = {
         focus: {
             delegateType: "focusin"
         },
@@ -34,7 +34,7 @@ dom.define("event", "node,target",function(){
         beforeunload: {
             setup: function(src, selector, fn ) {
                 // We only want to do this special case on windows
-                if ( dom.type(src, "Window") ) {
+                if ( $.type(src, "Window") ) {
                     src.onbeforeunload = fn;
                 }
             },
@@ -44,7 +44,7 @@ dom.define("event", "node,target",function(){
                 }
             }
         }
-    }, rword = dom.rword;
+    }, rword = $.rword;
     function fixAndHandle(src, type, e){
         e = system.fix(e);
         e.type = type;
@@ -58,7 +58,7 @@ dom.define("event", "node,target",function(){
     "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g,function(_,orig, fix){
         specials[ orig ]  = {
             setup:function(src){//使用事件冒充
-                dom._data(src, orig+"_handle",dom.bind(src, fix, function(event){
+                $._data(src, orig+"_handle",$.bind(src, fix, function(event){
                     var parent = event.relatedTarget;
                     try {
                         while ( parent && parent !== src ) {
@@ -71,7 +71,7 @@ dom.define("event", "node,target",function(){
                 }));
             },
             teardown :function(){
-                dom.bind(this, fix, dom._data(orig+"_handle")|| dom.noop);
+                $.bind(this, fix, $._data(orig+"_handle")|| $.noop);
             }
         };
     });
@@ -84,9 +84,9 @@ dom.define("event", "node,target",function(){
         }
     }
     //模拟IE678的reset,submit,change的事件代理
-    var submitWhich = dom.oneObject("13,108");
-    var submitInput = dom.oneObject("submit,image");
-    var submitType  = dom.oneObject("text,password,textarea");
+    var submitWhich = $.oneObject("13,108");
+    var submitInput = $.oneObject("submit,image");
+    var submitType  = $.oneObject("text,password,textarea");
     if(!DOC.dispatchEvent){
         var changeEls = /^(?:textarea|input|select)$/i ,checkEls = /radio|checkbox/;
         var changeType = {
@@ -97,7 +97,7 @@ dom.define("event", "node,target",function(){
         }
         var changeNotify = function(e){
             if(e.propertyName === (changeType[this.type] || "value")){
-                var els = dom._data(this,"publisher");
+                var els = $._data(this,"publisher");
                 e = system.fix(e);
                 e.type = "change";
                 for(var i in els){
@@ -106,7 +106,7 @@ dom.define("event", "node,target",function(){
             }
         }
 
-        dom.mix(specials,{
+        $.mix(specials,{
             //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
             reset:{
                 setup: delegate(function(src){
@@ -136,24 +136,24 @@ dom.define("event", "node,target",function(){
             },
             change : {
                 setup: delegate(function(src){
-                    var subscriber = dom._data(src,"subscriber",{});//用于保存订阅者的UUID
-                    dom._data(src,"valuechange_setup", dom.bind( src, "beforeactivate", function( ) {
+                    var subscriber = $._data(src,"subscriber",{});//用于保存订阅者的UUID
+                    $._data(src,"valuechange_setup", $.bind( src, "beforeactivate", function( ) {
                         var target = event.srcElement;
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( changeEls.test(target.nodeName) && !subscriber[target.uniqueNumber] ) {
                             subscriber[target.uniqueNumber] = target;//表明其已注册
-                            var publisher = (dom._data(target,"publisher") || dom._data(target,"publisher",{}));
+                            var publisher = ($._data(target,"publisher") || $._data(target,"publisher",{}));
                             publisher[src.uniqueNumber] = src;//此孩子可能同时要向N个上司报告变化
                             system.bind.call(target,"propertychange._change",changeNotify );
                         }
                     }));
                 }),
                 teardown:delegate(function(src){
-                    dom.unbind( src, "beforeactive", dom._data(src,"valuechange_setup") || dom.noop);
-                    var els = dom.removeData(src,"subscriber",true) || {};
+                    $.unbind( src, "beforeactive", $._data(src,"valuechange_setup") || $.noop);
+                    var els = $.removeData(src,"subscriber",true) || {};
                     for(var i in els){
-                        dom.unbind(els[i],"._change");
-                        var publisher = dom._data(els[i],"publisher");
+                        $.unbind(els[i],"._change");
+                        var publisher = $._data(els[i],"publisher");
                         if(publisher){
                             delete publisher[src.uniqueNumber];
                         }
@@ -165,14 +165,14 @@ dom.define("event", "node,target",function(){
     }
     //我们可以通过change的事件代理来模拟YUI的valuechange事件
     //支持情况 FF2+ chrome 1+ IE9+ safari3+ opera9+11 The built-in Android browser,Dolphin HD browser
-    if(dom.eventSupport("input", DOC.createElement("input"))){
+    if($.eventSupport("input", DOC.createElement("input"))){
         //http://blog.danielfriesen.name/2010/02/16/html5-browser-maze-oninput-support/
         specials.change = {
             setup : delegate(function(src){
-                dom._data(src,"valuechange_setup",dom.bind( src, "input", function( e){
+                $._data(src,"valuechange_setup",$.bind( src, "input", function( e){
                     fixAndHandle(src, "change", e);
                 },true));
-                dom._data(src,"selectchange_setup",dom.bind( src, "change", function( e){
+                $._data(src,"selectchange_setup",$.bind( src, "change", function( e){
                     var type = e.target.type;
                     if(type && !submitType[type]){
                         system.handle.call(src, e);
@@ -180,19 +180,19 @@ dom.define("event", "node,target",function(){
                 },true))
             }),
             teardown: delegate(function(src){
-                dom.unbind( src, "input", dom._data(src,"valuechange_setup") || dom.noop);
-                dom.unbind( src, "change", dom._data(src,"selectchange_setup") || dom.noop);
+                $.unbind( src, "input", $._data(src,"valuechange_setup") || $.noop);
+                $.unbind( src, "change", $._data(src,"selectchange_setup") || $.noop);
             })
         }
     }
        
     //在标准浏览器里面模拟focusin
-    if(!dom.eventSupport("focusin")){
+    if(!$.eventSupport("focusin")){
         "focusin_focus,focusout_blur".replace(/(\w+)_(\w+)/g,function(_,$1, $2){
             var notice = 0, focusinNotify = function (e) {
                 var src = e.target
                 do{//模拟冒泡
-                    var events = dom._data( src,"events");
+                    var events = $._data( src,"events");
                     if(events && events[$1]){
                         fixAndHandle(src, $1, e);
                     }
@@ -238,7 +238,7 @@ dom.define("event", "node,target",function(){
         }
         return quick;
     }
-    dom.implement({
+    $.implement({
         toggle:function(/*fn1,fn2,fn3*/){
             var fns = [].slice.call(arguments), i = 0;
             return this.click(function(e){
@@ -286,11 +286,11 @@ dom.define("event", "node,target",function(){
         },
 
         live: function( types,  fn, times ) {
-            dom( this.ownerDocument ).on( types, fn, this.selector,times );
+            $( this.ownerDocument ).on( types, fn, this.selector,times );
             return this;
         },
         die: function( types, fn ) {
-            dom( this.ownerDocument ).off( types, fn, this.selector || "**" );
+            $( this.ownerDocument ).off( types, fn, this.selector || "**" );
             return this;
         },
         undelegate: function( selector, types, fn ) {
@@ -306,13 +306,13 @@ dom.define("event", "node,target",function(){
         fire: function(  ) {
             var args = arguments;
             return this.each(function() {
-                dom.event.fire.apply(this, args );
+                $.event.fire.apply(this, args );
             });
         }
     })
 
     types.replace(rword,function(type){
-        dom.fn[type] = function(callback){
+        $.fn[type] = function(callback){
             return callback?  this.bind(type, callback) : this.fire(type);
         }
     });
