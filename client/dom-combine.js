@@ -74,7 +74,7 @@
         v : version,
         "@name" : "dom",
         "@debug" : true,
-        "@dispatcher" : w3c ? "addEventListener" : "attachEvent",
+        "@target" : w3c ? "addEventListener" : "attachEvent",
         "@path":(function(url, scripts, node){
             scripts = DOC.getElementsByTagName("script");
             node = scripts[scripts.length - 1];
@@ -4069,7 +4069,7 @@
         
         "attr,prop".replace(dom.rword,function(method){
             dom[method] = function( node, name, value ) { 
-                if(node  && (dom["@dispatcher"] in node )){
+                if(node  && (dom["@target"] in node )){
                     var isElement = "setAttribute" in node;
           
                     if ( !isElement ) {
@@ -4361,7 +4361,7 @@
                 //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
                 //把需要的数据储存到里面,而现在我们就把一个叫@events的对象储放都它里面,
                 //而这个@event的表将用来放置各种事件类型与对应的回调函数
-                var target = this, events = dom._data( target) ,emitter =  dom["@dispatcher"] in target,
+                var target = this, events = dom._data( target) ,emitter =  dom["@target"] in target,
                 num = times || selector, all, tns ,type, namespace, special, handlerObj, handlers, fn;
                 if(target.nodeType === 3 || target.nodeType === 8 || !types ||  !handler  || !events) return ;
                 selector = selector && selector.length ? selector : false;
@@ -4411,7 +4411,7 @@
             unbind: function( types, handler, selector ) {
                 var target = this, events = dom._data( target,"events");
                 if(!events) return;
-                var t, tns, type, namespace, origCount,emitter =  dom["@dispatcher"] in target,
+                var t, tns, type, namespace, origCount,emitter =  dom["@target"] in target,
                 j, special, handlers, handlerObj;
                 types = emitter ? (types || blank).replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
                 types = (types || blank).match(dom.rword) || [];
@@ -4477,7 +4477,7 @@
                 event.namespace = namespace.join( "." );
                 event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
                 var args = [event].concat(dom.slice(arguments,1));
-                if( dom["@dispatcher"] in target){
+                if( dom["@target"] in target){
                     var cur = target,  ontype = "on" + type;
                     do{//模拟事件冒泡与执行内联事件
                         if(dom._data(cur,"events")||{}

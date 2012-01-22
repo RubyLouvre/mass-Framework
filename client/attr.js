@@ -1,4 +1,4 @@
-
+﻿
 $.define("attr","support,node", function(support){
    // $.log("已加载attr模块")
     var global = this, DOC = global.document, rclass = /(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,rreturn = /\r/g,
@@ -145,7 +145,7 @@ $.define("attr","support,node", function(support){
         
     "attr,prop".replace($.rword,function(method){
         $[method] = function( node, name, value ) {
-            if(node  && ($["@dispatcher"] in node )){
+            if(node  && ($["@target"] in node )){
                 var isElement = "setAttribute" in node;
           
                 if ( !isElement ) {

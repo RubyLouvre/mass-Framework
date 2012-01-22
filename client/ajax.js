@@ -1,4 +1,4 @@
-//数据请求模块
+﻿//数据请求模块
 
 dom.define("ajax","node,dispatcher", function(){
     //dom.log("已加载ajax模块");
