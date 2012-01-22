@@ -73,7 +73,7 @@
         v : version,
         mass : "$",
         "@debug" : true,
-        "@dispatcher" : w3c ? "addEventListener" : "attachEvent",
+        "@target" : w3c ? "addEventListener" : "attachEvent",
         "@path":(function(url, scripts, node){
             scripts = DOC.getElementsByTagName("script");
             node = scripts[scripts.length - 1];
@@ -3343,7 +3343,7 @@ dom.namespace改为dom["mass"]
 2011.10.9
 简化fixOperaError中伪dom命名空间对象
 优化截取隐藏命名空间的正则， /(\W|(#.+))/g --〉  /(#.+|\\W)/g
-2011.10.13 dom["@emitter"] -> dom["@dispatcher"]
+2011.10.13 dom["@emitter"] -> dom["@target"]
 2011.10.16 移除XMLHttpRequest的判定，回调函数将根据依赖列表生成参数，实现更彻底的模块机制
 2011.10.20 添加error方法，重构log方法
 2011.11.6  重构uuid的相关设施
