@@ -1,5 +1,5 @@
 //取得汉字的拼音
-dom.define("more/pinyin", function(){
+$.define("more/pinyin", function(){
     //http://wiki.orz.asia/owen/index.php?title=Js%E6%B1%89%E5%AD%97%E8%BD%AC%E6%8B%BC%E9%9F%B3&oldid=452&printable=yes
     //http://tech.byreach.com/node/222
     var dict = {

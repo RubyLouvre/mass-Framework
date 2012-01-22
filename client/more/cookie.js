@@ -1,4 +1,4 @@
-mass.define("cookie",function(){
+$.define("cookie",function(){
     return {
         /**
          * 获取 cookie 值

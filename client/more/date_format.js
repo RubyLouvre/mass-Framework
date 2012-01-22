@@ -1,4 +1,4 @@
-dom.define("date_format","lang",function(){
+$.define("date_format","lang",function(){
     function dateParse(data) {
 
         var date = null;

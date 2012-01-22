@@ -1,47 +1,19 @@
 //==================================================
 // 测试模块
 //==================================================
-dom.define("more/spec", function(){
-    dom.log("已加载spec模块");
+$.define("more/spec","lang", function(){
+    $.log("已加载spec模块");
     var global = this, DOC = global.document;
     //模块为dom添加如下方法:
     //quote isEqual dump Deferred runTest addTestModule
     //在全局命名空间下多添加一个函数 expect
-    dom.mix(dom,{
-        //在字符串两端加上引号,并对其内部一些字符进行转义,用于JSON与引用
-        quote :global.JSON && JSON.stringify || String.quote ||  (function(){
-            var meta = {
-                '\t':'t',
-                '\n':'n',
-                '\v':'v',
-                'f':'f',
-                '\r':'\r',
-                '\'':'\'',
-                '\"':'\"',
-                '\\':'\\'
-            },
-            reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
-            regFn = function(c){
-                if (c in meta) return '\\' + meta[c];
-                var ord = c.charCodeAt(0);
-                return ord < 0x20   ? '\\x0' + ord.toString(16)
-                :  ord < 0x7F   ? '\\'   + c
-                :  ord < 0x100  ? '\\x'  + ord.toString(16)
-                :  ord < 0x1000 ? '\\u0' + ord.toString(16)
-                : '\\u'  + ord.toString(16)
-            };
-            return function (str) {
-                return    '"' + str.replace(reg, regFn)+ '"';
-            }
-        })(),
-        //比较对象是否相等或相似
-        isEqual: function(a, b) {
+    $.isEqual = function(a, b) {
             if (a === b) {
                 return true;
-            } else if (a === null || b === null || typeof a === "undefined" || typeof b === "undefined" || dom.type(a) !== dom.type(b)) {
+            } else if (a === null || b === null || typeof a === "undefined" || typeof b === "undefined" || $.type(a) !== $.type(b)) {
                 return false; // don't lose time with error prone cases
             } else {
-                switch(dom.type(a)){
+                switch($.type(a)){
                     case "String":
                     case "Boolean":
                     case "Number":
@@ -77,51 +49,12 @@ dom.define("more/spec", function(){
                         return true;
                 }
             }
-        },
-        //用于查看对象的内部构造
-        dump :  function(obj, indent) {
-            indent = indent || "";
-            if (obj === null)
-                return indent + "null";
-            if (obj === void 0)
-                return indent + "undefined";
-            if (obj.nodeType === 9)
-                return indent + "[object Document]";
-            if (obj.nodeType)
-                return indent + "[object " + (obj.tagName || "Node") +"]";
-            var arr = [],type = dom.type(obj),self = arguments.callee,next = indent +  "\t";
-            switch (type) {
-                case "Boolean":
-                case "Number":
-                case "NaN":
-                case "RegExp":
-                    return indent + obj;
-                case "String":
-                    return indent + dom.quote(obj);
-                case "Function":
-                    return (indent + obj).replace(/\n/g, "\n" + indent);
-                case "Date":
-                    return indent + '(new Date(' + obj.valueOf() + '))';
-                case "XMLHttpRequest" :
-                case "Window" :
-                    return indent + "[object "+type +"]";
-                case "NodeList":
-                case "Arguments":
-                case "Array":
-                    for (var i = 0, n = obj.length; i < n; ++i)
-                        arr.push(self(obj[i], next).replace(/^\s* /g, next));
-                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
-                default:
-                    for ( i in obj) {
-                        arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
-                    }
-                    return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
-            }
         }
+        //用于查看对象的内部构造
+        
 
-    });
     //这里尽量不依赖其他核主模块
-    var $ = function(id) {
+    var get = function(id) {
         return DOC.getElementById(id);
     };
     var parseHTML = function() {//用于生成元素节点，注意第一层只能用一个元素
@@ -134,7 +67,7 @@ dom.define("more/spec", function(){
     //在字符串嵌入表达式 http://www.cnblogs.com/rubylouvre/archive/2011/03/06/1972176.html
     var reg_format = /\\?\#{([^{}]+)\}/gm;
     var format = function(str, object){
-        var array = dom.slice(arguments,1);
+        var array = $.slice(arguments,1);
         return str.replace(reg_format, function(match, name){
             if (match.charAt(0) == '\\')
                 return match.slice(1);
@@ -173,7 +106,7 @@ dom.define("more/spec", function(){
         return ret;
     }
 
-    dom.require("ready",function(){
+    $.require("ready",function(){
         var html = ['<div id="dom-spec-result"><p class="dom-spec-summary">',
         '<span id="dom-spec-failures" title="0">0</span>&nbsp;failures&emsp;',
         '<span id="dom-spec-errors" title="0">0</span>&nbsp;errors&emsp;',
@@ -187,19 +120,19 @@ dom.define("more/spec", function(){
         DOC.body.appendChild(parseHTML(html.join("")));
     });
 
-    dom.mix(Expect,{
+    $.mix(Expect,{
         refreshTime : function(){//刷新花费时间
-            var el = $("dom-spec-time");
+            var el = get("dom-spec-time");
             var times = parseInt(el.title,10) + (new Date - Expect.now);
             el.title = times;
             el.innerHTML = times
         },
         addTestModule : function(title, cases) {   
-            dom.require("ready",function(){
+            $.require("ready",function(){
                 var moduleId = "dom-spec-"+title, names = [];
-                if(!$(moduleId)){//在主显示区中添加一个版块
+                if(!get(moduleId)){//在主显示区中添加一个版块
                     /**   =================每个模块大抵是下面的样子===============
-                    <div class="dom-spec-case" id="dom-spec-dom.js">
+                    <div class="dom-spec-case" id="dom-spec-$.js">
                     <p><a href="javascript:void(0)">JS文件名字</a></p>
                     <ul style="display: none;" class="dom-spec-detail">
                     测试结果
@@ -209,7 +142,7 @@ dom.define("more/spec", function(){
                     var html = ['<div id="#{0}" class="dom-spec-case">',
                     '<p class="dom-spec-slide"><a href="javascript:void(0)">#{1}</a></p>',
                     '<ul class="dom-spec-detail" style="display:none;"></ul></div>'].join('');
-                    $("dom-spec-cases").appendChild(parseHTML(format(html, moduleId, title)));
+                    get("dom-spec-cases").appendChild(parseHTML(format(html, moduleId, title)));
                        
                 }
                 for(var name in cases){//取得describe第二个参数的那个对象所包含的所有函数,并放到异步列队中逐一执行它们
@@ -222,12 +155,12 @@ dom.define("more/spec", function(){
                         var suite = cases[name],//测试函数
                         caseId = "dom-spec-case-"+name.replace(/\./g,"-");
                         if(!Expect.removeLoading){
-                            var loading = $("loading");
+                            var loading = get("loading");
                             loading.parentNode.removeChild(loading);
                             Expect.removeLoading = 1
                         }        
-                        if(!$(caseId)){//对应一个方法
-                            var parentNode = $(moduleId).getElementsByTagName("ul")[0];
+                        if(!get(caseId)){//对应一个方法
+                            var parentNode = get(moduleId).getElementsByTagName("ul")[0];
                             //处理函数体的显示 
                             var safe = (suite+"").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                             //从函数体内分解出所有测试单元
@@ -236,7 +169,7 @@ dom.define("more/spec", function(){
                             var node = parseHTML(format('<li id="#{0}">#{1}<pre>#{2}</pre></li>',caseId,name,uni2hanzi(safe)));
                             parentNode.appendChild(node);
                         }
-                        Expect.Client = $(caseId);//对应一个LI元素
+                        Expect.Client = get(caseId);//对应一个LI元素
                         Expect.PASS = 1;//用于判定此测试套件有没有通过
                         Expect.boolIndex = 0;//用于记录当前是执行到第几条测试
                         Expect.totalIndex = 0;
@@ -252,11 +185,11 @@ dom.define("more/spec", function(){
                             }
                             htm = '<pre title="error">'+htm.join("").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+"</pre>";
                             Expect.Client.appendChild(parseHTML(htm));
-                            var errors = $("dom-spec-errors");
+                            var errors = get("dom-spec-errors");
                             errors.title++;
                             errors.innerHTML = errors.title;
                         }
-                        $(caseId).className = Expect.CLASS[Expect.PASS];
+                        get(caseId).className = Expect.CLASS[Expect.PASS];
                         Expect.refreshTime();//更新测试所花的时间
                         setTimeout(runTest,16);
                     }
@@ -331,7 +264,7 @@ dom.define("more/spec", function(){
                         bool = actual != expected;
                         break;
                     case "same":
-                        bool = dom.isEqual(actual, expected);
+                        bool = $.isEqual(actual, expected);
                         break
                     case "has":
                         bool = Object.prototype.hasOwnProperty.call(actual, expected);
@@ -349,14 +282,14 @@ dom.define("more/spec", function(){
                         break;
                     case "log":
                         bool = "";
-                        Expect.Client.appendChild(parseHTML('<pre class="dom-spec-log" title="log">'+(expected||"")+"  "+dom.dump(actual)+'</pre>'));
+                        Expect.Client.appendChild(parseHTML('<pre class="dom-spec-log" title="log">'+(expected||"")+"  "+$.dump(actual)+'</pre>'));
                         break;
                 }
                 // Expect.Msgs[Expect.boolIndex] = msg;
                 //修改统计栏的数值
-                var done = $("dom-spec-done");
-                var errors = $("dom-spec-errors");
-                var failures = $("dom-spec-failures");
+                var done = get("dom-spec-done");
+                var errors = get("dom-spec-errors");
+                var failures = get("dom-spec-failures");
                 if(typeof bool === "boolean"){
                     Expect.PASS = ~~bool;
                     if(!bool){//如果没有通过
@@ -364,8 +297,8 @@ dom.define("more/spec", function(){
                         failures.innerHTML = failures.title;
                         var statement = getUnpassExpect((Expect.expectArray[Expect.totalIndex] || ""))
                         var html = ['<div class="dom-spec-diff clearfix">'+(msg ? "<p>"+msg+"</p>" : "")+'<p>本测试套件中第',Expect.boolIndex,
-                        '条测试出错: ',statement,'</p><div>actual:<pre title="actual">'+dom.type(actual)+" : "+dom.dump(actual)+'</pre></div>',
-                        '<div>expected:<pre title="expected">'+dom.type(expected)+" : "+dom.dump(expected)+'</pre></div>',
+                        '条测试出错: ',statement,'</p><div>actual:<pre title="actual">'+$.type(actual)+" : "+$.dump(actual)+'</pre></div>',
+                        '<div>expected:<pre title="expected">'+$.type(expected)+" : "+$.dump(expected)+'</pre></div>',
                         '</div>'];
                         Expect.Client.appendChild(parseHTML(html.join('')));
                     }
@@ -378,7 +311,7 @@ dom.define("more/spec", function(){
         }
     });
     //用于收起或展开详细测试结果
-    dom.bind(DOC,"click",function(e){
+    $.bind(DOC,"click",function(e){
         var target = e && e.target || event.srcElement;
         if(target.tagName === "A"){
             var parent = target.parentNode.parentNode;
@@ -392,7 +325,7 @@ dom.define("more/spec", function(){
     //shortcut
     //暴露到全局作用域
     global.expect = Expect;
-    dom.addTestModule = Expect.addTestModule;
+    $.addTestModule = Expect.addTestModule;
     //此函数是解决FF无法显示函数体内的汉字问题
     var uni2hanzi = global.netscape ? function(s){
         return  unescape(s.replace(/\\u/g,'%u'));

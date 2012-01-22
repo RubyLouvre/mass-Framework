@@ -1,7 +1,7 @@
 /**
  * utf16,utf8互转模块
  */
-dom.define("more/utf", function(){
+$.define("more/utf", function(){
     //http://wiki.orz.asia/owen/index.php?title=Js%E6%B1%89%E5%AD%97%E8%BD%AC%E6%8B%BC%E9%9F%B3&oldid=452&printable=yes
     //http://tech.byreach.com/node/222
     return {

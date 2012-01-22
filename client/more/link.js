@@ -1,7 +1,7 @@
 ;
 (function(global,DOC){
-    var dom = global[DOC.URL.replace(/(#.+|\W)/g,'')];
-    dom.define("more/link", function(dom){
+    var $ = global[DOC.URL.replace(/(#.+|\W)/g,'')];
+    $.define("more/link", function(){
         function getBody(fn){
             return fn.toString().match(/\{([\s\S]*)\}/m)[1];
         }
@@ -30,7 +30,7 @@
             var iframe = DOC.createElement("iframe");
             obj.proxy = iframe
             iframe.style.display = "none";
-            dom.head.appendChild(iframe);
+            $.head.appendChild(iframe);
             var idoc = iframe.contentDocument || iframe.contentWindow.document;
             var html =  '<link rel="stylesheet" type="text/css" href="'+url+'" onload=\''+getBody(iframeLinkOnload)+'\'/>' +
             '<script>window.onload = '+iframeWindowOnload.toString()+'<\/script>'
@@ -50,17 +50,17 @@
                 return true;
             }
             script.onload = function() {
-                dom.link.check(true,url);
+                $.link.check(true,url);
             };
             script.onerror = function(){
-                dom.link.check(false,url);
+                $.link.check(false,url);
             }
             script.src = url;
-            dom.head.appendChild(script);
+            $.head.appendChild(script);
         }
         var linkMap = {};//用于保存相关回调与节点
         var UseIframeCheck = ("attachEvent" in DOC)  && ((~~DOC.documentMode) < 9);
-        dom.link =  function (url, callback, errback) {
+        $.link =  function (url, callback, errback) {
             if(!linkMap[url]){
                 var link = DOC.createElement("link")
                 link.rel = "stylesheet";
@@ -72,14 +72,14 @@
                 }else{
                     scriptCheck(url,obj);
                 }
-                obj.callback = callback || dom.noop;
-                obj.errback = errback || dom.noop;
+                obj.callback = callback || $.noop;
+                obj.errback = errback || $.noop;
                 //开始加载
                 link.href = url;
-                dom.HEAD.appendChild(link);
+                $.HEAD.appendChild(link);
             }
         }
-        dom.link.check = function(succeed,url){
+        $.link.check = function(succeed,url){
             var obj = linkMap[url];
             var fn =  obj[succeed ? "callback" : "errback"]
             fn.call(obj.link);
