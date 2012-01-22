@@ -1,9 +1,9 @@
-//==================================================
+﻿//==================================================
 // 事件发送器模块
 //==================================================
   
-dom.define("dispatcher","data", function(){
-    // dom.log("已加载dispatcher模块")
+dom.define("target","data", function(){
+    // dom.log("已加载target模块")
     var global = this, DOC = global.document, fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
     function addHandler(handlers, obj){

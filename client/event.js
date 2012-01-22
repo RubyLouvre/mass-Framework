@@ -1,4 +1,4 @@
-//http://davidwalsh.name/snackjs
+﻿//http://davidwalsh.name/snackjs
 //http://microjs.com/
 //http://westcoastlogic.com/lawnchair/
 //https://github.com/madrobby/emile
@@ -7,7 +7,7 @@
 //  事件模块（包括伪事件对象，事件绑定与事件代理）
 //==========================================
    
-dom.define("event", "node,dispatcher",function(){
+dom.define("event", "node,target",function(){
     // dom.log("加载event模块成功");
     var global = this, DOC = global.document, types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
