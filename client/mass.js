@@ -25,9 +25,9 @@
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
     }
-    if(commonNs.v !== version ){
+    if(commonNs.mass !== version ){
         commonNs[version] = $;//保存当前版本的命名空间对象到公用命名空间对象上
-        if(commonNs.v) {
+        if(commonNs.mass) {
             postfix = (version + "").replace(".","_");
         }
     }else{
@@ -70,8 +70,8 @@
         html : DOC.documentElement,
         head : HEAD,
         rword : /[^, ]+/g,
-        v : version,
-        mass : "$",
+        mass : version,
+        "@name" : "$",
         "@debug" : true,
         "@target" : w3c ? "addEventListener" : "attachEvent",
         "@path":(function(url, scripts, node){
@@ -86,8 +86,8 @@
          */
         exports: function (name) {
             _$ && (global.$ = _$);//多库共存
-            name = name || $.mass;//取得当前简短的命名空间
-            $.mass = name
+            name = name || $["@name"];//取得当前简短的命名空间
+            $["@name"] = name
             global[namespace] = commonNs;
             return global[name]  = this;
         },
@@ -275,7 +275,7 @@
                 name  = "@"+ match[1];//取得模块名
                 if(!map[name]){ //防止重复生成节点与请求
                     map[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    loadModule(name,match[2],$.v);//加载JS文件
+                    loadModule(name,match[2],$.mass);//加载JS文件
                 }else if(map[name].state === 2){
                     cn++;
                 }

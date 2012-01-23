@@ -1,5 +1,6 @@
 /**
  * 延迟加载模块
+ * https://github.com/rgrove/lazyload/blob/master/lazyload.js
  */
 $.define("lazyload","lang,node,css",function($$){
     var nodes = [], now = new Date;
