@@ -1,7 +1,7 @@
 
 (function(){
     //后端部分　2011.12.4 by 司徒正美
-    function mass(){}
+    function $(){}
     var
     version = 0.1,
     class2type = {
@@ -46,9 +46,9 @@
     function format (arr, str) {
         return '\x1b[' + arr[0] + 'm' + str + '\x1b[' + arr[1] + 'm';
     };
-    mix(mass,{//为此版本的命名空间对象添加成员
+    mix($,{//为此版本的命名空间对象添加成员
         rword : /[^, ]+/g,
-        v : version,
+        mass : version,
         "@debug" : true,
         /**
          * 数组化
@@ -71,7 +71,7 @@
         mkdirSync:function(url,mode,cb){
             var path = require("path"), arr = url.replace(/\\/g,"/").split("/");
             mode = mode || 0755;
-            cb = cb || mass.noop;
+            cb = cb || $.noop;
             if(arr[0]==="."){//处理 ./aaa
                 arr.shift();
             }
@@ -81,7 +81,7 @@
             function inner(cur){
                 if(!path.existsSync(cur)){//不存在就创建一个
                     fs.mkdirSync(cur, mode);
-                    mass.log("<code style='color:green'>创建目录"+cur+"成功</code>",true);
+                    $.log("<code style='color:green'>创建目录"+cur+"成功</code>",true);
                 }
                 if(arr.length){
                     inner(cur + "/"+arr.shift());
@@ -96,7 +96,7 @@
                 var arr = fs.readdirSync(old), folder, stat;
                 if(!path.existsSync(neo)){//创建新文件
                     fs.mkdirSync(neo, 0755);
-                    mass.log("<code style='color:green'>创建目录"+neo + "/" + el+"成功</code>",true);
+                    $.log("<code style='color:green'>创建目录"+neo + "/" + el+"成功</code>",true);
                 }
                 for(var i = 0, el ; el = arr[i++];){
                     folder = old + "/" + el
@@ -105,7 +105,7 @@
                         cpdirSync(folder, neo + "/" + el)
                     }else{
                         fs.writeFileSync(neo + "/" + el,fs.readFileSync(folder));
-                        mass.log("<code style='color:magenta'>创建文件"+neo + "/" + el+"成功</code>",true);
+                        $.log("<code style='color:magenta'>创建文件"+neo + "/" + el+"成功</code>",true);
                     }
                 }
             }
@@ -127,7 +127,7 @@
                 }
             }
             return function(dir,cb){
-                cb = cb || mass.noop;
+                cb = cb || $.noop;
                 var dirs = []; 
                 try{
                     iterator(dir,dirs);
@@ -202,7 +202,7 @@
              */
         oneObject : function(array, val){
             if(typeof array == "string"){
-                array = array.match(mass.rword) || [];
+                array = array.match($.rword) || [];
             }
             var result = {},value = val !== void 0 ? val :1;
             for(var i=0,n=array.length;i < n;i++){
@@ -213,8 +213,8 @@
         mix:mix
     });
 
-    mass.noop = mass.error = function(){};
-    "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace(mass.rword,function(name){
+    $.noop = $.error = function(){};
+    "Boolean,Number,String,Function,Array,Date,RegExp,Arguments".replace($.rword,function(name){
         class2type[ "[object " + name + "]" ] = name;
     });
 
@@ -223,7 +223,7 @@
     names = [],//需要处理的模块名列表
     rets = {},//用于收集模块的返回值
     cbi = 1e4 ;//用于生成回调函数的名字
-    var map = mass["@modules"] = {};
+    var map = $["@modules"] = {};
     //执行并移除所有依赖都具备的模块或回调
     function resolveCallbacks(){
         loop:
@@ -263,11 +263,11 @@
             }
             return list.length ? self : self.complete();
         }
-        self.complete = mass.noop;
+        self.complete = $.noop;
         return self;
     }
 
-    var nativeModules = mass.oneObject("assert,child_process,cluster,crypto,dgram,dns,"+
+    var nativeModules = $.oneObject("assert,child_process,cluster,crypto,dgram,dns,"+
         "events,fs,http,https,net,os,path,querystring,readline,repl,tls,tty,url,util,vm,zlib")
     function useNativeRequire(name,url,errback){
         var nick = name.slice(1);
@@ -278,18 +278,18 @@
         }else{
             url = url  || process.cwd()+"/" + nick + ".js";
             try{
-                mass.log("<code style='color:yellow'>"+url+"</code>",true)
+                $.log("<code style='color:yellow'>"+url+"</code>",true)
                 require(url);
                 resolveCallbacks()
             }catch(e){
-                mass.stack(Function('mass.log("\033[31m'+e+'\033[39m")'));
-                mass.stack.fire();//打印错误堆栈
+                $.stack(Function('$.log("\033[31m'+e+'\033[39m")'));
+                $.stack.fire();//打印错误堆栈
                 errback();
             }
         }
     }
 
-    mass.mix(mass,{
+    $.mix($,{
         stack : deferred(),
         define:function(name,deps,callback){//模块名,依赖列表,模块本身
             var str = "/"+name;
@@ -310,15 +310,11 @@
         },
         require:function(deps,callback,errback){//依赖列表,正向回调,负向回调
             var _deps = {}, args = [], dn = 0, cn = 0;
-            (deps +"").replace(mass.rword,function(url,name,match){
+            (deps +"").replace($.rword,function(url,name,match){
                 dn++;
                 match = url.match(rmodule);
-              
                 name = "@"+ match[1];//取得模块名
-                if(match[2]){
-                    console.log(name);
-                    console.log(match[2])
-                }
+
                 if(!map[name]){ //防止重复生成节点与请求
                     map[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
                     useNativeRequire(name,match[2],errback);//加载模块
@@ -341,7 +337,7 @@
             }
             cbname = cbname || "@cb"+ (cbi++).toString(32);
             if(errback){
-                mass.stack(errback);//压入错误堆栈
+                $.stack(errback);//压入错误堆栈
             }
             map[cbname] = {//创建或更新模块的状态
                 callback:callback,
@@ -358,47 +354,47 @@
         settings:{}
     });
     
-    exports.mass = global.mass = mass;
-    mass.cache = {};
-
-    //必须先加载settings模块
-    mass.require("settings,construct,endError",function(settings,construct,endError ){
-        mass.settings = settings;
-        var dir = mass.adjustPath("")
-        mass.rmdirSync(dir);//用于删掉原来的网站重建
-        mass.require("http,fs,path,scaffold,intercepters",function(http,fs,path,scaffold,intercepters){
-            if(path.existsSync(dir)){
-                mass.log("<code style='color:red'>此网站已存在</code>",true);
-            }else{
-                fs.mkdir(dir,0755)
-                mass.log("<code style='color:green'>开始利用内部模板建立您的网站……</code>",true);
-            }
-            global.mapper = scaffold(dir);//取得路由系统
-            http.createServer(function(req, res) {
-                console.log("req.url  :  "+req.url)
-                var arr = intercepters.concat();
-                //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-                req.on("next_intercepter",function(){
-                    try{
-                        var next = arr.shift();
-                        next && next.apply(null,arguments)
-                    }catch(err){
-                        err.statusCode = 500;
-                        endError(err, req, res)
-                    }
-                });
-                req.emit("next_intercepter",req, res);
-          
-            }).listen(settings.port);
-            mass.log("Server running at "+settings.port+" port")
-        });
-    });
+    exports.$ = global.$ = $;
+//    $.cache = {};
+//
+//    //必须先加载settings模块
+//    $.require("settings,construct,endError",function(settings,construct,endError ){
+//        $.settings = settings;
+//        var dir = $.adjustPath("")
+//        $.rmdirSync(dir);//用于删掉原来的网站重建
+//        $.require("http,fs,path,scaffold,intercepters",function(http,fs,path,scaffold,intercepters){
+//            if(path.existsSync(dir)){
+//                $.log("<code style='color:red'>此网站已存在</code>",true);
+//            }else{
+//                fs.mkdir(dir,0755)
+//                $.log("<code style='color:green'>开始利用内部模板建立您的网站……</code>",true);
+//            }
+//            global.mapper = scaffold(dir);//取得路由系统
+//            http.createServer(function(req, res) {
+//                console.log("req.url  :  "+req.url)
+//                var arr = intercepters.concat();
+//                //有关HTTP状态的解释 http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
+//                req.on("next_intercepter",function(){
+//                    try{
+//                        var next = arr.shift();
+//                        next && next.apply(null,arguments)
+//                    }catch(err){
+//                        err.statusCode = 500;
+//                        endError(err, req, res)
+//                    }
+//                });
+//                req.emit("next_intercepter",req, res);
+//
+//            }).listen(settings.port);
+//            $.log("Server running at "+settings.port+" port")
+//        });
+//    });
 //--------开始创建网站---------
 })();
 
-    //2011.12.17 mass.define再也不用指定模块所在的目录了,
-    //如以前我们要对位于intercepters目录下的favicon模块,要命名为mass.define("intercepters/favicon",module),
-    //才能用mass.require("intercepters/favicon",callback)请求得到
-    //现在可以直接mass.define("favicon",module)了
+    //2011.12.17 $.define再也不用指定模块所在的目录了,
+    //如以前我们要对位于intercepters目录下的favicon模块,要命名为$.define("intercepters/favicon",module),
+    //才能用$.require("intercepters/favicon",callback)请求得到
+    //现在可以直接$.define("favicon",module)了
 
 
