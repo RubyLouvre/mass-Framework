@@ -111,7 +111,7 @@ $.define("ajax","node,dispatcher", function(){
  
     });
  
-    $.mix(dom,{
+    $.mix($,{
         getScript: function( url, callback ) {
             return $.get( url, null, callback, "script" );
         },

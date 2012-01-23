@@ -4,7 +4,7 @@
 $.define("more/spec","lang", function(){
     $.log("已加载spec模块");
     var global = this, DOC = global.document;
-    //模块为dom添加如下方法:
+    //模块为$添加如下方法:
     //quote isEqual dump Deferred runTest addTestModule
     //在全局命名空间下多添加一个函数 expect
     $.isEqual = function(a, b) {

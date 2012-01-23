@@ -189,7 +189,7 @@
     names = [],//需要处理的模块名列表
     rets = {},//用于收集模块的返回值
     cbi = 1e4 ;//用于生成回调函数的名字
-    var map = $["@modules"] = {
+    var mapper = $["@modules"] = {
         "@ready" : { }
     };
     /**
@@ -273,10 +273,10 @@
                 dn++;
                 match = url.match(rmodule);
                 name  = "@"+ match[1];//取得模块名
-                if(!map[name]){ //防止重复生成节点与请求
-                    map[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
+                if(!mapper[name]){ //防止重复生成节点与请求
+                    mapper[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
                     loadModule(name,match[2],$.mass);//加载JS文件
-                }else if(map[name].state === 2){
+                }else if(mapper[name].state === 2){
                     cn++;
                 }
                 if(!_deps[name] ){
@@ -287,7 +287,7 @@
             var cbname = callback._name;
             if(dn === cn ){//在依赖都已执行过或没有依赖的情况下
                 if(cbname && !(cbname in rets)){
-                    map[cbname].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
+                    mapper[cbname].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
                     return rets[cbname] = safeEval(callback,args);
                 }else if(!cbname){//普通的回调可执行无数次
                     return safeEval(callback,args);
@@ -299,7 +299,7 @@
                 Function((errback+"").replace(/[^{]*\{([\d\D]*)\}$/,"$1")) ;
                 $.stack(errback);//压入错误堆栈
             }
-            map[cbname] = {//创建或更新模块的状态
+            mapper[cbname] = {//创建或更新模块的状态
                 callback:callback,
                 name:cbname,
                 str: callback.toString(),
@@ -313,9 +313,9 @@
         //定义模块
         define:function(name,deps,callback){//模块名,依赖列表,模块本身
             var str = "/"+name;
-            for(var prop in map){
-                if(map.hasOwnProperty(prop) ){
-                    if(prop.substring(prop.length - str.length) === str && map[prop].state !== 2){
+            for(var prop in mapper){
+                if(mapper.hasOwnProperty(prop) ){
+                    if(prop.substring(prop.length - str.length) === str && mapper[prop].state !== 2){
                         name = prop.slice(1);//自动修正模块名(加上必要的目录)
                         break;
                     }
@@ -332,9 +332,9 @@
         _resolveCallbacks: function (){
             loop:
             for (var i = names.length,repeat, name; name = names[--i]; ) {
-                var  obj = map[name], deps = obj.deps;
+                var  obj = mapper[name], deps = obj.deps;
                 for(var key in deps){
-                    if(deps.hasOwnProperty(key) && map[key].state != 2 ){
+                    if(deps.hasOwnProperty(key) && mapper[key].state != 2 ){
                         continue loop;
                     }
                 }
@@ -351,7 +351,7 @@
         },
         //用于检测这模块有没有加载成功
         _checkFail : function(name, error){
-            if(error || !map[name].state ){
+            if(error || !mapper[name].state ){
                 this.stack(new Function('$.log("fail to load module [ '+name+' ]")'));
                 this.stack.fire();//打印错误堆栈
             }
@@ -361,7 +361,7 @@
     //domReady机制
     var readylist = deferred();
     function fireReady(){
-        map["@ready"].state = 2;
+        mapper["@ready"].state = 2;
         $._resolveCallbacks();
         readylist.complete = function(fn){
             $.type(fn, "Function") &&  fn()

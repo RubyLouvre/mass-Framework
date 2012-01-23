@@ -15,11 +15,11 @@ function getAllFiles(root) {
   });
   return result
 }
-var arr = getAllFiles("doc")
+var arr = getAllFiles("client/more/")
 arr.forEach(function(name){
   console.log(name)
   fs.readFile(name,function(e,fd){
-     var text = ( fd+"").replace(/\<meta charset="utf-8" \/>\r?\n/,'<meta charset="utf-8" />');
+     var text = ( fd+"").replace(/"mass\."/g,'$\.');
      fs.writeFile(name,text, function(e){
      })
   })

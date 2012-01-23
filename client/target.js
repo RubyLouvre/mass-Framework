@@ -2,8 +2,8 @@
 // 事件发送器模块
 //==================================================
   
-dom.define("target","data", function(){
-    // dom.log("已加载target模块")
+$.define("target","data", function(){
+    // $.log("已加载target模块")
     var global = this, DOC = global.document, fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
     function addHandler(handlers, obj){
@@ -26,17 +26,17 @@ dom.define("target","data", function(){
             (!m[3] || m[3].test( (attrs[ "class" ] || {}).value ))
             );
     };
-    var system = dom.event = {
+    var system = $.event = {
         special:{},//用于处理个别的DOM事件
         bind : function( types, handler, selector, times){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
             //把需要的数据储存到里面,而现在我们就把一个叫@events的对象储放都它里面,
             //而这个@event的表将用来放置各种事件类型与对应的回调函数
-            var target = this, events = dom._data( target) ,emitter =  dom["@target"] in target,
+            var target = this, events = $._data( target) ,emitter =  $["@target"] in target,
             num = times || selector, all, tns ,type, namespace, special, handlerObj, handlers, fn;
             if(target.nodeType === 3 || target.nodeType === 8 || !types ||  !handler  || !events) return ;
             selector = selector && selector.length ? selector : false;
-            var uuid =  handler.uuid || (handler.uuid = dom.uuid++);
+            var uuid =  handler.uuid || (handler.uuid = $.uuid++);
             all = {
                 handler:handler,
                 uuid: uuid,
@@ -52,7 +52,7 @@ dom.define("target","data", function(){
             }
             events = events.events || (events.events = {});
             //对多个事件进行绑定
-            types.replace(dom.rword,function(type){
+            types.replace($.rword,function(type){
                 tns = rtypenamespace.exec( type ) || [];
                 type = tns[1];//取得事件类型
                 namespace = (tns[2] || blank).split( "." ).sort();//取得命名空间
@@ -60,7 +60,7 @@ dom.define("target","data", function(){
                 special = emitter && system.special[ type ] || {};
                 type = (selector? special.delegateType : special.bindType ) || type;
                 special = emitter && system.special[ type ] || {};
-                handlerObj = dom.mix({
+                handlerObj = $.mix({
                     type: type,
                     origType: tns[1],
                     selector: selector,
@@ -72,7 +72,7 @@ dom.define("target","data", function(){
                 if(emitter && !handlers.length  ){
                     if (!special.setup || special.setup( target, selector, fn ) === false ) {
                         // 为此元素这种事件类型绑定一个全局的回调，用户的回调则在此回调中执行
-                        dom.bind(target,type,fn,!!selector)
+                        $.bind(target,type,fn,!!selector)
                     }
                 }
                 addHandler(handlers,handlerObj);//同一事件不能绑定重复回调
@@ -80,12 +80,12 @@ dom.define("target","data", function(){
         },
 
         unbind: function( types, handler, selector ) {
-            var target = this, events = dom._data( target,"events");
+            var target = this, events = $._data( target,"events");
             if(!events) return;
-            var t, tns, type, namespace, origCount,emitter =  dom["@target"] in target,
+            var t, tns, type, namespace, origCount,emitter =  $["@target"] in target,
             j, special, handlers, handlerObj;
             types = emitter ? (types || blank).replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
-            types = (types || blank).match(dom.rword) || [];
+            types = (types || blank).match($.rword) || [];
             for ( t = 0; t < types.length; t++ ) {
                 tns = rtypenamespace.exec( types[t] ) || [];
                 type = tns[1];
@@ -124,15 +124,15 @@ dom.define("target","data", function(){
                 }
                 if (emitter && (handlers.length === 0 && origCount !== handlers.length) ) {
                     if ( !special.teardown || special.teardown( target, selector, handler ) === false ) {
-                        dom.unbind( target, type, dom._data(target,"handle") );
+                        $.unbind( target, type, $._data(target,"handle") );
                     }
                     delete events[ type ];
                 }
             }
-            if(dom.isEmptyObject(events)){
-                var handle = dom.removeData( target,"handle") ;
+            if($.isEmptyObject(events)){
+                var handle = $.removeData( target,"handle") ;
                 handle.target = null;
-                dom.removeData( target,"events") ;
+                $.removeData( target,"events") ;
             }
         },
 
@@ -147,11 +147,11 @@ dom.define("target","data", function(){
             event.target = target;
             event.namespace = namespace.join( "." );
             event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
-            var args = [event].concat(dom.slice(arguments,1));
-            if( dom["@target"] in target){
+            var args = [event].concat($.slice(arguments,1));
+            if( $["@target"] in target){
                 var cur = target,  ontype = "on" + type;
                 do{//模拟事件冒泡与执行内联事件
-                    if(dom._data(cur,"events")||{}
+                    if($._data(cur,"events")||{}
                         [type]){
                         system.handle.apply(cur, args);
                     }
@@ -183,7 +183,7 @@ dom.define("target","data", function(){
             }
         },
         filter:function(cur, parent, expr){
-            var matcher = typeof expr === "function"? expr : expr.input ? quickIs : dom.match
+            var matcher = typeof expr === "function"? expr : expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr))
                     return true
@@ -193,15 +193,15 @@ dom.define("target","data", function(){
         handle: function( e ) {
             var win = (this.ownerDocument || this.document || this).parentWindow || window,
             event = system.fix( e || win.event ),
-            handlers = dom._data(this,"events");
+            handlers = $._data(this,"events");
             if (  handlers ) {
                 handlers = handlers[event.type]||[]
                 event.currentTarget = this;
-                var src = event.target,args = [event].concat(dom.slice(arguments,1)), result;
+                var src = event.target,args = [event].concat($.slice(arguments,1)), result;
                 //复制数组以防影响下一次的操作
                 handlers = handlers.concat();
                 //开始进行拆包操作
-                //  dom.log(event.namespace)
+                //  $.log(event.namespace)
                 for ( var i = 0, obj; obj = handlers[i++]; ) {
                     //如果是事件代理，确保元素处于enabled状态，并且满足过滤条件
                     if ( !src.disabled && !(event.button && event.type === "click")
@@ -294,7 +294,7 @@ dom.define("target","data", function(){
         }
     }
     
-    var jEvent = dom.Event = function ( event ) {
+    var jEvent = $.Event = function ( event ) {
         this.originalEvent = event.substr ? {} : event;
         this.type = event.type || event;
         this.timeStamp  = Date.now();
@@ -337,19 +337,19 @@ dom.define("target","data", function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    dom.dispatcher = {};
-    "bind,unbind,fire".replace(dom.rword,function(name){
-        dom.dispatcher[name] = function(){
+    $.dispatcher = {};
+    "bind,unbind,fire".replace($.rword,function(name){
+        $.dispatcher[name] = function(){
             system[name].apply(this, arguments);
             return this;
         }
     });
-    dom.dispatcher.uniqueNumber = dom.uuid++;
-    dom.dispatcher.defineEvents = function(names){
+    $.dispatcher.uniqueNumber = $.uuid++;
+    $.dispatcher.defineEvents = function(names){
         var events = [];
         if(typeof names == "string"){
-            events = names.match(dom.rword);
-        }else if(dom.isArray(names)){
+            events = names.match($.rword);
+        }else if($.isArray(names)){
             events = names;
         }
         events.forEach(function(name){
@@ -369,7 +369,7 @@ dom.define("target","data", function(){
     //2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
     //2011.9.17 事件发送器增加一个uniqueID属性
     //2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
-    //2011.9.27 uniqueID改为uniqueNumber 使用dom._data存取数据
+    //2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
     //2011.9.29 简化bind与unbind
     //2011.10.13 模块名改为dispatcher
     //2011.10.23 简化system.handle与fire

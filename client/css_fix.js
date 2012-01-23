@@ -1,8 +1,8 @@
 /*
  * 样式操作模块的补丁模块
  */
-$.define("css_ie", function(){
-    $.log("已加载css_ie模块");
+$.define("css_fix", function(){
+    $.log("已加载css_fix模块");
     if(!$.html.currentStyle)
         return
     var adapter = $.cssAdapter = {};

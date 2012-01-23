@@ -49,7 +49,7 @@ $.define("css", node$css_fix, function(){
             if($.scrollbarWidth.ret){
                 return $.scrollbarWidth.ret
             }
-            var test =  dom('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body")
+            var test =  $('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body")
             var ret = test[0].offsetWidth - test[0].clientWidth;              
             test.remove();
             return $.scrollbarWidth.ret = ret
@@ -556,8 +556,8 @@ $.define("css", node$css_fix, function(){
                 win = getWindow( this );
                 if ( win ) {
                     win.scrollTo(
-                        !i ? val : dom( win ).scrollLeft(),
-                        i ? val : dom( win ).scrollTop()
+                        !i ? val : $( win ).scrollLeft(),
+                        i ? val : $( win ).scrollTop()
                         );
                 } else {
                     this[ method ] = val;
