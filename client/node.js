@@ -10,7 +10,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video";
     html5.replace($.rword,function(tag){//让IE678支持HTML5的新标签
         DOC.createElement(tag);
-    })
+    });
     function getDoc(){
         for(var i  = 0 , el; i < arguments.length; i++){
             if(el = arguments[i]){

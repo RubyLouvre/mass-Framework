@@ -1,7 +1,7 @@
 //=========================================
 // 类型扩展模块 by 司徒正美
 //=========================================
-$.define("lang",function(){
+$.define("lang",Array.isArray ? "" : "lang_fix",function(){
     console.log("已加载语言扩展模块");
     var global = this,
     rascii = /[^\x00-\xff]/g,
@@ -270,7 +270,6 @@ $.define("lang",function(){
         }
     };
     var proto = $.lang.prototype;
-    //  var $$ = $.lang
     //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
@@ -278,13 +277,13 @@ $.define("lang",function(){
                 $[type][name] = ext[name];
                 proto[name] = function(){
                     var obj = this.target;
-                    var method = obj[name] || $[type][name];
+                    var method = obj[name] || $[this.type][name];
                     var result = method.apply(obj, arguments);
                     return result;
                 }
                 proto[name+"X"] = function(){
                     var obj = this.target;
-                    var method = obj[name] || $[type][name];
+                    var method = obj[name] || $[this.type][name];
                     var result = method.apply(obj, arguments);
                     return $.lang.call(this, result) ;
                 }

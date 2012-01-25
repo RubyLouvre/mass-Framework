@@ -64,21 +64,7 @@ $.define("more/spec","lang", function(){
             return div.firstChild;
         };
     }();
-    //在字符串嵌入表达式 http://www.cnblogs.com/rubylouvre/archive/2011/03/06/1972176.html
-    var reg_format = /\\?\#{([^{}]+)\}/gm;
-    var format = function(str, object){
-        var array = $.slice(arguments,1);
-        return str.replace(reg_format, function(match, name){
-            if (match.charAt(0) == '\\')
-                return match.slice(1);
-            var index = Number(name)
-            if(index >=0 )
-                return array[index];
-            if(object && object[name] !== void 0)
-                return  object[name];
-            return  '' ; ;
-        });
-    }
+
     var Expect = function(actual){
         return this instanceof Expect ? this.init(actual) : new Expect(actual);
     }
@@ -142,8 +128,7 @@ $.define("more/spec","lang", function(){
                     var html = ['<div id="#{0}" class="dom-spec-case">',
                     '<p class="dom-spec-slide"><a href="javascript:void(0)">#{1}</a></p>',
                     '<ul class="dom-spec-detail" style="display:none;"></ul></div>'].join('');
-                    get("dom-spec-cases").appendChild(parseHTML(format(html, moduleId, title)));
-                       
+                    get("dom-spec-cases").appendChild(parseHTML($.format(html, moduleId, title)));
                 }
                 for(var name in cases){//取得describe第二个参数的那个对象所包含的所有函数,并放到异步列队中逐一执行它们
                     if(cases.hasOwnProperty(name)){
@@ -166,7 +151,7 @@ $.define("more/spec","lang", function(){
                             //从函数体内分解出所有测试单元
                             Expect.expectArray = safe.split("expect");
                             //函数体本身
-                            var node = parseHTML(format('<li id="#{0}">#{1}<pre>#{2}</pre></li>',caseId,name,uni2hanzi(safe)));
+                            var node = parseHTML($.format('<li id="#{0}">#{1}<pre>#{2}</pre></li>',caseId,name,uni2hanzi(safe)));
                             parentNode.appendChild(node);
                         }
                         Expect.Client = get(caseId);//对应一个LI元素

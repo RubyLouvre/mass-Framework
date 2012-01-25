@@ -1,65 +1,66 @@
-dom.define("test/lang","lang,more/spec",function( $$){
-    dom.addTestModule("语言扩展模块-lang",{ 
-        "dom.isPlainObject": function() {
-            expect(dom.isPlainObject([])).ng();//false
-            expect(dom.isPlainObject(1)).ng();//false
-            expect(dom.isPlainObject(null)).ng();//false
-            expect(dom.isPlainObject(void 0)).ng();//false
-            expect(dom.isPlainObject(window)).ng();//false
-            expect(dom.isPlainObject(document.body)).ng();//false
+$.define("test/lang","lang,more/spec",function( $$){
+    console.log("======================")
+    $.addTestModule("语言扩展模块-lang",{
+        "$.isPlainObject": function() {
+            expect($.isPlainObject([])).ng();//false
+            expect($.isPlainObject(1)).ng();//false
+            expect($.isPlainObject(null)).ng();//false
+            expect($.isPlainObject(void 0)).ng();//false
+            expect($.isPlainObject(window)).ng();//false
+            expect($.isPlainObject(document.body)).ng();//false
             expect(window.location).log();
-            expect(dom.isPlainObject(window.location)).ng();//false
+            expect($.isPlainObject(window.location)).ng();//false
             var fn = function(){}
-            expect(dom.isPlainObject(fn)).ng();//false
+            expect($.isPlainObject(fn)).ng();//false
             fn.prototype = {
                 someMethod: function(){}
             };
-            expect(dom.isPlainObject(new fn)).ng();//false
-            expect(dom.isPlainObject({})).ok();//true
-            expect(dom.isPlainObject({
+            expect($.isPlainObject(new fn)).ng();//false
+            expect($.isPlainObject({})).ok();//true
+            expect($.isPlainObject({
                 aa:"aa",
                 bb:"bb",
                 cc:"cc"
             })).ok();//true
-            expect(dom.isPlainObject(new Object)).ok();//true
+            expect($.isPlainObject(new Object)).ok();//true
         },
-        "dom.isArrayLike":function(){
-            expect(dom.isArrayLike(arguments)).ok();//1
-            expect(dom.isArrayLike(document.links)).ok();//2
-            expect(dom.isArrayLike(document.documentElement.childNodes)).ok();
-            expect(dom.isArrayLike({
+        "$.isArrayLike":function(){
+            expect($.isArrayLike(arguments)).ok();//1
+            expect($.isArrayLike(document.links)).ok();//2
+            expect($.isArrayLike(document.documentElement.childNodes)).ok();
+            expect($.isArrayLike({
                 0:"a",
                 1:"b",
                 length:2
             })).ok();
             
-            var tag = dom.tag
+            var tag = $.tag
             var html = tag("select",tag("option","aaa") + tag("option","bbb")+ tag("option","ccc"))
             var div = document.createElement("div");
             div.innerHTML = html;
             var select = div.firstChild;
-            expect(dom.isArrayLike(select)).ng();
+            expect($.isArrayLike(select)).ng();
 
         },
-        "dom.isNative":function(){
-            expect(dom.isNative(Array.prototype,"slice")).ok();
-            expect(dom.isNative(Array.prototype,"indexOf")).log();
-            expect(dom.isNative(Array.prototype,"forEach")).log();
-            expect(dom.isNative(String.prototype,"quote")).log();
-            expect(dom.isNative(String.prototype,"trim")).log();
-            expect(dom.isNative(Function.prototype,"bind")).log();
+        "$.isNative":function(){
+            expect($.isNative(Array.prototype,"slice")).ok();
+            expect($.isNative(Array.prototype,"indexOf")).log();
+            expect($.isNative(Array.prototype,"forEach")).log();
+            expect($.isNative(String.prototype,"quote")).log();
+            expect($.isNative(String.prototype,"trim")).log();
+            expect($.isNative(Function.prototype,"bind")).log();
         },
-        "dom.range":function(){
-            expect(dom.range(10)).same([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
-            expect(dom.range(1, 11)).same([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-            expect(dom.range(0, 30, 5)).same([0, 5, 10, 15, 20, 25]);
-            expect(dom.range(0, -10, -1)).same([0, -1, -2, -3, -4, -5, -6, -7, -8, -9]);
-            expect(dom.range(0)).same([]);
+        "$.range":function(){
+            expect($.range(10)).same([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            expect($.range(1, 11)).same([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            expect($.range(0, 30, 5)).same([0, 5, 10, 15, 20, 25]);
+            expect($.range(0, -10, -1)).same([0, -1, -2, -3, -4, -5, -6, -7, -8, -9]);
+            expect($.range(0)).same([]);
         },
-        "dom.format":function(){
-            expect(dom.format("pi is #{0}", Math.PI)).eq("pi is 3.141592653589793");
+        "$.format":function(){
+            expect($.format("pi is #{0}", Math.PI)).eq("pi is 3.141592653589793");
             
-            var a = dom.format("style.#{name}=((isEnd ? #{end} : adapter.#{type}( #{from}, #{change},'#{easing}',per ))|0)+'#{unit}';",{
+            var a = $.format("style.#{name}=((isEnd ? #{end} : adapter.#{type}( #{from}, #{change},'#{easing}',per ))|0)+'#{unit}';",{
                 name:"width",
                 end:"0",
                 type:"_default",
@@ -72,8 +73,8 @@ dom.define("test/lang","lang,more/spec",function( $$){
             expect(a).eq("style.width=((isEnd ? 0 : adapter._default( 200, 200,'linear',per ))|0)+'px';");
 
         },
-        "dom.tag":function(){
-            var tag = dom.tag
+        "$.tag":function(){
+            var tag = $.tag
             var html = tag("h1 title='aaa'","sss")
             ('a href=#' ,
                 tag("img src='http://www.google.com.hk/images/nav_logo83.png'")
@@ -81,9 +82,9 @@ dom.define("test/lang","lang,more/spec",function( $$){
                 ('' ,"View larger image") );
             expect(html+"").eq("<h1 title='aaa'>sss</h1><a href=#><img src='http://www.google.com.hk/images/nav_logo83.png'><br>View larger image</a>");
         },
-        "dom.parseXML":function(){
+        "$.parseXML":function(){
             var str = "<note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
-            expect(dom.parseXML(str).nodeType).eq(9)//[object XMLDocument]
+            expect($.parseXML(str).nodeType).eq(9)//[object XMLDocument]
         },
         
         "String2":function(){
@@ -121,6 +122,7 @@ dom.define("test/lang","lang,more/spec",function( $$){
 
             expect($$("2").padRight(4," ")).eq("2   ");
             expect($$("ruby").times(2)).eq("rubyruby");
+
         },
         "Array2":function(){
             var a = ["aaa",1,2,undefined,3,4,null,{
@@ -200,7 +202,6 @@ dom.define("test/lang","lang,more/spec",function( $$){
             expect($$(454).nearer(-4543,6576)).eq(-4543);
         },
         "Object2":function(){
-
             var a = {
                 a:"one",
                 b:"two",
