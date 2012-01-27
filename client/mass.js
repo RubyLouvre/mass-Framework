@@ -303,6 +303,7 @@
                 callback:callback,
                 name:cbname,
                 str: callback.toString(),
+                bytes: String(callback).length,
                 deps:_deps,
                 args: args,
                 state: 1
@@ -315,7 +316,10 @@
             var str = "/"+name;
             for(var prop in mapper){
                 if(mapper.hasOwnProperty(prop) ){
-                    if(prop.substring(prop.length - str.length) === str && mapper[prop].state !== 2){
+                    if(prop.substring(prop.length - str.length) === str
+                        && mapper[prop].state !== 2
+                        && (!mapper[prop].bytes ||  mapper[prop].bytes == String(callback).length)
+                        ){
                         name = prop.slice(1);//自动修正模块名(加上必要的目录)
                         break;
                     }
@@ -353,6 +357,9 @@
         _checkFail : function(name, error){
             if(error || !mapper[name].state ){
                 this.stack(new Function('$.log("fail to load module [ '+name+' ]")'));
+                this.stack(function(){
+                    console.log($["@modules"])
+                });
                 this.stack.fire();//打印错误堆栈
             }
         }
