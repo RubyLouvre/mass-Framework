@@ -1,6 +1,5 @@
 $.define("lang","lang,more/spec",function( $$){
-    console.log("======================")
-    $.addTestModule("语言扩展模块-lang",{
+    $.fixture("语言扩展模块-lang",{
         "$.isPlainObject": function() {
             expect($.isPlainObject([])).ng();//false
             expect($.isPlainObject(1)).ng();//false
@@ -87,7 +86,7 @@ $.define("lang","lang,more/spec",function( $$){
             expect($.parseXML(str).nodeType).eq(9)//[object XMLDocument]
         },
         
-        "String2":function(){
+        "$.String":function(){
             expect($$("aaabbbcc").contains("bbb")).ok();
             expect($$('http://index').startsWith('http')).ok();
             expect($$('image.gif').endsWith('.gif')).ok();
@@ -124,7 +123,7 @@ $.define("lang","lang,more/spec",function( $$){
             expect($$("ruby").times(2)).eq("rubyruby");
 
         },
-        "Array2":function(){
+        "$.Array":function(){
             var a = ["aaa",1,2,undefined,3,4,null,{
                 2:2
             }];
@@ -187,7 +186,7 @@ $.define("lang","lang,more/spec",function( $$){
             expect(j).same([1, 2, "a"]);
             
         },
-        "Number2" : function(){
+        "$.Number" : function(){
             var a = [];
             $$(8).downto(4, function(i) {
                 a.push(i);
@@ -202,7 +201,7 @@ $.define("lang","lang,more/spec",function( $$){
             expect($$(4).nearer(3,9)).eq(3);
             expect($$(454).nearer(-4543,6576)).eq(-4543);
         },
-        "Object2":function(){
+        "$.Object":function(){
 
             var a = {
                 a:"one",

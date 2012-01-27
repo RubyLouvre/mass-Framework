@@ -2,7 +2,7 @@ $.define("mass","more/spec",function(){
     $.isWindow = function(obj){//单独提出来，专门用于测试对window的判定
         return $.type(obj,"Window")
     };
-    $.addTestModule('模块加载模块-mass', {
+    $.fixture('模块加载模块-mass', {
         'type': function() {
             expect($.type("string")).eq("String");
             expect($.type(1)).eq("Number");
