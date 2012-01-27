@@ -473,6 +473,7 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
         },
         //只有原数组不存在才添加它
         ensure: function(target, array) {
+            array = Array.isArray(array) ? array : $.slice(arguments)
             array.forEach(function(el){
                 if (!~target.indexOf(el) ) target.push(el);
             });
