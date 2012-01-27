@@ -1,4 +1,4 @@
-$.define("test/mass","more/spec",function(){
+$.define("mass","more/spec",function(){
     $.isWindow = function(obj){//单独提出来，专门用于测试对window的判定
         return $.type(obj,"Window")
     };

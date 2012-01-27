@@ -1,4 +1,4 @@
-$.define("test/lang","lang,more/spec",function( $$){
+$.define("lang","lang,more/spec",function( $$){
     console.log("======================")
     $.addTestModule("语言扩展模块-lang",{
         "$.isPlainObject": function() {
@@ -149,6 +149,7 @@ $.define("test/lang","lang,more/spec",function( $$){
             expect($$(a).diff([1,2,3])).same(["aaa",undefined,4,null,{
                 2:2
             }]);
+
             expect($$(b).remove(1)).same([1]);
             expect($$(b).removeAt(1)).same([2]);
             expect($$(a).shuffle()).log();
@@ -156,7 +157,7 @@ $.define("test/lang","lang,more/spec",function( $$){
             expect($$(a).compact()).same(["aaa",1,2,3,4,{
                 2:2
             }]);
-            expect($$(a).ensure(3,4,5)).same(["aaa",1,2,undefined,3,4,null,{
+            expect($$(a).ensure([3,4,5])).same(["aaa",1,2,undefined,3,4,null,{
                 2:2
             },5]);
             var c = [3,4,6,1,45,9,5,3,4,22,3];
@@ -164,20 +165,20 @@ $.define("test/lang","lang,more/spec",function( $$){
             expect($$(c).max()).eq(45);
             expect($$(c).unique()).same([6,1,45,9,5,4,22,3]);
             expect($$([1, 2, 1, 3, 1, 4]).unique()).same([2,3,1,4]);
-
+        
             var d =['frank', ['bob', 'lisa'], ['jill', ['tom', 'sally']]];
             expect($$(d).flatten()).same(['frank', 'bob', 'lisa', 'jill', 'tom', 'sally']);
-
+        
             var e = ['hello', 'world', 'this', 'is', 'nice'];
             expect($$(e).pluck("length")).same([5, 5, 4, 2, 4]);
             expect($$(e).sortBy(function(s) {
                 return s.length;
             })).same(["is","this","nice","hello","world"]);
-
+        
             var f = [0,1,2,9];
             var g = [0,5,2];
             expect($$(f).diff(g)).same([1,9]);
-
+        
             var h = [1,2,3];
             h = $$(h).union([2,3,4,5,6]);//取并集
             expect(h).same([1,2,3,4,5,6]);
@@ -202,6 +203,7 @@ $.define("test/lang","lang,more/spec",function( $$){
             expect($$(454).nearer(-4543,6576)).eq(-4543);
         },
         "Object2":function(){
+
             var a = {
                 a:"one",
                 b:"two",
@@ -217,7 +219,7 @@ $.define("test/lang","lang,more/spec",function( $$){
                 third: 'Tuesday'
             };
             var b = [];
-            $$(a).forEach(function(value,key){
+            $$(a).forEach(function(value){
                 b.push(value);
             });
             expect(b).same(["Sunday","Monday","Tuesday"]);
