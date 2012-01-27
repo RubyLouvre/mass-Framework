@@ -132,6 +132,8 @@ $.define("spec","lang", function(){
             },
             _should:function(method, expected, msg){//上面方法的内部实现,比较真伪,并渲染结果到页面
                 var actual = this.actual,bool = false;
+                var el = Expect.Client.getElementsByTagName("a")[Expect.index];
+                Expect.index++;//当前测试套件中第index条测试
                 switch(method){
                     case "ok"://布尔真测试
                         bool = actual === true;
@@ -170,9 +172,8 @@ $.define("spec","lang", function(){
                         break;
                     case "log":
                         bool = "";
-                        var el = Expect.Client.getElementsByTagName("a")[Expect.index];
                         el.className = "mass-spec-log";
-                        el.appendChild( parseHTML("<form>"+$.dump(actual)+"</form>") );
+                        el.appendChild( parseHTML('<form class="mass-spec-diff"><pre>'+$.dump(actual)+'</pre></form>') );
                         break;
                 }
                 //修改统计栏的数值
@@ -183,7 +184,6 @@ $.define("spec","lang", function(){
                     if(!bool){//如果没有通过
                         Expect.PASS = 0;
                         failures.innerHTML = failures.title++;//更新出错栏的数值
-                        el = Expect.Client.getElementsByTagName("a")[Expect.index];
                         el.className = "mass-assert-unpass";
                         var html = ['<form class="mass-spec-diff clearfix"><div>actual:<pre title="actual">'+$.type(actual)+" : "+$.dump(actual)+'</pre></div>',
                         '<div>expected:<pre title="expected">'+$.type(expected)+" : "+$.dump(expected)+'</pre></div>',
@@ -195,7 +195,7 @@ $.define("spec","lang", function(){
                     done.innerHTML = (((done.title-errors.title-failures.title)/done.title)*100).toFixed(0);
                     return bool
                 }
-                Expect.index++;//当前测试套件中第index条测试
+              
             }
         }
     });
