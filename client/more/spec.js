@@ -5,7 +5,7 @@ $.define("spec","lang", function(){
     $.log("已加载spec模块");
     var global = this, DOC = global.document;
     //模块为$添加如下方法:
-    // isEqual runTest addTestModule
+    // isEqual  fixture
     //在全局命名空间下多添加一个函数 expect
     $.isEqual = function(a, b) {
         if (a === b) {
@@ -172,8 +172,10 @@ $.define("spec","lang", function(){
                         break;
                     case "log":
                         bool = "";
-                        el.className = "mass-spec-log";
-                        el.appendChild( parseHTML('<form class="mass-spec-diff"><pre>'+$.dump(actual)+'</pre></form>') );
+                        if(el){
+                            el.className = "mass-spec-log";
+                            el.appendChild( parseHTML('<form class="mass-spec-diff"><pre>'+$.dump(actual)+'</pre></form>') );
+                        }
                         break;
                 }
                 //修改统计栏的数值
@@ -184,11 +186,13 @@ $.define("spec","lang", function(){
                     if(!bool){//如果没有通过
                         Expect.PASS = 0;
                         failures.innerHTML = failures.title++;//更新出错栏的数值
-                        el.className = "mass-assert-unpass";
-                        var html = ['<form class="mass-spec-diff clearfix"><div>actual:<pre title="actual">'+$.type(actual)+" : "+$.dump(actual)+'</pre></div>',
-                        '<div>expected:<pre title="expected">'+$.type(expected)+" : "+$.dump(expected)+'</pre></div>',
-                        '</form>'];
-                        el.appendChild(parseHTML(html.join('')));
+                        if(el){
+                            el.className = "mass-assert-unpass";
+                            var html = ['<form class="mass-spec-diff clearfix"><div>actual:<pre title="actual">'+$.type(actual)+" : "+$.dump(actual)+'</pre></div>',
+                            '<div>expected:<pre title="expected">'+$.type(expected)+" : "+$.dump(expected)+'</pre></div>',
+                            '</form>'];
+                            el.appendChild(parseHTML(html.join('')));
+                        }
                     }
                     done.title++;
                     //更新总数栏的数值
@@ -272,8 +276,10 @@ $.define("spec","lang", function(){
                     }catch(e){
                         Expect.PASS = 2;
                         var el = Expect.Client.getElementsByTagName("a")[0];
-                        el.appendChild(parseHTML('<form class="mass-spec-diff"><pre>'+e+'</pre></form>'));
-                        el.className = "mass-assert-error";
+                        if(el){
+                            el.appendChild(parseHTML('<form class="mass-spec-diff"><pre>'+e+'</pre></form>'));
+                            el.className = "mass-assert-error";
+                        }
                         var errors = get("mass-spec-errors");
                         //修正异常栏的数值
                         errors.innerHTML = errors.title++;

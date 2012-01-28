@@ -1,9 +1,12 @@
-$.define("tsupport","more/spec,support",function(){
+$.define("support","more/spec,support,ready",function(){
     $.fixture('特征嗅探模块-support', {
         '$.support': function() {
+            var el = document.getElementById("mass-spec-case-$-support");
+            var html = ""
             for(var i in $.support){
-                expect($.support[i]).log(i);
+                html += "<p>"+i+" : "+$.support[i]+"</p>"
             }
+            el.getElementsByTagName("pre")[0].innerHTML = html;
         }
     });
 });

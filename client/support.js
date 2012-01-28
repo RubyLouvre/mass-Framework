@@ -39,7 +39,11 @@ $.define("support", function(){
         cloneAll: false,
         insertAdjacentHTML:false,
         innerHTML:false,
-        fastFragment:false
+        fastFragment:false,
+
+        inlineBlockNeedsLayout: false,
+        shrinkWrapBlocks: false,
+        pixelMargin: true
     };
     //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
     //当select元素设置为disabled后，其所有option子元素是否也会被设置为disabled
@@ -60,7 +64,7 @@ $.define("support", function(){
     }catch(e){ }
     try{
         var range =  DOC.createRange();
-        support.fastFragment = range.createContextualFragment("<a>") && range;
+        support.fastFragment = !!range.createContextualFragment("<a>");
     }catch(e){ };
     //判定innerHTML是否完美，用于html方法
     try{
