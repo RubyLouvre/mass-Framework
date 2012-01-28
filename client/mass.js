@@ -186,25 +186,36 @@
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
-    names = [],//需要处理的模块名列表
-    rets = {},//用于收集模块的返回值
+    tokens = [],//需要处理的模块名列表
+    transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
     cbi = 1e4 ;//用于生成回调函数的名字
     var mapper = $["@modules"] = {
         "@ready" : { }
     };
+    //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
+    var innerDefine = function(name, deps, callback){
+        if(typeof deps == "function"){//处理只有两个参数的情况
+            callback = deps;
+            deps = "";
+        }
+        //将iframe中的函数转换为父窗口的函数
+        Ns.define(nick.slice(1), deps,(parent.Function("return "+ callback)()))
+    }
     /**
      * 加载模块。它会临时生成一个iframe，并在里面创建相应的script节点进笨请求，并附加各种判定是否加载成功的机制
      * @param {String} name 模块名
      * @param {String} url  模块的路径
      * @param {String} ver  当前dom框架的版本
      */
-    function loadModule(name, url, ver){
+    function request(name, url, mass){
         url = url  || $["@path"] +"/"+ name.slice(1) + ".js" + ($["@debug"] ? "?timestamp="+(new Date-0) : "");
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ["<script> var $ = parent[document.URL.replace(/(#.+|\\W)/g,'')][", ver,'] ;<\/script><script src="',url,'" ',
-        (DOC.uniqueID ? "onreadystatechange" : "onload"),'="', "if(/loaded|complete|undefined/i.test(this.readyState)){  $._resolveCallbacks();",
-        (global.opera ? "this.ownerDocument.x = 1;" : " $._checkFail('"+name+"');"),
-        '} " ' , (w3c ? 'onerror="$._checkFail(\''+name+'\',true);" ' : ""),' ><\/script>' ];
+        codes = ['<script>var nick ="', name, '";var $ = {}; $.define = ',innerDefine,
+        '; var Ns = parent[document.URL.replace(/(#.+|\\W)/g,"")][', mass,'] ;<\/script><script src="',url,'" ',
+        (DOC.uniqueID ? "onreadystatechange" : "onload"),
+        '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
+        'Ns._resolveCallbacks();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick);}',
+        '} " onerror="Ns._checkFail(nick, true);" ><\/script>' ];
         iframe.style.display = "none";
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if(!"1"[0]){//IE6 iframe在https协议下没有的指定src会弹安全警告框
@@ -214,24 +225,20 @@
         var d = iframe.contentDocument || iframe.contentWindow.document;
         d.write(codes.join(''));
         d.close();
-        $.bind(iframe,"load",function(){
-            if(global.opera && d.x == void 0){
+        $.bind(iframe, "load", function(){
+            if(global.opera && d.ok == void 0){
                 $._checkFail(name, true);//模拟opera的script onerror
             }
             d.write("<body/>");//清空内容
             HEAD.removeChild(iframe);//移除iframe
         });
     }
-    //凡是通过iframe加载回来的模块函数都要经过它进行转换
-    function safeEval(fn, args, str, obj){
-        obj = obj || rets;
+    //收集依赖列表对应模块的返回值，传入目标模块中执行
+    function assemble(fn, args){
         for(var i = 0,argv = [], name; name = args[i++];){
-            argv.push(obj[name]);
-        }//如果是同一执行环境下，就不用再eval了
-        if(fn instanceof Function){//合并时进入此分支
-            return fn.apply(global,argv);
+            argv.push(transfer[name]);
         }
-        return  Function("b"," return " +(str || fn) +".apply(window,b)" )(argv);
+        return fn.apply(global, argv);
     }
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
@@ -267,15 +274,15 @@
             el.detachEvent("on"+type, fn);
         },
         //请求模块
-        require:function(deps,callback,errback){//依赖列表,正向回调,负向回调
+        require:function(deps, callback, errback){//依赖列表,正向回调,负向回调
             var _deps = {}, args = [], dn = 0, cn = 0;
-            (deps +"").replace($.rword,function(url,name,match){
+            (deps +"").replace($.rword, function(url,name,match){
                 dn++;
                 match = url.match(rmodule);
                 name  = "@"+ match[1];//取得模块名
                 if(!mapper[name]){ //防止重复生成节点与请求
                     mapper[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    loadModule(name,match[2],$.mass);//加载JS文件
+                    request(name, match[2],  $.mass);//加载JS文件
                 }else if(mapper[name].state === 2){
                     cn++;
                 }
@@ -284,59 +291,43 @@
                     _deps[name] = "司徒正美";//去重，去掉@ready
                 }
             });
-            var cbname = callback._name;
+            var token = callback.token;
             if(dn === cn ){//在依赖都已执行过或没有依赖的情况下
-                if(cbname && !(cbname in rets)){
-                    mapper[cbname].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
-                    return rets[cbname] = safeEval(callback,args);
-                }else if(!cbname){//普通的回调可执行无数次
-                    return safeEval(callback,args);
+                if(token && !(token in transfer)){
+                    mapper[token].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
+                    return transfer[token] = assemble(callback, args);
+                }else if(!token){//普通的回调可执行无数次
+                    return assemble(callback,args);
                 }
             }
-            cbname = cbname || "@cb"+ (cbi++).toString(32);
+            token = token || "@cb"+ (cbi++).toString(32);
             if(errback){
-                errback = errback instanceof Function ? errback :
-                Function((errback+"").replace(/[^{]*\{([\d\D]*)\}$/,"$1")) ;
                 $.stack(errback);//压入错误堆栈
             }
-            mapper[cbname] = {//创建或更新模块的状态
+            mapper[token] = {//创建或更新模块的状态
                 callback:callback,
-                name:cbname,
-                str: callback.toString(),
-                bytes: String(callback).length,
+                name:token,
                 deps:_deps,
                 args: args,
                 state: 1
             };//在正常情况下模块只能通过resolveCallbacks执行
-            names.unshift(cbname);
+            tokens.unshift(token);
             $._resolveCallbacks();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define:function(name,deps,callback){//模块名,依赖列表,模块本身
-            var str = "/"+name;
-            for(var prop in mapper){
-                if(mapper.hasOwnProperty(prop) ){
-                    if(prop.substring(prop.length - str.length) === str
-                        && mapper[prop].state !== 2
-                        && (!mapper[prop].bytes ||  mapper[prop].bytes == String(callback).length)
-                        ){
-                        name = prop.slice(1);//自动修正模块名(加上必要的目录)
-                        break;
-                    }
-                }
-            }
+        define:function(name, deps, callback, errback){//模块名,依赖列表,模块本身
             if(typeof deps == "function"){//处理只有两个参数的情况
                 callback = deps;
                 deps = "";
             }
-            callback._name = "@"+name; //模块名
-            this.require(deps,callback);
+            callback.token = "@"+name; //模块名
+            this.require(deps, callback, errback);
         },
         //执行并移除所有依赖都具备的模块或回调
         _resolveCallbacks: function (){
             loop:
-            for (var i = names.length,repeat, name; name = names[--i]; ) {
-                var  obj = mapper[name], deps = obj.deps;
+            for (var i = tokens.length,repeat, name; name = tokens[--i]; ) {
+                var obj = mapper[name], deps = obj.deps;
                 for(var key in deps){
                     if(deps.hasOwnProperty(key) && mapper[key].state != 2 ){
                         continue loop;
@@ -344,9 +335,9 @@
                 }
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
-                    names.splice(i,1);//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
+                    tokens.splice(i,1);//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
                     //在IE下通过iframe得到的回调，如果不立即变成字符串保存起来，会报“不能执行已释放 Script 的代码 ”错误
-                    rets[obj.name] = safeEval(obj.callback, obj.args, obj.str);
+                    transfer[obj.name] = assemble(obj.callback, obj.args);
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
                 }
@@ -356,10 +347,7 @@
         //用于检测这模块有没有加载成功
         _checkFail : function(name, error){
             if(error || !mapper[name].state ){
-                this.stack(new Function('$.log("fail to load module [ '+name+' ]")'));
-                this.stack(function(){
-                    console.log($["@modules"])
-                });
+                this.stack(Function('$.log("fail to load module [ '+name+' ]")'));
                 this.stack.fire();//打印错误堆栈
             }
         }
