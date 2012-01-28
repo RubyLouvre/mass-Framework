@@ -1,7 +1,7 @@
 //=========================================
-// 模块加载模块（核心模块）2011.11.11 by 司徒正美
+// 模块加载模块（核心模块）2012.1.29 by 司徒正美
 //=========================================
-(function(global , DOC){
+(function(global, DOC){
     var
     _$ = global.$, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,'');
@@ -11,13 +11,13 @@
      * 第一个是DOC.URL.replace(/(\W|(#.+))/g,'')，根据页面的地址动态生成
      * 第二个是$，我们可以使用别名机制重写它
      */
-    function $(expr,context){//新版本的基石
+    function $(expr, context){//新版本的基石
         if($.type(expr,"Function")){ //注意在safari下,typeof nodeList的类型为function,因此必须使用dom.type
-            $.require("ready,lang,attr,event,fx",expr);
+            $.require("ready,lang,attr,event,fx", expr);
         }else{
             if(!$.fn)
                 throw "must load the 'node' module!"
-            return new $.fn.init(expr,context);
+            return new $.fn.init(expr, context);
         }
     }
     //多版本共存
@@ -84,10 +84,10 @@
          * 暴露到全局作用域下，此时可重命名，并有jquery的noConflict的效果
          * @param {String} name 新的命名空间
          */
-        exports: function (name) {
+        exports: function( name ) {
             _$ && (global.$ = _$);//多库共存
             name = name || $["@name"];//取得当前简短的命名空间
-            $["@name"] = name
+            $["@name"] = name;
             global[namespace] = commonNs;
             return global[name]  = this;
         },
@@ -115,7 +115,7 @@
          * @return {String|Boolean}
          */
         type : function (obj, str){
-            var result = class2type[ (obj == null || obj !== obj )? obj :  toString.call(obj)  ] || obj.nodeName || "#";
+            var result = class2type[ (obj == null || obj !== obj ) ? obj :  toString.call(obj)  ] || obj.nodeName || "#";
             if( result.charAt(0) === "#"){//兼容旧式浏览器与处理个别情况,如window.opera
                 //利用IE678 window == document为true,document == window竟然为false的神奇特性
                 if(obj == obj.document && obj.document != obj){
@@ -127,7 +127,7 @@
                 }else if(isFinite(obj.length) && obj.item ){
                     result = 'NodeList'; //处理节点集合
                 }else{
-                    result = toString.call(obj).slice(8,-1);
+                    result = toString.call(obj).slice(8, -1);
                 }
             }
             if(str){
@@ -137,18 +137,18 @@
         },
         /**
          * 用于调试
-         * @param {String} s 要打印的内容
+         * @param {String} text 要打印的内容
          * @param {Boolean} force 强逼打印到页面上
          */
-        log:function (s, force){
+        log:function (text, force){
             if(force){
                 $.require("ready",function(){
                     var div =  DOC.createElement("div");
-                    div.innerHTML = s +"";//确保为字符串
+                    div.innerHTML = text +"";//确保为字符串
                     DOC.body.appendChild(div)
                 });
             }else if(global.console ){
-                global.console.log(s);
+                global.console.log(text);
             }
         },
         uuid : 1,
@@ -173,7 +173,7 @@
                 array = array.match($.rword) || [];
             }
             var result = {},value = val !== void 0 ? val :1;
-            for(var i=0,n=array.length;i < n;i++){
+            for(var i=0, n=array.length; i < n; i++){
                 result[array[i]] = value;
             }
             return result;
@@ -188,7 +188,7 @@
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
     tokens = [],//需要处理的模块名列表
     transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
-    cbi = 1e4 ;//用于生成回调函数的名字
+    cbi = 1e5 ;//用于生成回调函数的名字
     var mapper = $["@modules"] = {
         "@ready" : { }
     };
@@ -199,29 +199,29 @@
             deps = "";
         }
         //将iframe中的函数转换为父窗口的函数
-        Ns.define(nick.slice(1), deps,(parent.Function("return "+ callback)()))
+        Ns.define(nick.slice(1), deps, (parent.Function("return "+ callback)()))
     }
     /**
      * 加载模块。它会临时生成一个iframe，并在里面创建相应的script节点进笨请求，并附加各种判定是否加载成功的机制
      * @param {String} name 模块名
      * @param {String} url  模块的路径
-     * @param {String} ver  当前dom框架的版本
+     * @param {String} mass  当前框架的版本号
      */
     function request(name, url, mass){
         url = url  || $["@path"] +"/"+ name.slice(1) + ".js" + ($["@debug"] ? "?timestamp="+(new Date-0) : "");
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ['<script>var nick ="', name, '";var $ = {}; $.define = ',innerDefine,
-        '; var Ns = parent[document.URL.replace(/(#.+|\\W)/g,"")][', mass,'] ;<\/script><script src="',url,'" ',
+        codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent[document.URL.replace(/(#.+|\\W)/g,"")][',
+            mass, ']; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
         '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
-        'Ns._resolveCallbacks();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick);}',
+        'Ns._resolveCallbacks();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
         '} " onerror="Ns._checkFail(nick, true);" ><\/script>' ];
         iframe.style.display = "none";
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if(!"1"[0]){//IE6 iframe在https协议下没有的指定src会弹安全警告框
             iframe.src = "javascript:false"
         }
-        HEAD.insertBefore(iframe,HEAD.firstChild);
+        HEAD.insertBefore(iframe, HEAD.firstChild);
         var d = iframe.contentDocument || iframe.contentWindow.document;
         d.write(codes.join(''));
         d.close();
@@ -297,7 +297,7 @@
                     mapper[token].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
                     return transfer[token] = assemble(callback, args);
                 }else if(!token){//普通的回调可执行无数次
-                    return assemble(callback,args);
+                    return assemble(callback, args);
                 }
             }
             token = token || "@cb"+ (cbi++).toString(32);
@@ -306,8 +306,8 @@
             }
             mapper[token] = {//创建或更新模块的状态
                 callback:callback,
-                name:token,
-                deps:_deps,
+                name: token,
+                deps: _deps,
                 args: args,
                 state: 1
             };//在正常情况下模块只能通过resolveCallbacks执行
@@ -315,13 +315,13 @@
             $._resolveCallbacks();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define:function(name, deps, callback, errback){//模块名,依赖列表,模块本身
+        define:function(name, deps, callback){//模块名,依赖列表,模块本身
             if(typeof deps == "function"){//处理只有两个参数的情况
                 callback = deps;
                 deps = "";
             }
             callback.token = "@"+name; //模块名
-            this.require(deps, callback, errback);
+            this.require(deps, callback);
         },
         //执行并移除所有依赖都具备的模块或回调
         _resolveCallbacks: function (){
@@ -352,7 +352,6 @@
             }
         }
     });
-    //$.log("已加载模块加载模块")
     //domReady机制
     var readylist = deferred();
     function fireReady(){
@@ -432,7 +431,7 @@ dom.namespace改为dom["mass"]
 2011.12.19 增加define方法
 2011.12.22 加载用iframe内增加$变量,用作过渡.
 2012.1.15  更换$为命名空间
-
+2012.1.29  升级到v15
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */
