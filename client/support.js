@@ -1,6 +1,7 @@
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
+
 $.define("support", function(){
     $.log("已加载特征嗅探模块");
     var global = this, DOC = global.document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
@@ -9,13 +10,14 @@ $.define("support", function(){
     '<object><param/></object><table></table><input type="checkbox"/>';
     var a = div[TAGS]("a")[0], style = a.style,
     select = DOC.createElement("select"),
-
+    input = div[TAGS]( "input" )[ 0 ],
     opt = select.appendChild( DOC.createElement("option") );
+    //true为正常，false为不正常
     var support = $.support = {
         //是否支持自动插入tbody
-        insertTbody: !!div[TAGS]("tbody").length,
+        insertTbody: !div[TAGS]("tbody").length,
         // checkbox的value默认为on，唯有Chrome 返回空字符串
-        checkOn :  div[TAGS]( "input" )[ 0 ].value === "on",
+        checkOn :  input.value === "on",
         //safari下可能无法取得这个属性,需要访问一下其父元素后才能取得该值
         attrSelected:!!opt.selected,
         //是否区分href属性与特性
@@ -35,23 +37,25 @@ $.define("support", function(){
         //某些浏览器不能通过innerHTML生成link,style,script节点
         createAll: !!div[TAGS]("link").length,
         cloneHTML5: DOC.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
-        //IE的cloneNode才是真正意义的复制，能复制动态添加的自定义属性与事件（可惜这不是标准，归为bug）
-        cloneAll: false,
+      
+        cloneNode : true,
         insertAdjacentHTML:false,
         innerHTML:false,
         fastFragment:false,
 
-        inlineBlockNeedsLayout: false,
+        inlineBlock: true,
         shrinkWrapBlocks: false,
         pixelMargin: true
     };
+    input.checked = true;
+    support.cloneChecked = (input.cloneNode( true ).checked === true);
     //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
     //当select元素设置为disabled后，其所有option子元素是否也会被设置为disabled
     select.disabled = true;
     support.optDisabled = !opt.disabled;
     if ( !div.addEventListener && div.attachEvent && div.fireEvent ) {
         div.attachEvent("onclick", function click() {
-            support.cloneAll = true;//w3c的节点复制是不复制事件的
+            support.cloneNode = false;//w3c的节点复制是不复制事件的
             div.detachEvent("onclick", click);
         });
         div.cloneNode(true).fireEvent("onclick");
@@ -83,12 +87,12 @@ $.define("support", function(){
         div.innerHTML = "";
         div.style.width = div.style.paddingLeft = "1px";
         support.boxModel = div.offsetWidth === 2;
-        if ( "zoom" in div.style ) {
+        if ( typeof div.style.zoom !== "undefined"  ) {
             //IE7以下版本并不支持display: inline-block;样式，而是使用display: inline;
             //并通过其他样式触发其hasLayout形成一种伪inline-block的状态
             div.style.display = "inline";
             div.style.zoom = 1;
-            support.inlineBlockNeedsLayout = div.offsetWidth === 2;
+            support.inlineBlock = !(div.offsetWidth === 2);
             //http://w3help.org/zh-cn/causes/RD1002
             // 在 IE6 IE7(Q) IE8(Q) 中，如果一个明确设置了尺寸的非替换元素的 'overflow' 为 'visible'，
             // 当该元素无法完全容纳其内容时，该元素的尺寸将被其内容撑大
