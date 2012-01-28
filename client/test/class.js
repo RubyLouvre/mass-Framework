@@ -1,7 +1,7 @@
-dom.define("test/class","more/spec,class",function(){
-    dom.addTestModule('类工厂模块-class', {
-        "dom.factory":function(){
-            var Ancestor = dom.factory({
+$.define("class","more/spec,class",function(){
+    $.fixture('类工厂模块-class', {
+        "$.factory":function(){
+            var Ancestor = $.factory({
                 init:function(name){
                     this.name = name;
                 },
@@ -18,7 +18,7 @@ dom.define("test/class","more/spec,class",function(){
                     }
                 }
             });
-            var Parent = dom.factory({
+            var Parent = $.factory({
                 inherit:Ancestor,
                 instance_fn:function(){
                     return this._super()+"-->Parent";
@@ -29,7 +29,7 @@ dom.define("test/class","more/spec,class",function(){
                     }
                 }
             });
-            var Son = dom.factory({
+            var Son = $.factory({
                 inherit:Parent,
                 init:function(name,age){
                     this.age = age;
@@ -62,7 +62,7 @@ dom.define("test/class","more/spec,class",function(){
             expect(a.name).eq("时光之轮");
             expect(s instanceof Parent).ok();
             
-            var VS = dom.factory({
+            var VS = $.factory({
                 init:function(name){
                     this.name = name;
                 },
