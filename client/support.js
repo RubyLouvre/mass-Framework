@@ -34,15 +34,14 @@ $.define("support", function(){
         //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
         //某些浏览器不能通过innerHTML生成link,style,script节点
         createAll: !!div[TAGS]("link").length,
+        cloneHTML5: DOC.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
         //IE的cloneNode才是真正意义的复制，能复制动态添加的自定义属性与事件（可惜这不是标准，归为bug）
         cloneAll: false,
-        optDisabled: false,
-        boxModel: null,
         insertAdjacentHTML:false,
         innerHTML:false,
         fastFragment:false
     };
-
+    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
     //当select元素设置为disabled后，其所有option子元素是否也会被设置为disabled
     select.disabled = true;
     support.optDisabled = !opt.disabled;
@@ -53,8 +52,6 @@ $.define("support", function(){
         });
         div.cloneNode(true).fireEvent("onclick");
     }
-    //测试是否符合w3c的盒子模型
-    div.style.width = div.style.paddingLeft = "1px";
     //判定insertAdjacentHTML是否完美，用于append,prepend,before,after等方法
     var table = div[TAGS]("table")[0]
     try{
@@ -70,61 +67,47 @@ $.define("support", function(){
         table.innerHTML = "<tr><td>1</td></tr>";
         support.innerHTML = true;
     }catch(e){};
+    a = select = table = opt = style = null;
+    $.require("ready",function(){
+        //boxModel，inlineBlockNeedsLayout，shrinkWrapBlocks，pixelMargin
+        var body = DOC.body,
+        testElement = div.cloneNode(false);
+        testElement.style.cssText = "visibility:hidden;width:0;height:0;border:0;margin:0;background:none;padding:0;"
+        testElement.appendChild( div );
+        body.insertBefore( testElement, body.firstChild );
+        //测试是否符合w3c的盒子模型
+        div.innerHTML = "";
+        div.style.width = div.style.paddingLeft = "1px";
+        support.boxModel = div.offsetWidth === 2;
+        if ( "zoom" in div.style ) {
+            //IE7以下版本并不支持display: inline-block;样式，而是使用display: inline;
+            //并通过其他样式触发其hasLayout形成一种伪inline-block的状态
+            div.style.display = "inline";
+            div.style.zoom = 1;
+            support.inlineBlockNeedsLayout = div.offsetWidth === 2;
+            //http://w3help.org/zh-cn/causes/RD1002
+            // 在 IE6 IE7(Q) IE8(Q) 中，如果一个明确设置了尺寸的非替换元素的 'overflow' 为 'visible'，
+            // 当该元素无法完全容纳其内容时，该元素的尺寸将被其内容撑大
+            // 注:替换元素（replaced element）是指 img，input，textarea，select，object等这类默认就有CSS格式化外表范围的元素
+            div.style.display = "";
+            div.innerHTML = "<div style='width:4px;'></div>";
+            support.shrinkWrapBlocks = div.offsetWidth !== 2;
+            if( global.getComputedStyle ) {
+                div.style.marginTop = "1%";
+                support.pixelMargin = ( global.getComputedStyle( div, null ) || {
+                    marginTop: 0
+                } ).marginTop !== "1%";
+            }
 
-    //有些特征嗅探必须连接到DOM树上才能进行
-    var body = DOC[TAGS]( "body" )[ 0 ],i,
-    testElement = DOC.createElement( body ? "div" : "body" ),
-    testElementStyle = {
-        visibility: "hidden",
-        width: 0,
-        height: 0,
-        border: 0,
-        margin: 0,
-        background: "none"
-    };
-    if ( body ) {
-        $.mix( testElementStyle, {
-            position: "absolute",
-            left: "-1000px",
-            top: "-1000px"
-        });
-    }
-    for ( i in testElementStyle ) {
-        testElement.style[ i ] = testElementStyle[ i ];
-    }
-    testElement.appendChild( div );//将DIV加入DOM树
-    var testElementParent = body || $.html;
-    testElementParent.insertBefore( testElement, testElementParent.firstChild );
-
-    support.boxModel = div.offsetWidth === 2;
-    if ( "zoom" in div.style ) {
-        //IE7以下版本并不支持display: inline-block;样式，而是使用display: inline;
-        //并通过其他样式触发其hasLayout形成一种伪inline-block的状态
-        div.style.display = "inline";
-        div.style.zoom = 1;
-        support.inlineBlockNeedsLayout = div.offsetWidth === 2;
-        //http://w3help.org/zh-cn/causes/RD1002
-        // 在 IE6 IE7(Q) IE8(Q) 中，如果一个明确设置了尺寸的非替换元素的 'overflow' 为 'visible'，
-        // 当该元素无法完全容纳其内容时，该元素的尺寸将被其内容撑大
-        // 注:替换元素（replaced element）是指 img，input，textarea，select，object等这类默认就有CSS格式化外表范围的元素
-        div.style.display = "";
-        div.innerHTML = "<div style='width:4px;'></div>";
-        support.shrinkWrapBlocks = div.offsetWidth !== 2;
-        if( global.getComputedStyle ) {
-            div.style.marginTop = "1%";
-            support.pixelMargin = ( global.getComputedStyle( div, null ) || {
-                marginTop: 0
-            } ).marginTop !== "1%";
         }
-
-    }
-    div.innerHTML = "";
-    testElementParent.removeChild( testElement );
-    div = null;
+        body.removeChild( testElement );
+        div = testElement = null;
+    });
     return support;
 });
 /**
 2011.9.7 优化attrProp判定
 2011.9.16所有延时判定的部分现在可以立即判定了
 2011.9.23增加fastFragment判定
+2012.1.28有些特征嗅探必须连接到DOM树上才能进行
 */

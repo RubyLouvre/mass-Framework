@@ -90,7 +90,7 @@ pre a:hover form{
     margin: 0;
 }
 .mass-spec-diff {
-    background: red;
+    background: #800080;
     margin: 1em;
 }
 .mass-spec-diff div{
