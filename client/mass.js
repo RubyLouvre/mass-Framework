@@ -21,14 +21,14 @@
         }
     }
     //多版本共存
-    var commonNs = global[namespace], version = 1.0, postfix = "";
+    var commonNs = global[namespace], mass = 1.0, postfix = "";
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
     }
-    if(commonNs.mass !== version ){
-        commonNs[version] = $;//保存当前版本的命名空间对象到公用命名空间对象上
+    if(commonNs.mass !== mass ){
+        commonNs[mass] = $;//保存当前版本的命名空间对象到公用命名空间对象上
         if(commonNs.mass) {
-            postfix = (version + "").replace(".","_");
+            postfix = (mass + "").replace(".","_");
         }
     }else{
         return;
@@ -70,7 +70,7 @@
         html : DOC.documentElement,
         head : HEAD,
         rword : /[^, ]+/g,
-        mass : version,
+        mass : mass,
         "@name" : "$",
         "@debug" : true,
         "@target" : w3c ? "addEventListener" : "attachEvent",
@@ -99,7 +99,7 @@
          * @return {Array}
          */
         slice: function (nodes, start, end) {
-            for(var i = 0,n = nodes.length, result = []; i < n; i++){
+            for(var i = 0, n = nodes.length, result = []; i < n; i++){
                 result[i] = nodes[i];
             }
             if (arguments.length > 1) {
@@ -172,7 +172,7 @@
             if(typeof array == "string"){
                 array = array.match($.rword) || [];
             }
-            var result = {},value = val !== void 0 ? val :1;
+            var result = {}, value = val !== void 0 ? val :1;
             for(var i=0, n=array.length; i < n; i++){
                 result[array[i]] = value;
             }
