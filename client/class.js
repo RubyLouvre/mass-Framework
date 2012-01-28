@@ -18,8 +18,8 @@ $.define("class", "lang",function(){
         });
         return klass
     }
-    function setOptions(){
-        var options = this.options = $.Object.merge.apply(this.options || {}, arguments),key,match
+    function setOptions(obj){
+        var options = this.options = $.Object.merge(this.options || {}, obj),key,match
         if (typeof this.bind == "function") {
             for (key in options) {
                 if ((match = key.match(ron))) {
@@ -119,4 +119,5 @@ $.define("class", "lang",function(){
 //fix 子类实例不是父类的实例的bug
 //2011.8.14 更改隐藏namespace,增强setOptions
 //2011.10.7 include更名为implement 修复implement的BUG（能让人重写toString valueOf方法）
+//2012.1.29  修正setOptions中$.Object.merge方法的调用方式
 
