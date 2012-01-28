@@ -2,7 +2,7 @@
 // 测试模块v3
 //==================================================
 $.define("spec","lang", function(){
-    $.log("已加载spec模块");
+    $.log("已加载spec v3模块");
     var global = this, DOC = global.document;
     //模块为$添加如下方法:
     // isEqual  fixture
@@ -76,7 +76,7 @@ $.define("spec","lang", function(){
                     section++;
                     if(section == 2){
                         return str.slice(0,i+1) +
-                        str.slice(i+1,i+3).replace(/\s*;?\s*/,";</a>\n")+
+                        str.slice(i+1, i+3).replace(/\s*;?\s*/,";</a>\n")+
                         str.slice(i+3)
                     }
                 }
@@ -206,7 +206,7 @@ $.define("spec","lang", function(){
     //用于收起或展开详细测试结果
     $.bind(DOC,"click",function(e){
         var target = e && e.target || event.srcElement;
-        var el = target.parentNode
+        var el = target.parentNode;
         if(target.tagName === "A" && el.className === "mass-spec-slide"){
             var parent = el.parentNode;
             if(parent.className== "mass-spec-case"){//用于切换详情面板
