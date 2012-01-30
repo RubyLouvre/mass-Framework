@@ -214,7 +214,7 @@
             mass, ']; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
         '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
-        'Ns._resolveCallbacks();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
+        'Ns._checkDeps();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
         '} " onerror="Ns._checkFail(nick, true);" ><\/script>' ];
         iframe.style.display = "none";
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
@@ -312,7 +312,7 @@
                 state: 1
             };//在正常情况下模块只能通过resolveCallbacks执行
             tokens.unshift(token);
-            $._resolveCallbacks();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
+            $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
         define:function(name, deps, callback){//模块名,依赖列表,模块本身
@@ -324,7 +324,7 @@
             this.require(deps, callback);
         },
         //执行并移除所有依赖都具备的模块或回调
-        _resolveCallbacks: function (){
+        _checkDeps: function (){
             loop:
             for (var i = tokens.length,repeat, name; name = tokens[--i]; ) {
                 var obj = mapper[name], deps = obj.deps;
@@ -342,12 +342,12 @@
                     repeat = true;
                 }
             }
-        repeat && $._resolveCallbacks();
+        repeat && $._checkDeps();
         },
         //用于检测这模块有没有加载成功
         _checkFail : function(name, error){
             if(error || !mapper[name].state ){
-                this.stack(Function('$.log("fail to load module [ '+name+' ]")'));
+                this.stack(Function('window['+ $["@name"] +'].log("fail to load module [ '+name+' ]")'));
                 this.stack.fire();//打印错误堆栈
             }
         }
@@ -356,7 +356,7 @@
     var readylist = deferred();
     function fireReady(){
         mapper["@ready"].state = 2;
-        $._resolveCallbacks();
+        $._checkDeps();
         readylist.complete = function(fn){
             $.type(fn, "Function") &&  fn()
         }
@@ -432,6 +432,7 @@ dom.namespace改为dom["mass"]
 2011.12.22 加载用iframe内增加$变量,用作过渡.
 2012.1.15  更换$为命名空间
 2012.1.29  升级到v15
+2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */
