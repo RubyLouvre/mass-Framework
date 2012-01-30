@@ -12,7 +12,7 @@
      * 第二个是$，我们可以使用别名机制重写它
      */
     function $(expr, context){//新版本的基石
-        if($.type(expr,"Function")){ //注意在safari下,typeof nodeList的类型为function,因此必须使用dom.type
+        if($.type(expr,"Function")){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             $.require("ready,lang,attr,event,fx", expr);
         }else{
             if(!$.fn)
@@ -202,12 +202,12 @@
         Ns.define(nick.slice(1), deps, (parent.Function("return "+ callback)()))
     }
     /**
-     * 加载模块。它会临时生成一个iframe，并在里面创建相应的script节点进笨请求，并附加各种判定是否加载成功的机制
+     * 加载模块。它会临时构建一个iframe沙箱环境，在里面创建script标签加载指定模块
      * @param {String} name 模块名
      * @param {String} url  模块的路径
      * @param {String} mass  当前框架的版本号
      */
-    function request(name, url, mass){
+    function load(name, url, mass){
         url = url  || $["@path"] +"/"+ name.slice(1) + ".js" + ($["@debug"] ? "?timestamp="+(new Date-0) : "");
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent[document.URL.replace(/(#.+|\\W)/g,"")][',
@@ -282,7 +282,7 @@
                 name  = "@"+ match[1];//取得模块名
                 if(!mapper[name]){ //防止重复生成节点与请求
                     mapper[name] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    request(name, match[2],  $.mass);//加载JS文件
+                    load(name, match[2],  $.mass);//加载JS文件
                 }else if(mapper[name].state === 2){
                     cn++;
                 }
