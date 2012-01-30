@@ -347,7 +347,7 @@
         //用于检测这模块有没有加载成功
         _checkFail : function(name, error){
             if(error || !mapper[name].state ){
-                this.stack(Function('window['+ $["@name"] +'].log("fail to load module [ '+name+' ]")'));
+                this.stack(Function('window.'+ $["@name"] +'.log("fail to load module [ '+name+' ]")'));
                 this.stack.fire();//打印错误堆栈
             }
         }
