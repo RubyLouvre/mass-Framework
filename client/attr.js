@@ -298,7 +298,7 @@ $.define("attr","support,node", function(support){
     }
     propAdapter["tabIndex:get"] = attrAdapter["tabIndex:get"]
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
-    if ( !support.attrSelected ) {
+    if ( !support.optSelected ) {
         $.propAdapter[ "selected:get" ] = function( node ) {
             var parent = node
             for(;!parent.add; parent.selectedIndex, parent = parent.parentNode){};

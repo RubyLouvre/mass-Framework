@@ -18,8 +18,9 @@ $.define("class", "lang",function(){
         });
         return klass
     }
-    function setOptions(obj){
-        var options = this.options = $.Object.merge(this.options || {}, obj),key,match
+    function setOptions(){
+        [].unshift(arguments,this.options || {})
+        var options = this.options = $.Object.merge.apply(null,arguments),key,match
         if (typeof this.bind == "function") {
             for (key in options) {
                 if ((match = key.match(ron))) {

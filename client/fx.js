@@ -462,7 +462,7 @@ $.define("fx", "css",function(){
                         after.unshift(function(node,props,config){
                             node.style.display = "none";
                             node.style.visibility = "hidden";
-                            if ( config.overflow != null && !$.support.shrinkWrapBlocks ) {
+                            if ( config.overflow != null && !$.support.keepSize ) {
                                 [ "", "X", "Y" ].forEach(function (postfix,index) {
                                     node.style[ "overflow" + postfix ] = config.overflow[index]
                                 });

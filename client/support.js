@@ -87,7 +87,7 @@ $.define("support", function(){
     }catch(e){};
     a = select = table = opt = style = null;
     $.require("ready",function(){
-        //boxModel，inlineBlock，keepSize，cssPercentedMargin
+        //boxModel，inlineBlock，keepSize，cssPercentedMargin这些特征必须等到domReady后才能检测
         var body = DOC.body,
         testElement = div.cloneNode(false);
         testElement.style.cssText = "visibility:hidden;width:0;height:0;border:0;margin:0;background:none;padding:0;"
@@ -96,7 +96,6 @@ $.define("support", function(){
         //是否遵循w3c的盒子boxModel去计算元素的大小(IE存在怪异模式,inconformity)
         div.innerHTML = "";
         div.style.width = div.style.paddingLeft = "1px";
-      
         support.boxModel = div.offsetWidth === 2;
         if ( typeof div.style.zoom !== "undefined"  ) {
             //IE7以下版本并不支持display: inline-block;样式，而是使用display: inline;

@@ -4,6 +4,7 @@
 $.define("spec","lang", function(){
     $.log("已加载spec v3模块");
     var global = this, DOC = global.document;
+  
     //模块为$添加如下方法:
     // isEqual  fixture
     //在全局命名空间下多添加一个函数 expect
@@ -87,12 +88,13 @@ $.define("spec","lang", function(){
     var Expect = function(actual){
         this.actual = actual;
     }
+    var specTime ;
     $.mix(Expect,{
         refreshTime : function(){//刷新花费时间
-            var el = get("mass-spec-time");
-            var times = parseInt(el.title,10) + (new Date - Expect.now);
-            el.title = times;
-            el.innerHTML = times
+            specTime = specTime || get("mass-spec-time");
+            var times = parseInt(specTime.title,10) + (new Date - Expect.now);
+            specTime.title = times;
+            specTime.innerHTML = times
         },
         CLASS : {
             0:"mass-asserts-unpass",
@@ -204,6 +206,7 @@ $.define("spec","lang", function(){
         }
     });
     //用于收起或展开详细测试结果
+
     $.bind(DOC,"click",function(e){
         var target = e && e.target || event.srcElement;
         var el = target.parentNode;
@@ -222,6 +225,7 @@ $.define("spec","lang", function(){
     };
     $.fixture = function(title, asserts) {
         $.require("ready",function(){
+          
             var moduleId = "mass-spec-"+title, names = [];
             if(!get(moduleId)){//在主显示区中添加一个版块
                 /** =================每个模块大抵是下面的样子===============
@@ -242,7 +246,8 @@ $.define("spec","lang", function(){
                     names.push(name);
                 }
             };
-            (function runTest(){
+         
+            ;(function runTest(){
                 if((name = names.shift())){
                     var assert = asserts[name],//测试函数
                     caseId = "mass-spec-case-"+name.replace(/\./g,"-");
@@ -264,7 +269,7 @@ $.define("spec","lang", function(){
                             }
                         }).join('<a href="javascript:void(0);" hidefocus="true" >expect');
                         //将经过修整的内容放到DOM树上。
-                        var node = parseHTML($.format('<li id="#{0}">#{1}<pre>#{2}</pre></li>', caseId, name, uni2hanzi(body)));
+                        var node = parseHTML($.format('<li id="#{0}">#{1}<pre>#{2}</pre></li>', caseId, name, uni2hanzi(body)));  
                         parentNode.appendChild(node);
                     }
                     Expect.Client = get(caseId);//对应一个LI元素
@@ -284,9 +289,12 @@ $.define("spec","lang", function(){
                         //修正异常栏的数值
                         errors.innerHTML = errors.title++;
                     }
-                    get(caseId).className = Expect.CLASS[Expect.PASS];
+                    Expect.Client.className = Expect.CLASS[Expect.PASS];
                     Expect.refreshTime();//更新测试所花的时间
-                    setTimeout(runTest,16);
+                    //前面必须用window来显式调用,否则会在safari5中
+                    //报INVALID_ACCESS_ERR: DOM Exception 15: A parameter or an operation
+                    // was not supported by the underlying object.错误
+                    global.setTimeout(runTest,15);
                 }
             })();
         });

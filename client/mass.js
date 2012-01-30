@@ -148,7 +148,7 @@
                     DOC.body.appendChild(div)
                 });
             }else if(global.console ){
-                global.console.log(text);
+                global.console.log(text+"");
             }
         },
         uuid : 1,
@@ -258,6 +258,7 @@
 
     var errorstack = $.stack = deferred();
     errorstack.method = "pop";
+
     mix($, {
         mix:mix,
         //绑定事件(简化版)

@@ -1,27 +1,28 @@
-$.define("lang","lang,more/spec",function( $$){
+$.define("lang","lang,more/spec",function( $$ ){
+    $.log("已加载text/lang模块")
     $.fixture("语言扩展模块-lang",{
         "$.isPlainObject": function() {
-            expect($.isPlainObject([])).ng();//false
-            expect($.isPlainObject(1)).ng();//false
-            expect($.isPlainObject(null)).ng();//false
-            expect($.isPlainObject(void 0)).ng();//false
-            expect($.isPlainObject(window)).ng();//false
-            expect($.isPlainObject(document.body)).ng();//false
+            expect($.isPlainObject([])).ng();
+            expect($.isPlainObject(1)).ng();
+            expect($.isPlainObject(null)).ng();
+            expect($.isPlainObject(void 0)).ng();
+            expect($.isPlainObject(window)).ng();
+            expect($.isPlainObject(document.body)).ng();
             expect(window.location).log();
-            expect($.isPlainObject(window.location)).ng();//false
+            expect($.isPlainObject(window.location)).ng();
             var fn = function(){}
-            expect($.isPlainObject(fn)).ng();//false
+            expect($.isPlainObject(fn)).ng();
             fn.prototype = {
                 someMethod: function(){}
             };
-            expect($.isPlainObject(new fn)).ng();//false
-            expect($.isPlainObject({})).ok();//true
+            expect($.isPlainObject(new fn)).ng();
+            expect($.isPlainObject({})).ok();
             expect($.isPlainObject({
                 aa:"aa",
                 bb:"bb",
                 cc:"cc"
-            })).ok();//true
-            expect($.isPlainObject(new Object)).ok();//true
+            })).ok();
+            expect($.isPlainObject(new Object)).ok();
         },
         "$.isArrayLike":function(){
             expect($.isArrayLike(arguments)).ok();//1
@@ -32,7 +33,7 @@ $.define("lang","lang,more/spec",function( $$){
                 1:"b",
                 length:2
             })).ok();
-            
+
             var tag = $.tag
             var html = tag("select",tag("option","aaa") + tag("option","bbb")+ tag("option","ccc"))
             var div = document.createElement("div");
@@ -58,7 +59,7 @@ $.define("lang","lang,more/spec",function( $$){
         },
         "$.format":function(){
             expect($.format("pi is #{0}", Math.PI)).eq("pi is 3.141592653589793");
-            
+
             var a = $.format("style.#{name}=((isEnd ? #{end} : adapter.#{type}( #{from}, #{change},'#{easing}',per ))|0)+'#{unit}';",{
                 name:"width",
                 end:"0",
@@ -68,7 +69,7 @@ $.define("lang","lang,more/spec",function( $$){
                 easing:"linear",
                 unit:"px"
             })   ;
-           
+
             expect(a).eq("style.width=((isEnd ? 0 : adapter._default( 200, 200,'linear',per ))|0)+'px';");
 
         },
@@ -85,7 +86,7 @@ $.define("lang","lang,more/spec",function( $$){
             var str = "<note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
             expect($.parseXML(str).nodeType).eq(9)//[object XMLDocument]
         },
-        
+
         "$.String":function(){
             expect($$("aaabbbcc").contains("bbb")).ok();
             expect($$('http://index').startsWith('http')).ok();
@@ -129,21 +130,21 @@ $.define("lang","lang,more/spec",function( $$){
             }];
             //复制一个副本
             var b = $$(a).clone();
-            expect(a).same(b);//1
-            expect(a).not(b);//2
+            expect(a).same(b);
+            expect(a).not(b);
 
-            expect($$(a).first()).eq('aaa');//3
-            expect($$(a).first(function(el){//4
+            expect($$(a).first()).eq('aaa');
+            expect($$(a).first(function(el){
                 return el >1
             })).eq(2);
-            expect($$(a).last()).same({//5
+            expect($$(a).last()).same({
                 2:2
             });
-            expect($$(a).last(function(el){//6
+            expect($$(a).last(function(el){
                 return el >1
             })).eq(4);
 
-            expect($$(a).contains(2)).ok();//7
+            expect($$(a).contains(2)).ok();
 
             expect($$(a).diff([1,2,3])).same(["aaa",undefined,4,null,{
                 2:2
@@ -164,27 +165,27 @@ $.define("lang","lang,more/spec",function( $$){
             expect($$(c).max()).eq(45);
             expect($$(c).unique()).same([6,1,45,9,5,4,22,3]);
             expect($$([1, 2, 1, 3, 1, 4]).unique()).same([2,3,1,4]);
-        
+
             var d =['frank', ['bob', 'lisa'], ['jill', ['tom', 'sally']]];
             expect($$(d).flatten()).same(['frank', 'bob', 'lisa', 'jill', 'tom', 'sally']);
-        
+
             var e = ['hello', 'world', 'this', 'is', 'nice'];
             expect($$(e).pluck("length")).same([5, 5, 4, 2, 4]);
             expect($$(e).sortBy(function(s) {
                 return s.length;
             })).same(["is","this","nice","hello","world"]);
-        
+
             var f = [0,1,2,9];
             var g = [0,5,2];
             expect($$(f).diff(g)).same([1,9]);
-        
+
             var h = [1,2,3];
             h = $$(h).union([2,3,4,5,6]);//取并集
             expect(h).same([1,2,3,4,5,6]);
             var j = [1, 2, 3, "a"];
             j = $$(j).intersect([1, "a", 2]);//取交集
             expect(j).same([1, 2, "a"]);
-            
+
         },
         "$.Number" : function(){
             var a = [];
@@ -275,6 +276,7 @@ $.define("lang","lang,more/spec",function( $$){
                 c:3
             });
         }
+       
     });
 });
    
