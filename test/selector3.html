@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>Test descendant combinators</title>
+        <script>
+            window.onload = function(){
+                (function self(){
+                    if( window.parent.selectorTestCall3){
+                        window.parent.selectorTestCall3()
+                    }else{
+                        setTimeout(self,16)
+                    }
+                })()
+            }
+        </script>
+
+    </head>
+    <body>
+
+        <h3>To test for cross-browsers inconsistences:</h3>
+
+        <ol>
+            <li>Execute these tests in a browsers without support for "querySelectorAll" (Opera &lt; 10, Firefox &lt;= 3.1, IE6/7)</li>
+            <li>Compare the results obtained from different browsers, also, test different versions of the same browser</li>
+            <li>Finally compare the results above with results from browsers having support for "querySelectorAll"</li>
+        </ol>
+        <p><b>NOTE:</b> All following tests lines should be green on browsers with support for "querySelectorAll"</p>
+
+        <!-- adjacent siblings -->
+
+        <h2>Descendant combinators (E&nbsp;&nbsp;&nbsp;F)</h2>
+
+        <div>
+            <h3>Descendant and general descendant combinators (E&nbsp;&nbsp;&nbsp;F&nbsp;&nbsp;&nbsp;F)</h3>
+            <div id="test1">
+                <!-- <div>&nbsp;</div> -->
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output1"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Descendant and child selector combinators (E&nbsp;&nbsp;&nbsp;F > F)</h3>
+            <div id="test2">
+                <!-- <div>&nbsp;</div> -->
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output2"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Descendant and adjacent sibling combinators (E&nbsp;&nbsp;&nbsp;F + F)</h3>
+            <div id="test3">
+                <div style="display: none;">&nbsp;</div>
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output3"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Descendant and general sibling combinators (E&nbsp;&nbsp;&nbsp;F ~ F)</h3>
+            <div id="test4">
+                <div style="display: none;">&nbsp;</div>
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output4"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- general siblings -->
+
+        <h2>Direct descendant combinators (E > F)</h2>
+
+        <div>
+            <h3>Direct descendant and general descendant combinators (E > F&nbsp;&nbsp;&nbsp;F)</h3>
+            <div id="test5">
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output5"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Direct descendant and child selector combinators (E > F > F)</h3>
+            <div id="test6">
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output6"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Direct descendant and adjacent sibling combinators (E > F + F)</h3>
+            <div id="test7">
+                <div style="display: none;">&nbsp;</div>
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output7"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3>Direct descendant and general sibling combinators (E > F ~ F)</h3>
+            <div id="test8">
+                <div style="display: none;">&nbsp;</div>
+                <div>
+                    <ul>
+                        <li>Should be green <span id="output8"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

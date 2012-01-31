@@ -1,0 +1,109 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Test sibling combinators</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            window.onload = function(){
+                (function self(){
+                    if( window.parent.selectorTestCall2){
+                        window.parent.selectorTestCall2()
+                    }else{
+                        setTimeout(self,16)
+                    }
+                })()
+            }
+        </script>
+    </head>
+    <body>
+        <!-- adjacent siblings -->
+
+        <h2>Adjacent sibling combinators (E + F)</h2>
+
+        <div>
+            <div id="test1"><h3>Adjacent sibling and general descendant combinators (E + F&nbsp;&nbsp;&nbsp;F)</h3></div>
+            <!-- <div>&nbsp;</div> -->
+            <div>
+                <ul>
+                    <li>Should be green <span id="output1"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div id="test2"><h3>Adjacent sibling and child selector combinators (E + F > F)</h3></div>
+            <!-- <div>&nbsp;</div> -->
+            <div>
+                <ul>
+                    <li>Should be green <span id="output2"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div id="test3"><h3>Adjacent sibling and adjacent sibling combinators (E + F + F)</h3></div>
+            <div style="display: none;">&nbsp;</div>
+            <div>
+                <ul>
+                    <li>Should be green <span id="output3"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div id="test4"><h3>Adjacent sibling and general sibling combinators (E + F ~ F)</h3></div>
+            <div style="display: none;">&nbsp;</div>
+            <div>
+                <ul>
+                    <li>Should be green <span id="output4"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- general siblings -->
+
+        <h2>General sibling combinators (E ~ F)</h2>
+
+        <div>
+            <div id="test5"><h3>General sibling and general descendant combinators (E ~ F&nbsp;&nbsp;&nbsp;F)</h3></div>
+            <div>
+                <ul>
+                    <li>Should be green <span id="output5"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div id="test6"><h3>General sibling and child selector combinators (E ~ F > F)</h3></div>
+            <div>
+                <ul>
+                    <li>Should be green <span id="output6"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div id="test7"><h3>General sibling and adjacent sibling combinators (E ~ F + F)</h3></div>
+            <div style="display: none;">&nbsp;</div>
+            <div>
+                <ul>
+                    <li>Should be green <span id="output7"></span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div>
+            <div id="test8"><h3>General sibling and general sibling combinators (E ~ F ~ F)</h3></div>
+            <div style="display: none;">&nbsp;</div>
+            <div>
+                <ul>
+                    <li>Should be green <span id="output8"></span></li>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>

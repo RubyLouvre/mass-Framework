@@ -7,13 +7,13 @@
         <script src="/client/mass.js"></script>
         <script>
             var testcases = "",
-            url = "mass,lang_fix,lang,support,class";//mass,lang,
+            url = "mass,lang_fix,lang,support,class";//,lang_fix,lang,support,class
             url.replace($.rword,function(name){
                 testcases += ",test/"+name
             });
 
             $.require("ready"+testcases, function(){
-                $.log($["@modules"])
+             //   $.log($["@modules"])
             });
 //http://trip.taobao.com/
         </script>
