@@ -501,7 +501,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
         var outerHTML = node.outerHTML;
-        var neo = !support.cloneHTML5 && outerHTML && (outerHTML.indexOf(unknownTag) === 0) ?
+        var neo = !support.cloneHTML5 && (outerHTML.indexOf(unknownTag) === 0) ?
             shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1){

@@ -159,9 +159,9 @@ $.define("lang","lang,more/spec",function( $$ ){
             expect($$(a).compact()).same(["aaa",1,2,3,4,{
                 2:2
             }]);
-            expect($$(a).ensure([3,4,5])).same(["aaa",1,2,undefined,3,4,null,{
+            expect($$(a).merge([3,4,5])).same(["aaa",1,2,undefined,3,4,null,{
                 2:2
-            },5]);
+            },3,4,5]);
             var c = [3,4,6,1,45,9,5,3,4,22,3];
             expect($$(c).min()).eq(1);
             expect($$(c).max()).eq(45);
