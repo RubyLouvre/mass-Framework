@@ -113,6 +113,8 @@ $.define("lang","lang,more/spec",function( $$ ){
             expect($$("fooBar").underscored()).eq("foo_bar");
             expect($$("foo-bar").underscored()).eq("foo_bar");
 
+            expect($$("foo-bar").capitalizeX().camelize()).eq("FooBar");
+            
             expect($$("10.23").toInt()).eq(10);
             expect($$("1.23").toFloat()).eq(1.23);
 

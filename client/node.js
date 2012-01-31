@@ -8,7 +8,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     var global = this, DOC = global.document, rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName";
     var html5 ="abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
     "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video";
-    html5.replace($.rword,function(tag){//让IE678支持HTML5的新标签
+    html5.replace($.rword,function(tag){//让IE6789支持HTML5的新标签
         DOC.createElement(tag);
     });
     function getDoc(){
@@ -31,8 +31,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             }
             //让$实例与元素节点一样拥有ownerDocument属性
             var doc, nodes;//用作节点搜索的起点
-            if(/Array|NodeList|String/.test($.type(context))|| context && context.version){//typeof context === "string"
-
+            if(/Array|NodeList|String/.test($.type(context))|| context && context.mass){//typeof context === "string"
                 return $(context).find(expr);
             }
             // 处理节点参数
@@ -64,7 +63,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 delete this.selector;
             }
         },
-        version:'1.0',
+        mass:'1.0',
         length:0,
         valueOf:function(){
             return Array.prototype.slice.call(this);
@@ -141,7 +140,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         //移除匹配元素
         remove :function(){
             return this.each(function(el){
-                lang(el[TAGS]("*")).concatX(el).forEach(cleanNode);
+                $.slice(el[TAGS]("*")).concat(el).forEach(cleanNode);
                 if ( el.parentNode ) {
                     el.parentNode.removeChild( el );
                 }
@@ -166,7 +165,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         },
 
         merge: function (arr){ //把普通对象变成类数组对象，
-            var ri = this.length,node;
+            var ri = this.length, node;
             for(var i = 0,n = arr.length;node = arr[i],i < n ;i ++){
                 if(node && (node.nodeType || node.document)){
                     this[ri++] = node;

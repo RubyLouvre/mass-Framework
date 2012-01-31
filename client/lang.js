@@ -288,7 +288,7 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
                 }
                 proto[name+"X"] = function(){
                     var result = this[name].apply(this, arguments);
-                    return $.lang.call(this, result) ;
+                    return $.lang(result) ;
                 }
             });
         }
