@@ -187,7 +187,7 @@ $.define("spec","lang", function(){
                 if(typeof bool === "boolean"){
                     if(!bool){//如果没有通过
                         Expect.PASS = 0;
-                        failures.innerHTML = failures.title++;//更新出错栏的数值
+                        failures.innerHTML = ++failures.title;//更新出错栏的数值
                         if(el){
                             el.className = "mass-assert-unpass";
                             var html = ['<form class="mass-spec-diff clearfix"><div>actual:<pre title="actual">'+$.type(actual)+" : "+$.dump(actual)+'</pre></div>',
@@ -287,7 +287,7 @@ $.define("spec","lang", function(){
                         }
                         var errors = get("mass-spec-errors");
                         //修正异常栏的数值
-                        errors.innerHTML = errors.title++;
+                        errors.innerHTML = ++errors.title;
                     }
                     Expect.Client.className = Expect.CLASS[Expect.PASS];
                     Expect.refreshTime();//更新测试所花的时间

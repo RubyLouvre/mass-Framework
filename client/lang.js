@@ -468,14 +468,6 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
         max: function(target) {
             return Math.max.apply(0, target);
         },
-        //只有原数组不存在才添加它
-        ensure: function(target, array) {
-            array = Array.isArray(array) ? array : $.slice(arguments, 1)
-            array.forEach(function(el){
-                if (!~target.indexOf(el) ) target.push(el);
-            });
-            return target;
-        },
         //取得对象数组的每个元素的特定属性
         pluck:function(target, name){
             var result = [], prop;
@@ -519,9 +511,18 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
             }
             return result;
         },
+        merge : function(target, array){
+            var i = target.length, j = 0;
+            for ( var l = array.length; j < l; j++ ) {
+                target[ i++ ] = array[ j ];
+            }
+            target.length = i;
+            return target;
+        },
         //取并集
         union :function(target, array){
-            return $.Array.unique(target.concat(array));
+            $.Array.merge(target, array)
+            return $.Array.unique(target);
         },
         //取交集
         intersect:function(target, array){

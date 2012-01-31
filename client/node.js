@@ -1,15 +1,10 @@
-//=========================================
-// 节点操作模块 by 司徒正美
-//=========================================
-//https://plus.google.com/photos/111819995660768943393/albums/5632848757471385857
-  
 $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     $.log("已加载node模块");
-    var global = this, DOC = global.document, rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName";
+    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
     var html5 ="abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
     "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video";
     html5.replace($.rword,function(tag){//让IE6789支持HTML5的新标签
-        DOC.createElement(tag);
+        document.createElement(tag);
     });
     function getDoc(){
         for(var i  = 0 , el; i < arguments.length; i++){
@@ -21,9 +16,9 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 }
             }
         }
-        return DOC;
+        return document;
     }
-    $.mix($,$["@class"]).implement({
+    $.mix($, $["@class"]).implement({
         init:function(expr,context){
             // 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -37,16 +32,16 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             // 处理节点参数
             if ( expr.nodeType ) {
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-                return this.merge([expr]);
+                return merge( this, [expr] );
             }
             this.selector = expr + "";
-            if ( expr === "body" && !context && DOC.body ) {//分支3 body
-                this.ownerDocument = DOC;
-                this.merge([DOC.body]);
+            if ( expr === "body" && !context && document.body ) {//分支3 body
+                this.ownerDocument = document;
+                merge( this, [document.body] );
                 return this.selector = "body";
             }
             if ( typeof expr === "string" ) {
-                doc = this.ownerDocument = !context ? DOC : getDoc(context, context[0]);
+                doc = this.ownerDocument = !context ? document : getDoc(context, context[0]);
                 var scope = context || doc;
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
                     nodes = $.parseHTML(expr,doc);//先转化为文档碎片
@@ -56,10 +51,10 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 } else{//分支7：选择器群组
                     nodes  = $.query(expr, scope);
                 }
-                return this.merge(nodes)
+                return merge(this, nodes)
             }else {//分支7：如果是数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc(expr[0]);
-                this.merge( $.isArrayLike(expr) ? expr : [expr]);
+                merge( this, $.isArrayLike(expr) ? expr : [expr]);
                 delete this.selector;
             }
         },
@@ -80,24 +75,20 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             neo.context = this.context;
             neo.selector = this.selector;
             neo.ownerDocument = this.ownerDocument;
-            return neo.merge(nodes||[]);
+            return merge(neo, nodes||[]);
         },
         slice:function(a,b){
             return this.labor($.slice(this,a,b));
         },
         get: function( num ) {
-            return num == null ?
-            // Return a 'clean' array
-            this.valueOf() :
-            // Return just the object
-            ( num < 0 ? this[ this.length + num ] : this[ num ] );
+            return num == null ? this.valueOf() : this[ num < 0 ? this.length + num : num ]
         },
         eq: function( i ) {
             return i === -1 ? this.slice( i ) :this.slice( i, +i + 1 );
         },
 
         gt:function(i){
-            return this.slice(i+1,this.length);
+            return this.slice( i+1,this.length );
         },
         lt:function(i){
             return this.slice(0,i);
@@ -128,7 +119,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         map : function( callback ) {
             return this.labor(this.collect(callback));
         },
-            
+
         collect:function(callback){
             var ret = []
             for(var i = 0, ri = 0, n = this.length; i < n; i++){
@@ -137,24 +128,24 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             return ret
         },
 
-        //移除匹配元素
-        remove :function(){
-            return this.each(function(el){
-                $.slice(el[TAGS]("*")).concat(el).forEach(cleanNode);
-                if ( el.parentNode ) {
-                    el.parentNode.removeChild( el );
-                }
-            });
-        },
-        //清空匹配元素的内容
-        empty:function(){
-            return this.each(function(el){
-                lang(el[TAGS]("*")).forEach(cleanNode);
-                while ( el.firstChild ) {
-                    el.removeChild( el.firstChild );
-                }
-            });
-        },
+//        //移除匹配元素
+//        remove :function(){
+//            return this.each(function(el){
+//                $.slice(el[TAGS]("*")).concat(el).forEach(cleanNode);
+//                if ( el.parentNode ) {
+//                    el.parentNode.removeChild( el );
+//                }
+//            });
+//        },
+//        //清空匹配元素的内容
+//        empty:function(){
+//            return this.each(function(el){
+//                lang(el[TAGS]("*")).forEach(cleanNode);
+//                while ( el.firstChild ) {
+//                    el.removeChild( el.firstChild );
+//                }
+//            });
+//        },
 
         clone : function( dataAndEvents, deepDataAndEvents ) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
@@ -164,16 +155,16 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             });
         },
 
-        merge: function (arr){ //把普通对象变成类数组对象，
-            var ri = this.length, node;
-            for(var i = 0,n = arr.length;node = arr[i],i < n ;i ++){
-                if(node && (node.nodeType || node.document)){
-                    this[ri++] = node;
-                }
-            }
-            this.length = ri;
-            return this;
-        },
+//        merge: function (arr){ //把普通对象变成类数组对象，
+//            var ri = this.length, node;
+//            for(var i = 0,n = arr.length;node = arr[i],i < n ;i ++){
+//                if(node && (node.nodeType || node.document)){
+//                    this[ri++] = node;
+//                }
+//            }
+//            this.length = ri;
+//            return this;
+//        },
         //取得或设置节点的innerHTML属性
         html: function(value){
             if(value === void 0){
@@ -188,7 +179,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                     try {
                         for ( var i = 0, node; node = this[i++]; ) {
                             if ( node.nodeType === 1 ) {
-                                lang(node[TAGS]("*")).forEach(cleanNode);
+                                $.slice( node[TAGS]("*") ).forEach( cleanNode );
                                 node.innerHTML = value;
                             }
                         }
@@ -228,6 +219,27 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     $.fn = $.prototype;
     $.fn.init.prototype = $.fn;
 
+    "remove,empty".replace( $.rword, function( method ){
+        $.fn[ method ] = function(){
+            var isRemove = method === "remove";
+            for(var i = 0, node; node = this[i++]; ){
+                if(node.nodeType === 1){
+                    //移除匹配元素
+                    $.slice( node[TAGS]("*") ).concat( isRemove ? node : [] ).forEach( cleanNode );
+                }
+                if( isRemove ){
+                    if ( node.parentNode ) {
+                        node.parentNode.removeChild( node );
+                    }
+                }else{
+                    while ( node.firstChild ) {
+                        node.removeChild( node.firstChild );
+                    }
+                }
+            }
+            return this;
+        }
+    });
     //前导 前置 追加 后放 替换
     "append,prepend,before,after,replace".replace($.rword,function(method){
         $.fn[method] = function(insertion){
@@ -286,13 +298,13 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                  * @return {FragmentDocument}
                  */
         parseHTML:function( html, doc){
-            doc = doc || this.nodeType === 9  && this || DOC;
+            doc = doc || this.nodeType === 9  && this || document;
             html = html.replace(rxhtml, "<$1></$2>").trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            var range = support.fastFragment
-            if(range && doc === DOC && DOC.body && !rcreate.test(html) && !rnest.test(html)){
-                range.selectNodeContents(DOC.body);//fix opera(9.2~11.51) bug,必须对文档进行选取
+            if(support.fastFragment && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html)){
+                var range = doc.createRange()
+                range.selectNodeContents(doc.body);//fix opera(9.2~11.51) bug,必须对文档进行选取
                 return range.createContextualFragment(html);
             }
             if(!support.createAll){//fix IE
@@ -482,18 +494,18 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         target.clearAttributes && target.clearAttributes();
     }
     function shimCloneNode( outerHTML) {
-        var div = DOC.createElement( "div" );
+        var div = document.createElement( "div" );
         div.innerHTML = outerHTML;
         return div.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
         var outerHTML = node.outerHTML;
-        var neo = outerHTML && (outerHTML.indexOf(unknownTag) === 0) ?
+        var neo = !support.cloneHTML5 && outerHTML && (outerHTML.indexOf(unknownTag) === 0) ?
             shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1){
-            if($.support.cloneAll ){
+            if(!support.cloneNode ){
                 fixNode( neo, node );
                 src = node[TAGS]("*");
                 neos = neo[TAGS]("*");
@@ -565,7 +577,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         }
         return array.join("");
     }
-        
+
     $.implement({
         //取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。
         find: function(expr){
@@ -622,7 +634,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor(ret);
         },
-        index:function(el){ 
+        index:function(el){
             var first = this[0]
             if ( !el ) {//如果没有参数，返回第一元素位于其兄弟的位置
                 return ( first && first.parentNode ) ? this.prevAll().length : -1;
@@ -748,8 +760,8 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
 2011.10.20 修复rid的BUG
 2011.10.21 添加even odd这两个切片方法 重构html方法
 2011.10.23 增加rcheckEls成员,它是一个成员
-2011.10.27 修正init方法中doc的指向错误  
-由 doc = this.ownerDocument = expr.ownerDocument || expr.nodeType == 9 && expr || DOC 改为
+2011.10.27 修正init方法中doc的指向错误
+由 doc = this.ownerDocument = expr.ownerDocument || expr.nodeType == 9 && expr || document 改为
 doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.10.29 优化$.parseHTML 在IE6789下去掉所有为修正createAll特性而添加的补丁元素
 （原来是添加一个文本节点\u200b，而现在是<br class="fix_create_all"/>）

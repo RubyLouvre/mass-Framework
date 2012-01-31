@@ -78,7 +78,7 @@ $.define("support", function(){
     }catch(e){ }
     try{
         var range =  DOC.createRange();
-        support.fastFragment = range.createContextualFragment("<a>") && range
+        support.fastFragment = !!range.createContextualFragment("<a>")
     }catch(e){ };
     //判定innerHTML是否完美，用于html方法
     try{
