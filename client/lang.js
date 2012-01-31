@@ -513,7 +513,7 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
         },
         merge : function(target, array){
             var i = target.length, j = 0;
-            for ( var l = array.length; j < l; j++ ) {
+            for ( var n = array.length; j < n; j++ ) {
                 target[ i++ ] = array[ j ];
             }
             target.length = i;
@@ -563,14 +563,14 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
             return target;
         },
         //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
-        constrain:function(target, n1, n2){
+        constrain: function(target, n1, n2){
             var a = [n1, n2].sort();
             if(target < a[0]) target = a[0];
             if(target > a[1]) target = a[1];
             return target;
         },
         //求出距离原数最近的那个数
-        nearer:function(target, n1, n2){
+        nearer: function(target, n1, n2){
             var diff1 = Math.abs(target - n1),
             diff2 = Math.abs(target - n2);
             return diff1 < diff2 ? n1 : n2
@@ -699,4 +699,5 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
 //2012.1.17 添加dump方法
 //2012.1.20 重构$$.String, $$.Array, $$.Number, $$.Object, 让其变成一个函数
 //2012.1.27 让$$.String等对象上的方法全部变成静态方法
+//2012.1.31 去掉$.Array.ensure，添加$.Array.merge
 //键盘控制物体移动 http://www.wushen.biz/move/

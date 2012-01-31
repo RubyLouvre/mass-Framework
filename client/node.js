@@ -58,94 +58,75 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 delete this.selector;
             }
         },
-        mass:'1.0',
-        length:0,
-        valueOf:function(){
+        mass: '1.0',
+        length: 0,
+        valueOf: function(){
             return Array.prototype.slice.call(this);
         },
-        toString : function(){
+        toString: function(){
             var i = this.length, ret = [], getType = $.type;
             while(i--){
                 ret[i] = getType(this[i]);
             }
             return ret.join(", ");
         },
-        labor:function(nodes){
+        labor: function(nodes){
             var neo = new $;
             neo.context = this.context;
             neo.selector = this.selector;
             neo.ownerDocument = this.ownerDocument;
-            return merge(neo, nodes||[]);
+            return merge( neo, nodes || [] );
         },
-        slice:function(a,b){
-            return this.labor($.slice(this,a,b));
+        slice: function( a, b ){
+            return this.labor( $.slice(this, a, b) );
         },
         get: function( num ) {
-            return num == null ? this.valueOf() : this[ num < 0 ? this.length + num : num ]
+            return num == null ? this.valueOf() : this[ num < 0 ? this.length + num : num ];
         },
         eq: function( i ) {
             return i === -1 ? this.slice( i ) :this.slice( i, +i + 1 );
         },
 
-        gt:function(i){
-            return this.slice( i+1,this.length );
+        gt:function( i ){
+            return this.slice( i+1, this.length );
         },
-        lt:function(i){
+        lt:function( i ){
             return this.slice(0,i);
         },
         first: function() {
             return this.slice( 0,1 );
         },
-        even: function(  ) {
-            return this.labor(this.valueOf().filter(function(el,i){
+        even: function() {
+            return this.labor(this.valueOf().filter(function( _, i ){
                 return i % 2 === 0;
             }));
         },
-        odd: function(  ) {
-            return this.labor(this.valueOf().filter(function(el,i){
+        odd: function() {
+            return this.labor(this.valueOf().filter(function( _, i ){
                 return i % 2 === 1;
             }));
         },
         last: function() {
             return this.slice( -1 );
         },
-        each : function(callback){
+        each : function( fn ){
             for(var i = 0, n = this.length; i < n; i++){
-                callback.call(this[i], this[i], i);
+                fn.call( this[i], this[i], i );
             }
             return this;
         },
 
-        map : function( callback ) {
-            return this.labor(this.collect(callback));
+        map : function( fn ) {
+            return this.labor( this.collect(fn) );
         },
 
-        collect:function(callback){
+        collect:function( fn ){
             var ret = []
             for(var i = 0, ri = 0, n = this.length; i < n; i++){
-                ret[ri++] = callback.call(this[i], this[i], i);
+                ret[ri++] = fn.call( this[i], this[i], i );
             }
             return ret
         },
-
-//        //移除匹配元素
-//        remove :function(){
-//            return this.each(function(el){
-//                $.slice(el[TAGS]("*")).concat(el).forEach(cleanNode);
-//                if ( el.parentNode ) {
-//                    el.parentNode.removeChild( el );
-//                }
-//            });
-//        },
-//        //清空匹配元素的内容
-//        empty:function(){
-//            return this.each(function(el){
-//                lang(el[TAGS]("*")).forEach(cleanNode);
-//                while ( el.firstChild ) {
-//                    el.removeChild( el.firstChild );
-//                }
-//            });
-//        },
 
         clone : function( dataAndEvents, deepDataAndEvents ) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
@@ -155,44 +136,34 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             });
         },
 
-//        merge: function (arr){ //把普通对象变成类数组对象，
-//            var ri = this.length, node;
-//            for(var i = 0,n = arr.length;node = arr[i],i < n ;i ++){
-//                if(node && (node.nodeType || node.document)){
-//                    this[ri++] = node;
-//                }
-//            }
-//            this.length = ri;
-//            return this;
-//        },
         //取得或设置节点的innerHTML属性
-        html: function(value){
-            if(value === void 0){
+        html: function( item ){
+            if(item === void 0){
                 var el = this[0]
                 if(el && (el.nodeType ===1 || /xml/i.test(el.nodeName))){//处理IE的XML数据岛
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
             }else {
-                value = (value || "")+""
-                if(support.innerHTML && (!rcreate.test(value) && !rnest.test(value))){
+                item = (item || "")+""
+                if(support.innerHTML && (!rcreate.test(item) && !rnest.test(item))){
                     try {
                         for ( var i = 0, node; node = this[i++]; ) {
                             if ( node.nodeType === 1 ) {
                                 $.slice( node[TAGS]("*") ).forEach( cleanNode );
-                                node.innerHTML = value;
+                                node.innerHTML = item;
                             }
                         }
                         return this;
                     } catch(e) {}
                 }
-                return this.empty().append( value );
+                return this.empty().append( item );
             }
         },
         // 取得或设置节点的text或innerText或textContent属性
-        text:function(value){
+        text:function(item){
             var node = this[0];
-            if(value === void 0){
+            if(item === void 0){
                 if(!node){
                     return "";
                 }else if(node.tagName == "OPTION" || node.tagName === "SCRIPT"){
@@ -201,13 +172,13 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                     return node.textContent || node.innerText ||  $.getText([ node ]);
                 }
             }else{
-                return this.empty().append( this.ownerDocument.createTextNode( value ));
+                return this.empty().append( this.ownerDocument.createTextNode( item ));
             }
         },
         // 取得或设置节点的outerHTML
-        outerHTML:function(value){
+        outerHTML: function(item){
             if(typeof value === "string"){
-                return this.empty().replace( value );
+                return this.empty().replace( item );
             }
             var el = this[0]
             if(el && el.nodeType === 1 ){
@@ -241,28 +212,28 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         }
     });
     //前导 前置 追加 后放 替换
-    "append,prepend,before,after,replace".replace($.rword,function(method){
-        $.fn[method] = function(insertion){
-            return manipulate(this, method, insertion);
+    "append,prepend,before,after,replace".replace($.rword,function( method ){
+        $.fn[method] = function( item ){
+            return manipulate(this, method, item);
         }
-        $.fn[method+"To"] = function(insertion){
-            $(insertion,this.ownerDocument)[method](this);
+        $.fn[method+"To"] = function( item ){
+            $( item, this.ownerDocument )[ method ](this);
             return this;
         }
     });
     var HTML = $.html;
     var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
     $.extend({
-        match : function(node, expr, i){
+        match : function( node, expr, i ){
             if($.type(expr, "Function")){
-                return expr.call(node,node,i);
+                return expr.call( node, node, i );
             }
             try{
                 return matchesAPI.call( node, expr );
             } catch(e) {
                 var parent = node.parentNode;
                 if(parent){
-                    var array = $.query(expr,parent);
+                    var array = $.query( expr, parent );
                     return !!(array.length && array.indexOf(node))
                 }
                 return false;
@@ -297,7 +268,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                  * @param {Document} doc 可选
                  * @return {FragmentDocument}
                  */
-        parseHTML:function( html, doc){
+        parseHTML:function( html, doc ){
             doc = doc || this.nodeType === 9  && this || document;
             html = html.replace(rxhtml, "<$1></$2>").trim();
             //尝试使用createContextualFragment获取更高的效率
@@ -327,7 +298,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                             }
                         }
                         script3.text = script.text;//必须指定,因为无法在attributes中遍历出来
-                        script.parentNode.replaceChild(script3,script);//替换节点
+                        script.parentNode.replaceChild( script3, script );//替换节点
                     }
                 }
             }
@@ -341,7 +312,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 if(spear && shield){
                     for(var t=0, tbody; tbody = tbodys[t++];){
                         if(!tbody.childNodes.length )//如果是自动插入的里面肯定没有内容
-                            tbody.parentNode.removeChild(tbody );
+                            tbody.parentNode.removeChild( tbody );
                     }
                 }
             }
@@ -382,38 +353,38 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     //需要处理套嵌关系的标签
     rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,adjacent = "insertAdjacentHTML",
     insertApapter = {
-        prepend : function(el, node){
-            el.insertBefore(node,el.firstChild);
+        prepend: function( el, node ){
+            el.insertBefore( node, el.firstChild );
         },
-        append  : function(el, node){
-            el.appendChild(node);
+        append: function( el, node ){
+            el.appendChild( node );
         },
-        before  : function(el, node){
-            el.parentNode.insertBefore(node,el);
+        before: function( el, node ){
+            el.parentNode.insertBefore( node, el );
         },
-        after   : function(el, node){
-            el.parentNode.insertBefore(node,el.nextSibling);
+        after: function( el, node ){
+            el.parentNode.insertBefore( node, el.nextSibling );
         },
-        replace : function(el, node){
-            el.parentNode.replaceChild(node,el);
+        replace: function( el, node ){
+            el.parentNode.replaceChild( node, el );
         },
-        prepend2: function(el, html){
-            el[adjacent]( "afterBegin", html);
+        prepend2: function( el, html ){
+            el[adjacent]( "afterBegin", html );
         },
-        append2 : function(el, html){
-            el[adjacent]( "beforeEnd", html);
+        append2: function( el, html ){
+            el[adjacent]( "beforeEnd", html );
         },
-        before2 : function(el,html){
-            el[adjacent]( "beforeBegin",html);
+        before2: function( el, html ){
+            el[adjacent]( "beforeBegin",html );
         },
-        after2  : function(el, html){
-            el[adjacent]( "afterEnd", html);
+        after2: function( el, html ){
+            el[adjacent]( "afterEnd", html );
         }
     };
 
-    var insertAdjacentNode = function(nodes,callback,stuff){
+    var insertAdjacentNode = function(nodes, fn, item){
         for(var i = 0, node; node = nodes[i];i++){
-            callback(node, !!i ? stuff : cloneNode(stuff,true,true) );
+            fn(node, !!i ? item : cloneNode(item,true,true) );
         }
     }
     var insertAdjacentHTML = function(nodes,slowInsert,fragment,fast,fastInsert,html){
@@ -425,13 +396,13 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             }
         }
     }
-    var insertAdjacentFragment = function(nodes,callback,fakearray){
+    var insertAdjacentFragment = function( nodes, fn, fakearray ){
         var fragment = nodes.ownerDocument.createDocumentFragment();
         for(var i = 0, node; node = nodes[i++];){
-            callback(node, makeFragment(fakearray,fragment,i > 1));
+            fn(node, makeFragment(fakearray,fragment,i > 1));
         }
     }
-    var makeFragment = function(nodes,fragment,bool){
+    var makeFragment = function( nodes, fragment, bool ){
         //只有非NodeList的情况下我们才为i递增;
         var ret = fragment.cloneNode(false), go= !nodes.item
         for(var i = 0,node;node = nodes[i]; go && i++){
@@ -443,22 +414,22 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
              * 实现insertAdjacentHTML的增强版
              * @param {mass}  nodes mass实例
              * @param {String} type 方法名
-             * @param {Any}  stuff 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
+             * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
              * @return {mass} 还是刚才的mass实例
              */
-    function manipulate(nodes, type, stuff){
-        if(stuff.nodeType ){
+    function manipulate( nodes, type, item ){
+        if(item.nodeType ){
             //如果是传入元素节点或文本节点或文档碎片
-            insertAdjacentNode(nodes,insertApapter[type],stuff) ;
-        }else if(typeof stuff === "string"){
+            insertAdjacentNode( nodes, insertApapter[type], item );
+        }else if(typeof item === "string"){
             //如果传入的是字符串片断
-            var fragment = $.parseHTML(stuff, nodes.ownerDocument),
+            var fragment = $.parseHTML( item, nodes.ownerDocument ),
             //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
-            fast = (type !== "replace") && support[adjacent] &&  !rnest.test(stuff);
-            insertAdjacentHTML(nodes,insertApapter[type],fragment, fast, insertApapter[type+"2"],stuff ) ;
-        }else if( stuff.length) {
+            fast = (type !== "replace") && support[adjacent] &&  !rnest.test(item);
+            insertAdjacentHTML(nodes, insertApapter[type], fragment, fast, insertApapter[type+"2"], item ) ;
+        }else if( item.length) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
-            insertAdjacentFragment(nodes,insertApapter[type],stuff) ;
+            insertAdjacentFragment(nodes, insertApapter[type],item) ;
         }
         return nodes;
     }
@@ -722,8 +693,8 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         },
         children:function(el){
             return  el.children ? $.slice(el.children) :
-            lang(el.childNodes).filter(function(ee){
-                return ee.nodeType === 1
+            $$(el.childNodes).filter(function(ee){
+                return ee.nodeType === 1;
             });
         },
         siblings:function(el){
@@ -734,7 +705,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             el.contentDocument || el.contentWindow.document :
             $.slice( el.childNodes );
         }
-    }).forEach(function(method,name){
+    }).forEach(function( method, name ){
         $.fn[name] = function(selector){
             var nodes = [];
             $.slice(this).forEach(function(el){

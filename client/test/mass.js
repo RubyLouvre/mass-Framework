@@ -18,7 +18,6 @@ $.define("mass","more/spec",function(){
             expect($.type(window)).eq("Window");
             expect($.type(document)).eq("Document");
             expect($.type(document.documentElement)).eq("HTML");
-            expect($.type(document.documentElement)).eq("BODY");
             expect($.type(document.body)).eq("BODY");
             expect($.type(document.childNodes)).eq("NodeList");
             expect($.type(document.getElementsByTagName("*"))).eq("NodeList");
