@@ -284,13 +284,10 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
                 proto[name] = function(){
                     var target = this.target;
                     var method = target[name] || transform($[this.type][name]);
-                    var result = method.apply(target, arguments);
-                    return result;
+                    return method.apply(target, arguments);
                 }
                 proto[name+"X"] = function(){
-                    var target = this.target;
-                    var method = target[name] || transform($[this.type][name]);
-                    var result = method.apply(target, arguments);
+                    var result = this[name].apply(this, arguments);
                     return $.lang.call(this, result) ;
                 }
             });
