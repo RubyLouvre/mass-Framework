@@ -1,5 +1,5 @@
 
-$.define("more/brower", function( ){
+$.define("brower", function( ){
     //$.log("已加载brower模块");
     var ver = top.opera ? (opera.version().replace(/\d$/, "") - 0)
     : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.

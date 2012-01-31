@@ -1,7 +1,7 @@
 //=========================================
 // 异步列队模块
 //==========================================
-$.define("more/deferred", function(){
+$.define("deferred", function(){
     $.log("已加载deferred模块")
     var Deferred = $.Deferred = function (fn) {
         return this instanceof Deferred ? this.init(fn) : new Deferred(fn);

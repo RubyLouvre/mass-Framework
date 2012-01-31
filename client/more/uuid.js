@@ -1,7 +1,7 @@
 /**
  * UUID模块
  */
-$.define("more/uuid", function () {
+$.define("uuid", function () {
     var _time = new Date,
     getBits = function(val, start, end){ 
         val = val.toString(36).split('');

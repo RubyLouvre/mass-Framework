@@ -1,5 +1,5 @@
 
-$.define("more/base64",  function(){
+$.define("base64",  function(){
     //改自 https://bitbucket.org/davidchambers/base64.js
     var
     characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=',

@@ -1,5 +1,5 @@
 
-$.define("more/node_wrap",'node',function(){
+$.define("node_wrap",'node',function(){
     $.implement({
         /**
              *用一个标签包裹所有匹配节点
