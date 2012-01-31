@@ -4,7 +4,22 @@
 (function(global, DOC){
     var
     _$ = global.$, //保存已有同名变量
-    namespace = DOC.URL.replace( /(#.+|\W)/g,'');
+    namespace = DOC.URL.replace( /(#.+|\W)/g,''),
+    w3c = DOC.dispatchEvent, //w3c事件模型
+    HEAD = DOC.head || DOC.getElementsByTagName("head")[0],
+    commonNs = global[namespace], mass = 1.0, postfix = "",
+    class2type = {
+        "[object HTMLDocument]"   : "Document",
+        "[object HTMLCollection]" : "NodeList",
+        "[object StaticNodeList]" : "NodeList",
+        "[object IXMLDOMNodeList]": "NodeList",
+        "[object DOMWindow]"      : "Window"  ,
+        "[object global]"         : "Window"  ,
+        "null"                    : "Null"    ,
+        "NaN"                     : "NaN"     ,
+        "undefined"               : "Undefined"
+    },
+    toString = class2type.toString;
     /**
      * @class $
      * mass Framework拥有两个命名空间,
@@ -21,7 +36,6 @@
         }
     }
     //多版本共存
-    var commonNs = global[namespace], mass = 1.0, postfix = "";
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
     }
@@ -33,20 +47,7 @@
     }else{
         return;
     }
-    var w3c = DOC.dispatchEvent, //w3c事件模型
-    HEAD = DOC.head || DOC.getElementsByTagName("head")[0],
-    class2type = {
-        "[object HTMLDocument]"   : "Document",
-        "[object HTMLCollection]" : "NodeList",
-        "[object StaticNodeList]" : "NodeList",
-        "[object IXMLDOMNodeList]": "NodeList",
-        "[object DOMWindow]"      : "Window"  ,
-        "[object global]"         : "Window"  ,
-        "null"                    : "Null"    ,
-        "NaN"                     : "NaN"     ,
-        "undefined"               : "Undefined"
-    },
-    toString = class2type.toString;
+
     /**
      * 糅杂，为一个对象添加更多成员
      * @param {Object} target 目标对象
