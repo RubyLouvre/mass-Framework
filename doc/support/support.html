@@ -26,9 +26,11 @@
         <h3>support模块</h3>
 
         <p><span class="stress">描述：</span></p>
-        <p>mass Framework的<span class="stress">特征嗅探模块</span>，通过避免使用无法向后兼容的浏览器检测。
+        <p>mass Framework的<span class="stress">特征嗅探模块</span>，替代旧式的浏览器检测。
         </p>
-        <p>$.support所包含的各样检测，如果存在对应DOM API并且其行为与大多数标准浏览器的行为一致为true，否则为false（此时需要框架做N多兼容代码）。</p>
+        <p>这是统一进行各种特征检测的模块。这些检测的值，如果存在对应DOM API并且其行为与大多数标准浏览器的行为一致为true，
+            否则为false。false值越多说明该浏览器越落后，在我的测试列表中，FF9是做得最好的，全部为true，
+            最差的不用说是哪个吧。就算是IE9也不尽人意，我还是需要为它做N多兼容代码。webkit系的也没有想象中的好。标准化之路任重道远啊。</p>
         <table class="table1">
             <tbody>
                 <tr><td>insertTbody</td><td>标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody</td></tr>
