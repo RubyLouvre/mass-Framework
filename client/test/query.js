@@ -1,5 +1,5 @@
-dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
-    var iframe =  dom("<iframe id='test_query' src='/test/selector.html' style='display:none;width:0px;height:0px;' frameBorder=0  />").appendTo("body");//style='display:none;width:0px;height:0px;'
+$.define("test/query","more/spec,test/nwmatcher,node,css",function(){
+    var iframe =  $("<iframe id='test_query' src='/test/selector.html' style='display:none;width:0px;height:0px;' frameBorder=0  />").appendTo("body");//style='display:none;width:0px;height:0px;'
   
     function eq(obj,expr,msg){
         expect(obj).match(function(){
@@ -11,7 +11,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
             expr2 = expr1
         }
         if(typeof expr1 === "string"){
-            expr1 =  dom.query(expr1,context) ;
+            expr1 =  $.query(expr1,context) ;
         }
         if(typeof expr2 === "string"){
             expr2 =  NW.Dom.select(expr2,context) ;
@@ -25,13 +25,13 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
             sameWithNWMatcher(expr1,expr2,msg,context)
         }
        
-        dom.addTestModule("选择器测试1-query",{
+        $.fixture("选择器测试1-query",{
             testSelectorWithTagName:function(){
                 same("li");
                 same("strong");
                 same("nonexistent");
                 same("#p>.first","#link_1")
-                var allNodes = dom.slice(idoc.getElementsByTagName('*')).filter( function(node) {
+                var allNodes = $.slice(idoc.getElementsByTagName('*')).filter( function(node) {
                     return node.tagName !== '!';
                 });
                 same(allNodes, "*");
@@ -131,7 +131,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 same('a[class~=external]:not([href="#"])',[]);
             },
             testElementMatch: function() {
-                var span = dom('#dupL1',idoc);
+                var span = $('#dupL1',idoc);
            
                 eq(span,"span")
                 eq(span,'span#dupL1');
@@ -142,9 +142,9 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 eq(span,'span.span_bar', 'class name 2');
                 eq(span,'span:first-child', 'first-child pseudoclass');
 
-                eq(dom('#link_1',idoc),'a[rel^=external]');
-                eq(dom('#link_1',idoc),'a[rel^="external"]');
-                eq(dom('#link_1',idoc),"a[rel^='external']");
+                eq($('#link_1',idoc),'a[rel^=external]');
+                eq($('#link_1',idoc),'a[rel^="external"]');
+                eq($('#link_1',idoc),"a[rel^='external']");
             },
             testSelectorWithSpaceInAttributeValue: function() {
                 same('cite[title="hello world!"]','#with_title');
@@ -278,11 +278,11 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 
         });
     }
-    var iframe2 =  dom("<iframe id='test_query' src='/test/selector2.html' style='display:none;width:0px;height:0px;' frameBorder=0  />").appendTo("body");//style='display:none;width:0px;height:0px;'
+    var iframe2 =  $("<iframe id='test_query' src='/test/selector2.html' style='display:none;width:0px;height:0px;' frameBorder=0  />").appendTo("body");//style='display:none;width:0px;height:0px;'
     window.selectorTestCall2 = function(){
         var idoc2  =  iframe2.contents()[0];
 
-        dom.addTestModule("选择器测试2-query",{
+        $.fixture("选择器测试2-query",{
             testSiblings: function() {
                 var i = 1, j = 1, n,
                 elements, items, expr, types,
@@ -294,7 +294,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                     items = operators[types].split('');
                     for (i = 1, n = items.length; n >= i; ++i, ++j) {
                         expr = '#test' + j + ' ' + types + ' div ' + items[i - 1] + ' *';
-                        elements = dom.query(expr,idoc2)
+                        elements = $.query(expr,idoc2)
                         expect(elements.length).eq( i % 5 == 1 ? 3 : 1,expr);
                     }
                 }
@@ -302,11 +302,11 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
             }
         })
     }
-    var iframe3 =  dom("<iframe id='test_query' src='/test/selector3.html' style='display:none;width:0px;height:0px;' frameBorder=0  />").appendTo("body");
+    var iframe3 =  $("<iframe id='test_query' src='/test/selector3.html' style='display:none;width:0px;height:0px;' frameBorder=0  />").appendTo("body");
     window.selectorTestCall3 = function(){
         var idoc3  =  iframe3.contents()[0];
 
-        dom.addTestModule("选择器测试3-query",{
+        $.fixture("选择器测试3-query",{
             testDescendant: function() {
                 var i = 1, j = 1, n,
                 elements, items, expr, types,
@@ -318,7 +318,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                     items = operators[types].split('');
                     for (i = 1, n = items.length; n >= i; ++i, ++j) {
                         expr = '#test' + j + ' ' + types + ' div ' + items[i - 1] + ' *';
-                        elements = dom.query(expr,idoc3)
+                        elements = $.query(expr,idoc3)
                         expect(elements.length).eq( i % 5 == 1 ? 3 : 1,expr);
                     }
                 }
@@ -326,16 +326,16 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
             }
         })
     }
-//    var iframe4 =  dom("<iframe id='test_query' src='/test/selector4.html#target' width=100% height=400px  frameBorder=0  />").appendTo("body");//
+//    var iframe4 =  $("<iframe id='test_query' src='/test/selector4.html#target' width=100% height=400px  frameBorder=0  />").appendTo("body");//
 //    window.selectorTestCall4 = function(){
 //        var idoc4  =  iframe4.contents()[0];
 //
-//        var styleEl = dom("<style>body {background-color:blue;}</style>",idoc4).appendTo("head"),style = styleEl[0];
+//        var styleEl = $("<style>body {background-color:blue;}</style>",idoc4).appendTo("head"),style = styleEl[0];
 //        var matchCSS = ""
 //        function same(expr1,expr2,css,context){
 //            context = context || idoc4;
 //            expr2 = expr2 || expr1;
-//            var  nodes1 =  dom(expr1,context) ;
+//            var  nodes1 =  $(expr1,context) ;
 //  
 //            var nodes2 =  NW.Dom.select(expr2,context) ;
 //            var ret = expect(nodes1.valueOf()).same(nodes2,css)
@@ -343,7 +343,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 //                if(!context.querySelectorAll && /(:|\[)/.test(css)){
 //                    var cssText = css.replace(expr1,"").replace("{","").replace("}","");
 //                    cssText = cssText.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-//                    dom.log(cssText)
+//                    $.log(cssText)
 //                    for(var i = 0,el;el = nodes1[i++];){
 //                        el.style.cssText += ";"+cssText;
 //                    }
@@ -353,7 +353,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 //                }
 //            }
 //        }
-//        var cssText  = dom("#teststyle",idoc4).html();
+//        var cssText  = $("#teststyle",idoc4).html();
 //     
 //        var lines = cssText.split(/\r?\n/),line,expr,rcomment = /\/\*/,rules = {},ri = 0,exprs = [];
 //        for(var i=0,n=lines.length;i<n;i++){
@@ -370,8 +370,8 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 //            exprs.push(expr);
 //   
 //        }
-//        // dom.log(rules)
-//        dom.addTestModule("选择器-query",{
+//        // $.log(rules)
+//        $.fixture("选择器-query",{
 //            testCSS3_: function() {
 //            
 //                var expr,  time = 0,exprs2 = exprs, i = 0;
@@ -400,13 +400,13 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 //            }
 //        })
 //    }
-    var iframe5 =  dom("<iframe id='test_query' src='/test/selector5.html#target' style='display:none;width:0px;height:0px;'  frameBorder=0  />").appendTo("body");//
+    var iframe5 =  $("<iframe id='test_query' src='/test/selector5.html#target' style='display:none;width:0px;height:0px;'  frameBorder=0  />").appendTo("body");//
     window.selectorTestCall5 = function(){
         var idoc5  =  iframe5.contents()[0];
-        var styleEl = dom("<style>body {background-color:blue;}</style>",idoc5).appendTo("head"),style = styleEl[0];
+        var styleEl = $("<style>body {background-color:blue;}</style>",idoc5).appendTo("head"),style = styleEl[0];
         function afforest(selector,rule,context){
             context = context || idoc5;
-            var nodes = dom.query(selector,context) ;
+            var nodes = $.query(selector,context) ;
             if(nodes.length && nodes){
                 var cssText = rule.replace(selector,"").replace("{","").replace("}","");
                 cssText = cssText.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
@@ -416,7 +416,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 }
             }
         }
-        var cssText  = dom("#teststyle",idoc5).html();
+        var cssText  = $("#teststyle",idoc5).html();
         var lines = cssText.split(/\r?\n/),line,expr,rcomment = /\/\*/,rules = {},ri = 0,exprs = [];
         for(var i=0,n=lines.length;i<n;i++){
             line = lines[i]
@@ -432,7 +432,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
             exprs.push(expr);
         }
  
-        dom.addTestModule("选择器测试4-query",{
+        $.fixture("选择器测试4-query",{
             testCSS3: function() {
             
                 var expr,  time = 0,exprs2 = exprs, i = 0;
@@ -457,11 +457,11 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
         })
     }
     
-    var iframe6 =  dom("<iframe id='test_query' src='/test/selector6.html' width=100% height=400px  frameBorder=0  />").appendTo("body");//
+    var iframe6 =  $("<iframe id='test_query' src='/test/selector6.html' width=100% height=400px  frameBorder=0  />").appendTo("body");//
     window.selectorTestCall6 = function(){
         var idoc6  =  iframe6.contents()[0];
         function t(a,b,c) {
-            var nodes = dom.query(b,idoc6);
+            var nodes = $.query(b,idoc6);
             expect(nodes).same( q.apply(q,c), a + " (" + b + ")");
         }
         function q() {
@@ -477,10 +477,10 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
         function same(nodes1,nodes2,msg){
             expect(nodes1).same(nodes2,msg)
         }
-        dom.addTestModule("选择器测试5-query",{
+        $.fixture("选择器测试5-query",{
             "element":function() {
   
-                var all = dom("*",idoc6);
+                var all = $("*",idoc6);
                 expect( all.length >= 30 ).ok( "Select all" );//1
                 var good = true;
                 for ( var i = 0; i < all.length; i++ )
@@ -491,30 +491,30 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 t( "Element Selector", "body", ["body"] );//4
                 t( "Element Selector", "html", ["html"] );//5
                 t( "Parent Element", "div p", ["firstp","ap","sndp","en","sap","first"] );//6
-                /* expect( dom("#object1 param",idoc6).length).eq( 2, "Object/param as context" );//7 */
-                same( dom("p", idoc6.getElementsByTagName("div")).get(), q("firstp","ap","sndp","en","sap","first"), "Context is a NodeList)." );
+                /* expect( $("#object1 param",idoc6).length).eq( 2, "Object/param as context" );//7 */
+                same( $("p", idoc6.getElementsByTagName("div")).get(), q("firstp","ap","sndp","en","sap","first"), "Context is a NodeList)." );
                 //如果context是字符串，context就必然是当前文档了
-                //same( dom("p", "div").get(), q("firstp","ap","sndp","en","sap","first"), "Context is a String." );
-                same( dom("p", dom("div",idoc6)).get(), q("firstp","ap","sndp","en","sap","first"), "Context is a dom instance." );
-                same( dom("div p",idoc6).get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
-                same( dom("div",idoc6).find("p").get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
+                //same( $("p", "div").get(), q("firstp","ap","sndp","en","sap","first"), "Context is a String." );
+                same( $("p", $("div",idoc6)).get(), q("firstp","ap","sndp","en","sap","first"), "Context is a dom instance." );
+                same( $("div p",idoc6).get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
+                same( $("div",idoc6).find("p").get(), q("firstp","ap","sndp","en","sap","first"), "Finding elements with a context." );
           
-                same( dom("#form",idoc6).find("select").get(), q("select1","select2","select3","select4","select5"), "Finding selects with a context." );
+                same( $("#form",idoc6).find("select").get(), q("select1","select2","select3","select4","select5"), "Finding selects with a context." );
 
-                expect( dom("#length",idoc6).length).eq(1, '&lt;input name="length"&gt; cannot be found under IE, see #945' );
-                expect( dom("#lengthtest input",idoc6).length).eq(2, '&lt;input name="length"&gt; cannot be found under IE, see #945' );
+                expect( $("#length",idoc6).length).eq(1, '&lt;input name="length"&gt; cannot be found under IE, see #945' );
+                expect( $("#lengthtest input",idoc6).length).eq(2, '&lt;input name="length"&gt; cannot be found under IE, see #945' );
 
                 // Check for unique-ness and sort order
-                same( dom("p, div p",idoc6).get(), dom("p",idoc6).get(), "Check for duplicates: p, div p" );
+                same( $("p, div p",idoc6).get(), $("p",idoc6).get(), "Check for duplicates: p, div p" );
        
                 t( "Checking sort order", "h2, h1", ["qunit-header", "qunit-banner", "qunit-userAgent"] );
                 t( "Checking sort order", "h2:nth-child(2), h1:first-child", ["qunit-header", "qunit-banner"] );
                 t( "Checking sort order", "#qunit-fixture p, #qunit-fixture p a", ["firstp", "simon1", "ap", "google", "groups", "anchor1", "mark", "sndp", "en", "yahoo", "sap", "anchor2", "simon", "first"] );
 
                 // Test Conflict ID
-                same( dom("#lengthtest",idoc6).find("#idTest").get(), q("idTest"), "Finding element with id of ID." );
-                same( dom("#lengthtest",idoc6).find("[name='id']").get(), q("idTest"), "Finding element with id of ID." );
-                same( dom("#lengthtest",idoc6).find("input[id='idTest']").get(), q("idTest"), "Finding elements with a context." );
+                same( $("#lengthtest",idoc6).find("#idTest").get(), q("idTest"), "Finding element with id of ID." );
+                same( $("#lengthtest",idoc6).find("[name='id']").get(), q("idTest"), "Finding element with id of ID." );
+                same( $("#lengthtest",idoc6).find("input[id='idTest']").get(), q("idTest"), "Finding elements with a context." );
             },
 
             "xml":function(){
@@ -545,17 +545,17 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 	</soap:Body>\
 </soap:Envelope>"  
 
-                var xml = dom.parseXML(xmlstr);
-                equals( dom("foo_bar", xml).length, 1, "Element Selector with underscore" );
-                equals( dom(".component", xml).length, 1, "Class selector" );
-                equals( dom("[class*=component]", xml).length, 1, "Attribute selector for class" );
-                equals( dom("property[name=prop2]", xml).length, 1, "Attribute selector with name" );
-                equals( dom("[name=prop2]", xml).length, 1, "Attribute selector with name" );
-                equals( dom("#seite1", xml).length, 1, "Attribute selector with ID" );
-                equals( dom("component#seite1", xml).length, 1, "Attribute selector with ID" );
-                equals( dom("component", xml).filter("#seite1").length, 1, "Attribute selector filter with ID" );
+                var xml = $.parseXML(xmlstr);
+                equals( $("foo_bar", xml).length, 1, "Element Selector with underscore" );
+                equals( $(".component", xml).length, 1, "Class selector" );
+                equals( $("[class*=component]", xml).length, 1, "Attribute selector for class" );
+                equals( $("property[name=prop2]", xml).length, 1, "Attribute selector with name" );
+                equals( $("[name=prop2]", xml).length, 1, "Attribute selector with name" );
+                equals( $("#seite1", xml).length, 1, "Attribute selector with ID" );
+                equals( $("component#seite1", xml).length, 1, "Attribute selector with ID" );
+                equals( $("component", xml).filter("#seite1").length, 1, "Attribute selector filter with ID" );
 
-                expect( dom( xml.lastChild ).is( "soap\\:Envelope" )).ok( "Check for namespaced element" );
+                expect( $( xml.lastChild ).is( "soap\\:Envelope" )).ok( "Check for namespaced element" );
 
             },
             "id": function() {
@@ -583,20 +583,20 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 
                 t( "All Children of ID", "#foo > *", ["sndp", "en", "sap"] );
                 t( "All Children of ID with no children", "#firstUL > *", [] );
-                var fixture = dom('#qunit-fixture',idoc6)
-                var a = dom('<div id="xxxx7><a name="tName1">tName1 A</a><a name="tName2">tName2 A</a><div id="tName1">tName1 Div</div></div>',idoc6).appendTo(fixture);
+                var fixture = $('#qunit-fixture',idoc6)
+                var a = $('<div id="xxxx7><a name="tName1">tName1 A</a><a name="tName2">tName2 A</a><div id="tName1">tName1 Div</div></div>',idoc6).appendTo(fixture);
 
-                equals( dom("#tName1",idoc6)[0].id, 'tName1', "ID selector with same value for a name attribute" );
-                equals( dom("#tName2",idoc6).length, 0, "ID selector non-existing but name attribute on an A tag" );
+                equals( $("#tName1",idoc6)[0].id, 'tName1', "ID selector with same value for a name attribute" );
+                equals( $("#tName2",idoc6).length, 0, "ID selector non-existing but name attribute on an A tag" );
                 a.remove();
 
                 t( "ID Selector on Form with an input that has a name of 'id'", "#lengthtest", ["lengthtest"] );
 
                 t( "ID selector with non-existant ancestor", "#asdfasdf #foobar", [] ); // bug #986
 
-                same( dom("body",idoc6).find("div#form").get(), [], "ID selector within the context of another element" );
+                same( $("body",idoc6).find("div#form").get(), [], "ID selector within the context of another element" );
                 //#7533
-                equals( dom("<div id=\"A'B~C.D[E]\"><p>foo</p></div>").find("p").length, 1, "Find where context root is a node and has an ID with CSS3 meta characters" );
+                equals( $("<div id=\"A'B~C.D[E]\"><p>foo</p></div>").find("p").length, 1, "Find where context root is a node and has an ID with CSS3 meta characters" );
           
                 t( "Underscore ID", "#types_all", ["types_all"] );
                 t( "Dash ID", "#fx-queue", ["fx-queue"] );
@@ -611,10 +611,10 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 t( "Class Selector w/ Element", "a.blog", ["mark","simon"] );
                 t( "Parent Class Selector", "p .blog", ["mark","simon"] );
                
-                same( dom(".blog", idoc6.getElementsByTagName("p")).get(), q("mark", "simon"), "Finding elements with a context." );
-                same( dom("p .blog", idoc6).get(), q("mark", "simon"), "Finding elements with a context. p .blog" );
-                same( dom(".blog", dom("p",idoc6)).get(), q("mark", "simon"), "Finding elements with a context." );
-                same( dom("p",idoc6).find(".blog").get(), q("mark", "simon"), "Finding elements with a context." );
+                same( $(".blog", idoc6.getElementsByTagName("p")).get(), q("mark", "simon"), "Finding elements with a context." );
+                same( $("p .blog", idoc6).get(), q("mark", "simon"), "Finding elements with a context. p .blog" );
+                same( $(".blog", $("p",idoc6)).get(), q("mark", "simon"), "Finding elements with a context." );
+                same( $("p",idoc6).find(".blog").get(), q("mark", "simon"), "Finding elements with a context." );
 
                 t( "Class selector using UTF8", ".台北Táiběi", ["utf8class1"] );
                 t( "Class selector using UTF8", ".台北", ["utf8class1","utf8class2"] );
@@ -632,11 +632,11 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 
                 var div = document.createElement("div");
                 div.innerHTML = "<div class='test e'></div><div class='test'></div>";
-                same( dom(".e", div).get(), [ div.firstChild ], "Finding a second class." );
+                same( $(".e", div).get(), [ div.firstChild ], "Finding a second class." );
 
                 div.lastChild.className = "e";
 
-                same( dom(".e", div).get(), [ div.firstChild, div.lastChild ], "Finding a modified class." );
+                same( $(".e", div).get(), [ div.firstChild, div.lastChild ], "Finding a modified class." );
                 div = null;
             },
             "name": function() {
@@ -650,23 +650,23 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
 
                 t( "Name selector for grouped input", "input[name='types[]']", ["types_all", "types_anime", "types_movie"] );
 
-                same( dom("#form",idoc6).find("input[name=action]").get(), q("text1"), "Name selector within the context of another element" );
-                same( dom("#form",idoc6).find("input[name='foo[bar]']").get(), q("hidden2"), "Name selector for grouped form element within the context of another element" );
+                same( $("#form",idoc6).find("input[name=action]").get(), q("text1"), "Name selector within the context of another element" );
+                same( $("#form",idoc6).find("input[name='foo[bar]']").get(), q("hidden2"), "Name selector for grouped form element within the context of another element" );
 
-                var form = dom("<form><input name='id'/></form>").appendTo("body");
+                var form = $("<form><input name='id'/></form>").appendTo("body");
 
                 equals( form.find("input").length, 1, "Make sure that rooted queries on forms (with possible expandos) work." );
 
                 form.remove();
-                var fixture = dom('#qunit-fixture',idoc6)
-                var a = dom('<div id="xxxx8"><a id="tName1ID" name="tName1">tName1 A</a><a id="tName2ID" name="tName2">tName2 A</a><div id="tName1">tName1 Div</div></div>',idoc6).appendTo(fixture);
+                var fixture = $('#qunit-fixture',idoc6)
+                var a = $('<div id="xxxx8"><a id="tName1ID" name="tName1">tName1 A</a><a id="tName2ID" name="tName2">tName2 A</a><div id="tName1">tName1 Div</div></div>',idoc6).appendTo(fixture);
                 var children = a.children();
 
                 equals( children.length, 3, "Make sure the right number of elements were inserted." );
                 equals( children[1].id, "tName2ID", "Make sure the right number of elements were inserted." );
 
-                equals( dom("[name=tName1]",idoc6)[0], children[0], "Find elements that have similar IDs" );
-                equals( dom("[name=tName2]",idoc6)[0], children[1], "Find elements that have similar IDs" );
+                equals( $("[name=tName1]",idoc6)[0], children[0], "Find elements that have similar IDs" );
+                equals( $("[name=tName2]",idoc6)[0], children[1], "Find elements that have similar IDs" );
                 t( "Find elements that have similar IDs", "#tName2ID", ["tName2ID"] );
                 a.remove();
             },
@@ -702,13 +702,13 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 t( "Element Preceded By", "#length ~ input", ["idTest"] );
                 t( "Element Preceded By", "#siblingfirst ~ em", ["siblingnext"] );
                   
-                //    same( dom("#siblingfirst",idoc6).find("~ em").get(), q("siblingnext"), "Element Preceded By with a context." );
-                //    same( dom("#siblingfirst",idoc6).find("+ em").get(), q("siblingnext"), "Element Directly Preceded By with a context." );
+                //    same( $("#siblingfirst",idoc6).find("~ em").get(), q("siblingnext"), "Element Preceded By with a context." );
+                //    same( $("#siblingfirst",idoc6).find("+ em").get(), q("siblingnext"), "Element Directly Preceded By with a context." );
 
-                equals( dom("#listWithTabIndex",idoc6).length, 1, "Parent div for next test is found via ID (#8310)" );
+                equals( $("#listWithTabIndex",idoc6).length, 1, "Parent div for next test is found via ID (#8310)" );
 
-                equals( dom("#__sizzle__",idoc6).length, 0, "Make sure the temporary id assigned by sizzle is cleared out (#8310)" );
-                equals( dom("#listWithTabIndex",idoc6).length, 1, "Parent div for previous test is still found via ID (#8310)" );
+                equals( $("#__sizzle__",idoc6).length, 0, "Make sure the temporary id assigned by sizzle is cleared out (#8310)" );
+                equals( $("#listWithTabIndex",idoc6).length, 1, "Parent div for previous test is still found via ID (#8310)" );
 
                 t( "Verify deep class selector", "div.blah > p > a", [] );
 
@@ -765,8 +765,8 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 t( "Grouped Form Elements", "input[name='foo[bar]']", ["hidden2"] );
 
                 // Make sure attribute value quoting works correctly. See: #6093
-                var body = dom("body",idoc6)
-                var attrbad = dom('<input type="hidden" value="2" name="foo.baz" id="attrbad1"/><input type="hidden" value="2" name="foo[baz]" id="attrbad2"/>',idoc6).appendTo(body);
+                var body = $("body",idoc6)
+                var attrbad = $('<input type="hidden" value="2" name="foo.baz" id="attrbad1"/><input type="hidden" value="2" name="foo[baz]" id="attrbad2"/>',idoc6).appendTo(body);
 
                 t("Find escaped attribute value", "input[name=foo\\.baz]", ["attrbad1"]);
                 t("Find escaped attribute value", "input[name=foo\\[baz\\]]", ["attrbad2"]);
@@ -783,7 +783,7 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 var div = document.createElement("div");
                 div.innerHTML = "<div id='foo' xml:test='something'></div>";
 
-                same( dom( "[xml\\:test]", div ).get(), [ div.firstChild ], "Finding by attribute with escaped characters." );
+                same( $( "[xml\\:test]", div ).get(), [ div.firstChild ], "Finding by attribute with escaped characters." );
             },
             "pseudo_child": function() {
                 t( "First Child", "#qunit-fixture p:first-child", ["firstp","sndp"] );
@@ -798,8 +798,8 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 t( "Not Nth Child", "#qunit-fixture p:not(:nth-child(1))", ["ap","en","sap","first"] );
 
                 // Verify that the child position isn't being cached improperly
-                dom("p:first-child",idoc6).after("<div></div>");
-                dom("p:first-child",idoc6).before("<div></div>").next().remove();
+                $("p:first-child",idoc6).after("<div></div>");
+                $("p:first-child",idoc6).before("<div></div>").next().remove();
 
                 t( "First Child", "p:first-child", [] );
                 
@@ -832,8 +832,8 @@ dom.define("test/query","more/spec,test/nwmatcher,node,css",function(){
                 t( ":not() Multiple Class", "#foo a:not(.link)", ["yahoo","anchor2"] );
             },
             "pseudo - form": function() {
-                var form = dom("#form",idoc6)
-                var implied = dom('<input id="impliedText"/>',idoc6).appendTo(form);
+                var form = $("#form",idoc6)
+                var implied = $('<input id="impliedText"/>',idoc6).appendTo(form);
 
                 t( "Form element :input", "#form :input", ["text1", "text2", "radio1", "radio2", "check1", "check2", "hidden1", "hidden2", "name", "search", "button", "area1", "select1", "select2", "select3", "select4", "select5", "impliedText"] );
                 t( "Form element :radio", "#form :radio", ["radio1", "radio2"] );

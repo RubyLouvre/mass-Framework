@@ -1,5 +1,5 @@
-dom.define("test/icarus","more/spec,icarus",function(){
-    dom.addTestModule('Icarus选择器-icarus', {
+$.define("test/icarus","more/spec,icarus",function(){
+    $.addTestModule('Icarus选择器-icarus', {
         "CSS表达式的切割":function(){
             //http://www.w3.org/TR/selectors/
             var reg_split = /^(?:[-\w\*]|[^\x00-\xa0]|\\.)+|\.(?:[-\w*\.]|[^\x00-\xa0]|\\.)+|[#:](?:[-\w]|[^\x00-\xa0]|\\.)+(?:\([^\)]*\))?|\[[^\]]*\]|(?:\s*)([>+~,\s])(?:\s*)(?=\S)/
@@ -34,7 +34,7 @@ dom.define("test/icarus","more/spec,icarus",function(){
             logger('body > h2:nth-of-type(n+2):nth-last-of-type(n+2)').same(["body",">","h2",":nth-of-type(n+2)",":nth-last-of-type(n+2)"])
             logger('body > h2:not(:first-of-type):not(:last-of-type)').same(["body",">","h2",":not(:first-of-type)",":not(:last-of-type)"])
             logger('div ol>li p').same(["div"," ","ol",">","li"," ","p"])
-            dom.icarus("div > span.aaa#id")
+            $.icarus("div > span.aaa#id")
 
              
         }

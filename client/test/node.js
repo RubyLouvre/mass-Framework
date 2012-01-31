@@ -1,5 +1,4 @@
-dom.define("test/node","more/spec,node",function($$){
-    var $ = dom;
+$.define("test/node","more/spec,node",function($$){
     var iframe =  $("<iframe id='test_node' frameBorder=0 style='display:none;width:0px;height:0px;' />").appendTo("body");//
     var idoc  =  iframe.contents()[0];
    
@@ -30,9 +29,9 @@ dom.define("test/node","more/spec,node",function($$){
                    <div id="test-contains">text node</div>'
     $(html2).appendTo(ibody2);
     var t = $('#test-parent4',idoc2);
-    // dom.addTestModule2 =dom.noop;
+    // $.addTestModule2 =$.noop;
     
-    dom.addTestModule("节点操作模块-node",{
+    $.fixture("节点操作模块-node",{
         "append()":function(){
             //先添加两个类为.test_node的P元素
             $("body",idoc).append("<p class='test_node'>测试append方法<strong>这是它的内部</strong></p><p class='test_node'>测试append方法<strong>这是它的内部</strong></p>");
@@ -83,11 +82,11 @@ dom.define("test/node","more/spec,node",function($$){
                 return this;
             });
         },
-        "dom.parseHTML":function(){
+        "$.parseHTML":function(){
             var str = "<h1>My First<strong>Heading</strong></h1><p>My first paragraph.</p><script>document.aa = 'test';</script>";
             var fragment = $.parseHTML(str);
             expect(fragment.firstChild.nodeName).eq("H1");
-             var style = dom("<style>.testtest {width:1px;height:1px;opacity:0.55;filter:alpha(opacity=55); }</style>")//.appendTo("head");
+             var style = $("<style>.testtest {width:1px;height:1px;opacity:0.55;filter:alpha(opacity=55); }</style>")//.appendTo("head");
             expect( style[0].nodeType).eq(1)
         //  $(fragment).appendTo($("body",idoc));  expect(idoc.aa).eq("test");    
         },
