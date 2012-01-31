@@ -71,7 +71,7 @@ $.define("data", "lang", function(){
         mergeData:function(neo, src){
             var srcData = $._data(src), neoData = $._data(neo), events = srcData.events;
             if(srcData && neoData){
-                $.Object.merge.call(neoData, srcData);
+                $.Object.merge(neoData, srcData);
                 if(events){
                     delete neoData.handle;
                     neoData.events = {};
@@ -90,3 +90,4 @@ $.define("data", "lang", function(){
 //2011.9.27 uniqueID改为uniqueNumber 简化data与removeData
 //2011.9.28 添加$._data处理内部数据
 //2011.10.21 强化mergeData，可以拷贝事件
+//2012.1.31 简化$.Object.merge的调用
