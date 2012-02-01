@@ -117,16 +117,16 @@ $.define("test/node","more/spec,node",function($$){
             expect(ul.children().index(first)).eq(0);
             expect(ul.children().index(first[0])).eq(0);
         },
-        "is()":function(){
+        "is()": function(){
             expect(first.is("#aaa>li")).ok();
             expect(first.is("#aaa :nth-child(1)")).ok();
         },
-        "find()":function(){
+        "find()": function(){
             expect(ul.find("li").length).eq(3);
             expect(ul.find("#aaaa").length).eq(1);
             expect($("body",idoc2).find("#aaa li").length).eq(3);
         },
-        "filter()":function(){
+        "filter()": function(){
             expect(li.filter("#aaaa").length).eq(1);
             expect(li.filter("#aaa :nth-child(1)").length).eq(1);
         },

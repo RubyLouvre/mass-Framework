@@ -365,12 +365,29 @@ $.define("lang",Array.isArray ? "" : "lang_fix",function(){
         },
         //http://stevenlevithan.com/regex/xregexp/
         //将字符串安全格式化为正则表达式的源码
-        escapeRegExp: function(target){
+        escapeRegExp: function( target ){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+        },
+        //将字符串中的html代码转换为可以直接显示的格式,
+        escapeHTML: function( target ){
+            return target.replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').
+            replace(/</g, '&lt;').
+            replace(/>/g, '&gt;')
+            replace(/"/g, '&quot;').
+            replace(/'/g, '&#x27;').
+            replace(/\//g,'&#x2F;');
+        },
+        unescapeHTML: function( target ){
+            return target.replace(/&lt;/g,'<').
+            replace(/&gt;/g,'>').
+            replace(/&quot;/g,'"').
+            replace(/&#x27;/g,"'").
+            replace(/&#x2F;/g,"//").
+            replace(/&amp;/g,'&')
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
-        padLeft: function(target, digits, filling, radix){
+        padLeft: function( target, digits, filling, radix ){
             var num = target.toString(radix || 10);
             filling = filling || "0";
             while(num.length < digits){

@@ -601,7 +601,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor(ret);
         },
-        index:function(el){
+        index: function( el ){
             var first = this[0]
             if ( !el ) {//如果没有参数，返回第一元素位于其兄弟的位置
                 return ( first && first.parentNode ) ? this.prevAll().length : -1;
