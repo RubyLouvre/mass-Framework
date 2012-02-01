@@ -163,29 +163,27 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         },
         // 取得或设置节点的text或innerText或textContent属性
         text:function( item ){
-            var node = this[0];
-            if(item === void 0){
-                if(!node){
+            return $.access(this, 0, item, function( el ){//getter
+                if( !el ){
                     return "";
-                }else if(node.tagName == "OPTION" || node.tagName === "SCRIPT"){
-                    return node.text;
-                }else{
-                    return node.textContent || node.innerText ||  $.getText( [node] );
+                }else if(el.tagName == "OPTION" || el.tagName === "SCRIPT"){
+                    return el.text;
                 }
-            }else{
-                return this.empty().append( this.ownerDocument.createTextNode( item ));
-            }
+                return el.textContent || el.innerText ||  $.getText( [el] );
+            }, function(){//setter
+                this.empty().append( this.ownerDocument.createTextNode( item ));
+            });
         },
         // 取得或设置节点的outerHTML
-        outerHTML: function(item){
-            if(typeof value === "string"){
-                return this.empty().replace( item );
-            }
-            var el = this[0]
-            if(el && el.nodeType === 1 ){
-                return "outerHTML" in el? el.outerHTML :outerHTML(el)
-            }
-            return null;
+        outerHTML: function( item ){
+            return $.access(this, 0, item, function( el ){
+                if(el && el.nodeType === 1 ){
+                    return "outerHTML" in el? el.outerHTML :outerHTML( el );
+                }
+                return null;
+            }, function( ){
+                this.empty().replace( item );
+            });
         }
     });
     $.fn = $.prototype;
@@ -240,24 +238,28 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 return false;
             }
         },
-        access: function( elems,  key, value, get, set ) {
+        access: function( elems,  key, value, getter, setter ) {
             var length = elems.length;
             //为所有元素设置N个属性
             if ( typeof key === "object" ) {
                 for ( var k in key ) {
-                    $.access( elems, k, key[k], get, set );
+                    $.access( elems, k, key[k], getter, setter );
                 }
                 return elems;
             }
             // 为所有元素设置属性
             if ( value !== void 0 ) {
-                for ( var i = 0; i < length; i++ ) {
-                    set( elems[i], key, value);
+                if(!key){
+                    setter.call( elems, value);
+                }else{
+                    for ( var i = 0; i < length; i++ ) {
+                        setter( elems[i], key, value);
+                    }
                 }
                 return elems;
             }
             //为第一个元素设置属性
-            return length ? get( elems[0], key ) : void 0;
+            return length ? getter( elems[0], key ) : void 0;
         },
 
         /**
@@ -434,23 +436,6 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         return nodes;
     }
     $.implement({
-        //        data:function(key, value){
-        //            if ( typeof key === "string" ) {
-        //                if(value === void 0){
-        //                    return $.data(this[0], key);
-        //                }else{//读方法，取第一个匹配元素的相关属性
-        //                    return this.each(function(el){
-        //                        $.data(el, key, value);//写方法，为所有匹配元素缓存相关属性
-        //                    });
-        //                }
-        //            } else if ( $.isPlainObject(key) ) {
-        //                return  this.each(function(el){
-        //                    var d = $.data( el );
-        //                    d && $.mix(d, key);//写方法，为所有匹配元素缓存相关属性
-        //                });
-        //            }
-        //            return this;
-        //        },
         data: function(key , value){
             return $.access(this, key, value, function(el, key){
                 return  $.data(el, key);
@@ -545,7 +530,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             case "4":
                 return el.nodeValue;
             case "8":
-                return "<!--"+el.nodeValue+"-->"
+                return "<!--"+el.nodeValue+"-->";
         }
     }
     function innerHTML(el){
@@ -571,7 +556,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         },
         //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
         is: function(expr){
-            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid
+            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
             for(var i = 0 , node; node = nodes[i++];){
                 uid = $.getUid(node);
                 obj[uid] = 1;
