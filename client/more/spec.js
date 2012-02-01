@@ -223,10 +223,10 @@ $.define("spec","lang", function(){
     global.expect = function(actual){
         return new Expect(actual);
     };
-    $.fixture = function(title, asserts) {
+    $.fixture = function( title, asserts ) {
         $.require("ready",function(){
           
-            var moduleId = "mass-spec-"+title, names = [];
+            var moduleId = "mass-spec-"+title;
             if(!get(moduleId)){//在主显示区中添加一个版块
                 /** =================每个模块大抵是下面的样子===============
                 <div class="mass-spec-case" id="mass-spec-$.js">
@@ -241,11 +241,7 @@ $.define("spec","lang", function(){
                 '<ul class="mass-spec-detail" style="display:none;"></ul></div>'].join('');
                 get("mass-spec-cases").appendChild(parseHTML($.format(html, moduleId, title)));
             }
-            for(var name in asserts){//取得describe第二个参数的那个对象所包含的所有函数,并放到异步列队中逐一执行它们
-                if(asserts.hasOwnProperty(name)){
-                    names.push(name);
-                }
-            };
+            var names = Object.keys(asserts), name;
          
             ;(function runTest(){
                 if((name = names.shift())){
