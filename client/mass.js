@@ -236,7 +236,7 @@
     }
     //收集依赖列表对应模块的返回值，传入目标模块中执行
     function assemble( fn, args ){
-        for(var i = 0,argv = [], name; name = args[i++];){
+        for ( var i = 0,argv = [], name; name = args[i++]; ) {
             argv.push( transfer[name] );
         }
         return fn.apply( global, argv );
@@ -260,7 +260,7 @@
     var errorstack = $.stack = deferred();
     errorstack.method = "pop";
     mix($, {
-        mix:mix,
+        mix: mix,
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
             el.addEventListener( type, fn, !!phase );
@@ -284,7 +284,7 @@
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
                     mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
                     load( name, match[2], $.mass );//加载JS文件
-                }else if(mapper[ name ].state === 2){
+                }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
                 if( !_deps[ name ] ){
@@ -317,7 +317,7 @@
         },
         //定义模块
         define:function( name, deps, callback ){//模块名,依赖列表,模块本身
-            if(typeof deps == "function"){//处理只有两个参数的情况
+            if( typeof deps == "function" ){//处理只有两个参数的情况
                 callback = deps;
                 deps = "";
             }
@@ -327,7 +327,7 @@
         //执行并移除所有依赖都具备的模块或回调
         _checkDeps: function (){
             loop:
-            for (var i = tokens.length, repeat, name; name = tokens[ --i ]; ) {
+            for ( var i = tokens.length, repeat, name; name = tokens[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -358,7 +358,7 @@
     function fireReady(){
         mapper[ "@ready" ].state = 2;
         $._checkDeps();
-        readylist.complete = function(fn){
+        readylist.complete = function( fn ){
             $.type( fn, "Function") &&  fn();
         }
         readylist.fire();
