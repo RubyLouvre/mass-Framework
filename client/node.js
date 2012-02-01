@@ -1,11 +1,12 @@
 $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
-    var html5 ="abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-    "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video";
-    html5.replace($.rword,function(tag){//让IE6789支持HTML5的新标签
-        document.createElement(tag);
-    });
+    if(!support.cloneHTML5){
+        "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace($.rword,function( tag ){
+            document.createElement( tag );////让IE6789支持HTML5的新标签
+        });
+    }
     function getDoc(){
         for(var i  = 0 , el; i < arguments.length; i++){
             if(el = arguments[i]){
@@ -20,22 +21,22 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     }
     $.mix($, $["@class"]).implement({
         init:function(expr,context){
-            // 处理空白字符串,null,undefined参数
+            // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
                 return this;
             }
-            //让$实例与元素节点一样拥有ownerDocument属性
+            //分支2:  让$实例与元素节点一样拥有ownerDocument属性
             var doc, nodes;//用作节点搜索的起点
             if(/Array|NodeList|String/.test($.type(context))|| context && context.mass){//typeof context === "string"
                 return $(context).find(expr);
             }
-            // 处理节点参数
+            //分支3:  处理节点参数
             if ( expr.nodeType ) {
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
                 return merge( this, [expr] );
             }
             this.selector = expr + "";
-            if ( expr === "body" && !context && document.body ) {//分支3 body
+            if ( expr === "body" && !context && document.body ) {//分支4:  body
                 this.ownerDocument = document;
                 merge( this, [document.body] );
                 return this.selector = "body";
@@ -44,15 +45,15 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 doc = this.ownerDocument = !context ? document : getDoc(context, context[0]);
                 var scope = context || doc;
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
-                    nodes = $.parseHTML( expr, doc );//先转化为文档碎片
-                    nodes = nodes.childNodes;//再转化为节点数组
-                } else if( rtag.test( expr ) ){
+                    nodes = $.parseHTML( expr, doc );//分支5: 动态生成新节点
+                    nodes = nodes.childNodes;
+                } else if( rtag.test( expr ) ){//分支6: getElementsByTagName
                     nodes  = scope[TAGS](expr) ;
-                } else{//分支7：选择器群组
+                } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
                 return merge( this, nodes )
-            }else {//分支7：如果是数组，节点集合或者mass对象或window对象
+            }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
                 merge( this, $.isArrayLike(expr) ? expr : [expr]);
                 delete this.selector;
@@ -66,11 +67,11 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         toString: function(){
             var i = this.length, ret = [], getType = $.type;
             while(i--){
-                ret[i] = getType(this[i]);
+                ret[i] = getType( this[i] );
             }
             return ret.join(", ");
         },
-        labor: function(nodes){
+        labor: function( nodes ){
             var neo = new $;
             neo.context = this.context;
             neo.selector = this.selector;
@@ -91,7 +92,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             return this.slice( i+1, this.length );
         },
         lt:function( i ){
-            return this.slice(0,i);
+            return this.slice( 0, i );
         },
         first: function() {
             return this.slice( 0,1 );
@@ -140,7 +141,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         html: function( item ){
             if(item === void 0){
                 var el = this[0]
-                if(el && (el.nodeType ===1 || /xml/i.test(el.nodeName))){//处理IE的XML数据岛
+                if(el && (el.nodeType === 1 || /xml/i.test(el.nodeName))){//处理IE的XML数据岛
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
@@ -161,7 +162,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             }
         },
         // 取得或设置节点的text或innerText或textContent属性
-        text:function(item){
+        text:function( item ){
             var node = this[0];
             if(item === void 0){
                 if(!node){
@@ -169,7 +170,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 }else if(node.tagName == "OPTION" || node.tagName === "SCRIPT"){
                     return node.text;
                 }else{
-                    return node.textContent || node.innerText ||  $.getText([ node ]);
+                    return node.textContent || node.innerText ||  $.getText( [node] );
                 }
             }else{
                 return this.empty().append( this.ownerDocument.createTextNode( item ));
@@ -189,7 +190,6 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     });
     $.fn = $.prototype;
     $.fn.init.prototype = $.fn;
-
     "remove,empty".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
             var isRemove = method === "remove";
@@ -217,11 +217,12 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             return manipulate(this, method, item);
         }
         $.fn[method+"To"] = function( item ){
-            $( item, this.ownerDocument )[ method ](this);
+            $( item, this.ownerDocument )[ method ]( this );
             return this;
         }
     });
     var HTML = $.html;
+    var commonRange = document.createRange && document.createRange();
     var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
     $.extend({
         match : function( node, expr, i ){
@@ -239,23 +240,23 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 return false;
             }
         },
-        access: function( elems,  key, value, set, get ) {
+        access: function( elems,  key, value, get, set ) {
             var length = elems.length;
-            //使用一个纯净的对象一下子设置多个属性
+            //为所有元素设置N个属性
             if ( typeof key === "object" ) {
                 for ( var k in key ) {
-                    $.access( elems, k, key[k], set, get );
+                    $.access( elems, k, key[k], get, set );
                 }
                 return elems;
             }
-            // 设置一个属性
+            // 为所有元素设置属性
             if ( value !== void 0 ) {
                 for ( var i = 0; i < length; i++ ) {
                     set( elems[i], key, value);
                 }
                 return elems;
             }
-            //获取一个属性
+            //为第一个元素设置属性
             return length ? get( elems[0], key ) : void 0;
         },
 
@@ -274,9 +275,8 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
             if(support.fastFragment && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html)){
-                var range = doc.createRange()
-                range.selectNodeContents(doc.body);//fix opera(9.2~11.51) bug,必须对文档进行选取
-                return range.createContextualFragment(html);
+                commonRange.selectNodeContents(doc.body);//fix opera(9.2~11.51) bug,必须对文档进行选取
+                return commonRange.createContextualFragment(html);
             }
             if(!support.createAll){//fix IE
                 html = html.replace(rcreate,"<br class='fix_create_all'/>$1");//在link style script等标签之前添加一个补丁
@@ -434,22 +434,29 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         return nodes;
     }
     $.implement({
-        data:function(key,value){
-            if ( typeof key === "string" ) {
-                if(value === void 0){
-                    return $.data(this[0], key);
-                }else{//读方法，取第一个匹配元素的相关属性
-                    return this.each(function(el){
-                        $.data(el, key, value);//写方法，为所有匹配元素缓存相关属性
-                    });
-                }
-            } else if ( $.isPlainObject(key) ) {
-                return  this.each(function(el){
-                    var d = $.data(el);
-                    d && $.mix(d, key);//写方法，为所有匹配元素缓存相关属性
-                });
-            }
-            return this;
+        //        data:function(key, value){
+        //            if ( typeof key === "string" ) {
+        //                if(value === void 0){
+        //                    return $.data(this[0], key);
+        //                }else{//读方法，取第一个匹配元素的相关属性
+        //                    return this.each(function(el){
+        //                        $.data(el, key, value);//写方法，为所有匹配元素缓存相关属性
+        //                    });
+        //                }
+        //            } else if ( $.isPlainObject(key) ) {
+        //                return  this.each(function(el){
+        //                    var d = $.data( el );
+        //                    d && $.mix(d, key);//写方法，为所有匹配元素缓存相关属性
+        //                });
+        //            }
+        //            return this;
+        //        },
+        data: function(key , value){
+            return $.access(this, key, value, function(el, key){
+                return  $.data(el, key);
+            }, function(el, key, value){
+                $.data(el, key, value);
+            })
         },
         removeData: function( key ) {
             return this.each(function() {
@@ -473,7 +480,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
         var outerHTML = node.outerHTML;
         var neo = !support.cloneHTML5 && (outerHTML.indexOf(unknownTag) === 0) ?
-            shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
+        shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1){
             if(!support.cloneNode ){
@@ -552,7 +559,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     $.implement({
         //取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。
         find: function(expr){
-            return this.labor($.query(expr,this));
+            return this.labor( $.query( expr, this ) );
         },
         //取得当前匹配节点的所有匹配expr的节点，组成新mass实例返回。
         filter:function(expr){
@@ -560,12 +567,12 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         },
         //取得当前匹配节点的所有不匹配expr的节点，组成新mass实例返回。
         not: function(expr){
-            return this.labor(filterhElement(this.valueOf(), expr,  this.ownerDocument,   true));
+            return this.labor(filterhElement(this.valueOf(), expr,  this.ownerDocument, true));
         },
         //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
-        is:function(expr){
-            var nodes = $.query(expr,this.ownerDocument), obj = {}, uid
-            for(var i =0 , node; node = nodes[i++];){
+        is: function(expr){
+            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid
+            for(var i = 0 , node; node = nodes[i++];){
                 uid = $.getUid(node);
                 obj[uid] = 1;
             }
@@ -663,60 +670,60 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     };
 
     lang({
-        parent:function(el){
+        parent: function( el ){
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent : [];
         },
-        parents:function(el){
+        parents: function( el ){
             return travel(el, "parentNode").reverse();
         },
-        parentsUntil:function(el, expr){
+        parentsUntil: function( el, expr ){
             return travel(el, "parentNode", expr).reverse();
         },
-        next :function(el){
+        next: function( el ){
             return travel(el, "nextSibling", true)
         },
-        nextAll :function(el){
+        nextAll: function( el ){
             return travel(el, "nextSibling");
         },
-        nextUntil:function(el, expr){
+        nextUntil: function( el, expr ){
             return travel(el, "nextSibling", expr);
         },
-        prev :function(el){
+        prev: function( el ){
             return travel(el, "previousSibling", true);
         },
-        prevAll :function(el){
+        prevAll : function( el ){
             return travel(el, "previousSibling" ).reverse();
         },
-        prevUntil :function(el, expr){
+        prevUntil: function( el, expr ){
             return travel(el, "previousSibling", expr).reverse();
         },
-        children:function(el){
-            return  el.children ? $.slice(el.children) :
+        children: function( el ){
+            return  el.children ? $.slice( el.children ) :
             $$(el.childNodes).filter(function(ee){
                 return ee.nodeType === 1;
             });
         },
-        siblings:function(el){
+        siblings: function( el ){
             return travel(el,"previousSibling").reverse().concat(travel(el,"nextSibling"));
         },
-        contents:function(el){
+        contents: function( el ){
             return el.tagName === "IFRAME" ?
             el.contentDocument || el.contentWindow.document :
             $.slice( el.childNodes );
         }
     }).forEach(function( method, name ){
-        $.fn[name] = function(selector){
+        $.fn[ name ] = function(selector){
             var nodes = [];
-            $.slice(this).forEach(function(el){
-                nodes = nodes.concat(method(el,selector));
+            $.slice(this).forEach(function( el ){
+                nodes = nodes.concat( method( el,selector ) );
             });
-            if(/Until/.test(name)){
+            if(/Until/.test( name )){
                 selector = null
             }
             nodes = this.length > 1 && !uniqOne[ name ] ? $.unique( nodes ) : nodes;
             var neo = this.labor(nodes);
-            return selector ? neo.filter(selector) :neo;
+            return selector ? neo.filter( selector ) : neo;
         };
     });
 });
