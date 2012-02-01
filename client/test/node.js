@@ -214,7 +214,7 @@ $.define("test/node","more/spec,node",function($$){
   </li>\
   <li class="item-iii">III</li>\
 </ul>'
-       $(html,idoc2).appendTo("body");
+       $(html, idoc2).appendTo("body");
             expect($('li.item-a',idoc2).parentsUntil('.level-1').length).eq(2);
             iframe.remove();
             iframe2.remove();

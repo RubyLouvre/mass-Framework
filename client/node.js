@@ -44,16 +44,16 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 doc = this.ownerDocument = !context ? document : getDoc(context, context[0]);
                 var scope = context || doc;
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
-                    nodes = $.parseHTML(expr,doc);//先转化为文档碎片
+                    nodes = $.parseHTML( expr, doc );//先转化为文档碎片
                     nodes = nodes.childNodes;//再转化为节点数组
-                } else if(rtag.test(expr) ){
+                } else if( rtag.test( expr ) ){
                     nodes  = scope[TAGS](expr) ;
                 } else{//分支7：选择器群组
-                    nodes  = $.query(expr, scope);
+                    nodes  = $.query( expr, scope );
                 }
-                return merge(this, nodes)
+                return merge( this, nodes )
             }else {//分支7：如果是数组，节点集合或者mass对象或window对象
-                this.ownerDocument = getDoc(expr[0]);
+                this.ownerDocument = getDoc( expr[0] );
                 merge( this, $.isArrayLike(expr) ? expr : [expr]);
                 delete this.selector;
             }
@@ -109,7 +109,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         last: function() {
             return this.slice( -1 );
         },
-        each : function( fn ){
+        each: function( fn ){
             for(var i = 0, n = this.length; i < n; i++){
                 fn.call( this[i], this[i], i );
             }
@@ -615,7 +615,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 return $(el).index(first)
             }
             // 返回传入元素（如果是mass实例则取其第一个元素）位于原实例的位置
-            return   this.valueOf().indexOf(el.version ? el[0] : el)
+            return   this.valueOf().indexOf(el.mass ? el[0] : el)
         }
 
     });
