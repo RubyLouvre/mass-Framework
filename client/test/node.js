@@ -32,51 +32,51 @@ $.define("test/node","more/spec,node",function($$){
     // $.addTestModule2 =$.noop;
     
     $.fixture("节点操作模块-node",{
-        "append()":function(){
+        "append()": function(){
             //先添加两个类为.test_node的P元素
             $("body",idoc).append("<p class='test_node'>测试append方法<strong>这是它的内部</strong></p><p class='test_node'>测试append方法<strong>这是它的内部</strong></p>");
             expect($(".test_node",idoc).length).eq(2);
 
              
         },
-        "prepend()":function(){
+        "prepend()": function(){
             //再在它们的内部前置两个类为.test_node1的P元素
             $(".test_node",idoc).prepend("<p class='test_node1'>测试prepend方法</p>");
             expect($(".test_node1",idoc).length).eq(2);
         },
-        "after()":function(){
+        "after()": function(){
             //在所有类名为test_node的P元素的后面添加一个类名为test_node2的P元素
             $(".test_node",idoc).after("<p class='test_node2'>测试after方法</p>");
             expect($(".test_node2",idoc).length).eq(2);
         },
-        "before()":function(){
+        "before()": function(){
             //在所有类名为test_node的P元素的前面添加一个类名为test_node2的P元素
             $(".test_node",idoc).before("<p class='test_node3'>测试before方法</p>");
             expect($(".test_node3",idoc).length).eq(2);
         },
-        "replace()":function(){
+        "replace()": function(){
             //  将第一类名为test_node2的P元素替换为类名test3的P元素
             $(".test_node2",idoc).eq(0).replace("<p class='test_node3'>测试replace方法</p>");
             expect($(".test_node3",idoc).length).eq(3);
         },
-        "empty()":function(){
+        "empty()": function(){
             $(".test_node",idoc).empty();
             expect($(".test_node1",idoc).length).eq(0);
         },
-        "html()":function(){
+        "html()": function(){
             $(".test_node",idoc).html("<em>测试html方法</em>");
             expect($(".test_node",idoc).html().toLowerCase()).eq("<em>测试html方法</em>");
         },
-        "text()":function(){
+        "text()": function(){
             $(".test_node3",idoc).text("<em>测试text方法</em>");
             expect($(".test_node3",idoc).text()).eq("<em>测试text方法</em>");
         },
-        "remove()":function(){
+        "remove()": function(){
             $(".test_node2",idoc).remove();
             expect($(".test_node2",idoc).length).eq(0);
         },
       
-        "map()":function(){
+        "map()": function(){
             $(".inner",idoc).map(function(){
                 expect(this.tagName).eq("DIV");
                 return this;
@@ -130,13 +130,13 @@ $.define("test/node","more/spec,node",function($$){
             expect(li.filter("#aaaa").length).eq(1);
             expect(li.filter("#aaa :nth-child(1)").length).eq(1);
         },
-        "not()":function(){
+        "not()": function(){
             expect(li.not("#aaaa").length).eq(2);
             expect(li.not("#aaa :nth-child(1)").length).eq(2);
             expect(li.not("._travel").length).eq(1);
             expect(li.not(":first-child").length).eq(2);
         },
-        "closest()":function(){
+        "closest()": function(){
             expect(first.closest("ul")[0].id).eq("aaa");
         
             expect(t.closest("p")[0].className).eq("test-p");
@@ -145,13 +145,13 @@ $.define("test/node","more/spec,node",function($$){
             expect(t.closest(".test-parent")[0].id).eq("test-children");
             
         },
-        "has()":function(){
+        "has()": function(){
             expect(li.has("b").length).eq(1);
             expect(li.filter("._travel").length).eq(2);
             //移除测试数据
             $("#aaa",idoc2).remove();
         },
-        "next()":function(){
+        "next()": function(){
             var nodes = thirdItem.next();
             expect(nodes.text()).eq("list item 4");
             var node = $("#test-next",idoc2);
@@ -161,19 +161,19 @@ $.define("test/node","more/spec,node",function($$){
 
         },
 
-        "nextAll()":function(){
+        "nextAll()": function(){
             var nodes = thirdItem.nextAll();
             expect(nodes.eq(1).text()).eq("list item 5");
         },
-        "prev()":function(){
+        "prev()": function(){
             var nodes = thirdItem.prev();
             expect(nodes.text()).eq("list item 2");
         },
-        "prevAll()":function(){
+        "prevAll()": function(){
             var nodes = thirdItem.prevAll();
             expect(nodes.text()).eq("list item 1");
         },
-        "parent()":function(){
+        "parent()": function(){
             var nodes = thirdItem.parent();
             expect(nodes[0].id).eq("test_next");
 
@@ -184,20 +184,20 @@ $.define("test/node","more/spec,node",function($$){
             expect($("body").parent()[0]).eq(document.documentElement);
          
         },
-        "parents()":function(){
+        "parents()": function(){
             var nodes = thirdItem.parents();
             expect(nodes[0].tagName).eq("HTML");
         },
-        "siblings()":function(){
+        "siblings()": function(){
             var nodes = thirdItem.siblings();
             expect(nodes.length).eq(4);
         },
-        "children()":function(){
+        "children()": function(){
             var nodes = thirdItem.parent().children();
             expect(nodes.length).eq(5);
             thirdItem.parent().remove()
         },
-        "nextUntil()":function(){
+        "nextUntil()": function(){
             var html = '<dl>\
               <dt>term 1</dt>\
               <dd>definition 1-a</dd>\
@@ -215,10 +215,10 @@ $.define("test/node","more/spec,node",function($$){
             $(html,idoc2).appendTo(ibody2);
             expect($('#term-2',idoc2).nextUntil('dt').length).eq(3);
         },
-        "prevUntil()":function(){
+        "prevUntil()": function(){
             expect($('#term-2',idoc2).prevUntil('dt').length).eq(4);
         },
-        "parentsUntil()":function(){
+        "parentsUntil()": function(){
             var html = '<ul class="level-1">\
   <li class="item-i">I</li>\
   <li class="item-ii">II\
