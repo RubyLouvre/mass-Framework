@@ -259,7 +259,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 }
                 return elems;
             }
-            //为第一个元素设置属性
+            //取得第一个元素的属性
             return length ? getter( elems[0], key ) : void 0;
         },
         /**
@@ -276,11 +276,11 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             html = html.replace(rxhtml, "<$1></$2>").trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            if(support.fastFragment && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html)){
+            if( support.fastFragment && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html) ){
                 commonRange.selectNodeContents(doc.body);//fix opera(9.2~11.51) bug,必须对文档进行选取
-                return commonRange.createContextualFragment(html);
+                return commonRange.createContextualFragment( html );
             }
-            if(!support.createAll){//fix IE
+            if( !support.createAll ){//fix IE
                 html = html.replace(rcreate,"<br class='fix_create_all'/>$1");//在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec( html ) || ["", ""])[1].toLowerCase(),//取得其标签名
@@ -289,7 +289,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             wrapper = doc.createElement("div"), firstChild;
             wrapper.innerHTML = wrap[1] + html + wrap[2];
             var els = wrapper[TAGS]("script");
-            if(els.length){//使用innerHTML生成的script节点不会发出请求与执行text属性
+            if( els.length ){//使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script2 = doc.createElement("script"), script3;
                 for(var i = 0, el; el = els[i++];){
                     if(!el.type || types[el.type]){//如果script节点的MIME能让其执行脚本
@@ -305,7 +305,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 }
             }
             //移除我们为了符合套嵌关系而添加的标签
-            for (i = wrap[0]; i--;wrapper = wrapper.lastChild){};
+            for ( i = wrap[0]; i--;wrapper = wrapper.lastChild ){};
             //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
             if( !support.insertTbody ){
                 var noTbody = !rtbody.test(html); //矛:html本身就不存在<tbody字样
@@ -317,14 +317,14 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                     }
                 }
             }
-            if(!support.createAll){//移除所有补丁
+            if( !support.createAll ){//移除所有补丁
                 for(els = wrapper[TAGS]("br"), i = 0; el = els[i++];){
                     if( el.className && el.className === "fix_create_all" ){
                         el.parentNode.removeChild(el);
                     }
                 }
             }
-            if(!support.appendChecked){//IE67没有为它们添加defaultChecked
+            if( !support.appendChecked ){//IE67没有为它们添加defaultChecked
                for(els = wrapper[TAGS]("input"), i = 0; el = els[i++];){
                     if ( el.type === "checkbox" || el.type === "radio" ) {
                         el.defaultChecked = el.checked;
@@ -413,7 +413,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         //只有非NodeList的情况下我们才为i递增;
         var ret = fragment.cloneNode(false), go= !nodes.item
         for(var i = 0,node;node = nodes[i]; go && i++){
-            ret.appendChild(bool && cloneNode(node,true,true) || node);
+            ret.appendChild(bool && cloneNode(node, true, true) || node);
         }
         return ret;
     }
@@ -611,7 +611,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 return $(el).index(first)
             }
             // 返回传入元素（如果是mass实例则取其第一个元素）位于原实例的位置
-            return   this.valueOf().indexOf(el.mass ? el[0] : el)
+            return  this.valueOf().indexOf(el.mass ? el[0] : el)
         }
 
     });
