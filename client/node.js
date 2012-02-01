@@ -51,7 +51,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
-                return merge( this, nodes )
+                return merge( this, nodes );
             }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
                 merge( this, $.isArrayLike(expr) ? expr : [expr]);
@@ -217,6 +217,8 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             return this;
         }
     });
+    var noInput = $.oneObject("AREA,BASE,BASEFONT,BR,COL,FRAME,HEAD,HR,IMG,INPUT,ISINDEX,LINK,META,NOSCRIPT,PARAM,SCRIPT,TEXTAREA");
+    console.log(noInput)
     var HTML = $.html;
     var commonRange = document.createRange && document.createRange();
     var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
@@ -286,41 +288,46 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             fragment = doc.createDocumentFragment(),
             wrapper = doc.createElement("div"), firstChild;
             wrapper.innerHTML = wrap[1] + html + wrap[2];
-            var scripts = wrapper[TAGS]("script");
-            if(scripts.length){//使用innerHTML生成的script节点不会发出请求与执行text属性
+            var els = wrapper[TAGS]("script");
+            if(els.length){//使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script2 = doc.createElement("script"), script3;
-                for(var i = 0, script; script = scripts[i++];){
-                    if(!script.type || types[script.type]){//如果script节点的MIME能让其执行脚本
+                for(var i = 0, el; el = els[i++];){
+                    if(!el.type || types[el.type]){//如果script节点的MIME能让其执行脚本
                         script3 = script2.cloneNode(false);//FF不能省略参数
-                        for(var j = 0, attr;attr = script.attributes[j++];){
+                        for(var j = 0, attr;attr = el.attributes[j++];){
                             if(attr.specified){//复制其属性
                                 script3[attr.name] = [attr.value];
                             }
                         }
-                        script3.text = script.text;//必须指定,因为无法在attributes中遍历出来
-                        script.parentNode.replaceChild( script3, script );//替换节点
+                        script3.text = el.text;//必须指定,因为无法在attributes中遍历出来
+                        el.parentNode.replaceChild( script3, el );//替换节点
                     }
                 }
             }
             //移除我们为了符合套嵌关系而添加的标签
             for (i = wrap[0]; i--;wrapper = wrapper.lastChild){};
             //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
-            if( support.insertTbody ){
-                var spear = !rtbody.test(html),//矛:html本身就不存在<tbody字样
-                tbodys = wrapper[TAGS]("tbody"),
-                shield = tbodys.length > 0;//盾：实际上生成的NodeList中存在tbody节点
-                if(spear && shield){
-                    for(var t=0, tbody; tbody = tbodys[t++];){
-                        if(!tbody.childNodes.length )//如果是自动插入的里面肯定没有内容
-                            tbody.parentNode.removeChild( tbody );
+            if( !support.insertTbody ){
+                var noTbody = !rtbody.test(html); //矛:html本身就不存在<tbody字样
+                els = wrapper[TAGS]("tbody");
+                if(els.length > 0 && noTbody){//盾：实际上生成的NodeList中存在tbody节点
+                    for(i = 0; el = els[i++];){
+                        if(!el.childNodes.length )//如果是自动插入的里面肯定没有内容
+                            el.parentNode.removeChild( el );
                     }
                 }
             }
             if(!support.createAll){//移除所有补丁
-                var brs =  wrapper[TAGS]("br");
-                for(var b=0,br;br = brs[b++];){
-                    if(br.className && br.className === "fix_create_all"){
-                        br.parentNode.removeChild(br);
+                for(els = wrapper[TAGS]("br"), i = 0; el = els[i++];){
+                    if( el.className && el.className === "fix_create_all" ){
+                        el.parentNode.removeChild(el);
+                    }
+                }
+            }
+            if(!support.appendChecked){//IE67没有为它们添加defaultChecked
+               for(els = wrapper[TAGS]("input"), i = 0; el = els[i++];){
+                    if ( el.type === "checkbox" || el.type === "radio" ) {
+                        el.defaultChecked = el.checked;
                     }
                 }
             }
