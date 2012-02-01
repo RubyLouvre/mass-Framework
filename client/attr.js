@@ -1,17 +1,17 @@
-﻿
-$.define("attr","support,node", function(support){
-   // $.log("已加载attr模块")
-    var global = this, DOC = global.document, rclass = /(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,rreturn = /\r/g,
+$.define("attr","support,node", function( support ){
+    $.log("已加载attr模块")
+    var rclass = /(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,
+    rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
     rspaces = /\s+/,
     valOne = {
-        "SELECT":"select",
-        "OPTION":"option",
-        "BUTTON":"button"
+        "SELECT": "select",
+        "OPTION": "option",
+        "BUTTON": "button"
     },
-    getValType = function(node){
-        return "form" in node && (valOne[node.tagName] || node.type)
+    getValType = function( node ){
+        return "form" in node && (valOne[ node.tagName ] || node.type);
     }
     $.implement({
         /**
@@ -26,7 +26,7 @@ $.define("attr","support,node", function(support){
                         if ( !el.className ) {
                             el.className = value;
                         } else {
-                            el.className = (el.className +" "+value).replace(rclass,"")
+                            el.className = (el.className +" "+value).replace( rclass,"" );
                         }
                     }
                 }
@@ -35,21 +35,21 @@ $.define("attr","support,node", function(support){
         },
         //如果第二个参数为true，则只判定第一个是否存在此类名，否则对所有元素进行操作；
         hasClass: function( value, every ) {
-            var method = every === true ? "every" : "some"
-            var rclass = new RegExp('(\\s|^)'+value+'(\\s|$)');//判定多个元素，正则比indexOf快点
-            return $.slice(this)[method](function(el){
-                return "classList" in el ? el.classList.contains(value):
+            var method = every === true ? "every" : "some",
+            rclass = new RegExp('(\\s|^)'+value+'(\\s|$)');//判定多个元素，正则比indexOf快点
+            return $.slice(this)[ method ](function( el ){
+                return "classList" in el ? el.classList.contains( value ):
                 (el.className || "").match(rclass);
             });
         },
         //如果不传入类名,则去掉所有类名,允许传入多个类名
         removeClass: function( value ) {
             if ( (value && typeof value === "string") || value === undefined ) {
-                var classNames = (value || "").split( rspaces );
-                for ( var i = 0, node; node = this[i++]; ) {
+                var classNames = ( value || "" ).split( rspaces );
+                for ( var i = 0, node; node = this[ i++ ]; ) {
                     if ( node.nodeType === 1 && node.className ) {
                         if ( value ) {
-                            var className = (" " + node.className + " ").replace(rspaces, " ");
+                            var className = (" " + node.className + " ").replace( rspaces, " " );
                             for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
                                 className = className.replace(" " + classNames[c] + " ", " ");
                             }
@@ -63,13 +63,12 @@ $.define("attr","support,node", function(support){
             return this;
         },
         //如果存在（不存在）就删除（添加）一个类。对所有匹配元素进行操作。
-        toggleClass:function(value){
-            var classNames = value.split(rspaces ), i, className;
-            var type = typeof value
-            return this.each(function(el) {
+        toggleClass: function( value ){
+            var classNames = value.split( rspaces ), type = typeof value, className, i;
+            return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
-                    var self = $(el);
+                    var self = $( el );
                     if(type == "string" ){
                         while ( (className = classNames[ i++ ]) ) {
                             self[ self.hasClass( className ) ? "removeClass" : "addClass" ]( className );
@@ -84,12 +83,12 @@ $.define("attr","support,node", function(support){
             });
         },
         //如果匹配元素存在old类名则将其改应neo类名
-        replaceClass:function(old, neo){
-            for ( var i = 0, node; node = this[i++]; ) {
+        replaceClass: function( old, neo ){
+            for ( var i = 0, node; node = this[ i++ ]; ) {
                 if ( node.nodeType === 1 && node.className ) {
                     var arr = node.className.split(rspaces), arr2 = [];
-                    for (var j = 0; j<arr.length; j++) {
-                        arr2.push(arr[j] != old ? arr[j] : neo);
+                    for ( var j = 0; j < arr.length; j++ ) {
+                        arr2.push( arr[j] != old ? arr[j] : neo );
                     }
                     node.className = arr2.join(" ");
                 }
@@ -293,7 +292,7 @@ $.define("attr","support,node", function(support){
         propMap[name.toLowerCase()] = name;
     });
 
-    if(!DOC.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
+    if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
         propMap.enctype = "encoding";
     }
     propAdapter["tabIndex:get"] = attrAdapter["tabIndex:get"]
