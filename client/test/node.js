@@ -109,6 +109,9 @@ $.define("test/node","more/spec,node",function($$){
             expect( children.eq(1).data("_test_children")).eq(void 0)
             expect( children.eq(2).data("_test_children")).eq(void 0)
         },
+        "toString":function(){
+            expect( ul.children().toString()).eq("LI, LI, LI");
+        },
         "index()": function(){
             expect(first.index()).eq(0);
             expect(ul.children().index(first)).eq(0);
@@ -157,6 +160,7 @@ $.define("test/node","more/spec,node",function($$){
             expect(node.nextAll(".test-next")[0].tagName).eq('P');
 
         },
+
         "nextAll()":function(){
             var nodes = thirdItem.nextAll();
             expect(nodes.eq(1).text()).eq("list item 5");
