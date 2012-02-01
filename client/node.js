@@ -8,7 +8,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         });
     }
     function getDoc(){
-        for(var i  = 0 , el; i < arguments.length; i++){
+        for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
                 if( el.nodeType ){
                     return el.nodeType === 9 ? el : el.ownerDocument;
@@ -651,7 +651,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         return result;
     };
 
-    lang({
+    $$({
         parent: function( el ){
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent: [];
