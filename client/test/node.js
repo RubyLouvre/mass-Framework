@@ -82,16 +82,34 @@ $.define("test/node","more/spec,node",function($$){
                 return this;
             });
         },
-        "$.parseHTML":function(){
+        "$.parseHTML": function(){
             var str = "<h1>My First<strong>Heading</strong></h1><p>My first paragraph.</p><script>document.aa = 'test';</script>";
             var fragment = $.parseHTML(str);
             expect(fragment.firstChild.nodeName).eq("H1");
-             var style = $("<style>.testtest {width:1px;height:1px;opacity:0.55;filter:alpha(opacity=55); }</style>")//.appendTo("head");
-            expect( style[0].nodeType).eq(1)
-        //  $(fragment).appendTo($("body",idoc));  expect(idoc.aa).eq("test");    
+            var style = $("<style>.testtest {width:1px;height:1px;opacity:0.55;filter:alpha(opacity=55); }</style>")//.appendTo("head");
+            expect( style[0].nodeType).eq(1) 
         },
-        
-        "index()":function(){
+        "data()": function(){
+            var children = ul.children();
+            children.data("_test_children","司徒正美");
+            expect( children.first().data("_test_children")).eq("司徒正美")
+            expect( children.eq(2).data("_test_children")).eq("司徒正美")
+            children.data({
+                data1:"value1",
+                data2:"value2",
+                data3:"value3"
+            });
+            expect( children.eq(1).data("data1")).eq("value1");
+            expect( children.eq(1).data("data2")).eq("value2");
+        },
+        "removeData()": function(){
+            var children = ul.children();
+            children.removeData("_test_children");
+            expect( children.first().data("_test_children")).eq(void 0)
+            expect( children.eq(1).data("_test_children")).eq(void 0)
+            expect( children.eq(2).data("_test_children")).eq(void 0)
+        },
+        "index()": function(){
             expect(first.index()).eq(0);
             expect(ul.children().index(first)).eq(0);
             expect(ul.children().index(first[0])).eq(0);
@@ -214,7 +232,7 @@ $.define("test/node","more/spec,node",function($$){
   </li>\
   <li class="item-iii">III</li>\
 </ul>'
-       $(html, idoc2).appendTo("body");
+            $(html, idoc2).appendTo("body");
             expect($('li.item-a',idoc2).parentsUntil('.level-1').length).eq(2);
             iframe.remove();
             iframe2.remove();
