@@ -57,6 +57,7 @@ $.define("support", function(){
     //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
     input.checked = true;
     support.cloneChecked = (input.cloneNode( true ).checked === true);
+    support.appendChecked = input.checked;
     //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
     //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
     //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
