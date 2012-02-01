@@ -30,8 +30,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             if(/Array|NodeList|String/.test($.type(context))|| context && context.mass){//typeof context === "string"
                 return $(context).find(expr);
             }
-            //分支3:  处理节点参数
-            if ( expr.nodeType ) {
+            if ( expr.nodeType ) { //分支3:  处理节点参数
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
                 return merge( this, [expr] );
             }
@@ -139,13 +138,12 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
 
         //取得或设置节点的innerHTML属性
         html: function( item ){
-            if(item === void 0){
-                var el = this[0]
+            return $.access(this, 0, item, function( el ){//getter
                 if(el && (el.nodeType === 1 || /xml/i.test(el.nodeName))){//处理IE的XML数据岛
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
-            }else {
+            }, function(){//setter
                 item = (item || "")+""
                 if(support.innerHTML && (!rcreate.test(item) && !rnest.test(item))){
                     try {
@@ -155,11 +153,11 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                                 node.innerHTML = item;
                             }
                         }
-                        return this;
+                        return;
                     } catch(e) {}
                 }
-                return this.empty().append( item );
-            }
+                this.empty().append( item );
+            });
         },
         // 取得或设置节点的text或innerText或textContent属性
         text:function( item ){
@@ -169,7 +167,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 }else if(el.tagName == "OPTION" || el.tagName === "SCRIPT"){
                     return el.text;
                 }
-                return el.textContent || el.innerText ||  $.getText( [el] );
+                return el.textContent || el.innerText || $.getText( [el] );
             }, function(){//setter
                 this.empty().append( this.ownerDocument.createTextNode( item ));
             });
@@ -238,6 +236,7 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
                 return false;
             }
         },
+        //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML, data, attr, prop, value
         access: function( elems,  key, value, getter, setter ) {
             var length = elems.length;
             //为所有元素设置N个属性
@@ -250,10 +249,10 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             // 为所有元素设置属性
             if ( value !== void 0 ) {
                 if(!key){
-                    setter.call( elems, value);
+                    setter.call( elems, value );
                 }else{
                     for ( var i = 0; i < length; i++ ) {
-                        setter( elems[i], key, value);
+                        setter( elems[i], key, value );
                     }
                 }
                 return elems;
@@ -261,7 +260,6 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
             //为第一个元素设置属性
             return length ? getter( elems[0], key ) : void 0;
         },
-
         /**
                  * 将字符串转换为文档碎片，如果没有传入文档碎片，自行创建一个
                  * 有关innerHTML与createElement创建节点的效率可见<a href="http://andrew.hedges.name/experiments/innerhtml/">这里</a><br/>
@@ -452,9 +450,9 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
     //======================================================================
     //复制与移除节点时的一些辅助函数
     //======================================================================
-    function cleanNode(target){
-        target.uniqueNumber && $.removeData(target);
-        target.clearAttributes && target.clearAttributes();
+    function cleanNode( node ){
+        node.uniqueNumber && $.removeData(node);
+        node.clearAttributes && node.clearAttributes();
     }
     function shimCloneNode( outerHTML) {
         var div = document.createElement( "div" );
@@ -492,9 +490,9 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         return neo;
     }
     //修正IE下对数据克隆时出现的一系列问题
-    function fixNode(clone, src) {
+    function fixNode( clone, src ) {
         if(src.nodeType == 1){
-            // 只处理元素节点
+            //只处理元素节点
             var nodeName = clone.nodeName.toLowerCase();
             //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
             clone.clearAttributes();
@@ -534,11 +532,10 @@ $.define("node", "lang,support,class,query,data,ready",function(lang,support){
         }
     }
     function innerHTML(el){
-        var array = [];
-        for(var i=0,c;c=el.childNodes[i++];){
-            array.push(outerHTML(c))
+        for(var i=0, c, ret = []; c=el.childNodes[i++]; ){
+            ret.push( outerHTML( c ) );
         }
-        return array.join("");
+        return ret.join("");
     }
 
     $.implement({
