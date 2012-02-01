@@ -169,7 +169,7 @@ $.define("attr","more/spec,attr",function(){
     
     var iframe2 =  $("<iframe id='test_attr' src='/test/attr2.html' style='display:none;width:0px;height:0px;' frameBorder=0  />" ).appendTo("body");//
     window.classNameTestCall = function(){
-        $.fixture("className API测试-attr",{
+        $.fixture("属性操作模块-attr(className相关)",{
             "className":function(){
                 var idoc  =  iframe2.contents()[0];
                 var a = $('#foo-class a',idoc);

@@ -1,16 +1,16 @@
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
-var node$css_fix = this.getComputedStyle ?  "node" : "node,css_fix" ;
-$.define("css", node$css_fix, function(){
-    var global = this, DOC = global.document,
-    cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
+var node$css_fix = this.getComputedStyle ? "node" : "node,css_fix" ;
+$.define( "css", node$css_fix, function(){
+    var cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
     rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
-    rad2deg = 180/Math.PI, deg2rad = Math.PI/180,
+    rad2deg = 180/Math.PI,
+    deg2rad = Math.PI/180,
     prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
     adapter = $.cssAdapter = $.cssAdapter || {};
     function cssCache(name){
-        return cssCache[name] || (cssCache[name] = name == 'float' ? cssFloat : $.String.camelize.call(name));
+        return cssCache[name] || (cssCache[name] = name == 'float' ? cssFloat : $.String.camelize( name ));
     }
     var shortcuts = {
         c:          "color",
@@ -37,22 +37,22 @@ $.define("css", node$css_fix, function(){
             if(cssCache[name])
                 return name;
             target = target || $.html.style;
-            for (var i=0, n = prefixes.length; i < n; i++) {
-                test = $.String.camelize.call(prefixes[i] + name)
-                if(test in target){
+            for (var i = 0, n = prefixes.length; i < n; i++) {
+                test = $.String.camelize( prefixes[i] + name )
+                if( test in target ){
                     return (cssCache[name] = test);
                 }
             }
             return null;
         },
         scrollbarWidth:function (){
-            if($.scrollbarWidth.ret){
+            if( $.scrollbarWidth.ret ){
                 return $.scrollbarWidth.ret
             }
-            var test =  $('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body")
+            var test =  $('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body");
             var ret = test[0].offsetWidth - test[0].clientWidth;              
             test.remove();
-            return $.scrollbarWidth.ret = ret
+            return $.scrollbarWidth.ret = ret;
         },
         cssNumber : $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function(nodes, name, value){
@@ -293,7 +293,7 @@ $.define("css", node$css_fix, function(){
         }
     },false);
 
-    if ( DOC.defaultView && DOC.defaultView.getComputedStyle ) {
+    if ( document.defaultView && document.defaultView.getComputedStyle ) {
         adapter[ "_default:get" ] = function( node, name ) {
             var ret, defaultView, computedStyle;
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
@@ -425,7 +425,7 @@ $.define("css", node$css_fix, function(){
                 if(/absolute|fixed/.test(getter(node,"position"))){
                     offset = node["offset"+name ];
                     // old-ie 下，elem.offsetLeft 包含 offsetParent 的 border 宽度，需要减掉
-                    if (node.uniqueID && DOC.documentMode < 9 ||global.opera) {
+                    if (node.uniqueID && document.documentMode < 9 ||window.opera) {
                         // 类似 offset ie 下的边框处理
                         // 如果 offsetParent 为 html ，需要减去默认 2 px == documentElement.clientTop
                         // 否则减去 borderTop 其实也是 clientTop
@@ -462,7 +462,7 @@ $.define("css", node$css_fix, function(){
     //=======================================================
     //获取body的offset
     function getBodyOffsetNoMargin(){
-        var el = DOC.body, ret = parseFloat($.css(el,"margin-top"))!== el.offsetTop;
+        var el = document.body, ret = parseFloat($.css(el,"margin-top"))!== el.offsetTop;
         function getBodyOffsetNoMargin(){
             return ret;//一次之后的执行结果
         }
@@ -526,7 +526,7 @@ $.define("css", node$css_fix, function(){
         },
         offsetParent: function() {
             return this.map(function() {
-                var offsetParent = this.offsetParent || DOC.body;
+                var offsetParent = this.offsetParent || document.body;
                 while ( offsetParent && (!rroot.test(offsetParent.nodeName) && getter(offsetParent, "position") === "static") ) {
                     offsetParent = offsetParent.offsetParent;
                 }
