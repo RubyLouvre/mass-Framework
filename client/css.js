@@ -246,11 +246,11 @@ $.define( "css", node$css_fix, function(){
     if(cssTransfrom){
         // gerrer(node) 返回一个包含 scaleX,scaleY, rotate, translateX,translateY, translateZ的对象
         // setter(node, { rotate: 30 })返回自身
-        $.transform = function(node,  param){
+        $.transform = function( node,  param ){
             var meta = $._data(node,"transform"),arr = [1,0,0,1,0,0], m
             if(!meta){
                 //将CSS3 transform属性中的数值分解出来
-                var style = $.css([node],cssTransfrom);
+                var style = $.css( node ,cssTransfrom );
                 if(~style.indexOf("matrix")){
                     m = rmatrix.exec(style);
                     arr = [m[1], m[2], m[3], m[4], m[5], m[6]];
@@ -259,7 +259,7 @@ $.define( "css", node$css_fix, function(){
                 }
                 meta = $._toMatrixObject(arr);
                 //保存到缓存系统，省得每次都计算
-                $._data(node,"transform",meta);
+                $._data( node,"transform",meta);
             }
 
             if(arguments.length === 1){
@@ -275,7 +275,7 @@ $.define( "css", node$css_fix, function(){
             });
             node.style[cssTransfrom]  =
             "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
-            "rotate(" + $.all2deg(meta.rotate)  + "deg) " +
+            "rotate(" + $.all2deg( meta.rotate )  + "deg) " +
             "translate(" + meta.translateX  + "px," + meta.translateY + "px)";
         }
     }
