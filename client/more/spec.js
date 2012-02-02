@@ -118,7 +118,7 @@ $.define("spec","lang", function(){
                     case "eq"://同一性真测试
                         bool = actual == expected;
                         break;
-                    case "near":
+                    case "near"://判定两个数字是否相近
                         var threshold = arguments[2] | 0;
                         return Math.abs(parseFloat(this.actual) - parseFloat(expected)) <= threshold;
                         break;
