@@ -102,37 +102,7 @@ $.define("spec","lang", function(){
             2:"mass-asserts-error"
         },
         prototype:{
-            ok:function(msg){//判定是否返回true
-                return this._should("ok", void 0, msg);
-            },
-            ng:function(msg){//判定是否返回false
-                return this._should("ng",void 0,msg);
-            },
-            log:function(msg){//不做判断,只打印结果,用于随机数等肉眼验证
-                this._should("log",msg);
-            },
-            eq:function(expected,msg){//判定目标值与expected是否全等
-                return this._should("eq", expected, msg);
-            },
-            near:function(expected, msg){
-                return this._should("near", expected, msg);
-            },
-            match:function(fn, msg){//判定目标值与expected是否全等
-                return this._should("match", fn, msg);
-            },
-            not:function(expected, msg){//判定目标值与expected是否非全等
-                return this._should("not", expected, msg);
-            },
-            has:function(prop, msg){//判定目标值是否包含prop属性
-                return this._should("has", prop, msg);
-            },
-            contains:function(el, msg){//判定目标值是否包含el这个元素(用于数组或类数组)
-                return this._should("contains", el, msg);
-            },
-            same: function(expected, msg){//判定结果是否与expected相似(用于数组或对象或函数等复合类型)
-                return this._should("same", expected, msg);
-            },
-            _should:function(method, expected, msg){//上面方法的内部实现,比较真伪,并渲染结果到页面
+            _should:function(method, expected){//上面方法的内部实现,比较真伪,并渲染结果到页面
                 var actual = this.actual,bool = false;
                 var el = Expect.Client.getElementsByTagName("a")[Expect.index];
                 Expect.index++;//当前测试套件中第index条测试
@@ -149,22 +119,22 @@ $.define("spec","lang", function(){
                         bool = actual == expected;
                         break;
                     case "near":
-                        var threshold = arguments[3] | 0;
+                        var threshold = arguments[2] | 0;
                         return Math.abs(parseFloat(this.actual) - parseFloat(expected)) <= threshold;
                         break;
                     case "not"://同一性非测试
                         bool = actual != expected;
                         break;
-                    case "same":
+                    case "same"://判定结果是否与expected相似(用于数组或对象或函数等复合类型)
                         bool = $.isEqual(actual, expected);
                         break
-                    case "has":
+                    case "has"://判定目标值是否包含prop属性
                         bool = Object.prototype.hasOwnProperty.call(actual, expected);
                         break;
-                    case "match":
+                    case "match"://判定回调是否返回真
                         bool = expected(actual);
                         break;
-                    case "contains":
+                    case "contains"://判定目标值是否包含el这个元素(用于数组或类数组)
                         for(var i = 0,n = actual.length; i < n ;i++ ){
                             if(actual === expected ){
                                 bool = true;
@@ -205,6 +175,11 @@ $.define("spec","lang", function(){
             }
         }
     });
+    "ok, ng, log, eq, near, match, not, has, contains, same".replace( $.rword, function( method ){
+        Expect.prototype[ method ] = function( a, b, c ){
+            return this._should(method, a, b, c)
+        }
+    })
     //用于收起或展开详细测试结果
 
     $.bind(DOC,"click",function(e){
@@ -275,10 +250,15 @@ $.define("spec","lang", function(){
                     try{
                         assert();//执行测试套件
                     }catch(e){
+                    
                         Expect.PASS = 2;
                         var el = Expect.Client.getElementsByTagName("a")[0];
                         if(el){
-                            el.appendChild(parseHTML('<form class="mass-spec-diff"><pre>'+e+'</pre></form>'));
+                            var arr = [];
+                            for(var i in e){
+                                arr.push( i + " : "+e[i] )
+                            }
+                            el.appendChild(parseHTML('<form class="mass-spec-diff"><pre>'+arr.join("\n")+'</pre></form>'));
                             el.className = "mass-assert-error";
                         }
                         var errors = get("mass-spec-errors");
