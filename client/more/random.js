@@ -7,27 +7,27 @@ $.define("more/random", function(){
     //http://paulirish.com/2009/random-hex-color-code-snippets/
     return {
         hex:function(){
-            return  '#'+('00000'+(Math.ran$()*0x1000000<<0).toString(16)).slice(-6);
+            return  '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
         },
         hsb:function(){//颜色比效鲜艳
-            return "hsb(" + Math.ran$()  + ", 1, 1)";
+            return "hsb(" + Math.random()  + ", 1, 1)";
         },
         rgb:function(){
-            return [Math.floor(Math.ran$() * 255),
-            Math.floor(Math.ran$() * 255),
-            Math.floor(Math.ran$() * 255)];
+            return [Math.floor(Math.random() * 255),
+            Math.floor(Math.random() * 255),
+            Math.floor(Math.random() * 255)];
         },
         str:function(len,prefix) {
             if (!len) len = 10;
             var s = typeof prefix === "string" ? prefix : '';
             for (var i = 0; i < len; ++i) {
-                var n = Math.ran$() * 1e6;
+                var n = Math.random() * 1e6;
                 s += cs.charAt(n % cs.length);
             }
             return s;
         },
         num:function (min,max) {
-            return Math.floor(Math.ran$()*(max-min+1)) + min;
+            return Math.floor(Math.random()*(max-min+1)) + min;
         },
         //https://github.com/louisremi/Math.uuid.js/blob/master/Math.uuid.js
         uuid:function(){
@@ -39,7 +39,7 @@ $.define("more/random", function(){
             // per rfc4122, sec. 4.1.5
             while (i--) {
                 if (!uuid[i]) {
-                    r = Math.ran$()*16|0;
+                    r = Math.random()*16|0;
                     uuid[i] = uuid_arr[(i == 19) ? (r & 0x3) | 0x8 : r];
                 }
             }
