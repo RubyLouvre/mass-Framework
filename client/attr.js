@@ -170,10 +170,10 @@ $.define("attr","support,node", function( support ){
     });
         
     $.extend({
-        attrMap:{
+        attrMap:{//特性名映射
             tabindex: "tabIndex"
         },
-        propMap:{//属性映射
+        propMap:{//属性名映射
             "accept-charset": "acceptCharset",
             "char": "ch",
             charoff: "chOff",
