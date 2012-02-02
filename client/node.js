@@ -246,7 +246,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             }
             // 为所有元素设置属性
             if ( value !== void 0 ) {
-                if(!key){
+                if( !key ){
                     setter.call( elems, value );
                 }else{
                     for ( var i = 0; i < length; i++ ) {
@@ -321,7 +321,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
                 }
             }
             if( !support.appendChecked ){//IE67没有为它们添加defaultChecked
-               for( els = wrapper[ TAGS ]( "input" ), i = 0; el = els[ i++ ]; ){
+                for( els = wrapper[ TAGS ]( "input" ), i = 0; el = els[ i++ ]; ){
                     if ( el.type === "checkbox" || el.type === "radio" ) {
                         el.defaultChecked = el.checked;
                     }
