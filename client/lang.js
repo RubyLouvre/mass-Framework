@@ -332,8 +332,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //转换为驼峰风格
         camelize:function(target){
-            return target.replace(/-([a-z])/g, function($1, $2){
-                return $2.toUpperCase();
+            return target.replace(/-([a-z])/g, function($0, $1){
+                return $1.toUpperCase();
             });
         },
         //转换为连字符风格
