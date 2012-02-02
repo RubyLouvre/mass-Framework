@@ -52,14 +52,15 @@ pre a{
     width:90%;
     color:#000;
     text-decoration:none;
-    outline:none; 
+    outline:none;
+    position:relative;
 }
 pre a:hover{
     background:#FFFFE0;
 }
 pre a form{
     position:absolute;
-    top:-3.2em;
+    top:-5em;
     left:0px;
     display:none;
 }

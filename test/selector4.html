@@ -21,16 +21,16 @@
             
         </script>
         <script type="tmpl">
-   var iframe4 =  dom("<iframe id='test_query' src='/test/selector4.html#target' width=100% height=400px  frameBorder=0  />").appendTo("body");//
+   var iframe4 =  $("<iframe id='test_query' src='/test/selector4.html#target' width=100% height=400px  frameBorder=0  />").appendTo("body");//
     window.selectorTestCall4 = function(){
         var idoc4  =  iframe4.contents()[0];
 
-        var styleEl = dom("<style>body {background-color:blue;}</style>",idoc4).appendTo("head"),style = styleEl[0];
+        var styleEl = $("<style>body {background-color:blue;}</style>",idoc4).appendTo("head"),style = styleEl[0];
         var matchCSS = ""
         function same(expr1,expr2,css,context){
             context = context || idoc4;
             expr2 = expr2 || expr1;
-            var  nodes1 =  dom(expr1,context) ;
+            var  nodes1 =  $(expr1,context) ;
   
             var nodes2 =  NW.Dom.select(expr2,context) ;
             var ret = expect(nodes1.valueOf()).same(nodes2,css)
@@ -38,17 +38,16 @@
                 if(!context.querySelectorAll && /(:|\[)/.test(css)){
                      var cssText = css.replace(expr1,"").replace("{","").replace("}","");
                      cssText = cssText.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-                     dom.log(cssText)
+                     $.log(cssText)
                      for(var i = 0,el;el = nodes1[i++];){
                          el.style.cssText += ";"+cssText;
                      }
-
                 }else{
                     matchCSS += css +"\n"
                 }
             }
         }
-        var cssText  = dom("#teststyle",idoc4).html();
+        var cssText  = $("#teststyle",idoc4).html();
      
         var lines = cssText.split(/\r?\n/),line,expr,rcomment = /\/\*/,rules = {},ri = 0,exprs = [];
         for(var i=0,n=lines.length;i<n;i++){
@@ -65,8 +64,8 @@
             exprs.push(expr);
    
         }
-        // dom.log(rules)
-        dom.addTestModule("选择器测试-query",{
+        // $.log(rules)
+        $.fixture("选择器测试-query",{
             testCSS3: function() {
             
                 var expr,  time = 0,exprs2 = exprs, i = 0;
@@ -93,14 +92,14 @@
 
             //                var checkIndex = 33;
             //                expr = exprs[checkIndex]
-            //                dom.log(expr)
-            //                var els1 = dom(expr,idoc4)
-            //                dom.log(els1.valueOf()); 
+            //                $.log(expr)
+            //                var els1 = $(expr,idoc4)
+            //                $.log(els1.valueOf());
             //                if(idoc4.querySelectorAll)
-            //                    dom.log(dom.slice(idoc4.querySelectorAll(expr))); 
+            //                    $.log($.slice(idoc4.querySelectorAll(expr)));
             //                var els2 = NW.Dom.select(expr,idoc4)
-            //                dom.log( els2) ;
-            //                dom.log(els1[0] === els2[0])
+            //                $.log( els2) ;
+            //                $.log(els1[0] === els2[0])
 
 
             //   iframe4.remove()
