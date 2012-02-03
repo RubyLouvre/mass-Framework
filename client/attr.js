@@ -165,7 +165,7 @@ $.define("attr","support,node", function( support ){
             }
         };
         $.fn[ method ] = function( name, value ) {
-            return $.access( this, name, value, $[method], $[method] );
+            return $.access( this, name, value, $[method] );
         }
     });
         

@@ -32,7 +32,7 @@ $.define( "css", node$css_fix, function(){
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     $.implement({
         css : function( name, value ){
-            return $.access( this, name, value, $.css, $.css );
+            return $.access( this, name, value, $.css );
         },
         rotate : function( value ){
             return  this.css( "rotate", value ) ;
@@ -351,7 +351,7 @@ $.define( "css", node$css_fix, function(){
             none ++;
             node.style.display = "block";
         }
-        var rect = node[RECT] && node[RECT]() || node.ownerDocument.getBoxObjectFor(node),
+        var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
         val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
         extra = extra || 0;
         which.forEach(function(direction){
@@ -493,19 +493,19 @@ $.define( "css", node$css_fix, function(){
         if ( !node || !owner ) {
             return pos;
         }
-        if(node.tagName === "BODY"){
+        if( node.tagName === "BODY" ){
             pos.top = node.offsetTop;
             pos.left = body.offsetLeft;
             //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
             if(getBodyOffsetNoMargin()){
                 pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
-                pos.left += parseFloat( getter(node, "marginLeft")) || 0;
+                pos.left += parseFloat( getter(node, "marginLeft") ) || 0;
             }
             return pos;
-        }else if ($.html[RECT]) { //如果支持getBoundingClientRect
+        }else if ( $.html[ RECT ]) { //如果支持getBoundingClientRect
             //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
             //http://msdn.microsoft.com/en-us/library/ms536433.aspx
-            var box = node[RECT](),win = getWindow(owner),
+            var box = node[ RECT ](),win = getWindow(owner),
             root = owner.documentElement,body = owner.body,
             clientTop = root.clientTop || body.clientTop || 0,
             clientLeft = root.clientLeft || body.clientLeft || 0,
@@ -551,7 +551,7 @@ $.define( "css", node$css_fix, function(){
         }
     });
     //生成scrollTo, scrollLeft这两种原型方法
-    "Left,Top".replace($.rword,function(  name ) {
+    "Left,Top".replace( $.rword, function(  name ) {
         var method = "scroll" + name;
         $.fn[ method ] = function( val ) {
             var node, win, i = name == "Top";
@@ -590,105 +590,7 @@ $.define( "css", node$css_fix, function(){
         })
 
 });
-var supportFloat32Array = typeof window.Float32Array === "function"
-  //将 skewx(10deg) translatex(150px)这样的字符串转换成3*2的距阵数组
-function matrix( transform ) {
-    transform = transform.split(")");
-    var
-    i = -1
-    // last element of the array is an empty string, get rid of it
-    , l = transform.length -1
-    , split, prop, val
-    , prev = supportFloat32Array ? new Float32Array(6) : []
-    , curr = supportFloat32Array ? new Float32Array(6) : []
-    , rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0]
-    ;
 
-    prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
-    prev[1] = prev[2] = prev[4] = prev[5] = 0;
-
-    // Loop through the transform properties, parse and multiply them
-    while ( ++i < l ) {
-        split = transform[i].split("(");
-        prop = split[0].trim();
-        val = split[1];
-        curr[0] = curr[3] = 1;
-        curr[1] = curr[2] = curr[4] = curr[5] = 0;
-
-        switch (prop) {
-            case _translate+"X":
-                curr[4] = parseInt(val, 10);
-                break;
-
-            case _translate+"Y":
-                curr[5] = parseInt(val, 10);
-                break;
-
-            case _translate:
-                val = val.split(",");
-                curr[4] = parseInt(val[0], 10);
-                curr[5] = parseInt(val[1] || 0, 10);
-                break;
-
-            case _rotate:
-                val = toRadian(val);
-                curr[0] = Math.cos(val);
-                curr[1] = Math.sin(val);
-                curr[2] = -Math.sin(val);
-                curr[3] = Math.cos(val);
-                break;
-
-            case _scale+"X":
-                curr[0] = +val;
-                break;
-
-            case _scale+"Y":
-                curr[3] = val;
-                break;
-
-            case _scale:
-                val = val.split(",");
-                curr[0] = val[0];
-                curr[3] = val.length>1 ? val[1] : val[0];
-                break;
-
-            case _skew+"X":
-                curr[2] = Math.tan(toRadian(val));
-                break;
-
-            case _skew+"Y":
-                curr[1] = Math.tan(toRadian(val));
-                break;
-
-            case _skew:
-                val = val.split(",");
-                curr[2] = Math.tan(toRadian(val[0]));
-                val[1] && ( curr[1] = Math.tan(toRadian(val[1])) );
-                break;
-
-            case _matrix:
-                val = val.split(",");
-                curr[0] = val[0];
-                curr[1] = val[1];
-                curr[2] = val[2];
-                curr[3] = val[3];
-                curr[4] = parseInt(val[4], 10);
-                curr[5] = parseInt(val[5], 10);
-                break;
-        }
-
-        // Matrix product (array in column-major order)
-        rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
-        rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
-        rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
-        rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
-        rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
-        rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
-
-        prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
-    }
-    return rslt;
-}
 //2011.9.5
 //将cssName改为隋性函数,修正msTransform Bug
 //2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
