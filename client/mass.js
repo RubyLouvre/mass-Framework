@@ -67,11 +67,11 @@
         }
         return target;
     }
-    mix($, {//为此版本的命名空间对象添加成员
+    mix( $, {//为此版本的命名空间对象添加成员
         html: DOC.documentElement,
         head: HEAD,
         rword: /[^, ]+/g,
-        mass: mass,
+        mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
         "@debug": true,
         "@target": w3c ? "addEventListener" : "attachEvent",
@@ -82,7 +82,7 @@
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
         /**
-         * 暴露到全局作用域下，此时可重命名，并有jquery的noConflict的效果
+         * 将内部对象挂到window下，此时可重命名，实现多库共存
          * @param {String} name 新的命名空间
          */
         exports: function( name ) {
@@ -110,9 +110,9 @@
             }
         },
         /**
-         * 用于取得数据的类型或判定数据的类型
+         * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
          * @param {Any} obj 要检测的东西
-         * @param {String} str 要比较的类型
+         * @param {String} str 可选，要比较的类型
          * @return {String|Boolean}
          */
         type: function ( obj, str ){
@@ -181,7 +181,6 @@
         }
     });
     $.noop = $.error = function(){};
-
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
@@ -194,7 +193,7 @@
         "@ready" : { }
     };
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
-    var innerDefine = function(_, deps, callback){
+    var innerDefine = function( _, deps, callback ){
         var args = arguments;
         args[0] = nick.slice(1);
         args[ args.length - 1 ] =  parent.Function( "return "+ args[ args.length - 1 ] )();
@@ -227,10 +226,10 @@
         d.close();
         $.bind( iframe, "load", function(){
             if( global.opera && d.ok == void 0 ){
-                $._checkFail(name, true);//模拟opera的script onerror
+                $._checkFail( name, true );//模拟opera的script onerror
             }
             d.write( "<body/>" );//清空内容
-            HEAD.removeChild(iframe);//移除iframe
+            HEAD.removeChild( iframe );//移除iframe
         });
     }
     //收集依赖列表对应模块的返回值，传入目标模块中执行
@@ -258,7 +257,7 @@
 
     var errorstack = $.stack = deferred();
     errorstack.method = "pop";
-    mix($, {
+    mix( $, {
         mix: mix,
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
@@ -317,13 +316,13 @@
         //定义模块
         define: function( name, deps, callback ){//模块名,依赖列表,模块本身
             var args = arguments;
-            if(typeof deps === "boolean"){//用于文件合并, 在标准浏览器中跳过补丁模块
+            if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
                 if( deps ){
                     return;
                 }
                 [].splice.call( args, 1, 1 );
             }
-            if(typeof args[1] === "function"){//处理只有两个参数的情况
+            if( typeof args[1] === "function" ){//处理只有两个参数的情况
                 [].splice.call( args, 1, 0, "" );
             }
             args[2].token = "@"+name; //模块名

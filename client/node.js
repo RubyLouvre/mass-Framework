@@ -3,7 +3,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
     if( !support.cloneHTML5 ){
         "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace($.rword,function( tag ){
+        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace( $.rword, function( tag ){
             document.createElement( tag );////让IE6789支持HTML5的新标签
         });
     }
@@ -97,12 +97,12 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             return this.slice( 0,1 );
         },
         even: function() {
-            return this.labor( this.valueOf().filter(function( _, i ){
+            return this.labor( this.valueOf().filter(function( _, i ) {
                 return i % 2 === 0;
             }));
         },
         odd: function() {
-            return this.labor( this.valueOf().filter(function( _, i ){
+            return this.labor( this.valueOf().filter(function( _, i ) {
                 return i % 2 === 1;
             }));
         },
@@ -110,22 +110,22 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             return this.slice( -1 );
         },
         each: function( fn ){
-            for( var i = 0, n = this.length; i < n; i++ ){
+            for ( var i = 0, n = this.length; i < n; i++ ) {
                 fn.call( this[i], this[i], i );
             }
             return this;
         },
-        map : function( fn ) {
+        map: function( fn ) {
             return this.labor( this.collect( fn ) );
         },
-        collect:function( fn ){
-            for(var i = 0, ret = [], n = this.length; i < n; i++ ){
+        collect: function( fn ){
+            for ( var i = 0, ret = [], n = this.length; i < n; i++ ) {
                 ret.push( fn.call( this[ i ], this[ i ], i ));
             }
             return ret
         },
 
-        clone : function( dataAndEvents, deepDataAndEvents ) {
+        clone: function( dataAndEvents, deepDataAndEvents ) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
             return this.map( function () {
@@ -136,13 +136,13 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         //取得或设置节点的innerHTML属性
         html: function( item ){
             return $.access(this, 0, item, function( el ){//getter
-                if(el && (el.nodeType === 1 || /xml/i.test(el.nodeName))){//处理IE的XML数据岛
+                if ( el && (el.nodeType === 1 || /xml/i.test(el.nodeName)) ) {//处理IE的XML数据岛
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
             }, function(){//setter
                 item = (item || "")+""
-                if(support.innerHTML && (!rcreate.test(item) && !rnest.test(item))){
+                if ( support.innerHTML && (!rcreate.test(item) && !rnest.test(item)) ) {
                     try {
                         for ( var i = 0, node; node = this[ i++ ]; ) {
                             if ( node.nodeType === 1 ) {
@@ -157,7 +157,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             });
         },
         // 取得或设置节点的text或innerText或textContent属性
-        text:function( item ){
+        text: function( item ){
             return $.access(this, 0, item, function( el ){//getter
                 if( !el ){
                     return "";
@@ -172,7 +172,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         // 取得或设置节点的outerHTML
         outerHTML: function( item ){
             return $.access(this, 0, item, function( el ){
-                if(el && el.nodeType === 1 ){
+                if( el && el.nodeType === 1 ){
                     return "outerHTML" in el ? el.outerHTML :outerHTML( el );
                 }
                 return null;
@@ -186,7 +186,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
     "remove,empty".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
             var isRemove = method === "remove";
-            for(var i = 0, node; node = this[i++]; ){
+            for ( var i = 0, node; node = this[i++]; ){
                 if(node.nodeType === 1){
                     //移除匹配元素
                     $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] ).forEach( cleanNode );
@@ -205,7 +205,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         }
     });
     //前导 前置 追加 后放 替换
-    "append,prepend,before,after,replace".replace( $.rword,function( method ){
+    "append,prepend,before,after,replace".replace( $.rword, function( method ){
         $.fn[ method ] = function( item ){
             return manipulate( this, method, item, this.ownerDocument );
         }
@@ -227,7 +227,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
                 return matchesAPI.call( node, expr );
             } catch(e) {
                 var parent = node.parentNode;
-                if(parent){
+                if( parent ){
                     var array = $.query( expr, parent );
                     return !!( array.length && array.indexOf( node ) )
                 }
@@ -289,10 +289,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             var els = wrapper[ TAGS ]("script");
             if( els.length ){//使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script = doc.createElement("script"), neo;
-                for( var i = 0, el; el = els[ i++ ]; ){
-                    if( !el.type || types[ el.type ] ){//如果script节点的MIME能让其执行脚本
+                for ( var i = 0, el; el = els[ i++ ]; ){
+                    if ( !el.type || types[ el.type ] ){//如果script节点的MIME能让其执行脚本
                         neo = script.cloneNode(false);//FF不能省略参数
-                        for( var j = 0, attr; attr = el.attributes[ j++ ]; ){
+                        for ( var j = 0, attr; attr = el.attributes[ j++ ]; ){
                             if( attr.specified ){//复制其属性
                                 neo[ attr.name ] = [ attr.value ];
                             }
@@ -308,22 +308,22 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             if( !support.insertTbody ){
                 var noTbody = !rtbody.test( html ); //矛:html本身就不存在<tbody字样
                 els = wrapper[ TAGS ]( "tbody" );
-                if( els.length > 0 && noTbody ){//盾：实际上生成的NodeList中存在tbody节点
-                    for( i = 0; el = els[ i++ ]; ){
+                if ( els.length > 0 && noTbody ){//盾：实际上生成的NodeList中存在tbody节点
+                    for ( i = 0; el = els[ i++ ]; ) {
                         if(!el.childNodes.length )//如果是自动插入的里面肯定没有内容
                             el.parentNode.removeChild( el );
                     }
                 }
             }
             if( !support.createAll ){//移除所有补丁
-                for( els = wrapper[ TAGS ]( "br" ), i = 0; el = els[ i++ ]; ){
-                    if( el.className && el.className === "fix_create_all" ){
+                for( els = wrapper[ TAGS ]( "br" ), i = 0; el = els[ i++ ]; ) {
+                    if( el.className && el.className === "fix_create_all" ) {
                         el.parentNode.removeChild(el);
                     }
                 }
             }
             if( !support.appendChecked ){//IE67没有为它们添加defaultChecked
-                for( els = wrapper[ TAGS ]( "input" ), i = 0; el = els[ i++ ]; ){
+                for( els = wrapper[ TAGS ]( "input" ), i = 0; el = els[ i++ ]; ) {
                     if ( el.type === "checkbox" || el.type === "radio" ) {
                         el.defaultChecked = el.checked;
                     }

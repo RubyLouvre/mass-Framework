@@ -2,6 +2,7 @@
 // 样式操作模块 by 司徒正美
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
+    $.log( "已加载css模块" );
     var cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
     rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,
@@ -38,17 +39,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return  this.css( "rotate", value ) ;
         }
     });
-    //transform:  matrix(a, c, b, d, tx, ty)
-    //transform:  rotate(angle);
-    //transform:  scale(sx[, sy]);
-    //transform:  scaleX(sx);
-    //transform:  scaleY(sy)
-    //transform:  skew(ax[, ay])
-    //transform:  skewX(angle)
-    //transform:  skewY(angle)
-    //transform:  translate(tx[, ty])
-    //transform:  translateX(tx)
-    //transform:  translateY(ty)   
+
     //http://www.w3.org/TR/2009/WD-css3-2d-transforms-20091201/#introduction
     $.mix($, {
         cssMap: cssMap,
@@ -126,25 +117,25 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 
                 switch (prop) {
                     case "translateX":
-                        curr[4] = parseInt(val, 10);
+                        curr[4] = parseInt( val, 10 );
                         break;
 
                     case "translateY":
-                        curr[5] = parseInt(val, 10);
+                        curr[5] = parseInt( val, 10 );
                         break;
 
                     case "translate":
                         val = val.split(",");
-                        curr[4] = parseInt(val[0], 10);
-                        curr[5] = parseInt(val[1] || 0, 10);
+                        curr[4] = parseInt( val[0], 10 );
+                        curr[5] = parseInt( val[1] || 0, 10 );
                         break;
 
                     case "rotate":
-                        val = $.all2rad(val);
-                        curr[0] = Math.cos(val);
-                        curr[1] = Math.sin(val);
-                        curr[2] = -Math.sin(val);
-                        curr[3] = Math.cos(val);
+                        val = $.all2rad( val );
+                        curr[0] = Math.cos( val );
+                        curr[1] = Math.sin( val );
+                        curr[2] = -Math.sin( val );
+                        curr[3] = Math.cos( val );
                         break;
 
                     case "scaleX":
@@ -158,15 +149,15 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     case "scale":
                         val = val.split(",");
                         curr[0] = val[0];
-                        curr[3] = val.length>1 ? val[1] : val[0];
+                        curr[3] = val.length > 1 ? val[1] : val[0];
                         break;
 
                     case "skewX":
-                        curr[2] = Math.tan( $.all2rad(val) );
+                        curr[2] = Math.tan( $.all2rad( val ) );
                         break;
 
                     case "skewY":
-                        curr[1] = Math.tan( $.all2rad(val) );
+                        curr[1] = Math.tan( $.all2rad( val ) );
                         break;
 
                     case "skew":
@@ -181,8 +172,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         curr[1] = val[1];
                         curr[2] = val[2];
                         curr[3] = val[3];
-                        curr[4] = parseInt(val[4], 10);
-                        curr[5] = parseInt(val[5], 10);
+                        curr[4] = parseInt( val[4], 10 );
+                        curr[5] = parseInt( val[5], 10 );
                         break;
                 }
 
@@ -194,7 +185,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
                 rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
 
-                prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
+                prev = [ rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5] ];
             }
             return rslt;
         },
@@ -315,7 +306,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
             rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
             rmargin = /^margin/, style = node.style ;
-
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
@@ -337,37 +327,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     }
 
     //=========================　处理　width height　=========================
-    var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
-    cssPair = {
-        Width:['Left', 'Right'],
-        Height:['Top', 'Bottom']
-    }
-    function getWH( node, name,extra  ) {//注意 name是首字母大写
-        var none = 0, getter = $.cssAdapter["_default:get"], which = cssPair[name];
-        if(getter(node,"display") === "none" ){
-            none ++;
-            node.style.display = "block";
-        }
-        var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
-        val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
-        extra = extra || 0;
-        which.forEach(function(direction){
-            if(extra < 1)
-                val -= parseFloat(getter(node, 'padding' + direction)) || 0;
-            if(extra < 2)
-                val -= parseFloat(getter(node, 'border' + direction + 'Width')) || 0;
-            if(extra === 3){
-                val += parseFloat(getter(node, 'margin' + direction )) || 0;
-            }
-        });
-        none && (node.style.display = "none");
-        return val;
-    };
-    "width,height".replace( $.rword, function( name ){
-        $.cssAdapter[ name+":get" ] = function( node, name ){
-            return getWH( node, name == "width" ? "Width" : "Height") + "px";
-        }
-    });
     // clientWidth         = node.style.width + padding
     // https://developer.mozilla.org/en/DOM/element.clientWidth
     // offsetWidth           = node.style.width + padding + border
@@ -391,9 +350,48 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
+    var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
+    cssPair = {
+        Width:['Left', 'Right'],
+        Height:['Top', 'Bottom']
+    }
+    function getWH( node, name, extra  ) {//注意 name是首字母大写
+        var none = 0, getter = $.cssAdapter["_default:get"], which = cssPair[name];
+        if(getter(node,"display") === "none" ){
+            none ++;
+            node.style.display = "block";
+        }
+        var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
+        val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
+        extra = extra || 0;
+        which.forEach(function(direction){
+            if(extra < 1)
+                val -= parseFloat(getter(node, 'padding' + direction)) || 0;
+            if(extra < 2)
+                val -= parseFloat(getter(node, 'border' + direction + 'Width')) || 0;
+            if(extra === 3){
+                val += parseFloat(getter(node, 'margin' + direction )) || 0;
+            }
+        });
+        none && (node.style.display = "none");
+        return val;
+    };
     //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
     "Height,Width".replace( $.rword, function(  name ) {
-        $.fn[ name.toLowerCase() ] = function(size) {
+        var lower = name.toLowerCase();
+        $.cssAdapter[ lower+":get" ] = function( node ){
+            return getWH( node, name ) + "px";//为适配器添加节点
+        }
+        $.fn[ "inner" + name ] = function() {
+            var node = this[0];
+            return node && node.style ? getWH( node, name, 1 ) : null;
+        };
+        // outerHeight and outerWidth
+        $.fn[ "outer" + name ] = function( margin ) {
+            var node = this[0], extra = margin === "margin" ? 3 : 2;
+            return node && node.style ?  getWH( node,name, extra ) : null;
+        };
+        $.fn[ lower ] = function( size ) {
             var target = this[0];
             if ( !target ) {
                 return size == null ? null : this;
@@ -408,52 +406,15 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     target.body["offset" + name], target.documentElement["offset" + name]
                     );
             } else if ( size === void 0 ) {
-                return getWH( target, name, 0)
+                return getWH( target, name, 0 )
             } else {
-                return this.css( name.toLowerCase(), size );
+                return this.css( lower, size );
             }
         };
-        $.fn[ "inner" + name ] = function() {
-            var node = this[0];
-            return node && node.style ? getWH(node,name, 1) : null;
-        };
-        // outerHeight and outerWidth
-        $.fn[ "outer" + name ] = function( margin ) {
-            var node = this[0], extra = margin === "margin" ? 3 : 2;
-            return node && node.style ?  getWH(node,name, extra) : null;
-        };
+
     });
         
-    //=========================　处理　left top　=========================
-    "Left,Top".replace($.rword, function(name){
-        adapter[ name.toLowerCase() +":get"] =  function(node){
-            var val = getter(node, name.toLowerCase()), offset;
-            // 1. 当没有设置 style.left 时，getComputedStyle 在不同浏览器下，返回值不同
-            //    比如：firefox 返回 0, webkit/ie 返回 auto
-            // 2. style.left 设置为百分比时，返回值为百分比
-            // 对于第一种情况，如果是 relative 元素，值为 0. 如果是 absolute 元素，值为 offsetLeft - marginLeft
-            // 对于第二种情况，大部分类库都未做处理，属于“明之而不 fix”的保留 bug
-            if(val === "auto"){
-                val = 0;
-                if(/absolute|fixed/.test(getter(node,"position"))){
-                    offset = node["offset"+name ];
-                    // old-ie 下，elem.offsetLeft 包含 offsetParent 的 border 宽度，需要减掉
-                    if (node.uniqueID && document.documentMode < 9 ||window.opera) {
-                        // 类似 offset ie 下的边框处理
-                        // 如果 offsetParent 为 html ，需要减去默认 2 px == documentElement.clientTop
-                        // 否则减去 borderTop 其实也是 clientTop
-                        // http://msdn.microsoft.com/en-us/library/aa752288%28v=vs.85%29.aspx
-                        // ie<9 注意有时候 elem.offsetParent 为 null ...
-                        // 比如 DOM.append(DOM.create("<div class='position:absolute'></div>"),document.body)
-                        offset -= node.offsetParent && node.offsetParent['client' + name] || 0;
-                        
-                    }
-                    val = offset - (parseInt(getter(node, 'margin' + name),10) || 0) +"px";
-                }
-            }
-            return val
-        };
-    });
+   
     
     //=========================　处理　user-select　=========================
     //https://developer.mozilla.org/en/CSS/-moz-user-select
@@ -548,10 +509,37 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
     });
     //生成scrollTo, scrollLeft这两种原型方法
-    "Left,Top".replace( $.rword, function(  name ) {
+    "Left,Top".replace( $.rword, function( name ) {
+        //=========================　处理　left top　=========================
+        adapter[ name.toLowerCase() +":get"] =  function(node){
+            var val = getter(node, name.toLowerCase()), offset;
+            // 1. 当没有设置 style.left 时，getComputedStyle 在不同浏览器下，返回值不同
+            //    比如：firefox 返回 0, webkit/ie 返回 auto
+            // 2. style.left 设置为百分比时，返回值为百分比
+            // 对于第一种情况，如果是 relative 元素，值为 0. 如果是 absolute 元素，值为 offsetLeft - marginLeft
+            // 对于第二种情况，大部分类库都未做处理，属于“明之而不 fix”的保留 bug
+            if(val === "auto"){
+                val = 0;
+                if(/absolute|fixed/.test(getter(node,"position"))){
+                    offset = node["offset"+name ];
+                    // old-ie 下，elem.offsetLeft 包含 offsetParent 的 border 宽度，需要减掉
+                    if (node.uniqueID && document.documentMode < 9 || window.opera) {
+                        // 类似 offset ie 下的边框处理
+                        // 如果 offsetParent 为 html ，需要减去默认 2 px == documentElement.clientTop
+                        // 否则减去 borderTop 其实也是 clientTop
+                        // http://msdn.microsoft.com/en-us/library/aa752288%28v=vs.85%29.aspx
+                        // ie<9 注意有时候 elem.offsetParent 为 null ...
+                        // 比如 DOM.append(DOM.create("<div class='position:absolute'></div>"),document.body)
+                        offset -= node.offsetParent && node.offsetParent['client' + name] || 0;
+                    }
+                    val = offset - (parseInt(getter(node, 'margin' + name),10) || 0) +"px";
+                }
+            }
+            return val
+        };
         var method = "scroll" + name;
         $.fn[ method ] = function( val ) {
-            var node, win, i = name == "Top";
+            var node, win, t = name == "Top";
             if ( val === void 0 ) {
                 node = this[ 0 ];
                 if ( !node ) {
@@ -569,8 +557,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 win = getWindow( this );
                 if ( win ) {
                     win.scrollTo(
-                        !i ? val : $( win ).scrollLeft(),
-                        i ? val : $( win ).scrollTop()
+                        !t ? val : $( win ).scrollLeft(),
+                        t ? val : $( win ).scrollTop()
                         );
                 } else {
                     this[ method ] = val;
@@ -578,6 +566,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             });
         };
     });
+
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;

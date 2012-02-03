@@ -12,9 +12,9 @@ $.define("css","more/random,more/spec,node,css",function(random){
             var isWebkit = !!navigator.vendor;
         
             expect( node[0].tagName ).eq( "DIV" );
-            expect( node.css('width') ).eq( window.VBArray? "7px" : "8px" );
+            expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px" );
             node.css( 'width',"+=2px" );
-            expect( node.css('width') ).eq( window.VBArray? "9px" : "10px" );
+            expect( node.css('width') ).eq( document.documentMode < 9 ? "9px" : "10px" );
 
             expect( node.css('float')).eq('left');
             expect( node.css('position')).eq('static');
@@ -33,9 +33,8 @@ $.define("css","more/random,more/spec,node,css",function(random){
             // 不加入 dom 节点，ie9,firefox 返回 auto by computedStyle
             // ie7,8 返回负数，offsetHeight 返回0
             //alert(elem.currentStyle.height);== auto
-            expect(parseInt( node.css( 'height'))).match(function(value){
-                return value == 18 || value== 19;
-            },"获取height");
+            node.css( 'height',"18px")
+            expect( node.css( 'height')).eq("18px");
 
             node.css( 'float', 'right');
 
