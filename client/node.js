@@ -207,7 +207,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
     //前导 前置 追加 后放 替换
     "append,prepend,before,after,replace".replace( $.rword,function( method ){
         $.fn[ method ] = function( item ){
-            return manipulate( this, method, item );
+            return manipulate( this, method, item, this.ownerDocument );
         }
         $.fn[ method+"To" ] = function( item ){
             $( item, this.ownerDocument )[ method ]( this );
@@ -219,7 +219,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
     var commonRange = document.createRange && document.createRange();
     var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
     $.extend({
-        match : function( node, expr, i ){
+        match: function( node, expr, i ){
             if( $.type( expr, "Function" ) ){
                 return expr.call( node, node, i );
             }
@@ -235,21 +235,23 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             }
         },
         //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML, data, attr, prop, value
-        access: function( elems,  key, value, getter, setter ) {
+        access: function( elems, key, value, getter, setter ) {
             var length = elems.length;
+            setter = setter || getter;
             //为所有元素设置N个属性
             if ( typeof key === "object" ) {
                 for ( var k in key ) {
-                    $.access( elems, k, key[ k ], getter, setter );
+                    for ( var i = 0; i < length; i++ ) {
+                        setter( elems[i], k, key[ k ] );
+                    }
                 }
                 return elems;
             }
-            // 为所有元素设置属性
             if ( value !== void 0 ) {
-                if( !key ){
+                if( key === 0 ){
                     setter.call( elems, value );
                 }else{
-                    for ( var i = 0; i < length; i++ ) {
+                    for ( i = 0; i < length; i++ ) {
                         setter( elems[i], key, value );
                     }
                 }
@@ -259,15 +261,15 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             return length ? getter( elems[0], key ) : void 0;
         },
         /**
-                 * 将字符串转换为文档碎片，如果没有传入文档碎片，自行创建一个
-                 * 有关innerHTML与createElement创建节点的效率可见<a href="http://andrew.hedges.name/experiments/innerhtml/">这里</a><br/>
-                 * 注意，它能执行元素的内联事件，如<br/>
-                 * <pre><code>$.parseHTML("<img src=1 onerror=alert(22) />")</code></pre>
-                 * @param {String} html 要转换为节点的字符串
-                 * @param {Document} doc 可选
-                 * @return {FragmentDocument}
-                 */
-        parseHTML:function( html, doc ){
+         * 将字符串转换为文档碎片，如果没有传入文档碎片，自行创建一个
+         * 有关innerHTML与createElement创建节点的效率可见<a href="http://andrew.hedges.name/experiments/innerhtml/">这里</a><br/>
+         * 注意，它能执行元素的内联事件，如<br/>
+         * <pre><code>$.parseHTML("<img src=1 onerror=alert(22) />")</code></pre>
+         * @param {String} html 要转换为节点的字符串
+         * @param {Document} doc 可选
+         * @return {FragmentDocument}
+         */
+        parseHTML: function( html, doc ){
             doc = doc || this.nodeType === 9  && this || document;
             html = html.replace( rxhtml, "<$1></$2>" ).trim();
             //尝试使用createContextualFragment获取更高的效率
@@ -384,25 +386,24 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             el[adjacent]( "afterEnd", html );
         }
     };
-
-    var insertAdjacentNode = function( nodes, fn, item ){
-        for( var i = 0, node; node = nodes[i]; i++ ){
-            fn( node, !!i ? item : cloneNode( item, true, true) );
+    var insertAdjacentNode = function( elems, fn, item ){
+        for( var i = 0, el; el = elems[i]; i++ ){//第一个不用复制，其他要
+            fn( el, i ? cloneNode( item, true, true) : item );
         }
     }
-    var insertAdjacentHTML = function( nodes, slowInsert, fragment, fast, fastInsert, html ){
-        for(var i = 0, node; node = nodes[ i++ ];){
-            if(fast && node[adjacent]){//确保是支持insertAdjacentHTML的HTML元素节点
-                fastInsert( node, html );
+    var insertAdjacentHTML = function( elems, slowInsert, fragment, fast, fastInsert, html ){
+        for(var i = 0, el; el = elems[ i++ ];){
+            if( fast ){
+                fastInsert( el, html );
             }else{
-                slowInsert( node, fragment.cloneNode(true) );
+                slowInsert( el, fragment.cloneNode(true) );
             }
         }
     }
-    var insertAdjacentFragment = function( nodes, fn, item ){
-        var fragment = nodes.ownerDocument.createDocumentFragment();
-        for( var i = 0, node; node = nodes[ i++ ]; ){
-            fn(node, makeFragment( item, fragment, i > 1 ));
+    var insertAdjacentFragment = function( elems, fn, item, doc ){
+        var fragment = doc.createDocumentFragment();
+        for( var i = 0, el; el = elems[ i++ ]; ){
+            fn( el, makeFragment( item, fragment, i > 1 ) );
         }
     }
     var makeFragment = function( nodes, fragment, bool ){
@@ -414,25 +415,29 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         return ret;
     }
     /**
-             * 实现insertAdjacentHTML的增强版
-             * @param {mass}  nodes mass实例
-             * @param {String} type 方法名
-             * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
-             * @return {mass} 还是刚才的mass实例
-             */
-    function manipulate( nodes, type, item ){
+     * 实现insertAdjacentHTML的增强版
+     * @param {mass}  nodes mass实例
+     * @param {String} type 方法名
+     * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
+     * @param {Document}  doc 执行环境所在的文档
+     * @return {mass} 还是刚才的mass实例
+     */
+    function manipulate( nodes, type, item, doc ){
+        var elems = $.slice( nodes ).filter(function( el ){
+            return el.nodeType === 1;//转换为纯净的元素节点数组
+        });
         if( item.nodeType ){
             //如果是传入元素节点或文本节点或文档碎片
-            insertAdjacentNode( nodes, insertApapter[type], item );
+            insertAdjacentNode( elems, insertApapter[type], item );
         }else if( typeof item === "string" ){
             //如果传入的是字符串片断
-            var fragment = $.parseHTML( item, nodes.ownerDocument ),
+            var fragment = $.parseHTML( item, doc ),
             //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
             fast = (type !== "replace") && support[ adjacent ] && !rnest.test(item);
-            insertAdjacentHTML( nodes, insertApapter[ type ], fragment, fast, insertApapter[ type+"2" ], item ) ;
+            insertAdjacentHTML( elems, insertApapter[ type ], fragment, fast, insertApapter[ type+"2" ], item ) ;
         }else if( item.length ) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
-            insertAdjacentFragment( nodes, insertApapter[ type ], item) ;
+            insertAdjacentFragment( elems, insertApapter[ type ], item, doc ) ;
         }
         return nodes;
     }
@@ -465,7 +470,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
         var outerHTML = node.outerHTML;
-        var neo = !support.cloneHTML5 && (outerHTML.indexOf( unknownTag ) === 0) ?
+        //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
+        var neo = !support.cloneHTML5 && node.outerHTML && (outerHTML.indexOf( unknownTag ) === 0) ?
         shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
@@ -547,7 +553,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
             return this.labor( $.query( expr, this ) );
         },
         //取得当前匹配节点的所有匹配expr的节点，组成新mass实例返回。
-        filter:function( expr ){
+        filter: function( expr ){
             return this.labor( filterhElement(this.valueOf(), expr, this.ownerDocument, false) );
         },
         //取得当前匹配节点的所有不匹配expr的节点，组成新mass实例返回。
