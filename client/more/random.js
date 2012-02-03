@@ -37,6 +37,7 @@ $.define("more/random", function(){
             2权重对象表示的范围不会重叠（调用者保证）
             3未指定权重的范围权值默认为1
          例如random(1, 100, { from:1, to: 50, value:4})表示输出一个1-100之间的随机数，其中随机数出现在1-50范围内的概率是50-100范围内的4倍
+        random(1, 100, {from:1,to:50,value:4}, {from:70,to:80,value:2})
   */
         num:function (min,max,opts){
             //用于游戏掉装备，抽奖之类的场景，大奖只是给你看的，中奖只是给大多数人看的。 小将是人人都有机会的 场景...
@@ -45,7 +46,7 @@ $.define("more/random", function(){
             if(opts) span2 =  (max.to - opts.from) * (opts.value - 1);//增加跨度
             var seed = Math.random() * (span + span2); //全跨度取种子
             if(seed < span) return Math.floor(seed) + min; //默认跨度内
-            else return Math.floor((seed - span)/(opts.value - 1)) + opts.min; //如果是在增加的跨度内
+            else return Math.floor((seed - span)/(opts.value - 1)) +  opts.from; //如果是在增加的跨度内
         },
         //https://github.com/louisremi/Math.uuid.js/blob/master/Math.uuid.js
         uuid:function(){
