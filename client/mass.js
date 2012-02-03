@@ -342,7 +342,6 @@
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     tokens.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    //在IE下通过iframe得到的回调，如果不立即变成字符串保存起来，会报“不能执行已释放 Script 的代码 ”错误
                     transfer[ obj.name ] = assemble( obj.callback, obj.args );
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
@@ -439,6 +438,7 @@ dom.namespace改为dom["mass"]
 2012.1.15  更换$为命名空间
 2012.1.29  升级到v15
 2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
+2012.2.3 $.define的第二个参数可以为boolean, 允许文件合并后，在标准浏览器跳过补丁模块
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */
