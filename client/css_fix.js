@@ -1,10 +1,7 @@
 /*
  * 样式操作模块的补丁模块
  */
-$.define("css_fix", function(){
-  
-    if(!$.html.currentStyle)
-        return
+$.define("css_fix", !!top.getComputedStyle, function(){
     $.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {};
     //=========================　处理　opacity　=========================

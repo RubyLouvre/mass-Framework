@@ -1,8 +1,7 @@
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
-var node$css_fix = this.getComputedStyle ? "node" : "node,css_fix" ;
-$.define( "css", node$css_fix, function(){
+$.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     var cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
     rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,

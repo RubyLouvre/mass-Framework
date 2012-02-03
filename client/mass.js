@@ -318,7 +318,7 @@
         define: function( name, deps, callback ){//模块名,依赖列表,模块本身
             var args = arguments;
             if(typeof deps === "boolean"){//用于文件合并, 在标准浏览器中跳过补丁模块
-                if( !deps ){
+                if( deps ){
                     return;
                 }
                 [].splice.call( args, 1, 1 );
