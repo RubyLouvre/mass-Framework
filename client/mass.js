@@ -67,7 +67,7 @@
         }
         return target;
     }
-    mix($,{//为此版本的命名空间对象添加成员
+    mix($, {//为此版本的命名空间对象添加成员
         html: DOC.documentElement,
         head: HEAD,
         rword: /[^, ]+/g,

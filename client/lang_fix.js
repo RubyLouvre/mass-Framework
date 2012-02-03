@@ -1,7 +1,7 @@
 //=========================================
 //  语言补丁模块
 //==========================================
-$.define("lang_fix", !!Array.isArray, function(){
+$.define( "lang_fix",  function(){
     $.log("已加载语言补丁模块");
     //Object扩展
     //fix ie for..in bug

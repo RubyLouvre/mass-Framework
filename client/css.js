@@ -6,6 +6,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,
     deg2rad = Math.PI/180,
+    supportFloat32Array = "Float32Array" in window,
     prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
     adapter = $.cssAdapter = $.cssAdapter || {};
     function cssMap(name){
@@ -107,98 +108,95 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return $.all2deg(value) * deg2rad;
         },
         //将 skewx(10deg) translatex(150px)这样的字符串转换成3*2的距阵
-        _toMatrixArray: function(/*String*/ transform ) {
+        _toMatrixArray: function( transform ) {
             transform = transform.split(")");
-            var
-            i = transform.length -1
-            , split, prop, val
-            , A = 1
-            , B = 0
-            , C = 0
-            , D = 1
-            , A_, B_, C_, D_
-            , tmp1, tmp2
-            , X = 0
-            , Y = 0 ;
-            while ( i-- ) {
+            var  i = -1, l = transform.length -1, split, prop, val,
+            prev = supportFloat32Array ? new Float32Array(6) : [],
+            curr = supportFloat32Array ? new Float32Array(6) : [],
+            rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0];
+            prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
+            prev[1] = prev[2] = prev[4] = prev[5] = 0;
+            // Loop through the transform properties, parse and multiply them
+            while ( ++i < l ) {
                 split = transform[i].split("(");
                 prop = split[0].trim();
                 val = split[1];
-                A_ = B_ = C_ = D_ = 0;
+                curr[0] = curr[3] = 1;
+                curr[1] = curr[2] = curr[4] = curr[5] = 0;
+
                 switch (prop) {
                     case "translateX":
-                        X += parseInt(val, 10);
-                        continue;
+                        curr[4] = parseInt(val, 10);
+                        break;
 
                     case "translateY":
-                        Y += parseInt(val, 10);
-                        continue;
+                        curr[5] = parseInt(val, 10);
+                        break;
 
                     case "translate":
                         val = val.split(",");
-                        X += parseInt(val[0], 10);
-                        Y += parseInt(val[1] || 0, 10);
-                        continue;
+                        curr[4] = parseInt(val[0], 10);
+                        curr[5] = parseInt(val[1] || 0, 10);
+                        break;
 
                     case "rotate":
-                        val = $.all2rad(val) ;
-                        A_ = Math.cos(val);
-                        B_ = Math.sin(val);
-                        C_ = -Math.sin(val);
-                        D_ = Math.cos(val);
+                        val = $.all2rad(val);
+                        curr[0] = Math.cos(val);
+                        curr[1] = Math.sin(val);
+                        curr[2] = -Math.sin(val);
+                        curr[3] = Math.cos(val);
                         break;
 
                     case "scaleX":
-                        A_ = val;
-                        D_ = 1;
+                        curr[0] = +val;
                         break;
 
                     case "scaleY":
-                        A_ = 1;
-                        D_ = val;
+                        curr[3] = val;
                         break;
 
                     case "scale":
                         val = val.split(",");
-                        A_ = val[0];
-                        D_ = val.length>1 ? val[1] : val[0];
+                        curr[0] = val[0];
+                        curr[3] = val.length>1 ? val[1] : val[0];
                         break;
 
                     case "skewX":
-                        A_ = D_ = 1;
-                        C_ = Math.tan( $.all2rad(val));
+                        curr[2] = Math.tan( $.all2rad(val) );
                         break;
 
                     case "skewY":
-                        A_ = D_ = 1;
-                        B_ = Math.tan( $.all2rad(val));
+                        curr[1] = Math.tan( $.all2rad(val) );
                         break;
 
                     case "skew":
-                        A_ = D_ = 1;
                         val = val.split(",");
-                        C_ = Math.tan( $.all2rad(val[0]));
-                        B_ = Math.tan( $.all2rad(val[1] || 0));
+                        curr[2] = Math.tan( $.all2rad( val[0]) );
+                        val[1] && ( curr[1] = Math.tan( $.all2rad( val[1] )) );
                         break;
 
                     case "matrix":
                         val = val.split(",");
-                        A_ = +val[0];
-                        B_ = +val[1];
-                        C_ = +val[2];
-                        D_ = +val[3];
-                        X += parseInt(val[4], 10);
-                        Y += parseInt(val[5], 10);
+                        curr[0] = val[0];
+                        curr[1] = val[1];
+                        curr[2] = val[2];
+                        curr[3] = val[3];
+                        curr[4] = parseInt(val[4], 10);
+                        curr[5] = parseInt(val[5], 10);
+                        break;
                 }
-                // Matrix product
-                tmp1 = A * A_ + B * C_;
-                B    = A * B_ + B * D_;
-                tmp2 = C * A_ + D * C_;
-                D    = C * B_ + D * D_;
-                A = tmp1;
-                C = tmp2;
+
+                // Matrix product (array in column-major order)
+                rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
+                rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
+                rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
+                rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
+                rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
+                rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
+
+                prev = [rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5]];
             }
-            return [A,B,C,D,X,Y];
+            return rslt;
         },
         // 将矩阵转换为一个含有 rotate, scale and skew 属性的对象
         // http://hg.mozilla.org/mozilla-central/file/7cb3e9795d04/layout/style/nsStyleAnimation.cpp
