@@ -195,12 +195,11 @@
     };
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
     var innerDefine = function(_, deps, callback){
-        if( typeof deps == "function" ){//处理只有两个参数的情况
-            callback = deps;
-            deps = "";
-        }
+        var args = arguments;
+        args[0] = nick.slice(1);
+        args[ args.length - 1 ] =  parent.Function( "return "+ args[ args.length - 1 ] )();
         //将iframe中的函数转换为父窗口的函数
-        Ns.define( nick.slice(1), deps, parent.Function( "return "+ callback)() );
+        Ns.define.apply(Ns, args)
     }
     /**
      * 加载模块。它会临时构建一个iframe沙箱环境，在里面创建script标签加载指定模块
@@ -316,13 +315,19 @@
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define:function( name, deps, callback ){//模块名,依赖列表,模块本身
-            if( typeof deps == "function" ){//处理只有两个参数的情况
-                callback = deps;
-                deps = "";
+        define: function( name, deps, callback ){//模块名,依赖列表,模块本身
+            var args = arguments;
+            if(typeof deps === "boolean"){//用于文件合并, 在标准浏览器中跳过补丁模块
+                if( !deps ){
+                    return;
+                }
+                [].splice.call( args, 1, 1 );
             }
-            callback.token = "@"+name; //模块名
-            this.require( deps, callback );
+            if(typeof args[1] === "function"){//处理只有两个参数的情况
+                [].splice.call( args, 1, 0, "" );
+            }
+            args[2].token = "@"+name; //模块名
+            this.require( args[1], args[2] );
         },
         //执行并移除所有依赖都具备的模块或回调
         _checkDeps: function (){
