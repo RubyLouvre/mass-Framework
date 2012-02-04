@@ -35,7 +35,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             style.filter = currentStyle.filter.replace(ralpha,'');
         }
     }
-    var runselectable = /^(br|br|input|link|meta|hr|col|area|base|hr|embed|param|iframe|textarea|input|select|script|noscript)/i
+    var runselectable = /^(br|input|link|meta|hr|col|area|base|hr|embed|param|iframe|textarea|input|select|script|noscript)/i
     adapter[ "userSelect:set" ] = function( node, name, value ) {
         if(!runselectable.test(node.nodeName)){//跳过不显示的标签与表单控件
             var allow = /none/.test(value||"all");
@@ -45,7 +45,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             };
         }
     };
-    var ie8 = !!this.XDomainRequest,
+    var ie8 = !!top.XDomainRequest,
     border = {
         thin:   ie8 ? '1px' : '2px',
         medium: ie8 ? '3px' : '4px',
