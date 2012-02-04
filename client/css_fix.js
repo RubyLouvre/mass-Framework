@@ -35,6 +35,16 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             style.filter = currentStyle.filter.replace(ralpha,'');
         }
     }
+    var runselectable = /^(br|br|input|link|meta|hr|col|area|base|hr|embed|param|iframe|textarea|input|select|script|noscript)/i
+    adapter[ "userSelect:set" ] = function( node, name, value ) {
+        if(!runselectable.test(node.nodeName)){//跳过不显示的标签与表单控件
+            var allow = /none/.test(value||"all");
+            node.unselectable  = allow ? "" : "on";
+            node.onselectstart = allow ? "" : function(){
+                return false;
+            };
+        }
+    };
     var ie8 = !!this.XDomainRequest,
     border = {
         thin:   ie8 ? '1px' : '2px',

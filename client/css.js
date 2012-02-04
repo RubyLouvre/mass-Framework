@@ -421,18 +421,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
     //具体支持情况可见下面网址
     //http://help.dottoro.com/lcrlukea.php
-    adapter[ "userSelect:set" ] = function( node, name, value ) {
-        name = $.cssName(name);
-        if(typeof name === "string"){
-            return node.style[name] = value
-        }
-        var allow = /none/.test(value||"all");
-        node.unselectable  = allow ? "" : "on";
-        node.onselectstart = allow ? "" : function(){
-            return false;
+    var userSelect =  $.cssName("userSelect");
+    if(typeof userSelect === "string"){
+        adapter[ "userSelect:set" ] = function( node, _, value ) {
+            return node.style[ userSelect ] = value;
         };
-    };
-      
+    }
     //=======================================================
     //获取body的offset
     function getBodyOffsetNoMargin(){
@@ -508,10 +502,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             });
         }
     });
-    //生成scrollTo, scrollLeft这两种原型方法
+
     "Left,Top".replace( $.rword, function( name ) {
-        //=========================　处理　left top　=========================
-        adapter[ name.toLowerCase() +":get"] =  function(node){
+        adapter[ name.toLowerCase() +":get"] =  function(node){//添加top, left到cssAdapter
             var val = getter(node, name.toLowerCase()), offset;
             // 1. 当没有设置 style.left 时，getComputedStyle 在不同浏览器下，返回值不同
             //    比如：firefox 返回 0, webkit/ie 返回 auto
@@ -537,7 +530,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
             return val
         };
-        var method = "scroll" + name;
+        var method = "scroll" + name;//scrollTop,scrollLeft只有读方法
         $.fn[ method ] = function( val ) {
             var node, win, t = name == "Top";
             if ( val === void 0 ) {
@@ -573,10 +566,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 
     "margin,padding,borderWidth".replace(/([a-z]+)([^,]*)/g,function(s,a,b){
         // console.log([a,b])
-        })
-
+        });
 });
-
 //2011.9.5
 //将cssName改为隋性函数,修正msTransform Bug
 //2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
