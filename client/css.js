@@ -3,15 +3,14 @@
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     $.log( "已加载css模块" );
-    var cssFloat = $.support.cssFloat ? 'cssFloat': 'styleFloat',
-    rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
+    var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,
     deg2rad = Math.PI/180,
     supportFloat32Array = "Float32Array" in window,
     prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
     adapter = $.cssAdapter = $.cssAdapter || {};
     function cssMap(name){
-        return cssMap[name] || (cssMap[name] = name == 'float' ? cssFloat : $.String.camelize( name ));
+        return cssMap[name] ||  $.String.camelize( name );
     }
     var shortcuts = {
         c:   "color",
@@ -28,7 +27,11 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         sy:  "scaleY",
         tx:  "translateX",
         ty:  "translateY",
-        bgc: "backgroundColor"
+        bgc: "backgroundColor",
+        "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
+    };
+    for(var name in shortcuts){
+        cssMap[ name ]  = shortcuts[ name ]
     }
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     $.implement({
@@ -69,7 +72,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function( node, name, value, fn){
             if( !fn ){
-                name = shortcuts[ name ] || name;
                 name = cssMap( name );
             }
             if( value === void 0){ //取值
@@ -413,8 +415,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         };
 
     });
-        
-   
     
     //=========================　处理　user-select　=========================
     //https://developer.mozilla.org/en/CSS/-moz-user-select
