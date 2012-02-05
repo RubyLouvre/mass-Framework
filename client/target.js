@@ -335,15 +335,15 @@ $.define("target","data", function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    $.dispatcher = {};
+    $.target = {};
     "bind,unbind,fire".replace( $.rword, function( method ){
-        $.dispatcher[ method ] = function(){
+        $.target[ method ] = function(){
             facade [method ].apply(this, arguments);
             return this;
         }
     });
-    $.dispatcher.uniqueNumber = $.uuid++;
-    $.dispatcher.defineEvents = function( names ){
+    $.target.uniqueNumber = $.uuid++;
+    $.target.defineEvents = function( names ){
         var events = [];
         if(typeof names == "string"){
             events = names.match( $.rword ) || [];
@@ -364,17 +364,18 @@ $.define("target","data", function(){
     
 });
 
-    //2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
-    //2011.9.17 事件发送器增加一个uniqueID属性
-    //2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
-    //2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
-    //2011.9.29 简化bind与unbind
-    //2011.10.13 模块名改为dispatcher
-    //2011.10.23 简化facade.handle与fire
-    //2011.10.26 更改命名空间的检测方法
-    //2011.11.23 重构facade.fix与quickIs
-    //2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
-    //2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
+//2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
+//2011.9.17 事件发送器增加一个uniqueID属性
+//2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
+//2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
+//2011.9.29 简化bind与unbind
+//2011.10.13 模块名改为dispatcher
+//2011.10.23 简化facade.handle与fire
+//2011.10.26 更改命名空间的检测方法
+//2011.11.23 重构facade.fix与quickIs
+//2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
+//2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
+//2011.10.13 模块名改为target
 
 
 
