@@ -1,4 +1,4 @@
-$.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
+$.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
     if( !support.cloneHTML5 ){
@@ -657,7 +657,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         return result;
     };
 
-    $$({
+    lang({
         parent: function( el ){
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent: [];
@@ -688,7 +688,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( $$, support ){
         },
         children: function( el ){
             return  el.children ? $.slice( el.children ) :
-            $$( el.childNodes ).filter(function( node ){
+            lang( el.childNodes ).filter(function( node ){
                 return node.nodeType === 1;
             });
         },

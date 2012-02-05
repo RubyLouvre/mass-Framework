@@ -9,10 +9,10 @@
    
 $.define("event", "node,target",function(){
     // $.log("加载event模块成功");
-    var global = this, DOC = global.document, types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
+    var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
     $.eventSupport = function( eventName,el ) {
-        el = el || DOC.createElement("div");
+        el = el || document.createElement("div");
         eventName = "on" + eventName;
         var ret = eventName in el;
         if (el.setAttribute && !ret ) {
@@ -23,7 +23,8 @@ $.define("event", "node,target",function(){
         return ret;
     };
 
-    var system = $.event, specials = system.special = {
+    var facade = $.event,
+    adapter = $.eventAdapter = {
         focus: {
             delegateType: "focusin"
         },
@@ -32,65 +33,64 @@ $.define("event", "node,target",function(){
         },
 
         beforeunload: {
-            setup: function(src, selector, fn ) {
+            setup: function(src, _, _, fn ) {
                 // We only want to do this special case on windows
                 if ( $.type(src, "Window") ) {
                     src.onbeforeunload = fn;
                 }
             },
-            teardown: function( src, selector,  fn ) {
+            teardown: function( src, _, _, fn ) {
                 if ( src.onbeforeunload === fn ) {
                     src.onbeforeunload = null;
                 }
             }
         }
-    }, rword = $.rword;
-    function fixAndHandle(src, type, e){
-        e = system.fix(e);
+    };
+    function fixAndDispatch(src, type, e){
+        e = facade.fix( e );
         e.type = type;
-        system.handle.call(src,e);
+        facade.dispatch.call(src,e);
     }
     //用于在标准浏览器下模拟mouseenter与mouseleave
     //现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
     //opera11也支持这四个事件,同时它们也成为w3c DOM3 Event的规范
     //详见http://www.filehippo.com/pl/download_opera/changelog/9476/
     //http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
-    "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g,function(_,orig, fix){
-        specials[ orig ]  = {
+    "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_,orig, fix){
+        adapter[ orig ]  = {
             setup:function(src){//使用事件冒充
-                $._data(src, orig+"_handle",$.bind(src, fix, function(event){
-                    var parent = event.relatedTarget;
+                $._data( src, orig+"_handle", $.bind( src, fix, function( e ){
+                    var parent = e.relatedTarget;
                     try {
                         while ( parent && parent !== src ) {
                             parent = parent.parentNode;
                         }
                         if ( parent !== src ) {
-                            fixAndHandle(src, orig, event)
+                            fixAndDispatch(src, orig, e)
                         }
-                    } catch(e) { };
+                    } catch(err) { };
                 }));
             },
-            teardown :function(){
-                $.bind(this, fix, $._data(orig+"_handle")|| $.noop);
+            teardown: function(){
+                $.unbind(this, fix, $._data( orig+"_handle" ) || $.noop);
             }
         };
     });
     var checkEls = /radio|checkbox/;
-    var delegate = function(fn){
+    var delegate = function( fn ){
         return function(src,selector, type){
             if(type =="change" && src.tagName === "INPUT" && checkEls.test(src.type) || selector ){
                  fn(src);
             }else{
                 return false;
             }
-           
         }
     }
     //模拟IE678的reset,submit,change的事件代理
     var submitWhich = $.oneObject("13,108");
     var submitInput = $.oneObject("submit,image");
     var submitType  = $.oneObject("text,password,textarea");
-    if(!DOC.dispatchEvent){
+    if(!document.dispatchEvent){
         var changeEls = /^(?:textarea|input|select)$/i 
         var changeType = {
             "select-one":"selectedIndex",
@@ -99,64 +99,64 @@ $.define("event", "node,target",function(){
             "checkbox":"checked"
         }
         var changeNotify = function(e){
-            if(e.propertyName === (changeType[this.type] || "value")){
-                var sups = $._data(this,"publisher");
-                e = system.fix(e);
+            if(e.propertyName === ( changeType[this.type] || "value") ){
+                var sups = $._data( this,"publisher");
+                e = facade.fix(e);
                 e.type = "change";
                 for(var i in sups){
-                    system.handle.call(sups[i], e);
+                    facade.dispatch.call(sups[i], e);
                 }
             }
         }
 
-        $.mix(specials,{
+        $.mix(adapter,{
             //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
             reset:{
                 setup: delegate(function(src){
-                    system.bind.call( src, "click._reset keypress._reset", function( e ) {
+                    facade.bind.call( src, "click._reset keypress._reset", function( e ) {
                         if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
-                            fixAndHandle(src, "reset", e);
+                            fixAndDispatch(src, "reset", e);
                         }
                     });
                 }),
                 teardown: delegate(function(src){
-                    system.unbind.call( src, "._reset" );
+                    facade.unbind.call( src, "._reset" );
                 })
             },
             //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
             submit : {
                 setup: delegate(function(src){
-                    system.bind.call( src, "click._submit keypress._submit", function( e ) {
+                    facade.bind.call( src, "click._submit keypress._submit", function( e ) {
                         var el = e.target, type = el.type;
                         if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
-                            fixAndHandle(src, "submit", e);
+                            fixAndDispatch( src, "submit", e );
                         }
                     });
                 }),
                 teardown: delegate(function(src){
-                    system.unbind.call( src, "._submit" );
+                    facade.unbind.call( src, "._submit" );
                 })
             },
             change : {
-                setup: delegate(function( sup ){
-                    var subscriber = $._data( sup,"subscriber",{});//用于保存订阅者的UUID
-                    $._data( sup,"valuechange_setup", $.bind( sup, "beforeactivate", function( ) {
-                        var sub = event.srcElement;
+                setup: delegate(function( src ){
+                    var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
+                    $._data( src,"valuechange_setup", $.bind( src, "beforeactivate", function() {
+                        var target = event.srcElement;
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( changeEls.test(sub.nodeName) && !subscriber[sub.uniqueNumber] ) {
-                            subscriber[sub.uniqueNumber] = sub;//表明其已注册
-                            var publisher = ($._data(sub,"publisher") || $._data(sub,"publisher",{}));
-                            publisher[sup.uniqueNumber] = sup;//此孩子可能同时要向N个顶层元素报告变化
-                            system.bind.call(sub,"propertychange._change",changeNotify );
+                        if ( changeEls.test( target.nodeName) && !subscriber[ target.uniqueNumber ] ) {
+                            subscriber[ target.uniqueNumber] = target;//表明其已注册
+                            var publisher = ($._data( target,"publisher") || $._data(target,"publisher",{}));
+                            publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
+                            facade.bind.call( target,"propertychange._change", changeNotify );
                         }
                     }));
                 }),
-                teardown:delegate(function(src){
-                    $.unbind( src, "beforeactive", $._data(src,"valuechange_setup") || $.noop);
-                    var els = $.removeData(src,"subscriber",true) || {};
+                teardown: delegate(function(src){
+                    $.unbind( src, "beforeactive", $._data( src, "valuechange_setup") || $.noop );
+                    var els = $.removeData( src, "subscriber", true ) || {};
                     for(var i in els){
                         $.unbind(els[i],"._change");
-                        var publisher = $._data(els[i],"publisher");
+                        var publisher = $._data( els[i], "publisher");
                         if(publisher){
                             delete publisher[src.uniqueNumber];
                         }
@@ -168,17 +168,17 @@ $.define("event", "node,target",function(){
     }
     //我们可以通过change的事件代理来模拟YUI的valuechange事件
     //支持情况 FF2+ chrome 1+ IE9+ safari3+ opera9+11 The built-in Android browser,Dolphin HD browser
-    if($.eventSupport("input", DOC.createElement("input"))){
+    if($.eventSupport("input", document.createElement("input"))){
         //http://blog.danielfriesen.name/2010/02/16/html5-browser-maze-oninput-support/
-        specials.change = {
-            setup : delegate(function(src){
-                $._data(src,"valuechange_setup",$.bind( src, "input", function( e){
-                    fixAndHandle(src, "change", e);
+        adapter.change = {
+            setup: delegate(function(src){
+                $._data( src,"valuechange_setup", $.bind( src, "input", function( e){
+                    fixAndDispatch(src, "change", e);
                 },true));
-                $._data(src,"selectchange_setup",$.bind( src, "change", function( e){
+                $._data(src,"selectchange_setup", $.bind( src, "change", function( e){
                     var type = e.target.type;
                     if(type && !submitType[type]){
-                        system.handle.call(src, e);
+                        facade.dispatch.call( src, e);
                     }  
                 },true))
             }),
@@ -190,26 +190,26 @@ $.define("event", "node,target",function(){
     }
        
     //在标准浏览器里面模拟focusin
-    if(!$.eventSupport("focusin")){
-        "focusin_focus,focusout_blur".replace(/(\w+)_(\w+)/g,function(_,$1, $2){
+    if( !$.eventSupport("focusin") ){
+        "focusin_focus,focusout_blur".replace( /(\w+)_(\w+)/g, function(_,$1, $2){
             var notice = 0, focusinNotify = function (e) {
                 var src = e.target
                 do{//模拟冒泡
                     var events = $._data( src,"events");
                     if(events && events[$1]){
-                        fixAndHandle(src, $1, e);
+                        fixAndDispatch(src, $1, e);
                     }
                 } while (src = src.parentNode );
             }
-            specials[ $1 ] = {
+            adapter[ $1 ] = {
                 setup: function( ) {
                     if ( notice++ === 0 ) {
-                        DOC.addEventListener( $2, focusinNotify, true );
+                        document.addEventListener( $2, focusinNotify, true );
                     }
                 },
                 teardown: function() {
                     if ( --notice === 0 ) {
-                        DOC.removeEventListener( $2, focusinNotify, true );
+                        document.removeEventListener( $2, focusinNotify, true );
                     }
                 }
             };
@@ -217,15 +217,15 @@ $.define("event", "node,target",function(){
     }
     try{
         //FF3使用DOMMouseScroll代替标准的mousewheel事件
-        DOC.createEvent("MouseScrollEvents");
-        specials.mousewheel = {
+        document.createEvent("MouseScrollEvents");
+        adapter.mousewheel = {
             bindType    : "DOMMouseScroll",
             delegateType: "DOMMouseScroll"
         }
         try{
             //可能末来FF会支持标准的mousewheel事件，则需要删除此分支
-            DOC.createEvent("WheelEvent");
-            delete specials.mousewheel;
+            document.createEvent("WheelEvent");
+            delete adapter.mousewheel;
         }catch(e){};
     }catch(e){};
     //当一个元素，或者其内部任何一个元素获得焦点的时候会触发这个事件。
@@ -263,7 +263,7 @@ $.define("event", "node,target",function(){
                 return this;
             }
             return this.each( function() {//转交dispatch模块去处理
-                system.bind.call( this, types, fn, selector, times );
+                facade.bind.call( this, types, fn, selector, times );
             });
         },
         off: function( types, fn ) {
@@ -275,7 +275,7 @@ $.define("event", "node,target",function(){
             }
             var args = arguments
             return this.each(function() {
-                system.unbind.apply( this, args );
+                facade.unbind.apply( this, args );
             });
         },
         one: function( types, fn ) {
@@ -314,14 +314,14 @@ $.define("event", "node,target",function(){
         }
     })
 
-    types.replace(rword,function(type){
-        $.fn[type] = function(callback){
-            return callback?  this.bind(type, callback) : this.fire(type);
+    types.replace( $.rword, function( type ){
+        $.fn[ type ] = function( callback ){
+            return callback?  this.bind( type, callback ) : this.fire( type );
         }
     });
 });
 //2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
-//2011.10.21 修复focusin focsuout的事件代理 增加fixAndHandle处理事件冒充
+//2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
 //2011.11.23 简化rquickIs
 //1. 各浏览器兼容                  2. this指针指向兼容                  3. event参数传递兼容. 
 
