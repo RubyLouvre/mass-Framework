@@ -1,4 +1,4 @@
-dom.define("test/nwmatcher",function(){
+$.define("nwmatcher",function(){
     var global = window;
     var version = 'nwmatcher-1.2.4',
 

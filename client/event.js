@@ -75,12 +75,15 @@ $.define("event", "node,target",function(){
             }
         };
     });
+    var checkEls = /radio|checkbox/;
     var delegate = function(fn){
-        return function(src,selector){
-            if(!selector){
+        return function(src,selector, type){
+            if(type =="change" && src.tagName === "INPUT" && checkEls.test(src.type) || selector ){
+                 fn(src);
+            }else{
                 return false;
             }
-            fn(src);
+           
         }
     }
     //模拟IE678的reset,submit,change的事件代理
@@ -88,7 +91,7 @@ $.define("event", "node,target",function(){
     var submitInput = $.oneObject("submit,image");
     var submitType  = $.oneObject("text,password,textarea");
     if(!DOC.dispatchEvent){
-        var changeEls = /^(?:textarea|input|select)$/i ,checkEls = /radio|checkbox/;
+        var changeEls = /^(?:textarea|input|select)$/i 
         var changeType = {
             "select-one":"selectedIndex",
             "select-multiple":"selectedIndex",
@@ -97,11 +100,11 @@ $.define("event", "node,target",function(){
         }
         var changeNotify = function(e){
             if(e.propertyName === (changeType[this.type] || "value")){
-                var els = $._data(this,"publisher");
+                var sups = $._data(this,"publisher");
                 e = system.fix(e);
                 e.type = "change";
-                for(var i in els){
-                    system.handle.call(els[i], e);
+                for(var i in sups){
+                    system.handle.call(sups[i], e);
                 }
             }
         }
@@ -135,16 +138,16 @@ $.define("event", "node,target",function(){
                 })
             },
             change : {
-                setup: delegate(function(src){
-                    var subscriber = $._data(src,"subscriber",{});//用于保存订阅者的UUID
-                    $._data(src,"valuechange_setup", $.bind( src, "beforeactivate", function( ) {
-                        var target = event.srcElement;
+                setup: delegate(function( sup ){
+                    var subscriber = $._data( sup,"subscriber",{});//用于保存订阅者的UUID
+                    $._data( sup,"valuechange_setup", $.bind( sup, "beforeactivate", function( ) {
+                        var sub = event.srcElement;
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( changeEls.test(target.nodeName) && !subscriber[target.uniqueNumber] ) {
-                            subscriber[target.uniqueNumber] = target;//表明其已注册
-                            var publisher = ($._data(target,"publisher") || $._data(target,"publisher",{}));
-                            publisher[src.uniqueNumber] = src;//此孩子可能同时要向N个上司报告变化
-                            system.bind.call(target,"propertychange._change",changeNotify );
+                        if ( changeEls.test(sub.nodeName) && !subscriber[sub.uniqueNumber] ) {
+                            subscriber[sub.uniqueNumber] = sub;//表明其已注册
+                            var publisher = ($._data(sub,"publisher") || $._data(sub,"publisher",{}));
+                            publisher[sup.uniqueNumber] = sup;//此孩子可能同时要向N个顶层元素报告变化
+                            system.bind.call(sub,"propertychange._change",changeNotify );
                         }
                     }));
                 }),

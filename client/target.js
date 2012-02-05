@@ -70,7 +70,7 @@ $.define("target","data", function(){
                 handlers = events[ type ] = events[ type ] ||  [];
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if(emitter && !handlers.length  ){
-                    if (!special.setup || special.setup( target, selector, fn ) === false ) {
+                    if (!special.setup || special.setup( target, selector, type, fn ) === false ) {
                         // 为此元素这种事件类型绑定一个全局的回调，用户的回调则在此回调中执行
                         $.bind(target,type,fn,!!selector)
                     }
@@ -123,7 +123,7 @@ $.define("target","data", function(){
                     handlers.length = 0;
                 }
                 if (emitter && (handlers.length === 0 && origCount !== handlers.length) ) {
-                    if ( !special.teardown || special.teardown( target, selector, handler ) === false ) {
+                    if ( !special.teardown || special.teardown( target, selector,type, handler ) === false ) {
                         $.unbind( target, type, $._data(target,"handle") );
                     }
                     delete events[ type ];
