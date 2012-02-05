@@ -60,5 +60,21 @@ and open the template in the editor.
     http://dmitrysoshnikov.com/
 
 javascriptweblog.wordpress.com
+
+
+Chainvas.global('CanvasRenderingContext2D', {
+	circle: function(x, y, r) {
+		return this.beginPath().arc(x, y, r, 0, 2*Math.PI, false).closePath();
+	},
+
+	roundRect: function(x, y, w, h, r) {
+		return this.beginPath().moveTo(x + r, y)
+		  .lineTo(x + w - r, y).quadraticCurveTo(x + w, y, x + w, y + r)
+		  .lineTo(x + w, y + h - r).quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+		  .lineTo(x + r, y + h).quadraticCurveTo(x, y + h, x, y + h - r)
+		  .lineTo(x, y + r).quadraticCurveTo(x, y, x + r, y)
+		  .closePath();
+	}
+});
     </body>
 </html>
