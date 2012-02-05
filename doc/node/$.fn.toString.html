@@ -18,31 +18,30 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
-
-                    $.require("ready,node",function(){
+            var exec1 = function(){
+                $.require("ready,node",function(){
                     $.log($("article>*"),true)
-                    });
+                });
                 
-}
+            }
           
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.toString</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>此方法只要用于调试，查看里面节点的类型。</p>
+    <article>
+        <h3>$.fn.toString</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>此方法只要用于调试，查看里面节点的类型。</p>
 
-            <fieldset><legend>例子</legend>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node",function(){
                 $.log($("article>*"),true)
             });
-                </pre>
-                
-                <button onclick="exec1()">点我，执行代码</button>
-            </fieldset>
-        </article>
-    </body>
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
 </html>

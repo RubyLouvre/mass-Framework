@@ -3,7 +3,7 @@
 <html> 
     <head>
         <meta charset="utf-8" />        
-        <title>dispatcher module</title>
+        <title>target module</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
         <script src="../public/js/shCore.js" type="text/javascript" ></script>
@@ -20,9 +20,9 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var a  = $.a = {};
-                    $.mix(a,$.dispatcher);
+                    $.mix(a, $.target);
                     var repeat = function(){
                         $(".show_a").append("<div>已派发repeat事件</div>")
                     }
@@ -44,9 +44,9 @@
                 });
             }
             var exec2 = function(){
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var b  = $.b = {};
-                    $.mix(b,$.dispatcher);
+                    $.mix(b,$.target);
                     b.bind("write",function(){
                         $(".show_b").append("<div>"+[].slice.call(arguments)+"</div>");
                     });
@@ -59,10 +59,10 @@
                 });
             }
             var exec3 = function(){
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var c  = $.c = {};
                     c.prop = "属性"
-                    $.mix(c,$.dispatcher);
+                    $.mix(c, $.target);
                     c.bind("first second",function(e){
                         $(".show_c").append("<div>"+e.target.prop+"</div>");
                         $(".show_c").append("<div>"+e.type+"</div>");
@@ -77,9 +77,9 @@
                 });
             }
             var exec4 = function(){
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var d  = $.d = {};
-                    $.mix(d,$.dispatcher);
+                    $.mix(d,$.target);
                     d.defineEvents("slideUp,resize,destroy");
                     d.onSlideUp(function(e){
                         $(".show_d").append("<div>"+e.type+"</div>");
@@ -113,9 +113,9 @@
                 });
             }
           
-            $.require("ready,node,dispatcher",function(){
+            $.require("ready,node,target",function(){
                 var obj  = $.ee = {};
-                $.mix(obj,$.dispatcher);
+                $.mix(obj,$.target);
                 obj.bind("oneone",function(event){
                     $(".show_e").append("<div>"+event.type+"</div>");
                     $(".show_e").append("<div>我只能调用一次</div>");
@@ -129,7 +129,7 @@
     </head>
     <body>
         <article>
-            <h3>dispatcher模块</h3>
+            <h3>target模块</h3>
             <p><span class="stress">描述：</span></p>
             <p>事件派发器模块，此模块用于提供一个强大通用的事件处理机制,并把实现此接口的对象变成一个事件派发器。 </p>
             <p><span class="stress">事件派发器</span>是实现事件驱动的基本元素之一，其他几个是事件消息，事件监听器，事件处理器。
@@ -161,10 +161,10 @@
             <pre class="brush:javascript;gutter:false;toolbar:false">
 //方式一
             var a  = {};
-            $.mix(a,$.dispatcher);
+            $.mix(a,$.target);
 //方式二
             var SomeClass = $.factory({
-                implement:$.dispatcher,
+                implement:$.target,
                 init:function(){}
              });
            var b = new SomeClass()
@@ -179,9 +179,9 @@
             <fieldset><legend>例子</legend>
                 <p>添加事件与查看事件消息对象。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var a  = $.a = {};
-                    $.mix(a,$.dispatcher);
+                    $.mix(a, $.target);
                     var repeat = function(){
                        $(".show_a").append("&lt;div&gt;已派发repeat事件&lt;/div&gt;")
                     }
@@ -208,9 +208,9 @@
             <fieldset><legend>例子</legend>
                 <p>移除事件。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var b  = $.b = {};
-                    $.mix(b,$.dispatcher);
+                    $.mix(b, $.target);
                     b.bind("write",function(){
                          $(".show_b").append("&lt;div&gt;"+[].slice.call(arguments)+"&lt;/div&gt;");
                     });
@@ -228,10 +228,10 @@
             <fieldset><legend>例子</legend>
                 <p>同时绑定多个事件。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var c  = $.c = {};
                     c.prop = "属性"
-                    $.mix(c,$.dispatcher);
+                    $.mix(c, $.target);
                     c.bind("first second",function(e){
                         $(".show_c").append("&lt;div&gt;"+e.target.prop+"&lt;/div&gt;");
                         $(".show_c").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
@@ -251,9 +251,9 @@
             <fieldset><legend>例子</legend>
                 <p>defineEvents API。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var d  = $.d = {};
-                    $.mix(d,$.dispatcher);
+                    $.mix(d, $.target);
                     d.defineEvents("slideUp,resize,destroy");
                     d.onSlideUp(function(e){
                         $(".show_d").append("&lt;div&gt;"+e.type+"&lt;/div&gt;");
@@ -293,9 +293,9 @@
             <fieldset><legend>例子</legend>
                 <p>模拟YUI与jQuery的one API,只调用一次就移除它。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,node,dispatcher",function(){
+                $.require("ready,node,target",function(){
                     var obj  = $.ee = {};
-                    $.mix(obj,$.dispatcher);
+                    $.mix(obj, $.target);
                     obj.bind("oneone",function(event){
                         $(".show_e").append("&lt;div&gt;"+event.type+"&lt;/div&gt;");
                         $(".show_e").append("&lt;div&gt;我只能调用一次&lt;/div&gt;");
