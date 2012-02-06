@@ -49,7 +49,7 @@ $.define("event", "node,target",function(){
     function fixAndDispatch(src, type, e){
         e = facade.fix( e );
         e.type = type;
-        facade.dispatch.call(src,e);
+        facade.dispatch.call( src, e );
     }
     //用于在标准浏览器下模拟mouseenter与mouseleave
     //现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
@@ -79,8 +79,9 @@ $.define("event", "node,target",function(){
     var checkEls = /radio|checkbox/;
     var delegate = function( fn ){
         return function(src,selector, type){
-            if(type =="change" && src.tagName === "INPUT" && checkEls.test(src.type) || selector ){
-                 fn(src);
+            var fix = type =="change" && src.tagName === "INPUT" && checkEls.test(src.type)
+            if( fix || selector ){
+                fn(src, fix);
             }else{
                 return false;
             }
@@ -98,17 +99,28 @@ $.define("event", "node,target",function(){
             "radio":"checked",
             "checkbox":"checked"
         }
-        var changeNotify = function(e){
-            if(e.propertyName === ( changeType[this.type] || "value") ){
-                var sups = $._data( this,"publisher");
-                e = facade.fix(e);
-                e.type = "change";
-                for(var i in sups){
-                    facade.dispatch.call(sups[i], e);
-                }
+        var changeDispatch = function(target, e){
+            var sups = $._data( target,"publisher");
+            e = facade.fix(e);
+            e.type = "change";
+            for(var i in sups){
+                facade.dispatch.call(sups[i], e);
             }
         }
-
+        var changeNotify = function(e){
+            if(e.propertyName === ( changeType[this.type] || "value") ){
+                $._data(this,"change_flag",true);
+                changeDispatch(this,e);
+            }
+        }
+        var fixChangeFire = function(){
+            var el = event.srcElement;
+            if( !$._data(el,"change_flag")){
+                changeDispatch(el, event);
+            }else{
+                $.removeData(el,"change_flag",true)
+            }
+        }
         $.mix(adapter,{
             //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
             reset:{
@@ -138,7 +150,7 @@ $.define("event", "node,target",function(){
                 })
             },
             change : {
-                setup: delegate(function( src ){
+                setup: delegate(function( src, fix ){
                     var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
                     $._data( src,"valuechange_setup", $.bind( src, "beforeactivate", function() {
                         var target = event.srcElement;
@@ -148,14 +160,19 @@ $.define("event", "node,target",function(){
                             var publisher = ($._data( target,"publisher") || $._data(target,"publisher",{}));
                             publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
                             facade.bind.call( target,"propertychange._change", changeNotify );
+                            target.attachEvent("onchange",fixChangeFire)
                         }
                     }));
+                    if(fix){//允许change事件可以通过fireEvent("onchange")触发
+                        src.fireEvent("onbeforeactivate")
+                    }
                 }),
                 teardown: delegate(function(src){
                     $.unbind( src, "beforeactive", $._data( src, "valuechange_setup") || $.noop );
                     var els = $.removeData( src, "subscriber", true ) || {};
                     for(var i in els){
-                        $.unbind(els[i],"._change");
+                        $.unbind( els[i],"._change" );
+                        els[i].detachEvent("onchange", fixChangeFire );
                         var publisher = $._data( els[i], "publisher");
                         if(publisher){
                             delete publisher[src.uniqueNumber];
@@ -163,8 +180,7 @@ $.define("event", "node,target",function(){
                     }
                 })
             }
-        })
-            
+        });
     }
     //我们可以通过change的事件代理来模拟YUI的valuechange事件
     //支持情况 FF2+ chrome 1+ IE9+ safari3+ opera9+11 The built-in Android browser,Dolphin HD browser
