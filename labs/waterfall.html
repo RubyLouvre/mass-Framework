@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>瀑布流</title>
+        <script src="https://raw.github.com/RubyLouvre/mass-Framework/master/client/mass.js"></script>
+        <script>
+            $.require("more/random,ready,css,event",function(random){
+                //容器的CSS表达式，列数，每列的宽度
+                var Waterfall = function(expr, col, colWidth){
+                    //构建整体轮廓
+                    var container = this.container = $(expr);
+                    var pw = container.width();//容器的宽
+                    var gw = (pw - col * colWidth)/(col-1);//列间距离
+                    this.colWidth = colWidth;
+                    this.cols = [];
+                    for(var i = 0; i < col ; i++){//随机生成列
+                        this.cols[i] = $("<div class='waterfall' />").css({
+                            position: "absolute",
+                            top: 0,
+                            left: (colWidth + gw) * i,
+                            width: colWidth,
+                            backgroundColor: random.hex()
+                        }).appendTo(container);
+                    }
+                }
+                Waterfall.prototype = {
+                    //添加板块
+                    addBlocks : function(){
+                        for(var i = 0; i < 40; i++){//随机生成40个板砖
+                            $("<div class='waterfall_block' />").css({
+                                margin: 5,
+                                width: this.colWidth - 10 ,
+                                height: random.num(80, 300),
+                                backgroundColor: random.hex()
+                            }).appendTo( this.whichCol() );
+                        }
+                    },
+                    //计算出最短的栏栅
+                    whichCol:function(el, ret, h){
+                        for(var i = 0, shortest = 0; el = this.cols[i]; i++){
+                            h = el.height();
+                            if(i == 0){
+                                shortest = h;
+                                ret = el;
+                            }
+                            if(h < shortest ){
+                                shortest = h;
+                                ret = el;
+                            }
+                        }
+                        return ret;
+                    }
+                };
+
+                var waterfall = new Waterfall("body",4,300)
+                waterfall.addBlocks();
+                $(window).scroll(function(){
+                    var clientHeight = $(window).height(),
+                    scrollTop = $(window).scrollTop(),
+                    scrollHeight = $(document).height();
+                    if(clientHeight + scrollTop >=  scrollHeight ){
+                        waterfall.addBlocks();
+                    }
+                })
+            })
+        </script>
+    </head>
+    <body>
+        <p>
+            瀑布流 by 司徒正美
+        </p>
+    </body>
+</html>

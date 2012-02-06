@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>TODO supply a title</title>
+        <style>
+            .aaa{
+                float:right;
+            }
+        </style>
+        <script src="/client/mass.js"></script>
+        <!--  <script src="/client/jquery.js"></script>-->
+        <script>
+            function fireEvent(element,event){
+                if (document.createEventObject){
+                    // dispatch for IE
+                    //      var evt = document.createEventObject();
+                    return element.fireEvent('on'+event)
+                } else{
+                    // dispatch for firefox + others
+                    var evt = document.createEvent("HTMLEvents");
+                    evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+                    return !element.dispatchEvent(evt);
+                }
+            }
+            $.require("ready,node,event",function(){
+                /*   $("body").delegate("select","change",function(){
+                    $.log("select change event")
+                });
+              
+                $("input[type=checkbox]")[0].attachEvent("onchange",function(){
+                    console.log("==============")
+                })*/
+                /*     $("body").delegate("form","submit",function(){
+                    $.log("form submit event")
+                });*/
+                $("form").submit(function(){
+                    $.log("form submit event")
+                });
+                //         $("input[type=checkbox]").change(function(){
+                //            $.log("checkbox change event")
+                //        })
+
+                /*           fireEvent($("select")[0],"change");
+                fireEvent($("input[type=checkbox]")[0],"change")*/
+                fireEvent($("form")[0],"submit")
+            });
+
+
+        </script>
+    </head>
+    <body >
+        <form action="javascript:void(0)">
+            <input type="checkbox" />
+            <select>
+                <option>1111</option>
+                <option>1111</option>
+                <option>1111</option>
+            </select>
+            <input type="submit" value="提交" />
+        </form>
+
+
+    </body>
+</html>
