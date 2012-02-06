@@ -540,7 +540,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 }
                 win = getWindow( node );
                 // Return the scroll offset
-                return win ? ("pageXOffset" in win) ? win[ i ? "pageYOffset" : "pageXOffset" ] :
+                return win ? ("pageXOffset" in win) ? win[ t ? "pageYOffset" : "pageXOffset" ] :
                 $.support.boxModel && win.document.documentElement[ method ] ||
                 win.document.body[ method ] :
                 node[ method ];
