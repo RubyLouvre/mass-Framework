@@ -80,7 +80,7 @@
                 $("a").next().live(...)
                 $("a").children().live(...)//这些操作会寻找近邻节点构建交的实例，其selector已不是a了！
             </pre>
-            <p>但不管怎么说，在doc Framework中，事件代理已发展得很完善，通过事件冒充得手段，成功模块老式IE那些不能冒泡的事件
+            <p>但不管怎么说，在mass Framework中，事件代理已发展得很完善，通过事件冒充得手段，成功模块老式IE那些不能冒泡的事件
                 如change, submit, reset，focus, blur。并且delegate的第一个参数并不限是一个CSS表达式，可以为函数。可以让用户制定规则
                 来匹配元素。因此强烈建议使用delegate与live代替bind(on)。</p>
             <p>虽然delegate是基于bind(on)上实现的，但它内部还是做了一些工作，让它比$('.container').on( 'click', fn, 'a' })快。</p>

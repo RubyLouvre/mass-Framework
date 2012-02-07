@@ -12,17 +12,17 @@ $.define("fx", "css",function(){
     rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
     var adapter = $.fxAdapter = {
         _default:{
-            get:function(el, prop) {
-                return $.css(el,prop);
+            get: function( el, prop ) {
+                return $.css( el, prop );
             },
-            tween :function(form,change,name,per) {
-                var a = (form + change * $.easing[name](per)).toFixed(3);
+            tween: function( form, change, name, per ) {
+                var a = ( form + change * $.easing[name]( per ) ).toFixed(3);
                 return isNaN(a) ? 0 : a;
             }
         },
-        type:function (attr){
-            for(var i in types){
-                if(types[i].test(attr)){
+        type:function ( attr ){
+            for ( var i in types ){
+                if( types[i].test(attr) ){
                     return i;
                 }
             }
@@ -31,34 +31,33 @@ $.define("fx", "css",function(){
     }
 
     var tween = adapter._default.tween;
-    $.mix(adapter,{
-        scroll : {
-            get: function(el, prop){
-                return el[prop];
+    $.mix( adapter, {
+        scroll: {
+            get: function( el, prop ){
+                return el[ prop ];
             },
             tween: tween
         },
-        transform:{
-            get: function(el, prop){
+        transform: {
+            get: function( el, prop ){
                 return $.transform(el)[prop]
             },
-            set:function(el,t2d,isEnd,per){
-                var obj = {}
-   
-                for(var name in t2d){
-                    obj[name] = isEnd ? t2d[name][1] : tween(t2d[name][0],t2d[name][2],t2d[name][3],per); 
+            set: function( el, t2d, isEnd, per ){
+                var obj = {};
+                for ( var name in t2d ){
+                    obj[name] = isEnd ? t2d[name][1] : tween( t2d[name][0], t2d[name][2], t2d[name][3], per );
                 }
-                $.transform(el,obj);
+                $.transform( el, obj );
             }
         },
         color : {
-            get:function(el,prop){
+            get: function( el, prop ){
                 return  $.css(el,prop);
             },
-            tween:function(f0,f1,f2,c0,c1,c2,name,per,i){
+            tween: function(f0, f1, f2, c0, c1, c2, name, per, i){
                 var delta = $.easing[name](per), ret = [];
-                for(i = 0;i < 3;i++){
-                    ret[i] = Math.max(Math.min((arguments[i] +arguments[i+3] * delta)|0, 255), 0);
+                for( i = 0;i < 3; i++){
+                    ret[i] = Math.max( Math.min((arguments[i] +arguments[i+3] * delta)|0, 255), 0);
                 }
                 return "rgb("+ret+")";
             }

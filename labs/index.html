@@ -12,41 +12,7 @@
         <script src="/client/mass.js"></script>
         <!--  <script src="/client/jquery.js"></script>-->
         <script>
-            function fireEvent(element,event){
-                if (document.createEventObject){
-                    // dispatch for IE
-                    //      var evt = document.createEventObject();
-                    return element.fireEvent('on'+event)
-                } else{
-                    // dispatch for firefox + others
-                    var evt = document.createEvent("HTMLEvents");
-                    evt.initEvent(event, true, true ); // event type,bubbling,cancelable
-                    return !element.dispatchEvent(evt);
-                }
-            }
-            $.require("ready,node,event",function(){
-                /*   $("body").delegate("select","change",function(){
-                    $.log("select change event")
-                });
-              
-                $("input[type=checkbox]")[0].attachEvent("onchange",function(){
-                    console.log("==============")
-                })*/
-                /*     $("body").delegate("form","submit",function(){
-                    $.log("form submit event")
-                });*/
-                $("form").submit(function(){
-                    $.log("form submit event")
-                });
-                //         $("input[type=checkbox]").change(function(){
-                //            $.log("checkbox change event")
-                //        })
-
-                /*           fireEvent($("select")[0],"change");
-                fireEvent($("input[type=checkbox]")[0],"change")*/
-                fireEvent($("form")[0],"submit")
-            });
-
+         alert(window.requestAnimationFrame)
 
         </script>
     </head>
@@ -60,7 +26,38 @@
             </select>
             <input type="submit" value="提交" />
         </form>
+ w= window.open('about:blank');
 
+w.document.documentElement.clientWidth === 0
+Franky-上海(449666)  15:43:03
+来判断是不是被拦截了
+Franky-上海(449666)  15:43:19
+如果没被拦截 则 w.location.replace("真正的地址")
 
+Franky-上海(449666)  15:43:51
+replace 还不会留下历史记录 导致用户 返回到about:blank .所以 很完美
+将 HTML 变换为普通文本的两个函数
+作者：address-withheld@my.opera.com.invalid (OU)
+目的很简单，把 HTML 代码的 TAG 全部去掉，仅保留换行样式（比如 <br> 需转化为 \n）, 原先的 <td> 或 <th> 之间加空格。
+
+以下分别用 PHP 和 JavaScript 实现。
+PHP:
+function htmlToText( $html ){
+ 	$html = preg_replace( '/\r?\n/' , '' , $html );
+ 	$html = preg_replace('/<(\/?)(br|hr|div|p|object|marquee|table|tr|ul|ol|li|dd|dl|h[1-9])(\b)/i', $this->LFC.'<${1}${2}${3}', $html);
+ 	$html = preg_replace('/<\/(td|th)(\b)/i', ' </${1}${2}', $html);
+ 	return trim(strip_tags($html));
+}
+JavaScript:
+function htmlToText(sHtml) {
+ 	sHtml = sHtml.replace(/\r?\n/g, '').replace(/<\/?(br|div|p|object|marquee|table|tr|ul|ol|li|dd|dl|h[1-9])\b/gi, function($0, tag){
+ 		return '\n' + $0;
+ 	}).replace(/<\/(td|th)\b/gi, function($0, tag){
+ 		return  ' ' + $0;
+ 	});
+ 	var element = document.createElement('div');
+ 	element.innerHTML = sHtml;
+ 	return element.textContent || element.innerText;
+}
     </body>
 </html>

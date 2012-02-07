@@ -6,15 +6,15 @@ $.define("event","more/spec,event",function(){
             "native fire": function(){
                 var form = $("#form1",idoc);
                 form.submit(function(e){
-                    expect( e.type ).eq( "submit" )
+                    expect( e.type ).eq( "submit" );
                 });
                 var input = $("#input1",idoc);
                 input.change(function(e){
-                    expect( e.type ).eq( "change" )
+                    expect( e.type ).eq( "change" );
                 });
                 var select = $("#select1",idoc);
                 select.change(function(e){
-                    expect( e.type ).eq( "change" )
+                    expect( e.type ).eq( "change" );
                 });
 
                 function fireEvent(el, type, e){
@@ -27,11 +27,38 @@ $.define("event","more/spec,event",function(){
                     }
                 }
 
-                fireEvent(form[0], "submit")
-                fireEvent(input[0], "change")
-                fireEvent(select[0], "change")
+                fireEvent(form[0], "submit");
+                fireEvent(input[0], "change");
+                fireEvent(select[0], "change");
+            },
+            "mass fire": function(){
+                var form = $("#form2",idoc);
+                form.submit(function(e){
+                    expect( e.type ).eq( "submit" );
+                });
+                var input = $("#input2",idoc);
+                input.change(function(e){
+                    expect( e.type ).eq( "change" );
+                });
+                var select = $("#select2",idoc);
+                select.change(function(e){
+                    expect( e.type ).eq( "change" );
+                });
 
+                function fireEvent(el, type, e){
+                    if ( document.dispatchEvent ){
+                        e = document.createEvent("HTMLEvents");
+                        e.initEvent(type, true, true );
+                        el.dispatchEvent( e );
+                    }else {
+                        el.fireEvent( 'on'+type );
+                    }
+                }
+
+                fireEvent(form[0], "submit");
+                fireEvent(input[0], "change");
+                fireEvent(select[0], "change");
             }
-        })
+        });
     }
 })
