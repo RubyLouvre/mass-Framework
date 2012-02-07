@@ -14,9 +14,10 @@ $.define("event", "node,target",function(){
         el = el || document.createElement("div");
         eventName = "on" + eventName;
         var ret = eventName in el;
-        if (el.setAttribute && !ret ) {
-            el.setAttribute(eventName, "return;");
-            ret = typeof el[eventName] === "function";
+        if ( el.setAttribute && !ret ) {
+            el.setAttribute( eventName, "" );
+            ret = typeof el[ eventName ] === "function";
+            el.removeAttribute(eventName);
         }
         el = null;
         return ret;
@@ -57,29 +58,32 @@ $.define("event", "node,target",function(){
     }
     //用于在标准浏览器下模拟mouseenter与mouseleave
     //现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
-    //opera11也支持这四个事件,同时它们也成为w3c DOM3 Event的规范
+    //opera11,FF10也支持这四个事件,同时它们也成为w3c DOM3 Event的规范
     //详见http://www.filehippo.com/pl/download_opera/changelog/9476/
     //http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
-    "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_,orig, fix){
-        adapter[ orig ]  = {
-            setup: function( src ){//使用事件冒充
-                $._data( src, orig+"_handle", $.bind( src, fix, function( e ){
-                    var parent = e.relatedTarget;
-                    try {
-                        while ( parent && parent !== src ) {
-                            parent = parent.parentNode;
-                        }
-                        if ( parent !== src ) {
-                            fixAndDispatch( [ src ], orig, e );
-                        }
-                    } catch(err) { };
-                }));
-            },
-            teardown: function(){
-                $.unbind(this, fix, $._data( orig+"_handle" ) || $.noop);
-            }
-        };
-    });
+    if( !+"\v1" || !$.eventSupport("mouseenter")){
+        "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_,orig, fix){
+            adapter[ orig ]  = {
+                setup: function( src ){//使用事件冒充
+                    $._data( src, orig+"_handle", $.bind( src, fix, function( e ){
+                        var parent = e.relatedTarget;
+                        try {
+                            while ( parent && parent !== src ) {
+                                parent = parent.parentNode;
+                            }
+                            if ( parent !== src ) {
+                                fixAndDispatch( [ src ], orig, e );
+                            }
+                        } catch(err) { };
+                    }));
+                },
+                teardown: function(){
+                    $.unbind(this, fix, $._data( orig+"_handle" ) || $.noop);
+                }
+            };
+        });
+    }
+
     var checkEls = /radio|checkbox/;
     var delegate = function( fn ){
         return function(src,selector, type){
@@ -182,6 +186,7 @@ $.define("event", "node,target",function(){
             }
         });
     }
+    $.log($.eventSupport("focusin"))
     //在标准浏览器里面模拟focusin
     if( !$.eventSupport("focusin") ){
         "focusin_focus,focusout_blur".replace( /(\w+)_(\w+)/g, function(_,$1, $2){
