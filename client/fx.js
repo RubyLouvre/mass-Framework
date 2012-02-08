@@ -207,7 +207,7 @@ $.define("fx", "css",function(){
     var rspecialVal = /show|toggle|hide/;
     function fxBuilder(node, fxs, props, config){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
-        reverseConfig = $.Object.merge.call( {},config),
+        reverseConfig = $.Object.merge( {},config),
         transfromChanged = 0,
         reverseProps = {};
         reverseConfig.back =  1;
@@ -354,7 +354,7 @@ $.define("fx", "css",function(){
     }
     function parseColor(color) {
         var value;
-        callCasual($.HTML,function(doc){
+        callCasual($.html, function(doc){
             var range = doc.body.createTextRange();
             doc.body.style.color = color;
             value = range.queryCommandValue("ForeColor");
