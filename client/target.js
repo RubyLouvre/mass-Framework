@@ -123,7 +123,7 @@ $.define("target","data", function(){
                 }
                 if ( DOM && (queue.length === 0 && origCount !== queue.length) ) {//如果在回调队列的长度发生变化时才进行此分支
                     if ( !adapter.teardown || adapter.teardown( target, selector, origType, fn ) === false ) {
-                        $.unbind( target, type, $._data(target,"handle") );
+                        $.unbind( target, type, $._data(target,"callback") );
                     }
                     delete events[ type ];
                 }
