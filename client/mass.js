@@ -268,9 +268,9 @@
             return fn;
         },
         unbind: w3c ? function( el, type, fn, phase ){
-            el.removeEventListener( type, fn, !!phase );
+            el.removeEventListener( type, fn || $.noop, !!phase );
         } : function( el, type, fn ){
-            el.detachEvent( "on"+type, fn );
+            el.detachEvent( "on"+type, fn || $.noop );
         },
         //请求模块
         require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
