@@ -43,20 +43,7 @@
                     $(this).append(e.type+"  "+String(a)+"   "+String(b)+"<br/>")
                 } ).fire("click", "foo", "bar");
             
-                if(window.VBArray){
-                    var el = $(".sample3 input");
-                    $.bind(el[0],"propertychange",function(){
-                        if ( event.propertyName === "checked" ) {
-                            el[0]._just_changed = true;
-                        }
-                    });
-                    $.bind(el[0],"click",function(){
-                        if (  el[0]._just_changed) {
-                            el[0]._just_changed = false;
-                            $(".sample3 div").html(el.prop("checked")+"<br/>" +el.attr("checked") )
-                        }
-                    });
-                }
+
             });
         </script>
     </head>
@@ -129,30 +116,7 @@
                 </pre>
             </fieldset>
 
-            <fieldset><legend>例子</legend>
-                <p>使用click事件模拟change事件(此事例仅运行于IE)。 </p>
-
-                <div class="sample3" >
-                    <input type="checkbox" checked="checked"> 点我
-                    <div></div>
-                </div>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
-                if(window.VBArray){
-                    var el = $(".sample3 input");
-                    $.bind(el[0],"propertychange",function(){
-                        if ( event.propertyName === "checked" ) {
-                            el[0]._just_changed = true;
-                        }
-                    });
-                    $.bind(el[0],"click",function(){
-                        if (  el[0]._just_changed) {
-                            el[0]._just_changed = false;
-                            $(".sample3 div").html(el.prop("checked")+"&lt;br/&gt;" +el.attr("checked") )
-                        }
-                    });
-                }
-                </pre>
-            </fieldset>
+    
         </article>
     </body>
 </html>

@@ -4513,7 +4513,7 @@ $.define("target","data", function(){
                 queue = events[ type ] = events[ type ] ||  [];
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if( DOM && !queue.length  ){
-                    if (!adapter.setup || adapter.setup( target, selector, type, callback ) === false ) {
+                    if (!adapter.setup || adapter.setup( target, selector, item.origType, callback ) === false ) {
                         // 为此元素这种事件类型绑定一个全局的回调，用户的回调则在此回调中执行
                         $.bind(target, type, callback, !!selector)
                     }
@@ -4524,13 +4524,14 @@ $.define("target","data", function(){
         unbind: function( types, fn, selector ) {
             var target = this, events = $._data( target, "events");
             if(!events) return;
-            var t, tns, type, namespace, origCount, DOM =  $["@target"] in target,
+            var t, tns, type, origType, namespace, origCount, DOM =  $["@target"] in target,
             j, adapter, queue, item;
             types = DOM ? (types || blank).replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
             types = (types || blank).match( $.rword ) || [];
             for ( t = 0; t < types.length; t++ ) {
                 tns = rtypenamespace.exec( types[t] ) || [];
                 type = tns[1];
+                origType = type;
                 namespace = tns[2];
                 // 如果types只包含命名空间，则去掉所有拥有此命名空间的事件类型的回调
                 if ( !type  ) {
@@ -4564,7 +4565,7 @@ $.define("target","data", function(){
                     queue.length = 0;
                 }
                 if ( DOM && (queue.length === 0 && origCount !== queue.length) ) {//如果在回调队列的长度发生变化时才进行此分支
-                    if ( !adapter.teardown || adapter.teardown( target, selector,type, fn ) === false ) {
+                    if ( !adapter.teardown || adapter.teardown( target, selector, origType, fn ) === false ) {
                         $.unbind( target, type, $._data(target,"handle") );
                     }
                     delete events[ type ];
@@ -4834,7 +4835,7 @@ $.define("target","data", function(){
 $.define("event", "node,target",function(){
     // $.log("加载event模块成功");
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,valuechange,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
     $.eventSupport = function( eventName,el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
@@ -4849,7 +4850,16 @@ $.define("event", "node,target",function(){
     };
 
     var facade = $.event,
+    rform  = /^(?:textarea|input|select)$/i ,
+    supportInput = $.eventSupport("input", document.createElement("input")),
     adapter = $.eventAdapter = {
+        valuechange: {
+            check: supportInput?  0 : function(src){
+                return rform.test(src.tagName) && !/^select/.test(src.type);
+            },
+            bindType: supportInput ? "input" : "change",
+            delegateType: supportInput ? "input" : "change"
+        },
         focus: {
             delegateType: "focusin"
         },
@@ -4909,12 +4919,11 @@ $.define("event", "node,target",function(){
         });
     }
 
-    var checkEls = /radio|checkbox/;
     var delegate = function( fn ){
         return function(src,selector, type){
-            var fix = type =="change" && src.tagName === "INPUT" && checkEls.test(src.type)
+            var fix = !adapter[type] || !adapter[type].check || adapter[type].check(src);
             if( fix || selector ){
-                fn(src, fix);
+                fn(src, type, fix);
             }else{
                 return false;
             }
@@ -4927,7 +4936,7 @@ $.define("event", "node,target",function(){
         submitWhich = $.oneObject("13,108"),
         submitInput = $.oneObject("submit,image"),
         submitType  = $.oneObject("text,password,textarea"),
-        changeEls = /^(?:textarea|input|select)$/i ,
+
         changeType = {
             "select-one": "selectedIndex",
             "select-multiple": "selectedIndex",
@@ -4938,7 +4947,6 @@ $.define("event", "node,target",function(){
             if( e.propertyName === ( changeType[ this.type ] || "value") ){
                 $._data( this, "_just_changed", true );
                 fixAndDispatch( $._data( this, "publisher" ), "change", e );
-                changeDispatch( this,e );
             }
         }
         function changeFire( e ){
@@ -4978,18 +4986,23 @@ $.define("event", "node,target",function(){
                 })
             },
             change: {
-                setup: delegate(function( src, fix ){
+                check: function(src){
+                    return rform.test(src.tagName) && /radio|checkbox/.test(src.type)
+                },
+                setup: delegate(function( src, type, fix ){
                     var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
                     $._data( src, "_beforeactivate", $.bind( src, "beforeactivate", function() {
                         var e = src.document.parentWindow.event, target = e.srcElement;
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( changeEls.test( target.nodeName) && !subscriber[ target.uniqueNumber ] ) {
+                        if ( rform.test( target.tagName) && !subscriber[ target.uniqueNumber ] ) {
                             subscriber[ target.uniqueNumber] = target;//表明其已注册
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
                             facade.bind.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
-                            $._data(src, "_change_fire",$.bind(target, "change", changeFire.bind(target, e) ))
+                            if(type === "change"){
+                                $._data(src, "_change_fire",$.bind(target, "change", changeFire.bind(target, e) ))
+                            }
                         }
                     }));
                     if( fix ){//如果是事件绑定
@@ -5011,7 +5024,9 @@ $.define("event", "node,target",function(){
             }
         });
     }
-    $.log($.eventSupport("focusin"))
+
+
+
     //在标准浏览器里面模拟focusin
     if( !$.eventSupport("focusin") ){
         "focusin_focus,focusout_blur".replace( /(\w+)_(\w+)/g, function(_,$1, $2){
@@ -5146,6 +5161,9 @@ $.define("event", "node,target",function(){
 //2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
 //2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
 //2011.11.23 简化rquickIs
+//2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
+//2012.2.8 添加mouseenter的分支判定，增强eventSupport
+//2012.2.9 完美支持valuechange事件
 //1. 各浏览器兼容                  2. this指针指向兼容                  3. event参数传递兼容. 
 
 
@@ -5361,6 +5379,7 @@ $.define("fx", "css",function(){
         }
         return fxs.run; // 调用 clearInterval方法，中止定时器
     }
+    //   https://bugs.webkit.org/show_bug.cgi?id=74606
     var rspecialVal = /show|toggle|hide/;
     function fxBuilder(node, fxs, props, config){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
@@ -5370,7 +5389,7 @@ $.define("fx", "css",function(){
         reverseConfig.back =  1;
         var orig = config.orig = {}
         for(var p in props){
-            var name = $.cssCache(p);//将属性名转换为驼峰风格
+            var name = $.cssName(p);//将属性名转换为驼峰风格
             var val =  props[name] = props[p];//取得结束值
             if(val == undefined){
                 continue;

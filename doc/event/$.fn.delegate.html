@@ -103,7 +103,7 @@
                     //  var opt = document.createElement("option");
                     //  opt.text = opt.label = opt.value = Math.floor(Math.ran$()*16777215).toString(16);//label Fix IE  
                     //  $(".selectchange").append(opt)
-                    var rand = Math.floor(Math.ran$()*(-1>>>0)).toString(36) ;
+                    var rand = Math.floor(Math.random()*(-1>>>0)).toString(36) ;
                     $("<option>text</option>").appendTo(".selectchange").text(rand).val(rand)
                 });
                 $("body").delegate(".selectchange","change",function(e){

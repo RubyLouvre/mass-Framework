@@ -12,7 +12,7 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
         <style type="text/css">
-            #show_result,#show_result2 { color:red; }
+            #show_result,#show_result2,#show_result3 { color:red; }
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
@@ -36,28 +36,28 @@
                     }
                 });
                 $("#checkbox").change(function(){
-                    $.log("00000000000",true);
+                    $("#show_result3").text(this.checked)
                 });
             });
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.change([ fn ])</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>为 change 事件绑定一个处理函数，或者触发元素上的 change 事件。</p>
-            <p>这个函数的第一种用法是 .bind('change', handler) 的快捷方式，第二种用法是 .fire('change') 的快捷方式。</p>
+    <article>
+        <h3>$.fn.change([ fn ])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>为 change 事件绑定一个处理函数，或者触发元素上的 change 事件。</p>
+        <p>这个函数的第一种用法是 .bind('change', handler) 的快捷方式，第二种用法是 .fire('change') 的快捷方式。</p>
 
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>fn</dt>
-                <dd>
-                    可选。Funcion。回调函数。
-                </dd>
-            </dl>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>fn</dt>
+            <dd>
+                可选。Funcion。回调函数。
+            </dd>
+        </dl>
 
-            <fieldset><legend>例子</legend>
-                <pre class="brush:js;gutter:false;toolbar:false;">
+        <fieldset><legend>例子</legend>
+            <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
                 $("#sweets").change(function () {
                     var str = "";
@@ -77,31 +77,31 @@
                     }
                 });
                 $("#checkbox").change(function(){
-                    $.log("00000000000",true);
+                    $("#show_result3").text(this.checked)
                 });
             });;
-                </pre>
-                <select id="sweets" multiple="multiple">
-                    <option>Chocolate</option>
-                    <option selected="selected">Candy</option>
+            </pre>
+            <select id="sweets" multiple="multiple">
+                <option>Chocolate</option>
+                <option selected="selected">Candy</option>
 
-                    <option>Taffy</option>
-                    <option selected="selected">Caramel</option>
-                    <option>Fudge</option>
-                    <option>Cookie</option>
+                <option>Taffy</option>
+                <option selected="selected">Caramel</option>
+                <option>Fudge</option>
+                <option>Cookie</option>
 
-                </select>
-                <div id="show_result"></div>
+            </select>
+            <div id="show_result"></div>
 
-                <select class="listOfOptions">
-                    <option value="U">时光之轮</option>
-                    <option value="M">冰与火之歌</option>
-                    <option value="C" class="customOption">指环王</option>
-                </select>
-                <input id="checkbox" type="checkbox"/>
-                <div id="show_result2"></div>
-
-            </fieldset>
-        </article>
-    </body>
+            <select class="listOfOptions">
+                <option value="U">时光之轮</option>
+                <option value="M">冰与火之歌</option>
+                <option value="C" class="customOption">指环王</option>
+            </select>
+            <div id="show_result2"></div>
+            <input id="checkbox" type="checkbox"/>
+            <div id="show_result3"></div>
+        </fieldset>
+    </article>
+</body>
 </html>
