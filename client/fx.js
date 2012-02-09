@@ -204,6 +204,7 @@ $.define("fx", "css",function(){
         }
         return fxs.run; // 调用 clearInterval方法，中止定时器
     }
+    //   https://bugs.webkit.org/show_bug.cgi?id=74606
     var rspecialVal = /show|toggle|hide/;
     function fxBuilder(node, fxs, props, config){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
@@ -213,7 +214,7 @@ $.define("fx", "css",function(){
         reverseConfig.back =  1;
         var orig = config.orig = {}
         for(var p in props){
-            var name = $.cssCache(p);//将属性名转换为驼峰风格
+            var name = $.cssName(p);//将属性名转换为驼峰风格
             var val =  props[name] = props[p];//取得结束值
             if(val == undefined){
                 continue;
