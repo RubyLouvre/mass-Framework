@@ -70,7 +70,7 @@ $.define("target","data", function(){
                 queue = events[ type ] = events[ type ] ||  [];
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if( DOM && !queue.length  ){
-                    if (!adapter.setup || adapter.setup( target, selector, type, callback ) === false ) {
+                    if (!adapter.setup || adapter.setup( target, selector, item.origType, callback ) === false ) {
                         // 为此元素这种事件类型绑定一个全局的回调，用户的回调则在此回调中执行
                         $.bind(target, type, callback, !!selector)
                     }
@@ -81,13 +81,14 @@ $.define("target","data", function(){
         unbind: function( types, fn, selector ) {
             var target = this, events = $._data( target, "events");
             if(!events) return;
-            var t, tns, type, namespace, origCount, DOM =  $["@target"] in target,
+            var t, tns, type, origType, namespace, origCount, DOM =  $["@target"] in target,
             j, adapter, queue, item;
             types = DOM ? (types || blank).replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
             types = (types || blank).match( $.rword ) || [];
             for ( t = 0; t < types.length; t++ ) {
                 tns = rtypenamespace.exec( types[t] ) || [];
                 type = tns[1];
+                origType = type;
                 namespace = tns[2];
                 // 如果types只包含命名空间，则去掉所有拥有此命名空间的事件类型的回调
                 if ( !type  ) {
@@ -121,7 +122,7 @@ $.define("target","data", function(){
                     queue.length = 0;
                 }
                 if ( DOM && (queue.length === 0 && origCount !== queue.length) ) {//如果在回调队列的长度发生变化时才进行此分支
-                    if ( !adapter.teardown || adapter.teardown( target, selector,type, fn ) === false ) {
+                    if ( !adapter.teardown || adapter.teardown( target, selector, origType, fn ) === false ) {
                         $.unbind( target, type, $._data(target,"handle") );
                     }
                     delete events[ type ];
