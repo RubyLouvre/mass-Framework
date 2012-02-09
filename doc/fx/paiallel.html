@@ -43,10 +43,10 @@
             });
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    var color = [ "#"+((1<<24)*Math.ran$()|0).toString(16),
-                        "#"+((1<<24)*Math.ran$()|0).toString(16),
-                        "#"+((1<<24)*Math.ran$()|0).toString(16),
-                        "#"+((1<<24)*Math.ran$()|0).toString(16)];
+                    var color = [ "#"+((1<<24)*Math.random()|0).toString(16),
+                        "#"+((1<<24)*Math.random()|0).toString(16),
+                        "#"+((1<<24)*Math.random()|0).toString(16),
+                        "#"+((1<<24)*Math.random()|0).toString(16)];
                     $(".tgt1").fx(2000, { tx: [400, "linear"],
                         ty: 400,
                         w: 200,
@@ -78,10 +78,10 @@
             每调用一次fx方法就会往这些列队中添加一个动画，
             每个动画都只会等前一个动画前执行完才执行，除非调用stop方法或delay方法。 </p>
         <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
-                  var color = [ "#"+((1<<24)*Math.ran$()|0).toString(16),
-          "#"+((1<<24)*Math.ran$()|0).toString(16),
-          "#"+((1<<24)*Math.ran$()|0).toString(16),
-          "#"+((1<<24)*Math.ran$()|0).toString(16)];
+                  var color = [ "#"+((1<<24)*Math.random()|0).toString(16),
+          "#"+((1<<24)*Math.random()|0).toString(16),
+          "#"+((1<<24)*Math.random()|0).toString(16),
+          "#"+((1<<24)*Math.random()|0).toString(16)];
         $(".tgt1").fx(2000, { tx: [400, "linear"],
           ty: 400,
           w: 200,
