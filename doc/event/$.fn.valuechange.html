@@ -105,7 +105,7 @@
                 $(".textareachange1").valuechange(function(e){
                     log('textarea',e.type,1);
                 });
-                //===================事件绑定=====================
+                //===================事件代理=====================
                 $("body").delegate(".textinputchange2","valuechange",function(e){
                     log('text',e.type,2);
                 });
