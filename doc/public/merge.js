@@ -1,6 +1,6 @@
 (function(){
     var fs = require("fs");
-    var modules = ["lang_fix",'lang',"support","class","data","query","node","css_fix","css","attr","target","event"];//在这里添加要合并的子模块
+    var modules = ["lang_fix",'lang',"support","class","data","query","node","css_fix","css","attr","target","event","fx"];//在这里添加要合并的子模块
     var result = [], index = 0;
     //读取子模块对应的文件，并将它们的内容合并到“模块加载模块”中！
     modules.forEach(function(el,i){

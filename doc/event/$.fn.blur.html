@@ -28,7 +28,6 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,event,fx",function(){
-                var $ = dom;
                 var self = $("#test").blur(function(){
                     var color =  /^\d+$/.test(self.val())? "green" :"red"
                     self.css({
@@ -90,7 +89,6 @@ $('#other').click(function() {
             <fieldset><legend>例子</legend>
                 <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
-                var $ = dom;
                 var self = $("#test").blur(function(){
                     var color =  /^\d+$/.test(self.val())? "green" :"red"
                     self.css({
