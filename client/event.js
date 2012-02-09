@@ -87,7 +87,7 @@ $.define("event", "node,target",function(){
                     }));
                 },
                 teardown: function(){
-                    $.unbind(this, fix, $._data( orig+"_handle" ) || $.noop);
+                    $.unbind( this, fix, $._data( orig+"_handle" ) );
                 }
             };
         });
@@ -184,8 +184,8 @@ $.define("event", "node,target",function(){
                     }
                 }),
                 teardown: delegate(function( src, els, i ){
-                    $.unbind( src, "beforeactive", $._data( src, "_beforeactivate") || $.noop );
-                    $.unbind( src, "change", $._data(src, "_change_fire") || $.noop );
+                    $.unbind( src, "beforeactive", $._data( src, "_beforeactivate") );
+                    $.unbind( src, "change", $._data(src, "_change_fire")  );
                     els = $.removeData( src, "subscriber", true ) || {};
                     for( i in els){
                         $.unbind( els[i],"._change" );
