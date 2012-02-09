@@ -2,8 +2,8 @@
 // 特效模块
 //==========================================
 $.define("fx", "css",function(){
-    //  $.log("已加载fx模块");
-    var global = this, DOC = global.document, types = {
+    $.log("已加载fx模块");
+    var  types = {
         color:/color/i,
         transform:/rotate|scaleX|scaleY|translateX|translateY/i,
         scroll:/scroll/i,
@@ -67,7 +67,7 @@ $.define("fx", "css",function(){
     function heartbeat( node) {
         heartbeat.nodes.push( node);
         if (heartbeat.id === null) {//如果浏览器支持JIT，那么把间隔设小点，让动画更加流畅
-            heartbeat.id = setInterval(nextTick, 16);//开始心跳
+            heartbeat.id = setInterval( nextTick, 16);//开始心跳
         }
         return true;
     }
@@ -110,9 +110,8 @@ $.define("fx", "css",function(){
         config.easing = $.easing[easing] ? easing : "swing";
         config.duration = duration || 500;
         config.type = "noop";
-           
         return this.each(function(node){
-            var fxs = $._data(node,"fx") || $._data( node,"fx",{
+            var fxs = $._data( node,"fx") || $._data( node,"fx",{
                 artery:[], //正向列队
                 vein:  [], //负向列队
                 run: false 
@@ -128,14 +127,14 @@ $.define("fx", "css",function(){
             }
         });
     }
-    function eventInterceptor(mix, node, fx, back) {
+    function interceptor(mix, node, fx, back) {
         var array = $.isArray(mix) ? mix : [mix], i = 0, n = array.length;
         for (; i < n; ++i) {
             array[i](node, fx.props, fx, back);
         }
     }
     function animate(node) {//fxs对象类似Deferred，包含两个列队（artery与vein）
-        var fxs = $._data( node,"fx") ,interceptor = eventInterceptor, fx = fxs.artery[0],
+        var fxs = $._data( node,"fx") , fx = fxs.artery[0],
         back, now, isEnd, mix;
         if( isFinite(fx)){ 
             setTimeout(function(){
@@ -162,7 +161,7 @@ $.define("fx", "css",function(){
                         fxs.artery  = fxs.vein = [];//中断全部动画
                         break;
                     case 3:
-                        for(var ii=0,_fx;_fx=fxs.artery[ii++];){
+                        for(var ii=0, _fx; _fx=fxs.artery[ii++];){
                             _fx.gotoEnd = true;//立即完成全部动画
                         }   
                         break;
@@ -171,9 +170,9 @@ $.define("fx", "css",function(){
 
             } else { // 初始化动画
                 mix = config.before;
-                mix && (interceptor(mix, node, fx, back), config.before = 0);
+                mix && (interceptor( mix, node, fx, back ), config.before = 0);
                 fx.render = fxBuilder(node, fxs, fx.props, config); // 创建渲染函数
-                $[config.type]([node], fx.props, fx)
+                $[ config.type ]( [node], fx.props, fx )
                 fx.startTime = now = +new Date;
             }
             isEnd = fx.gotoEnd || (now >= fx.startTime + config.duration);
@@ -182,17 +181,15 @@ $.define("fx", "css",function(){
             if(fx.render === $.noop) {//立即开始下一个动画
                 fxs.artery.shift();
             }
-            if (isEnd) {
-    
-                if(config.type == "hide"){
+            if ( isEnd ) {
+                if( config.type == "hide" ){
                     for(var i in config.orig){//还原为初始状态
-                        $.css(node,i,config.orig[i])
+                        $.css( node, i, config.orig[i] )
                     }
                 }
                 fxs.artery.shift(); // remove current queue
                 mix = config.after;
-                mix && interceptor(mix, node, fx, back);
-                
+                mix && interceptor( mix, node, fx, back );
                 if (!config.back && config.reverse && fxs.vein.length) {
                     fxs.artery = fxs.vein.reverse().concat(fxs.artery); // inject reverse queue
                     fxs.vein = []; // clear reverse qeueue
@@ -206,9 +203,9 @@ $.define("fx", "css",function(){
     }
     //   https://bugs.webkit.org/show_bug.cgi?id=74606
     var rspecialVal = /show|toggle|hide/;
-    function fxBuilder(node, fxs, props, config){//用于分解属性包中的样式或属性,变成可以计算的因子
+    function fxBuilder( node, fxs, props, config ){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
-        reverseConfig = $.Object.merge( {},config),
+        reverseConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         reverseProps = {};
         reverseConfig.back =  1;
@@ -239,7 +236,7 @@ $.define("fx", "css",function(){
                 easing = arr[1] || easing;//取得第二个值或默认值
             }
             //开始分解结束值to
-            if(type != "color" ){//如果不是颜色，则需判定其有没有单位以及起止值单位不一致的情况
+            if( type != "color" ){//如果不是颜色，则需判定其有没有单位以及起止值单位不一致的情况
                 var parts = rfxnum.exec( val) ,op = (parts[1]||"").charAt(0),
                 to = parseFloat( parts[2]|| 0 ),//确保to为数字
                 unit = parts[3] || ($.cssNumber[ name ] ?  "" : "px");
@@ -291,15 +288,15 @@ $.define("fx", "css",function(){
                     ret +=  $.format('t2d.#{name} = [#{from},#{to}, #{change},"#{easing}"];',hash);
                     break
             }
-            if(type == "color"){
+            if( type == "color" ){
                 from = "rgb("+from.join(",")+")"
             }
             reverseProps[name] = [from , easing];
         }
-        if(transfromChanged){
+        if( transfromChanged ){
             ret += 'adapter.transform.set(node,t2d,isEnd,per);'
         }
-        if (config.chain || config.reverse) {
+        if ( config.chain || config.reverse ) {
             fxs.vein.push({
                 startTime: 0,
                 isEnd: false,
@@ -341,13 +338,13 @@ $.define("fx", "css",function(){
     var casual,casualDoc;
     function callCasual(parent,callback){
         if ( !casual ) {
-            casual = DOC.createElement( "iframe" );
+            casual = document.createElement( "iframe" );
             casual.frameBorder = casual.width = casual.height = 0;
         }
         parent.appendChild(casual);
         if ( !casualDoc || !casual.createElement ) {
             casualDoc = ( casual.contentWindow || casual.contentDocument ).document;
-            casualDoc.write( ( DOC.compatMode === "CSS1Compat" ? "<!doctype html>" : "" ) + "<html><body>" );
+            casualDoc.write( ( document.compatMode === "CSS1Compat" ? "<!doctype html>" : "" ) + "<html><body>" );
             casualDoc.close();
         }
         callback(casualDoc);
@@ -390,8 +387,8 @@ $.define("fx", "css",function(){
     $.mix(cacheDisplay ,blocks);
     function parseDisplay( nodeName ) {
         if ( !cacheDisplay[ nodeName ] ) {
-            var body = DOC.body, elem = DOC.createElement(nodeName);
-            body.appendChild(elem)
+            var body = document.body, elem = document.createElement(nodeName);
+            body.appendChild(elem);
             var display = $.css(elem, "display" );
             body.removeChild(elem);
             // 先尝试连结到当前DOM树去取，但如果此元素的默认样式被污染了，就使用iframe去取
@@ -530,8 +527,7 @@ $.define("fx", "css",function(){
         }
     }
     Object.keys(effects).forEach(function(key){
-        $.fn[key] = function(duration,hash){
-               
+        $.fn[key] = function( duration, hash ){
             return normalizer(this, duration, hash, effects[key]);
         }
     });
@@ -549,15 +545,15 @@ $.define("fx", "css",function(){
             var arr = hash.before =  hash.before || [];
             arr.unshift(before)
         }
-        return Instance.fx(duration, $.mix(hash,effects));
+        return Instance.fx(duration, $.mix(hash, effects));
     }
 
-    "show,hide".replace($.rword,function(name){
-        $.fn[name] = function(duration,hash){
+    "show,hide".replace( $.rword, function( method ){
+        $.fn[ method ] = function( duration, hash ){
             if(!arguments.length){
-                return $[name](this);
+                return $[method](this);
             }else{
-                return normalizer(this, duration, hash, genFx(name, 3));
+                return normalizer(this, duration, hash, genFx(method, 3));
             }
         }
     })
