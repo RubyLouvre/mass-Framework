@@ -28,6 +28,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         tx:  "translateX",
         ty:  "translateY",
         bgc: "backgroundColor",
+        opacity: "opacity",//fix IE
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
     for(var name in shortcuts){
@@ -52,7 +53,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 return name;
             host = host || $.html.style;
             for ( var i = 0, n = prefixes.length; i < n; i++ ) {
-                test = $.String.camelize( prefixes[i] + name )
+                test = $.String.camelize( prefixes[i] + name || "")
                 if( test in host ){
                     return ( cssMap[ name ] = test );
                 }
