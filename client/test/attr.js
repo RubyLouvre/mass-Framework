@@ -1,6 +1,6 @@
 $.define("attr","more/spec,attr",function(){
     var iframe =  $("<iframe id='test_attr' style='display:none;width:0px;height:0px;' src='/test/attr.html' frameBorder=0  />" ).appendTo("body");//
-    window.attrTestCall = function(){
+    window.attrTestCall2 = function(){
         $.fixture("属性操作模块-attr",{
             "$.fn.attr":function(){
                 var idoc = iframe.contents()[0];

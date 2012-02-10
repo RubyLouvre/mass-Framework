@@ -3,7 +3,7 @@ $.define("attr","support,node", function( support ){
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
-    rspaces = /\s+/,
+    rnospaces = /\S+/g
     valOne = {
         "SELECT": "select",
         "OPTION": "option",
@@ -25,7 +25,7 @@ $.define("attr","support,node", function( support ){
                         if ( !el.className ) {
                             el.className = item;
                         } else {
-                            var a = (el.className+" "+item).split( rspaces );
+                            var a = (el.className+" "+item).match( rnospaces );
                             a.sort();
                             for (var j = a.length - 1; j > 0; --j)
                                 if (a[j] == a[j - 1])
@@ -49,15 +49,15 @@ $.define("attr","support,node", function( support ){
         //如果不传入类名,则去掉所有类名,允许传入多个类名
         removeClass: function( item ) {
             if ( (item && typeof item === "string") || item === void 0 ) {
-                var classNames = ( item || "" ).split( rspaces );
+                var classNames = ( item || "" ).match( rnospaces );
                 for ( var i = 0, node; node = this[ i++ ]; ) {
                     if ( node.nodeType === 1 && node.className ) {
                         if ( item ) {
-                            var className = (" " + node.className + " ").replace( rspaces, " " );
+                            var set = " " + node.className.match( rnospaces ).join(" ") + " ";
                             for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
-                                className = className.replace(" " + classNames[c] + " ", " ");
+                                set = set.replace(" " + classNames[c] + " ", " ");
                             }
-                            node.className = className.trim();
+                            node.className = set.slice( 1, set.length - 1 );
                         } else {
                             node.className = "";
                         }
@@ -68,7 +68,7 @@ $.define("attr","support,node", function( support ){
         },
         //如果存在（不存在）就删除（添加）一个类。对所有匹配元素进行操作。
         toggleClass: function( item ){
-            var classNames = item.split( rspaces ), type = typeof item, className, i;
+            var classNames = item.match( rnospaces ), type = typeof item, className, i;
             return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
@@ -90,7 +90,7 @@ $.define("attr","support,node", function( support ){
         replaceClass: function( old, neo ){
             for ( var i = 0, node; node = this[ i++ ]; ) {
                 if ( node.nodeType === 1 && node.className ) {
-                    var arr = node.className.split(rspaces), arr2 = [];
+                    var arr = node.className.match( rnospaces ), arr2 = [];
                     for ( var j = 0; j < arr.length; j++ ) {
                         arr2.push( arr[j] != old ? arr[j] : neo );
                     }
