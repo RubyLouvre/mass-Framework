@@ -1,7 +1,6 @@
 $.define("attr","support,node", function( support ){
     $.log("已加载attr模块")
-    var rclass = /(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,
-    rreturn = /\r/g,
+    var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
     rspaces = /\s+/,
@@ -26,7 +25,12 @@ $.define("attr","support,node", function( support ){
                         if ( !el.className ) {
                             el.className = item;
                         } else {
-                            el.className = ( el.className +" "+item ).replace( rclass,"" );
+                            var a = (el.className+" "+item).split( rspaces );
+                            a.sort();
+                            for (var j = a.length - 1; j > 0; --j)
+                                if (a[j] == a[j - 1])
+                                    a.splice(j, 1);
+                            el.className = a.join(' ');
                         }
                     }
                 }
