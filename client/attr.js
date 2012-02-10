@@ -68,7 +68,7 @@ $.define("attr","support,node", function( support ){
         },
         //如果存在（不存在）就删除（添加）一个类。对所有匹配元素进行操作。
         toggleClass: function( item ){
-            var classNames = item.match( rnospaces ), type = typeof item, className, i;
+            var type = typeof item , classNames = type === "string" && item.match( rnospaces ) || [],  className, i;
             return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
