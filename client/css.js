@@ -50,7 +50,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: function( name, host, test ){
             if( cssMap[ name ] )
-                return name;
+                return cssMap[ name ];
             host = host || $.html.style;
             for ( var i = 0, n = prefixes.length; i < n; i++ ) {
                 test = $.String.camelize( prefixes[i] + name || "")
