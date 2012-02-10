@@ -131,14 +131,14 @@ $.define("fx", "css",function(){
             }
         });
     }
-    function eventInterceptor(mix, node, fx, back) {
-        var array = Array.isArray(mix) ? mix : [mix], i = 0, n = array.length;
+    function interceptor(mix, node, fx, back) {
+        var array = Array.isArray(mix) ? mix : [ mix ], i = 0, n = array.length;
         for (; i < n; ++i) {
             array[i](node, fx.props, fx, back);
         }
     }
     function animate(node) {//fxs对象类似Deferred，包含两个列队（artery与vein）
-        var fxs = $._data( node,"fx") ,interceptor = eventInterceptor, fx = fxs.artery[0],
+        var fxs = $._data( node,"fx") , fx = fxs.artery[0],
         back, now, isEnd, mix;
         if( isFinite(fx)){
             setTimeout(function(){
@@ -208,9 +208,9 @@ $.define("fx", "css",function(){
         return fxs.run; // 调用 clearInterval方法，中止定时器
     }
     var rspecialVal = /show|toggle|hide/;
-    function fxBuilder(node, fxs, props, config){//用于分解属性包中的样式或属性,变成可以计算的因子
+    function fxBuilder( node, fxs, props, config ){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
-        reverseConfig = $.Object.merge.call( {},config),
+        reverseConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         reverseProps = {};
         reverseConfig.back =  1;
@@ -321,7 +321,7 @@ $.define("fx", "css",function(){
         }
     }
 
-    var cacheColor = {
+    var colorMap = {
         "black":[0,0,0],
         "silver":[192,192,192],
         "gray":[128,128,128],
@@ -365,25 +365,25 @@ $.define("fx", "css",function(){
     }
     function color2array(val) {//将字符串变成数组
         var color = val.toLowerCase(),ret = [];
-        if (cacheColor[color]) {
-            return cacheColor[color];
+        if (colorMap[color]) {
+            return colorMap[color];
         }
         if (color.indexOf("rgb") == 0) {
             var match = color.match(/(\d+%?)/g),
             factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
-            return (cacheColor[color] = [ parseInt(match[0]) * factor , parseInt(match[1]) * factor, parseInt(match[2]) * factor ]);
+            return (colorMap[color] = [ parseInt(match[0]) * factor , parseInt(match[1]) * factor, parseInt(match[2]) * factor ]);
         } else if (color.charAt(0) == '#') {
             if (color.length == 4)
                 color = color.replace(/([^#])/g, '$1$1');
             color.replace(/\w{2}/g,function(a){
                 ret.push( parseInt(a, 16))
             });
-            return (cacheColor[color] = ret);
+            return (colorMap[color] = ret);
         }
-        if(cacheColor.VBArray){
-            return (cacheColor[color] = parseColor(color));
+        if(window.VBArray){
+            return (colorMap[color] = parseColor(color));
         }
-        return cacheColor.white;
+        return colorMap.white;
     }
 
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
