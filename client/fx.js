@@ -3,7 +3,7 @@
 //==========================================
 $.define("fx", "css",function(){
     //  $.log("已加载fx模块");
-    var global = this, DOC = global.document, types = {
+    var types = {
         color:/color/i,
         transform:/rotate|scaleX|scaleY|translateX|translateY/i,
         scroll:/scroll/i,
@@ -20,7 +20,7 @@ $.define("fx", "css",function(){
                 return isNaN(a) ? 0 : a;
             }
         },
-        type:function (attr){
+        type: function (attr){//  用于取得适配器的类型
             for(var i in types){
                 if(types[i].test(attr)){
                     return i;
@@ -207,53 +207,56 @@ $.define("fx", "css",function(){
         }
         return fxs.run; // 调用 clearInterval方法，中止定时器
     }
-    var rspecialVal = /show|toggle|hide/;
+
     function fxBuilder( node, fxs, props, config ){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
         reverseConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         reverseProps = {};
         reverseConfig.back =  1;
-        var orig = config.orig = {}
+        var orig = config.orig = {}, parts, to, from, val, unit, easing, op, type
         for(var name in props){
-            var val = props[name] //取得结束值
-            if(val == undefined){
+            val = props[name] //取得结束值
+            if(typeof val == null){
                 continue;
             }
-            var easing = config.easing;//公共缓动公式
-            var type = $.fxAdapter.type(name);
-            var adapter = $.fxAdapter[type];
-            var from = adapter.get(node,name);
-            if(rspecialVal.test(val) ){//如果值为show hide toggle
-                if(val == "show" || (val == "toggle" && $._isHide(node))){
-                    val = $._data(node,"old"+name) || from;
-                    config.type = "show"
-                    from = 0;
-                }else {//hide
-                    orig[name] =  $._data(node,"old"+name,from);
-                    config.type = "hide"
-                    val = 0;
-                }
-            }else if(Array.isArray(val)){
-                var arr = val;
-                val = arr[0];//取得第一个值
-                easing = arr[1] || easing;//取得第二个值或默认值
+            easing = config.easing;//公共缓动公式
+            type = $.fxAdapter.type(name);
+            from = $.fxAdapter[ type ].get(node,name);
+            if( val === "show" || (val === "toggle" && $._isHide(node))){
+                val = $._data(node,"old"+name) || from;
+                config.type = "show"
+                from = 0;
+            }else if(val === "hide" ){//hide
+                orig[name] =  $._data(node,"old"+name,from);
+                config.type = "hide"
+                val = 0;
+            }else if(typeof val === "object" && isFinite(val.length)){// array
+                parts = val;
+                val = parts[0];//取得第一个值
+                easing = parts[1] || easing;//取得第二个值或默认值
             }
             //开始分解结束值to
             if(type != "color" ){//如果不是颜色，则需判定其有没有单位以及起止值单位不一致的情况
-                var parts = rfxnum.exec( val) ,op = (parts[1]||"").charAt(0),
-                to = parseFloat( parts[2]|| 0 ),//确保to为数字
-                unit = parts[3] || ($.cssNumber[ name ] ?  "" : "px");
                 from = from == "auto" ? 0 : parseFloat(from)//确保from为数字
-                if ((op == "+" || op == "-") && unit && unit !== "px" ) {
-                    $.css(node, name, (to || 1) + unit);
-                    from = ((to || 1) / parseFloat($.css(node,name))) * from;
-                    $.css( node, name, from + unit);
+                if(parts = rfxnum.exec( val)){
+                    to = parseFloat( parts[2] ),//确保to为数字
+                    unit = parts[3] 
+                    if(parts[1]){
+                        op = parts[1].charAt(0)
+                        if ((op == "+" || op == "-") && unit && unit !== "px" ) {
+                            $.css(node, name, (to || 1) + unit);
+                            from = ((to || 1) / parseFloat($.css(node,name))) * from;
+                            $.css( node, name, from + unit);
+                        }
+                        if(op){//处理+=,-= \= *=
+                            to = eval(from+op+to);
+                        }
+                    }
+                    var change = to - from;
+                }else{
+                    continue;
                 }
-                if(op){//处理+=,-= \= *=
-                    to = eval(from+op+to);
-                }
-                var change = to - from;
             }else{
                 from = color2array(from);
                 to   = color2array(val);
@@ -261,31 +264,32 @@ $.define("fx", "css",function(){
                     return end - from[i]
                 });
             }
+
             if(from +"" === to +""){//不处理初止值都一样的样式与属性
                 continue;
             }
             var hash = {
-                name:name,
-                to:to,
-                type:type,
-                from:from ,
-                change:change,
-                easing:easing,
-                unit:unit
+                name: name,
+                to: to,
+                from: from ,
+                change: change,
+                type: type,
+                easing: easing,
+                unit: unit
             };
-            switch(type){
+            switch( type ){
                 case "_default":
                     if(name == "opacity" && !$.support.cssOpacity){
-                        ret += $.format('$.css(node,"opacity", (isEnd ? #{to} : _defaultTween(#{from},#{change},"#{easing}", per )));;',hash);
+                        ret += $.format('$.css(node,"opacity", (isEnd ? #{to} : _defaultTween(#{from},#{change},"#{easing}", per )));;', hash);
                     }else{
-                        ret += $.format('style.#{name} = ((isEnd ? #{to} : _defaultTween(#{from}, #{change},"#{easing}",per )))+"#{unit}";',hash);
+                        ret += $.format('style.#{name} = ((isEnd ? #{to} : _defaultTween(#{from}, #{change},"#{easing}",per )))+"#{unit}";', hash);
                     }
                     break;
                 case "scroll":
                     ret += $.format('node.#{name} = (isEnd ? #{to}: _defaultTween(#{from}, #{change},"#{easing}",per ));',hash);
                     break;
                 case "color":
-                    ret += $.format('style.#{name} = (isEnd ? "rgb(#{to})" : adapter.#{type}.tween(#{from}, #{change},"#{easing}",per));',hash);
+                    ret += $.format('style.#{name} = (isEnd ? "rgb(#{to})" : adapter.#{type}.tween(#{from}, #{change},"#{easing}",per));', hash);
                     break;
                 case "transform":
                     transfromChanged++
@@ -298,7 +302,7 @@ $.define("fx", "css",function(){
             reverseProps[name] = [from , easing];
         }
         if(transfromChanged){
-            ret += 'adapter.transform.set(node,t2d,isEnd,per);'
+            ret += 'adapter.transform.set(node, t2d, isEnd, per);'
         }
         if (config.chain || config.reverse) {
             fxs.vein.push({
@@ -342,13 +346,13 @@ $.define("fx", "css",function(){
     var casual,casualDoc;
     function callCasual(parent,callback){
         if ( !casual ) {
-            casual = DOC.createElement( "iframe" );
+            casual = document.createElement( "iframe" );
             casual.frameBorder = casual.width = casual.height = 0;
         }
         parent.appendChild(casual);
         if ( !casualDoc || !casual.createElement ) {
             casualDoc = ( casual.contentWindow || casual.contentDocument ).document;
-            casualDoc.write( ( DOC.compatMode === "CSS1Compat" ? "<!doctype html>" : "" ) + "<html><body>" );
+            casualDoc.write( ( document.compatMode === "CSS1Compat" ? "<!doctype html>" : "" ) + "<html><body>" );
             casualDoc.close();
         }
         callback(casualDoc);
@@ -391,7 +395,7 @@ $.define("fx", "css",function(){
     $.mix(cacheDisplay ,blocks);
     function parseDisplay( nodeName ) {
         if ( !cacheDisplay[ nodeName ] ) {
-            var body = DOC.body, elem = DOC.createElement(nodeName);
+            var body = document.body, elem = document.createElement(nodeName);
             body.appendChild(elem)
             var display = $.css(elem, "display" );
             body.removeChild(elem);

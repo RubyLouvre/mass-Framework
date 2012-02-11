@@ -73,7 +73,7 @@
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
-        "@debug": true,
+        "@debug": false,
         "@target": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
@@ -268,9 +268,9 @@
             return fn;
         },
         unbind: w3c ? function( el, type, fn, phase ){
-            el.removeEventListener( type, fn, !!phase );
+            el.removeEventListener( type, fn || $.noop, !!phase );
         } : function( el, type, fn ){
-            el.detachEvent( "on"+type, fn );
+            el.detachEvent( "on"+type, fn || $.noop );
         },
         //请求模块
         require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
@@ -916,23 +916,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         escapeRegExp: function( target ){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
-        //将字符串中的html代码转换为可以直接显示的格式,
-        escapeHTML: function( target ){
-            return target.replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').
-            replace(/</g, '&lt;').
-            replace(/>/g, '&gt;')
-            replace(/"/g, '&quot;').
-            replace(/'/g, '&#x27;').
-            replace(/\//g,'&#x2F;');
-        },
-        unescapeHTML: function( target ){
-            return target.replace(/&lt;/g,'<').
-            replace(/&gt;/g,'>').
-            replace(/&quot;/g,'"').
-            replace(/&#x27;/g,"'").
-            replace(/&#x2F;/g,"//").
-            replace(/&amp;/g,'&')
-        },
+
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
         padLeft: function( target, digits, filling, radix ){
@@ -3475,6 +3459,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         tx:  "translateX",
         ty:  "translateY",
         bgc: "backgroundColor",
+        opacity: "opacity",//fix IE
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
     for(var name in shortcuts){
@@ -3496,10 +3481,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: function( name, host, test ){
             if( cssMap[ name ] )
-                return name;
+                return cssMap[ name ];
             host = host || $.html.style;
             for ( var i = 0, n = prefixes.length; i < n; i++ ) {
-                test = $.String.camelize( prefixes[i] + name )
+                test = $.String.camelize( prefixes[i] + name || "")
                 if( test in host ){
                     return ( cssMap[ name ] = test );
                 }
@@ -4030,11 +4015,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 
 $.define("attr","support,node", function( support ){
     $.log("已加载attr模块")
-    var rclass = /(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,
-    rreturn = /\r/g,
+    var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
-    rspaces = /\s+/,
+    rnospaces = /\S+/g
     valOne = {
         "SELECT": "select",
         "OPTION": "option",
@@ -4056,7 +4040,12 @@ $.define("attr","support,node", function( support ){
                         if ( !el.className ) {
                             el.className = item;
                         } else {
-                            el.className = ( el.className +" "+item ).replace( rclass,"" );
+                            var a = (el.className+" "+item).match( rnospaces );
+                            a.sort();
+                            for (var j = a.length - 1; j > 0; --j)
+                                if (a[j] == a[j - 1])
+                                    a.splice(j, 1);
+                            el.className = a.join(' ');
                         }
                     }
                 }
@@ -4075,15 +4064,15 @@ $.define("attr","support,node", function( support ){
         //如果不传入类名,则去掉所有类名,允许传入多个类名
         removeClass: function( item ) {
             if ( (item && typeof item === "string") || item === void 0 ) {
-                var classNames = ( item || "" ).split( rspaces );
+                var classNames = ( item || "" ).match( rnospaces );
                 for ( var i = 0, node; node = this[ i++ ]; ) {
                     if ( node.nodeType === 1 && node.className ) {
                         if ( item ) {
-                            var className = (" " + node.className + " ").replace( rspaces, " " );
+                            var set = " " + node.className.match( rnospaces ).join(" ") + " ";
                             for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
-                                className = className.replace(" " + classNames[c] + " ", " ");
+                                set = set.replace(" " + classNames[c] + " ", " ");
                             }
-                            node.className = className.trim();
+                            node.className = set.slice( 1, set.length - 1 );
                         } else {
                             node.className = "";
                         }
@@ -4094,7 +4083,7 @@ $.define("attr","support,node", function( support ){
         },
         //如果存在（不存在）就删除（添加）一个类。对所有匹配元素进行操作。
         toggleClass: function( item ){
-            var classNames = item.split( rspaces ), type = typeof item, className, i;
+            var type = typeof item , classNames = type === "string" && item.match( rnospaces ) || [],  className, i;
             return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
@@ -4116,7 +4105,7 @@ $.define("attr","support,node", function( support ){
         replaceClass: function( old, neo ){
             for ( var i = 0, node; node = this[ i++ ]; ) {
                 if ( node.nodeType === 1 && node.className ) {
-                    var arr = node.className.split(rspaces), arr2 = [];
+                    var arr = node.className.match( rnospaces ), arr2 = [];
                     for ( var j = 0; j < arr.length; j++ ) {
                         arr2.push( arr[j] != old ? arr[j] : neo );
                     }
@@ -4566,7 +4555,7 @@ $.define("target","data", function(){
                 }
                 if ( DOM && (queue.length === 0 && origCount !== queue.length) ) {//如果在回调队列的长度发生变化时才进行此分支
                     if ( !adapter.teardown || adapter.teardown( target, selector, origType, fn ) === false ) {
-                        $.unbind( target, type, $._data(target,"handle") );
+                        $.unbind( target, type, $._data(target,"callback") );
                     }
                     delete events[ type ];
                 }
@@ -4913,7 +4902,7 @@ $.define("event", "node,target",function(){
                     }));
                 },
                 teardown: function(){
-                    $.unbind(this, fix, $._data( orig+"_handle" ) || $.noop);
+                    $.unbind( this, fix, $._data( orig+"_handle" ) );
                 }
             };
         });
@@ -5010,8 +4999,8 @@ $.define("event", "node,target",function(){
                     }
                 }),
                 teardown: delegate(function( src, els, i ){
-                    $.unbind( src, "beforeactive", $._data( src, "_beforeactivate") || $.noop );
-                    $.unbind( src, "change", $._data(src, "_change_fire") || $.noop );
+                    $.unbind( src, "beforeactive", $._data( src, "_beforeactivate") );
+                    $.unbind( src, "change", $._data(src, "_change_fire")  );
                     els = $.removeData( src, "subscriber", true ) || {};
                     for( i in els){
                         $.unbind( els[i],"._change" );
@@ -5187,17 +5176,17 @@ $.define("fx", "css",function(){
     rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
     var adapter = $.fxAdapter = {
         _default:{
-            get: function( el, prop ) {
-                return $.css( el, prop );
+            get:function(el, prop) {
+                return $.css(el,prop);
             },
-            tween: function( form, change, name, per ) {
-                var a = ( form + change * $.easing[name]( per ) ).toFixed(3);
+            tween :function(form,change,name,per) {
+                var a = (form + change * $.easing[name](per)).toFixed(3);
                 return isNaN(a) ? 0 : a;
             }
         },
-        type:function ( attr ){
-            for ( var i in types ){
-                if( types[i].test(attr) ){
+        type:function (attr){
+            for(var i in types){
+                if(types[i].test(attr)){
                     return i;
                 }
             }
@@ -5206,33 +5195,34 @@ $.define("fx", "css",function(){
     }
 
     var tween = adapter._default.tween;
-    $.mix( adapter, {
-        scroll: {
-            get: function( el, prop ){
-                return el[ prop ];
+    $.mix(adapter,{
+        scroll : {
+            get: function(el, prop){
+                return el[prop];
             },
             tween: tween
         },
-        transform: {
-            get: function( el, prop ){
+        transform:{
+            get: function(el, prop){
                 return $.transform(el)[prop]
             },
-            set: function( el, t2d, isEnd, per ){
-                var obj = {};
-                for ( var name in t2d ){
-                    obj[name] = isEnd ? t2d[name][1] : tween( t2d[name][0], t2d[name][2], t2d[name][3], per );
+            set:function(el,t2d,isEnd,per){
+                var obj = {}
+
+                for(var name in t2d){
+                    obj[name] = isEnd ? t2d[name][1] : tween(t2d[name][0],t2d[name][2],t2d[name][3],per);
                 }
-                $.transform( el, obj );
+                $.transform(el,obj);
             }
         },
         color : {
-            get: function( el, prop ){
+            get:function(el,prop){
                 return  $.css(el,prop);
             },
-            tween: function(f0, f1, f2, c0, c1, c2, name, per, i){
+            tween:function(f0,f1,f2,c0,c1,c2,name,per,i){
                 var delta = $.easing[name](per), ret = [];
-                for( i = 0;i < 3; i++){
-                    ret[i] = Math.max( Math.min((arguments[i] +arguments[i+3] * delta)|0, 255), 0);
+                for(i = 0;i < 3;i++){
+                    ret[i] = Math.max(Math.min((arguments[i] +arguments[i+3] * delta)|0, 255), 0);
                 }
                 return "rgb("+ret+")";
             }
@@ -5260,19 +5250,22 @@ $.define("fx", "css",function(){
         }
         nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
     }
-        
-    var callbacks = $.oneObject("before,after");
-    var keyworks  = $.oneObject("easing,reverse,chain,back");
+
+    var keyworks  = $.oneObject("easing,reverse,chain,back");//playback
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象fxs
     //fxs对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function(duration, hash){
-        var props = hash ||{}, config = {};
+        var props = hash ||{}, config = {}, p
         if(typeof duration === "funciton"){
             props.after = duration
             duration = null;
         }
         for(var name in props){
-            if(name in callbacks){
+            p = $.cssName(name) || name;
+            if(name != p){
+                props[p] = props[name];
+                delete props[name];
+            }else if(typeof props[name] === "function"){
                 config[name] = [].concat(props[name]);
                 delete props[name]
             }else if(name in keyworks){
@@ -5280,17 +5273,16 @@ $.define("fx", "css",function(){
                 delete props[name];
             }
         }
-
         var easing = (config.easing || "swing").toLowerCase() ;
         config.easing = $.easing[easing] ? easing : "swing";
         config.duration = duration || 500;
         config.type = "noop";
-           
+
         return this.each(function(node){
             var fxs = $._data(node,"fx") || $._data( node,"fx",{
                 artery:[], //正向列队
                 vein:  [], //负向列队
-                run: false 
+                run: false
             });
             fxs.artery.push({//fx对象
                 startTime:  0,//timestamp
@@ -5303,16 +5295,16 @@ $.define("fx", "css",function(){
             }
         });
     }
-    function eventInterceptor(mix, node, fx, back) {
-        var array = $.isArray(mix) ? mix : [mix], i = 0, n = array.length;
+    function interceptor(mix, node, fx, back) {
+        var array = Array.isArray(mix) ? mix : [ mix ], i = 0, n = array.length;
         for (; i < n; ++i) {
             array[i](node, fx.props, fx, back);
         }
     }
     function animate(node) {//fxs对象类似Deferred，包含两个列队（artery与vein）
-        var fxs = $._data( node,"fx") ,interceptor = eventInterceptor, fx = fxs.artery[0],
+        var fxs = $._data( node,"fx") , fx = fxs.artery[0],
         back, now, isEnd, mix;
-        if( isFinite(fx)){ 
+        if( isFinite(fx)){
             setTimeout(function(){
                 fxs.artery.shift();
                 fxs.run = heartbeat( node);
@@ -5331,7 +5323,7 @@ $.define("fx", "css",function(){
                         fx.render = $.noop;//中断当前动画，继续下一个动画
                         break;
                     case 1:
-                        fx.gotoEnd = true;//立即跳到最后一帧，继续下一个动画   
+                        fx.gotoEnd = true;//立即跳到最后一帧，继续下一个动画
                         break;
                     case 2:
                         fxs.artery  = fxs.vein = [];//中断全部动画
@@ -5339,7 +5331,7 @@ $.define("fx", "css",function(){
                     case 3:
                         for(var ii=0,_fx;_fx=fxs.artery[ii++];){
                             _fx.gotoEnd = true;//立即完成全部动画
-                        }   
+                        }
                         break;
                 }
                 delete fxs.stopCode;
@@ -5358,7 +5350,7 @@ $.define("fx", "css",function(){
                 fxs.artery.shift();
             }
             if (isEnd) {
-    
+
                 if(config.type == "hide"){
                     for(var i in config.orig){//还原为初始状态
                         $.css(node,i,config.orig[i])
@@ -5367,7 +5359,7 @@ $.define("fx", "css",function(){
                 fxs.artery.shift(); // remove current queue
                 mix = config.after;
                 mix && interceptor(mix, node, fx, back);
-                
+
                 if (!config.back && config.reverse && fxs.vein.length) {
                     fxs.artery = fxs.vein.reverse().concat(fxs.artery); // inject reverse queue
                     fxs.vein = []; // clear reverse qeueue
@@ -5379,18 +5371,16 @@ $.define("fx", "css",function(){
         }
         return fxs.run; // 调用 clearInterval方法，中止定时器
     }
-    //   https://bugs.webkit.org/show_bug.cgi?id=74606
     var rspecialVal = /show|toggle|hide/;
-    function fxBuilder(node, fxs, props, config){//用于分解属性包中的样式或属性,变成可以计算的因子
+    function fxBuilder( node, fxs, props, config ){//用于分解属性包中的样式或属性,变成可以计算的因子
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
-        reverseConfig = $.Object.merge( {},config),
+        reverseConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         reverseProps = {};
         reverseConfig.back =  1;
         var orig = config.orig = {}
-        for(var p in props){
-            var name = $.cssName(p);//将属性名转换为驼峰风格
-            var val =  props[name] = props[p];//取得结束值
+        for(var name in props){
+            var val = props[name] //取得结束值
             if(val == undefined){
                 continue;
             }
@@ -5435,7 +5425,7 @@ $.define("fx", "css",function(){
                     return end - from[i]
                 });
             }
-            if(from +"" === to +""){//不处理初止值都一样的样式与属性      
+            if(from +"" === to +""){//不处理初止值都一样的样式与属性
                 continue;
             }
             var hash = {
@@ -5495,7 +5485,7 @@ $.define("fx", "css",function(){
         }
     }
 
-    var cacheColor = {
+    var colorMap = {
         "black":[0,0,0],
         "silver":[192,192,192],
         "gray":[128,128,128],
@@ -5530,7 +5520,7 @@ $.define("fx", "css",function(){
     }
     function parseColor(color) {
         var value;
-        callCasual($.html, function(doc){
+        callCasual( $.html, function(doc){
             var range = doc.body.createTextRange();
             doc.body.style.color = color;
             value = range.queryCommandValue("ForeColor");
@@ -5539,25 +5529,25 @@ $.define("fx", "css",function(){
     }
     function color2array(val) {//将字符串变成数组
         var color = val.toLowerCase(),ret = [];
-        if (cacheColor[color]) {
-            return cacheColor[color];
+        if (colorMap[color]) {
+            return colorMap[color];
         }
         if (color.indexOf("rgb") == 0) {
             var match = color.match(/(\d+%?)/g),
             factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
-            return (cacheColor[color] = [ parseInt(match[0]) * factor , parseInt(match[1]) * factor, parseInt(match[2]) * factor ]);
+            return (colorMap[color] = [ parseInt(match[0]) * factor , parseInt(match[1]) * factor, parseInt(match[2]) * factor ]);
         } else if (color.charAt(0) == '#') {
             if (color.length == 4)
                 color = color.replace(/([^#])/g, '$1$1');
             color.replace(/\w{2}/g,function(a){
                 ret.push( parseInt(a, 16))
             });
-            return (cacheColor[color] = ret);
+            return (colorMap[color] = ret);
         }
-        if(cacheColor.VBArray){
-            return (cacheColor[color] = parseColor(color));
+        if(window.VBArray){
+            return (colorMap[color] = parseColor(color));
         }
-        return cacheColor.white;
+        return colorMap.white;
     }
 
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
@@ -5584,7 +5574,7 @@ $.define("fx", "css",function(){
     //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
     //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
     //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
-    $.mix($, {
+    $.mix( $, {
         _isHide : function(node) {
             var width = node.offsetWidth,
             height = node.offsetHeight;
@@ -5637,7 +5627,7 @@ $.define("fx", "css",function(){
                         after.unshift(function(node,props,config){
                             node.style.display = "none";
                             node.style.visibility = "hidden";
-                            if ( config.overflow != null && !$.support.keepSize ) {
+                            if ( config.overflow != null && !$.support.keepSize  ) {
                                 [ "", "X", "Y" ].forEach(function (postfix,index) {
                                     node.style[ "overflow" + postfix ] = config.overflow[index]
                                 });
@@ -5664,8 +5654,8 @@ $.define("fx", "css",function(){
             }
         });
     }
-        
-    // 0 1 
+
+    // 0 1
     $.fn.delay = function(ms){
         return this.each(function(node){
             var fxs = $._data(node,"fx") || $._data( node,"fx",{
@@ -5689,7 +5679,7 @@ $.define("fx", "css",function(){
         });
         return obj;
     }
-        
+
     var effects = {
         slideDown: genFx("show", 1),
         slideUp: genFx("hide", 1),
@@ -5706,7 +5696,7 @@ $.define("fx", "css",function(){
     }
     Object.keys(effects).forEach(function(key){
         $.fn[key] = function(duration,hash){
-               
+
             return normalizer(this, duration, hash, effects[key]);
         }
     });
@@ -5727,12 +5717,12 @@ $.define("fx", "css",function(){
         return Instance.fx(duration, $.mix(hash,effects));
     }
 
-    "show,hide".replace($.rword,function(name){
-        $.fn[name] = function(duration,hash){
+    "show,hide".replace( $.rword, function( method ){
+        $.fn[ method ] = function(duration,hash){
             if(!arguments.length){
-                return $[name](this);
+                return $[ method ](this);
             }else{
-                return normalizer(this, duration, hash, genFx(name, 3));
+                return normalizer(this, duration, hash, genFx( method , 3));
             }
         }
     })
@@ -5780,7 +5770,7 @@ $.define("fx", "css",function(){
 });
 
 
-//2011.10.10 改进$.fn.stop
+//2011.10.10 改进dom.fn.stop
 //2011.10.20 改进所有特效函数，让传参更加灵活
 //2011.10.21 改进内部的normalizer函数
 
@@ -5799,8 +5789,6 @@ $.define("fx", "css",function(){
 //http://wonderfl.net/search?page=2&q=DoTweener
 //http://www.phoboslab.org/ztype/
 //http://kangax.github.com/fabric.js/kitchensink/
-
-
 
 })( this, this.document );
 /**
