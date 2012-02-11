@@ -90,29 +90,29 @@ $.define("fx", "css",function(){
     var keyworks  = $.oneObject("easing,reverse,chain,back");//playback
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象fxs
     //fxs对象包含两个列队，每个列队装载着不同的特效对象
-    $.fn.fx = function(duration, hash){
+    $.fn.fx = function( duration, hash ){
         var props = hash ||{}, config = {}, p
         if(typeof duration === "funciton"){
             props.after = duration
             duration = null;
         }
-        for(var name in props){
+        for( var name in props){
             p = $.cssName(name) || name;
-            if(name != p){
-                props[p] = props[name];
-                delete props[name];
-            }else if(typeof props[name] === "function"){
-                config[name] = [].concat(props[name]);
-                delete props[name]
-            }else if(name in keyworks){
-                config[name] = props[name];
-                delete props[name];
+            if( name != p ){
+                props[ p ] = props[ name ];
+                delete props[ name ];
+            }else if( typeof props[ name ] === "function"){
+                config[ name ] = [].concat( props[ name ] );
+                delete props[ name ];
+            }else if( name in keyworks ){
+                config[ name ] = props[ name ];
+                delete props[ name ];
             }
         }
         var easing = (config.easing || "swing").toLowerCase() ;
         config.easing = $.easing[easing] ? easing : "swing";
         config.duration = duration || 500;
-        config.type = "noop";
+        config.method = "noop";
 
         return this.each(function(node){
             var fxs = $._data(node,"fx") || $._data( node,"fx",{
@@ -176,7 +176,7 @@ $.define("fx", "css",function(){
                 mix = config.before;
                 mix && (interceptor(mix, node, fx, back), config.before = 0);
                 fx.render = fxBuilder(node, fxs, fx.props, config); // 创建渲染函数
-                $[config.type]([node], fx.props, fx)
+                $[config.method]([node], fx.props, fx)
                 fx.startTime = now = +new Date;
             }
             isEnd = fx.gotoEnd || (now >= fx.startTime + config.duration);
@@ -187,7 +187,7 @@ $.define("fx", "css",function(){
             }
             if (isEnd) {
 
-                if(config.type == "hide"){
+                if(config.method == "hide"){
                     for(var i in config.orig){//还原为初始状态
                         $.css(node,i,config.orig[i])
                     }
@@ -198,6 +198,7 @@ $.define("fx", "css",function(){
 
                 if (!config.back && config.reverse && fxs.vein.length) {
                     fxs.artery = fxs.vein.reverse().concat(fxs.artery); // inject reverse queue
+
                     fxs.vein = []; // clear reverse qeueue
                 }
                 if (!fxs.artery.length) {
@@ -225,11 +226,11 @@ $.define("fx", "css",function(){
             from = $.fxAdapter[ type ].get(node,name);
             if( val === "show" || (val === "toggle" && $._isHide(node))){
                 val = $._data(node,"old"+name) || from;
-                config.type = "show"
+                config.method = "show"
                 from = 0;
             }else if(val === "hide" ){//hide
                 orig[name] =  $._data(node,"old"+name,from);
-                config.type = "hide"
+                config.method = "hide"
                 val = 0;
             }else if(typeof val === "object" && isFinite(val.length)){// array
                 parts = val;
@@ -304,6 +305,7 @@ $.define("fx", "css",function(){
         if(transfromChanged){
             ret += 'adapter.transform.set(node, t2d, isEnd, per);'
         }
+     
         if (config.chain || config.reverse) {
             fxs.vein.push({
                 startTime: 0,
@@ -397,7 +399,7 @@ $.define("fx", "css",function(){
         if ( !cacheDisplay[ nodeName ] ) {
             var body = document.body, elem = document.createElement(nodeName);
             body.appendChild(elem)
-            var display = $.css(elem, "display" );
+            var display = $.css( elem, "display" );
             body.removeChild(elem);
             // 先尝试连结到当前DOM树去取，但如果此元素的默认样式被污染了，就使用iframe去取
             if ( display === "none" || display === "" ) {
