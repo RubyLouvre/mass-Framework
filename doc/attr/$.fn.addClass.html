@@ -79,7 +79,7 @@
                         if ( !el.className ) {
                             el.className = item;
                         } else {
-                            var a = (el.className+" "+cls).split(/\s+/);
+                            var a = (el.className+" "+cls).match(/\S+/g );
                             a.sort();
                             for (var i = a.length - 1; i > 0; --i)
                                 if (a[i] == a[i - 1])
