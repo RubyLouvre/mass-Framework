@@ -449,9 +449,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 $.data( el, key, item );
             })
         },
-        removeData: function( key ) {
+        removeData: function( key, pv ) {
             return this.each(function() {
-                $.removeData( this, key );
+                $.removeData( this, key, pv );
             });
         }
     });
