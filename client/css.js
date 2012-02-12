@@ -560,6 +560,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             });
         };
     });
+    var pseudoAdapter = window.VBArray && $.query && $.query.pseudoAdapter
+    if(pseudoAdapter){
+        pseudoAdapter.hidden = function( el ) {
+            return el.type === "hidden" || $.css( el, "display") === "none" ;
+        }
+    }
 
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
