@@ -13,6 +13,7 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <style type="text/css">
             .box {
+                position:absolute;
                 color: white;
                 background-color: #333;
                 top: 50px;
@@ -26,29 +27,30 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(800, { top:"+=30",left:"+=40" }); // 位移
-                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40" }); 
-                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px" }); 
+                    $(".box").fx(800, { tx:"+=300",ty:"+=40", rewind:1 }); // 位移
+                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40", rewind:1 });
+                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px", rewind:1 });
                 });
             }
         </script>
     </head>
     <body>
-        <article>
-            <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
-            <pre class="brush:js;gutter:false;toolbar:false">
+    <article>
+        <p>此特效可能在IE下失败, 因为用到了CSS3的transform 2d.</p>
+        <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
+        <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(800, { tx:"+=30",ty:"+=40" }); // 位移
-                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40" }); 
-                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px" }); 
+                    $(".box").fx(800, { tx:"+=300",ty:"+=40", rewind:1 }); // 位移
+                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40", rewind:1 });
+                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px", rewind:1 });
                 });
-            </pre>
-            <div style="position:relative;height: 400px;">
+        </pre>
+        <div style="position:relative;height: 400px;">
 
-                <div class="box">box</div>
+            <div class="box">位移</div>
 
-            </div>
-        </article>
+        </div>
+    </article>
 
-    </body>
+</body>
 </html>

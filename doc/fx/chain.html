@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />        
-        <title>reverse.a</title>
+        <title>连续倒带</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
         <script src="../public/js/shCore.js" type="text/javascript" ></script>
@@ -12,7 +12,13 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <style type="text/css">
-            div {
+
+            .sample{
+                background:#8B4513;
+                height:40px;
+                position:absolute;
+            }
+            .sample div {
                 position: absolute;
                 left: 100px;
                 top: 100px;
@@ -20,38 +26,80 @@
                 background-color: #a3d1fc;
                 border: 10px double skyblue;
             }
-
-
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $("div").css({ o: 0.5 }).click(function() {
-                        $("div").unbind("click"); // unclick all
-                        action();
-                    }).fx(800, { o: 0.1 }).fx(800, { o: 0.5 });
+                    $(".sample").fx(500,{
+                        top:0,
+                        left:0,
+                        width:$(document).width(),
+                        height:$(document).height(),
+                        record:1,
+                        after: function(){
+                            $(".sample div").css({ o: 0.5 }).one("click",function() {
+                                action();
+                            }).fx(800, { o: 0.1 }).fx(800, { o: 0.5 });
+                        }
+                    });
                 });
             }
             function action() {
-                $("div").each(function(node, i) {
-                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, chain: 1 });
-                }).fx(1000, { mbtx: 0, mbty: 0, chain: 1 }).each(function(node, i) {
-                    $(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", chain: 1 });
-                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, chain: 1 });
-                }).fx(1000, { tx: 0, ty: 0, reverse: 1 });
+                $(".sample div").each(function(node, i) {
+                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1,after:function(node,props,fx){
+                            if( fx.rewinding && i == 4){
+                                $(".sample").fx(800,{ rewind:1})
+                            }
+                        } });
+                }).fx(1000, { mbtx: 0, mbty: 0, record: 1 }).each(function(node, i) {
+                    $(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", record: 1 });
+                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1 });
+                }).fx(1000, { tx: 0, ty: 0, rewind: 1 });
             }
-
-
         </script>
     </head>
     <body>
+        <p>当图片变淡后请点击它!</p>
+        <pre class="brush:javascript;gutter:false;toolbar:false">
+
+            $.require("ready,fx",function(){
+                    $(".sample").fx(500,{
+                        top:0,
+                        left:0,
+                        width:$(document).width(),
+                        height:$(document).height(),
+                        record:1,
+                        after: function(){
+                            $(".sample div").css({ o: 0.5 }).one("click",function() {
+                                action();
+                            }).fx(800, { o: 0.1 }).fx(800, { o: 0.5 });
+                        }
+                    });
+             });
+            function action() {
+                $(".sample div").each(function(node, i) {
+                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1,after:function(node,props,fx){
+                            if( fx.rewinding && i == 4){
+                                $(".sample").fx(800,{ rewind:1})
+                            }
+                        } });
+                }).fx(1000, { mbtx: 0, mbty: 0, record: 1 }).each(function(node, i) {
+                    $(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", record: 1 });
+                    $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1 });
+                }).fx(1000, { tx: 0, ty: 0, rewind: 1 });
+            }
+        </pre>
         <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
-        <div><img src="../public/styles/fx_dom_fn_fx_chain.jpg" width="100" height="100"/></div>
-        <div><img src="../public/styles/fx_dom_fn_fx_chain.jpg" width="100" height="100"/></div>
-        <div><img src="../public/styles/fx_dom_fn_fx_chain.jpg" width="100" height="100"/></div>
-        <div><img src="../public/styles/fx_dom_fn_fx_chain.jpg" width="100" height="100"/></div>
+        <div class="sample">
+            <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
+            <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
+            <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
+            <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
+            <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
+        </div>
+
 
     </body>
 </html>

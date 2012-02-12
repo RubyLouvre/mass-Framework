@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="utf-8" />        <title>reverse.a</title>
+        <meta charset="utf-8" />        
+        <title>倒带示例3</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
         <script src="../public/js/shCore.js" type="text/javascript" ></script>
@@ -11,43 +12,47 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <style type="text/css">
-            .box {
-                color: white;
-                background-color: #333;
+            .box{
+                color: #000;
+                background-color:blue;
                 position: absolute;
                 top: 50px;
                 left: 50px;
                 width: 100px;
                 height: 100px;
+                border:1px solid yellow;
             }
-
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { w: 300, reverse: 1 }); // A
-                });
+                    $(".box").fx(2000, { bgc: "red", rewind: 1 }).//背景由蓝变红，再由红退倒回蓝
+                    fx(2000, { w: 300, record:   1 }). // 宽度拉长到300
+                    fx(2000, { h: 300, rewind: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
+                }); 
             }
-
-
         </script>
     </head>
     <body>
-        <article>
-            <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
-            <pre class="brush:js;gutter:false;toolbar:false">
+    <article>
+        <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
+        <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { w: 300, reverse: 1 }); // A
+                    $(".box").fx(2000, { bgc: "red", rewind: 1 }).//背景由蓝变红，再由红退倒回蓝
+                    fx(2000, { w: 300, record:   1 }). // 宽度拉长到300
+                    fx(2000, { h: 300, rewind: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
                 });
-            </pre>
-            <div style="position:relative;">
+        </pre>
+        <div style="position:relative;">
 
-                <div class="box">box</div>
+            <div class="box">box</div>
 
 
-            </div>
-        </article>
-    </body>
+        </div>
+    </article>
+</body>
 </html>
+
+

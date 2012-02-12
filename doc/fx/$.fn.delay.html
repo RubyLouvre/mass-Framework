@@ -23,46 +23,44 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-               
-            $.require("ready,fx,event",function(){
-                $("button").click(function() {
-                    $("div.first").slideUp(300).delay(800).fadeIn(400).hide(1000).show(1000);
+            var exec1 = function(){
+                $.require("ready,fx",function(){
+                    $("div.first").slideUp(300).fx(2000).fadeIn(400).hide(1000).show(1000);
                     $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
                 });
-            });
-               
+            }
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.delay(duration)</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>delay会将其列队中没有执行的动画都向后延迟duration秒执行。</p>
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>duration</dt>
-                <dd>必需。Number。动画执行时间，单位为ms。</dd>
-
-            </dl>
-            <p><span class="stress">返回值：</span></p>
-            <p>mass实例</p>
-            <fieldset ><legend>例子</legend>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
+    <article>
+        <h3>$.fn.delay(duration)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>delay会将其列队中没有执行的动画都向后延迟duration秒执行。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>duration</dt>
+            <dd>必需。Number。动画执行时间，单位为ms。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p>其实此方法相当于$.fn.fx(duration), 但fx方法会做许多其他操作, 而它不会。</p>
+        <fieldset ><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,fx,event",function(){
-                $("button").click(function() {
-                    $("div.first").slideUp(300).delay(800).fadeIn(400).hide(1000).show(1000);
+                $.require("ready,fx",function(){
+                    $("div.first").slideUp(300).fx(2000).fadeIn(400).hide(1000).show(1000);
                     $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
                 });
             });
-                </pre>
-                <div id="sample">
-                    <p><button type="button">点我，执行代码</button></p>
-                    <div class="first"></div>
-                    <div class="second"></div>
-                </div>
+            </pre>
+            <p><input onclick="exec1()" value="点我，执行代码" type="button"/></p>
+            <div id="sample">
+                <div class="first"></div>
+                <div class="second"></div>
+            </div>
 
-            </fieldset>
+        </fieldset>
 
-        </article>
-    </body>
+    </article>
+</body>
 </html>

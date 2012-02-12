@@ -27,64 +27,74 @@
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.fx(duration, props)</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>让匹配节点在指定时间对指定的属性进行变化。</p>
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>duration</dt>
-                <dd>必需。Number。动画执行时间，单位为ms。</dd>
-                <dt>props</dt>
-                <dd>必需。Object。各种配置。</dd>
-            </dl>
-            <p><span class="stress">返回值：</span></p>
-            <p>mass实例</p>
-            <p>props配置对象可以指定各种CSS属性，如width, height, color, fontSize, opacity等进行动画变化，
-                还支持scrollTop与scrollLeft这两个属性进行动画变化。还可以指定动画开始前的回调函数before,动画结束时的回调函数after,
-                动画是否进行倒退reverse....
-            </p>
-
-            <p><span class="stress">props属性一览表：</span></p>
-            <table class="table1">
-                <tr><th>键名</th><th>值</th></tr>
-                <tr><td>CSS属性名（或其简写）</td><td>数字（默认单位是px）,字符串（如200px, 2em, #aaa, +=400, -=30）,数组（第一个用于指定缓动公式，第二个属性值）</td></tr>
-                <tr><td>easing</td><td>缓动公式的名字，将作用于所有CSS属性或scrollTop,scrollLeft，当然可以在这些属性上用数组进行单个指定。</td></tr>
-                <tr><td>before</td><td>动画开始时的回调函数。</td></tr>
-                <tr><td>after</td><td>动画结束时的回调函数。</td></tr>
-                <tr><td>reverse</td><td>Boolean。</td></tr>
-
-            </table>
-            <p><span class="stress">CSS属性名的简写一览表：</span></p>
-            <table class="table1">
-                <tr><th>简写</th><th>真实名字</th></tr>
-                <tr><td>w</td><td>width</td></tr>
-                <tr><td>h</td><td>height</td></tr>
-                <tr><td>o</td><td>opacity</td></tr>
-                <tr><td>c</td><td>color</td></tr>
-                <tr><td>x</td><td>left</td></tr>
-                <tr><td>y</td><td>top</td></tr>
-                <tr><td>f</td><td>fontSize</td></tr>
-                <tr><td>bgc</td><td>backgroundColor</td></tr>
-                <tr><td>r</td><td>rotate</td></tr>
-                <tr><td>sx</td><td>scaleX</td></tr>
-                <tr><td>sy</td><td>scaleY</td></tr>
-                <tr><td>st</td><td>scrollTop</td></tr>
-                <tr><td>sl</td><td>scrollLeft</td></tr>
-                <tr><td>tx</td><td>translateX</td></tr>
-                <tr><td>ty</td><td>translateY</td></tr>
-            </table>
-            <div><a href="paiallel.html">列队与并行</a></div>
-            <div><a href="transform.rotate.html">旋转</a></div>
-            <div><a href="transform.scale.html">缩放</a></div>
-            <div><a href="transform.translate.html">位移(translate在IE兼容性不好)</a></div>
-            <div><a href="reverse.a.html">倒退示例1</a></div>
-            <div><a href="reverse.ab.html">倒退示例2</a></div>
-            <div><a href="reverse.abc.html">倒退示例3</a></div>
-            <div><a href="reverse.abcd.html">倒退示例4</a></div>
-            <div><a href="reverse.abcde.html">倒退示例5</a></div>
-            <div><a href="chain.html">连锁</a></div>
-            <div><a href="scroll.html">滚动条</a></div>
-        </article>
-    </body>
+    <article>
+        <h3>$.fn.fx(duration, props)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>让匹配节点在指定时间对指定的属性进行变化。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>duration</dt>
+            <dd>必需。Number。动画执行时间，单位为ms。</dd>
+            <dt>props</dt>
+            <dd>必需。Object。各种配置。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p>props配置对象可以指定各种CSS属性，如width, height, color, fontSize, opacity等进行动画变化，
+            还支持scrollTop与scrollLeft这两个属性进行动画变化。还可以指定动画开始前的回调函数before,
+            动画每一帧时的回调函数frame,
+            动画结束时的回调函数after,
+            经及动画进行倒带效果rewind，record（即让元素回来开始时的样子）
+        </p>
+        <p><span class="stress">props属性一览表：</span></p>
+        <table class="table1">
+            <tr><th>键名</th><th>值</th></tr>
+            <tr><td>CSS属性名（或其简写）</td><td>数字（默认单位是px）,字符串（如200px, 2em, #aaa, +=400, -=30）,数组（第一个用于指定缓动公式，第二个属性值）</td></tr>
+            <tr><td>easing</td><td>缓动公式的名字，将作用于所有CSS属性或scrollTop,scrollLeft，当然可以在这些属性上用数组进行单个指定。</td></tr>
+            <tr><td>before</td><td>动画开始时的回调函数。</td></tr>
+            <tr><td>frame</td><td>每次执行补间后执行的回调函数。</td></tr>
+            <tr><td>after</td><td>动画结束时的回调函数。</td></tr>
+            <tr><td>rewind</td><td>是否开始倒带。</td></tr>
+            <tr><td>record</td><td>将当前动画设置转录到负向列队，从而实现多个动画的倒带。</td></tr>
+        </table>
+        <p>before, after, frame这三个回调的参数情况:</p>
+        <table class="table1">
+            <tr><th>参数名(按先后顺数排列)</th><th>说</th></tr>
+            <tr><td>node</td><td>当前执行动画的元素节点，当然我们也可以直接在回调函数使用this取得它</td></tr>
+            <tr><td>props</td><td>当前动画所进行渐变的属性集合。这是一个对象，键名为样式名，值为样式值。</td></tr>
+            <tr><td>fx</td><td>动画描述对象，可以通过它看到当前动画更详尽的执行情况，比如它从何时开始执行(startTime),
+                    那些属性正在改名（props，就是第二个参数的那个东西），用户配置，如何正在倒带，它还有个叫rewinding，值为1。</td></tr>
+        </table>
+        <p><span class="stress">CSS属性名的简写一览表：</span></p>
+        <table class="table1">
+            <tr><th>简写</th><th>真实名字</th></tr>
+            <tr><td>w</td><td>width</td></tr>
+            <tr><td>h</td><td>height</td></tr>
+            <tr><td>o</td><td>opacity</td></tr>
+            <tr><td>c</td><td>color</td></tr>
+            <tr><td>x</td><td>left</td></tr>
+            <tr><td>y</td><td>top</td></tr>
+            <tr><td>f</td><td>fontSize</td></tr>
+            <tr><td>bgc</td><td>backgroundColor</td></tr>
+            <tr><td>r</td><td>rotate</td></tr>
+            <tr><td>sx</td><td>scaleX</td></tr>
+            <tr><td>sy</td><td>scaleY</td></tr>
+            <tr><td>st</td><td>scrollTop</td></tr>
+            <tr><td>sl</td><td>scrollLeft</td></tr>
+            <tr><td>tx</td><td>translateX</td></tr>
+            <tr><td>ty</td><td>translateY</td></tr>
+        </table>
+        <div><a href="paiallel.html">列队与并行</a></div>
+        <div><a href="transform.rotate.html">旋转</a></div>
+        <div><a href="transform.scale.html">缩放</a></div>
+        <div><a href="transform.translate.html">位移(translate在IE兼容性不好)</a></div>
+        <div><a href="rewind.a.html">倒带示例1</a></div>
+        <div><a href="rewind.ab.html">倒带示例2</a></div>
+        <div><a href="rewind.abc.html">倒带示例3</a></div>
+        <div><a href="rewind.abcd.html">倒带示例4</a></div>
+        <div><a href="rewind.abcde.html">倒带示例5</a></div>
+        <div><a href="chain.html">连续倒带</a></div>
+        <div><a href="scroll.html">滚动条</a></div>
+    </article>
+</body>
 </html>

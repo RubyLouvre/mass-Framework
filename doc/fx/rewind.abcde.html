@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8" />        
-        <title>reverse.ab</title>
+        <title>倒带示例5</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
         <script src="../public/js/shCore.js" type="text/javascript" ></script>
@@ -12,7 +12,7 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <style type="text/css">
-            .box {
+            .box{
                 color: white;
                 background-color: #333;
                 position: absolute;
@@ -20,6 +20,7 @@
                 left: 50px;
                 width: 100px;
                 height: 100px;
+                border:1px solid yellow;
             }
         </style>
         <script type="text/javascript">
@@ -27,10 +28,16 @@
             SyntaxHighlighter.all();
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { w: 300, chain:   1 }). // A
-                    fx(2000, { h: 300, reverse: 1 }); // B
+                    $(".box").fx(2000, { o: 0.5  }). // A
+                    fx(2000, { w: 300, record:  1 }). // B
+                    fx(2000, { h: 300 }). // C
+                    fx(2000, { fs: "*=3", record: 1 }). // D
+                    fx(2000, { bgc: "red", rewind: 1 }); // E
                 });
+               //A -> B -> C -> D -> E -> !E -> !D -> !B
+               //!号表示回退效果
             }
+
         </script>
     </head>
     <body>
@@ -38,9 +45,14 @@
             <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
             <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { w: 300, chain:   1 }). // A
-                    fx(2000, { h: 300, reverse: 1 }); // B
+                    $(".box").fx(2000, { o: 0.5  }). // A
+                    fx(2000, { w: 300, record:  1 }). // B
+                    fx(2000, { h: 300 }). // C
+                    fx(2000, { fs: "*=3", record: 1 }). // D
+                    fx(2000, { bgc: "red", rewind: 1 }); // E
                 });
+               //A -> B -> C -> D -> E -> !E -> !D -> !B
+               //!号表示回退效果
             </pre>
             <div style="position:relative;">
 
@@ -51,3 +63,5 @@
         </article>
     </body>
 </html>
+
+

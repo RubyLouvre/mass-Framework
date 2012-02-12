@@ -47,21 +47,21 @@
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.stop([clearQueue],[jumpToEnd])</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>dom Framework支持四种形式的中止动画的方式，通过这两个参数的有机组合。</p>
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>obj</dt>
-                <dd>可选。Boolean。默认为false。是否清空列队。</dd>
-                <dt>name</dt>
-                <dd>可选。Boolean。默认为false。是否跳到此动画最后一帧</dd>
-            </dl>
-            <p><span class="stress">返回值：</span></p>
-            <p>mass实例</p>
-            <p><span class="stress">源码：</span></p>
-            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+    <article>
+        <h3>$.fn.stop([clearQueue],[jumpToEnd])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>dom Framework支持四种形式的中止动画的方式，通过这两个参数的有机组合。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>obj</dt>
+            <dd>可选。Boolean。默认为false。是否清空列队。</dd>
+            <dt>name</dt>
+            <dd>可选。Boolean。默认为false。是否跳到此动画最后一帧</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p><span class="stress">源码：</span></p>
+        <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
         $.fn.stop =function(clearQueue,jumpToEnd){
             clearQueue = clearQueue ? "1" : "";
             jumpToEnd =  jumpToEnd ? "1" : "0";
@@ -73,56 +73,56 @@
                 }
             });
         }
-            </pre>
-            <fieldset><legend>例子</legend>
-                <button id="start" type="button">开始</button>
+        </pre>
+        <fieldset><legend>例子</legend>
+            <p>当点击开始按钮,然后立即点击其他任一停止按钮!</p>
+            <p><button id="start" type="button">开始</button>
                 <button id="stop0" type="button">停止false,false</button>
                 <button id="stop1" type="button">停止false,true</button>
-                <button id="stop2" type="button">停止true,true</button>
+                <button id="stop2" type="button">停止true,false</button>
                 <button id="stop3" type="button">停止true,true</button>
-                <button id="reset" type="button">重置</button>
+                <button id="reset" type="button">重置</button></p>
 
-                <div class="container">
-                    <div class="test">
-                        TEXT
-                    </div>
-                    <br/>
-                    <div class="test">
-                        TEXT2
-                    </div>
+            <div class="container">
+                <div class="test">
+                    TEXT
                 </div>
-                <p>由上面的演示我们可以看到以下效果： </p>
-                <ul>
-                    <li>false,false:跳过了宽的渐变动画，直接执行高的渐变动画。</li>
-                    <li>false,true:立即把宽设为最终值，然后执行高的渐变动画。</li>
-                    <li>true,false:停止了宽与高的动画。</li>
-                    <li>true,true:停止了宽与高的动画，并把它们的值设到最终值。</li>
-                </ul>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
-      $.require("ready,event,fx",function(){
-        var box = $(".test");
-        $("#start").click(function(){
-          box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
-        });
-        $("#reset").click(function(){
-          box.width(10).height(10);
-        });
-        $("#stop0").click(function(){
-          box.stop(false,false);
-        });
-        $("#stop1").click(function(){
-          box.stop(false,true);
-        });
-        $("#stop2").click(function(){
-          box.stop(true,false);
-        });
-        $("#stop3").click(function(){
-          box.stop(true,true);
-        });
-      });
-
-                </pre>
-            </fieldset>
-        </article>
-    </body>
+                <br/>
+                <div class="test">
+                    TEXT2
+                </div>
+            </div>
+            <p>由上面的演示我们可以看到以下效果： </p>
+            <ul>
+                <li>false,false:跳过了宽的渐变动画，直接执行高的渐变动画。</li>
+                <li>false,true:立即把宽设为最终值，然后执行高的渐变动画。</li>
+                <li>true,false:停止了宽与高的动画。</li>
+                <li>true,true:停止了宽与高的动画，并把它们的值设到最终值。</li>
+            </ul>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,event,fx",function(){
+                var box = $(".test");
+                $("#start").click(function(){
+                    box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
+                });
+                $("#reset").click(function(){
+                    box.width(10).height(10)
+                });
+                $("#stop0").click(function(){
+                    box.stop(false,false);
+                });
+                $("#stop1").click(function(){
+                    box.stop(false,true);
+                });
+                $("#stop2").click(function(){
+                    box.stop(true,false);
+                });
+                $("#stop3").click(function(){
+                    box.stop(true,true);
+                });
+            });
+            </pre>
+        </fieldset>
+    </article>
+</body>
 </html>
