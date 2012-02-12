@@ -544,6 +544,7 @@ $.define("fx", "css",function(){
             hash.after = after;
         }
         if( before ){
+            hash = hash || {};
             var arr = hash.before = hash.before || [];
             arr.unshift(before)
         }
@@ -598,7 +599,7 @@ $.define("fx", "css",function(){
     }
     //扩大1.5倍并淡去
     $.fn.puff = function(duration, hash) {
-        return normalizer(this, duration, hash || {}, {}, beforePuff);
+        return normalizer(this, duration, hash, {}, beforePuff);
     }
 });
 
