@@ -109,6 +109,7 @@ $.define("fx", "css",function(){
                 delete props[ name ];
             }
         }
+
         var easing = (config.easing || "swing").toLowerCase() ;
         config.easing = $.easing[easing] ? easing : "swing";
         config.duration = duration || 500;
@@ -122,7 +123,6 @@ $.define("fx", "css",function(){
             });
             fxs.artery.push({//fx对象
                 startTime:  0,//timestamp
-                isEnd:     false,
                 config:   $.mix({}, config),//各种配置
                 props:    $.mix({}, props)//用于渐变的属性
             });
@@ -134,13 +134,13 @@ $.define("fx", "css",function(){
     function interceptor(mix, node, fx, back) {
         var array = Array.isArray(mix) ? mix : [ mix ], i = 0, n = array.length;
         for (; i < n; ++i) {
-            array[i](node, fx.props, fx, back);
+            array[i].call(node, node, fx.props, fx, back);
         }
     }
     function animate(node) {//fxs对象类似Deferred，包含两个列队（artery与vein）
         var fxs = $._data( node,"fx") , fx = fxs.artery[0],
         back, now, isEnd, mix;
-        if( isFinite(fx)){
+        if( isFinite(fx)){//实现delay
             setTimeout(function(){
                 fxs.artery.shift();
                 fxs.run = heartbeat( node);
@@ -193,14 +193,19 @@ $.define("fx", "css",function(){
                     }
                 }
                 fxs.artery.shift(); // remove current queue
+               
                 mix = config.after;
                 mix && interceptor(mix, node, fx, back);
-
+                console.log("config.back : " + config.back);
+                console.log("config.reverse : " + config.reverse);
                 if (!config.back && config.reverse && fxs.vein.length) {
-                    fxs.artery = fxs.vein.reverse().concat(fxs.artery); // inject reverse queue
+                    console.log("1111111111");
+                    [].push.apply(fxs.artery,fxs.vein.reverse())
+                    //   fxs.artery = fxs.vein.reverse().concat(fxs.artery); // inject reverse queue
 
                     fxs.vein = []; // clear reverse qeueue
                 }
+                console.log(fxs)
                 if (!fxs.artery.length) {
                     fxs.run = false;
                 }
@@ -214,7 +219,9 @@ $.define("fx", "css",function(){
         reverseConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         reverseProps = {};
-        reverseConfig.back =  1;
+        //  reverseConfig.back =  1;
+        if(config.reverse)
+            reverseConfig.reverse = 0
         var orig = config.orig = {}, parts, to, from, val, unit, easing, op, type
         for(var name in props){
             val = props[name] //取得结束值
@@ -226,11 +233,11 @@ $.define("fx", "css",function(){
             from = $.fxAdapter[ type ].get(node,name);
             if( val === "show" || (val === "toggle" && $._isHide(node))){
                 val = $._data(node,"old"+name) || from;
-                config.method = "show"
+                config.method = "show";
                 from = 0;
             }else if(val === "hide" ){//hide
                 orig[name] =  $._data(node,"old"+name,from);
-                config.method = "hide"
+                config.method = "hide";
                 val = 0;
             }else if(typeof val === "object" && isFinite(val.length)){// array
                 parts = val;
@@ -240,9 +247,9 @@ $.define("fx", "css",function(){
             //开始分解结束值to
             if(type != "color" ){//如果不是颜色，则需判定其有没有单位以及起止值单位不一致的情况
                 from = from == "auto" ? 0 : parseFloat(from)//确保from为数字
-                if(parts = rfxnum.exec( val)){
+                if(parts = rfxnum.exec( val )){
                     to = parseFloat( parts[2] ),//确保to为数字
-                    unit = parts[3] 
+                    unit = $.cssNumber[ name ] ? "" : (parts[3] || "px");
                     if(parts[1]){
                         op = parts[1].charAt(0)
                         if ((op == "+" || op == "-") && unit && unit !== "px" ) {
@@ -309,13 +316,14 @@ $.define("fx", "css",function(){
         if (config.chain || config.reverse) {
             fxs.vein.push({
                 startTime: 0,
-                isEnd: false,
                 config: reverseConfig,
                 props: reverseProps
             });
         }
         //生成渲染函数
-        return new Function("node,isEnd,per",ret);
+        var fn =  Function("node,isEnd,per",ret);
+        //  console.log(fn+"")
+        return fn
     }
 
     $.easing =  {
