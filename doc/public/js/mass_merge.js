@@ -394,13 +394,7 @@
         $.exports();
     });
     $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
-var module_value = {  
-    state:2  
-};
-var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx".match($.rword);
-for(var i=0, module;module = list[i++];){                        
-    mapper["@"+module] = module_value;
-}//=========================================
+var module_value = {                                    state:2                                };                                var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx".match($.rword);                                for(var i=0, module;module = list[i++];){                                    mapper["@"+module] = module_value;                                }//=========================================
 //  语言补丁模块
 //==========================================
 $.define( "lang_fix",  function(){
@@ -5262,8 +5256,8 @@ $.define("fx", "css",function(){
         }
         nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
     }
-
-    var keyworks  = $.oneObject("easing,rewind,record");//
+    var callbacks = $.oneObject("before,frame,after");
+    var keyworks  = $.oneObject("easing,rewind,record");
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象linked
     //linked对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function( duration, hash ){
@@ -5277,7 +5271,7 @@ $.define("fx", "css",function(){
             if( name != p ){
                 props[ p ] = props[ name ];
                 delete props[ name ];
-            }else if( typeof props[ name ] === "function"){
+            }else if( callbacks[ name ]){
                 config[ name ] = [].concat( props[ name ] );
                 delete props[ name ];
             }else if( name in keyworks ){
@@ -5378,7 +5372,7 @@ $.define("fx", "css",function(){
                 mix && (interceptor( mix, node, fx ), config.before = 0);
                 fx.render = fxBuilder(node, linked, fx.props, config); // 生成补间动画函数
                 $[ config.method ]( node, fx.props, fx );//供show, hide 方法调用
-                fx.startTime = now = +new Date;
+                fx.startTime = now +new Date;
             }
 
         }
@@ -5479,6 +5473,7 @@ $.define("fx", "css",function(){
             }
             rewindProps[ name ] = [ from , easing ];
         }
+       
         if( transfromChanged ){
             ret += 'adapter.transform.set(node, t2d, isEnd, per);'
         }
@@ -5632,8 +5627,10 @@ $.define("fx", "css",function(){
                         config.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
                         node.style.overflow = "hidden";
                     }
-                    var after = config.after = (config.after || []);
-                    after.unshift(function( node, props, config ){
+                    var afters = config.after;
+                    var type = $.type(afters)
+                    afters = type === "Array" ? afters : "Function" ? [ afters ] : [];
+                    afters.unshift(function( node, props, config ){
                         node.style.display = "none";
                         node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
@@ -5642,6 +5639,7 @@ $.define("fx", "css",function(){
                             });
                         }
                     });
+                    config.after = afters;
                 }else{
                     node.style.display = "none";
                 }
@@ -5705,27 +5703,22 @@ $.define("fx", "css",function(){
         }
     }
     Object.keys(effects).forEach(function( method ){
-        $.fn[ method ] = function(duration,hash){
+        $.fn[ method ] = function(duration, hash ){
             return normalizer(this, duration, hash, effects[method]);
         }
     });
-    function normalizer(Instance, duration, hash, effects, before){
-        if(typeof duration === "function"){
-            hash = duration;
+    function normalizer(Instance, duration, hash, effects){
+        if(typeof duration === "function"){// fx(obj, fn)
+            hash = duration;               // fx(obj, 500, fn)
             duration = 500;
         }
-        if(typeof hash === "function"){
+        if(typeof hash === "function"){   //  fx(obj, num, fn)
             var after = hash;
             hash = {};
-            hash.after = after;
-        }
-        if( before ){
-            var arr = hash.before = hash.before || [];
-            arr.unshift(before)
+            hash.after = [ after ];
         }
         return Instance.fx(duration, $.mix(hash,effects));
     }
-
     "show,hide".replace( $.rword, function( method ){
         $.fn[ method ] = function(duration, hash){
             if(!arguments.length){
@@ -5749,40 +5742,13 @@ $.define("fx", "css",function(){
             return normalizer(this, duration, hash, genFx("toggle", 3));
         }
     }
-    function beforePuff(node, props, fx) {
-        var position = $.css(node,"position"),
-        width = $.css(node,"width"),
-        height = $.css(node,"height"),
-        left = $.css(node,"left"),
-        top = $.css(node,"top");
-        node.style.position = "relative";
-        $.mix(props, {
-            width: "*=1.5",
-            height: "*=1.5",
-            opacity: "hide",
-            left: "-=" + parseInt(width)  * 0.25,
-            top: "-=" + parseInt(height) * 0.25
-        });
-        var arr = fx.config.after = fx.config.after || [];
-        arr.unshift(function(node){
-            node.style.position = position;
-            node.style.width = width;
-            node.style.height = height;
-            node.style.left = left;
-            node.style.top = top;
-        });
-    }
-    //扩大1.5倍并淡去
-    $.fn.puff = function(duration, hash) {
-        return normalizer(this, duration, hash || {}, {}, beforePuff);
-    }
+  
 });
 
 
 //2011.10.10 改进dom.fn.stop
 //2011.10.20 改进所有特效函数，让传参更加灵活
 //2011.10.21 改进内部的normalizer函数
-
 //http://d.hatena.ne.jp/nakamura001/20110823/1314112008
 //http://easeljs.com/
 //https://github.com/gskinner/TweenJS/tree/

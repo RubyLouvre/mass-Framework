@@ -28,7 +28,7 @@
                             $("<div/>").text(el.id).appendTo("#log");
                         }
   
-                        $("#box1").fadeOut(1600, { after:complete});
+                        $("#box1").fadeOut(1600, { after: complete });
                         $("#box2").fadeOut(1600, { after:complete});
                     });
 
@@ -67,7 +67,7 @@
                         function complete(el) {
                             $("&lt;div/&gt;").text(el.id).appendTo("#log");
                         }
-                        $("#box1").fadeOut(1600, { o:[0,"linear"],after:complete});
+                        $("#box1").fadeOut(1600, { o:[0,"linear"],after:[ complete ]});
                         $("#box2").fadeOut(1600, { after:complete});
                     });
 

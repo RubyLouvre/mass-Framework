@@ -199,11 +199,10 @@ $.define("fx", "css",function(){
 
             } else { // 初始化动画
                 mix = config.before;
-                console.log(mix)
                 mix && (interceptor( mix, node, fx ), config.before = 0);
                 fx.render = fxBuilder(node, linked, fx.props, config); // 生成补间动画函数
                 $[ config.method ]( node, fx.props, fx );//供show, hide 方法调用
-                fx.startTime = now +new Date;
+                fx.startTime = now = +new Date;
             }
 
         }
@@ -280,7 +279,6 @@ $.define("fx", "css",function(){
                 easing: easing,
                 unit: unit
             };
-             console.log(hash)
             switch( type ){
                 case "_default":
                     if(name == "opacity" && !$.support.cssOpacity){
@@ -459,8 +457,10 @@ $.define("fx", "css",function(){
                         config.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
                         node.style.overflow = "hidden";
                     }
-                    var after = config.after = (config.after || []);
-                    after.unshift(function( node, props, config ){
+                    var afters = config.after;
+                    var type = $.type(afters)
+                    afters = type === "Array" ? afters : "Function" ? [ afters ] : [];
+                    afters.unshift(function( node, props, config ){
                         node.style.display = "none";
                         node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
@@ -469,7 +469,9 @@ $.define("fx", "css",function(){
                             });
                         }
                     });
+                    config.after = afters;
                 }else{
+                  
                     node.style.display = "none";
                 }
             }
@@ -532,28 +534,22 @@ $.define("fx", "css",function(){
         }
     }
     Object.keys(effects).forEach(function( method ){
-        $.fn[ method ] = function(duration,hash){
+        $.fn[ method ] = function(duration, hash ){
             return normalizer(this, duration, hash, effects[method]);
         }
     });
-    function normalizer(Instance, duration, hash, effects, before){
-        if(typeof duration === "function"){
-            hash = duration;
+    function normalizer(Instance, duration, hash, effects){
+        if(typeof duration === "function"){// fx(obj, fn)
+            hash = duration;               // fx(obj, 500, fn)
             duration = 500;
         }
-        if(typeof hash === "function"){
+        if(typeof hash === "function"){   //  fx(obj, num, fn)
             var after = hash;
             hash = {};
-            hash.after = after;
-        }
-        if( before ){
-            hash = hash || {};
-            var arr = hash.before = hash.before || [];
-            arr.unshift(before)
+            hash.after = [ after ];
         }
         return Instance.fx(duration, $.mix(hash,effects));
     }
-
     "show,hide".replace( $.rword, function( method ){
         $.fn[ method ] = function(duration, hash){
             if(!arguments.length){
@@ -577,41 +573,13 @@ $.define("fx", "css",function(){
             return normalizer(this, duration, hash, genFx("toggle", 3));
         }
     }
-    function beforePuff(node, props, fx) {
-        var position = $.css(node,"position"),
-        width = $.css(node,"width"),
-        height = $.css(node,"height"),
-        left = $.css(node,"left"),
-        top = $.css(node,"top");
-        node.style.position = "relative";
-        $.mix(props, {
-            width: "*=1.5",
-            height: "*=1.5",
-            opacity: "hide",
-            left: "-=" + parseInt(width)  * 0.25,
-            top: "-=" + parseInt(height) * 0.25
-        });
-        console.log(props)
-        var arr = fx.config.after = fx.config.after || [];
-        arr.unshift(function(node){
-            node.style.position = position;
-            node.style.width = width;
-            node.style.height = height;
-            node.style.left = left;
-            node.style.top = top;
-        });
-    }
-    //扩大1.5倍并淡去
-    $.fn.puff = function(duration, hash) {
-        return normalizer(this, duration, hash, {}, beforePuff);
-    }
+  
 });
 
 
 //2011.10.10 改进dom.fn.stop
 //2011.10.20 改进所有特效函数，让传参更加灵活
 //2011.10.21 改进内部的normalizer函数
-
 //http://d.hatena.ne.jp/nakamura001/20110823/1314112008
 //http://easeljs.com/
 //https://github.com/gskinner/TweenJS/tree/
