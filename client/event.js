@@ -9,7 +9,7 @@
 $.define("event", "node,target",function(){
     // $.log("加载event模块成功");
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,valuechange,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
     $.eventSupport = function( eventName,el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
@@ -25,15 +25,7 @@ $.define("event", "node,target",function(){
 
     var facade = $.event,
     rform  = /^(?:textarea|input|select)$/i ,
-    supportInput = $.eventSupport("input", document.createElement("input")),
     adapter = $.eventAdapter = {
-        valuechange: {
-            check: supportInput?  0 : function(src){
-                return rform.test(src.tagName) && !/^select/.test(src.type);
-            },
-            bindType: supportInput ? "input" : "change",
-            delegateType: supportInput ? "input" : "change"
-        },
         focus: {
             delegateType: "focusin"
         },
@@ -63,6 +55,16 @@ $.define("event", "node,target",function(){
             if(src.hasOwnProperty(i)){
                 facade.dispatch.call( src[ i ], e );
             }
+        }
+    }
+
+    if(!$.eventSupport("input", document.createElement("input"))){
+           adapter.input = {
+            check: function(src){
+                return rform.test(src.tagName) && !/^select/.test(src.type);
+            },
+            bindType: "change",
+            delegateType: "change"
         }
     }
     //用于在标准浏览器下模拟mouseenter与mouseleave
