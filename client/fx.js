@@ -137,7 +137,7 @@ $.define("fx", "css",function(){
     }
     function animate( node ) {//linked对象包含两个列队（positive与negative）
         var linked = $._data( node,"fx") ,  fx = linked.positive[0],  now, isEnd, mix;
-        if( isFinite( fx ) ){//实现delay效果
+        if( isFinite( fx ) ){//如果此时调用了delay方法，fx肯定是整型
             setTimeout(function(){
                 linked.positive.shift();
                 linked.run = heartbeat( node);
@@ -150,7 +150,7 @@ $.define("fx", "css",function(){
             var config = fx.config;
             if (fx.startTime) { // 如果已设置开始时间，说明动画已开始
                 now = +new Date;
-                switch(linked.stopCode){
+                switch(linked.stopCode){//如果此时调用了stop方法
                     case 0:
                         fx.render = $.noop;//中断当前动画，继续下一个动画
                         break;
@@ -177,7 +177,7 @@ $.define("fx", "css",function(){
                         interceptor( mix, node, fx ) ;
                     }
                 }
-                if (isEnd) {
+                if (isEnd) {//如果动画结束，则做还原，倒带，跳出列队等相关操作
                     if(config.method == "hide"){
                         for(var i in config.orig){//还原为初始状态
                             $.css( node, i, config.orig[i] )
@@ -456,7 +456,7 @@ $.define("fx", "css",function(){
                         config.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
                         node.style.overflow = "hidden";
                     }
-                    config.after = sureArray(config,"after",function( node, _, config ){
+                    config.after = addCallback( config.after, function( node, _, config ){
                         node.style.display = "none";
                         node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
@@ -527,14 +527,14 @@ $.define("fx", "css",function(){
             opacity: "toggle"
         }
     }
-    function sureArray(obj,prop,fn){
-        var type = $.type(obj.prop)
+    function addCallback(target ,fn){
+        var type = $.type(target)
         switch(type){
             case "Array":
-                obj.prop.unshift(fn)
-                return obj.prop
+                target.unshift(fn)
+                return target
             case "String":
-                return [fn, obj.prop]
+                return [fn, target]
             default:
                 return [ fn ]
         }
@@ -556,7 +556,7 @@ $.define("fx", "css",function(){
         }
         if(before){
             hash = hash || {};
-            hash.before = sureArray(hash,"before",before)
+            hash.before = addCallback(hash.before,before)
         }
         return Instance.fx(duration, $.mix(hash,effects));
     }
@@ -597,7 +597,7 @@ $.define("fx", "css",function(){
             left: "-=" + parseInt(width)  * 0.25,
             top: "-=" + parseInt(height) * 0.25
         });
-        fx.config.after = sureArray(fx.config,"after",function(node){
+        fx.config.after = addCallback(fx.config.after, function(node){
             node.style.position = position;
             node.style.width = width;
             node.style.height = height;
