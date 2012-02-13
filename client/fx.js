@@ -92,7 +92,7 @@ $.define("fx", "css",function(){
     //linked对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function( duration, hash ){
         var props = hash ||{}, config = {}, p
-        if(typeof duration === "funciton"){
+        if(typeof duration === "function"){
             props.after = duration;
             duration = null;
         }
