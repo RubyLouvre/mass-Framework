@@ -149,7 +149,6 @@ $.define("fx", "css",function(){
         } else {
             var config = fx.config;
             if (fx.startTime) { // 如果已设置开始时间，说明动画已开始
-
                 now = +new Date;
                 switch(linked.stopCode){
                     case 0:
@@ -457,10 +456,7 @@ $.define("fx", "css",function(){
                         config.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
                         node.style.overflow = "hidden";
                     }
-                    var afters = config.after;
-                    var type = $.type(afters)
-                    afters = type === "Array" ? afters : "Function" ? [ afters ] : [];
-                    afters.unshift(function( node, props, config ){
+                    config.after = sureArray(config,"after",function( node, _, config ){
                         node.style.display = "none";
                         node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
@@ -469,9 +465,7 @@ $.define("fx", "css",function(){
                             });
                         }
                     });
-                    config.after = afters;
                 }else{
-                  
                     node.style.display = "none";
                 }
             }
@@ -533,12 +527,24 @@ $.define("fx", "css",function(){
             opacity: "toggle"
         }
     }
+    function sureArray(obj,prop,fn){
+        var type = $.type(obj.prop)
+        switch(type){
+            case "Array":
+                obj.prop.unshift(fn)
+                return obj.prop
+            case "String":
+                return [fn, obj.prop]
+            default:
+                return [ fn ]
+        }
+    }
     Object.keys(effects).forEach(function( method ){
         $.fn[ method ] = function(duration, hash ){
             return normalizer(this, duration, hash, effects[method]);
         }
     });
-    function normalizer(Instance, duration, hash, effects){
+    function normalizer(Instance, duration, hash, effects, before){
         if(typeof duration === "function"){// fx(obj, fn)
             hash = duration;               // fx(obj, 500, fn)
             duration = 500;
@@ -547,6 +553,10 @@ $.define("fx", "css",function(){
             var after = hash;
             hash = {};
             hash.after = [ after ];
+        }
+        if(before){
+            hash = hash || {};
+            hash.before = sureArray(hash,"before",before)
         }
         return Instance.fx(duration, $.mix(hash,effects));
     }
@@ -573,7 +583,32 @@ $.define("fx", "css",function(){
             return normalizer(this, duration, hash, genFx("toggle", 3));
         }
     }
-  
+    function beforePuff(node, props, fx) {
+        var position = $.css(node,"position"),
+        width = $.css(node,"width"),
+        height = $.css(node,"height"),
+        left = $.css(node,"left"),
+        top = $.css(node,"top");
+        node.style.position = "relative";
+        $.mix(props, {
+            width: "*=1.5",
+            height: "*=1.5",
+            opacity: "hide",
+            left: "-=" + parseInt(width)  * 0.25,
+            top: "-=" + parseInt(height) * 0.25
+        });
+        fx.config.after = sureArray(fx.config,"after",function(node){
+            node.style.position = position;
+            node.style.width = width;
+            node.style.height = height;
+            node.style.left = left;
+            node.style.top = top;
+        });
+    }
+    //扩大1.5倍并淡去
+    $.fn.puff = function(duration, hash) {
+        return normalizer(this, duration, hash, {}, beforePuff);
+    }
 });
 
 

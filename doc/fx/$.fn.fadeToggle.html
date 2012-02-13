@@ -13,17 +13,15 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
         <style type="text/css">
-
             .box { height:100px; width:100px; background:#090; }
-
 
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             var exec1 = function(){
-                $.require("ready,fx,event",function(){
-                    $(".box").fadeToggle(1000)
+                $.require("ready,fx",function(){
+                    $(".box").fadeToggle( 1000 );
                 });
             }
         </script>
@@ -49,7 +47,7 @@
             </p>
             <fieldset ><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,fx,event",function(){
+                $.require("ready,fx",function(){
                     $(".box").fadeToggle(1000)
                 });
                 </pre>
