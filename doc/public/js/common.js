@@ -23,16 +23,13 @@
         }
     });
     if(self.eval !== top.eval){
-       
-//        $.require("ready,node,css",function(){
-//            var iheight = $("article").height() | 0; //取得其高
-//            if(iheight < 400)
-//                iheight = 400;
-            
-            var iframe = parent.document.getElementById("iframe");
-            iframe.style.height ="400px"
-//            iframe.style.height = (iheight+ 24) + "px";
-//
-//        });
+        $.bind(window,"load",function(){
+            $.require("ready,node,css",function(){
+                var iheight = parseFloat( $("article").height() ); //取得其高
+                if(iheight < 400)
+                    iheight = 400;
+                $("#iframe",parent.document).height(iheight);
+            });
+        });
     }
 })();

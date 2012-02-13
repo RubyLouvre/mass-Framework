@@ -86,8 +86,8 @@ $.define("fx", "css",function(){
         }
         nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
     }
-
-    var keyworks  = $.oneObject("easing,rewind,record");//
+    var callbacks = $.oneObject("before,frame,after");
+    var keyworks  = $.oneObject("easing,rewind,record");
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象linked
     //linked对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function( duration, hash ){
@@ -101,7 +101,7 @@ $.define("fx", "css",function(){
             if( name != p ){
                 props[ p ] = props[ name ];
                 delete props[ name ];
-            }else if( typeof props[ name ] === "function"){
+            }else if( callbacks[ name ]){
                 config[ name ] = [].concat( props[ name ] );
                 delete props[ name ];
             }else if( name in keyworks ){
@@ -199,10 +199,11 @@ $.define("fx", "css",function(){
 
             } else { // 初始化动画
                 mix = config.before;
+                console.log(mix)
                 mix && (interceptor( mix, node, fx ), config.before = 0);
                 fx.render = fxBuilder(node, linked, fx.props, config); // 生成补间动画函数
                 $[ config.method ]( node, fx.props, fx );//供show, hide 方法调用
-                fx.startTime = now = +new Date;
+                fx.startTime = now +new Date;
             }
 
         }
@@ -279,6 +280,7 @@ $.define("fx", "css",function(){
                 easing: easing,
                 unit: unit
             };
+             console.log(hash)
             switch( type ){
                 case "_default":
                     if(name == "opacity" && !$.support.cssOpacity){
@@ -303,6 +305,7 @@ $.define("fx", "css",function(){
             }
             rewindProps[ name ] = [ from , easing ];
         }
+       
         if( transfromChanged ){
             ret += 'adapter.transform.set(node, t2d, isEnd, per);'
         }
@@ -588,6 +591,7 @@ $.define("fx", "css",function(){
             left: "-=" + parseInt(width)  * 0.25,
             top: "-=" + parseInt(height) * 0.25
         });
+        console.log(props)
         var arr = fx.config.after = fx.config.after || [];
         arr.unshift(function(node){
             node.style.position = position;

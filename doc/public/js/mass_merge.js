@@ -394,7 +394,13 @@
         $.exports();
     });
     $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
-var module_value = {                                    state:2                                };                                var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx".match($.rword);                                for(var i=0, module;module = list[i++];){                                    mapper["@"+module] = module_value;                                }//=========================================
+var module_value = {  
+    state:2  
+};
+var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx".match($.rword);
+for(var i=0, module;module = list[i++];){                        
+    mapper["@"+module] = module_value;
+}//=========================================
 //  语言补丁模块
 //==========================================
 $.define( "lang_fix",  function(){
