@@ -685,6 +685,11 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
+        each : function(obj, fn){
+            $.lang(obj).forEach(function(el, i){
+                fn.call(el, el, i, obj)
+            })
+        },
         dump : function(obj, indent) {
             indent = indent || "";
             if (obj === null)
@@ -3432,6 +3437,9 @@ $.define("css_fix", !!top.getComputedStyle, function(){
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
+//自己写框架的好处不在于能将它做得多强大，多完美，而是从写框架的过程中，可以学到很多东西。
+//一个框架写完了，不在乎要给多少人使用，而是自己感觉有没有进步，这才是关键。
+
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     $.log( "已加载css模块" );
     var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
