@@ -137,6 +137,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
+        each : function(obj, fn, args ){
+            var go = 1, isArray = Array.isArray(args)
+            $.lang(obj).forEach( function (el, i){
+                if( go && fn.apply(el, isArray ? args : [el, i, obj]) === false){
+                    go = 0;
+                }
+            });
+        },
         dump : function(obj, indent) {
             indent = indent || "";
             if (obj === null)
