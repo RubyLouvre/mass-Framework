@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>number.nearer</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    var a = $.lang(6);
+                    $.log(a.nearer(1,7),true);
+                    $.log(a.nearer(-1,4),true);
+                    $.log(a.nearer(3,4),true);
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>number.nearer(n1,n2)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>求出距离原数最近的那个数</p>
+        <dl>
+            <dt>number</dt>
+            <dd>必需。Number。最小值或最大值。</dd>
+            <dt>fn</dt>
+            <dd>必需。Number。最大值或最小值。</dd>
+        </dl>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var a = $.lang(6);
+                    $.log(a.nearer(1,7),true);
+                    $.log(a.nearer(-1,4),true);
+                    $.log(a.nearer(3,4),true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

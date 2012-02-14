@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>string.truncate</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    var a = $.lang("A random sentence whose length exceeds 30 characters.");
+                    $.log(a.truncate(),true);
+                }); 
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>string.truncate([length],[truncation])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>将字符串截短为指定的长度（注意：这里的长度包含了后缀部分）， 并添加一个后缀（表示它仅只是一个摘要）。</p>
+        <p><strong>参数：</strong></p>
+        <ul>
+            <li><span class="list">length</span>可选。Nunber。长度默认为 30。</li>
+            <li><span class="list">truncation</span>可选。String。默认后缀为 "..."。</li>
+        </ul>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var a = $.lang("A random sentence whose length exceeds 30 characters.");
+                    $.log(a.truncate(),true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

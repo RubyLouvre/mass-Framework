@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>string.escapeHTML</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function($$){
+                    var s = "<div aa='\bb'>dd";
+                    $.log($$(s).escapeHTML(),true);
+                });
+            }
+            var escapeHTML = function(s) {
+                var el = document.createElement('pre'); //这里要用pre，用div有时会丢失换行，例如：'a\r\n\r\nb'
+                var text = document.createTextNode(s);
+                el.appendChild(text);
+                return el.innerHTML;
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>string.escapeHTML()</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>字符串过滤是在许多Web应用开发中需要考虑的问题。比如用户输入一个左尖括号(&lt;)，
+            在输出HTML代码对其进行显示的话，应该用”&amp;lt;”来表示。要不放便某一标签内，它就会被解析成一个新的元素了。比如代码高亮时，
+            我们就一定要使用此方法。
+        </p>
+        <p>现在此方法的实现是非常的复杂，需要进行六次replace才将相关的HTML entity转换掉，这是因为我还要考虑到后端node.js的使用，如果单单是前端使用，还有一种更简单的实现。
+            下面就把两种实现放出来，如果还有更好的实现请多多指教。
+        </p>
+        <pre class="brush:javascript;gutter:false;toolbar:false">
+//没有取纳的实现方式
+            var escapeHTML = function(s) {
+                var el = document.createElement('pre'); //这里要用pre，用div有时会丢失换行，例如：'a\r\n\r\nb'
+                var text = document.createTextNode(s);
+                el.appendChild(text);
+                return el.innerHTML;
+            }
+//当前使用的实现方式
+        escapeHTML: function( target ){
+            return target.replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').
+            replace(/</g, '&lt;').
+            replace(/>/g, '&gt;')
+            replace(/"/g, '&quot;').
+            replace(/'/g, '&#x27;').
+            replace(/\//g,'&#x2F;');
+        },
+        </pre>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function($$){
+                    var s = "&lt;div aa='\bb'&gt;dd";
+                    $.log($$(s).escapeHTML(),true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

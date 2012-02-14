@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>string.padRight</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    var a = $.lang("sds");
+                    $.log(a.PadRight( 5 ),true);
+                });          
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>string.padRight(digits, [filling], [radix])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>在右边补上一些字符。</p>
+        <dl>
+            <dt>digits</dt>
+            <dd>必需。Number。新字符的长度。</dd>
+            <dt>filling</dt>
+            <dd>可选。String。填空物，默认为"0"。</dd>
+            <dt>radix</dt>
+            <dd>可选。String。填空物，默认为10。</dd>
+        </dl>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var a = $.lang("sds");
+                    $.log(a.PadRight( 5 ),true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

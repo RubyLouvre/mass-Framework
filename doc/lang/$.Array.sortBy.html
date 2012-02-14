@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>array.sortBy</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    var test = $.lang(["zero", "one", "two", "three"]);
+                    var ret = test.sortBy(function(value){
+                        return value.length;
+                    });
+                    $.log($.dump(ret),true);
+                });
+            }
+
+            var exec2 = function(){
+                $.require("lang",function(){
+                    var test = $.lang([[0, 10], [1, 9], [2, 8], [3, 7]]);
+                    var ret = test.sortBy(function(value, index){
+                        return value[1];
+                    });
+                    $.log($.dump(ret),true);
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>array.sortBy(fn,scope)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>将数给元素与其索引值传一个迭代器中，用得到的新数组进行排序。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>fn</dt>
+            <dd>可选。回调函数，sortBy方法会为它传入两个参数，元素自身与其索引值</dd>
+            <dt>score</dt>
+            <dd>可选。要绑定的作用域。</dd>
+        </dl>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var test = $.lang(["zero", "one", "two", "three"]);
+                    var ret = test.sortBy(function(value){
+                        return value.length;
+                    });
+                    $.log($.dump(ret),true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var test = $.lang([[0, 10], [1, 9], [2, 8], [3, 7]]);
+                    var ret = test.sortBy(function(value, index){
+                        return value[1];
+                    });
+                    $.log($.dump(ret),true);
+                });
+            </pre>
+
+            <button onclick="exec2()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

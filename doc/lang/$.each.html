@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.each</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    $.each({
+                        aa:"人生",
+                        bb:"工作",
+                        cc:"评议",
+                        dd:"祈祷"
+                    },function(){
+                        $.log(this, true);
+                        if(this === "评议");
+                        return false;
+                    });
+                    $.each({
+                        aa:"人生",
+                        bb:"工作"
+                    },function(a,b){
+                        $.log(a, true);
+                        $.log(b, true);
+                    },[1,2]);
+                    $.each(["Wii U"," PS Vita", "Xperia"],function(el){
+                        $.log(el, true);
+                    });
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h2>$.each(obj, callback, [ args ])</h2>
+        <p><span class="stress">描述：</span></p>
+        <p>用于遍历类数组与普通对象。</p>
+        <p><span class="stress">回调函数的传参情况：</span></p>
+        <ol>
+            <li>如果第三个参数不是数组，并且obj为类数组，那么依次为数组元素，当前索引值与类数组本身。</li>
+            <li>如果第三个参数是数组，并且obj为类数组，那么参数就是第三个参数里面的元素。</li>
+            <li>如果第三个参数不是数组，并且obj为对象，那么依次为值，键名与对象本身。</li>
+            <li>如果第三个参数是数组，并且obj为对象，那么参数就是第三个参数里面的元素。</li>
+        </ol>
+        <p>如果回调函数返回false,会立即中断遍历。</p>
+        <p>回调函数中的this始终为当前元素（obj为类数组时）或值（obj为对象时）。</p>
+        <p><span class="stress">返回值：</span></p>
+        <p>无。</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    $.each({
+                        aa:"人生",
+                        bb:"工作",
+                        cc:"评议",
+                        dd:"祈祷"
+                    },function(){
+                        $.log(this, true);
+                        if(this === "评议");
+                        return false;
+                    });
+                    $.each({
+                        aa:"人生",
+                        bb:"工作"
+                    },function(a,b){
+                        $.log(a, true);
+                        $.log(b, true);
+                    },[1,2]);
+                    $.each(["Wii U"," PS Vita", "Xperia"],function(el){
+                        $.log(el, true);
+                    });
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>
