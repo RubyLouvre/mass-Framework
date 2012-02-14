@@ -18,11 +18,13 @@ function getAllFiles(root) {
 }
 var arr = getAllFiles("doc")
 arr.forEach(function(name){
-  console.log(name)
-  fs.readFile(name,function(e,fd){
-     var text = ( fd+"").replace('<!doctype html>\n<!DOCTYPE html>',"<!DOCTYPE html>");
-     fs.writeFile(name,text, function(e){
-     })
-  })
+  console.log(name);
+ // var neo = name.replace("/array.","$.Array.")
+  fs.renameSync(name, name.replace("object.","$.Object."))
+//  fs.readFile(name,function(e,fd){
+//     var text = ( fd+"").replace('<!doctype html>\n<!DOCTYPE html>',"<!DOCTYPE html>");
+//     fs.writeFile(name,text, function(e){
+//     })
+//  })
 
 })

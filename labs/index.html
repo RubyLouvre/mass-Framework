@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <title>$.fn.puff</title>
-        <script src="../client/mass.js" type="text/javascript" ></script>
+
 
         <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
@@ -15,24 +15,18 @@
         </style>
         <script type="text/javascript">
        
-
-            $.require("ready,fx,event",function(){
-                $('div').bind('inview', function (event, visible, topOrBottomOrBoth) {
-                    if (visible == true) {
-                        // element is now visible in the viewport
-                        if (topOrBottomOrBoth == 'top'){
-                           // 当前元素的上部可见
-
-                        } else if (topOrBottomOrBoth == 'bottom'){
-                             // 当前元素的下部可见
-                        }  else  {
-                             // 当前元素的整体可见
-                        }
-                    } else {
-                        // 当前元素离开可视区
-                    }
-                });
-            });
+            function add (a){
+                if(!isFinite(add.i)){
+                    add.i = a
+                }else {
+                    add.i += a;
+                }
+                add.valueOf = add.toString = function(){
+                    return add.i
+                }
+                return add;
+            }
+            alert(add(2)(3)(4))
 
         </script>
     </head>
