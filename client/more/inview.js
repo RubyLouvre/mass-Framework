@@ -10,16 +10,10 @@ $.define("inview", "event", function(){
                 elems.push(el.callback.target);
             }
         });
-        // naughty, but this is how it knows which elements to check for
-        $.each($.cache, function () {
-            if (this.events && this.events.inview) {
-                elems.push(this.handle.target);
-            }
-        });
 
         if (elems.length) {
-            $(elems).each(function () {
-                var $el = $(this),
+            elems.forEach(function (elem) {
+                var $el = $(elem),
                 top = $el.offset().top,
                 height = $el.height(),
                 inview = $el.data('inview') || false;
