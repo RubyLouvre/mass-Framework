@@ -1,6 +1,6 @@
 //数据请求模块
 
-$.define("ajax","node,dispatcher", function(){
+$.define("ajax","node,target", function(){
     //$.log("已加载ajax模块");
     var global = this, DOC = global.document, r20 = /%20/g,
     rCRLF = /\r?\n/g,
@@ -254,13 +254,13 @@ $.define("ajax","node,dispatcher", function(){
         return dummyXHR;
     }
  //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    $.mix(ajax, $.dispatcher);
+    $.mix(ajax, $.target);
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
          * jXHR类,用于模拟原生XMLHttpRequest的所有行为
          */
     $.jXHR = $.factory({
-        implement:$.dispatcher,
+        implement:$.target,
         init:function(option){
             $.mix(this, {
                 responseData:null,
