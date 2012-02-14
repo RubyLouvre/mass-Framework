@@ -24,7 +24,7 @@ mass Framework
 <p>后端部分，核心功能是手脚架，热部署，拦截器群集，MVC，ORM。它正在编写中，前三大功能基本成型。。。。</p>
 <h3>mass的合并</h3>
 <ol>
-<li>将模块加载模块dom.js里面的内容先复制到一个临时文件</li>
+<li>将模块加载模块mass.js里面的内容先复制到一个临时文件</li>
 <li>在其最后一行"})(this,this.document);" 与倒数第二行" $.exports("$"+postfix);"插入标识模块已加域的代码。
 其代码如下：<br/>
 <pre>
@@ -72,7 +72,7 @@ list里面的为要合并的模块名
 //....
 })(this,this.document)
 </pre>
-<p>此脚本已经放到doc/public/merge.js之中了。</p>
+<p>注意，以上合并工作已经有脚本实现了，它位于doc/public/merge.js文件之中。</p>
 <h3>如何试用mass Framework?</h3>
 <p>点上方“ZIP”按钮下载到本地，解压后里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。</p>
 
