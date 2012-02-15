@@ -398,7 +398,7 @@ var module_value = {                                    state:2                 
 //  语言补丁模块
 //==========================================
 $.define( "lang_fix",  function(){
-    $.log("已加载语言补丁模块");
+    // $.log("已加载语言补丁模块");
     //Object扩展
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
@@ -550,7 +550,7 @@ $.define( "lang_fix",  function(){
 // 类型扩展模块v3 by 司徒正美
 //=========================================
 $.define("lang", Array.isArray ? "" : "lang_fix",function(){
-    $.log("已加载语言扩展模块");
+    // $.log("已加载语言扩展模块");
     var global = this, rascii = /[^\x00-\xff]/g,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
@@ -685,10 +685,13 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
-        each : function(obj, fn){
-            $.lang(obj).forEach(function(el, i){
-                fn.call(el, el, i, obj)
-            })
+        each : function(obj, fn, args ){
+            var go = 1, isArray = Array.isArray(args)
+            $.lang(obj).forEach( function (el, i){
+                if( go && fn.apply(el, isArray ? args : [el, i, obj]) === false){
+                    go = 0;
+                }
+            });
         },
         dump : function(obj, indent) {
             indent = indent || "";
@@ -1259,7 +1262,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 // 特征嗅探模块 by 司徒正美
 //==========================================
 $.define("support", function(){
-    $.log("已加载特征嗅探模块");
+   // $.log("已加载特征嗅探模块");
     var global = this, DOC = global.document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
     div.setAttribute("className", "t");
     div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
@@ -1387,7 +1390,7 @@ $.define("support", function(){
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-    $.log("已加载class模块")
+   // $.log("已加载class模块")
     var
     P = "prototype",  C = "constructor", I = "@init",S = "_super",
     unextend = $.oneObject([S,P, 'extend', 'implement','_class']),
@@ -1512,9 +1515,9 @@ $.define("class", "lang",function(){
 // 数据缓存模块
 //==================================================
 $.define("data", "lang", function(){
-    $.log("已加载data模块");
+    //$.log("已加载data模块");
     var remitter = /object|function/
-    $.mix($,{
+    $.mix( $, {
         memcache:{},
         // 读写数据
         data : function( target, name, data, pvt ) {
@@ -1604,7 +1607,7 @@ $.define("data", "lang", function(){
 
 //$.query v5 开发代号Icarus
 $.define("query", function(){
-    $.log("已加载选择器模块")
+   // $.log("已加载选择器模块")
     var global = this, DOC = global.document;
     $.mix($,{
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
@@ -2551,7 +2554,7 @@ $.define("query", function(){
 
 
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
-    $.log("已加载node模块");
+    // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
     if( !support.cloneHTML5 ){
         "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
@@ -3293,7 +3296,7 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
  * 样式操作模块的补丁模块
  */
 $.define("css_fix", !!top.getComputedStyle, function(){
-    $.log("已加载css_fix模块");
+   // $.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {};
     //=========================　处理　opacity　=========================
     var  ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
@@ -3437,11 +3440,8 @@ $.define("css_fix", !!top.getComputedStyle, function(){
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
-//自己写框架的好处不在于能将它做得多强大，多完美，而是从写框架的过程中，可以学到很多东西。
-//一个框架写完了，不在乎要给多少人使用，而是自己感觉有没有进步，这才是关键。
-
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
-    $.log( "已加载css模块" );
+    //$.log( "已加载css模块" );
     var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,
     deg2rad = Math.PI/180,
@@ -4028,11 +4028,11 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 
 
 $.define("attr","support,node", function( support ){
-    $.log("已加载attr模块")
+   // $.log("已加载attr模块")
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
-    rnospaces = /\S+/g
+    rnospaces = /\S+/g,
     valOne = {
         "SELECT": "select",
         "OPTION": "option",
@@ -4448,7 +4448,7 @@ $.define("attr","support,node", function( support ){
 // 事件发送器模块
 //==================================================
 $.define("target","data", function(){
-    $.log("已加载target模块")
+    // $.log("已加载target模块")
     var fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
     function addCallback(queue, obj){//添加回调包到列队中
@@ -5182,7 +5182,7 @@ $.define("event", "node,target",function(){
 // 特效模块
 //==========================================
 $.define("fx", "css",function(){
-    $.log("已加载fx模块");
+    //$.log("已加载fx模块");
     var types = {
         color:/color/i,
         transform:/rotate|scaleX|scaleY|translateX|translateY/i,
