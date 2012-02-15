@@ -1,13 +1,13 @@
 $.require("ready,event,fx",function(){
-    var search = $("#search"),hash = window, prefix = "", last = [];//上次的查询结果
+    var search = $("#search"),hash = window, prefix = "";
     search.input(function(e){//监听输入
         var
         input = this.value,//原始值
-        val = input.slice(prefix.length),//比较值
+        val = input.slice( prefix.length),//比较值
         output = [], //用来放置输出内容
         apis = []; //放置方法或属性名
         for(var prop in hash){
-            if( prop.indexOf(val) === 0  ){
+            if( prop.indexOf( val ) === 0  ){
                 apis.push( prop );
                 if( output.push( '<li><a href="javascript:void(0)" data-value="'+prefix +
                     prop+'">'+ input + "<b>" + (prefix  + prop ).slice( input.length ) +"</b></a></li>" ) == 10){
@@ -15,18 +15,20 @@ $.require("ready,event,fx",function(){
                 }
             }
         }
-        if(apis.length){
-            last = apis
-        }
-        if( val.charAt(val.length - 1) === "." ){
-            if(last[0]){
-                hash = hash[ last[0] ],  prefix = ( prefix ? prefix : "") + last[0]  +".";
+        //如果向前遇到点号,或向后取消点号
+        if( val.charAt(val.length - 1) === "." || (input && !val) ){
+            var arr = input.split("."); hash = window;
+            for(var j = 0; j < arr.length; j++){
+                var el = arr[j];
+                if(el && hash[ el ]){
+                    hash = hash[ el ];//重新设置要遍历API的对象
+                }
             }
-            var sliceLen = input.length === 1 ? 0 : input.length;
+            prefix = input == "." ? "" : input;
             for( prop in hash){
                 apis.push( prop );
                 if( output.push( '<li><a href="javascript:void(0)" data-value="'+prefix +
-                    prop+'">'+ input + "<b>" + (prefix  + prop ).slice( sliceLen ) +"</b></a></li>" ) == 10){
+                    prop+'">'+ input + "<b>" + (prefix + prop ).slice( prefix.length ) +"</b></a></li>" ) == 10){
                     break;
                 }
             }
@@ -34,8 +36,7 @@ $.require("ready,event,fx",function(){
         $("#suggest_list").html( output.join("") );
         if(!input){
             hash = window;
-            prefix = "";
-            last = output = apis = [];
+            prefix = output = apis = [];
         }
     });
     var glowIndex = -1;
@@ -51,11 +52,11 @@ $.require("ready,event,fx",function(){
             var list =  $("#suggest_list a");
             list.eq(glowIndex).removeClass("glow_suggest");
             glowIndex += upOrdown;
-            if(glowIndex > list.length){
-                glowIndex = 0
-            }
             var el = list.eq( glowIndex ).addClass("glow_suggest");
             search.val( el.attr("data-value") )
+            if(glowIndex == list.length - 1){
+                glowIndex = -1;
+            }
         }
     });
     var dd = $("#leftsection dd");
