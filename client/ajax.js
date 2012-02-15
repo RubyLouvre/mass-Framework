@@ -52,7 +52,7 @@ $.define("ajax","node,target", function(){
         script: "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript",
         "*": "*/*"
     },
-    defaultOptions = {
+    defaults  = {
         type:"GET",
         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
         async:true,
@@ -60,13 +60,13 @@ $.define("ajax","node,target", function(){
         jsonp: "callback"
     };
  
-    function normalizeOptions(o) {
+    function setOptions( opts ) {
         // deep mix
-        o = $.Object.merge.call( {},defaultOptions, o);
+        opts = $.Object.merge( {}, defaults, opts );
         //判定是否跨域
-        if (o.crossDomain == null) {
-            var parts = rurl.exec(o.url.toLowerCase());
-            o.crossDomain = !!( parts &&
+        if (opts.crossDomain == null) {
+            var parts = rurl.exec(opts.url.toLowerCase());
+            opts.crossDomain = !!( parts &&
                 ( parts[ 1 ] != ajaxLocParts[ 1 ] || parts[ 2 ] != ajaxLocParts[ 2 ] ||
                     ( parts[ 3 ] || ( parts[ 1 ] === "http:" ?  80 : 443 ) )
                     !=
@@ -74,25 +74,27 @@ $.define("ajax","node,target", function(){
                 );
         }
         //转换data为一个字符串
-        if ( o.data && o.data !== "string") {
-            o.data = $.param( o.data );
+        if ( opts.data && opts.data !== "string") {
+            opts.data = $.param( opts.data );
         }
+        // fix #90 ie7 about "//x.htm"
+        opts.url = opts.url.replace(/^\/\//, ajaxLocParts[1] + "//");
         //type必须为大写
-        o.type = o.type.toUpperCase();
-        o.hasContent = !rnoContent.test(o.type);
+        opts.type = opts.type.toUpperCase();
+        opts.hasContent = !rnoContent.test(opts.type);
  
-        if (!o.hasContent) {//如果为GET请求,则参数依附于url上
-            if (o.data) {
-                o.url += (rquery.test(o.url) ? "&" : "?" ) + o.data;
+        if (!opts.hasContent) {//如果为GET请求,则参数依附于url上
+            if (opts.data) {
+                opts.url += (rquery.test(opts.url) ? "&" : "?" ) + opts.data;
             }
-            if (o.cache === false) {
-                o.url += (rquery.test(o.url) ? "&" : "?" ) + "_time=" + Date.now();
+            if ( opts.cache === false ) {
+                opts.url += (rquery.test(opts.url) ? "&" : "?" ) + "_time=" + Date.now();
             }
         }
-        return o;
+        return opts;
     }
  
-    "get post".replace($.rword,function(method){
+    "get,post".replace($.rword,function(method){
         $[ method ] = function( url, data, callback, type ) {
             // shift arguments if data argument was omitted
             if ( $.isFunction( data ) ) {
@@ -119,6 +121,19 @@ $.define("ajax","node,target", function(){
         getJSON: function( url, data, callback ) {
             return $.get( url, data, callback, "json" );
         },
+
+        /**无刷新上传
+             * @param {String} url 提交地址
+             * @param {HTMLElement} 元素
+             * @param {Object} data 普通对象（用于添加额外参数）
+             * @param {Function} 正向回调
+             * with parameter<br/>
+             * 1. data returned from this request with type specified by dataType<br/>
+             * 2. status of this request with type String<br/>
+             * 3. XhrObject of this request , for details {@link IO.XhrObject}
+             * @param {String} [dataType] 注明要返回何种数据类型("xml" or "json" or "text")
+             * @returns {IO.XhrObject}
+             */
         upload: function(url, form, data, callback, dataType) {
             if ($.isFunction(data)) {
                 dataType = callback;
@@ -126,22 +141,22 @@ $.define("ajax","node,target", function(){
                 data = undefined;
             }
             return $.ajax({
-                url:url,
-                type:'post',
-                dataType:dataType,
-                form:form,
-                data:data,
-                success:callback
+                url: url,
+                type: 'post',
+                dataType: dataType,
+                form: form,
+                data: data,
+                success: callback
             });
         },
         serialize : function(form) {
             return $.param($.serializeArray(form));
         },
-        serializeArray : function(form){
+        serializeArray : function( form ){
+            var ret = []
             // 不直接转换form.elements，防止以下情况：   <form > <input name="elements"/><input name="test"/></form>
-            var elements = $.slice(form||[]), ret = []
-            elements.forEach(function(elem){
-                if( elem.name && !elem.disabled && ( "checked" in elem ? elem.checked : 1 )){
+            $.slice( form || [] ).forEach(function( elem ){
+                if( elem.name && !elem.disabled && elem.checked !== false ){
                     var val = $( elem ).val();
                     if(Array.isArray(val)){
                         val.forEach(function(value){
@@ -172,13 +187,13 @@ $.define("ajax","node,target", function(){
             } else {
                 function buildParams(obj, prefix) {
                     if ( Array.isArray(obj) ) {
-                        for ( var i = 0, length = obj.length; i < length; i++ ) {
+                        for ( i = 0, length = obj.length; i < length; i++ ) {
                             buildParams( obj[i], prefix );
                         }
                     } else if( $.isPlainObject(obj) ) {
-                        for ( var j in obj ) {
-                            var postfix = ((j.indexOf("[]") > 0) ? "[]" : ""); // move the brackets to the end (if applicable)
-                            buildParams(obj[j], (prefix ? (prefix+"["+j.replace("[]", "")+"]"+postfix) : j) );
+                        for ( i in obj ) {
+                            var postfix = (( i.indexOf("[]") > 0) ? "[]" : ""); // move the brackets to the end (if applicable)
+                            buildParams( obj[i], (prefix ? (prefix+"["+i.replace("[]", "")+"]"+postfix) : i ) );
                         }
                     } else {
                         add( prefix, $.isFunction(obj) ? obj() : obj );
@@ -190,54 +205,53 @@ $.define("ajax","node,target", function(){
         }
     });
  
-    var ajax = $.ajax = function(object) {
-        if (!object.url) {
+    var ajax = $.ajax = function(opts) {
+        if (!opts || !opts.url) {
             return undefined;
         }
-        var options = normalizeOptions(object),//规整化参数对象
+        opts = setOptions(opts);//规整化参数对象
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
-        dummyXHR = new $.jXHR(options),
-        dataType = options.dataType;
+        var dummyXHR = new $.jXHR(opts), dataType = opts.dataType;
  
-        if(options.form && options.form.nodeType ==1){
+        if(opts.form && opts.form.nodeType ==1){
             dataType = "iframe";
         }else if(dataType == "jsonp"){
-            if(options.crossDomain){
-                ajax.fire("start", dummyXHR, options.url,options.jsonp);//用于jsonp请求
+            if(opts.crossDomain){
+                ajax.fire("start", dummyXHR, opts.url,opts.jsonp);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
             }
         }
-        var transportContructor = transports[dataType] || transports._default,
+        var transportContructor = transports[ dataType ] || transports._default,
         transport = new transportContructor();
         transport.dummyXHR = dummyXHR;
         dummyXHR.transport = transport;
-        if (options.contentType) {
-            dummyXHR.setRequestHeader("Content-Type", options.contentType);
+        if (opts.contentType) {
+            dummyXHR.setRequestHeader("Content-Type", opts.contentType);
         }
  
         //添加dataType所需要的Accept首部
-        dummyXHR.setRequestHeader( "Accept", accepts[dataType] ? accepts[ dataType ] +  ", */*; q=0.01"  : accepts[ "*" ] );
-        for (var i in options.headers) {
-            dummyXHR.setRequestHeader(i, options.headers[ i ]);
+        dummyXHR.setRequestHeader( "Accept", accepts[ dataType ] ? accepts[ dataType ] +  ", */*; q=0.01"  : accepts[ "*" ] );
+        for (var i in opts.headers) {
+            dummyXHR.setRequestHeader(i, opts.headers[ i ]);
         }
  
-        "Complete Success Error".replace($.rword, function(name){
+        "Complete Success Error".replace( $.rword, function(name){
             var method = name.toLowerCase();
-            dummyXHR[method] = dummyXHR["on"+name];
-            if(typeof options[method] === "function"){
-                dummyXHR[method](options[method]);
-                delete dummyXHR.options[method];
-                delete options[method];
+            dummyXHR[ method ] = dummyXHR[ "on"+name ];
+            if(typeof opts[ method ] === "function"){
+                dummyXHR[ method ](opts[ method ]);
+                delete dummyXHR.options[ method ];
+                delete opts[ method ];
             }
         });
         dummyXHR.readyState = 1;
         // Timeout
-        if (options.async && options.timeout > 0) {
+        if (opts.async && opts.timeout > 0) {
             dummyXHR.timeoutID = setTimeout(function() {
                 dummyXHR.abort("timeout");
-            }, options.timeout);
+            }, opts.timeout);
         }
  
         try {
@@ -250,10 +264,9 @@ $.define("ajax","node,target", function(){
                 $.log(e);
             }
         }
- 
         return dummyXHR;
     }
- //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
+    //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
     $.mix(ajax, $.target);
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
