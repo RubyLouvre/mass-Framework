@@ -2,9 +2,9 @@
 // 数据缓存模块
 //==================================================
 $.define("data", "lang", function(){
-    $.log("已加载data模块");
+    //$.log("已加载data模块");
     var remitter = /object|function/
-    $.mix($,{
+    $.mix( $, {
         memcache:{},
         // 读写数据
         data : function( target, name, data, pvt ) {

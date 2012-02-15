@@ -2,7 +2,7 @@
 // 事件发送器模块
 //==================================================
 $.define("target","data", function(){
-    $.log("已加载target模块")
+    // $.log("已加载target模块")
     var fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
     function addCallback(queue, obj){//添加回调包到列队中

@@ -2,7 +2,7 @@
 // 样式操作模块 by 司徒正美
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
-    $.log( "已加载css模块" );
+    //$.log( "已加载css模块" );
     var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,
     deg2rad = Math.PI/180,

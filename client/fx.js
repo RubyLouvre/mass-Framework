@@ -2,7 +2,7 @@
 // 特效模块
 //==========================================
 $.define("fx", "css",function(){
-    $.log("已加载fx模块");
+    //$.log("已加载fx模块");
     var types = {
         color:/color/i,
         transform:/rotate|scaleX|scaleY|translateX|translateY/i,

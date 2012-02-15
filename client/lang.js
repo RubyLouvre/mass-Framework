@@ -2,7 +2,7 @@
 // 类型扩展模块v3 by 司徒正美
 //=========================================
 $.define("lang", Array.isArray ? "" : "lang_fix",function(){
-    $.log("已加载语言扩展模块");
+    // $.log("已加载语言扩展模块");
     var global = this, rascii = /[^\x00-\xff]/g,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,

@@ -90,18 +90,35 @@
                     }
                 })
             }
+
+  
             $.require("ready,event,fx",function(){
+                var hash = $, sl = 0, prefix = "", beta = []
                 $("#search").input(function(e){
-                    var val = this.value;
-                    var candidate = []
-                    for(var i in $){
-                        if(i.indexOf(val) === 0){
-                            if(candidate.push( '<li><a href="javascript:void(0)">'+val+"<b>" + i.slice( val.length) +"</b></a></li>" ) == 10){
+                    var value = this.value;
+                    var ret = [], apis = [], val = value.slice(sl);
+                    console.log(val)
+                     console.log(hash)
+                    for(var i in hash){
+                        if(i.indexOf(val) === 0  ){
+                            apis.push(i)
+                            if(ret.push( '<li><a href="javascript:void(0)">'+value+"<b>" + i.slice( value.length) +"</b></a></li>" ) == 10){
                                 break;
                             }
                         }
                     }
-                    $("#result").html(candidate.join(""))
+                    if(apis.length){
+                        beta = apis
+                    }
+                    if(val.length > 2 && val.charAt(val.length - 1) === "." ){
+                        if(beta[0]){
+                            prefix = beta[0], hash = hash[prefix],sl = prefix.length + 1;
+                            console.log(prefix+"~!!!!!!!!!1")
+                        }else{
+
+                        }
+                    }
+                    $("#result").html(ret.join(""))
                 })
             })
 

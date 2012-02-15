@@ -1,9 +1,9 @@
 $.define("attr","support,node", function( support ){
-    $.log("已加载attr模块")
+   // $.log("已加载attr模块")
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
-    rnospaces = /\S+/g
+    rnospaces = /\S+/g,
     valOne = {
         "SELECT": "select",
         "OPTION": "option",

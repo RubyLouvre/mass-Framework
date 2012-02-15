@@ -2,7 +2,7 @@
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-    $.log("已加载class模块")
+   // $.log("已加载class模块")
     var
     P = "prototype",  C = "constructor", I = "@init",S = "_super",
     unextend = $.oneObject([S,P, 'extend', 'implement','_class']),

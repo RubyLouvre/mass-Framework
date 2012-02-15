@@ -1,5 +1,5 @@
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
-    $.log("已加载node模块");
+    // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
     if( !support.cloneHTML5 ){
         "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
