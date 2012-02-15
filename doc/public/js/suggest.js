@@ -1,8 +1,6 @@
 $.require("ready,event,fx",function(){
-    window.$$ = function(){};
-    var hash = window, prefix = "", last = [];//上次的查询结果
-    var search = $("#search");
-    search.input(function(e){
+    var search = $("#search"),hash = window, prefix = "", last = [];//上次的查询结果
+    search.input(function(e){//监听输入
         var
         input = this.value,//原始值
         val = input.slice(prefix.length),//比较值
@@ -41,7 +39,7 @@ $.require("ready,event,fx",function(){
         }
     });
     var glowIndex = -1;
-    $(window).keyup(function(e){
+    $(window).keyup(function(e){//监听上下翻
         e.preventDefault();
         var upOrdown = 0
         if(e.which === 38 || e.which === 104){ //up 8
@@ -61,7 +59,7 @@ $.require("ready,event,fx",function(){
         }
     });
     var dd = $("#leftsection dd");
-    search.keyup(function(e){
+    search.keyup(function(e){//监听提交
         var input = this.value
         if(input && (e.which == 13 || e.which == 108)){ //如果按下ENTER键
             for(var i = 0 , el ; el = dd[i++];){
@@ -75,4 +73,5 @@ $.require("ready,event,fx",function(){
         }
     });
 })
+//初步完成suggest控件,其实更像IDE的语法提示
 
