@@ -40,6 +40,8 @@
                 border-top:1px solid #252d37;
             }
         </style>
+        <script>
+        </script>
         <script type="text/javascript">
             window.onload = function(){
                 var iframe = document.getElementById("iframe");
@@ -88,12 +90,29 @@
                     }
                 })
             }
-
+            $.require("ready,event,fx",function(){
+                $("#search").input(function(e){
+                    var val = this.value;
+                    var candidate = []
+                    for(var i in $){
+                        if(i.indexOf(val) === 0){
+                            if(candidate.push( '<li><a href="javascript:void(0)">'+val+"<b>" + i.slice( val.length) +"</b></a></li>" ) == 10){
+                                break;
+                            }
+                        }
+                    }
+                    $("#result").html(candidate.join(""))
+                })
+            })
 
             //符号体系的运用。毫无疑问符号体系的简洁有助于理解难，在用语言来表达将使头脑负担过重。
         </script>
     </head>
     <body>
+        <div>
+            <p> <input id="search"></p>
+            <ul id="result"></ul>
+        </div>
         <div style="float:left;width:14%" id="leftsection">
             <dl class="first_dl">
                 <dt path="core/$.html">模块加载模块</dt>
