@@ -1,13 +1,13 @@
 $.require("ready,event,fx",function(){
-    var hash = $, prefix = "", last = [];//上次的查询结果
-    $("#search").input(function(e){
+    window.$$ = function(){};
+    var hash = window, prefix = "", last = [];//上次的查询结果
+    var search = $("#search");
+    search.input(function(e){
         var
         input = this.value,//原始值
         val = input.slice(prefix.length),//比较值
         output = [], //用来放置输出内容
         apis = []; //放置方法或属性名
-        $.log(val)
-
         for(var prop in hash){
             if( prop.indexOf(val) === 0  ){
                 apis.push( prop );
@@ -22,10 +22,10 @@ $.require("ready,event,fx",function(){
         }
         if( val.charAt(val.length - 1) === "." ){
             if(last[0]){
-                hash = hash[ last[0] ], prefix = last[0]+".";
+                hash = hash[ last[0] ],  prefix = ( prefix ? prefix : "") + last[0]  +".";
             }
             var sliceLen = input.length === 1 ? 0 : input.length;
-            for(var prop in hash){
+            for( prop in hash){
                 apis.push( prop );
                 if( output.push( '<li><a href="javascript:void(0)" data-value="'+prefix +
                     prop+'">'+ input + "<b>" + (prefix  + prop ).slice( sliceLen ) +"</b></a></li>" ) == 10){
@@ -35,7 +35,7 @@ $.require("ready,event,fx",function(){
         }
         $("#suggest_list").html( output.join("") );
         if(!input){
-            hash = $;
+            hash = window;
             prefix = "";
             last = output = apis = [];
         }
@@ -57,10 +57,22 @@ $.require("ready,event,fx",function(){
                 glowIndex = 0
             }
             var el = list.eq( glowIndex ).addClass("glow_suggest");
-            $("#search").val( el.attr("data-value") )
+            search.val( el.attr("data-value") )
         }
-
     });
-
+    var dd = $("#leftsection dd");
+    search.keyup(function(e){
+        var input = this.value
+        if(input && (e.which == 13 || e.which == 108)){ //如果按下ENTER键
+            for(var i = 0 , el ; el = dd[i++];){
+                var path = $(el).attr("path");
+                var start = path.indexOf("/");
+                if( path.slice(start+1).indexOf(input) === 0){
+                    $("#iframe").attr("src", "/doc/"+path );
+                    break;
+                }
+            }
+        }
+    });
 })
 
