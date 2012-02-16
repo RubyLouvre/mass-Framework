@@ -34,11 +34,11 @@ $.require("ready,event,fx",function(){
                 }
             }
         }
-        $("#suggest_list").html( output.join("") );
         if(!input){
             hash = window;
             fixIE = prefix = output = [];
         }
+        $("#suggest_list").html( output.join("") );
     });
     var glowIndex = -1,  dd = $("#leftsection dd");
     $(document).keyup(function(e){//监听上下翻
@@ -71,6 +71,8 @@ $.require("ready,event,fx",function(){
                 var start = path.indexOf("/");
                 if( path.slice(start+1).indexOf(input) === 0){
                     $("#iframe").attr("src", "/doc/"+path );//更新iframe
+                    console.log("8888888888888")
+                     $("#suggest_list").html( "" );
                     break;
                 }
             }
