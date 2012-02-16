@@ -76,7 +76,7 @@ list里面的为要合并的模块名
 <h3>如何试用mass Framework?</h3>
 <p>点上方“ZIP”按钮下载到本地，解压后里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。</p>
 
-
+<p>大家在github注册后,就可以在<a href="https://github.com/RubyLouvre/mass-Framework/issues">https://github.com/RubyLouvre/mass-Framework/issues</a>里面提交建议或BUG什么了.</p>
 <p>by 司徒正美 （zhongqincheng）</p>
 <p>2011.11.15</p>
  <a href="http://www.cnblogs.com/rubylouvre/">http://www.cnblogs.com/rubylouvre/</a>
