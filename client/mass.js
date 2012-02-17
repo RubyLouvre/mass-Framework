@@ -394,6 +394,7 @@
         $.exports();
     });
     $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
+    $.exports( "mass" );//防止不同版本的命名空间冲突
 /*combine modules*/
 
 })( this, this.document );

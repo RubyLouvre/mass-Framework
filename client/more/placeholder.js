@@ -1,14 +1,15 @@
-$.define("placeholder","attr,event,css",function(){
+$.define("placeholder","attr,css,event",function(){
     //读者可以与这个比较一下https://github.com/danielstocks/jQuery-Placeholder/blob/master/jquery.placeholder.js
-    function fixIE(input, node, val) {
+    function fix(input, node, val) {
         var placeholder = $._data(node,"placeholder")
         if(!placeholder){
             placeholder = $("<kbd>").afterTo(input).css({
                 marginLeft: -1 * input.width(),
-                width: input.width(),
-                height: input.height(),
+                w: input.width(),
+                h: input.height(),
+                bgc: input.css("bgc"),//背景
                 display: "inline-block",
-                color: "#ccc"
+                c: "#ccc"
             });
             $._data( node,"placeholder", placeholder )
         }
@@ -31,12 +32,12 @@ $.define("placeholder","attr,event,css",function(){
             if( NATIVE_SUPPORT ){
                 this.setAttribute("placeholder", val)
             }else{
-                var placeholder = fixIE(input, this, val );
+                var placeholder = fix(input, this, val );
                 placeholder.css("display" , (input.val() ? "none" : "inline-block"))
                 placeholder.click(function(){
                     placeholder.css("display","none" );
                 });
-                input.bind("hover,input",callback);
+                input.bind("mouseout,input",callback);
             }
         });
     }
@@ -48,7 +49,7 @@ $.define("placeholder","attr,event,css",function(){
             }else{
                 var placeholder =  $._data( this,"placeholder")
                 if( placeholder ){
-                    input.unbind("hover,input",callback);
+                    input.unbind("mouseout,input",callback);
                     input.removeData("placeholder",true);
                     placeholder.unbind("click")
                     placeholder.remove();
