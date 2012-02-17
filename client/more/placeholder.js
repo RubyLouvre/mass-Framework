@@ -13,7 +13,7 @@ $.define("placeholder","attr,css,event",function(){
             });
             $._data( node,"placeholder", placeholder )
         }
-        return  placeholder.text(val);
+        return placeholder.text(val);
     }
     function callback( e ){
         var placeholder = $._data( this,"placeholder");
@@ -28,10 +28,10 @@ $.define("placeholder","attr,css,event",function(){
 
     $.fn.placeholder = function(val) {
         return this.each(function() {
-            var input = $(this);
             if( NATIVE_SUPPORT ){
                 this.setAttribute("placeholder", val)
             }else{
+                var input = $(this);
                 var placeholder = fix(input, this, val );
                 placeholder.css("display" , (input.val() ? "none" : "inline-block"))
                 placeholder.click(function(){
@@ -43,12 +43,12 @@ $.define("placeholder","attr,css,event",function(){
     }
     $.fn.unplaceholder = function( ){
         return this.each(function() {
-            var input = $(this);
             if( NATIVE_SUPPORT ){
                 this.setAttribute("placeholder", "");
             }else{
                 var placeholder =  $._data( this,"placeholder")
                 if( placeholder ){
+                    var input = $(this);
                     input.unbind("mouseout,input",callback);
                     input.removeData("placeholder",true);
                     placeholder.unbind("click")
