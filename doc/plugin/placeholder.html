@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.placeholder</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .test{
+                background: red;
+                width:10px;
+                height:10px;
+                margin: 5px;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,more/placeholder",function(){
+                $("input").placeholder("司徒正美")
+            })
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.placeholder</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>让IE6789也支持HTML5的placeholder效果。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>val</dt>
+            <dd>必需。String。提示文字。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <fieldset><legend>例子</legend>
+
+            <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;input type="password"&gt;
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:false">
+                $.require("ready,more/placeholder",function(){
+                    $("input").placeholder("司徒正美")
+                })
+            </pre>
+            <input type="password">
+        </fieldset>
+    </article>
+</body>
+</html>

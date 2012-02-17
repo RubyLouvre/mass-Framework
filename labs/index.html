@@ -15,16 +15,18 @@
         </style>
         <script type="text/javascript" src="../client/mass.js">
 
+        </script>
 
-        </script>
-        <script type="text/javascript">
-            $.require("ready,more/placeholder",function(){
-                $("input").placeholder("rrrrrrrr")
-            })
-         
-        </script>
     </head>
     <body>
         <input type="password">
+        <script type="text/javascript">
+            window.onload = function(){
+                $.require("ready,more/placeholder",function(){
+                    $("input").placeholder("rrrrrrrr")
+                })
+            }
+
+        </script>
     </body>
 </html>

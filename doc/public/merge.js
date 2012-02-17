@@ -1,6 +1,7 @@
 (function(){
     var fs = require("fs");
-    var modules = ["lang_fix",'lang',"support","class","data","query","node","css_fix","css","attr","target","event","fx"];//在这里添加要合并的子模块
+    var modules = ["lang_fix",'lang',"support","class","data","query","node","css_fix","css","attr","target",
+        "event","fx","more/placeholder"];//在这里添加要合并的子模块
     var result = [], index = 0;
     //读取子模块对应的文件，并将它们的内容合并到“模块加载模块”中！
     modules.forEach(function(el,i){
@@ -17,12 +18,12 @@
                         if(e){
                             console.log(e);
                         }else{
-                            var head = 'var module_value = {\
-                                    state:2\
-                                };\
-                                var list = "@@@@@".match($.rword);\
-                                for(var i=0, module;module = list[i++];){\
-                                    mapper["@"+module] = module_value;\
+                            var head = 'var module_value = {\n\
+                                    state:2\n\
+                                };\n\
+                                var list = "@@@@@".match($.rword);\n\
+                                for(var i=0, module;module = list[i++];){\n\
+                                    mapper["@"+module] = module_value;\n\
                                 }'
                             var replaced = head.replace("@@@@@",modules.join(","));
                             replaced = replaced + result.join("\n");

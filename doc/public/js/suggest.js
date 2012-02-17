@@ -72,7 +72,7 @@ $.require("ready,event,fx",function(){
                 if( path.slice(start+1).indexOf(input) === 0){
                     $("#iframe").attr("src", "/doc/"+path );//更新iframe
                     console.log("8888888888888")
-                     $("#suggest_list").html( "" );
+                    $("#suggest_list").html( "" );
                     break;
                 }
             }
