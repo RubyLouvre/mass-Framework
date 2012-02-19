@@ -1,7 +1,7 @@
 $.define("placeholder","attr,css,event",function(){
     //读者可以与这个比较一下https://github.com/danielstocks/jQuery-Placeholder/blob/master/jquery.placeholder.js
     //http://www.iliadraznin.com/2011/02/jquery-placeholder-plugin/
-    $.log("placeholder模块加载成功")
+  //  $.log("placeholder模块加载成功")
     function fix(input, node, val) {
         var placeholder = $._data(node,"placeholder")
         if(!placeholder){

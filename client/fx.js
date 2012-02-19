@@ -188,9 +188,9 @@ $.define("fx", "css",function(){
                 }
 
             } else { // 初始化动画
+                fx.render = fxBuilder(node, linked, props, config); // 生成补间动画函数
                 mix = config.before
                 mix && (mix.call( node, node, fx.props, fx ), config.before = 0);
-                fx.render = fxBuilder(node, linked, props, config); // 生成补间动画函数
                 $[ config.method ].call(node, node, props, fx );//供show, hide 方法调用
                 fx.startTime = now = +new Date;
             }
@@ -199,7 +199,7 @@ $.define("fx", "css",function(){
         return linked.run; // 调用 clearInterval方法，中止定时器
     }
     function visible(node) {
-        return  $.css(node, "display")!== 'none';
+        return  $.css(node, "display") !== 'none';
     }
     function fxBuilder( node, linked, props, config ){
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
@@ -257,7 +257,7 @@ $.define("fx", "css",function(){
                     return end - from[i]
                 });
             }
-            if(from +"" === to +"" || /NaN/.test(from) || /NaN/.test(to)){//不处理初止值都一样的样式与属性
+            if(from +"" === to +"" ){//不处理初止值都一样的样式与属性
                 continue;
             }
             var hash = {
@@ -410,6 +410,33 @@ $.define("fx", "css",function(){
     //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
     //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
     $.mix( $, {
+        fx:  function ( nodes, duration, hash, effects ){
+            nodes = nodes.mass ? nodes : $(nodes);
+            var props =  hash || duration || {}
+            if(typeof duration === "function"){// fx(obj fn)
+                hash = duration;               // fx(obj, 500, fn)
+                duration = 500;
+            }
+            if(typeof hash === "function"){   //  fx(obj, num, fn)
+                props.after = hash;           //  fx(obj, num, {after: fn})
+            }
+            if(effects){
+                for(var i in effects){
+                    if(typeof effects[i] === "function"){
+                        var old = props[i];
+                        props[i] = function(node, props, fx ){
+                            effects[i].call(node, node, props, fx);
+                            if(typeof old === "function"){
+                                old.call(node, node, props, fx);
+                            }
+                        }
+                    }else{
+                        props[i] = effects[i]
+                    }
+                }
+            }
+            return nodes.fx(duration, props);
+        },
         show: function(node, props){
             if(node.nodeType == 1 && !visible(node)) {
                 var old =  $._data(node, "olddisplay"),
@@ -523,36 +550,10 @@ $.define("fx", "css",function(){
 
     Object.keys(effects).forEach(function( method ){
         $.fn[ method ] = function( duration, hash ){
-            return normalizer( this, duration, hash, effects[method] );
+            return $.fx( this, duration, hash, effects[method] );
         }
     });
-    function normalizer(Instance, duration, hash, effects){
-        var props = hash || {}
-        if(typeof duration === "function"){// fx(obj, fn)
-            hash = duration;               // fx(obj, 500, fn)
-            duration = 500;
-        }
-        if(typeof hash === "function"){   //  fx(obj, num, fn)
-            props.after = hash;
-        }
-        if(effects){
-            for(var i in effects){
-                if(typeof effects[i] === "function"){
-                    var old = props[i];
-                    props[i] = function(node, props, fx ){
-                        effects[i].call(node, node, props, fx);
-                        if(typeof old === "function"){
-                            old.call(node, node, props, fx);
-                        }
-                    }
-                }else{
-                    props[i] = effects[i]
-                }
-            }
-        }
-        return Instance.fx(duration, props);
-    }
-
+  
     "show,hide".replace( $.rword, function( method ){
         $.fn[ method ] = function(duration, hash){
             if(!arguments.length){
@@ -560,7 +561,7 @@ $.define("fx", "css",function(){
                     $[ method ]( this );
                 })
             }else{
-                return normalizer( this, duration, hash, genFx( method , 3) );
+                return $.fx( this, duration, hash, genFx( method , 3) );
             }
         }
     })
@@ -573,7 +574,7 @@ $.define("fx", "css",function(){
         }else if(typeof duration === "function" && typeof duration === "function" ){
             return _toggle.apply(this,arguments)
         }else{
-            return normalizer(this, duration, hash, genFx("toggle", 3));
+            return $.fx(this, duration, hash, genFx("toggle", 3));
         }
     }
     function beforePuff( node, props, fx ) {
@@ -604,7 +605,7 @@ $.define("fx", "css",function(){
     }
     //扩大1.5倍并淡去
     $.fn.puff = function(duration, hash) {
-        return normalizer( this, duration, hash, {
+        return $.fx( this, duration, hash, {
             before:beforePuff
         });
     }
@@ -614,6 +615,7 @@ $.define("fx", "css",function(){
 //2011.10.10 改进dom.fn.stop
 //2011.10.20 改进所有特效函数，让传参更加灵活
 //2011.10.21 改进内部的normalizer函数
+//2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
 //http://d.hatena.ne.jp/nakamura001/20110823/1314112008
 //http://easeljs.com/
 //https://github.com/gskinner/TweenJS/tree/
