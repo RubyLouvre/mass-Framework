@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.flip</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            #flipbox {
+                width: 500px;
+                height: 200px;
+                line-height: 200px;
+                background-color: #ff9000;
+                font-family: 'ChunkFive Regular', Tahoma, Helvetica;
+                font-size: 2.5em;
+                color: #ffffff;
+                text-align: center;
+            }
+            #flipPad {
+                margin: 15px 0;
+                width: 500px;
+                text-align: center;
+            }
+            #flipPad a {
+                padding: 5px 15px;
+                background: #1e90ff;
+                border: 2px solid #1e90ff;
+                border-radius: 2px;
+                color: #ffffff;
+                font-weight: bold;
+                text-decoration: none;
+                font-size: 1em;
+                font-family: Helvetica, Tahoma, Verdana, sans-serif;
+                line-height: 30px;
+                height: 30px;
+                -moz-border-radius: 2px;
+                -webkit-border-radius: 2px;
+                -moz-box-shadow: 1px 1px 2px #999999;
+                -webkit-box-shadow: 1px 1px 2px #999999;
+                -webkit-transition-duration: 1s;
+            }
+            #flipPad a:hover {
+                background-color: #ff9000;
+                border: 2px solid #ff9000;
+            }
+            #flipPad .revert {
+                background-color: #ff9000;
+                border: 2px solid #ff9000;
+                display: none;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,fx,event,attr,more/flip", function(){
+                $("#flipPad a:not(.revert)").bind("click",function(){
+                    var btn = $(this);
+                    $("#flipbox").flip(1000,{
+                        direction: btn.attr("rel"),
+                        endBgc: btn.attr("rev"),
+                        hyaline:"fff",
+                        after: function(){
+                            $(this).html( btn.attr("title") )
+                        }
+                    })
+                    return false;
+                });
+            })
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.flip</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>一种翻滚动画。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>duration</dt>
+            <dd>必需。Number或Object。时长或配置对象。</dd>
+            <dt>hash</dt>
+            <dd>可选。Object。配置对象。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p>hash中有如下可选参数:</p>
+        <table class="table1">
+            <tr><th>键名</th><th>值</th></tr>
+
+            <tr><td>beginBgc</td><td>开始时的背景颜色。</td></tr>
+            <tr><td>endBgc</td><td>结束时的背景颜色。</td></tr>
+            <tr><td>direction</td><td>翻滚方向。有如下值:tb,bt,lr,rl.</td></tr>
+            <tr><td>before</td><td>动画开始时的回调函数。</td></tr>
+            <tr><td>frame</td><td>每次执行补间后执行的回调函数。</td></tr>
+            <tr><td>after</td><td>动画结束时的回调函数。</td></tr>
+
+        </table>
+        <fieldset><legend>例子</legend>
+        <div id="flipbox">Hello! I'm a flip-box! :)</div>
+        <div id="flipPad">
+            <a href="#" class="left" rel="rl" rev="#39AB3E" title="Change content as <em>you</em> like!">left</a>
+            <a href="#" class="top" rel="bt" rev="#B0EB17" title="Ohhh yeah!">top</a>
+            <a href="#" class="bottom" rel="tb" rev="#82BD2E" title="Hey oh let's go!">bottom</a>
+            <a href="#" class="right" rel="lr" rev="#C8D97E" title="Waiting for css3...">right</a>
+            <a href="#" class="revert">revert!</a>
+        </div>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+        &lt;div id="flipbox"&gt;Hello! I'm a flip-box! :)&lt;/div&gt;
+        &lt;div id="flipPad"&gt;
+            &lt;a href="#" class="left" rel="rl" rev="#39AB3E" title="Change content as &lt;em&gt;you&lt;/em&gt; like!"&gt;left&lt;/a&gt;
+            &lt;a href="#" class="top" rel="bt" rev="#B0EB17" title="Ohhh yeah!"&gt;top&lt;/a&gt;
+            &lt;a href="#" class="bottom" rel="tb" rev="#82BD2E" title="Hey oh let's go!"&gt;bottom&lt;/a&gt;
+            &lt;a href="#" class="right" rel="lr" rev="#C8D97E" title="Waiting for css3..."&gt;right&lt;/a&gt;
+            &lt;a href="#" class="revert"&gt;revert!&lt;/a&gt;
+        &lt;/div&gt;
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,fx,event,attr,more/flip", function(){
+                $("#flipPad a:not(.revert)").click(function(){
+                    var btn = $(this);
+                    $("#flipbox").flip(1000,{
+                        direction: btn.attr("rel"),
+                        endBgc: btn.attr("rev"),
+                        hyaline:"fff",
+                        after: function(){
+                            $(this).html( btn.attr("title") )
+                        }
+                    })
+                    return false;
+                });
+            })
+            </pre>
+            <input type="password">
+        </fieldset>
+    </article>
+</body>
+</html>

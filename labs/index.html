@@ -2,31 +2,85 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <title>$.fn.puff</title>
-
-
-        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
-        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
-        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <title>$.fn.flip</title>
+        <!--        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+                <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+                <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>-->
         <style type="text/css">
-
-            #sample div { background:#a9ea00; margin:3px; width:80px;
-                          height:40px; float:left}
+            #flipbox {
+                width: 500px;
+                height: 200px;
+                line-height: 200px;
+                background-color: #ff9000;
+                font-family: 'ChunkFive Regular', Tahoma, Helvetica;
+                font-size: 2.5em;
+                color: #ffffff;
+                text-align: center;
+            }
+            #flipPad {
+                margin: 15px 0;
+                width: 500px;
+                text-align: center;
+            }
+            #flipPad a {
+                padding: 5px 15px;
+                background: #1e90ff;
+                border: 2px solid #1e90ff;
+                border-radius: 2px;
+                color: #ffffff;
+                font-weight: bold;
+                text-decoration: none;
+                font-size: 1em;
+                font-family: Helvetica, Tahoma, Verdana, sans-serif;
+                line-height: 30px;
+                height: 30px;
+                -moz-border-radius: 2px;
+                -webkit-border-radius: 2px;
+                -moz-box-shadow: 1px 1px 2px #999999;
+                -webkit-box-shadow: 1px 1px 2px #999999;
+                -webkit-transition-duration: 1s;
+            }
+            #flipPad a:hover {
+                background-color: #ff9000;
+                border: 2px solid #ff9000;
+            }
+            #flipPad .revert {
+                background-color: #ff9000;
+                border: 2px solid #ff9000;
+                display: none;
+            }
         </style>
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
+        <script>
+            $.require("ready,fx,event,attr,more/flip", function(){
+            
+                $("#flipPad a:not(.revert)").bind("click",function(){
+                    var btn = $(this);
+                    $("#flipbox").flip(1000,{
+                        direction: btn.attr("rel"),
+                        endBgc: btn.attr("rev"),
+                        hyaline:"fff",
+                        after: function(){
+                            $(this).html( btn.attr("title") )
+                        }
+                    })
+                    return false;
+                });
 
+            })
+         
+        </script>
     </head>
     <body>
-        <input type="password">
-        <script type="text/javascript">
-            window.onload = function(){
-                $.require("ready,more/placeholder",function(){
-                    $("input").placeholder("rrrrrrrr")
-                })
-            }
-
-        </script>
+        <div id="flipbox">Hello! I'm a flip-box! :)</div>
+        <div id="flipPad">
+            <a href="#" class="left" rel="rl" rev="#39AB3E" title="Change content as <em>you</em> like!">left</a>
+            <a href="#" class="top" rel="bt" rev="#B0EB17" title="Ohhh yeah!">top</a>
+            <a href="#" class="bottom" rel="tb" rev="#82BD2E" title="Hey oh let's go!">bottom</a>
+            <a href="#" class="right" rel="lr" rev="#C8D97E" title="Waiting for css3...">right</a>
+            <a href="#" class="revert">revert!</a>
+        </div>
     </body>
 </html>

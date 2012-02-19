@@ -95,7 +95,7 @@ $.define("flip", "fx", function(){
         });
         return result;
     }
-    //hash 中的主要参数 beginBgc endBgc before after frame
+    //hash 中的主要参数 beginBgc endBgc before after frame, direction
     $.fn.flip = function(duration, hash){//并不是原对象进行动画,而是其克隆进行动画
         var props =  hash || duration || {}
         if(typeof duration === "function"){// fx(obj fn)
