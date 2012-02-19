@@ -60,7 +60,7 @@ $.define("string", function(){
                 }
             });
             if(arr.length){
-                return url.replace(/(^[^?=]*)\?/ig, '$1').split('#')[0]  + "?" +arr.join("&")
+                return url.replace(/[#?].*/, '') + "?" +arr.join("&")
             }else{
                 return url
             }

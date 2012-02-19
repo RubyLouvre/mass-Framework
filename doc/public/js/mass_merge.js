@@ -6036,15 +6036,17 @@ $.define("flip", "fx", function(){
 
             // console.log({visibility:"visible",position:"absolute",left:flipObj.left,top:flipObj.top,margin:0,zIndex:9999,boxShadow:"0px 0px 0px #000"})
             var dirOption = getDirOption( message, direction, orientation);
-           if(!"1"[0]){//tb h
-                 dirOption.begin.filter = "chroma(color=" + dirOption.hyaline + ")";
-         }
-            var middle = dirOption.middle
-            middle.before = props.before || $.noop;
-            middle.frame = props.frame || $.noop;
-            var end = dirOption.end, self = this;
+            if(!"1"[0]){//tb h
+                dirOption.begin.filter = "chroma(color=" + dirOption.hyaline + ")";
+            }
+            var middle = dirOption.middle, end = dirOption.end, self = this;
 
-            end.frame = function( clone, prop, fx ){
+            middle.before = function( clone, prop, fx ){
+                if(typeof props.before === "function" ){
+                    props.before.call( self, clone, prop, fx );
+                }
+            }
+            middle.frame = end.frame = function( clone, prop, fx ){
                 if(typeof props.frame === "function" ){
                     props.frame.call( self, clone, prop, fx );
                 }
@@ -6060,7 +6062,7 @@ $.define("flip", "fx", function(){
         })
     }
 })
-
+// 2012.2.19 发布
 
 })( this, this.document );
 /**
