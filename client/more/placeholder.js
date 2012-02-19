@@ -2,13 +2,13 @@ $.define("placeholder","attr,css,event",function(){
     //读者可以与这个比较一下https://github.com/danielstocks/jQuery-Placeholder/blob/master/jquery.placeholder.js
     //http://www.iliadraznin.com/2011/02/jquery-placeholder-plugin/
   //  $.log("placeholder模块加载成功")
-    function fix(input, node, val) {
+    function fix(input, node, val) {//v3
         var placeholder = $._data(node,"placeholder")
         if(!placeholder){
-            placeholder = $("<kbd>").afterTo(input).css({
-                position: "relative",
-                left: -1 * (input.innerWidth() + parseFloat(input.css("marginRight"))) ,
-                top:  -1 * parseFloat(input.css("paddingTop")),
+            placeholder = $("<kbd>").css({
+                position: "absolute",
+                left:  input.offset().left + 2,
+                top:   input.offset().left + 2,
                 display: "inline-block",
                 w: input.width() - 4 ,
                 h: input.height(),
@@ -18,7 +18,7 @@ $.define("placeholder","attr,css,event",function(){
                 c: "#808080",
                 "font-weight": input.css("font-weight"),
                 "font-size": input.css("font-size")      
-            });
+            }).appendTo("body")
             $._data( node,"placeholder", placeholder )
         }
         return placeholder.text(val);
@@ -67,3 +67,6 @@ $.define("placeholder","attr,css,event",function(){
     }
 });
 
+//2012.2.17 v1 插入到目标元素之后,然后负边距定位
+//2012.2.18 v2 插入到目标元素之后,然后相对定位, 增加对坐标,边框, 字体的样式处理
+//2012.2.19 v3 插入到body之内,然后绝对定位
