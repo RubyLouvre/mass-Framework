@@ -20,3 +20,12 @@ http://www.businessinfo.co.uk/labs/CSSReg/CSSReg.html
 各种REG
 http://hackvertor.co.uk/hvurl/2n
 
+
+ http://guang.com/xihuan
+  http://faxianla.com/
+http://huaban.com/
+http://www.meilishuo.com/goods
+http://www.mogujie.com/shopping/
+  http://chill.com/
+http://pinterest.com/
+

@@ -86,32 +86,27 @@ $.define("fx", "css",function(){
         }
         nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
     }
-    var callbacks = $.oneObject("before,frame,after");
-    var keyworks  = $.oneObject("easing,rewind,record");
+    var keyworks = $.oneObject("before,frame,after,duration,easing,rewind,record");
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象linked
     //linked对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function( duration, hash ){
         var props = hash ||{}, config = {}, p
-        if(typeof duration === "function"){
-            props.after = duration;
-            duration = null;
+        if(typeof duration === "number" ){//将两个参数整成一个参数
+           props.duration = duration
         }
         for( var name in props){
             p = $.cssName(name) || name;
             if( name != p ){
                 props[ p ] = props[ name ];
                 delete props[ name ];
-            }else if( callbacks[ name ]){
-                config[ name ] = [].concat( props[ name ] );
-                delete props[ name ];
-            }else if( name in keyworks ){
-                config[ name ] = props[ name ];
+            }else if(  keyworks[name] ){
+                config[ name ] =  props[ name ] 
                 delete props[ name ];
             }
         }
         var easing = (config.easing || "swing").toLowerCase() ;
         config.easing = $.easing[ easing ] ? easing : "swing";
-        config.duration = duration || 500;
+        config.duration = config.duration || 500;
         config.method = "noop";
         return this.each(function(node){
             var linked = $._data(node,"fx") || $._data( node,"fx",{
@@ -174,7 +169,7 @@ $.define("fx", "css",function(){
                     linked.positive.shift();
                 }else{
                     if( (mix = config.frame ) && !isEnd ){
-                        interceptor( mix, node, fx ) ;
+                        mix( node, fx ) ;
                     }
                 }
                 if (isEnd) {//如果动画结束，则做还原，倒带，跳出列队等相关操作
@@ -185,7 +180,7 @@ $.define("fx", "css",function(){
                     }
                     linked.positive.shift(); //去掉播放完的动画
                     mix = config.after;
-                    mix && interceptor(mix, node, fx);
+                    mix &&  mix( node, fx ) ;
                     if (config.rewind && linked.negative.length) {
                         //开始倒带,将负向列队的动画加入播放列表中
                         [].unshift.apply(linked.positive, linked.negative.reverse())
@@ -198,7 +193,7 @@ $.define("fx", "css",function(){
 
             } else { // 初始化动画
                 mix = config.before;
-                mix && (interceptor( mix, node, fx ), config.before = 0);
+                mix && (mix( node, fx ), config.before = 0);
                 fx.render = fxBuilder(node, linked, fx.props, config); // 生成补间动画函数
                 $[ config.method ]( node, fx.props, fx );//供show, hide 方法调用
                 fx.startTime = now = +new Date;
@@ -544,6 +539,38 @@ $.define("fx", "css",function(){
             return normalizer(this, duration, hash, effects[method]);
         }
     });
+    function a (Instance, duration, hash, effects){
+        var opt;
+        if(typeof duration === "function"){// fx(obj, fn)
+            opt = {
+                duration:500,
+                before: duration
+            }
+        }
+        if(typeof hash === "function"){
+            opt = ({
+                duration:duration,
+                before: hash
+            });
+        }
+        if(effects){
+            for(var i in effects){
+                if(typeof effects[i] === "function"){
+                    var old = opt[i];
+                    opt[i] = function(node,fx){
+                        effects[i].call(node, node, fx.props, fx);
+                        if(typeof opt[i] === "function"){
+                            old.call(node, node, fx.props, fx);
+                        }
+                    }
+                }else{
+                    opt[i] = effects
+                }
+            }
+        }
+        return Instance.fx(opt);
+
+    }
     function normalizer(Instance, duration, hash, effects, before){
         if(typeof duration === "function"){// fx(obj, fn)
             hash = duration;               // fx(obj, 500, fn)
