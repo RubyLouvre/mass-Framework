@@ -92,7 +92,7 @@ $.define("fx", "css",function(){
     $.fn.fx = function( duration, hash ){
         var props = hash ||{}, config = {}, p
         if(typeof duration === "number" ){//将两个参数整成一个参数
-           props.duration = duration
+            props.duration = duration
         }
         for( var name in props){
             p = $.cssName(name) || name;
@@ -213,7 +213,7 @@ $.define("fx", "css",function(){
         var orig = config.orig = {}, parts, to, from, val, unit, easing, op, type
         for(var name in props){
             val = props[name] //取得结束值
-            if(typeof val == null){
+            if( val == null){
                 continue;
             }
             easing = config.easing;//公共缓动公式
@@ -261,7 +261,7 @@ $.define("fx", "css",function(){
                     return end - from[i]
                 });
             }
-            if(from +"" === to +""){//不处理初止值都一样的样式与属性
+            if(from +"" === to +"" || /NaN/.test(from) || /NaN/.test(to)){//不处理初止值都一样的样式与属性
                 continue;
             }
             var hash = {
@@ -451,7 +451,8 @@ $.define("fx", "css",function(){
                         config.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
                         node.style.overflow = "hidden";
                     }
-                    config.after = addCallback( config.after, function( node, _, config ){
+                    var after = config.after;
+                    config.after = function( node, fx ){
                         node.style.display = "none";
                         node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
@@ -459,7 +460,10 @@ $.define("fx", "css",function(){
                                 node.style[ "overflow" + postfix ] = config.overflow[index]
                             });
                         }
-                    });
+                        if(typeof after == "function"){
+                            after.call(node, node, fx.props, fx)
+                        }
+                    };
                 }else{
                     node.style.display = "none";
                 }
@@ -539,7 +543,7 @@ $.define("fx", "css",function(){
             return normalizer(this, duration, hash, effects[method]);
         }
     });
-    function a (Instance, duration, hash, effects){
+    function normalizer(Instance, duration, hash, effects){
         var opt;
         if(typeof duration === "function"){// fx(obj, fn)
             opt = {
@@ -569,24 +573,23 @@ $.define("fx", "css",function(){
             }
         }
         return Instance.fx(opt);
-
     }
-    function normalizer(Instance, duration, hash, effects, before){
-        if(typeof duration === "function"){// fx(obj, fn)
-            hash = duration;               // fx(obj, 500, fn)
-            duration = 500;
-        }
-        if(typeof hash === "function"){   //  fx(obj, num, fn)
-            var after = hash;
-            hash = {};
-            hash.after = [ after ];
-        }
-        if(before){
-            hash = hash || {};
-            hash.before = addCallback(hash.before,before)
-        }
-        return Instance.fx(duration, $.mix(hash,effects));
-    }
+//    function normalizer(Instance, duration, hash, effects, before){
+//        if(typeof duration === "function"){// fx(obj, fn)
+//            hash = duration;               // fx(obj, 500, fn)
+//            duration = 500;
+//        }
+//        if(typeof hash === "function"){   //  fx(obj, num, fn)
+//            var after = hash;
+//            hash = {};
+//            hash.after = [ after ];
+//        }
+//        if(before){
+//            hash = hash || {};
+//            hash.before = addCallback(hash.before,before)
+//        }
+//        return Instance.fx(duration, $.mix(hash,effects));
+//    }
     "show,hide".replace( $.rword, function( method ){
         $.fn[ method ] = function(duration, hash){
             if(!arguments.length){
@@ -634,7 +637,9 @@ $.define("fx", "css",function(){
     }
     //扩大1.5倍并淡去
     $.fn.puff = function(duration, hash) {
-        return normalizer(this, duration, hash, {}, beforePuff);
+        return normalizer(this, duration, hash, {
+            before:beforePuff
+        } );
     }
 });
 
