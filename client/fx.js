@@ -1,5 +1,5 @@
 //=========================================
-// 特效模块
+// 特效模块v3
 //==========================================
 $.define("fx", "css",function(){
     //$.log("已加载fx模块");
@@ -86,13 +86,14 @@ $.define("fx", "css",function(){
         }
         nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
     }
-    var keyworks = $.oneObject("before,frame,after,duration,easing,rewind,record");
+    var keyworks = $.oneObject("before,frame,after,easing,rewind,record");
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象linked
     //linked对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function( duration, hash ){
         var props = hash ||{}, config = {}, p
-        if(typeof duration === "number" ){//将两个参数整成一个参数
-            props.duration = duration
+        if(typeof duration === "function"){
+            props.after = duration;
+            duration = null;
         }
         for( var name in props){
             p = $.cssName(name) || name;
@@ -106,7 +107,7 @@ $.define("fx", "css",function(){
         }
         var easing = (config.easing || "swing").toLowerCase() ;
         config.easing = $.easing[ easing ] ? easing : "swing";
-        config.duration = config.duration || 500;
+        config.duration = duration || 500;
         config.method = "noop";
         return this.each(function(node){
             var linked = $._data(node,"fx") || $._data( node,"fx",{
@@ -124,12 +125,7 @@ $.define("fx", "css",function(){
             }
         });
     }
-    function interceptor( mix, node, fx ) {
-        var array = Array.isArray(mix) ? mix : [ mix ], i = 0, n = array.length;
-        for (; i < n; ++i) {
-            array[i].call(node, node, fx.props, fx);
-        }
-    }
+
     function animate( node ) {//linked对象包含两个列队（positive与negative）
         var linked = $._data( node,"fx") ,  fx = linked.positive[0],  now, isEnd, mix;
         if( isFinite( fx ) ){//如果此时调用了delay方法，fx肯定是整型
@@ -142,7 +138,7 @@ $.define("fx", "css",function(){
         if (!fx) { //这里应该用正向列队的长度做判定
             linked.run = false;
         } else {
-            var config = fx.config;
+            var config = fx.config, props = fx.props;
             if (fx.startTime) { // 如果已设置开始时间，说明动画已开始
                 now = +new Date;
                 switch(linked.stopCode){//如果此时调用了stop方法
@@ -156,7 +152,7 @@ $.define("fx", "css",function(){
                         linked.positive  = linked.negative = [];//清空该元素的所有动画
                         break;
                     case 3:
-                        for(var ii=0, _fx; _fx=linked.positive[ii++]; ){
+                        for(var ii=0, _fx; _fx= linked.positive[ii++]; ){
                             _fx.gotoEnd = true;//立即完成该元素的所有动画
                         }
                         break;
@@ -169,7 +165,7 @@ $.define("fx", "css",function(){
                     linked.positive.shift();
                 }else{
                     if( (mix = config.frame ) && !isEnd ){
-                        mix( node, fx ) ;
+                        mix.call(node, node, props, fx ) ;
                     }
                 }
                 if (isEnd) {//如果动画结束，则做还原，倒带，跳出列队等相关操作
@@ -180,7 +176,7 @@ $.define("fx", "css",function(){
                     }
                     linked.positive.shift(); //去掉播放完的动画
                     mix = config.after;
-                    mix &&  mix( node, fx ) ;
+                    mix &&  mix.call( node, node, fx.props, fx ) ;
                     if (config.rewind && linked.negative.length) {
                         //开始倒带,将负向列队的动画加入播放列表中
                         [].unshift.apply(linked.positive, linked.negative.reverse())
@@ -192,10 +188,10 @@ $.define("fx", "css",function(){
                 }
 
             } else { // 初始化动画
-                mix = config.before;
-                mix && (mix( node, fx ), config.before = 0);
-                fx.render = fxBuilder(node, linked, fx.props, config); // 生成补间动画函数
-                $[ config.method ]( node, fx.props, fx );//供show, hide 方法调用
+                mix = config.before
+                mix && (mix.call( node, node, fx.props, fx ), config.before = 0);
+                fx.render = fxBuilder(node, linked, props, config); // 生成补间动画函数
+                $[ config.method ].call(node, node, props, fx );//供show, hide 方法调用
                 fx.startTime = now = +new Date;
             }
 
@@ -452,7 +448,7 @@ $.define("fx", "css",function(){
                         node.style.overflow = "hidden";
                     }
                     var after = config.after;
-                    config.after = function( node, fx ){
+                    config.after = function( node, fx, props ){
                         node.style.display = "none";
                         node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
@@ -461,7 +457,7 @@ $.define("fx", "css",function(){
                             });
                         }
                         if(typeof after == "function"){
-                            after.call(node, node, fx.props, fx)
+                            after.call( node, node, props, fx );
                         }
                     };
                 }else{
@@ -475,7 +471,7 @@ $.define("fx", "css",function(){
     });
     //如果clearQueue为true，是否清空列队
     //如果jumpToEnd为true，是否跳到此动画最后一帧
-    $.fn.stop = function( clearQueue,jumpToEnd ){
+    $.fn.stop = function( clearQueue, jumpToEnd ){
         clearQueue = clearQueue ? "1" : ""
         jumpToEnd = jumpToEnd ? "1" : "0"
         var stopCode = parseInt( clearQueue+jumpToEnd,2 );//返回0 1 2 3
@@ -486,7 +482,6 @@ $.define("fx", "css",function(){
             }
         });
     }
-
     // 0 1
     $.fn.delay = function(ms){
         return this.each(function(node){
@@ -511,11 +506,10 @@ $.define("fx", "css",function(){
         });
         return obj;
     }
-
     var effects = {
-        slideDown: genFx("show", 1),
-        slideUp: genFx("hide", 1),
-        slideToggle: genFx("toggle", 1),
+        slideDown: genFx( "show", 1 ),
+        slideUp: genFx( "hide", 1 ),
+        slideToggle: genFx( "toggle", 1 ),
         fadeIn: {
             opacity: "show"
         },
@@ -526,70 +520,39 @@ $.define("fx", "css",function(){
             opacity: "toggle"
         }
     }
-    function addCallback(target ,fn){
-        var type = $.type(target)
-        switch(type){
-            case "Array":
-                target.unshift(fn)
-                return target
-            case "String":
-                return [fn, target]
-            default:
-                return [ fn ]
-        }
-    }
+
     Object.keys(effects).forEach(function( method ){
-        $.fn[ method ] = function(duration, hash ){
-            return normalizer(this, duration, hash, effects[method]);
+        $.fn[ method ] = function( duration, hash ){
+            return normalizer( this, duration, hash, effects[method] );
         }
     });
     function normalizer(Instance, duration, hash, effects){
-        var opt;
+        var props = hash || {}
         if(typeof duration === "function"){// fx(obj, fn)
-            opt = {
-                duration:500,
-                before: duration
-            }
+            hash = duration;               // fx(obj, 500, fn)
+            duration = 500;
         }
-        if(typeof hash === "function"){
-            opt = ({
-                duration:duration,
-                before: hash
-            });
+        if(typeof hash === "function"){   //  fx(obj, num, fn)
+            props.after = hash;
         }
         if(effects){
             for(var i in effects){
                 if(typeof effects[i] === "function"){
-                    var old = opt[i];
-                    opt[i] = function(node,fx){
-                        effects[i].call(node, node, fx.props, fx);
-                        if(typeof opt[i] === "function"){
-                            old.call(node, node, fx.props, fx);
+                    var old = props[i];
+                    props[i] = function(node, props, fx ){
+                        effects[i].call(node, node, props, fx);
+                        if(typeof old === "function"){
+                            old.call(node, node, props, fx);
                         }
                     }
                 }else{
-                    opt[i] = effects
+                    props[i] = effects[i]
                 }
             }
         }
-        return Instance.fx(opt);
+        return Instance.fx(duration, props);
     }
-//    function normalizer(Instance, duration, hash, effects, before){
-//        if(typeof duration === "function"){// fx(obj, fn)
-//            hash = duration;               // fx(obj, 500, fn)
-//            duration = 500;
-//        }
-//        if(typeof hash === "function"){   //  fx(obj, num, fn)
-//            var after = hash;
-//            hash = {};
-//            hash.after = [ after ];
-//        }
-//        if(before){
-//            hash = hash || {};
-//            hash.before = addCallback(hash.before,before)
-//        }
-//        return Instance.fx(duration, $.mix(hash,effects));
-//    }
+
     "show,hide".replace( $.rword, function( method ){
         $.fn[ method ] = function(duration, hash){
             if(!arguments.length){
@@ -597,7 +560,7 @@ $.define("fx", "css",function(){
                     $[ method ]( this );
                 })
             }else{
-                return normalizer(this, duration, hash, genFx( method , 3));
+                return normalizer( this, duration, hash, genFx( method , 3) );
             }
         }
     })
@@ -608,12 +571,12 @@ $.define("fx", "css",function(){
                 $.toggle( node );
             });
         }else if(typeof duration === "function" && typeof duration === "function" ){
-            _toggle.apply(this,arguments)
+            return _toggle.apply(this,arguments)
         }else{
             return normalizer(this, duration, hash, genFx("toggle", 3));
         }
     }
-    function beforePuff(node, props, fx) {
+    function beforePuff( node, props, fx ) {
         var position = $.css(node,"position"),
         width = $.css(node,"width"),
         height = $.css(node,"height"),
@@ -624,22 +587,26 @@ $.define("fx", "css",function(){
             width: "*=1.5",
             height: "*=1.5",
             opacity: "hide",
-            left: "-=" + parseInt(width)  * 0.25,
+            left: "-=" + parseInt(width) * 0.25,
             top: "-=" + parseInt(height) * 0.25
         });
-        fx.config.after = addCallback(fx.config.after, function(node){
+        var after = fx.config.after;
+        fx.config.after = function( node, props, fx ){
             node.style.position = position;
             node.style.width = width;
             node.style.height = height;
             node.style.left = left;
             node.style.top = top;
-        });
+            if(typeof after === "function"){
+                after.call( node, node, props, fx );
+            }
+        }
     }
     //扩大1.5倍并淡去
     $.fn.puff = function(duration, hash) {
-        return normalizer(this, duration, hash, {
+        return normalizer( this, duration, hash, {
             before:beforePuff
-        } );
+        });
     }
 });
 
