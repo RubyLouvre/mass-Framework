@@ -196,7 +196,7 @@
     var innerDefine = function( _, deps, callback ){
         var args = arguments;
         args[0] = nick.slice(1);
-        args[ args.length - 1 ] =  parent.Function( "return "+ args[ args.length - 1 ] )();
+        args[ args.length - 1 ] =  parent.Function( "$ = "+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -229,7 +229,7 @@
                 $._checkFail( name, true );//模拟opera的script onerror
             }
             d.write( "<body/>" );//清空内容
-            HEAD.removeChild( iframe );//移除iframe
+           // HEAD.removeChild( iframe );//移除iframe
         });
     }
     //收集依赖列表对应模块的返回值，传入目标模块中执行
@@ -393,8 +393,7 @@
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
         $.exports();
     });
-    $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
-   
+    $.exports( (window.$ ? "dom" : "$")+ postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
 })( this, this.document );
