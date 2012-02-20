@@ -54,8 +54,15 @@
 
         </script>
         <script>
-            $.require("ready,fx,event,attr,more/flip", function(){
-            
+            $.exports("dom");
+            $ = {};
+          
+            dom.require("lang",function(){
+                var $ = dom;
+                $.parseJS("console.log(111111)")
+            })
+            //   dom.require("ready,fx,event,attr,more/flip", function(){
+            /*  var  $ = dom
                 $("#flipPad a:not(.revert)").bind("click",function(){
                     var btn = $(this);
                     $("#flipbox").flip(1000,{
@@ -67,9 +74,9 @@
                         }
                     })
                     return false;
-                });
+                });*/
 
-            })
+            //   })
          
         </script>
     </head>
