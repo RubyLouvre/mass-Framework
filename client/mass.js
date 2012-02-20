@@ -393,7 +393,7 @@
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
         $.exports();
     });
-    $.exports( (window.$ ? "dom" : "$")+ postfix );//防止不同版本的命名空间冲突
+    $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
 })( this, this.document );

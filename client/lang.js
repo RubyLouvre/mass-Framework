@@ -520,7 +520,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return result;
         },
-        merge : function(target, array){
+        merge: function(target, array){
             var i = target.length, j = 0;
             for ( var n = array.length; j < n; j++ ) {
                 target[ i++ ] = array[ j ];
