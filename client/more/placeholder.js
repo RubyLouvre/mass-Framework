@@ -8,7 +8,7 @@ $.define("placeholder","attr,css,event",function(){
             placeholder = $("<kbd>").css({
                 position: "absolute",
                 left:  input.offset().left + 2,
-                top:   input.offset().left + 2,
+                top:   input.offset().top + 2,
                 display: "inline-block",
                 w: input.width() - 4 ,
                 h: input.height(),
