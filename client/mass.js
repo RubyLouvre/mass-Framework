@@ -229,7 +229,7 @@
                 $._checkFail( name, true );//模拟opera的script onerror
             }
             d.write( "<body/>" );//清空内容
-           // HEAD.removeChild( iframe );//移除iframe
+            HEAD.removeChild( iframe );//移除iframe
         });
     }
     //收集依赖列表对应模块的返回值，传入目标模块中执行
