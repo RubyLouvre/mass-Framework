@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.pagination</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .pagination a , .pagination span{
+                border: 1px solid #9AAFE5;
+                color: #2E6AB1;
+                margin: 0 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .pagination span{
+                background-color: #2E6AB1;
+                border: 1px solid navy;
+                color: #FFFFFF;
+                font-weight: bold;
+            }
+            .prev_page, .next_page {
+                background:#d8d9dd;
+            }
+            .pagination input{
+                width:20px;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,more/pagination",function(){
+                $("#box").pagination(120,{
+                    curr_page:7,
+                    per_page:10,
+                    show_pages:8,
+                    show_jump:true,
+                    callback: function(e, ui, i){
+                        e.preventDefault();
+                        alert(i)
+                        ui.curr_page = i;
+                        ui.render();
+                        return false;
+                    }
+                })
+            })
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.pagination</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>mass Framework的分页插件。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>duration</dt>
+            <dd>必需。Number。一共有多少个需要进行分页的物件（如贴子，图片什么）。</dd>
+            <dt>hash</dt>
+            <dd>可选。Object。配置对象。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p>hash中有如下可选参数:</p>
+        <table class="table1">
+            <tr><th>键名</th><th>值</th></tr>
+
+            <tr><td>show_last:</td><td>当分页过多时，是否显示最后一页。</td></tr>
+            <tr><td>show_first:</td><td>当分页过多时，是否显示第一页。</td></tr>
+            <tr><td>show_next:</td><td>当分页过多时，是否显示下一页链接。</td></tr>
+            <tr><td>show_prev:</td><td>当分页过多时，是否显示上一页链接。</td></tr>
+            <tr><td>prev_class:</td><td>上一页链接的类名，默认为prev_page。</td></tr>
+            <tr><td>next_class:</td><td>下一页链接的类名，默认为next_page。</td></tr>
+            <tr><td>prev_class:</td><td>上一页链接的显示文本，默认为下一页&gt;。</td></tr>
+            <tr><td>next_class:</td><td>下一页链接的显示文本，默认为&lt;上一页。</td></tr>
+            <tr><td>curr_page:</td><td>当前页面，注意为了符合普通人的常识，<span style="color:red">强制最小值是1</span>。</td></tr>
+            <tr><td>per_page:</td><td>每页显示多少条目（贴子，图片什么的）。</td></tr>
+            <tr><td>show_pages:</td><td>显示多少个页码，默认为10，建议取最中间的那个页码,比如是说11取6,可以确保视觉上的对称性。</td></tr>
+            <tr><td>show_jump:</td><td>是否显示跳转框。默认是false。</td></tr>
+            <tr><td>fill_text：</td><td>当分页过多时，在第一页与显示页之间或者最后一页与显示页之间的用于表示省略的文本，默认是"..."</td></tr>
+            <tr><td>callback:</td><td>当点击分页栏中的链接或跳转框时触发的回调，第一个参数是事件对象，第二参数是分页栏对象，第三个参数是页码，
+                    this指向当前点击的元素节点。</td></tr>
+            <tr><td>frame</td><td>每次执行补间后执行的回调函数。</td></tr>
+            <tr><td>after</td><td>动画结束时的回调函数。</td></tr>
+
+        </table>
+        <p>在回调函数中，我们可以调用分页栏对象的render方法重新渲染自身。</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div id="box"&gt;&lt;/div"&gt;
+            </pre>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+            .pagination a , .pagination span{
+                border: 1px solid #9AAFE5;
+                color: #2E6AB1;
+                margin: 0 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .pagination span{
+                background-color: #2E6AB1;
+                border: 1px solid navy;
+                color: #FFFFFF;
+                font-weight: bold;
+            }
+            .prev_page, .next_page {
+                background:#d8d9dd;
+            }
+            .pagination input{
+                width:20px;
+            }
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,more/pagination",function(){
+                $("#box").pagination(120,{
+                    curr_page:7,
+                    per_page:10,
+                    show_pages:8,
+                    show_jump:true,
+                    callback: function(e, ui, i){
+                        e.preventDefault();
+                        alert(i)
+                        ui.curr_page = i;
+                        ui.render();
+                        return false;
+                    }
+                })
+            })
+            </pre>
+            <div id="box"></div>
+        </fieldset>
+    </article>
+</body>
+</html>
