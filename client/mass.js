@@ -39,7 +39,7 @@
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
     }
-    if(commonNs.mass !== mass ){
+    if(commonNs.mass !== mass || (!_$.mass) ){
         commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
         if(commonNs.mass) {
             postfix = ( mass + "" ).replace( ".", "_" );
