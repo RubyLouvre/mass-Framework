@@ -75,10 +75,11 @@
             <tr><td>show_first:</td><td>当分页过多时，是否显示第一页。</td></tr>
             <tr><td>show_next:</td><td>当分页过多时，是否显示下一页链接。</td></tr>
             <tr><td>show_prev:</td><td>当分页过多时，是否显示上一页链接。</td></tr>
+            <tr><td>link_class:</td><td>普通分页的类名，默认为link。</td></tr>
             <tr><td>prev_class:</td><td>上一页链接的类名，默认为prev_page。</td></tr>
             <tr><td>next_class:</td><td>下一页链接的类名，默认为next_page。</td></tr>
-            <tr><td>prev_class:</td><td>上一页链接的显示文本，默认为下一页&gt;。</td></tr>
-            <tr><td>next_class:</td><td>下一页链接的显示文本，默认为&lt;上一页。</td></tr>
+            <tr><td>prev_text:</td><td>上一页链接的显示文本，默认为下一页&gt;。</td></tr>
+            <tr><td>next_text:</td><td>下一页链接的显示文本，默认为&lt;上一页。</td></tr>
             <tr><td>curr_page:</td><td>当前页面，注意为了符合普通人的常识，<span style="color:red">强制最小值是1</span>。</td></tr>
             <tr><td>per_page:</td><td>每页显示多少条目（贴子，图片什么的）。</td></tr>
             <tr><td>show_pages:</td><td>显示多少个页码，默认为10，建议取最中间的那个页码,比如是说11取6,可以确保视觉上的对称性。</td></tr>
@@ -86,9 +87,6 @@
             <tr><td>fill_text：</td><td>当分页过多时，在第一页与显示页之间或者最后一页与显示页之间的用于表示省略的文本，默认是"..."</td></tr>
             <tr><td>callback:</td><td>当点击分页栏中的链接或跳转框时触发的回调，第一个参数是事件对象，第二参数是分页栏对象，第三个参数是页码，
                     this指向当前点击的元素节点。</td></tr>
-            <tr><td>frame</td><td>每次执行补间后执行的回调函数。</td></tr>
-            <tr><td>after</td><td>动画结束时的回调函数。</td></tr>
-
         </table>
         <p>在回调函数中，我们可以调用分页栏对象的render方法重新渲染自身。</p>
         <fieldset><legend>例子</legend>
