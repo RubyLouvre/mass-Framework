@@ -6,7 +6,7 @@ http://d.hatena.ne.jp/sutara_lumpur/20100718/1279420832
 jquery.ajaxSuggest.js を公開しました。
 //ge 
 http://d.hatena.ne.jp/cyokodog/20091212/extable01
-
+IvanK http://lib.ivank.net/index.php?p=download一个基于WEBGL的动画库
 http://d.hatena.ne.jp/cyokodog/20101015/exchangeselect01
 
 http://d.hatena.ne.jp/cyokodog/20101101/exresize01
