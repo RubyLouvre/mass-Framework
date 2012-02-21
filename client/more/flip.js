@@ -1,7 +1,7 @@
 $.define("flip", "fx", function(){
     var flip = {
         begin: function() {
-            hyaline =  (!"1"[0] ? "#123456" : "transparent")
+            var hyaline =  (!"1"[0] ? "#123456" : "transparent")//透明色，IE6不支持透明，因此要使用滤镜hack一下
             return {//初始化属性
                 hyaline: hyaline,
                 backgroundColor: hyaline,
@@ -139,14 +139,12 @@ $.define("flip", "fx", function(){
                 zIndex: 9999,
                 boxShadow:"0px 0px 0px #000"
             });
-
-            // console.log({visibility:"visible",position:"absolute",left:flipObj.left,top:flipObj.top,margin:0,zIndex:9999,boxShadow:"0px 0px 0px #000"})
             var dirOption = getDirOption( message, direction, orientation);
-            if(!"1"[0]){//tb h
+            if(!"1"[0]){//fuck IE6
                 dirOption.begin.filter = "chroma(color=" + dirOption.hyaline + ")";
             }
             var middle = dirOption.middle, end = dirOption.end, self = this;
-
+            //绑定回调
             middle.before = function( clone, prop, fx ){
                 if(typeof props.before === "function" ){
                     props.before.call( self, clone, prop, fx );
