@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>TODO supply a title</title>
+        <script type="text/javascript" src="../client/mass.js">
+
+        </script>
+        <script>
+            $.require("ready,event,attr",function(){
+                $("body").delegate(".title","click",function(e){
+                    var target = $(e.target);
+                    var index = target.index();
+                
+                    $("#mass_tabs .show").removeClass("show");
+                    target.addClass("show")
+                });
+            });
+        </script>
+        <style>
+            #mass_tabs {
+                padding-top:5px;
+                position:relative;
+                height:200px;
+                width:400px;
+                padding-left:20px;
+                background:green;
+                overflow:hidden;
+            }
+            #mass_tabs .title {
+                padding:0px 10px;
+                height:20px;
+                color:#000;
+                display:inline-block;
+                line-height:20px;
+                text-align:center;
+                background:#00FF7F;
+            }
+            #mass_tabs .title.show{
+                padding-bottom:10px;
+                color:#fff;
+                background:#a9ea00;
+            }
+            #mass_tabs .panel{
+                display:none;
+                position:absolute;
+                width:500px;
+                height:100%;
+                top: 30px;
+                left:0px;
+                text-align:left;
+                background:#a9ea00;
+                color:#000;
+            }
+            #mass_tabs .show .panel{
+                display:block;
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="mass_tabs">
+            <div class="title show">
+                按钮1
+                <div class="panel show">
+                    面板1<a href="javascript:void(0)">这是里面的链接</a>
+                </div>
+            </div>
+            <div class="title">
+                按钮2
+                <div class="panel">
+                    面板2
+                </div>
+            </div>
+            <div class="title">
+                按钮3
+                <div class="panel">
+                    面板3
+                </div>
+            </div>
+            <div class="title">
+                按钮4
+                <div class="panel">
+                    面板4
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

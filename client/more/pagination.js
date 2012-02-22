@@ -96,10 +96,10 @@ $.define("pagination","event",function(){
             }
         })
     }
-})
+});
 /*
 另外suggest 我在githup上放过一个
 http://leecade.github.com/suggest/
 http://leecade.github.com/suggest/demo.html
-
+http://www.xarg.org/2011/09/jquery-pagination-revised/#1
 */
