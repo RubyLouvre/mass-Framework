@@ -39,10 +39,10 @@
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
     }
-    if(commonNs.mass !== mass || (!_$.mass) ){
+    if(commonNs.mass !== mass  ){
         commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
-        if(commonNs.mass) {
-            postfix = ( mass + "" ).replace( ".", "_" );
+        if(commonNs.mass || (_$ && typeof _$.mass !== "string")) {
+            postfix = ( mass + "" ).replace( ".", "_" ) ;//是否强制使用多库共存
         }
     }else{
         return;
@@ -393,7 +393,7 @@
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
         $.exports();
     });
-    $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
+    $.exports( "$"+  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
 })( this, this.document );
