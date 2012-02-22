@@ -13,44 +13,617 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
         <style type="text/css">
-            .pagination a , .pagination span{
-                border: 1px solid #9AAFE5;
-                color: #2E6AB1;
-                margin: 0 2px;
-                padding: 2px 5px;
-                text-decoration: none;
-            }
-            .pagination span{
-                background-color: #2E6AB1;
-                border: 1px solid navy;
-                color: #FFFFFF;
-                font-weight: bold;
-            }
-            .prev_page, .next_page {
-                background:#d8d9dd;
+            .pagination {
+                padding: 5px;
+                text-align: left !important;
             }
             .pagination input{
                 width:20px;
             }
+            /* Black-Red Style */
+            .black_red {
+                background-color: #3E3E3E;
+                color: #FFFFFF;
+                font-family: Tahoma,Arial,Helvetica,Sans-serif;
+                font-size: 11px;
+            }
+            .black_red a {
+                background-color: #3E3E3E;
+                color: #FFFFFF;
+                margin: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .black_red a:hover, .black_red a:active {
+                background-color: #EC5210;
+                color: #FFFFFF;
+            }
+            .black_red span.current {
+                background-color: #313131;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .black_red span.disabled {
+                background-color: #3E3E3E;
+                color: #868686;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+
+            .digg {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .digg a {
+                border: 1px solid #AAAADD;
+                color: #000099;
+                margin: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .digg a:hover, div.digg a:active {
+                border: 1px solid #000099;
+                color: #000000;
+            }
+            .digg span.current {
+                background-color: #000099;
+                border: 1px solid #000099;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .digg span.disabled {
+                border: 1px solid #EEEEEE;
+                color: #DDDDDD;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+
+            .yahoo {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .yahoo a {
+                border: 1px solid #FFFFFF;
+                color: #000099;
+                margin: 2px;
+                padding: 2px 5px;
+                text-decoration: underline;
+            }
+            .yahoo a:hover {
+                border: 1px solid #000099;
+                color: #000000;
+            }
+            .yahoo a:active {
+                border: 1px solid #000099;
+                color: #FF0000;
+            }
+            .yahoo span.current {
+                background-color: #FFFFFF;
+                border: 1px solid #FFFFFF;
+                color: #000000;
+                font-weight: bold;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .yahoo span.disabled {
+                border: 1px solid #EEEEEE;
+                color: #DDDDDD;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+
+            .Meneame {
+                color: #FF6500;
+                font-size: 80%;
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .Meneame a {
+                background-image: none;
+                background-position: center bottom;
+                border: 1px solid #FF9600;
+                color: #FF6500;
+                margin-right: 3px;
+                padding: 5px 7px;
+                text-decoration: none;
+            }
+            .Meneame a:hover, div.meneame a:active {
+                background-color: #FFC794;
+                background-image: none;
+                border: 1px solid #FF9600;
+                color: #FF6500;
+            }
+            .Meneame span.current {
+                background-color: #FFBE94;
+                border: 1px solid #FF6500;
+                color: #FF6500;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 5px 7px;
+            }
+            .Meneame span.disabled {
+                border: 1px solid #FFE3C6;
+                color: #FFE3C6;
+                margin-right: 3px;
+                padding: 5px 7px;
+            }
+            .new_yahoo {
+                font-family: Tahoma,Helvetica,sans-serif;
+                font-size: 0.85em;
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .new_yahoo a {
+                background-position: center bottom;
+                border: 1px solid #CCDBE4;
+                color: #0061DE;
+                margin-right: 3px;
+                padding: 2px 8px;
+                text-decoration: none;
+            }
+            .new_yahoo a:hover, .new_yahoo a:active {
+                background-color: #3666D4;
+                background-image: none;
+                border: 1px solid #2B55AF;
+                color: #FFFFFF;
+            }
+            .new_yahoo span.current {
+                color: #000000;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 2px 6px;
+            }
+            .new_yahoo span.disabled {
+                display: none;
+            }
+            .new_yahoo a.next {
+                border: 2px solid #CCDBE4;
+                margin: 0 0 0 10px;
+            }
+            .new_yahoo a.next:hover {
+                border: 2px solid #2B55AF;
+            }
+            .new_yahoo a.prev {
+                border: 2px solid #CCDBE4;
+                margin: 0 10px 0 0;
+            }
+            .new_yahoo a.prev:hover {
+                border: 2px solid #2B55AF;
+            }
+            .flickr {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .flickr a {
+                background-position: center bottom;
+                border: 1px solid #DEDFDE;
+                color: #0061DE;
+                margin-right: 3px;
+                padding: 2px 6px;
+                text-decoration: none;
+            }
+            .flickr a:hover, div.meneame a:active {
+                background-color: #0061DE;
+                background-image: none;
+                border: 1px solid #000000;
+                color: #FFFFFF;
+            }
+            .flickr span.current {
+                color: #FF0084;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 2px 6px;
+            }
+            .flickr span.disabled {
+                color: #ADAAAD;
+                margin-right: 3px;
+                padding: 2px 6px;
+            }
+            .sabros {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .sabros a {
+                border: 1px solid #9AAFE5;
+                color: #2E6AB1;
+                margin-right: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .sabros a:hover, .sabros a:active {
+                background-color: lightyellow;
+                border: 1px solid #2B66A5;
+                color: #000000;
+            }
+            .sabros span.current {
+                background-color: #2E6AB1;
+                border: 1px solid navy;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .sabros span.disabled {
+                border: 1px solid #929292;
+                color: #929292;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .green {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .green a {
+                border: 1px solid #DDDDDD;
+                color: #88AF3F;
+                margin-right: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .green a:hover, .green a:active {
+                background-color: #F1FFD6;
+                border: 1px solid #85BD1E;
+                color: #638425;
+            }
+            .green span.current {
+                background-color: #B2E05D;
+                border: 1px solid #B2E05D;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .green span.disabled {
+                border: 1px solid #F3F3F3;
+                color: #CCCCCC;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .gray {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .gray a {
+                border: 1px solid #DDDDDD;
+                color: #AAAAAA;
+                margin-right: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .gray a:hover, .gray a:active {
+                border: 1px solid #A0A0A0;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .gray span.current {
+                background-color: #F0F0F0;
+                border: 1px solid #E0E0E0;
+                color: #AAAAAA;
+                font-weight: bold;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .gray span.disabled {
+                border: 1px solid #F3F3F3;
+                color: #CCCCCC;
+                margin-right: 2px;
+                padding: 2px 5px;
+            }
+            .black {
+                color: #A0A0A0;
+                font-size: 80%;
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .black a {
+                background-image: none;
+                background-position: center bottom;
+                border: 1px solid #909090;
+                color: #C0C0C0;
+                margin-right: 3px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .black a:hover, div.meneame a:active {
+                background-color: #404040;
+                background-image: none;
+                border: 1px solid #F0F0F0;
+                color: #FFFFFF;
+            }
+            .black span.current {
+                background-color: #606060;
+                border: 1px solid #FFFFFF;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 2px 5px;
+            }
+            .black span.disabled {
+                border: 1px solid #606060;
+                color: #808080;
+                margin-right: 3px;
+                padding: 2px 5px;
+            }
+            .mis_algoritmos {
+                margin: 3px;
+                padding: 7px;
+                text-align: center;
+            }
+            .mis_algoritmos a {
+                border: 1px solid #000000;
+                color: #000000;
+                margin: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .mis_algoritmos a:hover, .mis_algoritmos a:active {
+                background-color: #000000;
+                border: 1px solid #000000;
+                color: #FFFFFF;
+            }
+            .mis_algoritmos span.current {
+                background-color: #000000;
+                border: 1px solid #000000;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .mis_algoritmos span.disabled {
+                border: 1px solid #EEEEEE;
+                color: #DDDDDD;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .f12_megas {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .f12_megas a {
+                background-position: center bottom;
+                border: 1px solid #DEDFDE;
+                color: #99210B;
+                margin-right: 3px;
+                padding: 2px 6px;
+                text-decoration: none;
+            }
+            .f12_megas a:hover, .f12_megas a:active {
+                background-color: #777777;
+                background-image: none;
+                border: 1px solid #000000;
+                color: #FFFFFF;
+            }
+            .f12_megas span.current {
+                color: #99210B;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 2px 6px;
+            }
+            .f12_megas span.disabled {
+                color: #ADAAAD;
+                margin-right: 3px;
+                padding: 2px 6px;
+            }
+            .Technorati {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .Technorati a {
+                background-position: center bottom;
+                border: 1px solid #CCCCCC;
+                color: #4261DE;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 2px 6px;
+                text-decoration: none;
+            }
+            .Technorati a:hover, .Technorati a:active {
+                background-color: #4261DF;
+                background-image: none;
+                color: #FFFFFF;
+            }
+            .Technorati span.current {
+                color: #000000;
+                font-weight: bold;
+                margin-right: 3px;
+                padding: 2px 6px;
+            }
+            .Technorati span.disabled {
+                display: none;
+            }
+            .youtube {
+                background-color: #CECFCE;
+                border-top: 1px dotted #9C9A9C;
+                color: #313031;
+                font-family: Arial,Helvetica,sans-serif;
+                font-size: 13px;
+                padding: 4px 6px 4px 0;
+                text-align: right;
+            }
+            .youtube a {
+                color: #0030CE;
+                font-weight: bold;
+                margin: 0 1px;
+                padding: 1px 3px;
+                text-decoration: underline;
+            }
+            .youtube a:hover, .youtube a:active {
+            }
+            .youtube span.current {
+                background-color: #FFFFFF;
+                color: #000000;
+                padding: 1px 2px;
+            }
+            .youtube span.disabled {
+                display: none;
+            }
+            .msdn {
+                background-color: #FFFFFF;
+                color: #313031;
+                font-family: Verdana,Tahoma,Arial,Helvetica,Sans-Serif;
+                font-size: 13px;
+                padding: 4px 6px 4px 0;
+                text-align: right;
+            }
+            .msdn a {
+                border: 1px solid #B7D8EE;
+                color: #0030CE;
+                margin: 0 3px;
+                padding: 5px 6px 4px 5px;
+                text-decoration: none;
+            }
+            .msdn a:hover, .msdn a:active {
+                background-color: #D2EAF6;
+                border: 1px solid #B7D8EE;
+                color: #0066A7;
+            }
+            .msdn span.current {
+                background-color: #D2EAF6;
+                border: 1px solid #B7D8EE;
+                color: #444444;
+                font-weight: bold;
+                margin: 0 3px;
+                padding: 5px 6px 4px 5px;
+            }
+            .msdn span.disabled {
+                display: none;
+            }
+            .badoo {
+                background-color: #FFFFFF;
+                color: #48B9EF;
+                font-family: Arial,Helvetica,sans-serif;
+                font-size: 13px;
+                padding: 10px 0;
+                text-align: center;
+            }
+            .badoo a {
+                border: 2px solid #F0F0F0;
+                color: #48B9EF;
+                margin: 0 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .badoo a:hover, .badoo a:active {
+                border: 2px solid #FF5A00;
+                color: #FF5A00;
+            }
+            .badoo span.current {
+                background-color: #FF6C16;
+                border: 2px solid #FF5A00;
+                color: #FFFFFF;
+                font-weight: bold;
+                padding: 2px 5px;
+            }
+            .badoo span.disabled {
+                display: none;
+            }
+            .blue {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+            }
+            .blue a {
+                border: 1px solid #EEEEEE;
+                color: #036CB4;
+                margin: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .blue a:hover, .blue a:active {
+                border: 1px solid #999999;
+                color: #666666;
+            }
+            .blue .current {
+                background-color: #036CB4;
+                border: 1px solid #036CB4;
+                color: #FFFFFF;
+                font-weight: bold;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .blue .disabled {
+                border: 1px solid #EEEEEE;
+                color: #DDDDDD;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .ria9 {
+                margin: 3px;
+                padding: 3px;
+                text-align: center;
+                background:#f2f2f2;
+            }
+            .ria9 a {
+                border: 1px solid #EEEEEE;
+                color: #09c;
+                margin: 2px;
+                padding: 2px 5px;
+                text-decoration: none;
+            }
+            .ria9 a:hover, .ria9 a:active {
+                border: 1px solid #09c;
+            }
+            .ria9 .current {
+                background-color: #09c;
+                border: 1px solid #09c;
+                color: #FFFFFF;
+                font-weight: 700;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+            .ria9 .disabled {
+                border: 1px solid #EEEEEE;
+                color: #DDDDDD;
+                margin: 2px;
+                padding: 2px 5px;
+            }
+
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            $.require("ready,more/pagination",function(){
+            $.require("ready,attr,more/pagination",function(){
+                var html = "<select>";
+                ("black_red,digg,badoo,yahoo,new_yahoo,Meneame,new_yahoo,flickr,sabros,green,"+
+                    "black,gray,mis_algoritmos,f12_megas,Technorati,youtube,msdn,blue,ria9").replace( $.rword, function(value){
+                    html += "<option>"+value+"<\/option>"
+                });
+                html += "<\/select>";
+                $(html).appendTo("fieldset");
                 $("#box").pagination(120,{
-                    curr_page:7,
-                    per_page:10,
+                    curr_page:1,
+                    curr_class:"current",
+                    per_pages:10,
                     show_pages:8,
-                    show_jump:true,
+                    curr_tag: "span",
                     callback: function(e, ui, i){
                         e.preventDefault();
-                        alert(i)
                         ui.curr_page = i;
                         ui.render();
                         return false;
                     }
+                }).addClass("new_yahoo")
+                $("body").delegate("select","change",function(){
+                    $("#box")[0].className = $(this).val();
                 })
-            })
+
+            });
+            // http://www.xarg.org/2011/09/jquery-pagination-revised/
         </script>
     </head>
     <body>
@@ -75,16 +648,27 @@
             <tr><td>show_first:</td><td>当分页过多时，是否显示第一页。</td></tr>
             <tr><td>show_next:</td><td>当分页过多时，是否显示下一页链接。</td></tr>
             <tr><td>show_prev:</td><td>当分页过多时，是否显示上一页链接。</td></tr>
+            <tr><td>show_jump:</td><td>是否显示跳转框。默认是false。</td></tr>
             <tr><td>link_class:</td><td>普通分页的类名，默认为link。</td></tr>
             <tr><td>prev_class:</td><td>上一页链接的类名，默认为prev_page。</td></tr>
             <tr><td>next_class:</td><td>下一页链接的类名，默认为next_page。</td></tr>
+            <tr><td>fill_class:</td><td>包围省略号的标签的类名，默认为fill_page。</td></tr>
+            <tr><td>curr_class:</td><td>当前页面链接的类名，默认为curr_page。</td></tr>
+            <tr><td>disabled_class:</td><td>上一页与下一页不可点时的类名，默认为disabled。</td></tr>
             <tr><td>prev_text:</td><td>上一页链接的显示文本，默认为下一页&gt;。</td></tr>
             <tr><td>next_text:</td><td>下一页链接的显示文本，默认为&lt;上一页。</td></tr>
-            <tr><td>curr_page:</td><td>当前页面，注意为了符合普通人的常识，<span style="color:red">强制最小值是1</span>。</td></tr>
-            <tr><td>per_page:</td><td>每页显示多少条目（贴子，图片什么的）。</td></tr>
-            <tr><td>show_pages:</td><td>显示多少个页码，默认为10，建议取最中间的那个页码,比如是说11取6,可以确保视觉上的对称性。</td></tr>
-            <tr><td>show_jump:</td><td>是否显示跳转框。默认是false。</td></tr>
             <tr><td>fill_text：</td><td>当分页过多时，在第一页与显示页之间或者最后一页与显示页之间的用于表示省略的文本，默认是"..."</td></tr>
+            <tr><td>curr_page:</td><td>当前页面，注意为了符合普通人的常识，<span style="color:red">强制最小值是1</span>。</td></tr>
+            <tr><td>per_pages:</td><td>每页显示多少条目（贴子，图片什么的）。</td></tr>
+            <tr><td>show_pages:</td><td>显示多少个页码，默认为10，建议取最中间的那个页码,比如是说11取6,可以确保视觉上的对称性。</td></tr>
+            <tr><td>curr_tag:</td><td>当前页面的标签,默认为em。</td></tr>
+            <tr><td>fill_tag:</td><td>包围省略号的标签,默认为code。</td></tr>
+            <tr><td>disabled_tag:</td><td>当上一页与下一页不可点时，其标签类型，默认是span。</td></tr>
+            <tr><td>selector:</td><td>绑定事件时,我们使用事件代理,这是其用于过滤的选择器,默认是"a,input"。</td></tr>
+            <tr><td>layout:</td><td>分页栏各种元素的排序方式，默认是"prev,first,link,last,next,jump"。</td></tr>
+            <tr><td>jump_text:</td><td>跳转框的样子，默认是"&lt;kbd&gt;跳转到第&lt;input \/&gt;页&lt;\/kbd&gt;"。</td></tr>
+            <tr><td>link_tmpl:</td><td>各种页码（如上一页，下一页，当前页，普通页，省略号）的共同模板。</td></tr>
+
             <tr><td>callback:</td><td>当点击分页栏中的链接或跳转框时触发的回调，第一个参数是事件对象，第二参数是分页栏对象，第三个参数是页码，
                     this指向当前点击的元素节点。</td></tr>
         </table>
@@ -93,46 +677,37 @@
             <pre class="brush:xml;gutter:false;toolbar:false">
                 &lt;div id="box"&gt;&lt;/div"&gt;
             </pre>
-            <pre class="brush:xml;gutter:false;toolbar:false">
-            .pagination a , .pagination span{
-                border: 1px solid #9AAFE5;
-                color: #2E6AB1;
-                margin: 0 2px;
-                padding: 2px 5px;
-                text-decoration: none;
-            }
-            .pagination span{
-                background-color: #2E6AB1;
-                border: 1px solid navy;
-                color: #FFFFFF;
-                font-weight: bold;
-            }
-            .prev_page, .next_page {
-                background:#d8d9dd;
-            }
-            .pagination input{
-                width:20px;
-            }
-            </pre>
+            
             <pre class="brush:js;gutter:false;toolbar:false">
-            $.require("ready,more/pagination",function(){
+            $.require("ready,attr,more/pagination",function(){
+                var html = "&lt;select&gt;";
+                ("black_red,digg,badoo,yahoo,new_yahoo,Meneame,new_yahoo,flickr,sabros,green,"+
+                    "black,gray,mis_algoritmos,f12_megas,Technorati,youtube,msdn,blue,ria9").replace( $.rword, function(value){
+                    html += "&lt;option&gt;"+value+"&lt;\/option&gt;"
+                });
+                html += "&lt;\/select&gt;";
+                $(html).appendTo("fieldset");
                 $("#box").pagination(120,{
-                    curr_page:7,
-                    per_page:10,
-                    show_pages:8,
-                    show_jump:true,
+                    curr_page:1,
+                    curr_class:"current",
+                    per_tgfc:10,
+                    show_tgfc:8,
+                    curr_tag: "span",
                     callback: function(e, ui, i){
                         e.preventDefault();
-                        alert(i)
                         ui.curr_page = i;
                         ui.render();
                         return false;
                     }
+                }).addClass("new_yahoo")
+                $("body").delegate("select","change",function(){
+                    $("#box")[0].className = $(this).val();
                 })
+
             })
             </pre>
             <div id="box"></div>
-            http://www.xarg.org/2011/09/jquery-pagination-revised/
+           
         </fieldset>
     </article>
 </body>

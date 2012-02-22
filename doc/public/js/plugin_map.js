@@ -3,7 +3,8 @@ $["@modules"]["@plugin_map"] = {
 }
 $.define("plugin_map",function(){
     return {
-        "$.fn.placeholder":"plugin/placeholder.html"
+        "$.fn.placeholder":"plugin/$.fn.placeholder.html",
+        "$.fn.pagination":"plugin/$.fn.pagination.html"
     }
 })
 
