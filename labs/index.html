@@ -26,30 +26,31 @@
                 width:20px;
             }
         </style>
+
+        <script type="text/javascript" src="../client/jquery.js"></script>
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
 
         <script>
-            $.require("ready,more/pagination",function(){
-                $("#box").pagination(120,{
-                    curr_page:7,
-                    per_page:10,
-                    show_pages:8,
-                    show_jump:true,
-                    callback: function(e, ui, i){
-                        e.preventDefault();
-                        alert(i)
-                        ui.curr_page = i;
-                        ui.render();
-                        return false;
-                    }
-                })
-            })
+            $1.require("ready,more/pagination",function(){
+                console.log($1);
+                alert($.globalEval+"")
+            });
+            
+           console.log( window.$.extend+" in index")
          
         </script>
     </head>
     <body>
+        <div>
+            <a href="javascript:void(0)"><span>标题1</span>
+                <div></div>
+            </a>
+            <a href="javascript:void(0)"><span>标题2</span>
+                <div></div>
+            </a>
+        </div>
         <div id="box"></div>
     </body>
 </html>
