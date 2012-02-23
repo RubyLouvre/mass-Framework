@@ -281,7 +281,7 @@
                 name  = "@"+ match[1];//取得模块名
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
                     mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    load( name, match[2], $.mass );//加载JS文件
+                    load( name, match[2] );//加载JS文件
                 }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
