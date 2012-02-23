@@ -26,30 +26,19 @@
                 width:20px;
             }
         </style>
-        <script type="text/javascript" >
-            window.$ ={}
-        </script>
+
+        <script type="text/javascript" src="../client/jquery.js"></script>
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
 
         <script>
             $1.require("ready,more/pagination",function(){
-                var $ = $1;
-                $("#box").pagination(120,{
-                    curr_page:7,
-                    per_page:10,
-                    show_pages:8,
-                    show_jump:true,
-                    callback: function(e, ui, i){
-                        e.preventDefault();
-                        $.log(i)
-                        ui.curr_page = i;
-                        ui.render();
-                        return false;
-                    }
-                })
-            })
+                console.log($1);
+                alert($.globalEval+"")
+            });
+            
+           console.log( window.$.extend+" in index")
          
         </script>
     </head>
