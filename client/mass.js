@@ -351,7 +351,7 @@
         //用于检测这模块有没有加载成功
         _checkFail : function( name, error ){
             if( error || !mapper[ name ].state ){
-                this.stack( Function( 'window.'+ $["@name"] +'.log("fail to load module [ '+name+' ]")') );
+                this.stack( Function( $["@name"] +'.log("fail to load module [ '+name+' ]")') );
                 this.stack.fire();//打印错误堆栈
             }
         }
@@ -438,6 +438,7 @@ dom.namespace改为dom["mass"]
 2012.1.29  升级到v15
 2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
 2012.2.3 $.define的第二个参数可以为boolean, 允许文件合并后，在标准浏览器跳过补丁模块
+2012.2.23 修复内部对象泄漏，导致与外部$变量冲突的BUG
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */
