@@ -196,7 +196,7 @@
     var innerDefine = function( _, deps, callback ){
         var args = arguments;
         args[0] = nick.slice(1);
-        args[ args.length - 1 ] =  parent.Function( "var $ = "+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
+        args[ args.length - 1 ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -210,7 +210,7 @@
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
-            '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
+        '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
         '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
         'Ns._checkDeps();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',

@@ -1,56 +1,100 @@
-<!DOCTYPE html>
-<html>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
     <head>
-        <meta charset="utf-8" />
-        <title>$.fn.flip</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>TODO supply a title</title>
+        <script type="text/javascript" src="../client/jquery.js">
 
-        <style type="text/css">
-
-            .pagination a , .pagination span{
-                border: 1px solid #9AAFE5;
-                color: #2E6AB1;
-                margin: 0 2px;
-                padding: 2px 5px;
-                text-decoration: none;
-            }
-            .pagination span{
-                background-color: #2E6AB1;
-                border: 1px solid navy;
-                color: #FFFFFF;
-                font-weight: bold;
-            }
-            .prev_page, .next_page {
-                background:#d8d9dd;
-            }
-            .pagination input{
-                width:20px;
-            }
-        </style>
-
-        <script type="text/javascript" src="../client/jquery.js"></script>
+        </script>
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
+         <script type="text/javascript" src="../client/mass_1.js">
 
-        <script>
-            $1.require("ready,more/pagination",function(){
-                console.log($1);
-                alert($.globalEval+"")
-            });
-            
-           console.log( window.$.extend+" in index")
-         
         </script>
+        <script>
+          
+            $1.require("ready,lang,event,attr",function(){
+                $1("body").delegate(".title","click",function(e){
+                    var target = $1(e.target);
+                    $1("#mass_tabs .show").removeClass("show");
+                    target.addClass("show")
+                });
+            });
+            console.log(window.$2.v)
+        </script>
+        <style>
+            #mass_tabs {
+                padding-top:5px;
+                position:relative;
+                height:200px;
+                width:400px;
+                padding-left:20px;
+                background:green;
+                overflow:hidden;
+            }
+            #mass_tabs .title {
+                padding:0px 10px;
+                height:20px;
+                color:#000;
+                display:inline-block;
+                line-height:20px;
+                text-align:center;
+                background:#00FF7F;
+            }
+            #mass_tabs .title.show{
+                padding-bottom:10px;
+                color:#fff;
+                background:#a9ea00;
+            }
+            #mass_tabs .panel{
+                display:none;
+                position:absolute;
+                width:500px;
+                height:100%;
+                top: 30px;
+                left:0px;
+                text-align:left;
+                background:#a9ea00;
+                color:#000;
+            }
+            #mass_tabs .show .panel{
+                display:block;
+            }
+
+        </style>
     </head>
     <body>
-        <div>
-            <a href="javascript:void(0)"><span>标题1</span>
-                <div></div>
-            </a>
-            <a href="javascript:void(0)"><span>标题2</span>
-                <div></div>
-            </a>
+        <div id="mass_tabs">
+            <div class="title show">
+                按钮1
+                <div class="panel show">
+                    面板1<a href="javascript:void(0)">这是里面的链接</a>
+                </div>
+            </div>
+            <div class="title">
+                按钮2
+                <div class="panel">
+                    面板2
+                </div>
+            </div>
+            <div class="title">
+                按钮3
+                <div class="panel">
+                    面板3
+                </div>
+            </div>
+            <div class="title">
+                按钮4
+                <div class="panel">
+                    面板4
+                </div>
+            </div>
         </div>
-        <div id="box"></div>
     </body>
 </html>

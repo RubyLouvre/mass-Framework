@@ -15,8 +15,6 @@ and open the template in the editor.
             $.require("ready,event,attr",function(){
                 $("body").delegate(".title","click",function(e){
                     var target = $(e.target);
-                    var index = target.index();
-                
                     $("#mass_tabs .show").removeClass("show");
                     target.addClass("show")
                 });
