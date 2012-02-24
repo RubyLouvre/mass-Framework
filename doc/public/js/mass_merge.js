@@ -7,7 +7,7 @@
     namespace = DOC.URL.replace( /(#.+|\W)/g,''),
     w3c = DOC.dispatchEvent, //w3c事件模型
     HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0],
-    commonNs = global[ namespace ], mass = 1.0, postfix = "",
+    commonNs = global[ namespace ], mass = 1, postfix = "",
     class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -39,10 +39,10 @@
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
     }
-    if(commonNs.mass !== mass ){
+    if(commonNs.mass !== mass  ){
         commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
-        if(commonNs.mass) {
-            postfix = ( mass + "" ).replace( ".", "_" );
+        if(commonNs.mass || (_$ && _$.mass == null)) {
+            postfix = ( mass + "" ).replace(/\D/g, "" ) ;//是否强制使用多库共存
         }
     }else{
         return;
@@ -196,7 +196,7 @@
     var innerDefine = function( _, deps, callback ){
         var args = arguments;
         args[0] = nick.slice(1);
-        args[ args.length - 1 ] =  parent.Function( "return "+ args[ args.length - 1 ] )();
+        args[ args.length - 1 ] =  parent.Function( "var $ = "+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -206,11 +206,11 @@
      * @param {String} url  模块的路径
      * @param {String} mass  当前框架的版本号
      */
-    function load( name, url, mass ){
+    function load( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent[document.URL.replace(/(#.+|\\W)/g,"")][',
-        mass, ']; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
+        codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
+            '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
         '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
         'Ns._checkDeps();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
@@ -281,7 +281,7 @@
                 name  = "@"+ match[1];//取得模块名
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
                     mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    load( name, match[2], $.mass );//加载JS文件
+                    load( name, match[2] );//加载JS文件
                 }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
@@ -351,7 +351,7 @@
         //用于检测这模块有没有加载成功
         _checkFail : function( name, error ){
             if( error || !mapper[ name ].state ){
-                this.stack( Function( 'window.'+ $["@name"] +'.log("fail to load module [ '+name+' ]")') );
+                this.stack( Function( $["@name"] +'.log("fail to load module [ '+name+' ]")') );
                 this.stack.fire();//打印错误堆栈
             }
         }
@@ -393,8 +393,7 @@
         namespace = DOC.URL.replace(/(#.+|\W)/g,'');
         $.exports();
     });
-    $.exports( "$"+ postfix );//防止不同版本的命名空间冲突
-   
+    $.exports( "$"+  postfix );//防止不同版本的命名空间冲突
 var module_value = {
                                     state:2
                                 };
@@ -1075,7 +1074,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return result;
         },
-        merge : function(target, array){
+        merge: function(target, array){
             var i = target.length, j = 0;
             for ( var n = array.length; j < n; j++ ) {
                 target[ i++ ] = array[ j ];
@@ -1518,7 +1517,7 @@ $.define("class", "lang",function(){
 //2012.1.29  修正setOptions中$.Object.merge方法的调用方式
 
 
-//==================================================
+﻿//==================================================
 // 数据缓存模块
 //==================================================
 $.define("data", "lang", function(){
@@ -5863,6 +5862,7 @@ dom.namespace改为dom["mass"]
 2012.1.29  升级到v15
 2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
 2012.2.3 $.define的第二个参数可以为boolean, 允许文件合并后，在标准浏览器跳过补丁模块
+2012.2.23 修复内部对象泄漏，导致与外部$变量冲突的BUG
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */

@@ -1,4 +1,4 @@
-
+//用于兼并容jquery几个蛋痛方法wrapAll, unwrap, wrap, wrapInner
 $.define("node_wrap",'node',function(){
     $.implement({
         /**
@@ -24,7 +24,7 @@ $.define("node_wrap",'node',function(){
             return this.map(function(el){
                 return el.parentNode;
             }).each(function(){
-                if(this.parentNode && this.parentNode.nodeType == 1 && this.tagName !== "BODY" ){
+                if( this.parentNode && this.parentNode.nodeType == 1 && this.tagName !== "BODY" ){
                     $(this,this.ownerDocument).replace(this.childNodes );
                 }
             });
@@ -42,11 +42,11 @@ $.define("node_wrap",'node',function(){
             return this.each(function() {
                 var contents = this.childNodes;
                 if ( contents.length ) {
-                    $(contents,this.ownerDocument).wrapAll( html );
+                    $( contents,this.ownerDocument ).wrapAll( html );
                 } else {
-                    $(this,this.ownerDocument ).append( html );
+                    $( this, this.ownerDocument ).append( html );
                 }
             });
         }
     });
-})
+});

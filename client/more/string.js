@@ -67,4 +67,4 @@ $.define("string", function(){
         }
     })
 
-})
+});

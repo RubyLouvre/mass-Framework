@@ -1,23 +1,23 @@
 
-$.define("more/random", function(){
+$.define("random", function(){
     var cs = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; 
     var uuid_arr =  '0123456789ABCDEFG'.split('');
     $.log("已加载random模块");
     //http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
     //http://paulirish.com/2009/random-hex-color-code-snippets/
     return {
-        hex:function(){
+        hex: function(){
             return  '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
         },
-        hsb:function(){//颜色比效鲜艳
+        hsb: function(){//颜色比效鲜艳
             return "hsb(" + Math.random()  + ", 1, 1)";
         },
-        rgb:function(){
+        rgb: function(){
             return [Math.floor(Math.random() * 255),
             Math.floor(Math.random() * 255),
             Math.floor(Math.random() * 255)];
         },
-        str:function(len,prefix) {
+        str: function(len,prefix) {
             if (!len) len = 10;
             var s = typeof prefix === "string" ? prefix : '';
             for (var i = 0; i < len; ++i) {
@@ -39,7 +39,7 @@ $.define("more/random", function(){
          例如random(1, 100, { from:1, to: 50, value:4})表示输出一个1-100之间的随机数，其中随机数出现在1-50范围内的概率是50-100范围内的4倍
         random(1, 100, {from:1,to:50,value:4}, {from:70,to:80,value:2})
   */
-        num:function (min,max,opts){
+        num: function (min,max,opts){
             //用于游戏掉装备，抽奖之类的场景，大奖只是给你看的，中奖只是给大多数人看的。 小将是人人都有机会的 场景...
             var span = max - min + 1,//默认跨度
             span2 = 0;
@@ -52,7 +52,7 @@ $.define("more/random", function(){
 //            return Math.floor(Math.random()*(max-min+1)) + min;
 //        },
         //https://github.com/louisremi/Math.uuid.js/blob/master/Math.uuid.js
-        uuid:function(){
+        uuid: function(){
             var  uuid = [], r, i = 36;
             // rfc4122 requires these characters
             uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
