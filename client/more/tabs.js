@@ -13,7 +13,7 @@ $.define("tabs","event,attr",function(){
             ui.setOptions(defaults , typeof hash === "object" ? hash : {});
             ui.sections = ui.target.find("." + ui.section_class );
             var active = ui.active_class;
-            $(document).delegate("."+ ui.trigger_class, ui.active_event+".tabs", function( e ){
+            ui.target.delegate("."+ ui.trigger_class, ui.active_event+".tabs", function( e ){
                 var section =  ui.sections.has(e.target)
                 if( !section.hasClass( active) ){
                     ui.target.find("."+active).removeClass( active );
@@ -52,8 +52,7 @@ $.define("tabs","event,attr",function(){
             }
         },
         destroy: function(){
-            $(document).undelegate("."+ this.trigger_class, this.active_event+".tabs")
-            this.target.removeData("_init_tabs");
+           this.target.undelegate("."+ this.trigger_class, this.active_event+".tabs").removeData("_init_tabs");
         }
     });
     $.fn.tabs = function(method){
