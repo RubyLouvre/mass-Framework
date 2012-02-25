@@ -1,24 +1,34 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+
+<!DOCTYPE html>
+<html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>TODO supply a title</title>
+        <script type="text/javascript" src="../client/jquery.js">
+
+        </script>
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
+        <script type="text/javascript" src="../client/mass_1.js">
+
+        </script>
         <script>
-            $.require("ready,event,attr",function(){
-                $("body").delegate(".title","click",function(e){
-                    var target = $(e.target);
-                    $("#mass_tabs .show").removeClass("show");
-                    target.addClass("show")
+
+            $1.require("ready,lang,event,attr",function(){
+                $1("body").delegate(".mass_tabs_tigger", "click", function(e){
+                    var trigger = $1(e.target);
+                    if(!trigger.is(".mass_tabs_tigger"))
+                        return
+                    if(!trigger.is("selected")){
+                        console.log(e.target)
+                        $1("#mass_tabs .selected").removeClass("selected");
+                        trigger.addClass("selected")
+                    }
+
                 });
             });
+         //   console.log(window.$2.v)
         </script>
         <style>
             #mass_tabs {
@@ -30,8 +40,10 @@ and open the template in the editor.
                 background:green;
                 overflow:hidden;
             }
-            #mass_tabs .title {
+            #mass_tabs .mass_tabs_tigger {
                 padding:0px 10px;
+                margin-left:5px;
+                float:left;
                 height:20px;
                 color:#000;
                 display:inline-block;
@@ -39,23 +51,23 @@ and open the template in the editor.
                 text-align:center;
                 background:#00FF7F;
             }
-            #mass_tabs .title.show{
-                padding-bottom:10px;
+            #mass_tabs .mass_tabs_tigger.selected{
+                padding-bottom:5px;/* panel.top - parent.padding-top - tigger.height */
                 color:#fff;
                 background:#a9ea00;
             }
-            #mass_tabs .panel{
+            #mass_tabs .mass_tabs_panel{
                 display:none;
                 position:absolute;
-                width:500px;
-                height:100%;
+                width:420px;/* parent.width+ parent.padding-left*/
+                height:175px;/* parent.height +  padding-top - tabs.top */
                 top: 30px;
                 left:0px;
                 text-align:left;
                 background:#a9ea00;
                 color:#000;
             }
-            #mass_tabs .show .panel{
+            #mass_tabs .selected .mass_tabs_panel{
                 display:block;
             }
 
@@ -63,27 +75,27 @@ and open the template in the editor.
     </head>
     <body>
         <div id="mass_tabs">
-            <div class="title show">
+            <div class="mass_tabs_tigger selected">
                 按钮1
-                <div class="panel show">
-                    面板1<a href="javascript:void(0)">这是里面的链接</a>
+                <div class="mass_tabs_panel">
+                    面板1
                 </div>
             </div>
-            <div class="title">
+            <div class="mass_tabs_tigger">
                 按钮2
-                <div class="panel">
+                <div class="mass_tabs_panel">
                     面板2
                 </div>
             </div>
-            <div class="title">
+            <div class="mass_tabs_tigger">
                 按钮3
-                <div class="panel">
+                <div class="mass_tabs_panel">
                     面板3
                 </div>
             </div>
-            <div class="title">
+            <div class="mass_tabs_tigger">
                 按钮4
-                <div class="panel">
+                <div class="mass_tabs_panel">
                     面板4
                 </div>
             </div>

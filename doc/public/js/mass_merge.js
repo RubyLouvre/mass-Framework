@@ -196,7 +196,7 @@
     var innerDefine = function( _, deps, callback ){
         var args = arguments;
         args[0] = nick.slice(1);
-        args[ args.length - 1 ] =  parent.Function( "var $ = "+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
+        args[ args.length - 1 ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -210,7 +210,7 @@
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
-            '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
+        '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
         '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
         'Ns._checkDeps();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
@@ -1396,7 +1396,7 @@ $.define("support", function(){
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-   // $.log("已加载class模块")
+    // $.log("已加载class模块")
     var
     P = "prototype",  C = "constructor", I = "@init",S = "_super",
     unextend = $.oneObject([S,P, 'extend', 'implement','_class']),
@@ -1413,13 +1413,19 @@ $.define("class", "lang",function(){
         return klass
     }
     function setOptions(){
-        [].unshift(arguments,this.options || {})
-        var options = this.options = $.Object.merge.apply(null,arguments),key,match
+        var first = arguments[0]
+        if(typeof first === "string"){
+            first = this[first] || (this[first] = {});
+            [].splice.call(arguments, 0, 1, first);
+        }else{
+            [].unshift.call(arguments,this);
+        }
+        var target = $.Object.merge.apply(null,arguments), key, match
         if (typeof this.bind == "function") {
-            for (key in options) {
+            for (key in target) {
                 if ((match = key.match(ron))) {
-                    this.bind(match[1].toLowerCase(), options[key]);
-                    delete(options[key]);
+                    this.bind(match[1].toLowerCase(), target[key]);
+                    delete(target[key]);
                 }
             }
         }

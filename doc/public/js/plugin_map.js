@@ -2,10 +2,11 @@ $["@modules"]["@plugin_map"] = {
     state:2
 }
 $.define("plugin_map",function(){
-    return {
-        "$.fn.placeholder":"plugin/$.fn.placeholder.html",
-        "$.fn.pagination":"plugin/$.fn.pagination.html"
-    }
+    var obj = {}
+    "placeholder,pagination,tabs,flip".replace($.rword, function(method){
+        obj[ "$.fn." + method ] = "plugin/$.fn."+ method +".html"
+    });
+    return obj
 })
 
 /*
