@@ -2,7 +2,7 @@
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-   // $.log("已加载class模块")
+    // $.log("已加载class模块")
     var
     P = "prototype",  C = "constructor", I = "@init",S = "_super",
     unextend = $.oneObject([S,P, 'extend', 'implement','_class']),
@@ -19,13 +19,19 @@ $.define("class", "lang",function(){
         return klass
     }
     function setOptions(){
-        [].unshift(arguments,this.options || {})
-        var options = this.options = $.Object.merge.apply(null,arguments),key,match
+        var first = arguments[0]
+        if(typeof first === "string"){
+            first = this[first] || (this[first] = {});
+            [].splice.call(arguments, 0, 1, first);
+        }else{
+            [].unshift.call(arguments,this);
+        }
+        var target = $.Object.merge.apply(null,arguments), key, match
         if (typeof this.bind == "function") {
-            for (key in options) {
+            for (key in target) {
                 if ((match = key.match(ron))) {
-                    this.bind(match[1].toLowerCase(), options[key]);
-                    delete(options[key]);
+                    this.bind(match[1].toLowerCase(), target[key]);
+                    delete(target[key]);
                 }
             }
         }
