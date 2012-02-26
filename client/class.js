@@ -68,17 +68,17 @@ $.define("class", "lang",function(){
                                 return function() {
                                     var __super = this._super,
                                     __superApply = this._superApply,
-                                    returnValue;
+                                    ret;
 
                                     this._super = _super;
                                     this._superApply = _superApply;
 
-                                    returnValue = prop.apply( this, arguments );
+                                    ret = prop.apply( this, arguments );
 
                                     this._super = __super;
                                     this._superApply = __superApply;
 
-                                    return returnValue;
+                                    return ret;
                                 };
                             })();
                             target[name].toString = function(){
