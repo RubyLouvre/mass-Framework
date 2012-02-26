@@ -412,7 +412,8 @@ $.define("fx", "css",function(){
     $.mix( $, {
         fx:  function ( nodes, duration, hash, effects ){
             nodes = nodes.mass ? nodes : $(nodes);
-            var props =  hash || duration || {}
+            var props =  hash ||  duration ;
+            props = typeof props === "object" ? props : {}
             if(typeof duration === "function"){// fx(obj fn)
                 hash = duration;               // fx(obj, 500, fn)
                 duration = 500;
@@ -561,6 +562,7 @@ $.define("fx", "css",function(){
                     $[ method ]( this );
                 })
             }else{
+             
                 return $.fx( this, duration, hash, genFx( method , 3) );
             }
         }
