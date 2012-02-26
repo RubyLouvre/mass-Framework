@@ -160,7 +160,7 @@ $.define("fx", "css",function(){
                 delete linked.stopCode;
                 isEnd = fx.gotoEnd || (now >= fx.startTime + config.duration);
                 //node, 是否结束, 进度
-                fx.render(node, isEnd, (now - fx.startTime)/config.duration); // 处理渐变
+                fx.render(node, isEnd, (now - fx.startTime)/config.duration, $); // 处理渐变
                 if(fx.render === $.noop) { //立即开始下一个动画
                     linked.positive.shift();
                 }else{
@@ -202,7 +202,7 @@ $.define("fx", "css",function(){
         return  $.css(node, "display") !== 'none';
     }
     function fxBuilder( node, linked, props, config ){
-        var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
+        var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter, _defaultTween = adapter._default.tween;",
         rewindConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         rewindProps = {};
@@ -308,7 +308,7 @@ $.define("fx", "css",function(){
             });
         }
         //生成补间函数
-        return Function( "node,isEnd,per",ret );
+        return Function( "node,isEnd,per,$",ret );
     }
 
     $.easing = {
