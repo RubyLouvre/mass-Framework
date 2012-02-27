@@ -47,10 +47,12 @@
                 <tr><td>cloneNode</td><td>在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）</td></tr>
                 <tr><td>cloneChecked</td><td>IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）</td></tr>
                 <tr><td>fastFragment</td><td>fastFragment 是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段</td></tr>
-                <tr><td>inlineBlock</td><td>在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）</td></tr>
+                <tr><td>inlineBlock</td><td>IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）</td></tr>
                 <tr><td>cssPercentedMargin</td><td>getComputedStyle API是否能支持将margin的百分比原始值自动转换为像素值</td></tr>
                 <tr><td>boxModel</td><td>是否遵循w3c的盒子boxModel去计算元素的大小(IE存在怪异模式,inconformity)</td></tr>
-
+                <tr><td>innerHTML</td><td>innerHTML是否不区分只读与可读</td></tr>
+                <tr><td>insertAdjacentHTML</td><td>insertAdjacentHTML是否可用，且不区分只读与可读</td></tr>
+                <tr><td>keepSize</td><td>在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）</td></tr>
             </tbody>
         </table>
 

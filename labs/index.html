@@ -9,87 +9,111 @@
 
         </script>
 
-  
-        <script>
-            $.require("ready,more/tabs",function(){
-                $(".mass_tabs").tabs({
-                    active_event: "mouseover"
-                }).tabs("active",2)
 
+        <script>
+            $.require("ready,fx,attr,event",function(){           
+                $(".trigger").click(function(){
+                    var sec = $(this).closest(".section");
+                    if(!sec.hasClass("active")){
+                        $(".mass_accordion .active").removeClass("active")
+     
+                        sec.addClass("active")
+                       
+                    }
+                })
             })
         </script>
         <style>
-            .mass_tabs {
-                position:relative;
-                height:200px;
-                width:400px;
+
+
+            .mass_accordion {
                 list-style:none;
-                padding-left:20px;
-                padding-top:5px;
-                background:green;
+                width:250px;
+                height:262px;
+                background:#eee;
+                border:1px solid  #bbc8d6;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
+                padding:1px;
                 overflow:hidden;
             }
-            .mass_tabs .section {
-                float:left;
-            }
-            .mass_tabs .trigger {
+            .mass_accordion .section{
+                height:260px;
                 display:inline-block;
-                height:20px;
-                line-height:20px;
-                padding:1px 10px;
-                margin-left:5px;
-                color:#000;
-                background:#00FF7F;
-                text-align:center;
+                float:left;
+                margin:0px;
+                padding:0px;
+            }
+            .mass_accordion .trigger{
+                float:left;
+                display:inline-block;
+                width:20px;
+                height:260px;
+                border:1px solid #bbc8d6;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
+                color:#09c8ff;
+                background:#fff;
                 text-decoration:none;
             }
-            .mass_tabs .active .trigger{
-                padding-bottom:8px;/* panel.top - parent.padding-top - tigger.height */
-                color:#fff;
-                background:#a9ea00;
+            .mass_accordion .trigger span{
+                display:inline-block;
+                margin-top:20px;
+                font-weight:700;
             }
-            .mass_tabs .panel{
-                display: none;
-                position:absolute;
-                width:420px;/* parent.width+ parent.padding-left*/
-                height:175px;/* parent.height +  padding-top - tabs.top */
-                top: 30px;
-                left:0px;
-                color:#000;
-                background:#a9ea00;
+            .mass_accordion .trigger:hover{
+                color:#E87b10;
+                background:#fde175;
             }
-            .mass_tabs .active .panel{
+            .mass_accordion .panel{
+                float:left;
+                width:160px;
+                height:260px;
+                display:none;
+            }
+            .mass_accordion .active .trigger{
+                border-color:#f7b500;
+                color:#fb8f00;
+                border-bottom:none;
+            }
+            .mass_accordion .active .panel{
                 display:block;
             }
-
         </style>
     </head>
     <body>
-        <ul class="mass_tabs">
-            <li class="section active">
-                <a href="javascript:void(0)" class="trigger">按钮1</a>
+        <div class="hide">
+
+        </div>
+        <div class="mass_accordion">
+            <div class="section ">
+                <a href="javascript:void(0)" class="trigger"><span>按钮1</span></a>
                 <div class="panel">
                     面板1
                 </div>
-            </li>
-            <li class="section">
-                <a href="javascript:void(0)" class="trigger">按钮2</a>
+            </div>
+            <div class="section active">
+                <a href="javascript:void(0)" class="trigger"><span>按钮2</span></a>
                 <div class="panel">
                     面板2
                 </div>
-            </li>
-            <li class="section">
-                <a href="javascript:void(0)" class="trigger">按钮3</a>
+            </div>
+            <div class="section">
+                <a href="javascript:void(0)" class="trigger"><span>按钮3</span></a>
                 <div class="panel">
                     面板3
                 </div>
-            </li>
-            <li class="section">
-                <a href="javascript:void(0)" class="trigger">按钮4</a>
+
+            </div>
+            <div class="section">
+                <a href="javascript:void(0)" class="trigger"><span>按钮4</span></a>
                 <div class="panel">
                     面板4
                 </div>
-            </li>
+
+            </div>
         </ul>
-    </body>
+</body>
 </html>
