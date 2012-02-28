@@ -1,4 +1,3 @@
-
 $.define("brower", function( ){
     //$.log("已加载brower模块");
     var ver = top.opera ? (opera.version().replace(/\d$/, "") - 0)
@@ -7,7 +6,7 @@ $.define("brower", function( ){
     return {
         //测试是否为ie或内核为trident，是则取得其版本号
         ie: !!top.VBArray && Math.max(document.documentMode||0, ver),//内核trident
-        //测试是否为firefox，是则取得其版本号
+        //测试是否为firefox，是则取得其版本(chrome17也支持此api，此处判断需要修改)
         firefox: !!top.crypto && ver,//内核Gecko
         //测试是否为opera，是则取得其版本号
         opera:  !!top.opera && ver,//内核 Presto 9.5为Kestrel 10为Carakan
