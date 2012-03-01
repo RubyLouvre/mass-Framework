@@ -79,6 +79,21 @@ $.require("ready,event,fx",function(){
         }
     });
 
-})
+});
+
+var getAPI = function(obj, com, ret, i){
+    for(var name in obj){
+        if( obj.hasOwnProperty( name ) && !com.hasOwnProperty( name ) ){
+            com[ name ] = obj[ name ];
+            var type = $.type(obj[ name ]);
+            ret[ name ] = {
+                type: type
+            }
+            if((type === "Function" || type === "Object")&& i<4){
+                getAPI(obj[ name ], com, ret, i++)
+            }
+        }
+    }
+}
 //初步完成suggest控件,其实更像IDE的语法提示
 

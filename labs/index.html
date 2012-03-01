@@ -3,117 +3,59 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <title>TODO supply a title</title>
+        <title>弹出层</title>
 
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
 
-
         <script>
-            $.require("ready,fx,attr,event",function(){           
-                $(".trigger").click(function(){
-                    var sec = $(this).closest(".section");
-                    if(!sec.hasClass("active")){
-                        $(".mass_accordion .active").removeClass("active")
-     
-                        sec.addClass("active")
-                       
-                    }
-                })
+            $.require("ready,class,support,css",function(){
+              console.log(window.$$$$)
             })
         </script>
         <style>
-
-
-            .mass_accordion {
-                list-style:none;
-                width:250px;
-                height:262px;
-                background:#eee;
-                border:1px solid  #bbc8d6;
-                -moz-border-radius: 5px;
-                -webkit-border-radius: 5px;
-                border-radius: 5px;
-                padding:1px;
-                overflow:hidden;
+            .first_menu{
+                position:relative;
+                background:#534741;
+                border-right:1px solid #998675;
+                border-bottom:1px solid #998675;
+                border-left:1px solid #998675;
+                width:100px;
+                height:20px;
+                line-height:20px;
+                text-align:center;
             }
-            .mass_accordion .section{
-                height:260px;
-                display:inline-block;
-                float:left;
-                margin:0px;
-                padding:0px;
-            }
-            .mass_accordion .trigger{
-                float:left;
-                display:inline-block;
-                width:20px;
-                height:260px;
-                border:1px solid #bbc8d6;
-                -moz-border-radius: 5px;
-                -webkit-border-radius: 5px;
-                border-radius: 5px;
-                color:#09c8ff;
-                background:#fff;
-                text-decoration:none;
-            }
-            .mass_accordion .trigger span{
-                display:inline-block;
-                margin-top:20px;
-                font-weight:700;
-            }
-            .mass_accordion .trigger:hover{
-                color:#E87b10;
-                background:#fde175;
-            }
-            .mass_accordion .panel{
-                float:left;
-                width:160px;
-                height:260px;
+            .second_menu {
+                background:#38d8d8;
+                width:100px;
+                height:20px;
+                position:absolute;
                 display:none;
+                left:100px;
+                top:0px;
             }
-            .mass_accordion .active .trigger{
-                border-color:#f7b500;
-                color:#fb8f00;
-                border-bottom:none;
-            }
-            .mass_accordion .active .panel{
+            .first_menu:hover .second_menu{
                 display:block;
             }
+
         </style>
     </head>
     <body>
-        <div class="hide">
-
+        <div class="first_menu">
+            111
+            <div class="second_menu">
+                333
+            </div>
         </div>
-        <div class="mass_accordion">
-            <div class="section ">
-                <a href="javascript:void(0)" class="trigger"><span>按钮1</span></a>
-                <div class="panel">
-                    面板1
-                </div>
-            </div>
-            <div class="section active">
-                <a href="javascript:void(0)" class="trigger"><span>按钮2</span></a>
-                <div class="panel">
-                    面板2
-                </div>
-            </div>
-            <div class="section">
-                <a href="javascript:void(0)" class="trigger"><span>按钮3</span></a>
-                <div class="panel">
-                    面板3
-                </div>
-
-            </div>
-            <div class="section">
-                <a href="javascript:void(0)" class="trigger"><span>按钮4</span></a>
-                <div class="panel">
-                    面板4
-                </div>
-
-            </div>
-        </ul>
-</body>
+        <div class="first_menu">
+            222
+        </div>
+        <div class="first_menu">
+            333
+        </div>
+        <div class="first_menu">
+            444
+        </div>
+    </body>
 </html>
