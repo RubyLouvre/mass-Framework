@@ -1,20 +1,23 @@
 $.define("menu","fx,event,attr",function(){
-
-    var addItem = function(parent, obj, level){
+    var getIP = function(){
+        return (new Date - 0)  + (Math.random()*0x1000000<<0).toString(16).slice(-6) 
+    }
+    var addItem = function(parent, obj, ip){
         var item = $("<div class='menu_item'/>")
         for(var i in obj){
             item[i] && item[i](obj[i])
         }
-        item.attr("data-level",level)
+        item.attr("ip", ip)
         return item.appendTo( parent  )
     }
     var addMenu = function(parent, cls ){
         return $("<div />").appendTo( parent  ).addClass(cls)
     }
-    var addItems = function(parent, els, level){
-        var l = 1+level
+    var addItems = function(parent, els, prefix){
+       
         for(var i = 0, el; el = els[i++];){
-            var item = addItem(parent, el, level);
+            var ip = prefix ? prefix +"-"+ getIP() : getIP()
+            var item = addItem(parent, el, ip);
             if(el.sub && el.sub.length){
                 item.css( "position","relative");
                 var p = addMenu(item).css({
@@ -22,9 +25,9 @@ $.define("menu","fx,event,attr",function(){
                     display:"none",
                     top:  -1,
                     left: item.innerWidth()
-                }).addClass("sub_menu");
+                }).addClass("sub_menu").attr("ip", ip);
 
-                addItems( p , el.sub, l)
+                addItems( p , el.sub, ip)
             }
 
         }
@@ -35,16 +38,21 @@ $.define("menu","fx,event,attr",function(){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         ui.target = addMenu(ui.parent,"mass_menu");
 
-        addItems(ui.target , hash.menu, 0 );
+        addItems(ui.target , hash.menu, "" );
       
         ui.target.delegate(".menu_item", "mouseover", function(){
             //1 第一重的子菜单不能隐藏
             //2 如果当前选中的菜单是原选中菜单之内，也不用隐藏
-          var menu = ui.target.find(".sub_menu:visible");
-            if( menu &&  $(this).attr("data-level") == menu.attr("data-level")){
-                menu.hide()
+            var self = $(this);
+            var menu = ui.target.find(".sub_menu:visible");
+            if( menu[0]){
+                var ip = self.attr("ip")
+                var lip = menu.attr("ip");
+                if( (lip.length > lip.ip ?  lip.indexOf(ip) :  ip.indexOf(lip) ) != 0){
+                    menu.hide()
+                }
             }
-             $(this).find("> .sub_menu").show()
+            $(this).find("> .sub_menu").show()
             
         });
 
