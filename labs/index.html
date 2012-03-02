@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>TODO supply a title</title>
+
+        <script type="text/javascript" src="../client/mass.js">
+
+        </script>
+
+
+        <script >
+            $.require("ready,more/menu",function( api ){
+                $("body").menu({
+                    menu:[
+                        {html:"菜单1",
+                            sub:[
+                                {html:"菜单1-1"},
+                                {html:"菜单1-2",
+                                    sub:[
+                                        {html:"菜单3-1"},
+                                        {html:"菜单3-2"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {html:"菜单2",
+                            sub:[
+                                {html:"菜单2-1"},
+                                {html:"菜单2-2"}
+                            ]},
+                        {html:"菜单3"},
+                        {html:"菜单4"}
+                    ]
+                })
+            })
+        </script>
+        <style>
+            .mass_menu , .sub_menu{
+                padding-top:1px;
+
+                background: #f08002;
+                width:100px;
+            }
+
+            .menu_item{
+                width:100px;
+                height:20px;
+                line-height:20px;
+                border:1px solid #f08002;
+                border-top:0 none;
+                background:#826a46;
+                color:#fff;
+            }
+            .menu_item:hover{
+                background:#cc9966
+            }
+         
+            .item:hover .sub{
+                 display:inline-block;
+            }
+        </style>
+    </head>
+    <body>
+       
+    </body>
+</html>

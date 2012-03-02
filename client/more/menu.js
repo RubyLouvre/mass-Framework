@@ -1,28 +1,28 @@
 $.define("menu","fx,event,attr",function(){
 
-    var addItem = function(parent , obj){
-        var item = $("<div class='menu_item'/>").html(obj.html).addClass(obj.cls)
+    var addItem = function(parent , obj, level){
+        var item = $("<div class='menu_item'/>").html(obj.html).addClass(obj.cls).attr("data-level",level)
         return item.appendTo( parent  )
     }
-    var addMenu = function(parent, cls){
+    var addMenu = function(parent, cls ){
         return $("<div />").appendTo( parent  ).addClass(cls)
     }
-    var addItems = function(parent, els){
-        //   var _d = d;
+    var addItems = function(parent, els, level){
+        var l = 1+level
         for(var i = 0, el; el = els[i++];){
-            var item = addItem(parent, el);
+            var item = addItem(parent, el, level);
             if(el.sub && el.sub.length){
                 item.css( "position","relative");
+            
                 var p = addMenu(item).css({
                     position:"absolute",
                     display:"none",
-                    top:  0,
+                    top:  -1,
                     left: item.width()
                 }).addClass("sub_menu")
             
                 p.css( "display","none")
-               
-                addItems( p , el.sub)
+                addItems( p , el.sub, l)
             }
 
         }
@@ -32,13 +32,17 @@ $.define("menu","fx,event,attr",function(){
   
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         ui.target = addMenu(ui.parent,"mass_menu")
-        addItems(ui.target , hash.menu );
+        addItems(ui.target , hash.menu, 0 );
         ui.target.delegate(".menu_item","mouseover",function(){
-            console.log("ddddddddddddddd")
-            $(this).find(".sub_menu").show()
-        }).delegate(".menu_item","mouseout",function(){
-            $(this).find(".sub_menu").hide()
+        
+            var menu = ui.target.find(".sub_menu:visible");
+            if(menu[0] && $(this).attr("data-level") == menu.parent().attr("data-level")){
+        
+                menu.hide()
+            }
+            $(this).find("> .sub_menu").show()
         })
+
 
     }
     var Menu = $.factory({
