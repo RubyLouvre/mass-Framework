@@ -8,7 +8,7 @@ $.define("brower", function( ){
         //测试是否为ie或内核为trident，是则取得其版本号
         ie: !!top.VBArray && Math.max(document.documentMode||0, ver),//内核trident
         //测试是否为firefox，是则取得其版本号
-        firefox: !!top.crypto && ver,//内核Gecko
+        firefox: !!top.netscape && ver,//内核Gecko
         //测试是否为opera，是则取得其版本号
         opera:  !!top.opera && ver,//内核 Presto 9.5为Kestrel 10为Carakan
         //测试是否为chrome，是则取得其版本号

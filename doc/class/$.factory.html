@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.factory</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("ready,class",function(){
+                    var Ancestor = $.factory({
+                        init:function(name){
+                            this.name = name;
+                        },
+                        ancestor_prop:"3333333",
+                        instance_fn:function(){
+                            return "ancestor_instance"
+                        },
+                        instance_fn2:function(){
+                            return "ancestor_instance2"
+                        },
+                        extend:{
+                            class_fn:function(){
+                                return "ancestor_class";
+                            }
+                        }
+                    });
+                    var Parent = $.factory({
+                        inherit:Ancestor,
+                        instance_fn:function(){
+                            return this._super()+"-->Parent";
+                        },
+                        extend:{
+                            class_fn:function(){
+                                return "parent_class";
+                            }
+                        }
+                    });
+                    var Son = $.factory({
+                        inherit:Parent,
+                        init:function(name,age){
+                            this.age = age;
+                        },
+                        instance_fn2:function(){
+                            return this._super()+"-->Son";
+                        },
+                        instance_fn3:function(){
+                            return "instance_fn3"
+                        },
+                        extend:{
+                            class_fn:function(){
+                                return "son_class";
+                            }
+                        }
+                    });
+
+
+                    var p = new Parent("john");
+                    $.log(p.instance_fn(),true);
+                    $.log(Parent.class_fn(),true);
+                    var s = new Son("nasami", 14);
+                    $.log(s.instance_fn(),true);
+                    $.log(s.instance_fn2(),true);
+                    $.log(Son.class_fn(),true);
+                    $.log(s.age,true);
+                    $.log(s.name,true);
+                    var a = new Ancestor("时光之轮",30);
+                    $.log(a.age,true);
+                    $.log(a.name,true);
+                    $.log(s instanceof Parent,true);
+                });
+            }
+            var exec2 = function(){
+                $.require("ready,class",function(){
+                    var A = $.factory({
+                        init:function(name){
+                            this.name = name;
+                        },
+                        valueOf:function(){
+                            return this.name+"111"
+                        },
+                        toString:function(){
+                            return this.name+"222"
+                        }
+                    });
+                    var a = new A("小明");
+                    $.log(a.valueOf(),true)
+                    $.log(a.toString(),true)
+                });
+            }
+
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>class模块</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>mass Framework的类工厂模块，它只包含一个factory方法。通过它创建的类，能够通过this._super访问其父类（继承链），
+            或在其实例方法中，能够通过_super()调用其父类的同名方法（方法链）。</p>
+        <p>factory方法只有一个参数，为对象，它拥有如下特殊的值来让用户实现自己的类：</p>
+        <dl>
+            <dt>init</dt>
+            <dd>可选。Function。新类的构造器。</dd>
+            <dt>extend</dt>
+            <dd>可选。Object或Array。里面包含所有新类拥有的静态成员。</dd>
+            <dt>implement</dt>
+            <dd>可选。Object或Array。里面包含所有新类拥有的实例成员。</dd>
+            <dt>inherit</dt>
+            <dd>可选。Function。父类。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>Function。一个新类。</p>
+        <p>生成的新类拥有以下方法或属性</p>
+        <table class="table1">
+            <tbody>
+                <tr><td>_init</td><td>返回一个包含自身及其所有父类的原始构造器的数组。</td></tr>
+                <tr><td>_super</td><td>如果在构造器中，它指向其父类，在普通方法中，指向其同名的父方法。</td></tr>
+                <tr><td>_superApply</td><td>此方法只存在于普通方法中，用于传入当前方法的arguments对象或数组，可以说是_super的便捷形式。</td></tr>
+                <tr><td>setOptions</td><td>用于在构造器中，一次性添加多个新属性或新方法。如果第一个参数为字符串，
+                        它则在此实例的同名属性（没有则动态生成一个），常见用法是this.setOptions("options", defaults, obj1, obj2)</td></tr>
+              
+            </tbody>
+        </table>
+        <p>另外,生成的新类还拥有两个重要的静态方法，extend是用来扩展静态成员，implement是用来扩展原型成员。</p>
+        <fieldset><legend>例子</legend>
+            <p>超类-子类的关系是一种is-a关系。在设计对象继承层次的时候，对象模块使用子类化技术，这样就可以说子类是父类同样的类。例如：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+      $.require("class,spec",function(){
+
+        var Shape = $.factory({
+          init:function(len){
+            $.log(len)
+            this.length = len || 0;
+          },
+          getLength:function(){
+            return this.length;
+          },
+          setLength:function(len){
+            this.length = len;
+          },
+          getArea:function(){
+            throw "Subclasses must implement this method"
+          }
+        })
+
+        var Triangle =  $.factory({
+          inherit:Shape,
+          init:function(len,hei){//len属性在父类中已定义，这里可以省去
+            this.height = hei || 0;
+          },
+          getArea:function(){
+            return this.length * this.height /2
+          }
+        })
+        var Square =  $.factory({
+          inherit:Shape,
+          getArea:function(){
+            return this.length * this.length;
+          }
+        });
+        var t = new Triangle(3,4)
+        $.log(t.getArea(),true)
+        var s = new Square(4)
+        $.log(s.getArea(),true)
+      });
+            </pre>
+            <p>在上面的例子中，三角形(Triangle)是一种(is-a)形状(Shape)，因此Triangle类子类化了Shape类，
+                正方形(Square)也是一种(is-a)形状(Shape)，因此Square类也子类化了Shape类。</p>
+            <p>然而，子类化可以变得非常复杂，尤其在多继承的情况下。多继承允许一个类继承一个以上基类。
+                过分依赖于继承的软件通常形成扩展很广层次很深的继承树，一个类继承自多个超类可能会贯穿到整个系统中。由于多继承意味着实现继承(implementation inheritance)，
+                定位一个方法的实现和确认调用正确的方法变成了一种挑战。实此mass Framework摒弃多重继续这种做法，使用组合模式
+                来建创新类。</p>
+            <p>比如一只鸟，我们不可能搞一个抽象类，拥有会飞的这个接口，因此有的鸟不会飞，也不可能搞个夜晚睡觉的接口，因为有的是夜行。
+                因此我们把它们分散到一个模块中，用implement去实现它。
+            </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+       var owlFly = {
+          fly:function(){
+            return "能飞"
+          }
+        }
+        var owlHabit = {
+          getFood: function(){
+            return "老鼠"
+          },
+          isNightWalk :function(){
+            return true
+          }
+        }
+        var Bird = $.factory({
+          init:function(name){
+            this.name = name
+          }
+        })
+        var Owl = $.factory({
+          inherit:Bird,
+          implement:[owlFly,owlHabit]
+        });
+        var owl = new Owl("猫头鹰1号");
+        $.log(owl.name,true);
+        $.log(owl.fly(),true);
+        $.log(owl.getFood(),true);
+        $.log(owl.isNightWalk(),true);
+            </pre>
+            <p>例子3：一个复杂的继承体系。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("ready,class",function(){
+                    var Ancestor = $.factory({
+                        init:function(name){
+                            this.name = name;
+                        },
+                        ancestor_prop:"3333333",
+                        instance_fn:function(){
+                            return "ancestor_instance"
+                        },
+                        instance_fn2:function(){
+                            return "ancestor_instance2"
+                        },
+                        extend:{
+                            class_fn:function(){
+                                return "ancestor_class";
+                            }
+                        }
+                    });
+                    var Parent = $.factory({
+                        inherit:Ancestor,
+                        instance_fn:function(){
+                            return this._super()+"-->Parent";
+                        },
+                        extend:{
+                            class_fn:function(){
+                                return "parent_class";
+                            }
+                        }
+                    });
+                    var Son = $.factory({
+                        inherit:Parent,
+                        init:function(name,age){//name属性在父类已定义，这里可以省去
+                            this.age = age;
+                        },
+                        instance_fn2:function(){
+                            return this._super()+"-->Son";
+                        },
+                        instance_fn3:function(){
+                            return "instance_fn3"
+                        },
+                        extend:{
+                            class_fn:function(){
+                                return "son_class";
+                            }
+                        }
+                    });
+
+
+                    var p = new Parent("john");
+                    $.log(p.instance_fn(),true);
+                    $.log(Parent.class_fn(),true);
+                    var s = new Son("nasami", 14);
+                    $.log(s.instance_fn(),true);
+                    $.log(s.instance_fn2(),true);
+                    $.log(Son.class_fn(),true);
+                    $.log(s.age,true);
+                    $.log(s.name,true);
+                    var a = new Ancestor("时光之轮",30);
+                    $.log(a.age,true);
+                    $.log(a.name,true);//undefined
+                    $.log(s instanceof Parent,true);
+                });
+
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+
+        </fieldset>
+
+        <fieldset><legend>例子</legend>
+            <pre class="brush:js;gutter:false;toolbar:false">
+      $.require("ready,class",function(){
+        var A = $.factory({
+          init:function(name){
+            this.name = name;
+          },
+          valueOf:function(){
+            return this.name+"111"
+          },
+          toString:function(){
+            return this.name+"222"
+          }
+        });
+        var a = new A("小明");
+        $.log(a.valueOf(),true)
+        $.log(a.toString(),true)
+      });
+            </pre>
+            <button onclick="exec2()">点我，执行代码</button>
+        </fieldset>
+
+       
+    </article>
+</body>
+</html>
