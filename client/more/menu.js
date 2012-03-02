@@ -1,6 +1,6 @@
 $.define("menu","fx,event,attr",function(){
     var getIP = function(){
-        return (new Date - 0)  + (Math.random()*0x1000000<<0).toString(16).slice(-6) 
+        return (Math.random()*0x1000000<<0).toString(16).slice(-6) //(new Date - 0)  +
     }
     var addItem = function(parent, obj, ip){
         var item = $("<div class='menu_item'/>")
@@ -39,20 +39,26 @@ $.define("menu","fx,event,attr",function(){
         ui.target = addMenu(ui.parent,"mass_menu");
 
         addItems(ui.target , hash.menu, "" );
-      
+        var last = {}
         ui.target.delegate(".menu_item", "mouseover", function(){
             //1 第一重的子菜单不能隐藏
             //2 如果当前选中的菜单是原选中菜单之内，也不用隐藏
             var self = $(this);
-            var menu = ui.target.find(".sub_menu:visible");
-            if( menu[0]){
-                var ip = self.attr("ip")
-                var lip = menu.attr("ip");
-                if( (lip.length > lip.ip ?  lip.indexOf(ip) :  ip.indexOf(lip) ) != 0){
-                    menu.hide()
+            if( last[0]){
+                var self_ip = self.attr("ip")
+                var last_ip = last.attr("ip");
+                    console.log(self_ip.indexOf(last_ip) )
+                if(last_ip.length > self_ip.length || self_ip.indexOf(last_ip) == -1){
+                    last.hide();
+                
                 }
+
+//                console.log(lip)
+//                if( (lip.length > lip.ip ?  lip.indexOf(ip) :  ip.indexOf(lip) ) != 0){
+//                    last.hide()
+//                }
             }
-            $(this).find("> .sub_menu").show()
+            last = $(this).find("> .sub_menu").show()
             
         });
 
