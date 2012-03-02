@@ -36,12 +36,16 @@ $.define("menu","fx,event,attr",function(){
         ui.target = addMenu(ui.parent,"mass_menu");
 
         addItems(ui.target , hash.menu, 0 );
+      
         ui.target.delegate(".menu_item", "mouseover", function(){
-            var menu = ui.target.find(".sub_menu:visible");
-            if( $(this).attr("data-level") == menu.parent().attr("data-level")){
+            //1 第一重的子菜单不能隐藏
+            //2 如果当前选中的菜单是原选中菜单之内，也不用隐藏
+          var menu = ui.target.find(".sub_menu:visible");
+            if( menu &&  $(this).attr("data-level") == menu.attr("data-level")){
                 menu.hide()
             }
-            $(this).find("> .sub_menu").show()
+             $(this).find("> .sub_menu").show()
+            
         });
 
     }
