@@ -358,12 +358,30 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
     }
-    function getWH( node, name, extra  ) {//注意 name是首字母大写
-        var none = 0, getter = $.cssAdapter["_default:get"], which = cssPair[name];
-        if(getter(node,"display") === "none" ){
-            none ++;
-            node.style.display = "block";
+    var cssShow = { 
+        position: "absolute", 
+        visibility: "hidden", 
+        display: "block" 
+    }
+    var showHidden = function(node, array){
+        if( !node.offsetWidth ){
+            var obj = { 
+                node: node
+            }
+            for ( name in cssShow ) {
+                obj[ name ] = node.style[ name ];
+                node.style[ name ] = cssShow[ name ];
+            }
+            array.push( obj );
         }
+        if(!node.offsetWidth){
+            showHidden(node.parentNode, array)
+        }
+    }
+    
+    function getWH( node, name, extra  ) {//注意 name是首字母大写
+        var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
+        showHidden(node, hidden )
         var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
         val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
         extra = extra || 0;
@@ -376,7 +394,14 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 val += parseFloat(getter(node, 'margin' + direction )) || 0;
             }
         });
-        none && (node.style.display = "none");
+        for(var i = 0, obj; obj = hidden[i++];){
+            node = obj.node;
+            for ( name in obj ) {
+                if(typeof obj[ name ] == "string"){
+                    node.style[ name ] = obj[ name ];
+                }
+            }
+        }
         return val;
     };
     //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
