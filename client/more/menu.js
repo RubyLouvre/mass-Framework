@@ -1,7 +1,11 @@
 $.define("menu","fx,event,attr",function(){
 
-    var addItem = function(parent , obj, level){
-        var item = $("<div class='menu_item'/>").html(obj.html).addClass(obj.cls).attr("data-level",level)
+    var addItem = function(parent, obj, level){
+        var item = $("<div class='menu_item'/>")
+        for(var i in obj){
+            item[i] && item[i](obj[i])
+        }
+        item.attr("data-level",level)
         return item.appendTo( parent  )
     }
     var addMenu = function(parent, cls ){
@@ -13,15 +17,13 @@ $.define("menu","fx,event,attr",function(){
             var item = addItem(parent, el, level);
             if(el.sub && el.sub.length){
                 item.css( "position","relative");
-            
                 var p = addMenu(item).css({
                     position:"absolute",
                     display:"none",
                     top:  -1,
-                    left: item.width()
-                }).addClass("sub_menu")
-            
-                p.css( "display","none")
+                    left: item.innerWidth()
+                }).addClass("sub_menu");
+
                 addItems( p , el.sub, l)
             }
 
@@ -31,18 +33,16 @@ $.define("menu","fx,event,attr",function(){
     function init( ui, hash ){
   
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
-        ui.target = addMenu(ui.parent,"mass_menu")
+        ui.target = addMenu(ui.parent,"mass_menu");
+
         addItems(ui.target , hash.menu, 0 );
-        ui.target.delegate(".menu_item","mouseover",function(){
-        
+        ui.target.delegate(".menu_item", "mouseover", function(){
             var menu = ui.target.find(".sub_menu:visible");
-            if(menu[0] && $(this).attr("data-level") == menu.parent().attr("data-level")){
-        
+            if( $(this).attr("data-level") == menu.parent().attr("data-level")){
                 menu.hide()
             }
             $(this).find("> .sub_menu").show()
-        })
-
+        });
 
     }
     var Menu = $.factory({
@@ -63,6 +63,8 @@ $.define("menu","fx,event,attr",function(){
 
         },
         destroy: function(){
+            this.target.delegate(".menu_item");
+            this.target.remove();
         }
     });
     $.fn.menu = function( method){
@@ -83,3 +85,30 @@ $.define("menu","fx,event,attr",function(){
         return this;
     }
 })
+/*
+          $.require("ready,more/menu",function( api ){
+                $("body").menu({
+                    menu:[
+                        {html:"菜单1",
+                            sub:[
+                                {html:"菜单1-1"},
+                                {html:"菜单1-2",
+                                    sub:[
+                                        {html:"菜单3-1"},
+                                        {html:"菜单3-2"}
+                                    ]
+                                }
+                            ]
+                        },
+                        {html:"菜单2",
+                            sub:[
+                                {html:"菜单2-1"},
+                                {html:"菜单2-2"}
+                            ]},
+                        {html:"菜单3"},
+                        {html:"菜单4"}
+                    ]
+                })
+            })
+
+*/

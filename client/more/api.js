@@ -28,7 +28,7 @@ $.define("api", function(){
     //        })
     //它利用上述方法与属性在mass.js这个文件的三处，求得整个框架的API
     return {
-        "@core": {
+        "模块加载模块": {
             "html": "object",
             "head": "object",
             "rword": "object",
@@ -60,7 +60,7 @@ $.define("api", function(){
             "_checkDeps": "function",
             "_checkFail": "function"
         },
-        "@support": {
+        "特征嗅探模块": {
             "support": {
                 "insertTbody": "boolean",
                 "checkOn": "boolean",
@@ -86,7 +86,7 @@ $.define("api", function(){
                 "boxModel": "boolean"
             }
         },
-        "@lang": {
+        "语言扩展模块": {
             "isPlainObject": "function",
             "isNative": "function",
             "isEmptyObject": "function",
@@ -176,15 +176,15 @@ $.define("api", function(){
                 "without": "function"
             }
         },
-        "@class": {
-            "@class": {
+        "类工厂模块": {
+            "mutators": {
                 "inherit": "function",
                 "implement": "function",
                 "extend": "function"
             },
             "factory": "function"
         },
-        "@query": {
+        "选择器模块": {
             "isXML": "function",
             "contains": "function",
             "getText": "function",
@@ -243,14 +243,14 @@ $.define("api", function(){
                 }
             }
         },
-        "@data": {
+        "数据缓存模块": {
             "memcache": "object",
             "data": "function",
             "_data": "function",
             "removeData": "function",
             "mergeData": "function"
         },
-        "@node": {
+        "节点操作模块": {
             "inherit": "function",
             "implement": "function",
             "extend": "function",
@@ -315,7 +315,7 @@ $.define("api", function(){
             "access": "function",
             "parseHTML": "function"
         },
-        "@target": {
+        "事件派发器模块": {
             "eventAdapter": "object",
             "event": {
                 "bind": "function",
@@ -334,9 +334,10 @@ $.define("api", function(){
                 "defineEvents": "function"
             }
         },
-        "@attr": {
+        "属性操作模块": {
             "fn": {
                 "addClass": "function",
+                "class": "function",
                 "hasClass": "function",
                 "removeClass": "function",
                 "toggleClass": "function",
@@ -443,7 +444,7 @@ $.define("api", function(){
             },
             "valAdapter": "object"
         },
-        "@event": {
+        "DOM事件模块": {
             "fn": {
                 "toggle": "function",
                 "hover": "function",
@@ -489,7 +490,7 @@ $.define("api", function(){
             },
             "eventSupport": "function"
         },
-        "@css": {
+        "样式操作模块": {
             "fn": {
                 "css": "function",
                 "rotate": "function",
@@ -557,7 +558,7 @@ $.define("api", function(){
             "_toMatrixObject": "function",
             "transform": "function"
         },
-        "@fx": {
+        "动画模块": {
             "fn": {
                 "fx": "function",
                 "stop": "function",
@@ -585,10 +586,10 @@ $.define("api", function(){
             "hide": "function",
             "toggle": "function"
         },
-        "@flow":{
+        "操作流模块":{
             "flow":"function"
         },
-        "@ajax": {
+        "AJAX模块": {
             "get": "function",
             "post": "function",
             "getScript": "function",
