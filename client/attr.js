@@ -1,5 +1,5 @@
 $.define("attr","support,node", function( support ){
-   // $.log("已加载attr模块")
+    // $.log("已加载attr模块")
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
@@ -172,7 +172,7 @@ $.define("attr","support,node", function( support ){
             return $.access( this, name, value, $[method] );
         }
     });
-        
+    $.fn["class"] = $.fn.addClass;
     $.extend({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
