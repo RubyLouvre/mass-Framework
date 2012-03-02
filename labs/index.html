@@ -11,109 +11,39 @@
 
 
         <script>
-            $.require("ready,fx,attr,event",function(){           
-                $(".trigger").click(function(){
-                    var sec = $(this).closest(".section");
-                    if(!sec.hasClass("active")){
-                        $(".mass_accordion .active").removeClass("active")
-     
-                        sec.addClass("active")
-                       
-                    }
+            $.require("ready,more/menu",function( api ){
+                $("body").menu({
+                    menu:[
+                        {html:"aaaa",
+                            sub:[
+                                {html:"ddfsdf"},
+                                 {html:"ddfsdf"}
+                            ]
+                        },
+                        {html:"bbbb"},
+                        {html:"cccc"},
+                        {html:"dddd"}
+                    ]
                 })
             })
         </script>
         <style>
-
-
-            .mass_accordion {
-                list-style:none;
-                width:250px;
-                height:262px;
-                background:#eee;
-                border:1px solid  #bbc8d6;
-                -moz-border-radius: 5px;
-                -webkit-border-radius: 5px;
-                border-radius: 5px;
-                padding:1px;
-                overflow:hidden;
+            .mass_menu {
+                width:200px;
             }
-            .mass_accordion .section{
-                height:260px;
-                display:inline-block;
-                float:left;
-                margin:0px;
-                padding:0px;
+            .menu_item{
+                width:100px;
+                height:20px;
+                line-height:20px;
+                text-align:center;
+                background:blue;
             }
-            .mass_accordion .trigger{
-                float:left;
-                display:inline-block;
-                width:20px;
-                height:260px;
-                border:1px solid #bbc8d6;
-                -moz-border-radius: 5px;
-                -webkit-border-radius: 5px;
-                border-radius: 5px;
-                color:#09c8ff;
-                background:#fff;
-                text-decoration:none;
-            }
-            .mass_accordion .trigger span{
-                display:inline-block;
-                margin-top:20px;
-                font-weight:700;
-            }
-            .mass_accordion .trigger:hover{
-                color:#E87b10;
-                background:#fde175;
-            }
-            .mass_accordion .panel{
-                float:left;
-                width:160px;
-                height:260px;
-                display:none;
-            }
-            .mass_accordion .active .trigger{
-                border-color:#f7b500;
-                color:#fb8f00;
-                border-bottom:none;
-            }
-            .mass_accordion .active .panel{
-                display:block;
+            .menu_item:hover{
+                 background:red;
             }
         </style>
     </head>
     <body>
-        <div class="hide">
 
-        </div>
-        <div class="mass_accordion">
-            <div class="section ">
-                <a href="javascript:void(0)" class="trigger"><span>按钮1</span></a>
-                <div class="panel">
-                    面板1
-                </div>
-            </div>
-            <div class="section active">
-                <a href="javascript:void(0)" class="trigger"><span>按钮2</span></a>
-                <div class="panel">
-                    面板2
-                </div>
-            </div>
-            <div class="section">
-                <a href="javascript:void(0)" class="trigger"><span>按钮3</span></a>
-                <div class="panel">
-                    面板3
-                </div>
-
-            </div>
-            <div class="section">
-                <a href="javascript:void(0)" class="trigger"><span>按钮4</span></a>
-                <div class="panel">
-                    面板4
-                </div>
-
-            </div>
-        </ul>
-</body>
+    </body>
 </html>
