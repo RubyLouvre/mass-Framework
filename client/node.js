@@ -19,7 +19,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         }
         return document;
     }
-    $.mix( $, $[ "@class" ] ).implement({
+    $.mix( $, $.mutators ).implement({
         init:function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
