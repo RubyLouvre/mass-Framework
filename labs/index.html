@@ -11,21 +11,46 @@
 
         <script >
             $.require("ready,more/menu,more/api",function( _,_,api ){
-                var makeData = function( json ){
+                var pathMap = {
+                    "模块加载模块": "core/$",
+                    "特征嗅探模块": "support/$",
+                    "语言扩展模块": "lang/$",
+                    "类工厂模块":   "class/$",
+                    "选择器模块":   "query/$",
+                    "数据缓存模块": "data/$",
+                    "节点操作模块": "node/$",
+                    "事件派发器模块":"target/$",
+                    "属性操作模块": "attr/$",
+                    "DOM事件模块": "event/$",
+                    "样式操作模块": "css/$",
+                    "动画模块":     "fx/$",
+                    "操作流模块":   "flow/$",
+                    "AJAX模块":     "ajax/$"
+                }
+                var makeData = function( json, path ){
                     return  Object.keys( json ).map(function(key){
                         var ret = {
                             html: key
                         }
+                        var new_path = path + (pathMap[key] || key) + "."
                         if(typeof json[ key ] === "object"){
-                            ret.sub = makeData( json[ key ])
+                            ret.sub = makeData( json[ key ], new_path)
+                        }else{
+                            ret.attr = {
+                                type: json[ key ],
+                                path: new_path + "html"
+                            }
                         }
                         return ret;
                     },json );
                 }
-             //   console.log( makeData(api) );
-                 $("body").menu({
-                     menu: makeData(api)
-                 })
+                var id = $("body").menu({
+                    menu: makeData(api, "")
+                }).menu("getID");
+
+                $("body").delegate("#"+id+" .menu_item", "click", function(){
+                    $.log($(this).attr("path"))
+                })
             })
         </script>
         <style>

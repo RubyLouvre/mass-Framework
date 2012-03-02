@@ -1,23 +1,19 @@
 $.define("menu","fx,event,attr",function(){
-    var getIP = function(){
-        return (Math.random()*0x1000000<<0).toString(16).slice(-6) //(new Date - 0)  +
-    }
-    var addItem = function(parent, obj, ip){
+
+    var addItem = function(parent, obj){
         var item = $("<div class='menu_item'/>")
         for(var i in obj){
             item[i] && item[i](obj[i])
         }
-        item.attr("ip", ip)
         return item.appendTo( parent  )
     }
     var addMenu = function(parent, cls ){
         return $("<div />").appendTo( parent  ).addClass(cls)
     }
-    var addItems = function(parent, els, prefix){
+    var addItems = function(parent, els ){
        
         for(var i = 0, el; el = els[i++];){
-            var ip = prefix ? prefix +"-"+ getIP() : getIP()
-            var item = addItem(parent, el, ip);
+            var item = addItem(parent, el );
             if(el.sub && el.sub.length){
                 item.css( "position","relative");
                 var p = addMenu(item).css({
@@ -25,41 +21,26 @@ $.define("menu","fx,event,attr",function(){
                     display:"none",
                     top:  -1,
                     left: item.innerWidth()
-                }).addClass("sub_menu").attr("ip", ip);
+                }).addClass("sub_menu")
 
-                addItems( p , el.sub, ip)
+                addItems( p , el.sub );
             }
 
         }
     }
-    var defaults = {};
     function init( ui, hash ){
-  
-        ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         ui.target = addMenu(ui.parent,"mass_menu");
-
-        addItems(ui.target , hash.menu, "" );
-        var last = {}
+        var ID = "mass_menu"+(new Date - 0);
+        ui.target.attr("id", ID );
+        ui.ID = ID;
+        addItems(ui.target , hash.menu );
         ui.target.delegate(".menu_item", "mouseover", function(){
-            //1 第一重的子菜单不能隐藏
-            //2 如果当前选中的菜单是原选中菜单之内，也不用隐藏
-            var self = $(this);
-            if( last[0]){
-                var self_ip = self.attr("ip")
-                var last_ip = last.attr("ip");
-                    console.log(self_ip.indexOf(last_ip) )
-                if(last_ip.length > self_ip.length || self_ip.indexOf(last_ip) == -1){
-                    last.hide();
-                
-                }
-
-//                console.log(lip)
-//                if( (lip.length > lip.ip ?  lip.indexOf(ip) :  ip.indexOf(lip) ) != 0){
-//                    last.hide()
-//                }
+            var last = ui.target.find(".sub_menu:visible").last();
+            if(!last[0] || $.contains(last[0], this)){
+                $(this).find("> .sub_menu").show();
+            }else{
+                last.hide();
             }
-            last = $(this).find("> .sub_menu").show()
-            
         });
 
     }
@@ -69,41 +50,41 @@ $.define("menu","fx,event,attr",function(){
         },
         invoke: function(method, value){
             if(typeof this[method] === "function"){
-                this[method].apply( this, [].slice.call(arguments,1) );
+                return this[method].apply( this, [].slice.call(arguments,1) );
             }else{
                 this[method] = value;
             }
         },
-        active: function(index, callback){
-
-        },
-        remove: function(index,callback){
-
+        getID: function(){
+            return this.ID;
         },
         destroy: function(){
-            this.target.delegate(".menu_item");
+            this.target.undelegate(".menu_item","mouseover");
             this.target.remove();
         }
     });
     $.fn.menu = function( method){
         for(var i =0 ; i < this.length; i++){
             if(this[i] && this[i].nodeType === 1){
-                var tabs = $.data(this[i],"_init_menu")
-                if(! tabs  ){
-                    tabs = new Menu(this[i]);
-                    init(tabs, method);
-                    $.data(this[i],"_init_menu");
+                var menu = $.data(this[i],"_init_menu")
+                if(! menu  ){
+                    menu = new Menu(this[i]);
+                    init(menu, method);
+                    $.data(this[i],"_init_menu", menu);
                 }else if(typeof method == "string"){
-                    tabs.invoke.apply(tabs, arguments )
+                    var ret =  menu.invoke.apply(menu, arguments );
+                    if(ret !== void 0){
+                        return ret;
+                    }
                 }else if(method && typeof method == "object"){
-                    tabs.setOptions( method );
+                    menu.setOptions( method );
                 }
             }
         }
         return this;
     }
 })
-/*
+    /*
           $.require("ready,more/menu",function( api ){
                 $("body").menu({
                     menu:[
@@ -129,4 +110,4 @@ $.define("menu","fx,event,attr",function(){
                 })
             })
 
-*/
+     */
