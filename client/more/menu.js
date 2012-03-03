@@ -1,17 +1,16 @@
 $.define("menu","fx,event,attr",function(){
 
-    var addItem = function(parent, obj){
+    var addItem = function( parent, obj ){
         var item = $("<div class='menu_item'/>")
         for(var i in obj){
-            item[i] && item[i](obj[i])
+            item[i] && item[i]( obj[i] );
         }
-        return item.appendTo( parent  )
+        return item.appendTo( parent );
     }
-    var addMenu = function(parent, cls ){
+    var addMenu = function( parent, cls ){
         return $("<div />").appendTo( parent  ).addClass(cls)
     }
-    var addItems = function(parent, els ){
-       
+    var addItems = function( parent, els ){
         for(var i = 0, el; el = els[i++];){
             var item = addItem(parent, el );
             if(el.sub && el.sub.length){
@@ -29,19 +28,28 @@ $.define("menu","fx,event,attr",function(){
         }
     }
     var defaults = {
-        hover_class: "hover"
+        menu:[],
+        hover_class: "hover",
+        direction: "vertical"
     }
     function init( ui, hash ){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         delete ui.menu;//结构过于庞大，没有必要储存它
-        ui.target = addMenu(ui.parent,"main_menu");
+        ui.target = addMenu(ui.parent,"main_menu" );
         var ID = "mass_menu_"+(new Date - 0);
         ui.target.attr("id", ID );
         ui.ID = ID;
         addItems(ui.target , hash.menu );
         var hover = ui.hover_class;
+        if(ui.direction == "horizontal"){
+            var first = ui.target.find(">.menu_item").css("float","left");
+            first.find("> .sub_menu").css({
+                top: first.innerHeight(),
+                left: 0,//(parseFloat(first.css("border-left-width")) + parseFloat(first.css("padding-left"))) * -1,
+                zIndex:~~first.css("z-index")+1
+            })
+        }
         ui.target.delegate(".menu_item", "mouseover", function(){
-            console.log("ddddddddddd")
             ui.target.find("."+hover).removeClass(hover);
             $(this).addClass(hover).find("> .sub_menu").show(500);
             ui.target.find(".sub_menu:visible:not(:has(."+hover+"))").hide()

@@ -3,7 +3,7 @@ $["@modules"]["@plugin_map"] = {
 }
 $.define("plugin_map",function(){
     var obj = {}
-    "placeholder,pagination,tabs,flip".replace($.rword, function(method){
+    "placeholder,pagination,tabs,flip,menu".replace($.rword, function(method){
         obj[ "$.fn." + method ] = "plugin/$.fn."+ method +".html"
     });
     return obj

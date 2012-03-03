@@ -50,19 +50,96 @@
                     },json );
                 }
                 var id = $("body").menu({
-                    menu: makeData(api, "")
+                    menu: [
+                        {
+                            html:"随笔",
+                            sub:[
+                                {html:"生活"},
+                                {html:"杂文"},
+                                {html:"思考"}
+                            ]
+                        },
+                        {
+                            html:"编程工具",
+                            sub:[
+                                {html:"Vim"},
+                                {html:"NetBeans"},
+                                {html:"Git"}
+                            ]
+                        },
+                        {
+                            html:"编程语言",
+                            sub:[
+                                {html:"Web开发",sub:[
+                                        {html:"HTML"},
+                                        {html:"javascript"},
+                                        {html:"CSS"}
+                                    ]},
+                                {html:"Python"},
+                                {html:"Java语言"},
+                                {html:"C/C++"},
+                                {html:"Android开发"}
+                            ]
+                        },
+                        {html:"操作系统",sub:[
+                                {html:"IOS"},
+                                {html:"window"},
+                                {html:"ubuntu"}
+                            ]}
+                    ],
+                    direction: "horizontal"
                 }).menu("getID");
 
                 $("body").delegate("#"+id+" .menu_item", "click", function(){
                     $.log($(this).attr("path"))
                 })
-            })
+            });
+            $1.require("ready,20120303_menu",function( ){
+                $1("#black").menu({
+                    menu: [
+                        {
+                            html:"随笔",
+                            sub:[
+                                {html:"生活"},
+                                {html:"杂文"},
+                                {html:"思考"}
+                            ]
+                        },
+                        {
+                            html:"编程工具",
+                            sub:[
+                                {html:"Vim"},
+                                {html:"NetBeans"},
+                                {html:"Git"}
+                            ]
+                        },
+                        {
+                            html:"编程语言",
+                            sub:[
+                                {html:"Web开发",sub:[
+                                        {html:"HTML"},
+                                        {html:"javascript"},
+                                        {html:"CSS"}
+                                    ]},
+                                {html:"Python"},
+                                {html:"Java语言"},
+                                {html:"C/C++"},
+                                {html:"Android开发"}
+                            ]
+                        },
+                        {html:"操作系统",sub:[
+                                {html:"IOS"},
+                                {html:"window"},
+                                {html:"ubuntu"}
+                            ]}
+                    ],
+                    direction: "horizontal"
+                });
+            });
         </script>
         <style>
             .earth .main_menu ,  .earth .sub_menu{
                 padding-bottom:1px;
-                background: #f08002;
-                width:130px;
             }
             .earth .menu_item{
                 width:130px;
@@ -81,8 +158,8 @@
                 color:#000!important;
                 font-weight:600;
             }
-            .bright .main_menu , .bright .sub_menu{
-                width:130px;
+            .bright .main_menu,
+            .bright .sub_menu{
                 -moz-box-shadow:0 0 10px #06c;
                 -webkit-box-shadow:0 0 10px #06c;
                 box-shadow:0 0 10px #06c;
@@ -100,9 +177,22 @@
                 background:#f36100!important;
                 color:black;
             }
+            .black .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#000;
+                color:#fff;
+            }
+            .black .hover {
+                background:#636!important;
+                color:black;
+            }
         </style>
     </head>
-    <body class="bright">
+    <body class="black">
 
     </body>
 </html>

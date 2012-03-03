@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.menu</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .bright .main_menu,
+            .bright .sub_menu{
+                -moz-box-shadow:0 0 10px #06c;
+                -webkit-box-shadow:0 0 10px #06c;
+                box-shadow:0 0 10px #06c;
+            }
+            .bright .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#0088aa;
+                color:#fff;
+            }
+            .bright .hover {
+                background:#f36100!important;
+                color:black;
+            }
+            .black .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#000;
+                color:#fff;
+            }
+            .black .hover {
+                background:#636!important;
+                color:black;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+        
+            $.require("ready,more/menu",function( ){
+                $(".black").menu({
+                    menu: [
+                        {
+                            html:"随笔",
+                            sub:[
+                                {html:"生活"},
+                                {html:"杂文"},
+                                {html:"思考"}
+                            ]
+                        },
+                        {
+                            html:"编程工具",
+                            sub:[
+                                {html:"Vim"},
+                                {html:"NetBeans"},
+                                {html:"Git"}
+                            ]
+                        },
+                        {
+                            html:"编程语言",
+                            sub:[
+                                {html:"Web开发",sub:[
+                                        {html:"HTML"},
+                                        {html:"javascript"},
+                                        {html:"CSS"}
+                                    ]},
+                                {html:"Python"},
+                                {html:"Java语言"},
+                                {html:"C/C++"},
+                                {html:"Android开发"}
+                            ]
+                        },
+                        {html:"操作系统",sub:[
+                                {html:"IOS"},
+                                {html:"window"},
+                                {html:"ubuntu"}
+                            ]}
+                    ],
+                    direction: "horizontal"
+                });
+            });
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.menu</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>菜单插件。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>menu</dt>
+            <dd>必需。一个对象数组,里面的对象要求拥有html或sub属性,sub也是一个类似结构的对象数组。</dd>
+            <dt>hover_class</dt>
+            <dd>可选。菜单项移上去时发生作用的类名,默认是hover。</dd>
+            <dt>direction</dt>
+            <dd>可选。可用值为"vertical"或"horizontal", 默认是"vertical"。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+
+        <fieldset><legend>例子</legend>
+            <div class="black"></div>
+            <br clear="both"/>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+      &lt;div class="black"&gt;&lt;/div&gt;
+            </pre>
+            <pre class="brush:css;gutter:false;toolbar:false">
+            .black .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#000;
+                color:#fff;
+            }
+            .black .hover {
+                background:#636!important;
+                color:black;
+            }
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:false">
+             $.require("ready,more/menu",function( ){
+                $(".black").menu({
+                    menu: [
+                        {
+                            html:"随笔",
+                            sub:[
+                                {html:"生活"},
+                                {html:"杂文"},
+                                {html:"思考"}
+                            ]
+                        },
+                        {
+                            html:"编程工具",
+                            sub:[
+                                {html:"Vim"},
+                                {html:"NetBeans"},
+                                {html:"Git"}
+                            ]
+                        },
+                        {
+                            html:"编程语言",
+                            sub:[
+                                {html:"Web开发",sub:[
+                                        {html:"HTML"},
+                                        {html:"javascript"},
+                                        {html:"CSS"}
+                                    ]},
+                                {html:"Python"},
+                                {html:"Java语言"},
+                                {html:"C/C++"},
+                                {html:"Android开发"}
+                            ]
+                        },
+                        {html:"操作系统",sub:[
+                                {html:"IOS"},
+                                {html:"window"},
+                                {html:"ubuntu"}
+                            ]}
+                    ],
+                    direction: "horizontal"
+                });
+            });
+            </pre>
+
+        </fieldset>
+    </article>
+</body>
+</html>
