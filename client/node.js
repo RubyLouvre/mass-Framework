@@ -5,6 +5,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
         "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace( $.rword, function( tag ){
             document.createElement( tag );////让IE6789支持HTML5的新标签
+            document.createElement( tag.toUpperCase() );
         });
     }
     function getDoc(){
