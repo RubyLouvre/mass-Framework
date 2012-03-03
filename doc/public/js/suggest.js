@@ -40,7 +40,7 @@ $.require("ready,event,fx",function(){
         }
         $("#suggest_list").html( output.join("") );
     });
-    var glowIndex = -1,  dd = $("#leftsection dd");
+    var glowIndex = -1, dd;
     $(document).keyup(function(e){//监听上下翻
         if(/search_target/i.test( e.target.className)){//只代理特定元素,提高性能
             var upOrdown = 0
@@ -65,13 +65,13 @@ $.require("ready,event,fx",function(){
     });
     search.keyup(function(e){//监听提交
         var input = this.value;
+        dd = dd || $("div.menu_item");
         if(input && (e.which == 13 || e.which == 108)){ //如果按下ENTER键
+     
             for(var i = 0 , el ; el = dd[i++];){
-                var path = $(el).attr("path");
-                var start = path.indexOf("/");
-                if( path.slice(start+1).indexOf(input) === 0){
-                    $("#iframe").attr("src", "/doc/"+path );//更新iframe
-                    console.log("8888888888888")
+                var path = $(el).attr("path") ;
+                if(path && path.indexOf(input) !== -1){
+                    $("#iframe").attr("src", path );//更新iframe
                     $("#suggest_list").html( "" );
                     break;
                 }
@@ -81,19 +81,6 @@ $.require("ready,event,fx",function(){
 
 });
 
-var getAPI = function(obj, com, ret, i){
-    for(var name in obj){
-        if( obj.hasOwnProperty( name ) && !com.hasOwnProperty( name ) ){
-            com[ name ] = obj[ name ];
-            var type = $.type(obj[ name ]);
-            ret[ name ] = {
-                type: type
-            }
-            if((type === "Function" || type === "Object")&& i<4){
-                getAPI(obj[ name ], com, ret, i++)
-            }
-        }
-    }
-}
+
 //初步完成suggest控件,其实更像IDE的语法提示
 

@@ -1412,7 +1412,7 @@ $.define("class", "lang",function(){
         return klass;
     }
 
-    $["@class"] = {
+    $.mutators = {
         inherit : function( parent,init ) {
             var bridge = function() { }
             if( typeof parent == "function"){
@@ -1462,17 +1462,17 @@ $.define("class", "lang",function(){
                                 return function() {
                                     var __super = this._super,
                                     __superApply = this._superApply,
-                                    returnValue;
+                                    ret;
 
                                     this._super = _super;
                                     this._superApply = _superApply;
 
-                                    returnValue = prop.apply( this, arguments );
+                                    ret = prop.apply( this, arguments );
 
                                     this._super = __super;
                                     this._superApply = __superApply;
 
-                                    return returnValue;
+                                    return ret;
                                 };
                             })();
                             target[name].toString = function(){
@@ -1508,24 +1508,24 @@ $.define("class", "lang",function(){
                 init.apply(this, arguments);
             }
         };
-        $.mix( klass, $["@class"] ).inherit( parent, init );//添加更多类方法
+        $.mix( klass, $.mutators ).inherit( parent, init );//添加更多类方法
         return expand( klass, obj ).implement( obj );
     }
 });
 
-//2011.7.11 将$["class"]改为$["@class"]
+//2011.7.11 将$["class"]改为$["@class"] v4
 //2011.7.25
 //继承链与方法链被重新实现。
-//在方法中调用父类的同名实例方法，由$super改为supermethod，保留父类的原型属性parent改为superclass
+//在方法中调用父类的同名实例方法，由$super改为supermethod，保留父类的原型属性parent改为superclass v5
 //2011.8.6
-//在方法中调用父类的同名实例方法，由supermethod改为_super，保留父类的原型属性superclass改为_super
+//在方法中调用父类的同名实例方法，由supermethod改为_super，保留父类的原型属性superclass改为_super v6
 //重新实现方法链
 //fix 子类实例不是父类的实例的bug
 //2011.8.14 更改隐藏namespace,增强setOptions
-//2011.10.7 include更名为implement 修复implement的BUG（能让人重写toString valueOf方法）
+//2011.10.7 include更名为implement 修复implement的BUG（能让人重写toString valueOf方法） v7
 //2012.1.29 修正setOptions中$.Object.merge方法的调用方式
 //2012.2.25 改进setOptions，可以指定在this上扩展还是在this.XXX上扩展
-//2012.2.26 重新实现方法链，抛弃arguments.callee.caller
+//2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
 
 
 ﻿//==================================================
@@ -2591,7 +2591,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         }
         return document;
     }
-    $.mix( $, $[ "@class" ] ).implement({
+    $.mix( $, $.mutators ).implement({
         init:function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -3814,12 +3814,30 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
     }
-    function getWH( node, name, extra  ) {//注意 name是首字母大写
-        var none = 0, getter = $.cssAdapter["_default:get"], which = cssPair[name];
-        if(getter(node,"display") === "none" ){
-            none ++;
-            node.style.display = "block";
+    var cssShow = { 
+        position: "absolute", 
+        visibility: "hidden", 
+        display: "block" 
+    }
+    var showHidden = function(node, array){
+        if( !node.offsetWidth ){
+            var obj = { 
+                node: node
+            }
+            for ( name in cssShow ) {
+                obj[ name ] = node.style[ name ];
+                node.style[ name ] = cssShow[ name ];
+            }
+            array.push( obj );
         }
+        if(!node.offsetWidth){
+            showHidden(node.parentNode, array)
+        }
+    }
+    
+    function getWH( node, name, extra  ) {//注意 name是首字母大写
+        var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
+        showHidden(node, hidden )
         var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
         val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
         extra = extra || 0;
@@ -3832,7 +3850,14 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 val += parseFloat(getter(node, 'margin' + direction )) || 0;
             }
         });
-        none && (node.style.display = "none");
+        for(var i = 0, obj; obj = hidden[i++];){
+            node = obj.node;
+            for ( name in obj ) {
+                if(typeof obj[ name ] == "string"){
+                    node.style[ name ] = obj[ name ];
+                }
+            }
+        }
         return val;
     };
     //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
@@ -4041,11 +4066,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 //2011.10.21 修正width height的BUG
 //2011.11.10 添加top,left到cssAdapter
 //2011.11.21 all2deg,all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
+//2012.3.2 getWH现在能获取多重隐藏元素的高宽了
 
 
 
 $.define("attr","support,node", function( support ){
-   // $.log("已加载attr模块")
+    // $.log("已加载attr模块")
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
@@ -4218,7 +4244,7 @@ $.define("attr","support,node", function( support ){
             return $.access( this, name, value, $[method] );
         }
     });
-        
+    $.fn["class"] = $.fn.addClass;
     $.extend({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
@@ -5357,7 +5383,7 @@ $.define("fx", "css",function(){
                 delete linked.stopCode;
                 isEnd = fx.gotoEnd || (now >= fx.startTime + config.duration);
                 //node, 是否结束, 进度
-                fx.render(node, isEnd, (now - fx.startTime)/config.duration); // 处理渐变
+                fx.render(node, isEnd, (now - fx.startTime)/config.duration, $); // 处理渐变
                 if(fx.render === $.noop) { //立即开始下一个动画
                     linked.positive.shift();
                 }else{
@@ -5399,7 +5425,7 @@ $.define("fx", "css",function(){
         return  $.css(node, "display") !== 'none';
     }
     function fxBuilder( node, linked, props, config ){
-        var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter , _defaultTween = adapter._default.tween;",
+        var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter, _defaultTween = adapter._default.tween;",
         rewindConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
         rewindProps = {};
@@ -5505,7 +5531,7 @@ $.define("fx", "css",function(){
             });
         }
         //生成补间函数
-        return Function( "node,isEnd,per",ret );
+        return Function( "node,isEnd,per,$",ret );
     }
 
     $.easing = {
@@ -5609,7 +5635,8 @@ $.define("fx", "css",function(){
     $.mix( $, {
         fx:  function ( nodes, duration, hash, effects ){
             nodes = nodes.mass ? nodes : $(nodes);
-            var props =  hash || duration || {}
+            var props =  hash ||  duration ;
+            props = typeof props === "object" ? props : {}
             if(typeof duration === "function"){// fx(obj fn)
                 hash = duration;               // fx(obj, 500, fn)
                 duration = 500;
@@ -5758,6 +5785,7 @@ $.define("fx", "css",function(){
                     $[ method ]( this );
                 })
             }else{
+             
                 return $.fx( this, duration, hash, genFx( method , 3) );
             }
         }

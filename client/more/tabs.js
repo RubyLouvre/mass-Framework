@@ -24,19 +24,19 @@ $.define("tabs","event,attr",function(){
         }
     }
     var Tabs = $.factory({
-        init: function(target){
-            this.target = target;
+        init: function( parent ){
+            this.parent = parent;
         },
         invoke: function(method, value){
             if(typeof this[method] === "function"){
-                this[method].apply( this, [].slice.call(arguments,1) );
+               return this[method].apply( this, [].slice.call(arguments,1) );
             }else{
                 this[method] = value;
             }
         },
         active: function(index, callback){
             var ui = this, section = ui.sections.eq(~~index), active = ui.active_class;
-            console.log(section)
+
             if( !section.hasClass( active) ){
                 ui.target.find("."+active).removeClass( active );
                 section.addClass( active );

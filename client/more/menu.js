@@ -16,33 +16,36 @@ $.define("menu","fx,event,attr",function(){
             var item = addItem(parent, el );
             if(el.sub && el.sub.length){
                 item.css( "position","relative");
-                var p = addMenu(item).css({
+                var sub_menu = addMenu(item).css({
                     position:"absolute",
                     display:"none",
-                    top:  -1,
+                    top:  (parseFloat(item.css("border-top-width")) + parseFloat(item.css("padding-top"))) * -1,
                     left: item.innerWidth()
                 }).addClass("sub_menu")
 
-                addItems( p , el.sub );
+                addItems( sub_menu , el.sub );
             }
 
         }
     }
+    var defaults = {
+        hover_class: "hover"
+    }
     function init( ui, hash ){
-        ui.target = addMenu(ui.parent,"mass_menu");
-        var ID = "mass_menu"+(new Date - 0);
+        ui.setOptions(defaults , typeof hash === "object" ? hash : {});
+        delete ui.menu;//结构过于庞大，没有必要储存它
+        ui.target = addMenu(ui.parent,"main_menu");
+        var ID = "mass_menu_"+(new Date - 0);
         ui.target.attr("id", ID );
         ui.ID = ID;
         addItems(ui.target , hash.menu );
+        var hover = ui.hover_class;
         ui.target.delegate(".menu_item", "mouseover", function(){
-            var last = ui.target.find(".sub_menu:visible").last();
-            if(!last[0] || $.contains(last[0], this)){
-                $(this).find("> .sub_menu").show();
-            }else{
-                last.hide();
-            }
+            console.log("ddddddddddd")
+            ui.target.find("."+hover).removeClass(hover);
+            $(this).addClass(hover).find("> .sub_menu").show(500);
+            ui.target.find(".sub_menu:visible:not(:has(."+hover+"))").hide()
         });
-
     }
     var Menu = $.factory({
         init: function( parent ){
@@ -59,7 +62,7 @@ $.define("menu","fx,event,attr",function(){
             return this.ID;
         },
         destroy: function(){
-            this.target.undelegate(".menu_item","mouseover");
+            this.target.undelegate(".main_menu","mouseover");
             this.target.remove();
         }
     });
@@ -72,7 +75,7 @@ $.define("menu","fx,event,attr",function(){
                     init(menu, method);
                     $.data(this[i],"_init_menu", menu);
                 }else if(typeof method == "string"){
-                    var ret =  menu.invoke.apply(menu, arguments );
+                    var ret = menu.invoke.apply(menu, arguments );
                     if(ret !== void 0){
                         return ret;
                     }

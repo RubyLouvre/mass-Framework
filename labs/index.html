@@ -34,7 +34,12 @@
                         }
                         var new_path = path + (pathMap[key] || key) + "."
                         if(typeof json[ key ] === "object"){
-                            ret.sub = makeData( json[ key ], new_path)
+                            ret.sub = makeData( json[ key ], new_path);
+                            if(pathMap[key]){
+                                ret.attr = {
+                                    path: new_path.replace("$","index.html")
+                                }
+                            }
                         }else{
                             ret.attr = {
                                 type: json[ key ],
@@ -54,30 +59,50 @@
             })
         </script>
         <style>
-            .mass_menu , .sub_menu{
-                padding-top:1px;
+            .earth .main_menu ,  .earth .sub_menu{
+                padding-bottom:1px;
                 background: #f08002;
-                width:120px;
+                width:130px;
             }
-
-            .menu_item{
-                width:120px;
+            .earth .menu_item{
+                width:130px;
                 height:24px;
                 line-height:24px;
                 border:1px solid #f08002;
-                border-top:0 none;
+                border-bottom:0 none;
+                -moz-border-radius: 5px;
+                -webkit-border-radius: 5px;
+                border-radius: 5px;
                 background:#826a46;
                 color:#fff;
             }
-            .menu_item:hover{
-                background:#cc9966
+            .earth .hover {
+                background:#cc9966!important;
+                color:#000!important;
+                font-weight:600;
             }
-            .item:hover .sub{
-                display:inline-block;
+            .bright .main_menu , .bright .sub_menu{
+                width:130px;
+                -moz-box-shadow:0 0 10px #06c;
+                -webkit-box-shadow:0 0 10px #06c;
+                box-shadow:0 0 10px #06c;
+            }
+            .bright .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#0088aa;
+                color:#fff;
+            }
+            .bright .hover {
+                background:#f36100!important;
+                color:black;
             }
         </style>
     </head>
-    <body>
+    <body class="bright">
 
     </body>
 </html>
