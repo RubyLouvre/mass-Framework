@@ -125,7 +125,7 @@
                             ret.sub = makeData( json[ key ], new_path);
                             if(pathMap[key]){
                                 ret.attr = {
-                                    path: new_path.replace("$","index.html")
+                                    path: new_path.replace("$.","index.html")
                                 }
                             }
                         }else{
@@ -141,8 +141,13 @@
                     menu: makeData(api, "")
                 }).menu("getID");
                 
-                var iframe = $("#iframe")[0]
-
+                var iframe = $("#iframe")[0];
+                var menu = $("#"+id)
+                $(document).click(function(e){//点击其他处隐藏二级或二级以上的子菜单
+                    if(!$.contains(menu[0], e.target)){
+                        menu.find(".sub_menu:visible").hide();
+                    }
+                })
                 $("body").delegate("#"+id+" .menu_item", "click", function(){
                     iframe.src = $(this).attr("path");
                     setTimeout(function(){
