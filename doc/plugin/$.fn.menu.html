@@ -13,7 +13,7 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
         <style type="text/css">
-            .bright .main_menu,
+            .bright .mass_menu,
             .bright .sub_menu{
                 -moz-box-shadow:0 0 10px #06c;
                 -webkit-box-shadow:0 0 10px #06c;
@@ -52,7 +52,7 @@
         
             $.require("ready,more/menu",function( ){
                 $(".black").menu({
-                    menu: [
+                    data: [
                         {
                             html:"随笔",
                             sub:[
@@ -101,7 +101,7 @@
         <p>菜单插件。</p>
         <p><span class="stress">参数：</span></p>
         <dl>
-            <dt>menu</dt>
+            <dt>data</dt>
             <dd>必需。一个对象数组,里面的对象要求拥有html或sub属性,sub也是一个类似结构的对象数组。
                 想实现无限级联，就不断往里面套sub对象数组吧。</dd>
             <dt>hover_class</dt>
@@ -135,7 +135,7 @@
             <pre class="brush:js;gutter:false;toolbar:false">
              $.require("ready,more/menu",function( ){
                 $(".black").menu({
-                    menu: [
+                    data: [
                         {
                             html:"随笔",
                             sub:[
@@ -176,10 +176,10 @@
                 });
             });
             </pre>
-            <p>生成的菜单的HTML结构大致如下，第一层添加了一个叫"main_menu"的类名，而以后的其他层级的子菜单则添加一个叫"sub_menu"的类，
+            <p>生成的菜单的HTML结构大致如下，第一层添加了一个叫"mass_menu"的类名，而以后的其他层级的子菜单则添加一个叫"sub_menu"的类，
                 所有菜单项的类名都叫"menu_item"。大家可以根据这些类名编写自己的样式。</p>
             <pre class="brush:xml;gutter:false;toolbar:false;">
-        &lt;div class="main_menu" id="mass_menu_1330774806444"&gt;
+        &lt;div class="mass_menu" id="mass_menu_1330774806444"&gt;
             &lt;div class="menu_item" style="position: relative; float: left;"&gt;随笔
                 &lt;div  class="sub_menu"&gt;
                     &lt;div class="menu_item"&gt;生活&lt;/div&gt;

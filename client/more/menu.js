@@ -28,18 +28,15 @@ $.define("menu","fx,event,attr",function(){
         }
     }
     var defaults = {
-        menu:[],
+        data:[],
         hover_class: "hover",
         direction: "vertical"
     }
     function init( ui, hash ){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
-        delete ui.menu;//结构过于庞大，没有必要储存它
-        ui.target = addMenu(ui.parent,"main_menu" );
-        var ID = "mass_menu_"+(new Date - 0);
-        ui.target.attr("id", ID );
-        ui.ID = ID;
-        addItems(ui.target , hash.menu );
+        delete ui.data;//结构过于庞大，没有必要储存它
+        ui.target = addMenu( ui.parent,"mass_menu" );
+        addItems(ui.target , hash.data );
         var hover = ui.hover_class;
         if(ui.direction == "horizontal"){
             var first = ui.target.find(">.menu_item").css("float","left");
@@ -66,22 +63,22 @@ $.define("menu","fx,event,attr",function(){
                 this[method] = value;
             }
         },
-        getID: function(){
-            return this.ID;
+        getUI: function(){
+            return this;
         },
         destroy: function(){
-            this.target.undelegate(".main_menu","mouseover");
             this.target.remove();
+            this.parent.removeData("_mass_menu");
         }
     });
     $.fn.menu = function( method){
         for(var i =0 ; i < this.length; i++){
             if(this[i] && this[i].nodeType === 1){
-                var menu = $.data(this[i],"_init_menu")
+                var menu = $.data(this[i],"_mass_menu")
                 if(! menu  ){
                     menu = new Menu(this[i]);
                     init(menu, method);
-                    $.data(this[i],"_init_menu", menu);
+                    $.data(this[i],"_mass_menu", menu);
                 }else if(typeof method == "string"){
                     var ret = menu.invoke.apply(menu, arguments );
                     if(ret !== void 0){
@@ -98,7 +95,7 @@ $.define("menu","fx,event,attr",function(){
     /*
           $.require("ready,more/menu",function( api ){
                 $("body").menu({
-                    menu:[
+                    data:[
                         {html:"菜单1",
                             sub:[
                                 {html:"菜单1-1"},

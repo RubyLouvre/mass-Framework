@@ -17,7 +17,6 @@
                 position:relative;
                 height:200px;
                 width:400px;
-                list-style:none!important;
                 padding-left:20px;
                 padding-top:5px;
                 background:green;
@@ -60,9 +59,14 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
             $.require("ready,more/tabs",function(){
-                $("#first_tabs").tabs({
+                $("#first_tabs").tabs({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
                     active_event: "mouseover"
-                }).tabs("active",2)
+                }).tabs("active",2)//第二次调用tabs方法是将这些参数传到tabs对象中的invoke方法
             })
         </script>
     </head>
@@ -70,7 +74,7 @@
     <article>
         <h3>$.fn.tabs(settings)</h3>
         <p><span class="stress">描述：</span></p>
-        <p>将一段具有tabs结构的HTML代码变成真的切换卡。</p>
+        <p>将一段具有tabs结构的HTML代码变成真的切换卡，或传入一些数据动态生成一个切换卡。</p>
         <p><span class="stress">参数：</span></p>
         <dl>
             <dt>settings</dt>
@@ -79,78 +83,63 @@
         </dl>
         <p><span class="stress">返回值：</span></p>
         <p>mass实例</p>
+        <p><span class="stress">settings的配置参数：</span></p>
+        <ul>
+            <li>data:用于创建切换卡。</li>
+            <li>data_expr:文档中具有切换卡结构的元素的CSS表达式。</li>
+            <li>section_class:切换卡是有许多section组成的，这是它的特定类名。</li>
+            <li>trigger_class:每个section都包含一个trigger，它起得按钮的作用，用于切换面板，这是它的特定类名。</li>
+            <li>panel_class:每个section都包含一个panel(面板)，这是它的特定类名。</li>
+            <li>active_class:被激活的面板与trigger特有的类名，它将加上它们的父节点section之上。</li>
+            <li>active_event:用于切换面板的事件，不是click就是mouseover。</li>
+            <li>active_callback:切换面板时触发的事件。</li>
+        </ul>
         <p>切换卡对象默认拥有以下方法，都是使用$(expr).tabs(method,args1,args2,args3)的形式进行调用：</p>
         <ul>
             <li>active(index, [callback]): 切换到某一面板，index为面板的序号，从零开始。callback为回调函数，拥有一个参数，就是其index, this指向tabs实例。</li>
             <li>remove(index, [callback]): 移除到某一面板，index为面板的序号，从零开始。callback为回调函数，拥有一个参数，就是其index, this指向tabs实例。</li>
+            <li>add(index, trigger, panel): 在某一切换卡之后添加一个切换卡，trigger与panel为新切换卡的按钮与面板。</li>
             <li>destroy(): 销毁切换卡实例，移除相关事件绑定。</li>
             <li>invoke(method, args1, args2): 如果method为实例的一个方法，则调用此方法，将其他参数传进去，否则则重写或添加相关属性。</li>
         </ul>
         <fieldset><legend>例子</legend>
 
-            <pre class="brush:xml;gutter:false;toolbar:false">
-        &lt;ul id="first_tabs" class="mass_tabs"&gt;
-            &lt;li class="section active"&gt;
-                &lt;a href="javascript:void(0)" class="trigger"&gt;按钮1&lt;/a&gt;
-                &lt;div class="panel"&gt;
-                    面板1
-                &lt;/div&gt;
-            &lt;/li&gt;
-            &lt;li class="section"&gt;
-                &lt;a href="javascript:void(0)" class="trigger"&gt;按钮2&lt;/a&gt;
-                &lt;div class="panel"&gt;
-                    面板2
-                &lt;/div&gt;
-            &lt;/li&gt;
-            &lt;li class="section"&gt;
-                &lt;a href="javascript:void(0)" class="trigger"&gt;按钮3&lt;/a&gt;
-                &lt;div class="panel"&gt;
-                    面板3
-                &lt;/div&gt;
-            &lt;/li&gt;
-            &lt;li class="section"&gt;
-                &lt;a href="javascript:void(0)" class="trigger"&gt;按钮4&lt;/a&gt;
-                &lt;div class="panel"&gt;
-                    面板4
-                &lt;/div&gt;
-            &lt;/li&gt;
-        &lt;/ul&gt;
-
-            </pre>
             <pre class="brush:js;gutter:false;toolbar:false">
             $.require("ready,more/tabs",function(){
                 $("#first_tabs").tabs({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
                     active_event: "mouseover"
                 }).tabs("active",2)//第二次调用tabs方法是将这些参数传到tabs对象中的invoke方法
             })
             </pre>
+            <div id="first_tabs">
 
-            <ul id="first_tabs" class="mass_tabs">
-                <li class="section active">
-                    <a href="javascript:void(0)" class="trigger">按钮1</a>
-                    <div class="panel">
-                        面板1
-                    </div>
-                </li>
-                <li class="section">
-                    <a href="javascript:void(0)" class="trigger">按钮2</a>
-                    <div class="panel">
-                        面板2
-                    </div>
-                </li>
-                <li class="section">
-                    <a href="javascript:void(0)" class="trigger">按钮3</a>
-                    <div class="panel">
-                        面板3
-                    </div>
-                </li>
-                <li class="section">
-                    <a href="javascript:void(0)" class="trigger">按钮4</a>
-                    <div class="panel">
-                        面板4
-                    </div>
-                </li>
-            </ul>
+            </div>
+            <p>它将生成如下HTML结构</p>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+&lt;div class="mass_tabs"&gt;
+     &lt;div class="active section"&gt;
+         &lt;div class="trigger"&gt;标题1&lt;/div&gt;
+         &lt;div class="panel"&gt;面板1&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;div class="section"&gt;
+         &lt;div class="trigger"&gt;标题2&lt;/div&gt;
+         &lt;div class="panel"&gt;面板2&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;div class="section"&gt;
+         &lt;div class="trigger"&gt;标题3&lt;/div&gt;
+         &lt;div class="panel"&gt;面板3&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;div class="section"&gt;
+         &lt;div class="trigger"&gt;标题4&lt;/div&gt;
+         &lt;div class="panel"&gt;面板4&lt;/div&gt;
+     &lt;/div&gt;
+ &lt;/div&gt;
+            </pre>
 
 
         </fieldset>

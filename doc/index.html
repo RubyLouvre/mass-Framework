@@ -74,7 +74,7 @@
             .first_dl{
                 border-top:1px solid #252d37;
             }
-            .bright .main_menu , .bright .sub_menu{
+            .bright .mass_menu , .bright .sub_menu{
                 width:130px;
                 -moz-box-shadow:0 0 10px #06c;
                 -webkit-box-shadow:0 0 10px #06c;
@@ -137,18 +137,17 @@
                         return ret;
                     },json );
                 }
-                var id = $("#leftsection").menu({
-                    menu: makeData(api, "")
-                }).menu("getID");
-                
-                var iframe = $("#iframe")[0];
-                var menu = $("#"+id)
+                var menu = $("#leftsection").menu({
+                    data: makeData(api, "")
+                }).menu("getUI").target;
+
                 $(document).click(function(e){//点击其他处隐藏二级或二级以上的子菜单
                     if(!$.contains(menu[0], e.target)){
                         menu.find(".sub_menu:visible").hide();
                     }
-                })
-                $("body").delegate("#"+id+" .menu_item", "click", function(){
+                });
+                var iframe = $("#iframe")[0];
+                menu.delegate(".menu_item", "click", function(){
                     iframe.src = $(this).attr("path");
                     setTimeout(function(){
                         var doc =  iframe.contentDocument || iframe.contentWindow.document;
@@ -160,8 +159,7 @@
                 })
             })
   
-         
-
+        
             //符号体系的运用。毫无疑问符号体系的简洁有助于理解难，在用语言来表达将使头脑负担过重。
         </script>
         <style>

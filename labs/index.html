@@ -3,194 +3,67 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <title>TODO supply a title</title>
-
+        <style>
+            .mass_tabs {
+                position:relative;
+                height:200px;
+                width:400px;
+                padding-left:20px;
+                padding-top:5px;
+                background:green;
+                overflow:hidden;
+            }
+            .mass_tabs .section {
+                float:left;
+            }
+            .mass_tabs .trigger {
+                display:inline-block;
+                height:20px;
+                line-height:20px;
+                padding:1px 10px;
+                margin-left:5px;
+                color:#000;
+                background:#00FF7F;
+                text-align:center;
+                text-decoration:none;
+            }
+            .mass_tabs .active .trigger{
+                padding-bottom:8px;/* panel.top - parent.padding-top - tigger.height */
+                color:#fff;
+                background:#a9ea00;
+            }
+            .mass_tabs .panel{
+                display: none;
+                position:absolute;
+                width:420px;/* parent.width+ parent.padding-left*/
+                height:175px;/* parent.height +  padding-top - tabs.top */
+                top: 30px;
+                left:0px;
+                color:#000;
+                background:#a9ea00;
+            }
+            .mass_tabs .active .panel{
+                display:block;
+            }
+        </style>
         <script type="text/javascript" src="../client/mass.js">
 
         </script>
 
 
         <script >
-            $.require("ready,more/menu,more/api",function( _,_,api ){
-                var pathMap = {
-                    "模块加载模块": "core/$",
-                    "特征嗅探模块": "support/$",
-                    "语言扩展模块": "lang/$",
-                    "类工厂模块":   "class/$",
-                    "选择器模块":   "query/$",
-                    "数据缓存模块": "data/$",
-                    "节点操作模块": "node/$",
-                    "事件派发器模块":"target/$",
-                    "属性操作模块": "attr/$",
-                    "DOM事件模块": "event/$",
-                    "样式操作模块": "css/$",
-                    "动画模块":     "fx/$",
-                    "操作流模块":   "flow/$",
-                    "AJAX模块":     "ajax/$"
-                }
-                var makeData = function( json, path ){
-                    return  Object.keys( json ).map(function(key){
-                        var ret = {
-                            html: key
-                        }
-                        var new_path = path + (pathMap[key] || key) + "."
-                        if(typeof json[ key ] === "object"){
-                            ret.sub = makeData( json[ key ], new_path);
-                            if(pathMap[key]){
-                                ret.attr = {
-                                    path: new_path.replace("$","index.html")
-                                }
-                            }
-                        }else{
-                            ret.attr = {
-                                type: json[ key ],
-                                path: new_path + "html"
-                            }
-                        }
-                        return ret;
-                    },json );
-                }
-                var id = $("body").menu({
-                    menu: [
-                        {
-                            html:"随笔",
-                            sub:[
-                                {html:"生活"},
-                                {html:"杂文"},
-                                {html:"思考"}
-                            ]
-                        },
-                        {
-                            html:"编程工具",
-                            sub:[
-                                {html:"Vim"},
-                                {html:"NetBeans"},
-                                {html:"Git"}
-                            ]
-                        },
-                        {
-                            html:"编程语言",
-                            sub:[
-                                {html:"Web开发",sub:[
-                                        {html:"HTML"},
-                                        {html:"javascript"},
-                                        {html:"CSS"}
-                                    ]},
-                                {html:"Python"},
-                                {html:"Java语言"},
-                                {html:"C/C++"},
-                                {html:"Android开发"}
-                            ]
-                        },
-                        {html:"操作系统",sub:[
-                                {html:"IOS"},
-                                {html:"window"},
-                                {html:"ubuntu"}
-                            ]}
-                    ],
-                    direction: "horizontal"
-                }).menu("getID");
-
-                $("body").delegate("#"+id+" .menu_item", "click", function(){
-                    $.log($(this).attr("path"))
+            $.require("ready,more/tabs",function( ){
+                $("body").tabs({
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}
+                    ]
                 })
             });
-            $1.require("ready,20120303_menu",function( ){
-                $1("#black").menu({
-                    menu: [
-                        {
-                            html:"随笔",
-                            sub:[
-                                {html:"生活"},
-                                {html:"杂文"},
-                                {html:"思考"}
-                            ]
-                        },
-                        {
-                            html:"编程工具",
-                            sub:[
-                                {html:"Vim"},
-                                {html:"NetBeans"},
-                                {html:"Git"}
-                            ]
-                        },
-                        {
-                            html:"编程语言",
-                            sub:[
-                                {html:"Web开发",sub:[
-                                        {html:"HTML"},
-                                        {html:"javascript"},
-                                        {html:"CSS"}
-                                    ]},
-                                {html:"Python"},
-                                {html:"Java语言"},
-                                {html:"C/C++"},
-                                {html:"Android开发"}
-                            ]
-                        },
-                        {html:"操作系统",sub:[
-                                {html:"IOS"},
-                                {html:"window"},
-                                {html:"ubuntu"}
-                            ]}
-                    ],
-                    direction: "horizontal"
-                });
-            });
         </script>
-        <style>
-            .earth .main_menu ,  .earth .sub_menu{
-                padding-bottom:1px;
-            }
-            .earth .menu_item{
-                width:130px;
-                height:24px;
-                line-height:24px;
-                border:1px solid #f08002;
-                border-bottom:0 none;
-                -moz-border-radius: 5px;
-                -webkit-border-radius: 5px;
-                border-radius: 5px;
-                background:#826a46;
-                color:#fff;
-            }
-            .earth .hover {
-                background:#cc9966!important;
-                color:#000!important;
-                font-weight:600;
-            }
-            .bright .main_menu,
-            .bright .sub_menu{
-                -moz-box-shadow:0 0 10px #06c;
-                -webkit-box-shadow:0 0 10px #06c;
-                box-shadow:0 0 10px #06c;
-            }
-            .bright .menu_item{
-                width:120px;
-                padding-left:10px;
-                height:24px;
-                line-height:24px;
-                border-bottom:1px solid #fff;
-                background:#0088aa;
-                color:#fff;
-            }
-            .bright .hover {
-                background:#f36100!important;
-                color:black;
-            }
-            .black .menu_item{
-                width:120px;
-                padding-left:10px;
-                height:24px;
-                line-height:24px;
-                border-bottom:1px solid #fff;
-                background:#000;
-                color:#fff;
-            }
-            .black .hover {
-                background:#636!important;
-                color:black;
-            }
-        </style>
+
     </head>
     <body class="black">
 
