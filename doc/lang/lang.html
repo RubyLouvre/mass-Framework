@@ -19,7 +19,7 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
+            var exec1 = function(){
 
                 $.require("lang",function(){
                     var ret = $.lang([1,2,3,4,5,6,7,8,9,10]).mapX(function(el){
@@ -31,12 +31,12 @@ var exec1 = function(){
                     $.log(ret,true);//由于在CHM中alert被屏蔽了，我们只好把结果打印在页面底部
                 });
             
-}
+            }
         </script>
     </head>
     <body>
     <article>
-        <h3>lang模块</h3>
+        <h3>语言扩展模块</h3>
 
         <p><span class="stress">描述：</span></p>
         <p>作为一个框架，它就必然对数组，字符串，数字与对象这些基本数据类型的操作提供了诸多便捷方法。有的是对其原型进行扩展，
@@ -76,7 +76,7 @@ var exec1 = function(){
                     $.log(ret,true);//由于在CHM中alert被屏蔽了，我们只好把结果打印在页面底部
                 });
             </pre>
-            
+
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
         <pre class="brush:javascript;gutter:false;toolbar:false">平共处五项原则

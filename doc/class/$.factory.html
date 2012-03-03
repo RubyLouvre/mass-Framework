@@ -106,10 +106,8 @@
     </head>
     <body>
     <article>
-        <h3>class模块</h3>
+        <h3>$.factory( obj )</h3>
         <p><span class="stress">描述：</span></p>
-        <p>mass Framework的类工厂模块，它只包含一个factory方法。通过它创建的类，能够通过this._super访问其父类（继承链），
-            或在其实例方法中，能够通过_super()调用其父类的同名方法（方法链）。</p>
         <p>factory方法只有一个参数，为对象，它拥有如下特殊的值来让用户实现自己的类：</p>
         <dl>
             <dt>init</dt>
@@ -131,7 +129,7 @@
                 <tr><td>_superApply</td><td>此方法只存在于普通方法中，用于传入当前方法的arguments对象或数组，可以说是_super的便捷形式。</td></tr>
                 <tr><td>setOptions</td><td>用于在构造器中，一次性添加多个新属性或新方法。如果第一个参数为字符串，
                         它则在此实例的同名属性（没有则动态生成一个），常见用法是this.setOptions("options", defaults, obj1, obj2)</td></tr>
-              
+
             </tbody>
         </table>
         <p>另外,生成的新类还拥有两个重要的静态方法，extend是用来扩展静态成员，implement是用来扩展原型成员。</p>
@@ -308,7 +306,7 @@
             <button onclick="exec2()">点我，执行代码</button>
         </fieldset>
 
-       
+
     </article>
 </body>
 </html>
