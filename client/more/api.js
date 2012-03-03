@@ -315,7 +315,7 @@ $.define("api", function(){
             "access": "function",
             "parseHTML": "function"
         },
-        "事件派发器模块": {
+        "派发器模块": {
             "eventAdapter": "object",
             "event": {
                 "bind": "function",
