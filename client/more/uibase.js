@@ -2,9 +2,9 @@ $.define("uibase","class,data", function(){
     //提供所有UI控件的父类与在节点链对象上提供一个操UI实例的方法
     return {
         Class: $.factory({//所有UI控件的父类
-            init: function( parent, widget ){
-                this.parent = parent;
+            init: function( widget, parent ){
                 this["@name"] = widget;
+                this.parent = parent;
             },
             invoke: function( method, value ){
                 if(typeof this[method] === "function"){
@@ -27,7 +27,7 @@ $.define("uibase","class,data", function(){
                     if(this[i] && this[i].nodeType === 1){
                         var ui = $.data(this[i],"_mass_"+widget)
                         if(! ui  ){
-                            ui = new UI( this[i], widget );
+                            ui = new UI( widget, this[i] );
                             init(ui, method);//初始化控件
                             $.data( this[i],"_mass_" + widget, ui );
                         }else if(typeof method == "string"){//调用控件的方法
