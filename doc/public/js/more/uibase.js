@@ -4,7 +4,7 @@ $.define("uibase","class,data", function(){
         Class: $.factory({//所有UI控件的父类
             init: function( widget, parent ){
                 this["@name"] = widget;
-                this.parent = parent;
+                this.parent = $(parent);
             },
             invoke: function( method, value ){
                 if(typeof this[method] === "function"){
@@ -40,6 +40,7 @@ $.define("uibase","class,data", function(){
                         }
                     }
                 }
+                return this;
             }
         }
     }
