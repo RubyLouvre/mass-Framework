@@ -1,4 +1,4 @@
-$.define("pagination","event",function(){
+$.define("pager","more/uibase,event",function(Widget){
     var defaults = {
         show_last: true,
         show_first:true,
@@ -15,6 +15,7 @@ $.define("pagination","event",function(){
         fill_text:"...",
         show_jump:false,//是否显示跳转框
         callback: function(e, ui , i){}
+    /*total: 1000*/
     }
     function createLink(tag, index, text, cls){
         return tag == "a" ?  $.format('<#{tag} class="#{cls}" data-page="#{index}" href="?page=#{index}">#{text}<\/#{tag}>',{
@@ -24,20 +25,20 @@ $.define("pagination","event",function(){
             cls: cls
         }) : text
     }
+    function init( ui, hash ){
+        ui.setOptions(defaults , typeof hash === "object" ? hash : {});
+        if(!isFinite( ui.total)){
+            throw "必须拥有total属性，它为一个正整数"
+        }
+        ui.render();
+        ui.target.delegate("a, input", "click",function(e){
+            if( typeof ui.callback == "function" ){
+                return ui.callback.call( this, e, ui, ~~this.getAttribute("data-page") );
+            }
+        })
+    }
     var Pager = $.factory({
-        init: function( target, total, option ){
-            if( isFinite( total ) ){
-                this.total = total;
-            }else{
-                throw "第一个参数必须是一个正整数"
-            }
-            var opt = $.Object.merge( {}, defaults, option || {});
-            this.target = target;
-            for(var i in opt){
-                this[i] = opt[i];
-            }
-            this.render();
-        },
+        inherit: Widget.Class,
         render: function(){
             var max = this.total_pages = Math.ceil( this.total / this.per_page),//计算总页数
             count = this.show_pages = Math.min( this.show_pages, this.total_pages ),//计算还剩下多少页要生成
@@ -82,20 +83,16 @@ $.define("pagination","event",function(){
             if( this.show_jump ){
                 html.push( "<kbd>跳转到第<input \/>页<\/kbd>" );
             }
-            html.unshift( '<div class="pagination">' );
+            html.unshift( '<div class="mass_pager">' );
             html.push( '<\/div>' );
-            this.target.html( html.join("") );//每次都会清空目标元素,因此记得找个空标签来放分页栏啊
+            this.parent.html( html.join("") );//每次都会清空目标元素,因此记得找个空标签来放分页栏啊
+            this.target = this.parent.find("> .mass_pager")
         }
     });
 
-    $.fn.pagination = function( total, opt ){
-        var ui = new Pager( this, total, opt );
-        this.delegate("a,input", "click",function(e){
-            if( typeof ui.callback == "function" ){
-                return ui.callback.call( this, e, ui, ~~this.getAttribute("data-page") );
-            }
-        })
-    }
+    $.fn.pager = Widget.create("pager", Pager, init )
+
+   
 });
 /*
 另外suggest 我在githup上放过一个
