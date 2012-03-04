@@ -4,138 +4,63 @@
     <head>
         <meta charset="utf-8" />
         <title>mass Framework</title>
-        <script src="public/js/mass_merge.js" type="text/javascript" ></script>
-        <script src="public/js/plugin_map.js" type="text/javascript" ></script>
-        <!--     <script src="public/js/suggest.js" type="text/javascript" ></script>-->
-        <style >
-            html,body{
-                background:#ddc;
+        <!--     <script src="public/js/mass_merge.js" type="text/javascript" ></script>
+             <script src="public/js/plugin_map.js" type="text/javascript" ></script>
+             <script src="public/js/suggest.js" type="text/javascript" ></script>-->
+        <style>
+            .bright .mass_menu , .bright .sub_menu{
+                width:130px;
+                -moz-box-shadow:0 0 10px #06c;
+                -webkit-box-shadow:0 0 10px #06c;
+                box-shadow:0 0 10px #06c;
             }
-            #search_wrapper {
-                height:50px;
+            .bright .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#0088aa;
+                color:#fff;
             }
-            #search{
-                width:300px;
-            }
-            #suggest_wrapper{
-                position:relative;
-            }
-            #suggest_list{
-                position:absolute;
-                z-index:100;
-                list-style: none;
-                margin:0;
-                padding:0;
-                background:#fffafa;
-                border:1px solid #ccc;
-                border-bottom:0 none;
-            }
-            #suggest_list li a{
-                display: block;
-                height:20px;
-                width:304px;
-                color: #000;
-                border-bottom:1px solid #ccc;
-                line-height:20px;
-                text-decoration: none;
-            }
-            #suggest_list li a:hover{
-                background:#ffff80;
-            }
-            .glow_suggest {
-                background:#ffff80;
+            .bright .hover {
+                background:#f36100!important;
+                color:black;
             }
         </style>
-  
-        <script type="text/javascript">
-            $.require("plugin_map,ready,event,css,attr",function( plugins ){
-                var search = $("#search"), hash = window, prefix = "",  fixIE = NaN;
-                search.addClass("search_target");
-                search.input(function(){//监听输入
-                    var
-                    input = this.value,//原始值
-                    val = input.slice( prefix.length),//比较值
-                    output = []; //用来放置输出内容
-                    if( fixIE === input){
-                        return //IE下肃使是通过程序改变输入框里面的值也会触发propertychange事件，导致我们无法进行上下翻操作
-                    }
-                    for(var prop in hash){
-                        if( prop.indexOf( val ) === 0  ){//取得以输入值开头的API
-                            if( output.push( '<li><a href="javascript:void(0)" data-value="'+prefix +
-                                prop+'">'+ input + "<b>" + (prefix  + prop ).slice( input.length ) +"</b></a></li>" ) == 10){
-                                break;
-                            }
+        <script src="../mass.js"> </script>
+        <script>
+            $.require("ready,more/menu",function(){
+                var data = []
+                "placeholder,pager,tabs,flip,menu".replace($.rword, function(method){
+                    data.push({
+                        html: method,
+                        attr:{
+                            path: "plugin/$.fn."+ method +".html"
                         }
-                    }
-                    //如果向前遇到点号,或向后取消点号
-                    if( val.charAt(val.length - 1) === "." || (input && !val) ){
-                        var arr = input.split("."); hash = window;
-                        for(var j = 0; j < arr.length; j++){
-                            var el = arr[j];
-                            if(el && hash[ el ]){
-                                hash = hash[ el ];//重新设置要遍历API的对象
-                            }
-                        }
-                        prefix = input == "." ? "" : input;
-                        for( prop in hash){
-                            if( output.push( '<li><a href="javascript:void(0)" class="search_target" data-value="'+prefix +
-                                prop+'">'+ input + "<b>" + (prefix + prop ).slice( prefix.length ) +"</b></a></li>" ) == 10){
-                                break;
-                            }
-                        }
-                    }
-                    if(!input){
-                        hash = window;
-                        fixIE = prefix = output = [];
-                    }
-                    $("#suggest_list").html( output.join("") );
+                    })
                 });
-                var glowIndex = -1,  dd = $("#leftsection dd");
-                $(document).keyup(function(e){//监听上下翻
-                    if(/search_target/i.test( e.target.className)){//只代理特定元素,提高性能
-                        var upOrdown = 0
-                        if(e.which === 38 || e.which === 104){ //up 8
-                            upOrdown --;
-                        }else if(e.which === 40 || e.which === 98){//down 2
-                            upOrdown ++;
-                        }
-                        if(upOrdown){
-                            var list =  $("#suggest_list a");
-                            //转移高亮的栏目
-                            list.eq(glowIndex).removeClass("glow_suggest");
-                            glowIndex += upOrdown;
-                            var el = list.eq( glowIndex ).addClass("glow_suggest");
-                            fixIE = el.attr("data-value")
-                            search.val( fixIE )
-                            if(glowIndex === list.length - 1){
-                                glowIndex = -1;
-                            }
-                        }
-                    }
-                });
-                search.keyup(function(e){//监听提交
-                    var input = this.value;
-                    if(input && (e.which == 13 || e.which == 108)){ //如果按下ENTER键
-                        if(plugins[input]){
-                            $("#iframe").attr("src","/doc/"+plugins[input] )
-                        }
-                    }
-                });
-            });
-
+                var iframe = $("#iframe")[0]
+                $(".bright").menu({
+                    data:data
+                }).menu("getUI").target.delegate(".menu_item", "click", function(){
+                    iframe.src = $(this).attr("path")
+                })
+            })
         </script>
 
     </head>
     <body>
-        <div id="search_wrapper">
-            <div> <input id="search"  autocomplete="off" /><a href="index.html">点此返回文档首页</a></div>
-            <div id="suggest_wrapper">
-                <ul id="suggest_list"></ul>
+
+        <div> <a href="index.html">点此返回文档首页</a></div>
+        <div style="float:left;width:14%"
+             <div class="bright">
+
             </div>
         </div>
 
         <div style="float:left;width:85%">
-            <iframe id="iframe" src="/doc/core/ad.html" width="100%" frameborder="0">
+            <iframe id="iframe" src="core/index.html" width="100%" frameborder="0">
 
             </iframe>
         </div>
