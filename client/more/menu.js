@@ -1,5 +1,4 @@
-$.define("menu","fx,event,attr",function(){
-
+$.define("menu","more/uibase,fx,event,attr",function(Widget){
     var addItem = function( parent, obj ){
         var item = $("<div class='menu_item'/>")
         for(var i in obj){
@@ -52,45 +51,8 @@ $.define("menu","fx,event,attr",function(){
             ui.target.find(".sub_menu:visible:not(:has(."+hover+"))").hide()
         });
     }
-    var Menu = $.factory({
-        init: function( parent ){
-            this.parent = parent;
-        },
-        invoke: function(method, value){
-            if(typeof this[method] === "function"){
-                return this[method].apply( this, [].slice.call(arguments,1) );
-            }else{
-                this[method] = value;
-            }
-        },
-        getUI: function(){
-            return this;
-        },
-        destroy: function(){
-            this.target.remove();
-            this.parent.removeData("_mass_menu");
-        }
-    });
-    $.fn.menu = function( method){
-        for(var i =0 ; i < this.length; i++){
-            if(this[i] && this[i].nodeType === 1){
-                var menu = $.data(this[i],"_mass_menu")
-                if(! menu  ){
-                    menu = new Menu(this[i]);
-                    init(menu, method);
-                    $.data(this[i],"_mass_menu", menu);
-                }else if(typeof method == "string"){
-                    var ret = menu.invoke.apply(menu, arguments );
-                    if(ret !== void 0){
-                        return ret;
-                    }
-                }else if(method && typeof method == "object"){
-                    menu.setOptions( method );
-                }
-            }
-        }
-        return this;
-    }
+
+    $.fn.menu = Widget.create("tabs", Widget.Class, init )
 })
     /*
           $.require("ready,more/menu",function( api ){

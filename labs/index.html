@@ -10,7 +10,7 @@
                 width:400px;
                 padding-left:20px;
                 padding-top:5px;
-                background:green;
+                background:#464646;
                 overflow:hidden;
             }
             .mass_tabs .section {
@@ -20,17 +20,21 @@
                 display:inline-block;
                 height:20px;
                 line-height:20px;
-                padding:1px 10px;
+                padding:2px 10px 1px;
                 margin-left:5px;
                 color:#000;
-                background:#00FF7F;
+                background:#708090;
                 text-align:center;
                 text-decoration:none;
             }
+            .mass_tabs .trigger:hover{
+                color:#ff8000;
+                background:#000;
+            }
             .mass_tabs .active .trigger{
                 padding-bottom:8px;/* panel.top - parent.padding-top - tigger.height */
-                color:#fff;
-                background:#a9ea00;
+                color:#ff8000;
+                background:#000;
             }
             .mass_tabs .panel{
                 display: none;
@@ -39,11 +43,14 @@
                 height:175px;/* parent.height +  padding-top - tabs.top */
                 top: 30px;
                 left:0px;
-                color:#000;
-                background:#a9ea00;
+                color:#fff;
+                background:#000;
             }
             .mass_tabs .active .panel{
                 display:block;
+            }
+            .content {
+                margin:5px;
             }
         </style>
         <script type="text/javascript" src="../client/mass.js">
@@ -55,10 +62,10 @@
             $.require("ready,more/tabs",function( ){
                 $("body").tabs({
                     data:[
-                        {trigger:"标题1",panel:"面板1"},
-                        {trigger:"标题2",panel:"面板2"},
-                        {trigger:"标题3",panel:"面板3"},
-                        {trigger:"标题4",panel:"面板4"}
+                        {trigger:"标题1",panel:"<div class=content>面板1</div>"},
+                        {trigger:"标题2",panel:"<div class=content>面板2</div>"},
+                        {trigger:"标题3",panel:"<div class=content>面板3</div>"},
+                        {trigger:"标题4",panel:"<div class=content>面板4</div>"}
                     ]
                 })
             });

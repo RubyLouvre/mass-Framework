@@ -71,3 +71,8 @@ $.define("tabs","more/uibase,event,attr",function(Widget){
     $.fn.tabs = Widget.create("tabs", Tabs, init )
 
 })
+
+
+//2012.2.25  v1
+//2012.3.3   v2
+//2012.3.4   v3
