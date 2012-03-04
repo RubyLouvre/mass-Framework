@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>$.fn.width</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            #sample2{
+                height:130px;
+            }
+            #sample2 div { 
+                width:50px;
+                height:70px; 
+                float:left;
+                margin:5px;
+                background:rgb(255,140,0); 
+                cursor:pointer;
+            }  
+            #sample3{
+                height:130px;
+                overflow:auto;
+            }
+            #sample3 div { 
+                width:50px;
+                height:70px; 
+                float:left;
+                margin:5px;
+                display:none;
+            }
+            #sample3 p {
+                width:400px;
+                height:20px;
+                background:orange;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+           
+            
+            $.require("ready,node,css,event",function(){
+                function showWidth(ele, h) {
+                    $("#show_result").text(ele + h + "px.");
+                }
+                $("#getp").click(function () { 
+                    showWidth("段落的宽为", $("#test_p").width()); 
+                });
+                $("#getd").click(function () { 
+                    showWidth("页面的宽为", $(document).width()); 
+                });
+                $("#getw").click(function () { 
+                    showWidth("窗口的宽为", $(window).width()); 
+                });
+                
+                $("#aligning").click(function () {
+                    $("#sample2 div").width(200).css( "backgroundColor","#a9ea00");
+                });
+                $("#show_none").click(function () {
+                    var a = $("#sample3 div").width()+"px";
+                    $("#sample3").append("<p>"+a+"</p>")
+                });
+            });
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.width( [val])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>取得或设置匹配节点的宽。</p>
+        <p>此方法是属性于get one set all操作，根据传入参数决定其是读操作还是写操作。</p>
+        <p>如果没有参数，则读取第一个元素的width，并返回。</p>
+        <p>如果存在参数，通过它设置所有元素的width,并返回原实例。</p>
+        <p>.css(width) 和 .width()之间的区别是后者返回一个没有单位的数值（例如，400），前者是返回带有完整单位的字符串（例如，400px）。当一个元素的宽度需要数学计算的时候推荐使用.width() 方法 。</p>
+        <p><span class="note">如果没有设置单位，默认为px。</span></p>
+        <p><span class="note">它可以获取隐藏元素的宽。</span></p>
+        <p>w3c的盒子模型</p>
+        <img src="../public/styles/w3c_width.png" />
+        <fieldset><legend>例子</legend>
+
+            <button id="getp">取得测试段落的宽</button>
+            <button id="getd">取得当前文档对象（页面）的宽</button>
+            <button id="getw">取得当前窗口的宽</button>
+
+            <div id="show_result">&nbsp;</div>
+            <p id="test_p">
+                这是测试的小白鼠
+            </p>
+
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+             $.require("ready,node,css,event",function(){
+                function showHeight(ele, h) {
+                    $("#show_result").text(ele + h + "px.");
+                }
+                $("#getp").click(function () { 
+                    showHeight("段落的宽为", $("#test_p").width()); 
+                });
+                $("#getd").click(function () { 
+                    showHeight("页面的宽为", $(document).width()); 
+                });
+                $("#getw").click(function () { 
+                    showHeight("窗口的宽为", $(window).width()); 
+                });
+            })
+            </pre>
+        </fieldset>
+        <fieldset><legend>例子</legend>
+            <p>点击每个div时设置该div宽度为200px，并改变颜色。</p>
+            <div id="sample2">
+                <div></div>
+                <div class="div2"></div>
+                <div class="div3"></div>
+            </div>
+
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $("#aligning").click(function () {
+                    $("#sample2 div").width(60).css( "backgroundColor","#a9ea00");
+                });
+            </pre>
+            <button type="button" id="aligning">点我，执行代码</button>
+        </fieldset>
+        <fieldset><legend>例子</legend>
+            <p>显示隐藏元素的宽。</p>
+            <div id="sample3">
+                <div></div>
+            </div>
+
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $("#show_none").click(function () {
+                   var a = $("#sample3 div").width()+"px";
+                   $("#sample3").append("&lt;p&gt;"+a+"&lt;/p&gt;")
+                });
+            </pre>
+            <button type="button" id="show_none">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
+</html>

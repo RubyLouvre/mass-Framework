@@ -1,0 +1,211 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>$.define</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.define(name,[ deps ],callback)</h3>
+
+        <p><span class="stress">描述：</span></p>
+        <p>用于定义一个模块。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>name</dt>
+            <dd>必需。String。模块名。</dd>
+            <dt>deps</dt>
+            <dd>可选。String|Array。依赖列表。</dd>
+            <dt>callback</dt>
+            <dd>必需。Function。模块本身。它的参数列参为其依赖模块所有返回的值，如果某个模块没有返回值，则对应位置为undefined。详见下方《mass Framewok模块化》一文。</dd>
+        </dl>
+        <p>每个模块的定义如下(请确保模块名与文件名要一致，名字不能取名为"ready"，那是一个标识符，表示最后的回调函数要延迟到domReady之外才执行。</p>
+
+        <fieldset><legend>例子</legend>
+            <p></p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//class.js
+    $.define("class","lang",function(){//模块名，依赖列表，模块本身
+       $.log("class模块")
+    });
+
+            </pre>
+            <p>依赖于多个模块时：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//node.js
+    $.define("node", "class,support,query,data",function(){//第二个参数也可以改成字符串数组
+       $.log("node模块")
+    });
+            </pre>
+            <p>如果不存在依赖，如mass Framework的brower模块：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+    $.define("brower", function(){
+        $.mix($,new function(){
+            var ver = top.opera ? (opera.version().replace(/\d$/, "") - 0)
+            : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
+                exec(navigator.userAgent) || [,0])[1]);
+            return {
+                //测试是否为ie或内核为trident，是则取得其版本号
+                ie: !!top.VBArray && Math.max(DOC.documentMode||0, ver),//内核trident
+                //测试是否为firefox，是则取得其版本号
+                firefox: !!top.crypto && ver,//内核Gecko
+                //测试是否为opera，是则取得其版本号
+                opera:  !!top.opera && ver,//内核 Presto 9.5为Kestrel 10为Carakan
+                //测试是否为chrome，是则取得其版本号
+                chrome: !! top.chrome &&  ver ,//内核V8
+                //测试是否为safari，是则取得其版本号
+                safari: /apple/i.test(navigator.vendor) && ver// 内核 WebCore
+            }
+        });
+    });
+            </pre>
+            <p>如果某模块的JS文件与核心模块的JS文件不在同一文件下，比如是在核心模块$.js的所在文件夹下的ajax文件下，那它的模块名定义如下：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+     /** 文件目录
+     mass.js
+     css.js
+     support.js
+     class.js
+     css.js
+     ajax/base.js
+     ajax/jxhr.js
+     **/
+
+          $.define("base","ajax/jxhr", function(){
+                    //模块代码
+          });
+
+            </pre>
+            <p>如果目标模块与其依赖模块不在同一台服务器下，我们可以通过"module_name(url)"这种形式来指定其地址:</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+
+    $.define("css","lang(http://www.cnblogs.com/aaa/bbb/lang.js)", function(){
+              //模块代码
+    })
+
+            </pre>
+
+        </fieldset>
+        <fieldset><legend>例子：定义一个让元素垂直居中的模块</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("center","css", function(){
+                //让元素相对于窗口垂直居中对齐，$('#test').center();
+                $.fn.center = function (w) {
+                    w = $(window);
+                    return this.css({
+                        position: "absolute",
+                        top: ( w.height() - this.outerHeight()) / 2 + w.scrollTop(),
+                        left: ( w.width() - this.outerWidth()) / 2 + w.scrollLeft()
+                    });
+                }
+            });
+            </pre>
+        </fieldset>
+        <fieldset><legend>mass Framewok模块化</legend>
+            <p> 由于每一个模块都定义在匿名函数中，以前想实现模块间的数据共享（即在A模块在使用B模块定义的方法），
+                就得把它们绑定到mass命名空间对象上。
+                这有一个弊端，如果一个页面添加了N多插件，
+                那么mass命名空间对象就会属性方法大爆炸，就会出现互相覆盖的情况。
+                因此在模块加载系统v12新添加一种功能，在核心模块里定义了一个rets对象，
+                把每个模块的返回值收集起来，然后在另一个模块，
+                根据依赖列表从rets对象上取值与mass对象一起构成这个模块的参数，从而实现数据共享。</p>
+            <p>我们先看两个迷你模块： </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//浏览器检测模块：
+
+    $.define("brower", function( ){
+        var ver = top.opera ? (opera.version().replace(/\d$/, "") - 0)
+        : parseFloat((/(?:IE |fox\/|ome\/|ion\/)(\d+\.\d)/.
+            exec(navigator.userAgent) || [,0])[1]);
+        return {
+            //测试是否为ie或内核为trident，是则取得其版本号
+            ie: !!top.VBArray && Math.max(DOC.documentMode||0, ver),//内核trident
+            //测试是否为firefox，是则取得其版本号
+            firefox: !!top.crypto && ver,//内核Gecko
+            //测试是否为opera，是则取得其版本号
+            opera:  !!top.opera && ver,//内核 Presto 9.5为Kestrel 10为Carakan
+            //测试是否为chrome，是则取得其版本号
+            chrome: !! top.chrome &&  ver ,//内核V8
+            //测试是否为safari，是则取得其版本号
+            safari: /apple/i.test(navigator.vendor) && ver// 内核 WebCore
+        }
+    });
+
+//随机生成模块
+
+    $.define("random", function(){
+        var cs = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; 
+        var uuid_arr =  '0123456789ABCDEFG'.split('');
+        return {
+            hex:function(){
+                return  '#'+('00000'+(Math.ran$()*0x1000000<<0).toString(16)).slice(-6);
+            },
+            hsb:function(){//颜色比效鲜艳
+                return "hsb(" + Math.ran$()  + ", 1, 1)";
+            },
+            rgb:function(){
+                return [Math.floor(Math.ran$() * 255),
+                Math.floor(Math.ran$() * 255),
+                Math.floor(Math.ran$() * 255)];
+            },
+            str:function(len) {
+                if (!len) len = 10;
+                var s = '';
+                for (var i = 0; i < len; ++i) {
+                    var n = Math.ran$() * 1e6;
+                    s += cs.charAt(n % cs.length);
+                }
+                return s;
+            },
+            num:function (min,max) {
+                return Math.floor(Math.ran$()*(max-min+1)) + min;
+            }
+        }
+    });
+
+
+            </pre>
+            <p>假如我们需要构建一个新的模块叫sample，想用到这两个模块的方法，可以这样写: </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+
+    $.define("sample","brower,random", function(args1,args2 ){
+        $.log("进入sample模块")
+        $.log(args1.ie)
+        $.log(args2.str());
+    });
+
+            </pre>
+            <p>它会根据依赖列表中的顺序把原来模块的返回值传入到回调函数中。</p>
+            <p>但也有特殊情况，假若有人打瞌睡把依赖列表中的模块名写重复了，如：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+
+    $.define("sample","brower,brower,random,random", function(args1,args2 ){
+        $.log("进入sample模块")
+        $.log(args1.ie)
+        $.log(args2.str());
+    });
+
+            </pre>
+            <p>这时框架内部会做去重操作，这由核心模块的require方法去做。"brower, brower, random,random" --> "brower,randow",
+                因此args0依然为brower模块的返回值，args1依然为random模块的返回值。</p>
+
+        </fieldset>
+    </article>
+</body>
+</html>

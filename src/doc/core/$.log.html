@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.log</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.log({}+[],true);
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.log(s, [ force ])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>用于调试，默认是打印到window.console上，但对于不支持window.console的浏览器（如IE6）则会直接打印到页面底部。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>s</dt>
+            <dd>必需。要打印的内容。如果不是字符串会转换成字符串再打印。</dd>
+            <dt>force</dt>
+            <dd>可选。Boolean。强逼打印到页面上，默认false。</dd>
+        </dl>
+
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.log({}+[],true);
+            </pre>
+            <button onclick="exec1()">点我，执行代码</button>
+
+        </fieldset>
+    </article>
+</body>
+</html>

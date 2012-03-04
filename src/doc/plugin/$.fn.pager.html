@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.pager</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/plugin/pager.css"/>
+        <style type="text/css">
+
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,attr,more/pager",function(){
+                var html = "<select>";
+                ("black_red,digg,badoo,yahoo,new_yahoo,Meneame,new_yahoo,flickr,sabros,green,"+
+                    "black,gray,mis_algoritmos,f12_megas,Technorati,youtube,msdn,blue,ria9").replace( $.rword, function(value){
+                    html += "<option>"+value+"<\/option>"
+                });
+                html += "<\/select>";
+                $(html).appendTo("fieldset");
+                $("#box").pager({
+                    total:120,
+                    curr_page:1,
+                    curr_class:"current",
+                    per_pages:10,
+                    show_pages:8,
+                    curr_tag: "span",
+                    callback: function(e, ui, i){
+                        e.preventDefault();
+                        ui.curr_page = i;
+                        ui.render();
+                    }
+                }).addClass("new_yahoo")
+                $("body").delegate("select","change",function(){
+                    $("#box")[0].className = $(this).val();
+                })
+
+            });
+            // http://www.xarg.org/2011/09/jquery-pagination-revised/
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.pagination</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>mass Framework的分页插件。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>hash</dt>
+            <dd>必需。Object或Number。配置对象或total(总共有多少个东西要分页)。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p>hash中有如下可选参数:</p>
+        <table class="table1">
+            <tr><th>键名</th><th>值</th></tr>
+            <tr><td>total:</td><td><strong style="color:red;">必需</strong>，总共有多少个东西要分页。</td></tr>
+            <tr><td>show_last:</td><td>当分页过多时，是否显示最后一页。</td></tr>
+            <tr><td>show_first:</td><td>当分页过多时，是否显示第一页。</td></tr>
+            <tr><td>show_next:</td><td>当分页过多时，是否显示下一页链接。</td></tr>
+            <tr><td>show_prev:</td><td>当分页过多时，是否显示上一页链接。</td></tr>
+            <tr><td>show_jump:</td><td>是否显示跳转框。默认是false。</td></tr>
+            <tr><td>link_class:</td><td>普通分页的类名，默认为link。</td></tr>
+            <tr><td>prev_class:</td><td>上一页链接的类名，默认为prev_page。</td></tr>
+            <tr><td>next_class:</td><td>下一页链接的类名，默认为next_page。</td></tr>
+            <tr><td>fill_class:</td><td>包围省略号的标签的类名，默认为fill_page。</td></tr>
+            <tr><td>curr_class:</td><td>当前页面链接的类名，默认为curr_page。</td></tr>
+            <tr><td>disabled_class:</td><td>上一页与下一页不可点时的类名，默认为disabled。</td></tr>
+            <tr><td>prev_text:</td><td>上一页链接的显示文本，默认为下一页&gt;。</td></tr>
+            <tr><td>next_text:</td><td>下一页链接的显示文本，默认为&lt;上一页。</td></tr>
+            <tr><td>fill_text：</td><td>当分页过多时，在第一页与显示页之间或者最后一页与显示页之间的用于表示省略的文本，默认是"..."</td></tr>
+            <tr><td>curr_page:</td><td>当前页面，注意为了符合普通人的常识，<span style="color:red">强制最小值是1</span>。</td></tr>
+            <tr><td>per_pages:</td><td>每页显示多少条目（贴子，图片什么的）。</td></tr>
+            <tr><td>show_pages:</td><td>显示多少个页码，默认为10，建议取最中间的那个页码,比如是说11取6,可以确保视觉上的对称性。</td></tr>
+            <tr><td>curr_tag:</td><td>当前页面的标签,默认为em。</td></tr>
+            <tr><td>fill_tag:</td><td>包围省略号的标签,默认为code。</td></tr>
+            <tr><td>disabled_tag:</td><td>当上一页与下一页不可点时，其标签类型，默认是span。</td></tr>
+            <tr><td>selector:</td><td>绑定事件时,我们使用事件代理,这是其用于过滤的选择器,默认是"a,input"。</td></tr>
+            <tr><td>layout:</td><td>分页栏各种元素的排序方式，默认是"prev,first,link,last,next,jump"。</td></tr>
+            <tr><td>jump_text:</td><td>跳转框的样子，默认是"&lt;kbd&gt;跳转到第&lt;input \/&gt;页&lt;\/kbd&gt;"。</td></tr>
+            <tr><td>link_tmpl:</td><td>各种页码（如上一页，下一页，当前页，普通页，省略号）的共同模板。</td></tr>
+
+            <tr><td>callback:</td><td>当点击分页栏中的链接或跳转框时触发的回调，第一个参数是事件对象，第二参数是分页栏对象，第三个参数是页码，
+                    this指向当前点击的元素节点。</td></tr>
+        </table>
+        <p>在回调函数中，我们可以调用分页栏对象的render方法重新渲染自身。</p>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div id="box"&gt;&lt;/div"&gt;
+            </pre>
+
+            <pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,attr,more/pagination",function(){
+                var html = "&lt;select&gt;";
+                ("black_red,digg,badoo,yahoo,new_yahoo,Meneame,new_yahoo,flickr,sabros,green,"+
+                    "black,gray,mis_algoritmos,f12_megas,Technorati,youtube,msdn,blue,ria9").replace( $.rword, function(value){
+                    html += "&lt;option&gt;"+value+"&lt;\/option&gt;"
+                });
+                html += "&lt;\/select&gt;";
+                $(html).appendTo("fieldset");
+                $("#box").pager({
+                    total:120,
+                    curr_page:1,
+                    curr_class:"current",
+                    per_tgfc:10,
+                    show_tgfc:8,
+                    curr_tag: "span",
+                    callback: function(e, ui, i){
+                        e.preventDefault();
+                        ui.curr_page = i;
+                        ui.render();
+                        return false;
+                    }
+                }).addClass("new_yahoo")
+                $("body").delegate("select","change",function(){
+                    $("#box")[0].className = $(this).val();
+                })
+
+            })
+            </pre>
+            <div id="box"></div>
+
+        </fieldset>
+    </article>
+</body>
+</html>

@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>$.slice</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            function exec1(){
+                $.require("lang",function(){
+                    var ret = $.slice({0:'aa',1:'bb',2:'cc',length:3});
+                    ret = $.dump(ret);
+                    $.log(ret,true);
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.slice(arr,[start],[end])</h3>
+
+        <p><span class="stress">描述：</span></p>
+        <p>对类数组对象进行数组化，如果传入超个一个以上的参数，则其行为相当于数组的slice方法一样，进行切片。</p>
+        <p>所谓类数组对象通常指arguments对象，字符串对象，NodeList节点集合，由于这里没有强化对类型的检测，因此只要拥有length属性就被认为是类数组
+            因此牵及的对象增添window,function,form元素,select元素等东西.
+        </p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>arr</dt>
+            <dd>必需。ArrayLike。要处理的类数组对象。</dd>
+            <dt>start</dt>
+            <dd>可选。要抽取的片断的起始下标。如果是负数，从后面取起。</dd>
+            <dt>end</dt>
+            <dd>可选。规定从何处结束选取。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>Array</p>
+
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var ret = $.slice({0:'aa',1:'bb',2:'cc',length:3});
+                    ret = $.dump(ret);
+                    $.log(ret,true);
+                });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+
+        </fieldset>
+    </article>
+</body>
+</html>

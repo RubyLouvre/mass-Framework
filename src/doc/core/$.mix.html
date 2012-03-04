@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        
+        <title>$.mix</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeMDUltra.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("lang",function(){
+                    var ret = $.mix({a:1,b:1,c:1},{aa:2,bb:2},{cc:3,dd:3});
+                    ret = $.dump(ret);
+                    $.log(ret,true);
+                });
+            }
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.mix(target,source,[source2],[sourceN],[ride])</h3>
+
+            <p><span class="stress">描述：</span></p>
+            <p>糅杂，为一个对象添加更多成员。具体做法，将第二个参数起的所有对象参数的键值都赋给第一个对象，如果最后一个参数为布尔值，
+                则决定是否用新值替代旧值，默认是替代。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>target</dt>
+                <dd>必需。Object。<span style="color:red;">如果target为null,undefined,false,0,""等falsy值，则置换为一个新对象。</span></dd>
+                <dt>source</dt>
+                <dd>必需。Object。</dd>
+                <dt>source2</dt>
+                <dd>可选。Object。</dd>
+                <dt>sourceN</dt>
+                <dd>可选。Object。</dd>
+                <dt>ride</dt>
+                <dd>可选。Boolean。</dd>
+            </dl>
+            <p><span class="stress">返回值：</span></p>
+            <p>target</p>
+
+            <fieldset><legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var ret = $.mix({a:1,b:1,c:1},{aa:2,bb:2},{cc:3,dd:3});
+                    ret = $.dump(ret);
+                    $.log(ret,true);
+                });
+                </pre>
+                <button onclick="exec1()">点我，执行代码</button>
+
+            </fieldset>
+        </article>
+    </body>
+</html>

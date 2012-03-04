@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        
+        <title>$.fn.click</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+            .sample1 {background: #ffe0bb;  }
+            .sample2 {background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000;}
+            .button1 { margin:10px; }
+            .sample1 div { color:blue; font-weight:bold; }
+            .sample1 span { color:red; }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+
+            
+            $.require("ready,attr,event",function(){
+                var spans = $(".sample1 span")
+                var firstBtn = $(".sample1 button").first().click(function () {
+                    update(spans.first());
+                });
+                $(".sample1 button").last().click(function () {
+                    firstBtn.fire('click');
+                    update(spans.last());
+                });
+
+                function update(el) {
+                    var n = parseInt(el.text(), 10);
+                    el.text(n + 1);
+                }
+                $(".sample2").click( function (e, a, b) {
+                    $(this).append(e.type+"  "+String(a)+"   "+String(b)+"<br/>")
+                } ).fire("click", "foo", "bar");
+            
+
+            });
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.click([ fn ])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>为 click 事件绑定一个处理函数，或者触发元素上的 click 事件。</p>
+            <p>这个函数的第一种用法是 .bind('click', handler) 的快捷方式，第二种用法是 .fire('click') 的快捷方式。</p>
+
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>fn</dt>
+                <dd>
+                    可选。Funcion。回调函数。
+                </dd>
+            </dl>
+
+
+            <fieldset><legend>例子</legend>
+                <p>点击第一个按钮只会为自己加1，点击第二个按钮会为两者加1 </p>
+                <div class="sample1">
+                    <button>Button #1</button>
+                    <button>Button #2</button>
+                    <div><span>0</span> button #1 clicks.</div>
+                    <div><span>0</span> button #2 clicks.</div>
+                </div>
+
+
+                <pre class="brush:xml;gutter:false;toolbar:false">
+            &lt;div class="sample1"&gt;
+                &lt;button&gt;Button #1&lt;/button&gt;
+                &lt;button&gt;Button #2&lt;/button&gt;
+                &lt;div&gt;&lt;span&gt;0&lt;/span&gt; button #1 clicks.&lt;/div&gt;
+                &lt;div&gt;&lt;span&gt;0&lt;/span&gt; button #2 clicks.&lt;/div&gt;
+            &lt;/div&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+        $.require("ready,event",function(){
+            var spans = $(".sample1 span")
+            var firstBtn = $(".sample1 button").first().click(function () {
+                update(spans.first());
+            });
+            $(".sample1 button").last().click(function () {
+                firstBtn.fire('click');
+                update(spans.last());
+            });
+
+            function update(el) {
+                var n = parseInt(el.text(), 10);
+                el.text(n + 1);
+            }
+        });
+                </pre>
+            </fieldset>
+            <fieldset><legend>例子</legend>
+                <p>附加参数。 </p>
+
+                <p class="sample2" >请单击这里<br/></p>
+                <span class="show_b" ></span>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+                 &lt;p class="sample2" &gt;请单击这里&lt;br/&gt;&lt;/p&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+        $.require("ready,event",function(){
+            $(".sample2").click( function (e, a, b) {
+                $(this).append(e.type+"  "+String(a)+"   "+String(b)+"&lt;br/&gt;")
+            } ).fire("click", "foo", "bar");
+        });
+                </pre>
+            </fieldset>
+
+    
+        </article>
+    </body>
+</html>

@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>$.require</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("lang,ready",function($$){
+                $.log("这是最后的回调",true);
+                $.log($$("aa").toUpperCase(),true)
+            });
+      
+            $.require("lang,ready",function($$){
+                $.log("它将不会再发出请求",true);
+                $.log($$("aa").padRight(7),true);
+                $.require("lang,ready",function($$){
+                    $.log("这是内嵌的",true);
+                    $.log($$("aa").padRight(8),true);
+                    $.require("lang,ready",function($$){
+                        $.log("这是内嵌的2",true);
+                        $.log($$("aa").padRight(9),true);
+                        $.require("lang,ready",function($$){
+                            $.log("这是内嵌的3",true);
+                            $.log($$("aa").padRight(10),true)
+                        });
+                    });
+                });
+            });
+            $.require("support,class,ready",function(support,factory){
+                $.log("=========================",true);
+                $.log("mix" in $,true)//判定是否来自模块加载模块
+                $.log("cloneAll" in support,true);//判定是否来自support模块
+                $.log($.type(factory),true)//判定是否来自class模块, class模块并没有返回值
+            });
+
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.require(deps,callback,[errback])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>mass Framework提供了无以伦比的模块加载机制，成功地解决了前人无法支持负向回调的问题。</p>
+        <p> 通常，为了加载那些我们需要的模块，我们向DOM树添加一个临时节点，它们会在模块成功加载后移除，
+            判定时机一般是onload或onreadychange的complete|loaded状态，然后再执行JS文件最外层的那个函数，取得依赖列表，
+            待到所有指定依赖以及其所有依赖树都加载或执行成功后，就执行正向回调。</p>
+        <p>但还有一种情况，就是指定的模块不存在，也就是所谓的死链接，从而触发script的onerror事件，此时我们也将临时节点移除。但在opera与IE6-8下，
+            script节点不支持onerror事件，因此也就无法移除节点与向用户发出警告（负向回调的主要作用之一）。幸而，在我的模块加载系统 v5中
+            已创造性地解决这问题，到v7已经非常完美！并且，我们可以通过$.stack快速进行排查。</p>
+        <p>此外, mass Framework还支持多版本共存，详见<a href="http://www.cnblogs.com/rubylouvre/archive/2011/11/17/2251868.html">这里</a>。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>deps</dt>
+            <dd>必需。String|Array。依赖列表，如果是字符串请用逗号隔开，如果要指定具体路径请写到小括号中，如<br/>
+                $.require("aaa(http://www.cnblogs.com/rubylouvre/remote.js)",function(){})
+            </dd>
+            <dt>callback</dt>
+            <dd>必需。Function。正向回调，当用户指定的依赖以及这些依赖的依赖树都加载执行完毕后，才会安全执行它。</dd>
+            <dt>errback</dt>
+            <dd>可选。Function。负向回调，当某一个模块出错或不存在时，就会执行此回调。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>target</p>
+
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("lang,ready",function($$){
+                $.log("这是最后的回调",true);
+                $.log($$("aa").toUpperCase(),true)
+            });
+
+            $.require("lang,ready",function($$){
+                $.log("它将不会再发出请求",true);
+                $.log($$("aa").padRight(7),true);
+                $.require("lang,ready",function($$){
+                    $.log("这是内嵌的",true);
+                    $.log($$("aa").padRight(8),true);
+                    $.require("lang,ready",function($$){
+                        $.log("这是内嵌的2",true);
+                        $.log($$("aa").padRight(9),true);
+                        $.require("lang,ready",function($$){
+                            $.log("这是内嵌的3",true);
+                            $.log($$("aa").padRight(10),true)
+                        });
+                    });
+                });
+            });
+            $.require("support,class,ready",function(support,factory){
+                $.log("=========================",true);
+                $.log("mix" in $,true)//判定是否来自模块加载模块
+                $.log("cloneAll" in support,true);//判定是否来自support模块
+                $.log($.type(factory),true)//判定是否来自class模块, class模块并没有返回值
+            });
+            </pre>
+
+
+        </fieldset>
+    </article>
+</body>
+</html>
