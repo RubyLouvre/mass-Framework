@@ -30,8 +30,8 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
         ui.target.delegate("."+ ui.trigger_class, ui.active_event, function( e ){
             var reference =  $(e.target)
             if( !reference.hasClass( active) ){
-                ui.target.find("."+active).removeClass( active ).next().toggle(500)
-                reference.addClass( active ).next().toggle(500)
+                ui.target.find("."+active).removeClass( active ).next().slideUp(500)
+                reference.addClass( active ).next().slideDown(500)
                 ui.active_callback.call( this, e, ui );
             }
         })
@@ -41,8 +41,8 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
         active: function(index, callback){
             var ui = this, reference = ui.triggers.eq(~~index), active = ui.active_class;
             if( !reference.hasClass( active) ){
-                ui.target.find("."+active).removeClass( active ).next().toggle(500)
-                reference.addClass( active ).next().toggle(500)
+                ui.target.find("."+active).removeClass( active ).next().slideUp(500)
+                reference.addClass( active ).next().slideDown(500)
                 callback && callback.call( ui,index)
             }
         },
@@ -68,6 +68,8 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
     $.fn.accordion = Widget.create("accordion", Accordion, init )
 
 })
+
+
 
 
 //2012.2.25  v1
