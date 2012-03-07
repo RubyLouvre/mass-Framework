@@ -610,7 +610,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return ( first && first.parentNode ) ? this.prevAll().length : -1;
             }
             // 返回第一个元素在新实例中的位置
-            if ( typeof el === "string" ) {
+            if ( typeof expr === "string" ) {
                 return $( expr ).index( first );
             }
             // 返回传入元素（如果是mass实例则取其第一个元素）位于原实例的位置
