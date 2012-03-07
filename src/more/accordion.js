@@ -4,7 +4,10 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
         panel_class:    "panel",
         active_class:   "active",
         active_event:   "click",
-        active_callback: $.noop
+        active_callback: $.noop,
+        pause_over_panel: false,
+        autoplay: false,
+        delay: 500
     }
 
     var createAccordion = function( data, ui){
@@ -25,24 +28,48 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
         ui.triggers = ui.target.find("." + ui.trigger_class );
         ui.active(0);
 
-
         var active = ui.active_class;
+//http://www.welefen.com/user-define-rich-content-filter-class.html
         ui.target.delegate("."+ ui.trigger_class, ui.active_event, function( e ){
             var reference =  $(e.target)
             if( !reference.hasClass( active) ){
-                ui.target.find("."+active).removeClass( active ).next().slideUp(500)
+                ui.target.find("."+active).removeClass( active ).next().slideUp(500);
                 reference.addClass( active ).next().slideDown(500)
                 ui.active_callback.call( this, e, ui );
             }
-        })
+        });
+        if(ui.pause_over_panel){
+            var active_panel = "."+ active +"> ."+ui.panel_class;
+            ui.target.delegate(active_panel, "mouseover", function( e ){
+                ui.autoplay = false;
+            }).delegate(active_panel, "mouseout", function( e ){
+                if(!ui.autoplay){
+
+                    ui.autoplay = true;
+                    setTimeout(function(){
+                        ui.active(++ui.current_index);
+                    }, ui.delay);
+                }
+               
+            });
+        }
+
     }
     var Accordion = $.factory({
         inherit: Widget.Class,
         active: function(index, callback){
-            var ui = this, reference = ui.triggers.eq(~~index), active = ui.active_class;
+            var next = index, ui = this, reference = ui.triggers.eq(next) , active = ui.active_class;
+            if(ui.autoplay && !reference[0]){
+                reference = ui.triggers.eq(next = 0)
+            }
+            ui.current_index = next;
             if( !reference.hasClass( active) ){
-                ui.target.find("."+active).removeClass( active ).next().slideUp(500)
-                reference.addClass( active ).next().slideDown(500)
+                ui.target.find("."+active).removeClass( active ).next().slideUp(500);
+                reference.addClass( active ).next().slideDown(500, function(){
+                    setTimeout(function(){
+                        ui.autoplay && ui.active(++next);
+                    }, ui.delay);
+                })
                 callback && callback.call( ui,index)
             }
         },
@@ -51,8 +78,7 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
             var ui = this, reference = ui.triggers.eq(~~index), t = $.tag;
             reference.after(
                 t("div class="+ui.trigger_class, trigger) +
-                t("div class="+ui.panel_class, panel ) )
-
+                t("div class="+ui.panel_class, panel ) );
             ui.triggers = ui.target.find("." + ui.trigger_class );
         },
         remove: function(index,callback){

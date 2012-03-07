@@ -6,19 +6,22 @@
         <style>
             .mass_accordion {
                 width:300px;
+                border-bottom:1px solid blue;
             }
             .mass_accordion .trigger{
                 width:300px;
                 height:20px;
                 line-height:20px;
                 background:teal;
+                border-bottom:1px solid blue;
             }
-             .mass_accordion .trigger.acitve{
-
-                background:blue
+            .mass_accordion .trigger.active{
+                background:blue!important;
+                color:#fff;
             }
             .mass_accordion .panel{
- width:300px;
+                width:300px;
+                height:200px;
                 background:red;
             }
         </style>
@@ -30,6 +33,9 @@
         <script >
             $.require("ready,more/accordion",function( ){
                 $("body").accordion({
+                    delay: 1000,
+                    autoplay: true,
+                    pause_over_panel: true,
                     data:[
                         {trigger:"标题1",panel:"<div class=content>面板1</div>"},
                         {trigger:"标题2",panel:"<div class=content>面板2</div>"},
