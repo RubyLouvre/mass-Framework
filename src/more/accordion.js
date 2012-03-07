@@ -29,7 +29,7 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
         ui.active(0);
 
         var active = ui.active_class;
-//http://www.welefen.com/user-define-rich-content-filter-class.html
+        //http://www.welefen.com/user-define-rich-content-filter-class.html
         ui.target.delegate("."+ ui.trigger_class, ui.active_event, function( e ){
             var reference =  $(e.target)
             if( !reference.hasClass( active) ){
@@ -38,14 +38,16 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
                 ui.active_callback.call( this, e, ui );
             }
         });
-        if(ui.pause_over_panel){
-            var active_panel = "."+ active +"> ."+ui.panel_class;
-            ui.target.delegate(active_panel, "mouseover", function( e ){
-                ui.autoplay = false;
-            }).delegate(active_panel, "mouseout", function( e ){
-                if(!ui.autoplay){
 
-                    ui.autoplay = true;
+       // autoplay_callback
+        if(ui.pause_over_panel){
+            var active_panel = "."+ active +"+ ."+ui.panel_class;
+            ui.target.delegate(active_panel, "mouseover", function( e ){
+                ui.autoplay_callback = $.noop;
+
+            }).delegate(active_panel, "mouseout", function( e ){
+                if(ui.autoplay_callback == $.noop){
+                    delete ui.autoplay_callback
                     setTimeout(function(){
                         ui.active(++ui.current_index);
                     }, ui.delay);
@@ -65,13 +67,20 @@ $.define("accordion","more/uibase,event,attr,fx",function(Widget){
             ui.current_index = next;
             if( !reference.hasClass( active) ){
                 ui.target.find("."+active).removeClass( active ).next().slideUp(500);
-                reference.addClass( active ).next().slideDown(500, function(){
-                    setTimeout(function(){
-                        ui.autoplay && ui.active(++next);
-                    }, ui.delay);
-                })
+                console.log("00000000000000000")
+                console.log(ui.active+"")
+                reference.addClass( active ).next().slideDown(500, ui.autoplay_callback);
                 callback && callback.call( ui,index)
             }
+        },
+        autoplay_callback: function(){
+            console.log("autoplay_callback")
+            var ui = this;
+            console.log(this)
+            console.log(ui)
+            setTimeout(function(){
+                ui.active(++ui.current_index);
+            }, ui.delay);
         },
         //在第几个之后添加一个新切换卡
         add: function(index, trigger, panel ){
