@@ -27,58 +27,58 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         ui.target = createHTML(ui.data, ui)//创建一个ui实体
         delete ui.data;//考虑有时它的HTML结构会很庞大，没有必要储存它
-        reset(ui);
-        ui.panels.hide();
-        ui.active(0);
-        //http://www.welefen.com/user-define-rich-content-filter-class.html
+        reset(ui);//重新设置triggers与panels集合
+        ui.panels.hide();//隐藏所有panels
+        ui.active(0);//高亮第一个trigger与展开第一个panel
+        //当点击某一个trigger时，展开与之对应的panel
         ui.target.delegate("."+ ui.trigger_class, ui.active_event, function( e ){
             var index = ui.triggers.index(e.target);
-            ui.active(index,ui.active_callback, e);
+            ui.active(index, ui.active_callback, e);
         });
 
         // autoplay_callback
+        //如果pause_over_panel为true，则移到控件上方停止切换，移走恢复
         if(ui.pause_over_panel){
             ui.target.bind( "mouseenter", function( e ){
                 ui.autoplay = false;
-
+                ui.panels.stop(1,1);//立即停步所有动画，并让它们处于完成状态
+                clearTimeout(ui.timeoutID)
+                $.log("停止切换");
             }).bind("mouseleave", function( e ){
                 if(!ui.autoplay){
                     ui.autoplay = true
-                   setTimeout(function(){
-                         ui.active(++ui.current_index);
-                    
-                   },100)
-                  
+                    $.log("恢复切换");
+                    ui.active(++ui.current_index);
                 }
-
             });
         }
 
     }
     var Accordion = $.factory({
         inherit: Widget.Class,
+        //切换到某一面板
         active: function(index, callback, e){
             var i = index, ui = this, reference = ui.triggers.eq(i) , active = ui.active_class;
-            if( !reference[0]){
+            if( !reference[0]){//如果越界了就回到第一个面板
                 reference = ui.triggers.eq(i = 0)
             }
             ui.current_index = i;
-            if( !reference.hasClass( active) ){
+            if( !reference.hasClass( active ) ){
+                //找到当前处于激活状态的trigger与panel，去掉它们的相应类名
                 var el = ui.target.find("."+active).removeClass( active )
-                var p = ui.triggers.index( el )
-
-               ui.panels.eq(p).removeClass( active ).slideUp(500);
-
+                //收起原来展开的面板
+                ui.panels.eq( ui.triggers.index( el ) ).removeClass( active ).slideUp(500);
+                //将目标trigger与panel变为激活状态，并展开面板
                 reference.addClass( active );
                 ui.panels.eq(i).addClass(active).slideDown(500, function(){
-                    setTimeout(function(){
-                        ui.autoplay &&  ui.active(++ui.current_index);
+                    ui.timeoutID = setTimeout(function(){//如果开启了自动轮播功能
+                        ui.autoplay && ui.active(++ui.current_index);
                     }, ui.delay);
                 });
                 callback && callback.call( e ? e.target : ui.target[0], e || ui);
             }
         },
-        //在第几个之后添加一个新切换卡
+        //添加一组新的trigger与panel，index为它的插入位置
         add: function(index, trigger, panel ){
             var ui = this, reference = ui.triggers.eq(~~index), t = $.tag;
             reference.after(
@@ -86,6 +86,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
                 t("div class="+ui.panel_class, panel ) );
             reset(ui);
         },
+        //移除指定的trigger与panel
         remove: function(index,callback){
             var ui = this, reference = ui.triggers.eq(~~index)
             if( reference.length ){
@@ -98,4 +99,6 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
 
     $.fn.accordion = Widget.create("accordion", Accordion, init )
 
-})
+});
+ //http://www.welefen.com/user-define-rich-content-filter-class.html
+ //http://huaban.com/boards/327692/
