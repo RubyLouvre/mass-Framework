@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.switchable</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style>
+            .mass_tabs {
+                position:relative;
+                height:200px;
+                width:400px;
+                padding-left:20px;
+                padding-top:5px;
+                background:green;
+                overflow:hidden;
+            }
+            .mass_tabs .section {
+                float:left;
+            }
+            .mass_tabs .trigger {
+                display:inline-block;
+                height:20px;
+                line-height:20px;
+                padding:1px 10px;
+                margin-left:5px;
+                color:#000;
+                background:#00FF7F;
+                text-align:center;
+                text-decoration:none;
+            }
+            .mass_tabs .active .trigger{
+                padding-bottom:8px;/* panel.top - parent.padding-top - tigger.height */
+                color:#fff;
+                background:#a9ea00;
+            }
+            .mass_tabs .panel{
+                display: none;
+                position:absolute;
+                width:420px;/* parent.width+ parent.padding-left*/
+                height:175px;/* parent.height +  padding-top - tabs.top */
+                top: 30px;
+                left:0px;
+                color:#000;
+                background:#a9ea00;
+            }
+            .mass_tabs .active .panel{
+                display:block;
+            }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,more/tabs",function(){
+                $("#first_tabs").tabs({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
+                    active_event: "mouseover"
+                }).tabs("active",2)//第二次调用tabs方法是将这些参数传到tabs对象中的invoke方法
+            })
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.switchable(settings)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>用于生成跑马灯（marquee），轮播（carousel），风手琴（accordion）, 切换卡（tabs）, slide（幻灯片）这五种控件。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>settings</dt>
+            <dd>可选。用于配置控件对象。但当这个对象第二次调用它时，
+                只有当其第一个参数为字符串或对象才有效，这样相当于调用其方法或重写一些属性。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p><span class="stress">settings的配置参数：</span></p>
+        <ul>
+            <li>data:用于创建控件，必须是一个对象数组，每个对象都拥有trigger(可选)与panel属性。</li>
+            <li>data_expr:页面现存的具有切换卡，手风琴等结构的HTML元素的CSS表达式。此属性与data属性只能二选一。</li>
+            <li>trigger_class:触发器的类名，它起着类似按钮的作用，用于切换面板。</li>
+            <li>panel_class:面板的类名。</li>
+            <li>active_class:处于激活状态的面板与触发器都会添加上此类名。</li>
+            <li>active_event:用于切换面板的事件，不是click就是mouseover。</li>
+            <li>active_callback:切换面板时的回调函数。</li>
+            <li>autoplay:是否自动进行切换，默认是false。</li>
+            <li>pause_over_panel:当鼠标移到控件之上是否中止切换，默认是false。</li>
+            <li>delay:切换面板后要延迟多久才自动开始下一个切换，单位为ms，默认是1000。</li>
+            <li>switch_out:正在处于激活状态的面板在失去激活状态时要进行的切换动画，默认是$.fn.slideUp。</li>
+            <li>switch_out_args:上面动画的参数， 默认为500。</li>
+            <li>switch_in:某一面板在变成激活状态时要进行的切换动画，默认是$.fn.slideDown。</li>
+            <li>switch_in_args:上面动画的参数， 默认为500。</li>
+
+        </ul>
+        <p>切换卡对象默认拥有以下方法，都是使用$(expr).tabs(method,args1,args2,args3)的形式进行调用：</p>
+        <ul>
+            <li>active(index, [callback],[e]): 切换到某一面板，index为面板的序号，从零开始。callback为回调函数，e为事件对象。回调函数中的this指向事件源对象或ui.target[0], 参数为e或ui</li>
+            <li>remove(index, [callback]): 移除到某一面板，index为面板的序号，从零开始。callback为回调函数，拥有一个参数，就是实例自身, this指向ui.target[0]。</li>
+            <li>add(index, trigger, panel): 在某一切换卡之后添加一个切换卡，trigger与panel为新切换卡的按钮与面板。</li>
+            <li>destroy(): 销毁切换卡实例，移除相关事件绑定。</li>
+            <li>invoke(method, args1, args2): 如果method为实例的一个方法，则调用此方法，将其他参数传进去，否则则重写或添加相关属性。</li>
+        </ul>
+        <fieldset><legend>例子</legend>
+
+            <pre class="brush:js;gutter:false;toolbar:false">
+            $.require("ready,more/tabs",function(){
+                $("#first_tabs").tabs({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
+                    active_event: "mouseover"
+                }).tabs("active",2)//第二次调用tabs方法是将这些参数传到tabs对象中的invoke方法
+            })
+            </pre>
+            <div id="first_tabs">
+
+            </div>
+            <p>它将生成如下HTML结构</p>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+&lt;div class="mass_tabs"&gt;
+     &lt;div class="active section"&gt;
+         &lt;div class="trigger"&gt;标题1&lt;/div&gt;
+         &lt;div class="panel"&gt;面板1&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;div class="section"&gt;
+         &lt;div class="trigger"&gt;标题2&lt;/div&gt;
+         &lt;div class="panel"&gt;面板2&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;div class="section"&gt;
+         &lt;div class="trigger"&gt;标题3&lt;/div&gt;
+         &lt;div class="panel"&gt;面板3&lt;/div&gt;
+     &lt;/div&gt;
+     &lt;div class="section"&gt;
+         &lt;div class="trigger"&gt;标题4&lt;/div&gt;
+         &lt;div class="panel"&gt;面板4&lt;/div&gt;
+     &lt;/div&gt;
+ &lt;/div&gt;
+            </pre>
+
+
+        </fieldset>
+    </article>
+</body>
+</html>

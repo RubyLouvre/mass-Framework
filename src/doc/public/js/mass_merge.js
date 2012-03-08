@@ -73,7 +73,7 @@
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
-        "@debug": false,
+        "@debug": true,
         "@target": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
@@ -2577,6 +2577,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
         "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace( $.rword, function( tag ){
             document.createElement( tag );////让IE6789支持HTML5的新标签
+            document.createElement( tag.toUpperCase() );
         });
     }
     function getDoc(){
@@ -3181,7 +3182,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return ( first && first.parentNode ) ? this.prevAll().length : -1;
             }
             // 返回第一个元素在新实例中的位置
-            if ( typeof el === "string" ) {
+            if ( typeof expr === "string" ) {
                 return $( expr ).index( first );
             }
             // 返回传入元素（如果是mass实例则取其第一个元素）位于原实例的位置
@@ -3307,6 +3308,7 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.11.5 添加get方法 init的context参数可以是类数组对象
 2011.11.6 outerHTML支持对文档对象的处理，html可以取得XML数据岛的innerHTML,修正init中scope与ownerDocument的取得
 2011.11.7 重构find， 支持不插入文档的节点集合查找
+2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
  *
  */
 /*

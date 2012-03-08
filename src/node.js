@@ -87,7 +87,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         eq: function( i ) {
             return i === -1 ? this.slice( i ) :this.slice( i, +i + 1 );
         },
-
         gt:function( i ){
             return this.slice( i+1, this.length );
         },
@@ -125,7 +124,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             }
             return ret
         },
-
         clone: function( dataAndEvents, deepDataAndEvents ) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
@@ -133,7 +131,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return cloneNode( this,  dataAndEvents, deepDataAndEvents );
             });
         },
-
         //取得或设置节点的innerHTML属性
         html: function( item ){
             return $.access(this, 0, item, function( el ){//getter
@@ -184,6 +181,12 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
     $.fn = $.prototype;
     $.fn.init.prototype = $.fn;
+    "push,unshift,pop,shift,splice".replace( $.rword, function( method ){
+        $.fn[ method ] = function(){
+            Array.prototype[ method ].apply(this, arguments);
+            return this;
+        }
+    });
     "remove,empty".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
             var isRemove = method === "remove";
@@ -736,5 +739,6 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.11.5 添加get方法 init的context参数可以是类数组对象
 2011.11.6 outerHTML支持对文档对象的处理，html可以取得XML数据岛的innerHTML,修正init中scope与ownerDocument的取得
 2011.11.7 重构find， 支持不插入文档的节点集合查找
+2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
  *
  */
