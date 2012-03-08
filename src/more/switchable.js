@@ -39,11 +39,16 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         // autoplay_callback
         if(ui.pause_over_panel){
             ui.target.bind( "mouseenter", function( e ){
-                ui.autoplay = false
+                ui.autoplay = false;
+
             }).bind("mouseleave", function( e ){
                 if(!ui.autoplay){
                     ui.autoplay = true
-                    ui.active(++ui.current_index);
+                   setTimeout(function(){
+                         ui.active(++ui.current_index);
+                    
+                   },100)
+                  
                 }
 
             });
@@ -54,7 +59,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         inherit: Widget.Class,
         active: function(index, callback, e){
             var i = index, ui = this, reference = ui.triggers.eq(i) , active = ui.active_class;
-            if(ui.autoplay && !reference[0]){
+            if( !reference[0]){
                 reference = ui.triggers.eq(i = 0)
             }
             ui.current_index = i;
@@ -62,7 +67,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
                 var el = ui.target.find("."+active).removeClass( active )
                 var p = ui.triggers.index( el )
 
-                ui.panels.eq(p).removeClass( active ).slideUp(500);
+               ui.panels.eq(p).removeClass( active ).slideUp(500);
 
                 reference.addClass( active );
                 ui.panels.eq(i).addClass(active).slideDown(500, function(){
