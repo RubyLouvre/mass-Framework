@@ -35,16 +35,55 @@
                 color: #444;
                 overflow: hidden;
             }
-            .h_accordion {
+            .dew {
                 position:relative;
                 width:500px;
                 height:200px;
                 overflow:hidden;
             }
-            .h_accordion .panel{
+            .dew .panel{
                 position:absolute;
             }
-
+            .winnower {
+                width:536px;
+                height:265px;
+                position:relative;
+                overflow:hidden;
+                border:2px solid #000;
+            }
+            .winnower .trigger{
+                position:absolute;
+                display:inline-block;
+                width:15px;
+                height:15px;
+            }
+            .winnower .arrow{
+                position:absolute;
+                display:none;
+                z-index:100;
+                width:25px;
+                height:40px;
+                top:125px;
+                background: url("winnower_s.png") no-repeat scroll -40px 0px transparent;
+            }
+            .winnower .prev{
+                left:5px;
+            }
+            .winnower .next{
+                background: url("winnower_s.png") no-repeat scroll -90px 0px transparent;
+                right:5px;
+            }
+            .winnower .trigger a {
+                display:inline-block;
+                width:15px;
+                height:15px;
+                text-decoration:none;
+                outline:none;
+                background: url("winnower_s.png") no-repeat 3px -12px transparent;
+            }
+            .winnower .trigger a:hover,.winnower .trigger.active a{
+                background-position:-15px -12px;
+            }
 
         </style>
         <script type="text/javascript" src="/src/mass.js">
@@ -60,51 +99,97 @@
                         {trigger:"标题2",panel:"只有最基本的功能"},
                         {trigger:"标题3",panel:"<div class=content>面板3</div>"},
                         {trigger:"标题4",panel:"<div class=content>面板4</div>"}
-                    ]
-                });
-                var ui = $(".h_accordion").switchable({
-                    data:[
-                        {panel:'<div><img src="h1.jpg" /></div>'},
-                        {panel:'<div><img src="h2.jpg" /></div>'},
-                        {panel:'<div><img src="h3.jpg" /></div>'},
-                        {panel:'<div><img src="h4.jpg" /></div>'},
-                        {panel:'<div><img src="h5.jpg" /></div>'},
-                        {panel:'<div><img src="h6.jpg" /></div>'},
                     ],
-                    switch_out:$.noop,
-
-                    switch_in: $.noop
+                    switch_in: $.fn.slideDown,
+                    switch_out: $.fn.slideUp
+                });
+                var dew = $(".dew").switchable({
+                    data:[
+                        {panel:'<div><img src="dew1.jpg" /></div>'},
+                        {panel:'<div><img src="dew2.jpg" /></div>'},
+                        {panel:'<div><img src="dew3.jpg" /></div>'},
+                        {panel:'<div><img src="dew4.jpg" /></div>'},
+                        {panel:'<div><img src="dew5.jpg" /></div>'},
+                        {panel:'<div><img src="dew6.jpg" /></div>'},
+                    ]
                 }).switchable("getUI");
                 var t = 0;
                 function after(){
                     t += 1;
                     if(t == 6){
                         t = 0
-                        ui.panels.one("mouseover",switchIt);
+                        setTimeout(function(){
+                            dew.panels.one("mouseover",switchIt);
+                        },300);
                     }
                 }
                 function switchIt(e){
                     var index = $(this).index();
                     var width =  $(this).width();
-                    ui.panels.each(function(el,i){
+                    dew.panels.each(function(el,i){
                         $(el).fx(500,{left:i * 36+( i > index ? width - 36: 0),after:after})
                     });
                 }
-                ui.panels.each(function(el, i){
+                dew.panels.each(function(el, i){
                     $(el).css({
                         left: i * 83,
                         display:"block"
                     });
-                  
                 }).one("mouseover",switchIt);
-                ui.target.mouseleave(function(){
-                    ui.panels.each(function(el, i){
+                dew.target.mouseleave(function(){
+                    dew.panels.each(function(el, i){
                         $(el).fx(500,{
                             left: i * 83
                         });
                     });
+                });
+
+                var winnower = $(".winnower").switchable({
+                    data: [
+                        {trigger:"<a href='javascript:void(0)'></a>",panel:'<div><img src="winnower0.jpg" /></div>'},
+                        {trigger:"<a href='javascript:void(0)'></a>",panel:'<div><img src="winnower1.jpg" /></div>'},
+                        {trigger:"<a href='javascript:void(0)'></a>",panel:'<div><img src="winnower2.jpg" /></div>'},
+                        {trigger:"<a href='javascript:void(0)'></a>",panel:'<div><img src="winnower3.jpg" /></div>'},
+                        {trigger:"<a href='javascript:void(0)'></a>",panel:'<div><img src="winnower4.jpg" /></div>'},
+                    ],
+                    active_callback: function(){
+                        var w = -1 * winnower.panels.innerWidth() * winnower.active_index;
+                        console.log(w)
+                        winnower.target.fx(500,{"margin-left":w }  )
+                    }
+                }).switchable("getUI");
+                winnower.panels.css({
+                    "float":"left",
+                    "display":"inline-block"
                 })
-                
+                winnower.target.width(winnower.panels.innerWidth() * 5 +10);
+                var winnowerUI = $(".winnower").append('<div class="next arrow" ></div>').append('<div class="prev arrow"></div>')
+                winnower.triggers.each(function(el, i){
+                    $(el).css({
+                        display:"inline-block",
+                        zIndex:100,
+                        right:100 - i * 17,
+                        bottom: 20
+                    })
+                })
+                winnowerUI.mouseenter(function(){
+                    winnowerUI.find(".arrow").show()
+                }).mouseleave(function(){
+                    winnowerUI.find(".arrow").hide()
+                });
+                winnowerUI.find(".arrow").click(function(){
+                    var next = $(this).hasClass("next");
+                    var length = winnower.triggers.length-1
+                    var i = winnower.active_index ;
+                    if(next){
+                        var index =  i+1 > length ? 0 : i+1;
+                    }else{
+                        index = i-1 < 0 ? length : i-1;
+                    }
+                    winnower.active( index, winnower.active_callback )
+                })
+
+
             });
         </script>
 
@@ -114,7 +199,11 @@
 
         </div>
         <p>trigger与panel一体化的水平手风琴</p>
-        <div class="h_accordion">
+        <div class="dew">
+
+        </div>
+        <p>轮播</p>
+        <div class="winnower">
 
         </div>
 
