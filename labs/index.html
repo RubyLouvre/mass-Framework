@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>TODO supply a title</title>
+        <style>
+
+            .v_accordion  {
+                background:#DCDCDC;
+                width: 620px;
+                height:245px;
+                overflow:hidden;
+            }
+            .v_accordion .trigger{
+                height: 30px;
+                width: 600px;
+                background: url(mass_accordion_trigger.jpg) no-repeat top right #a9d06a;
+                padding: 0 10px 0 10px;
+                line-height: 30px;
+                color: #fff;
+                font-size: 12px;
+                color: #000;
+                border-bottom: 1px solid #cde99f;
+                cursor: pointer;
+            }
+            .v_accordion .trigger.active{
+                background: url(mass_accordion_trigger_active.jpg) no-repeat top right #e0542f;
+                color: #fff;
+                border-bottom: 1px solid #f68263;
+            }
+            .v_accordion .panel {
+                width: 600px;
+                height: 100px;
+                padding: 5px 10px 15px 10px;
+                color: #444;
+                overflow: hidden;
+            }
+            .h_accordion {
+                position:relative;
+                width:500px;
+                height:200px;
+                overflow:hidden;
+            }
+            .h_accordion .panel{
+                position:absolute;
+            }
+
+
+        </style>
+        <script type="text/javascript" src="/src/mass.js">
+
+        </script>
+
+
+        <script >
+            $.require("ready,more/switchable",function( ){
+                $(".v_accordion").switchable({
+                    data:[
+                        {trigger:"标题1",panel:"这是一个简单的垂直手风琴"},
+                        {trigger:"标题2",panel:"只有最基本的功能"},
+                        {trigger:"标题3",panel:"<div class=content>面板3</div>"},
+                        {trigger:"标题4",panel:"<div class=content>面板4</div>"}
+                    ]
+                });
+                var ui = $(".h_accordion").switchable({
+                    data:[
+                        {panel:'<div><img src="h1.jpg" /></div>'},
+                        {panel:'<div><img src="h2.jpg" /></div>'},
+                        {panel:'<div><img src="h3.jpg" /></div>'},
+                        {panel:'<div><img src="h4.jpg" /></div>'},
+                        {panel:'<div><img src="h5.jpg" /></div>'},
+                        {panel:'<div><img src="h6.jpg" /></div>'},
+                    ],
+                    switch_out:$.noop,
+
+                    switch_in: $.noop
+                }).switchable("getUI");
+                var t = 0;
+                function after(){
+                    t += 1;
+                    if(t == 6){
+                        t = 0
+                        ui.panels.one("mouseover",switchIt);
+                    }
+                }
+                function switchIt(e){
+                    var index = $(this).index();
+                    var width =  $(this).width();
+                    ui.panels.each(function(el,i){
+                        $(el).fx(500,{left:i * 36+( i > index ? width - 36: 0),after:after})
+                    });
+                }
+                ui.panels.each(function(el, i){
+                    $(el).css({
+                        left: i * 83,
+                        display:"block"
+                    });
+                  
+                }).one("mouseover",switchIt);
+                ui.target.mouseleave(function(){
+                    ui.panels.each(function(el, i){
+                        $(el).fx(500,{
+                            left: i * 83
+                        });
+                    });
+                })
+                
+            });
+        </script>
+
+    </head>
+    <body class="black">
+        <div class="v_accordion8">
+
+        </div>
+        <p>trigger与panel一体化的水平手风琴</p>
+        <div class="h_accordion">
+
+        </div>
+
+    </body>
+</html>
