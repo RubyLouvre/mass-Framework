@@ -125,3 +125,5 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
  //http://speckyboy.com/2010/08/19/10-mootools-image-and-content-sliders/
  //http://www.cnblogs.com/babyzone2004/archive/2010/08/30/1812682.html
  //http://jquery.org/
+ //http://www.cnblogs.com/zhangshenjia/archive/2012/03/09/get_relative_url.html
+ //http://nivo.dev7studios.com/demos/2/
