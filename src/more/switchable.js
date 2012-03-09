@@ -7,9 +7,9 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         active_callback: $.noop,
         pause_over_panel: false,
         autoplay: false,
-        switch_out: $.fn.slideUp,//收起
+        switch_out: $.noop,//收起
         switch_out_args: [500],
-        switch_in: $.fn.slideDown,
+        switch_in: $.noop,
         switch_in_args: [500],
         delay: 1000
     }
@@ -41,7 +41,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         ui.active(0);//高亮第一个trigger与展开第一个panel
         //当点击某一个trigger时，展开与之对应的panel
         ui.target.delegate("."+ ui.trigger_class, ui.active_event, function( e ){
-            var index = ui.panels.index(e.target);
+            var index = ui.triggers.index( $(e.target).closest("."+ui.trigger_class));
             ui.active(index, ui.active_callback, e);
         });
         //如果pause_over_panel为true，则移到控件上方停止切换，移走恢复
@@ -75,6 +75,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
             ui.active_index = i;
             if( !curr.hasClass( active ) ){
                 var prev = ui.panels.filter("."+active);
+              //  console.log(i)
                 //将原来处于激活状态的trigger与panel去掉对应类名
                 ui.target.find("."+active).removeClass( active );
                 //收起原来展开的面板
