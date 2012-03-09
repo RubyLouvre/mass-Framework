@@ -121,6 +121,6 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
 
 });
  //http://www.welefen.com/user-define-rich-content-filter-class.html
- //http://huaban.com/boards/327692/
+ //http://speckyboy.com/2010/08/19/10-mootools-image-and-content-sliders/
  //http://www.cnblogs.com/babyzone2004/archive/2010/08/30/1812682.html
  //http://jquery.org/
