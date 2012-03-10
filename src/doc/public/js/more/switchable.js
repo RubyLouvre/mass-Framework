@@ -74,7 +74,6 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
             ui.active_index = i;
             if( !curr.hasClass( active ) ){
                 var prev = ui.panels.filter("."+active);
-              //  console.log(i)
                 //将原来处于激活状态的trigger与panel去掉对应类名
                 ui.parent.find("."+active).removeClass( active );
                 //收起原来展开的面板
@@ -118,11 +117,4 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
     });
 
     $.fn.switchable = Widget.create("switchable", Swichable, init )
-
 });
- //http://www.welefen.com/user-define-rich-content-filter-class.html
- //http://speckyboy.com/2010/08/19/10-mootools-image-and-content-sliders/
- //http://www.cnblogs.com/babyzone2004/archive/2010/08/30/1812682.html
- //http://jquery.org/
- //http://www.cnblogs.com/zhangshenjia/archive/2012/03/09/get_relative_url.html
- //http://nivo.dev7studios.com/demos/2/

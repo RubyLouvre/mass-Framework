@@ -2659,7 +2659,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         eq: function( i ) {
             return i === -1 ? this.slice( i ) :this.slice( i, +i + 1 );
         },
-
         gt:function( i ){
             return this.slice( i+1, this.length );
         },
@@ -2697,7 +2696,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             }
             return ret
         },
-
         clone: function( dataAndEvents, deepDataAndEvents ) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
             deepDataAndEvents = deepDataAndEvents == null ? dataAndEvents : deepDataAndEvents;
@@ -2705,7 +2703,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return cloneNode( this,  dataAndEvents, deepDataAndEvents );
             });
         },
-
         //取得或设置节点的innerHTML属性
         html: function( item ){
             return $.access(this, 0, item, function( el ){//getter
@@ -2756,6 +2753,12 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
     $.fn = $.prototype;
     $.fn.init.prototype = $.fn;
+    "push,unshift,pop,shift,splice,sort,reverse".replace( $.rword, function( method ){
+        $.fn[ method ] = function(){
+            Array.prototype[ method ].apply(this, arguments);
+            return this;
+        }
+    });
     "remove,empty".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
             var isRemove = method === "remove";
@@ -3309,6 +3312,7 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.11.6 outerHTML支持对文档对象的处理，html可以取得XML数据岛的innerHTML,修正init中scope与ownerDocument的取得
 2011.11.7 重构find， 支持不插入文档的节点集合查找
 2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
+2012.3.9 添加一些数组方法
  *
  */
 /*
@@ -5669,7 +5673,7 @@ $.define("fx", "css",function(){
                 _default = parseDisplay(node.nodeName),
                 display = node.style.display = (old || _default);
                 $._data(node, "olddisplay", display);
-                node.style.visibility = "visible";
+              //  node.style.visibility = "visible";
                 if(props && ("width" in props || "height" in props)){//如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
                     if ( display === "inline" && $.css( node, "float" ) === "none" ) {
@@ -5703,7 +5707,7 @@ $.define("fx", "css",function(){
                     var after = config.after;
                     config.after = function( node, fx, props ){
                         node.style.display = "none";
-                        node.style.visibility = "hidden";
+                     //   node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
                             [ "", "X", "Y" ].forEach(function (postfix,index) {
                                 node.style[ "overflow" + postfix ] = config.overflow[index]
@@ -5717,7 +5721,7 @@ $.define("fx", "css",function(){
                     node.style.display = "none";
                 }
             }
-        },
+        }, 
         toggle: function( node ){
             $[ visible(node) ? "hide" : "show" ]( node );
         }
