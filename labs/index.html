@@ -182,7 +182,7 @@
 
         <script >
             $.require("ready,more/switchable",function( ){
-                /*     $(".starfish").switchable({
+                  $(".starfish").switchable({
                     data:[
                         {trigger:"标题1",panel:"这是一个简单的垂直手风琴"},
                         {trigger:"标题2",panel:"只有最基本的功能"},
@@ -283,11 +283,11 @@
                 }).switchable("getUI");
                 imac.target.width(imac.panels.innerWidth() * 7 );
                 $("<center></center>").appendTo(".imac").append(imac.triggers);
-                imac.parent.delegate(".trigger","click",function(e){
+             /*   imac.parent.delegate(".trigger","click",function(e){
                     var index = imac.triggers.index( $(e.target).closest(".trigger"));
                     imac.active(index, imac.active_callback, e);
-                });
-                 */
+                });*/
+               
                 var fade = $(".fade").switchable({
                     data: "0123".split("").map(function(el,d){
                         return {
