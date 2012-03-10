@@ -11,7 +11,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         switch_out_args: [500],
         switch_in: $.noop,
         switch_in_args: [500],
-        delay: 1000
+        interval: 1000
     }
 
     var createHTML = function( data, ui){
@@ -24,8 +24,8 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         return $(html).appendTo(ui.parent);
     }
     function reset(ui){
-        ui.triggers = ui.target.find("." + ui.trigger_class );
-        ui.panels = ui.target.find("." + ui.panel_class );
+        ui.triggers = ui.parent.find("." + ui.trigger_class );
+        ui.panels = ui.parent.find("." + ui.panel_class );
     }
 
     function init( ui, hash ){
@@ -37,10 +37,9 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
         }
         delete ui.data;//考虑有时它的HTML结构会很庞大，没有必要储存它
         reset(ui);//重新设置triggers与panels集合
-        ui.panels.hide();//隐藏所有panels
         ui.active(0);//高亮第一个trigger与展开第一个panel
         //当点击某一个trigger时，展开与之对应的panel
-        ui.target.delegate("."+ ui.trigger_class, ui.active_event, function( e ){
+        ui.parent.delegate("."+ ui.trigger_class, ui.active_event+".switchable", function( e ){
             var index = ui.triggers.index( $(e.target).closest("."+ui.trigger_class));
             ui.active(index, ui.active_callback, e);
         });
@@ -77,7 +76,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
                 var prev = ui.panels.filter("."+active);
               //  console.log(i)
                 //将原来处于激活状态的trigger与panel去掉对应类名
-                ui.target.find("."+active).removeClass( active );
+                ui.parent.find("."+active).removeClass( active );
                 //收起原来展开的面板
                 ui.switch_out[ $.isArray(args) ? "apply" : "call" ]( prev, args );
                 //将目标trigger与panel变为激活状态，并展开面板
@@ -97,7 +96,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
             var ui = this;
             ui.timer_id = setInterval(function(){//如果开启了自动轮播功能
                 ui.autoplay && ui.active(++ui.active_index);
-            }, ui.delay);
+            }, ui.interval);
         },
         //添加一组新的trigger与panel，index为它的插入位置
         add: function(index, trigger, panel ){

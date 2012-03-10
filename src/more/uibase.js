@@ -18,6 +18,7 @@ $.define("uibase","class,data", function(){
             },
             destroy: function(){
                 this.target.remove();
+                this.parent.off("."+this["@name"]);
                 this.parent.removeData("_mass_"+this["@name"]);
             }
         }),

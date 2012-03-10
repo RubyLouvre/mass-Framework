@@ -444,7 +444,7 @@ $.define("fx", "css",function(){
                 _default = parseDisplay(node.nodeName),
                 display = node.style.display = (old || _default);
                 $._data(node, "olddisplay", display);
-                node.style.visibility = "visible";
+              //  node.style.visibility = "visible";
                 if(props && ("width" in props || "height" in props)){//如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
                     if ( display === "inline" && $.css( node, "float" ) === "none" ) {
@@ -478,7 +478,7 @@ $.define("fx", "css",function(){
                     var after = config.after;
                     config.after = function( node, fx, props ){
                         node.style.display = "none";
-                        node.style.visibility = "hidden";
+                     //   node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
                             [ "", "X", "Y" ].forEach(function (postfix,index) {
                                 node.style[ "overflow" + postfix ] = config.overflow[index]
@@ -492,7 +492,7 @@ $.define("fx", "css",function(){
                     node.style.display = "none";
                 }
             }
-        },
+        }, 
         toggle: function( node ){
             $[ visible(node) ? "hide" : "show" ]( node );
         }

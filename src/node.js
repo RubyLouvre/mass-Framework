@@ -181,7 +181,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
     $.fn = $.prototype;
     $.fn.init.prototype = $.fn;
-    "push,unshift,pop,shift,splice".replace( $.rword, function( method ){
+    "push,unshift,pop,shift,splice,sort,reverse".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
             Array.prototype[ method ].apply(this, arguments);
             return this;
@@ -740,5 +740,6 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.11.6 outerHTML支持对文档对象的处理，html可以取得XML数据岛的innerHTML,修正init中scope与ownerDocument的取得
 2011.11.7 重构find， 支持不插入文档的节点集合查找
 2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
+2012.3.9 添加一些数组方法
  *
  */
