@@ -5,511 +5,108 @@
         <title>TODO supply a title</title>
         <style>
 
-            .starfish  {
-                background:#DCDCDC;
-                width: 620px;
-                height:245px;
-                overflow:hidden;
-            }
-            .starfish .trigger{
-                height: 30px;
-                width: 600px;
-                background: url(mass_accordion_trigger.jpg) no-repeat top right #a9d06a;
-                padding: 0 10px 0 10px;
-                line-height: 30px;
-                color: #fff;
-                font-size: 12px;
-                color: #000;
-                border-bottom: 1px solid #cde99f;
-                cursor: pointer;
-            }
-            .starfish .trigger.active{
-                background: url(mass_accordion_trigger_active.jpg) no-repeat top right #e0542f;
-                color: #fff;
-                border-bottom: 1px solid #f68263;
-            }
-            .starfish .panel {
-                width: 600px;
-                height: 100px;
-                padding: 5px 10px 15px 10px;
-                color: #444;
-                display:none;
-                overflow: hidden;
-            }
-
-
-            .dew {
-                position:relative;
-                width:500px;
-                height:200px;
-                overflow:hidden;
-            }
-            .dew .panel{
-                position:absolute;
-            }
-
-
-            .winnower {
-                width:536px;
-                height:265px;
-                position:relative;
-                overflow:hidden;
-                border:2px solid #000;
-            }
-            .winnower .mass_switchable{
-                width:3000px;/*此宽可容纳所有面板*/
-                height:270px;
-            }
-            /* 平铺所有面板，实现整体往左移或往右移*/
-            .winnower .panel{
-                float:left;
-                display:block;
-            }
-            /* 设置触发点*/
-            .winnower .trigger{
-                position:absolute;
-                display: block;
-                width:15px;
-                height:15px;
-                z-index:100;
-                bottom: 20px;
-            }
-            /* 灰色的圆点 */
-            .winnower .trigger a {
-                display:block;
-                width:15px;
-                height:15px;
-                text-decoration:none;
-                outline:none;
-                background: url("winnower_s.png") no-repeat 3px -12px transparent;
-            }
-            /* 橙色的圆点 */
-            .winnower .trigger a:hover,.winnower .trigger.active a{
-                background-position:-15px -12px;
-            }
-            /*上一个与下一个*/
-            .winnower .arrow{
-                position:absolute;
-                display:none;
-                z-index:100;
-                width:25px;
-                height:40px;
-                top:125px;
-                background: url("winnower_s.png") no-repeat scroll -40px 0px transparent;
-            }
-            .winnower .prev{
-                left:5px;
-            }
-            .winnower .next{
-                background: url("winnower_s.png") no-repeat scroll -90px 0px transparent;
-                right:5px;
-            }
-            .imac{
-                width:640px;
-                height:545px;
-                overflow:hidden;
-                border:2px solid #5296c7;
-            }
-            .imac .panel{
-                float:left;
-                width:640px;
-                height:480px;
-                display:inline-block;
-            }
-            .imac .trigger{
-                display:inline-block;
-                margin-top:10px;
-                margin-right:10px;
-            }
-            .imac .trigger img{
-                display:inline-block;
-                border:1px solid #9cf;
-            }
-            .imac .trigger.active img,  .imac .trigger img:hover{
-                border: 1px solid #369;
-            }
-            center {
-                width:640px;
-            }
-            .fade{
-                position:relative;
-                width:478px;
-                height:286px;
-                border:1px solid #666;
-                overflow:hidden;
-            }
-            .fade .panel{
-                position:absolute;
-            }
-            .fade .triggers{
-                position:absolute;
-                bottom:0;
-                background:#000;
-                height:30px;
-                width:478px; 
-                filter: Alpha(Opacity=30);
-                opacity:0.3;
-                z-index:10;
-                cursor:pointer; 
-            }
-            .fade .trigger {
-                position:absolute;
-                width:20px;
-                height:20px;
-                bottom: 5px;
-                z-index:100;
-            }
-            .fade .trigger a{
-                width:20px;
-                height:20px;
-                text-align:center;
-                line-height:20px;
-                display:inline-block;
-                color:#FFF;
-                border:#e5eaff 1px solid;
-                background:#6f4f67;
-                filter: Alpha(Opacity=80);
-                opacity:0.8;
-                text-decoration:none;
-                cursor:pointer
-            }
-            .fade .trigger a:hover, .fade .trigger.active a{
-                background:#900;
-            }
-
-            .elephant{
-                width:600px;
-                height:195px;
-                padding:30px;
-                background:#fff;
-                border:1px solid #b5c9e8;
+            .news{
+                width:200px;
+                height:24px;
+                border:1px solid black;
                 position:relative;
                 overflow:hidden;
             }
-
-            .elephant .mass_switchable{
-                width:900px;
-                height:180px;
+            .news .panel{
+                position:absolute;
+                top: 5px;
+                width:150px;
             }
-            .elephant .trigger{
-                float:left;
-                width:56px;
-                height:180px;
-                font-size:14px;
-                font-weight:bold;
-                background:#fff url(elephant_trigger.jpg) 0 0 no-repeat;
-                color:#26526c;
-                cursor:pointer;
-            }
-            .elephant .trigger span{
-                margin-left:20px;
-                margin-top:20px;
-                width:14px;
-                display:block;
-                height:140px;
-                color:#000;
-                letter-spacing:	1px;
-                word-spacing:0;
-                text-align:right;
-            }
-            .elephant .trigger.active{
-                cursor:pointer;
-                background:#fff url(elephant_active.jpg) 0 0 no-repeat
-            }
-            .elephant .trigger.active span{
-                color:#fff;
-            }
-            .elephant .trigger.hover{
-                color:#68889b;
-            }
-            .elephant .panel{
-                float:left;
-                padding:25px;
-                width:320px;
-                height:130px;
-                border:1px solid #dbe9ea;
-                border-left:0;
-                margin-right:3px;
-            }
-            .elephant h2{
-                font-size:25px;
-                margin-top:10px;
-                margin-bottom:10px;
-                font-family:serif;
-                color:#294F88;
-            }
-            .elephant p{
-                font-family:serif;
-                font-size:14px;
-                line-height:17px;
-                color:#294F88;
-            }
-            .elephant .panel img{
-                float:right;
-                margin:0 0 0 20px;
-                position:relative;
-                top:-20px
-            }
-
         </style>
         <script type="text/javascript" src="/src/mass.js">
 
         </script>
 
-
-        <script >
-
-            $.require("ready,more/switchable",function( ){
-                $(".starfish").switchable({
-                    data:[
-                        {trigger:"标题1",panel:"这是一个简单的垂直手风琴"},
-                        {trigger:"标题2",panel:"只有最基本的功能"},
-                        {trigger:"标题3",panel:"<div class=content>面板3</div>"},
-                        {trigger:"标题4",panel:"<div class=content>面板4</div>"}
-                    ],
-                    switch_in: $.fn.slideDown,
-                    switch_out: $.fn.slideUp
-                });
-                var dew = $(".dew").switchable({
-                    data:"012345".split("").map(function(el,d){
-                        return {
-                            panel:'<div><img src="dew'+d+'.jpg" /></div>'
-                        }
-                    }),
-                    count:0
-                }).switchable("getUI");
-
-                function switchIt(e){
-                    var index = $(this).index();
-                    var width = $(this).width();
-                    dew.panels.each(function(el,i){
-                        $(el).fx(500,{
-                            left:i * 36+( i > index ? width - 36: 0),
-                            after:function(){
-                                dew.count += 1;
-                                if(dew.count == 6){
-                                    dew.count = 0
-                                    setTimeout(function(){
-                                        dew.panels.one("mouseover",switchIt);
-                                    },300);
-                                }
-                            }
-                        })
-                    });
-                }
-
-                dew.panels.each(function(el, i){
-                    $(el).css("left", i * 83);
-                }).one("mouseover",switchIt);
-                
-                dew.target.mouseleave(function(){
-                    dew.panels.each(function(el, i){
-                        $(el).fx(500,{
-                            left: i * 83
-                        });
-                    });
-                });
-
-                var winnower = $(".winnower").switchable({
-                    data: "01234".split("").map(function(el,d){
-                        return {
-                            trigger:'<a href="javascript:void(0)"></a>',
-                            panel:'<div><img src="winnower'+d+'.jpg" /></div>'
-                        };
-                    }),
-                    active_callback: function(){
-                        var w = -1 * winnower.panels.innerWidth() * winnower.active_index;
-                        winnower.target.fx(500, {"margin-left":w }  )
-                    }
-                }).switchable("getUI");
-
-
-                var winnowerUI = winnower.parent.append('<div class="next arrow" ></div>').append('<div class="prev arrow"></div>')
-                var winnowerArrow = winnowerUI.find(".arrow");
-                winnower.triggers.each(function(el, i){
-                    $(el).css( "right", 100 - i * 17)
-                })
-                winnowerUI.mouseenter(function(){
-                    winnowerArrow.show()
-                }).mouseleave(function(){
-                    winnowerArrow.hide()
-                });
-                winnowerArrow.click(function(){
-                    var next = $(this).hasClass("next");
-                    var length = winnower.triggers.length-1
-                    var i = winnower.active_index ;
-                    if(next){
-                        var index =  i+1 > length ? 0 : i+1;
-                    }else{
-                        index = i-1 < 0 ? length : i-1;
-                    }
-                    winnower.active( index, winnower.active_callback )
-                });
-                
-                var imac = $(".imac").switchable({
-                    data: "0123456".split("").map(function(el,d){
-                        return {
-                            trigger:'<img src="imac'+d+'.jpg" width=50 height=46 />',
-                            panel:'<img src="imac'+d+'.jpg" />'
-                        }
-                    }),
-                    active_callback: function(){
-                        var w = -1 * imac.panels.innerWidth() * imac.active_index;
-                        imac.target.fx(500, {"margin-left":w }  )
-                    }
-                }).switchable("getUI");
-                imac.target.width(imac.panels.innerWidth() * 7 );
-                $("<center></center>").appendTo(".imac").append(imac.triggers);
-
-               
-                var fade = $(".fade").switchable({
-                    data: "0123".split("").map(function(el,d){
-                        return {
-                            panel:'<img src="fade'+d+'.jpg" />',
-                            trigger:'<a href="javascript:void(0)">'+(d+1)+"</a>"
-                        }
-                    }),
-                    switch_in: function(){
-                        this.fx(600,{o:1})
-                    },
-                    switch_out: function(){
-                        this.fx(600,{o:0})
-                    },
-                    interval:2000,
-                    autoplay: true,
-                    pause_over_panel:true
-                }).switchable("getUI");
-                $("<div class=triggers></div>").appendTo(fade.target);
-
-                fade.triggers.each(function(el, i){
-                    if( i != 0){
-                        fade.panels.eq(i).css("opacity",0)
-                    }
-                    $(el).css("right",90- i * 24)
-                });
-                 
-                var elephant = $(".elephant").switchable({
-                    data:[
-                        {
-                            trigger:"<span>第一张</span>",
-                            panel:'<h2>First mammoth here</h2><p><img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/260956/o_elephant0.png" />Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean commodo ligula eget dolor.</p>'
-                        },
-                        {
-                            trigger:"<span>第二张</span>",
-                            panel:'<h2>Over the moon!</h2><p><img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/260956/o_elephant1.png"  />Aenean commodo ligula eget dolor. Aenean massa. Nascetur aenean commodo ligula eget dolor. Aenean massa eget. </p>'
-                        },
-                        {
-                            trigger:"<span>第三张</span>",
-                            panel:'<h2>Another mammoth</h2><p><img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/260956/o_elephant2.png" />Ipsum dolor sit amet.Aenean ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur.</p>'
-                        },
-                        {
-                            trigger:"<span>第四张</span>",
-                            panel: '<h2>This is my favourite</h2><p><img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/260956/o_elephant3.png"  />Cum sociis natoque penatibus et donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.</p>'
-                        }
-                    ],
-                    switch_in: function(){
-                        this.fx(600,{  width:"show",
-                            paddigLeft:"show",
-                            paddingRight:"show"})
-                    },
-                    switch_out: function(){
-                        this.fx(600,{  width:"hide",
-                            paddigLeft:"hide",
-                            paddingRight:"hide"})
-                    }
-                }).switchable("getUI")
-                elephant.target.width( elephant.panels.innerWidth()+ elephant.triggers.innerWidth() * 5 );
-                elephant.panels.not(".active").fx(10,{
-                    width:"hide",
-                    paddigLeft:"hide",
-                    paddingRight:"hide"
-                });
-                $(".tabs").switchable({
-                    data: "1234".split("").map(function(el, i){
-                        return {
-                            trigger:"标题"+ (i+1),
-                            panel:"<div>面板"+(i+1)+"</div>"
-                        }
-                    }),
-                    switch_in: function(){
-                        this.show();
-                    },
-                    switch_out: function(){
-                        this.hide();
-                    }
-                });
-
-            });
+        <script>
+            $.require("ready,css",function(){
+                $.log($("#contentbox").width())
+            })
         </script>
+
+
         <style>
-            .tabs {
-                border:20px solid #E9EDF1;
-                position:relative;
-                width:400px;
-                height:200px;
-                background:#fff url(tabs_header.jpg) left top no-repeat;
-                overflow:hidden;
-            }
-            .tabs .trigger{
-                float:left;
-                height:40px;
-                line-height:40px;
-                margin-left:30px;
-                width:50px;
-                text-align:center;
-                cursor: pointer;
-                color:#fff;
-                font-weight:700;
-            }
-            .tabs .trigger.active{
-                color:yellow;
-            }
-            .tabs .panel{
-                position:absolute;
-                display:none;
-                top:40px;
-                left:0px;
-                width:398px;
-                height:150px;
-                background:#fff;
-                color: #000;
-                border:1px solid #595A5A;
-                border-radius: 4px 4px 4px 4px;
-                box-shadow: 5px 1px 3px  #8493A6;
-            }
-            .tabs .panel.active{
-                display:block;
-            }
-            .tabs .panel div{
-                margin:20px;
-            }
+            html,body{margin:0;padding:0;}
+            div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td{margin:0;padding:0;font-size:12px}
+            table{border-collapse:collapse;border-spacing:0;}
+            fieldset,img{border:0;}
+            address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}
+            ol,ul {list-style:none;}
+            caption,th {text-align:left;}
+            h1,h2,h3,h4,h5,h6{font-size:100%;}
+            .clearfix:after{content:"";display:block;clear:both;}
+            .clearfix{zoom:1;}
+
+            #contentbox{width:200px;height:200px;text-align:center;border:1px solid #ccc; overflow: hidden;}
+            #contentbox p{width:400px;line-height:30px;border:1px solid red;}
+            #contentbox ul{diplay:none;width:500px;border:1px solid red;}
+            #contentbox li{float:left;width:80px;line-height:80px;}
         </style>
     </head>
     <body>
+        <div id="contentbox">
+            <p>
+                近日，全国政协委员崔永元在人民网做访谈节目时，谈到为什么人们总是感觉自己不幸福的问题，崔永元指出，如果看收入数字，收入肯定是比以前高了，但为什么大家并不觉得自己挣的更多了？这是因为我们挣钱的增长幅度赶不上物价的增长，“所以很难在钱这方面找到幸福感。”
+                谈幸福感 健全社会保障就无需高工资 崔永元说，自己现在的工资单上每月是8000多元，再加上其他收入，每月过万甚至更多都没有问题，但却经常感觉“钱不够花”。
+                崔永元在人民网参加访谈节目时，讲述了自己的“挣钱感受”。他说，自己觉得“最富裕、最像百万富翁”的时候，是在1986年，“那时候刚工作，每个月的工资大概是80块钱”，虽然数字很小，但却感觉总是花不完，“跟同事吃饭抢着买单，想办法让自己有点儿高消费，之后还能存下来一些钱。”
+                那么，如何才能让老百姓找回幸福感呢？崔永元认为，政府不能只用给钱的方式，而应该努力健全社会保障体系，“如果我们上学不要钱、看病不要钱、住房不要钱，那我们要那么多工资干什么呢？”
+                谈保障房 要实施追究制度 在谈及保障房分配不公的现象时，崔永元提出两项建议：一是要有明确的规章条例，标示出有资格享受保障房的条件；二是要实施事后追究制度。
+                崔永元认为，大家之所以认为保障房分配不公，是因为有些不符合条件的人住了进去。“当追究制度实施后，不符合条件的人是住进去了，但是一定要让他住不稳当，天天提心吊胆，一旦被发现了就得把房子退回来，即使他把房子退回来了，其个人诚信也受到了影响，同时负责分配保障房的官员也会受到一定的牵连。目前发达国家就是这么操作的，并且行之有效”。
+                近日，全国政协委员崔永元在人民网做访谈节目时，谈到为什么人们总是感觉自己不幸福的问题，崔永元指出，如果看收入数字，收入肯定是比以前高了，但为什么大家并不觉得自己挣的更多了？这是因为我们挣钱的增长幅度赶不上物价的增长，“所以很难在钱这方面找到幸福感。”
+                谈幸福感 健全社会保障就无需高工资 崔永元说，自己现在的工资单上每月是8000多元，再加上其他收入，每月过万甚至更多都没有问题，但却经常感觉“钱不够花”。
+                崔永元在人民网参加访谈节目时，讲述了自己的“挣钱感受”。他说，自己觉得“最富裕、最像百万富翁”的时候，是在1986年，“那时候刚工作，每个月的工资大概是80块钱”，虽然数字很小，但却感觉总是花不完，“跟同事吃饭抢着买单，想办法让自己有点儿高消费，之后还能存下来一些钱。”
+                那么，如何才能让老百姓找回幸福感呢？崔永元认为，政府不能只用给钱的方式，而应该努力健全社会保障体系，“如果我们上学不要钱、看病不要钱、住房不要钱，那我们要那么多工资干什么呢？”
+                谈保障房 要实施追究制度 在谈及保障房分配不公的现象时，崔永元提出两项建议：一是要有明确的规章条例，标示出有资格享受保障房的条件；二是要实施事后追究制度。
+                崔永元认为，大家之所以认为保障房分配不公，是因为有些不符合条件的人住了进去。“当追究制度实施后，不符合条件的人是住进去了，但是一定要让他住不稳当，天天提心吊胆，一旦被发现了就得把房子退回来，即使他把房子退回来了，其个人诚信也受到了影响，同时负责分配保障房的官员也会受到一定的牵连。目前发达国家就是这么操作的，并且行之有效”。
+            </p>
 
-        <div class="starfish">
-
+            <ul class="clearfix" style="display:none;" >
+                <li>内容开始</li>
+                <li>2</li>
+                <li>3</li>
+                <li>4</li>
+                <li>5</li>
+                <li>6</li>
+                <li>7</li>
+                <li>8</li>
+                <li>内容正文</li>
+                <li>10</li>
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+                <li>4</li>
+                <li>5</li>
+                <li>6</li>
+                <li>7</li>
+                <li>8</li>
+                <li>9</li>
+                <li>10</li>
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+                <li>4</li>
+                <li>5</li>
+                <li>6</li>
+                <li>7</li>
+                <li>8</li>
+                <li>9</li>
+                <li>10</li>
+                <li>1</li>
+                <li>2</li>
+                <li>3</li>
+                <li>4</li>
+                <li>5</li>
+                <li>6</li>
+                <li>7</li>
+                <li>8</li>
+                <li>9</li>
+                <li>内容结束</li>
+            </ul>
         </div>
-        <p>trigger与panel一体化的水平手风琴</p>
-        <div class="dew">
 
-        </div>
-        <p>轮播</p>
-        <div class="winnower">
-
-        </div>
-        <div class="imac">
-
-        </div>
-        <div class="fade">
-
-        </div>
-
-        <div class="elephant">
-
-        </div>
-        <div class="tabs">
-
-        </div>
     </body>
 </html>
