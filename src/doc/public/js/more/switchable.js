@@ -68,6 +68,7 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
             curr = ui.panels.eq( i ) ,
             active = ui.active_class,
             args =  ui.switch_out_args;
+            callback = callback || ui.active_callback;
             if( ui.autoplay && !curr[0]){//如果越界了就回到第一个面板
                 curr = ui.panels.eq(i = 0);
             }
@@ -117,4 +118,5 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
     });
 
     $.fn.switchable = Widget.create("switchable", Swichable, init )
+
 });

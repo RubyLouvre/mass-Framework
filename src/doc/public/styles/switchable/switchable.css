@@ -284,3 +284,15 @@
 .dew .panel{
     position:absolute;
 }
+.news{
+    width:200px;
+    height:24px;
+    border:1px solid black;
+    position:relative;
+    overflow:hidden;
+}
+.news .panel{
+    position:absolute;
+    top: 5px;
+    width:150px;
+}

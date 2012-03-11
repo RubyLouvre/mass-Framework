@@ -68,13 +68,13 @@ $.define("switchable","more/uibase,event,attr,fx",function(Widget){
             curr = ui.panels.eq( i ) ,
             active = ui.active_class,
             args =  ui.switch_out_args;
+            callback = callback || ui.active_callback;
             if( ui.autoplay && !curr[0]){//如果越界了就回到第一个面板
                 curr = ui.panels.eq(i = 0);
             }
             ui.active_index = i;
             if( !curr.hasClass( active ) ){
                 var prev = ui.panels.filter("."+active);
-              //  console.log(i)
                 //将原来处于激活状态的trigger与panel去掉对应类名
                 ui.parent.find("."+active).removeClass( active );
                 //收起原来展开的面板

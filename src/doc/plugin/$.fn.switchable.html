@@ -90,8 +90,8 @@
                         };
                     }),
                     active_callback: function(){
-                        var w = -1 * winnower.panels.innerWidth() * winnower.active_index;
-                        winnower.target.fx(500, {"margin-left":w }  )
+                        var w = -1 * this.panels.innerWidth() * this.active_index;
+                        this.target.fx(500, {"margin-left":w }  )
                     }
                 }).switchable("getUI");
                 /* 调整触发器的位置,向它位于控件的左下角水平排列 */
@@ -126,8 +126,8 @@
                         }
                     }),
                     active_callback: function(){
-                        var w = -1 * imac.panels.innerWidth() * imac.active_index;
-                        imac.target.fx(500, {"margin-left":w }  )
+                        var w = -1 * this.panels.innerWidth() * this.active_index;
+                        this.target.fx(500, {"margin-left":w }  )
                     }
                 }).switchable("getUI");
                 imac.target.width(imac.panels.innerWidth() * 7 );
@@ -198,6 +198,34 @@
                         });
                     });
                 });
+
+
+
+                var news = $(".news").switchable({
+                    data:[
+                        {panel :'<span style="color:red">这是第一条新闻</span>'},
+                        {panel :'<span style="color:blue">这是第二条新闻</span>'},
+                        {panel :'<span style="color:#9932CC">这是第三条新闻</span>'},
+                    ],
+                    autoplay:true,
+                    pause_over_panel: true,
+                    interval:2200,
+                    active_callback:function(i){
+                        this.panels.fx(2000, {
+                            "left": "-=150",
+                            after:function(){
+                                if($(this).hasClass("active")){
+                                    $(this).css("left",300)
+                                }
+                            }
+                        })
+                    }
+                }).switchable("getUI");
+                news.panels.each(function(el,i){
+                    $(this).css("left", 150 * i)
+                })
+
+
             })
         </script>
     </head>
@@ -227,7 +255,7 @@
             <li>autoplay:是否自动进行切换，默认是false。</li>
             <li>pause_over_panel:当鼠标移到控件之上是否中止切换，默认是false。</li>
 
-            <li>delay:切换面板后要延迟多久才自动开始下一个切换，单位为ms，默认是1000。</li>
+            <li>interval:切换面板后要延迟多久才自动开始下一个切换，单位为ms，默认是1000。</li>
             <li>switch_out:正在处于激活状态的面板在失去激活状态时要进行的切换动画，默认是$.fn.slideUp。</li>
             <li>switch_out_args:上面动画的参数， 默认为500。</li>
             <li>switch_in:某一面板在变成激活状态时要进行的切换动画，默认是$.fn.slideDown。</li>
@@ -246,7 +274,7 @@
             而在这些控件中，基本上都会一个触发器（trigger）与之对应，另外，在轮播控件中，切换大多数是整体向左移动或整体向上移动，这就要求有一个容器，
             其宽等于所有面板的宽或其高等于所有面板的高，因此网上许多轮播控件都采用dl，dt，dd结构，对应我的switchable控件，分别中ui.target, ui.triggers,
             ui.panels，其中ui是可切换对象的实例，默认类名依次是.mass_swichable, .trigger, .panel。那么对非轮播控件，ui.target在外观的构建上也不是没有用处的，
-            毕竟多一层元素，我们可以风CSS把控件打扮得更漂亮。</p>
+            毕竟多一层元素，我们可以用CSS把控件打扮得更漂亮。</p>
         <p>下面是一个典型可切换对象的HTML结构</p>
         <pre class="brush:xml;gutter:false;toolbar:false">
         &lt;div class="sample"&gt;
@@ -581,8 +609,8 @@
                         };
                     }),
                     active_callback: function(){
-                        var w = -1 * winnower.panels.innerWidth() * winnower.active_index;
-                        winnower.target.fx(500, {"margin-left":w }  )
+                        var w = -1 * this.panels.innerWidth() * this.active_index;
+                        this.target.fx(500, {"margin-left":w }  )
                     }
                 }).switchable("getUI");
                 /* 调整触发器的位置,向它位于控件的左下角水平排列 */
@@ -656,8 +684,8 @@
                         }
                     }),
                     active_callback: function(){
-                        var w = -1 * imac.panels.innerWidth() * imac.active_index;
-                        imac.target.fx(500, {"margin-left":w }  )
+                        var w = -1 * this.panels.innerWidth() * this.active_index;
+                        this.target.fx(500, {"margin-left":w }  )
                     }
                 }).switchable("getUI");
                 imac.target.width(imac.panels.innerWidth() * 7 );
@@ -805,6 +833,54 @@
             });
             </pre>
             <div class="dew">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>水平跑马灯</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+          .news{
+                width:200px;
+                height:24px;
+                border:1px solid black;
+                position:relative;
+                overflow:hidden;
+            }
+            .news .panel{
+                position:absolute;
+                top: 5px;
+                width:150px;
+            }
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+
+
+            $.require("ready,more/switchable",function( ){
+                var news = $(".news").switchable({
+                    data:[
+                        {panel :'&lt;span style="color:red"&gt;这是第一条新闻&lt;/span&gt;'},
+                        {panel :'&lt;span style="color:blue"&gt;这是第二条新闻&lt;/span&gt;'},
+                        {panel :'&lt;span style="color:#9932CC"&gt;这是第三条新闻&lt;/span&gt;'},
+                    ],
+                    autoplay:true,
+                    pause_over_panel: true,
+                    interval:2200,
+                    active_callback:function(i){
+                        this.panels.fx(2000, {
+                            "left": "-=150",
+                            after:function(){
+                                if($(this).hasClass("active")){
+                                    $(this).css("left",300);
+                                }
+                            }
+                        })
+                    }
+                }).switchable("getUI");
+                news.panels.each(function(el,i){
+                    $(this).css( "left", 150 * i );
+                });
+            })
+            </pre>
+            <div class="news">
 
             </div>
         </fieldset>
