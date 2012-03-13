@@ -5,107 +5,79 @@
         <title>TODO supply a title</title>
         <style>
 
-            .news{
-                width:200px;
-                height:24px;
-                border:1px solid black;
+            .green{
                 position:relative;
+                height:200px;
+                width:400px;
+                background:green;
                 overflow:hidden;
             }
-            .news .panel{
+            .green .triggers{
                 position:absolute;
-                top: 5px;
-                width:150px;
+                top:5px;
+                left:20px;
+                height:30px;
             }
+            .green .trigger{
+                height:20px;
+                display:inline-block;
+                float:left;
+                line-height:20px;
+                padding:1px 10px;
+                margin-right:5px;
+                color:#000;
+                background:#00FF7F;
+                text-align:center;
+            }
+            .green .active.trigger{
+                padding-bottom:8px;/* panel.top - parent.padding-top - tigger.height */
+                color:#fff;
+                background:#a9ea00;
+            }
+            .green .panel{
+                display: none;
+                position:absolute;
+                width:400px;/* parent.width+ parent.padding-left*/
+                height:175px;/* parent.height +  padding-top - tabs.top */
+                top: 30px;
+                left:0px;
+                color:#000;
+                background:#a9ea00;
+            }
+            .green .active.panel{
+                display:block;
+            }
+
         </style>
         <script type="text/javascript" src="/src/mass.js">
 
         </script>
 
         <script>
-            $.require("ready,css",function(){
-                $.log($("#contentbox").width())
+
+            $.require("ready,more/switchable",function(){
+                var green = $(".green").switchable({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
+                    active_event: "mouseover"
+                }).switchable("getUI");
+                $('<div class="triggers"></div>').appendTo(green.target).append(green.triggers);
+                green.active(2);
             })
+           
         </script>
 
 
         <style>
-            html,body{margin:0;padding:0;}
-            div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,p,blockquote,th,td{margin:0;padding:0;font-size:12px}
-            table{border-collapse:collapse;border-spacing:0;}
-            fieldset,img{border:0;}
-            address,caption,cite,code,dfn,em,strong,th,var{font-style:normal;font-weight:normal;}
-            ol,ul {list-style:none;}
-            caption,th {text-align:left;}
-            h1,h2,h3,h4,h5,h6{font-size:100%;}
-            .clearfix:after{content:"";display:block;clear:both;}
-            .clearfix{zoom:1;}
 
-            #contentbox{width:200px;height:200px;text-align:center;border:1px solid #ccc; overflow: hidden;}
-            #contentbox p{width:400px;line-height:30px;border:1px solid red;}
-            #contentbox ul{diplay:none;width:500px;border:1px solid red;}
-            #contentbox li{float:left;width:80px;line-height:80px;}
         </style>
     </head>
     <body>
-        <div id="contentbox">
-            <p>
-                近日，全国政协委员崔永元在人民网做访谈节目时，谈到为什么人们总是感觉自己不幸福的问题，崔永元指出，如果看收入数字，收入肯定是比以前高了，但为什么大家并不觉得自己挣的更多了？这是因为我们挣钱的增长幅度赶不上物价的增长，“所以很难在钱这方面找到幸福感。”
-                谈幸福感 健全社会保障就无需高工资 崔永元说，自己现在的工资单上每月是8000多元，再加上其他收入，每月过万甚至更多都没有问题，但却经常感觉“钱不够花”。
-                崔永元在人民网参加访谈节目时，讲述了自己的“挣钱感受”。他说，自己觉得“最富裕、最像百万富翁”的时候，是在1986年，“那时候刚工作，每个月的工资大概是80块钱”，虽然数字很小，但却感觉总是花不完，“跟同事吃饭抢着买单，想办法让自己有点儿高消费，之后还能存下来一些钱。”
-                那么，如何才能让老百姓找回幸福感呢？崔永元认为，政府不能只用给钱的方式，而应该努力健全社会保障体系，“如果我们上学不要钱、看病不要钱、住房不要钱，那我们要那么多工资干什么呢？”
-                谈保障房 要实施追究制度 在谈及保障房分配不公的现象时，崔永元提出两项建议：一是要有明确的规章条例，标示出有资格享受保障房的条件；二是要实施事后追究制度。
-                崔永元认为，大家之所以认为保障房分配不公，是因为有些不符合条件的人住了进去。“当追究制度实施后，不符合条件的人是住进去了，但是一定要让他住不稳当，天天提心吊胆，一旦被发现了就得把房子退回来，即使他把房子退回来了，其个人诚信也受到了影响，同时负责分配保障房的官员也会受到一定的牵连。目前发达国家就是这么操作的，并且行之有效”。
-                近日，全国政协委员崔永元在人民网做访谈节目时，谈到为什么人们总是感觉自己不幸福的问题，崔永元指出，如果看收入数字，收入肯定是比以前高了，但为什么大家并不觉得自己挣的更多了？这是因为我们挣钱的增长幅度赶不上物价的增长，“所以很难在钱这方面找到幸福感。”
-                谈幸福感 健全社会保障就无需高工资 崔永元说，自己现在的工资单上每月是8000多元，再加上其他收入，每月过万甚至更多都没有问题，但却经常感觉“钱不够花”。
-                崔永元在人民网参加访谈节目时，讲述了自己的“挣钱感受”。他说，自己觉得“最富裕、最像百万富翁”的时候，是在1986年，“那时候刚工作，每个月的工资大概是80块钱”，虽然数字很小，但却感觉总是花不完，“跟同事吃饭抢着买单，想办法让自己有点儿高消费，之后还能存下来一些钱。”
-                那么，如何才能让老百姓找回幸福感呢？崔永元认为，政府不能只用给钱的方式，而应该努力健全社会保障体系，“如果我们上学不要钱、看病不要钱、住房不要钱，那我们要那么多工资干什么呢？”
-                谈保障房 要实施追究制度 在谈及保障房分配不公的现象时，崔永元提出两项建议：一是要有明确的规章条例，标示出有资格享受保障房的条件；二是要实施事后追究制度。
-                崔永元认为，大家之所以认为保障房分配不公，是因为有些不符合条件的人住了进去。“当追究制度实施后，不符合条件的人是住进去了，但是一定要让他住不稳当，天天提心吊胆，一旦被发现了就得把房子退回来，即使他把房子退回来了，其个人诚信也受到了影响，同时负责分配保障房的官员也会受到一定的牵连。目前发达国家就是这么操作的，并且行之有效”。
-            </p>
+        <div class="green">
 
-            <ul class="clearfix" style="display:none;" >
-                <li>内容开始</li>
-                <li>2</li>
-                <li>3</li>
-                <li>4</li>
-                <li>5</li>
-                <li>6</li>
-                <li>7</li>
-                <li>8</li>
-                <li>内容正文</li>
-                <li>10</li>
-                <li>1</li>
-                <li>2</li>
-                <li>3</li>
-                <li>4</li>
-                <li>5</li>
-                <li>6</li>
-                <li>7</li>
-                <li>8</li>
-                <li>9</li>
-                <li>10</li>
-                <li>1</li>
-                <li>2</li>
-                <li>3</li>
-                <li>4</li>
-                <li>5</li>
-                <li>6</li>
-                <li>7</li>
-                <li>8</li>
-                <li>9</li>
-                <li>10</li>
-                <li>1</li>
-                <li>2</li>
-                <li>3</li>
-                <li>4</li>
-                <li>5</li>
-                <li>6</li>
-                <li>7</li>
-                <li>8</li>
-                <li>9</li>
-                <li>内容结束</li>
-            </ul>
         </div>
 
     </body>
