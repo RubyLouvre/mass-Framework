@@ -40,6 +40,14 @@
                         }
                     })
                 });
+                "ejs".replace($.rword, function(method){
+                    data.push({
+                        html: method,
+                        attr:{
+                            path: "plugin/$."+ method +".html"
+                        }
+                    })
+                });
                 var iframe = $("#iframe")[0]
                 $(".bright").menu({
                     data:data
