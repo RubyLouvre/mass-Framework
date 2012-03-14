@@ -1,5 +1,6 @@
 $.define("uibase","class,data", function(){
     //提供所有UI控件的父类与在节点链对象上提供一个操UI实例的方法
+    $.log("已加载uibase模块")
     return {
         Class: $.factory({//所有UI控件的父类
             init: function( widget, parent ){
