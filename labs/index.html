@@ -220,17 +220,96 @@
                 {
                     img_src:"50.jpg",
                     title:"恍如仙境，不愿做神仙，愿作山中人。"
-                }];
+                },
+
+                {
+                    img_src:"51.jpg",
+                    title:"赏心悦目的小绿植，喜欢的转~"
+                },
+
+                {
+                    img_src:"52.jpg",
+                    title:"电影工厂：绝妙！！"
+                },
+
+                {
+                    img_src:"53.jpg",
+                    title:"站成永恒，没有悲欢的姿势。一半在尘土里安详，一半在风里飞扬，一半洒落阴凉，一半沐浴阳光。当音乐的水漫上来，时光与瞳孔都遗失了方向，悄悄地在风里冷眼旁观，誰的流年，悄悄沧桑了誰的朝华"
+                },
+
+                {
+                    img_src:"54.jpg",
+                    title:"暮光之城"
+                },
+                {
+                    img_src:"55.jpg",
+                    title:"宠物中心：天寒地冻，不想起床！！ "
+                },
+                {
+                    img_src:"56.jpg",
+                    title:"云冈石窟：云冈石窟于敦煌莫高窟、洛阳龙门石窟齐名，并称“中国三大石窟”。石窟位于大同城西16公里处的武周山麓，始创于北魏，距今已有1500多年。现存洞窟53个，东西绵延约一公里，内有造像51000余尊。"
+                },
+                {
+                    img_src:"57.jpg",
+                    title:"在心头洒下梦的种子，让清晨因无限可能而迷人。"
+                },
+                {
+                    img_src:"58.jpg",
+                    title:"趁阳光正好。趁微风不噪。趁繁花还未开至荼蘼。趁现在还年轻，还可以走很长很长的路，还能诉说很深很深的思念。"
+                },
+                {
+                    img_src:"59.jpg",
+                    title:"【阳光的句子】常常提醒自己注意幸福，就像在寒冷的日子里经常看看太阳，心就不知不觉暖洋洋亮光光。"
+                },
+                {
+                    img_src:"60.jpg",
+                    title:"美！就一个字！"
+                },
+                {
+                    img_src:"61.jpg",
+                    title:"离开你就是旅行的意义。。。"
+                },
+                {
+                    img_src:"62.jpg",
+                    title:"迷上中国风：美轮美奂的中国画卷。"
+                },
+                {
+                    img_src:"63.jpg",
+                    title:"在哪里都能睡的树袋熊"
+                },
+                {
+                    img_src:"64.jpg",
+                    title:"栗子焖鸡块"
+                },
+
+            ];
             $.require("ready,more/waterfall",function(){
                 var waterfall = $("#waterfall").waterfall({
-                    ejs_id:"brick_tmpl",
+                    ejs_id:"tile_tmpl",
                     col: 5,
                     img_expr:".big_img",
-                    col_width:230
+                    col_width:230,
+                    fade: true,
+                    callback: function(){
+                        if(!this._first){//最开始的砖头不需要透明
+                            var tiles = this.tiles.splice(0,5);
+                            for(var i = 0, el; el = tiles[i++];){
+                                el.css("o",1)
+                            }
+                            this._first = true;
+                        }
+                    }
                 }).waterfall("getUI");
 
-                waterfall.addBricks(data)
-
+                waterfall.addTiles( data.splice(0,10) )
+                waterfall.scroll(function(rollHeight, pageHeight){
+                    if(typeof rollHeight == "number"){
+                        console.log(rollHeight +"  "+ pageHeight)
+                        if(rollHeight + 30 > pageHeight){
+                            waterfall.addTiles( data.splice(0,10) )
+                        }
+                    }
+                })
             })
         </script>
 
@@ -240,22 +319,22 @@
             #waterfall{
                 background:#f4f2f3;
             }
-            .cls:after {
+            .clearfix:after {
                 content: "";
                 display: block;
                 height: 0;
                 clear: both;
                 visibility: hidden;
             }
-            .cls {zoom:1;}
-            .brick{
+            .clearfix {zoom:1;}
+            .tile{
                 width:198px;
                 padding:20px;
                 margin-top:10px;
                 border:1px solid #000;
                 background:#fff;
             }
-            .brick .dis{
+            .tile .dis{
                 width:198px;
             }
             .footer{
@@ -266,13 +345,13 @@
         </style>
     </head>
     <body>
-        <script type="brick_tmpl" id="brick_tmpl">
-                <div class="brick">
+        <script type="text/tmpl" id="tile_tmpl">
+                <div class="tile">
                 <img src="<&= @img_src &>" class="big_img" />
                 <div class="dis" ><&= @title &></div>
                 </div>
         </script>
-        <div id="waterfall" class="cls"></div>
+        <div id="waterfall" class="clearfix"></div>
         <div class="footer">这是页脚</div>
 
     </body>
