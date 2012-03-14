@@ -20,7 +20,7 @@ $.define("scrollpanel","uibase,event,attr,fx",function(Widget){
 
         function initialise(s)
         {
-
+ http://hi.baidu.com/%B3%E6%B5%C4%B4%AB%C8%CB/blog/item/9816163452130e52251f145b.html
             var /*firstChild, lastChild, */isMaintainingPositon, lastContentX, lastContentY,
             hasContainingSpaceChanged, originalScrollTop, originalScrollLeft,
             maintainAtBottom = false, maintainAtRight = false;

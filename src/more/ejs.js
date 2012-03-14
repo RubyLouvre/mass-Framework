@@ -1,4 +1,5 @@
-$.define("api", "lang",function(){
+$.define("ejs", "lang",function(){
+    $.log("已加载ejs模块");
     var
     _startOfHTML = "\t__views.push(",
     _endOfHTML = ");\n",
@@ -13,11 +14,12 @@ $.define("api", "lang",function(){
             sright = sRight,
             startOfHTML = _startOfHTML,
             endOfHTML = _endOfHTML, str , logic,
-            el = DOC.getElementById(id);
+            el = document.getElementById(id);
             if (!el) throw "can not find the target element";
             str = el.innerHTML;
             var arr = str.trim().split(rleft),
             buff = ["var __views = [];\n"],temp = [],i = 0,n = arr.length,els,segment;
+          
             while(i < n){//逐行分析，以防歧义
                 segment = arr[i++];
                 els = segment.split(rright);
@@ -42,10 +44,10 @@ $.define("api", "lang",function(){
                             }
                     }
                     //处理静态HTML片断
-                    els[1] &&  temp.push(startOfHTML, els[1].quote(), endOfHTML)
+                    els[1] &&  temp.push(startOfHTML, $.quote( els[1] ), endOfHTML)
                 }else{
                     //处理静态HTML片断
-                    temp.push(startOfHTML, els[0].quote(), endOfHTML );
+                    temp.push(startOfHTML, $.quote( els[0] ), endOfHTML );
                 }
             }
 
