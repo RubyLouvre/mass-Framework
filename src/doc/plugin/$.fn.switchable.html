@@ -34,6 +34,16 @@
                         this.hide();
                     }
                 });
+                var green = $(".green").switchable({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
+                    active_event: "mouseover"
+                }).switchable("getUI");
+                $('<div class="triggers"></div>').appendTo(green.target).append(green.triggers);
+                green.active(2);
                 $(".starfish").switchable({
                     data:[
                         {trigger:"标题1",panel:"这是一个简单的垂直手风琴"},
@@ -363,6 +373,69 @@
             })
             </pre>
             <div class="tabs">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>滑动式的切换卡</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.green{
+    position:relative;
+    height:200px;
+    width:400px;
+    background:green;
+    overflow:hidden;
+}
+.green .triggers{
+    position:absolute;
+    top:5px;
+    left:20px;
+    height:30px;
+}
+.green .trigger{
+    height:20px;
+    display:inline-block;
+    float:left;
+    line-height:20px;
+    padding:1px 10px;
+    margin-right:5px;
+    color:#000;
+    background:#00FF7F;
+    text-align:center;
+}
+.green .active.trigger{
+    padding-bottom:8px;
+    color:#fff;
+    background:#a9ea00;
+}
+.green .panel{
+    display: none;
+    position:absolute;
+    width:400px;
+    height:175px;
+    top: 30px;
+    left:0px;
+    color:#000;
+    background:#a9ea00;
+}
+.green .active.panel{
+    display:block;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+                var green = $(".green").switchable({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
+                    active_event: "mouseover"
+                }).switchable("getUI");
+                $('&lt;div class="triggers"&gt;&lt;/div&gt;').appendTo(green.target).append(green.triggers);
+                green.active(2);
+            })
+            </pre>
+            <div class="green">
 
             </div>
         </fieldset>
