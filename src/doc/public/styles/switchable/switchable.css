@@ -39,6 +39,48 @@
 .tabs .panel div{
     margin:20px;
 }
+.green{
+    position:relative;
+    height:200px;
+    width:400px;
+    background:green;
+    overflow:hidden;
+}
+.green .triggers{
+    position:absolute;
+    top:5px;
+    left:20px;
+    height:30px;
+}
+.green .trigger{
+    height:20px;
+    display:inline-block;
+    float:left;
+    line-height:20px;
+    padding:1px 10px;
+    margin-right:5px;
+    color:#000;
+    background:#00FF7F;
+    text-align:center;
+}
+.green .active.trigger{
+    padding-bottom:8px;
+    color:#fff;
+    background:#a9ea00;
+}
+.green .panel{
+    display: none;
+    position:absolute;
+    width:400px;
+    height:175px;
+    top: 30px;
+    left:0px;
+    color:#000;
+    background:#a9ea00;
+}
+.green .active.panel{
+    display:block;
+}
 /* 垂直手风琴 */
 .starfish  {
     background:#DCDCDC;
