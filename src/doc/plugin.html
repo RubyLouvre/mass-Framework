@@ -32,11 +32,19 @@
         <script>
             $.require("ready,more/menu",function(){
                 var data = []
-                "placeholder,pager,tabs,flip,menu,switchable".replace($.rword, function(method){
+                "placeholder,pager,flip,menu,switchable,waterfall".replace($.rword, function(method){
                     data.push({
                         html: method,
                         attr:{
                             path: "plugin/$.fn."+ method +".html"
+                        }
+                    })
+                });
+                "ejs".replace($.rword, function(method){
+                    data.push({
+                        html: method,
+                        attr:{
+                            path: "plugin/$."+ method +".html"
                         }
                     })
                 });

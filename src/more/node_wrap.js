@@ -2,8 +2,8 @@
 $.define("node_wrap",'node',function(){
     $.implement({
         /**
-             *用一个标签包裹所有匹配节点
-             */
+         *用一个标签包裹所有匹配节点
+         */
         wrapAll: function( html ) {
             if ( this[0] ) {
                 var wrap = $( html, this.ownerDocument ).beforeTo( this[0] );
@@ -18,8 +18,8 @@ $.define("node_wrap",'node',function(){
             return this;
         },
         /**
-             * 移除所有匹配元素的父节点,并把它们放到其祖父中去.此方法其实叫removeParent更合适
-             */
+         * 移除所有匹配元素的父节点,并把它们放到其祖父中去.此方法其实叫removeParent更合适
+         */
         unwrap: function() {
             return this.map(function(el){
                 return el.parentNode;
@@ -30,8 +30,8 @@ $.define("node_wrap",'node',function(){
             });
         },
         /**
-             * 把每一个匹配元素都用东西包裹起来
-             */
+         * 把每一个匹配元素都用东西包裹起来
+         */
         wrap : function( html ) {
             return this.each(function() {
                 $( this,this.ownerDocument ).wrapAll( html );
