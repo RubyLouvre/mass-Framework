@@ -16,6 +16,7 @@
         <style type="text/css">
 
             #waterfall{
+                width:1100px;
                 background: url("../public/styles/waterfall/waterfall_bc.jpg") repeat scroll 0 0 transparent;
             }
             .clearfix:after {
@@ -476,7 +477,7 @@
                     fade: true,
                     callback: function(){
                         if(!this._first){//最开始的砖头不需要透明
-                            var tiles = this.tiles.slice(0,5);
+                            var tiles = this.tiles.splice(0,5);
                             for(var i = 0, el; el = tiles[i++];){
                                 el.css("o",1)
                             }
@@ -493,7 +494,7 @@
                         }
                     }
                 });
-                var now = 0, ui = waterfall, interval = ui.interval, tiles = ui.tiles;
+/*             var now = 0, ui = waterfall, interval = ui.interval, tiles = ui.tiles;
                 $(window.parent).scroll(function(){
                     var time = new Date;
                     if(time - now > interval ){
@@ -513,7 +514,7 @@
                             ui.addTiles( data.splice(0,10) )
                         }
                     }
-                })
+                })*/
             });
 
             // http://www.xarg.org/2011/09/jquery-pagination-revised/
@@ -579,6 +580,7 @@
         <fieldset><legend>例子</legend>
             <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
             #waterfall{
+                 width:1100px;
                  background: url("../public/styles/waterfall/waterfall_bc.jpg") repeat scroll 0 0 transparent;
             }
             .clearfix:after {
