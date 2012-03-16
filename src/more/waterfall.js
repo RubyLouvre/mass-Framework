@@ -1,5 +1,5 @@
 $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
-    //$.log("已加载waterfall模块!!")
+    //$.log("已加载waterfall模块")
     var Waterfall = $.factory({
         inherit: Widget.Class,
         addTiles: function(json){
@@ -14,29 +14,30 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         },
         addTile: function(html, htmls ,index ){
             var ui = this, img, tile
-            if(isFinite(index)){
-                //将HTML数据转换成节点数据
-                tile = $(html).appendTo( ui.cols.eq(index) );
-                if(ui.fade){
-                    tile.css("opacity",0)
-                }
-                ui.tiles.push( tile );
-                img = tile.find(ui.img_expr)[0];
-                if( img ){
-                    (function fn(){
-                        //判定大图是否加载成功
-                        if(img.complete == true){
-                            ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
-                        }else{
-                            setTimeout( fn, 16 );
-                        }
-                    })();
-                }
-            }else {
-                ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
-            }
             if(!html){
-                ui.callback();
+                if(isFinite(index)){
+                    //将HTML数据转换成节点数据
+                    tile = $(html).appendTo( ui.cols.eq(index) );
+                    if(ui.fade){
+                        tile.css("opacity",0)
+                    }
+                    ui.tiles.push( tile );
+                    img = tile.find(ui.img_expr)[0];
+                    if( img ){
+                        (function fn(){
+                            //判定大图是否加载成功
+                            if(img.complete == true){
+                                ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
+                            }else{
+                                setTimeout( fn, 16 );
+                            }
+                        })();
+                    }
+                }else {
+                    ui.addTile( html, htmls, ui.getShortestColumn() );
+                }
+            }else{
+                 ui.callback();
             }
         },
         getShortestColumn: function(){
@@ -92,7 +93,7 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         ui.target = ui.parent;//所有控件都有target属性，这个也不例外
         ui.width = ui.width || ui.target.width();//求得容器宽
-        var gutter = ( ui.width - ui.col * ui.col_width)/ ui.col; //列间距离
+        var gutter = Math.floor( ( ui.width - ui.col * ui.col_width)/ (ui.col - 1) ); //列间距离
         for(var i = 0; i < ui.col ; i++){
             $("<div class='waterfall_cols' />").css({
                 "float": "left",
@@ -102,7 +103,6 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         }
         ui.cols = ui.target.find(".waterfall_cols");
     }
-
 
     $.fn.waterfall = Widget.create("waterfall", Waterfall, init )
 });
