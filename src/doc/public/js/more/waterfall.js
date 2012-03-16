@@ -37,7 +37,7 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
                     ui.addTile( html, htmls, ui.getShortestColumn() );
                 }
             }else{
-                 ui.callback();
+                ui.callback();
             }
         },
         getShortestColumn: function(){
@@ -55,36 +55,47 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
             }
             return result;
         },
-        scroll: function( callback ){
-            callback = callback || $.noop;
-            var now = 0, ui = this, interval = ui.interval, tiles = ui.tiles;
-            $(window).scroll(function(){
-                var time = new Date;
-                if(time - now > interval ){
-                    now = time;
-                    var pageHeight = $(document).height(), rollHeight = $(window).scrollTop() +  $(window).height()
-                    for( var i = 0; i < tiles.length; i++ ){
-                        var tile = tiles[i], top = tile.offset().top;//取得元素相对于整个页面的Y位置
-                        if( rollHeight >= top ) { //如果页面的滚动条拖动要处理的元素所在的位置
-                            if(ui.fade){
-                                tile.fx( ui.fade_time,{
-                                    o:1
-                                });
-                            }
-                            callback.call( ui ,tile );//调用回调，让元素显示出来
-                        }
+        //为原始的回调绑定参数
+        curry : function( callback ){
+            var ui = this, tiles = ui.tiles;
+            var pageHeight = $(document).height(), rollHeight = $(window).scrollTop() +  $(window).height()
+            for( var i = 0; i < tiles.length; i++ ){
+                var tile = tiles[i], top = tile.offset().top;//取得元素相对于整个页面的Y位置
+                if( rollHeight >= top ) { //如果页面的滚动条拖动要处理的元素所在的位置
+                    if(ui.fade){
+                        tile.fx( ui.fade_time,{
+                            o:1
+                        });
                     }
-                    callback.call(ui, rollHeight, pageHeight);
+                    callback.call( ui ,tile );//调用回调，让元素显示出来
                 }
+            }
+            callback.call(ui, rollHeight, pageHeight);
+        },
+        scroll: function( callback ){
+            //这只是一个代理，用于添加回调的
+            Waterfall.scrollCallbacks.push({
+                fn: callback || function(){},
+                ui: this
             });
         }
     });
+    var now = 0;
+    $(window).scroll(function(){
+        var time = new Date, els = Waterfall.scrollCallbacks;
+        if(time - now > 13 ){
+            now = time;
+            for(var i = 0, el; el = els[i++]; ){
+                el.ui.curry( el.fn );
+            }
+        }
+    });
+    Waterfall.scrollCallbacks = [];
     var defaults = {
         tiles: [],
         data: [],
         img_expr: ".waterfall_img",/*砖头中的大图的CSS表达式*/
         callback: $.noop,
-        interval: 20,
         fade: false,/* 是否使用淡入效果*/
         fade_time:500/*淡入时间*/
     }
