@@ -1,5 +1,5 @@
 $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
-    //$.log("已加载waterfall模块")
+    //$.log("已加载waterfall模块!!")
     var Waterfall = $.factory({
         inherit: Widget.Class,
         addTiles: function(json){
