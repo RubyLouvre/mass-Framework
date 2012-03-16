@@ -1,4 +1,4 @@
-$.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
+$.define("waterfall","uibase, ejs,event,attr,fx",function(Widget){
     //$.log("已加载waterfall模块")
     var Waterfall = $.factory({
         inherit: Widget.Class,
@@ -81,7 +81,7 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         }
     });
     var  now = 0;
-    W(window).on("scroll", function(){
+    $(window).scroll( function(){
         var time = new Date, els = Waterfall.scrollCallbacks;
         if(time - now > 13 ){
             now = time;

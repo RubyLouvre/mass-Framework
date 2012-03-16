@@ -277,7 +277,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         }
     };
 
-    var transform = function(method){
+    var retouch = function(method){
         return function(){
             [].unshift.call(arguments,this)
             return method.apply(null,arguments)
@@ -291,7 +291,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 $[type][name] = ext[name];
                 proto[name] = function(){
                     var target = this.target;
-                    var method = target[name] || transform($[this.type][name]);
+                    var method = target[name] || retouch($[this.type][name]);
                     return method.apply(target, arguments);
                 }
                 proto[name+"X"] = function(){

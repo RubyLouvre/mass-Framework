@@ -81,7 +81,7 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         }
     });
     var now = 0;
-    $(window).scroll(function(){
+    $(window).scroll( function(){
         var time = new Date, els = Waterfall.scrollCallbacks;
         if(time - now > 13 ){
             now = time;
