@@ -14,7 +14,7 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         },
         addTile: function(html, htmls ,index ){
             var ui = this, img, tile
-            if(!html){
+            if(html){
                 if(isFinite(index)){
                     //将HTML数据转换成节点数据
                     tile = $(html).appendTo( ui.cols.eq(index) );
