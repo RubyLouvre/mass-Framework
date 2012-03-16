@@ -14,29 +14,30 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         },
         addTile: function(html, htmls ,index ){
             var ui = this, img, tile
-            if(isFinite(index)){
-                //将HTML数据转换成节点数据
-                tile = $(html).appendTo( ui.cols.eq(index) );
-                if(ui.fade){
-                    tile.css("opacity",0)
-                }
-                ui.tiles.push( tile );
-                img = tile.find(ui.img_expr)[0];
-                if( img ){
-                    (function fn(){
-                        //判定大图是否加载成功
-                        if(img.complete == true){
-                            ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
-                        }else{
-                            setTimeout( fn, 16 );
-                        }
-                    })();
-                }
-            }else {
-                ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
-            }
             if(!html){
-                ui.callback();
+                if(isFinite(index)){
+                    //将HTML数据转换成节点数据
+                    tile = $(html).appendTo( ui.cols.eq(index) );
+                    if(ui.fade){
+                        tile.css("opacity",0)
+                    }
+                    ui.tiles.push( tile );
+                    img = tile.find(ui.img_expr)[0];
+                    if( img ){
+                        (function fn(){
+                            //判定大图是否加载成功
+                            if(img.complete == true){
+                                ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
+                            }else{
+                                setTimeout( fn, 16 );
+                            }
+                        })();
+                    }
+                }else {
+                    ui.addTile( html, htmls, ui.getShortestColumn() );
+                }
+            }else{
+                 ui.callback();
             }
         },
         getShortestColumn: function(){
@@ -102,7 +103,6 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         }
         ui.cols = ui.target.find(".waterfall_cols");
     }
-
 
     $.fn.waterfall = Widget.create("waterfall", Waterfall, init )
 });
