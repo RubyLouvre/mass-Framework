@@ -278,7 +278,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         }
     };
 
-    var retouch = function(method){
+    var retouch = function(method){//函数变换，静态转原型
         return function(){
             [].unshift.call(arguments,this)
             return method.apply(null,arguments)
@@ -288,16 +288,18 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
-            var array =  typeof ext == "string" ?  ext.match($.rword) : Object.keys(ext);
-            array.forEach(function(name){
-                $[type][name] = ext[name];
+            var isNative = typeof ext == "string",
+            methods =  isNative ?  ext.match($.rword) : Object.keys(ext);
+            methods.forEach(function(name){
+                $[type][name] = isNative ? function(obj){
+                    return obj[name].apply(obj,$.slice(arguments,1) );
+                } :  ext[name];
                 proto[name] = function(){
                     var target = this.target;
-                    $.log(name)
                     if( target == null){
                         return this;
                     }else{
-                        var method = target[name] || retouch( $[this.type][name] ),
+                        var method = isNative ? target[name] : retouch( $[this.type][name] ),
                         next = this.target = method.apply( target, arguments ),
                         type = $.type( next );
                         if( type === this.type){
