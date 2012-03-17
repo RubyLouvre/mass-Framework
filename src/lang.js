@@ -117,15 +117,17 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 '\t':'t',
                 '\n':'n',
                 '\v':'v',
-                'f':'f',
-                '\r':'\r',
+                '\f':'f',
+                '\r':'r',
                 '\'':'\'',
                 '\"':'\"',
                 '\\':'\\'
             },
             reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
             regFn = function(c){
-                if (c in meta) return '\\' + meta[c];
+                if (c in meta) {
+                    return '\\' + meta[c];
+                }
                 var ord = c.charCodeAt(0);
                 return ord < 0x20   ? '\\x0' + ord.toString(16)
                 :  ord < 0x7F   ? '\\'   + c
@@ -289,7 +291,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
             var isNative = typeof ext == "string",
-            methods =  isNative ?  ext.match($.rword) : Object.keys(ext);
+            methods = isNative ? ext.match($.rword) : Object.keys(ext);
             methods.forEach(function(name){
                 $[type][name] = isNative ? function(obj){
                     return obj[name].apply(obj,$.slice(arguments,1) );
