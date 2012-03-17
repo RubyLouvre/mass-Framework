@@ -248,20 +248,23 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     }
 
     var arrayLike = $.oneObject("NodeList,Arguments,Object");
-    //语言链对象
+    //这只是一个入口
     $.lang = function(obj, type){
+        return adjust(new Chain, obj, type)
+    }
+    //调整Chain实例的重要属性
+    function adjust(chain, obj, type){
         type = type || $.type(obj);
         if(arrayLike[type] && isFinite(obj.length)){
             obj = $.slice(obj);
             type = "Array";
         }
-        return new Chain(obj, type)
+        chain.target = obj;
+        chain.type = type;
+        return chain
     }
-    var Chain = function(target, type){
-        this.target = target;
-        this.type = type;
-    }
-
+    //语言链对象
+    var Chain = function(){ }
     Chain.prototype = {
         constructor: Chain,
         valueOf:function(){
@@ -300,7 +303,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                         if( type === this.type){
                             return this;
                         }else{
-                            return $.lang( next, type );
+                            return adjust(this, next, type)
                         }
                     }
                 }
