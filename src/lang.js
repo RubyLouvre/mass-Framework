@@ -246,34 +246,32 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-    var adjustOne = $.oneObject("String,Array,Number,Object"),
-    arrayLike = $.oneObject("NodeList,Arguments,Object");
+
+    var arrayLike = $.oneObject("NodeList,Arguments,Object");
     //语言链对象
-    $.lang = function(obj){
-        var type = $.type(obj), chain = this;
-        if(arrayLike[type] &&  isFinite(obj.length)){
+    $.lang = function(obj, type){
+        type = type || $.type(obj);
+        if(arrayLike[type] && isFinite(obj.length)){
             obj = $.slice(obj);
             type = "Array";
         }
-        if(adjustOne[type]){
-            if(!(chain instanceof $.lang)){
-                chain = new $.lang;
-            }
-            chain.target = obj;
-            chain.type = type;
-            return chain;
-        }else{// undefined boolean null
-            return obj
-        }
+        return new Chain(obj, type)
+    }
+    var Chain = function(target, type){
+        this.target = target;
+        this.type = type;
     }
 
-    $.lang.prototype = {
-        constructor:$.lang,
+    Chain.prototype = {
+        constructor: Chain,
         valueOf:function(){
             return this.target;
         },
         toString:function(){
             return this.target + "";
+        },
+        value: function(){
+            return this.target;
         }
     };
 
@@ -283,20 +281,28 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return method.apply(null,arguments)
         }
     }
-    var proto = $.lang.prototype;
+    var proto = Chain.prototype;
     //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
-            Object.keys(ext).forEach(function(name){
+            var array =  typeof ext == "string" ?  ext.match($.rword) : Object.keys(ext);
+            array.forEach(function(name){
                 $[type][name] = ext[name];
                 proto[name] = function(){
                     var target = this.target;
-                    var method = target[name] || retouch($[this.type][name]);
-                    return method.apply(target, arguments);
-                }
-                proto[name+"X"] = function(){
-                    var result = this[name].apply(this, arguments);
-                    return $.lang(result) ;
+                    $.log(name)
+                    if( target == null){
+                        return this;
+                    }else{
+                        var method = target[name] || retouch( $[this.type][name] ),
+                        next = this.target = method.apply( target, arguments ),
+                        type = $.type( next );
+                        if( type === this.type){
+                            return this;
+                        }else{
+                            return $.lang( next, type );
+                        }
+                    }
                 }
             });
         }
@@ -340,7 +346,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //转换为驼峰风格
         camelize:function(target){
-            return target.replace(/-([a-z])/g, function($0, $1){
+            return target.replace(/[_-]([a-z])/g, function($0, $1){
                 return $1.toUpperCase();
             });
         },
@@ -409,7 +415,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
-
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
+        "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         //深拷贝当前数组
         clone: function(target){
@@ -564,7 +571,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
-
+    $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift"+
+        "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
     var NumberExt = {
         times: function(target, fn, bind) {
             for (var i=0; i < target; i++)
@@ -610,6 +618,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         NumberExt[name] = Math[name];
     });
     $.Number(NumberExt);
+    $.Number("toFixed,toExponential,toPrecision,toJSON")
     function cloneOf(item){
         var name = $.type(item);
         switch(name){
@@ -684,6 +693,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
+    $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
     return $.lang;
 });
 
@@ -706,7 +716,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 //2011.11.6 对parseXML中的IE部分进行强化
 //2011.12.22 修正命名空间
 //2012.1.17 添加dump方法
-//2012.1.20 重构$$.String, $$.Array, $$.Number, $$.Object, 让其变成一个函数
+//2012.1.20 重构$.String, $.Array, $.Number, $.Object, 让其变成一个函数v3
 //2012.1.27 让$$.String等对象上的方法全部变成静态方法
 //2012.1.31 去掉$.Array.ensure，添加$.Array.merge
+//2012.3.17 v4 重构语言链对象
 //键盘控制物体移动 http://www.wushen.biz/move/
