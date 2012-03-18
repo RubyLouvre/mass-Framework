@@ -32,7 +32,6 @@ $.define("ejs", "lang",function(){
                             if(logic.indexOf("@")!==-1){
                                 temp.push( startOfHTML, logic.replace(rAt,"$1data.").replace(rlastSemi,''), endOfHTML );
                             }else{
-                                console.log(logic)
                                 temp.push( startOfHTML, logic.replace(rlastSemi,''), endOfHTML );
                             }
                             break;
@@ -60,4 +59,4 @@ $.define("ejs", "lang",function(){
         return  ejs2[id]( data )
     }
 })
-// ejs v9
+// ejs v9!
