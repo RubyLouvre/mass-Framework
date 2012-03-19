@@ -196,7 +196,7 @@ merge: function( first, second ) {
     first.length = i;
     return first;
 },
- */
+
 var a = {};
 [].push.call(a, window);
 console.log(a)//Object { 0=window, length=1}
@@ -224,14 +224,14 @@ function $A(iterable){
 };
 var toArray = function(){
     return isIE ?
-    function(a, i, j, res){
+        function(a, i, j, res){
         res = [];
         Ext.each(a, function(v) {
             res.push(v);
         });
         return res.slice(i || 0, j || res.length);
     } :
-    function(a, i, j){
+        function(a, i, j){
         return Array.prototype.slice.call(a, i || 0, j || a.length);
     }
 }()
@@ -256,12 +256,67 @@ var toArray = function(){
 })();
 
 jQuery.event = {
-
-	add: function( elem, types, handler, data, selector ) {
-//不能是文本节点与注释节点，即使是元素节点，也必须要验证它是否允许添加自定义属性
-//因为IE678中embed，applet以及clsid属性不等于
-		if ( elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler || !(elemData = jQuery._data( elem )) ) {
-			return;
-		}
+    add: function( elem, types, handler, data, selector ) {
+        //如果是文本节点或是注释节点，或是没有过指定事件类型与回调,
+        //或是此元素节点不能设置自定义属性,立即返回
+        //注:IE678中embed，applet以及object标签会在某些场合不能设置自定义属性
+        //而此属性的值是jQuery分配给每个元素的一个UUID,用于关联其数据缓存系统与事件系统
+        //既然不能设置UUID,就没有必要向下执行了
+        if ( elem.nodeType === 3 || elem.nodeType === 8 || !types ||
+            !handler || !(elemData = jQuery._data( elem )) ) {
+            return;
         }
+    }
+    // 略
 }
+
+//取得或设置节点的innerHTML属性
+html: function( item ){
+    return $.access(this, 0, item, function( el ){//getter
+        //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
+        //为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
+        //的nodeType为9,IE称之为XML数据岛
+        if ( el && (el.nodeType === 1 || /xml/i.test(el.nodeName)) ) {
+            return "innerHTML" in el ? el.innerHTML : innerHTML(el)
+        }
+        return null;
+    }, function(){//setter
+        item = item == null ?  '' : item+"";////这里的隐式转换也是防御性编程的一种
+        //接着判断innerHTML属性是否符合标准,不再区分可读与只读
+        //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
+        //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
+        if ( support.innerHTML && (!rcreate.test(item) && !rnest.test(item)) ) {
+            try {
+                // 略
+                return;
+            } catch(e) {};
+        }
+        this.empty().append( item );
+    });
+},
+ */
+//如果支持compareDocumentPosition 方法
+features.documentSorter = (root.compareDocumentPosition) ? function(a, b){
+    if (!a.compareDocumentPosition || !b.compareDocumentPosition) return 0;
+    return a.compareDocumentPosition(b) & 4 ? -1 : a === b ? 0 : 1;
+    //如果支持 sourceIndex属性
+} : ('sourceIndex' in root) ? function(a, b){
+    if (!a.sourceIndex || !b.sourceIndex) return 0;
+    return a.sourceIndex - b.sourceIndex;
+    //如果支持document.createRange
+} : (document.createRange) ? function(a, b){
+    if (!a.ownerDocument || !b.ownerDocument) return 0;
+    var aRange = a.ownerDocument.createRange(), bRange = b.ownerDocument.createRange();
+    aRange.setStart(a, 0);
+    aRange.setEnd(a, 0);
+    bRange.setStart(b, 0);
+    bRange.setEnd(b, 0);
+    return aRange.compareBoundaryPoints(Range.START_TO_END, bRange);
+} : null ;//如果浏览器太破,就不会返回比较函数
+//为字符串两端添上双引号,并对内部需要转义的地方进行转义
+quote : global.JSON && JSON.stringify || String.quote ||  (function(){
+    // 略
+    return function (str) {
+        return    '"' + str.replace(reg, regFn)+ '"';
+    }
+})(),

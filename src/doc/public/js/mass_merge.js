@@ -144,7 +144,7 @@
         log: function ( text, force ){
             if( force ){
                 $.require( "ready", function(){
-                    var div =  DOC.createElement("div");
+                    var div =  DOC.createElement("pre");
                     div.innerHTML = text +"";//确保为字符串
                     DOC.body.appendChild(div)
                 });
@@ -543,6 +543,97 @@ $.define( "lang_fix",  function(){
             return this.setFullYear(year + 1900);
         };
     }
+
+    /*!
+     * Cross-Browser Split 1.1.1
+     * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
+     * Available under the MIT License
+     * ECMAScript compliant, uniform cross-browser split method
+     * // Basic use
+     * split('a b c d', ' ');
+     * // -> ['a', 'b', 'c', 'd']
+     *
+     * // With limit
+     * split('a b c d', ' ', 2);
+     * // -> ['a', 'b']
+     *
+     * // Backreferences in result array
+     * split('..word1 word2..', /([a-z]+)(\d+)/i);
+     * // -> ['..', 'word', '1', ' ', 'word', '2', '..']
+     */
+    var nativeSplit = String.prototype.split,
+    compliantExecNpcg = /()??/.exec("")[1] === void 0, // NPCG: nonparticipating capturing group
+    fix = function (str, separator, limit) {
+        // If `separator` is not a regex, use `nativeSplit`
+        if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
+            return nativeSplit.call(str, separator, limit);
+        }
+        var output = [],
+        flags = (separator.ignoreCase ? "i" : "") +
+        (separator.multiline  ? "m" : "") +
+        (separator.extended   ? "x" : "") + // Proposed for ES6
+        (separator.sticky     ? "y" : ""), // Firefox 3+
+        lastLastIndex = 0,
+        // Make `global` and avoid `lastIndex` issues by working with a copy
+        separator = new RegExp(separator.source, flags + "g"),
+        separator2, match, lastIndex, lastLength;
+        str += ""; // Type-convert
+        if (!compliantExecNpcg) {
+            // Doesn't need flags gy, but they don't hurt
+            separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
+        }
+        /* Values for `limit`, per the spec:
+             * If undefined: 4294967295 // Math.pow(2, 32) - 1
+             * If 0, Infinity, or NaN: 0
+             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
+             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
+             * If other: Type-convert, then use the above rules
+             */
+        limit = limit === void 0 ?
+        -1 >>> 0 : // Math.pow(2, 32) - 1
+        limit >>> 0; // ToUint32(limit)
+        while (match = separator.exec(str)) {
+            // `separator.lastIndex` is not reliable cross-browser
+            lastIndex = match.index + match[0].length;
+            if (lastIndex > lastLastIndex) {
+                output.push(str.slice(lastLastIndex, match.index));
+                // Fix browsers whose `exec` methods don't consistently return `undefined` for
+                // nonparticipating capturing groups
+                if (!compliantExecNpcg && match.length > 1) {
+                    match[0].replace(separator2, function () {
+                        for (var i = 1; i < arguments.length - 2; i++) {
+                            if (arguments[i] === void 0) {
+                                match[i] = void 0;
+                            }
+                        }
+                    });
+                }
+                if (match.length > 1 && match.index < str.length) {
+                    Array.prototype.push.apply(output, match.slice(1));
+                }
+                lastLength = match[0].length;
+                lastLastIndex = lastIndex;
+                if (output.length >= limit) {
+                    break;
+                }
+            }
+            if (separator.lastIndex === match.index) {
+                separator.lastIndex++; // Avoid an infinite loop
+            }
+        }
+        if (lastLastIndex === str.length) {
+            if (lastLength || !separator.test("")) {
+                output.push("");
+            }
+        } else {
+            output.push(str.slice(lastLastIndex));
+        }
+        return output.length > limit ? output.slice(0, limit) : output;
+    };
+    // For convenience
+    String.prototype.split = function (separator, limit) {
+        return fix(this, separator, limit);
+    };
 });
     
 //2011.7.26
@@ -551,7 +642,7 @@ $.define( "lang_fix",  function(){
 //重构Array.prototype.unshift (thx @abcd)
 //2011.12.22
 //修正命名空间
-
+//2012.3.19 添加对split的修复
 //=========================================
 // 类型扩展模块v3 by 司徒正美
 //=========================================
@@ -666,20 +757,23 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return range;
         },
+        // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
         quote : global.JSON && JSON.stringify || String.quote ||  (function(){
             var meta = {
                 '\t':'t',
                 '\n':'n',
                 '\v':'v',
-                'f':'f',
-                '\r':'\r',
+                '\f':'f',
+                '\r':'r',
                 '\'':'\'',
                 '\"':'\"',
                 '\\':'\\'
             },
             reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
             regFn = function(c){
-                if (c in meta) return '\\' + meta[c];
+                if (c in meta) {
+                    return '\\' + meta[c];
+                }
                 var ord = c.charCodeAt(0);
                 return ord < 0x20   ? '\\x0' + ord.toString(16)
                 :  ord < 0x7F   ? '\\'   + c
@@ -800,57 +894,68 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-    var adjustOne = $.oneObject("String,Array,Number,Object"),
-    arrayLike = $.oneObject("NodeList,Arguments,Object");
-    //语言链对象
-    $.lang = function(obj){
-        var type = $.type(obj), chain = this;
-        if(arrayLike[type] &&  isFinite(obj.length)){
+
+    var arrayLike = $.oneObject("NodeList,Arguments,Object");
+    //这只是一个入口
+    $.lang = function(obj, type){
+        return adjust(new Chain, obj, type)
+    }
+    //调整Chain实例的重要属性
+    function adjust(chain, obj, type){
+        type = type || $.type(obj);
+        if(arrayLike[type] && isFinite(obj.length)){
             obj = $.slice(obj);
             type = "Array";
         }
-        if(adjustOne[type]){
-            if(!(chain instanceof $.lang)){
-                chain = new $.lang;
-            }
-            chain.target = obj;
-            chain.type = type;
-            return chain;
-        }else{// undefined boolean null
-            return obj
-        }
+        chain.target = obj;
+        chain.type = type;
+        return chain
     }
-
-    $.lang.prototype = {
-        constructor:$.lang,
+    //语言链对象
+    var Chain = function(){ }
+    Chain.prototype = {
+        constructor: Chain,
         valueOf:function(){
             return this.target;
         },
         toString:function(){
             return this.target + "";
+        },
+        value: function(){
+            return this.target;
         }
     };
 
-    var transform = function(method){
+    var retouch = function(method){//函数变换，静态转原型
         return function(){
             [].unshift.call(arguments,this)
             return method.apply(null,arguments)
         }
     }
-    var proto = $.lang.prototype;
+    var proto = Chain.prototype;
     //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(type){
         $[type] = function(ext){
-            Object.keys(ext).forEach(function(name){
-                $[type][name] = ext[name];
+            var isNative = typeof ext == "string",
+            methods = isNative ? ext.match($.rword) : Object.keys(ext);
+            methods.forEach(function(name){
+                $[type][name] = isNative ? function(obj){
+                    return obj[name].apply(obj,$.slice(arguments,1) );
+                } :  ext[name];
                 proto[name] = function(){
                     var target = this.target;
-                    var method = target[name] || transform($[this.type][name]);
-                    return method.apply(target, arguments);
-                }
-                proto[name+"X"] = function(){
-                    var result = this[name].apply(this, arguments);
-                    return $.lang(result) ;
+                    if( target == null){
+                        return this;
+                    }else{
+                        var method = isNative ? target[name] : retouch( $[this.type][name] ),
+                        next = this.target = method.apply( target, arguments ),
+                        type = $.type( next );
+                        if( type === this.type){
+                            return this;
+                        }else{
+                            return adjust(this, next, type)
+                        }
+                    }
                 }
             });
         }
@@ -894,7 +999,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //转换为驼峰风格
         camelize:function(target){
-            return target.replace(/-([a-z])/g, function($0, $1){
+            return target.replace(/[_-]([a-z])/g, function($0, $1){
                 return $1.toUpperCase();
             });
         },
@@ -963,7 +1068,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
-
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
+        "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         //深拷贝当前数组
         clone: function(target){
@@ -1118,7 +1224,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
-
+    $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift"+
+        "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
     var NumberExt = {
         times: function(target, fn, bind) {
             for (var i=0; i < target; i++)
@@ -1164,6 +1271,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         NumberExt[name] = Math[name];
     });
     $.Number(NumberExt);
+    $.Number("toFixed,toExponential,toPrecision,toJSON")
     function cloneOf(item){
         var name = $.type(item);
         switch(name){
@@ -1238,6 +1346,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
+    $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
     return $.lang;
 });
 
@@ -1260,9 +1369,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 //2011.11.6 对parseXML中的IE部分进行强化
 //2011.12.22 修正命名空间
 //2012.1.17 添加dump方法
-//2012.1.20 重构$.String, $.Array, $.Number, $.Object, 让其变成一个函数
+//2012.1.20 重构$.String, $.Array, $.Number, $.Object, 让其变成一个函数v3
 //2012.1.27 让$.String等对象上的方法全部变成静态方法
 //2012.1.31 去掉$.Array.ensure，添加$.Array.merge
+//2012.3.17 v4 重构语言链对象
 //键盘控制物体移动 http://www.wushen.biz/move/
 //==========================================
 // 特征嗅探模块 by 司徒正美
@@ -1528,7 +1638,7 @@ $.define("class", "lang",function(){
 //2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
 
 
-﻿//==================================================
+//==================================================
 // 数据缓存模块
 //==================================================
 $.define("data", "lang", function(){
@@ -2706,12 +2816,18 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //取得或设置节点的innerHTML属性
         html: function( item ){
             return $.access(this, 0, item, function( el ){//getter
-                if ( el && (el.nodeType === 1 || /xml/i.test(el.nodeName)) ) {//处理IE的XML数据岛
+                //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
+                //为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
+                //的nodeType为9,IE称之为XML数据岛
+                if ( el && (el.nodeType === 1 || /xml/i.test(el.nodeName)) ) {
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
             }, function(){//setter
-                item = (item || "")+""
+                item = item == null ?  '' : item+"";////这里的隐式转换也是防御性编程的一种
+                //接着判断innerHTML属性是否符合标准,不再区分可读与只读
+                //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
+                //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
                 if ( support.innerHTML && (!rcreate.test(item) && !rnest.test(item)) ) {
                     try {
                         for ( var i = 0, node; node = this[ i++ ]; ) {
@@ -2810,7 +2926,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return false;
             }
         },
-        //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML, data, attr, prop, value
+        //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
         access: function( elems, key, value, getter, setter ) {
             var length = elems.length;
             setter = setter || getter;
