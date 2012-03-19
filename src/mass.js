@@ -144,7 +144,7 @@
         log: function ( text, force ){
             if( force ){
                 $.require( "ready", function(){
-                    var div =  DOC.createElement("div");
+                    var div =  DOC.createElement("pre");
                     div.innerHTML = text +"";//确保为字符串
                     DOC.body.appendChild(div)
                 });
