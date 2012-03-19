@@ -112,6 +112,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return range;
         },
+        //为字符串两端添上双引号,并对内部需要转义的地方进行转义
         quote : global.JSON && JSON.stringify || String.quote ||  (function(){
             var meta = {
                 '\t':'t',
