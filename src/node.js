@@ -134,12 +134,18 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //取得或设置节点的innerHTML属性
         html: function( item ){
             return $.access(this, 0, item, function( el ){//getter
-                if ( el && (el.nodeType === 1 || /xml/i.test(el.nodeName)) ) {//处理IE的XML数据岛
+                //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
+                //为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
+                //的nodeType为9,IE称之为XML数据岛
+                if ( el && (el.nodeType === 1 || /xml/i.test(el.nodeName)) ) {
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
             }, function(){//setter
-                item = (item || "")+""
+                item = item == null ?  '' : item+"";////这里的隐式转换也是防御性编程的一种
+                //接着判断innerHTML属性是否符合标准,不再区分可读与只读
+                //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
+                //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
                 if ( support.innerHTML && (!rcreate.test(item) && !rnest.test(item)) ) {
                     try {
                         for ( var i = 0, node; node = this[ i++ ]; ) {
@@ -238,7 +244,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return false;
             }
         },
-        //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML, data, attr, prop, value
+        //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
         access: function( elems, key, value, getter, setter ) {
             var length = elems.length;
             setter = setter || getter;
