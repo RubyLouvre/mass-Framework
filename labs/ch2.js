@@ -254,3 +254,14 @@ var toArray = function(){
         return ((obj.item) ? slow : efficient).apply(this, arguments);
     } :   efficient;
 })();
+
+jQuery.event = {
+
+	add: function( elem, types, handler, data, selector ) {
+//不能是文本节点与注释节点，即使是元素节点，也必须要验证它是否允许添加自定义属性
+//因为IE678中embed，applet以及clsid属性不等于
+		if ( elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler || !(elemData = jQuery._data( elem )) ) {
+			return;
+		}
+        }
+}
