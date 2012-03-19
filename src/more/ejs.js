@@ -6,7 +6,7 @@ $.define("ejs", "lang",function(){
     rLeft = /\s*<&\s*/,
     rRight = /\s*&>\s*/,
     rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g,
-    rLastSemi = /;\s*$/
+    rLastSemi = /[,;]\s*$/
     var ejs2 = $.ejs = function(id,data){
         data = data || {};
         if( !ejs2[id] ){
