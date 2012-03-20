@@ -294,7 +294,7 @@ html: function( item ){
         this.empty().append( item );
     });
 },
- */
+
 //如果支持compareDocumentPosition 方法
 features.documentSorter = (root.compareDocumentPosition) ? function(a, b){
     if (!a.compareDocumentPosition || !b.compareDocumentPosition) return 0;
@@ -320,3 +320,33 @@ quote : global.JSON && JSON.stringify || String.quote ||  (function(){
         return    '"' + str.replace(reg, regFn)+ '"';
     }
 })(),
+ */
+//http://unscriptable.com/2009/05/01/a-better-javascript-memoizer/
+function memoize (fn, context) {
+    function memoizeArg (argPos) {
+        var cache = {};
+        return function () {
+            if (argPos == 0) {
+                if (!(arguments[argPos] in cache)) {
+                    cache[arguments[argPos]] = fn.apply(context, arguments);
+                }
+                return cache[arguments[argPos]];
+            }
+            else {
+                if (!(arguments[argPos] in cache)) {
+                    cache[arguments[argPos]] = memoizeArg(argPos - 1);
+                }
+                return cache[arguments[argPos]].apply(this, arguments);
+            }
+        }
+    }
+    // JScript doesn't grok the arity property, but uses length instead
+    var arity = fn.arity || fn.length;
+    return memoizeArg(arity - 1);
+}
+
+function fib(i) {
+    if (i == 0 || i == 1)
+        return 1;
+    return fib(i-1) + fib(i-2);
+}
