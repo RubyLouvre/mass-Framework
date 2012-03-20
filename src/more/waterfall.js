@@ -23,15 +23,18 @@ $.define("waterfall","uibase, ejs,event,attr,fx",function(Widget){
                     }
                     ui.tiles.push( tile );
                     img = tile.find(ui.img_expr)[0];
-                    if( img ){
+                    if( img ){//加载下一张图片
+                        var i = 0;
                         (function fn(){
                             //判定大图是否加载成功
-                            if(img.complete == true){
-                                ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
+                            if(img.complete == true || ++i > 15){
+                                ui.addBrick( htmls.shift(), htmls, ui.getShortestColumn() );
                             }else{
-                                setTimeout( fn, 16 );
+                                setTimeout( fn, 20);
                             }
                         })();
+                    }else{
+                        ui.addTile( html, htmls, ui.getShortestColumn() );
                     }
                 }else {
                     ui.addTile( html, htmls, ui.getShortestColumn() );
