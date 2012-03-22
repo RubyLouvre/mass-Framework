@@ -322,31 +322,119 @@ quote : global.JSON && JSON.stringify || String.quote ||  (function(){
 })(),
  */
 //http://unscriptable.com/2009/05/01/a-better-javascript-memoizer/
-function memoize (fn, context) {
-    function memoizeArg (argPos) {
-        var cache = {};
-        return function () {
-            if (argPos == 0) {
-                if (!(arguments[argPos] in cache)) {
-                    cache[arguments[argPos]] = fn.apply(context, arguments);
-                }
-                return cache[arguments[argPos]];
-            }
-            else {
-                if (!(arguments[argPos] in cache)) {
-                    cache[arguments[argPos]] = memoizeArg(argPos - 1);
-                }
-                return cache[arguments[argPos]].apply(this, arguments);
-            }
+var cssMap = {},
+prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
+cssName =  function( name, host, test ){
+    if( cssMap[ name ] )//如果缓存体有对应键值，立即返回
+        return cssMap[ name ];
+    host = host || document.documentElement.style;
+    for ( var i = 0, n = prefixes.length; i < n; i++ ) {
+        test = $.String.camelize( prefixes[i] + name || "")//添加前缀并转为驼峰
+        if( test in host ){//检测是否支持
+            return ( cssMap[ name ] = test );//支持则缓存结果并返回
         }
     }
-    // JScript doesn't grok the arity property, but uses length instead
-    var arity = fn.arity || fn.length;
-    return memoizeArg(arity - 1);
+    return null;
 }
 
-function fib(i) {
-    if (i == 0 || i == 1)
-        return 1;
-    return fib(i-1) + fib(i-2);
+//方法一,通过一个外围的变量来保存它,因此这是一个缓存函数
+var t;
+function foo() {
+    if (t) {
+        return t;
+    }
+    t = new Date();
+    return t;
 }
+
+//方法二是一个即时执行函数表达式, 只是返回的是函数罢了。其目的是摒弃方法一，污染全局对象的做法。
+var foo = (function() {
+    var t;
+    return function() {
+        if (t) {
+            return t;
+        }
+        t = new Date();
+        return t;
+    }
+})();
+//方法三是在函数自身上添加一个属性，来储存第一次运行的结果，下次就跳过计算，
+//直接返回结果了，是实现缓存函数最常见的手段。
+
+function foo() {
+    if (foo.t) {
+        return foo.t;
+    }
+    foo.t = new Date();
+    return foo.t;
+}
+
+function addEvent(el, type, fn, phase) {
+    if (document.addEventListener) {//w3c的API应该最先检测
+        addEvent = function(el, type, fn, phase) {
+            el.addEventListener(type, fn, !!phase)
+        }
+    }else{
+        addEvent = function(el, type, fn) {
+            el.attachEvent(type, fn)
+        }
+    }
+    return addEvent(el, type, fn)
+}
+function getXhr(){
+    var s = ["XMLHttpRequest",
+    "ActiveXObject('Msxml2.XMLHTTP.6.0')",
+    "ActiveXObject('Msxml2.XMLHTTP.3.0')",
+    "ActiveXObject('Msxml2.XMLHTTP')",
+    "ActiveXObject('Microsoft.XMLHTTP')"];
+    //IE7下的原生XMLHttpRequest在file协议下存在BUG,退回用ActiveXObject
+    if( !-[1,] && top.ScriptEngineMinorVersion() === 7
+        && location.protocol === "file:"){
+        s.shift();
+    }
+    for(var i = 0 ,axo;axo = s[i++];){
+        try{
+            if(eval("new "+ axo)){
+                getXhr = new Function( "return new "+axo);
+                return getXhr();
+            }
+        }catch(e){}
+    }
+}
+
+var foo = function() {
+    var t = new Date();
+    foo = function() {//注意这里！
+        return t;
+    };
+    return foo();
+};
+
+var b = foo();
+b();//TypeError: b is not a function
+
+function makeLazy(fn, self) {
+    return (function() {
+        var f = function () {
+            var result = fn.apply(self || this, arguments);
+            f = function() {
+                return result; 
+            };
+            return result;
+        };
+        return function() {
+            return f();
+        };
+    }());
+}
+
+//http://d.hatena.ne.jp/reinyannyan/20061127/p1
+//http://d.hatena.ne.jp/reinyannyan/20070116/p1
+//http://d.hatena.ne.jp/reinyannyan/20061212/p1
+//http://d.hatena.ne.jp/m-hiyama/20051213/1134446855
+//http://benalman.com/news/2010/09/partial-application-in-javascript/  重点
+//http://www.svendtofte.com/code/curried_javascript/ 重点
+//http://blog.jcoglan.com/2007/12/12/self-currying-javascript-functions/
+//http://www.barklund.org/blog/2008/02/06/self-partially-applying-javascript-functions/
+
+//http://d.hatena.ne.jp/paulownia/20120226/1330270866
