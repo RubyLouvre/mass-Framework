@@ -428,6 +428,122 @@ function makeLazy(fn, self) {
     }());
 }
 
+
+function curry(fun) {
+    if (typeof fun != 'function') {
+        throw new Error("The argument must be a function.");
+    }
+    if (fun.arity == 0) {
+        throw new Error("The function must have more than one argument.");
+    }
+
+    var funText = fun.toString();
+    var args = /function .*\((.*)\)(.*)/.exec(funText)[1].split(', ');
+    var firstArg = args.shift();
+    var restArgs = args.join(', ');
+    var body = funText.replace(/function .*\(.*\) /, "");
+
+    var curriedText =
+    "function (" + firstArg + ") {" +
+    "return function (" + restArgs + ")" + body +
+    "}";
+
+    eval("var curried =" + curriedText);
+    return curried;
+}
+
+function sum(x, y) {
+    return x + y;
+}
+curry(sum)(10)(15);
+curry(sum)(10,15);//看来还是存在缺陷，返回函数而不是最终结果
+
+Function.prototype.curry =  function() {
+    if (!arguments.length) return this;
+    var __method = this, args = [].slice.call(arguments);
+    return function() {
+        return __method.apply(this, args.concat( [].slice.call(arguments) ));
+    }
+}
+function sum3(a, b, c) {
+    return a + b + c;
+}
+sum3(4, 5, 6)//15
+sum3.curry(4)(5, 6);//15
+sum3.curry(4).curry(5)(6)//15
+
+function curry(fn) {
+    function c(n, arg) {
+        if (n <= 0)//检测还有多少没有传够，传够就返回结果，而是函数
+            return fn.apply(null, arg);
+        return function() {
+            return c(n-arguments.length, arg.concat([].slice.call(arguments)));
+        };
+    }
+    return c(fn.length, []);
+}
+function mean3(a, b, c) {
+    return (a + b + c) / 3;
+}
+
+var curriedMean3 = curry(mean3);
+console.log(curriedMean3(1)(2, 3)); // => 2
+console.log(curriedMean3(1)(2)(3));//空括号无效
+console.log(curriedMean3()(1)()(2)()(3)); // => 2
+console.log(curriedMean3(1, 2)(3, 4)); // => 2 (第四个参数无效)
+
+
+window.name = "the window object";
+function scopeTest() {
+    console.log(this.name)
+}
+scopeTest() //  "the window object"
+var foo = {
+    name: "the foo object",
+    scopeTest: function() {
+        console.log(this.name)
+    }
+}
+foo.scopeTest() ;//  "the foo object"
+
+setTimeout(foo.scopeTest, 500);//  "the window object"
+
+setTimeout(function(){
+    foo.scopeTest();//  "the foo object"
+}, 500)
+
+Function.prototype.bind = function(object) {
+    var method = this;
+    return function() {
+        method.apply(object, arguments);
+    }
+}
+
+Function.prototype.bindAsEventListener = function(object) {
+    var method = this;
+    return function(event) {//上面的升级片，attachEvent不传参的问题
+        method.call(object, event || window.event);
+    }
+}
+setTimeout(scopeTest.bind(foo), 500);// "the foo object"
+
+Function.prototype.bind = function(scope) {
+    if (arguments.length < 2 && scope===void 0) return this;
+    var fn = this, argv = arguments;
+    return function() {
+        var a = [].splice.call(argv,0, 1, arguments);
+        console.log(a)
+        return fn.apply(scope, a );
+    };
+}
+
+var a = function(){
+
+}
+
+a.bind({},2,3)(4,5)
+
+// -> "the foo object!"
 //http://d.hatena.ne.jp/reinyannyan/20061127/p1
 //http://d.hatena.ne.jp/reinyannyan/20070116/p1
 //http://d.hatena.ne.jp/reinyannyan/20061212/p1
