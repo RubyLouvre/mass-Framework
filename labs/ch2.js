@@ -548,9 +548,6 @@ a.bind({},2,3)(4,5)
 //http://d.hatena.ne.jp/reinyannyan/20070116/p1
 //http://d.hatena.ne.jp/reinyannyan/20061212/p1
 //http://d.hatena.ne.jp/m-hiyama/20051213/1134446855
-//http://benalman.com/news/2010/09/partial-application-in-javascript/  重点
-//http://www.svendtofte.com/code/curried_javascript/ 重点
-//http://blog.jcoglan.com/2007/12/12/self-currying-javascript-functions/
-//http://www.barklund.org/blog/2008/02/06/self-partially-applying-javascript-functions/
+
 
 //http://d.hatena.ne.jp/paulownia/20120226/1330270866
