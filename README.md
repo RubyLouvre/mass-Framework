@@ -36,6 +36,7 @@ $.require("ready",function(){
 })
 </pre>
 <p>上面的代面相当于：</p>
+<pre>
 $.require("ready,node",function(){
 /*待到domReady完成，并且在node.js模块加载完毕，执行回调*/
    $("&lt;pre&gt;将日志打印到页面上&lt;/pre&gt;").appendTo("body")
