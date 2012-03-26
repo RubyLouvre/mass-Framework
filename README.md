@@ -8,7 +8,7 @@ mass Framework
 <li>核心模块， 所有位于mass-Framework/src目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
 <li>外围模块， 位于mass-Framework/src/more的JS文件。</li>
 </ol>
-<p>mass Framework的优点：</p>
+<h3>mass Framework的优点：</h3>
 <ol>
 <li>多库共存。</li>
 <li>多版本共存。</li>
@@ -26,10 +26,50 @@ mass Framework
 <li>lang模块的提供语言链对象相当于把underscore.js这个库整合进来，你能想到语言扩展都有了。</li>
 <li>API 95%与jQuery神似。</li>
 </ol>
-<p>框架的使用：</p>
+<h3>框架的使用：</h3>
+<p>点击上面的ZIP按钮将框架下载回来，然后解压取得src文件里面的JS文件，统统放到你的项目下，然后在页面上引用mass.js。</p>
+<p>一个简单的例子</p>
+<pre>
+$.require("ready",function(){//待到domReady完成，执行回调
+   $.log("将日志打印到页面上",true)
+})
+</pre>
+<p>上面的代面相当于：</p>
+$.require("ready,node",function(){//待到domReady完成，并且在node.js模块加载完毕，执行回调
+   $("<pre>将日志打印到页面上</pre>").appendTo("body")
+})
+</pre>
+<p>我们在请求node.js时，会自动加载其依赖，如lang.js,support.js,class.js,query.js,data.js等等，
+IE下还会加载lang.js，但你无需理会它是怎么处理，只需专注于你的业务逻辑就行了。</p>
+<p>如果嫌麻烦，直接像jQuery那样，不过会把许多无用的部分都加载下来了。</p>
+<pre>
+$(function(){
+  $("<pre>将日志打印到页面上</pre>").appendTo("body")
+});
+</pre>
+<p>jQuery1.7最新的API它也支持了</p>
+<pre>
+$(function(){
+ $("#dataTable tbody tr").on("click", function(event){
+	alert($(this).text());
+ });
+});
+</pre>
+<p>相比于jQuery只限于DOM的操作，mass Framework提供一个语言链对象进行链式操作</p>
+<pre>
+$.require("ready,lang",function(){
+  $.lang("aaa_bbb").toLowerCase().capitalize().camelize().
+  split("").forEach(function(){
+    $.log(s);
+  });
+});
+</pre>
+<h3>文档的使用：</h3>
+<p>还是刚才解压出来的文件夹，里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。
+</p>
 
-
-<h3>mass的合并</h3>
+<h3>mass的JS文件合并</h3>
+<p>手动方式</p>
 <ol>
 <li>将模块加载模块mass.js里面的内容先复制到一个临时文件</li>
 <li>在其最后一行"})(this,this.document);" 与倒数第二行" $.exports("$"+postfix);"插入标识模块已加域的代码。
@@ -79,11 +119,15 @@ list里面的为要合并的模块名
 //....
 })(this,this.document)
 </pre>
-<p>注意，以上合并工作已经有脚本实现了，它位于doc/public/merge.js文件之中。</p>
-<h3>如何试用mass Framework?</h3>
-<p>点上方“ZIP”按钮下载到本地，解压后里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。</p>
+<p>脚本方式</p>
+<p>位于doc/public/文件夹有个merge.js， 它需要后端<a href="http://nodejs.org/">node.js</a>的支持</p>
 
-<p>大家在github注册后,就可以在<a href="https://github.com/RubyLouvre/mass-Framework/issues">https://github.com/RubyLouvre/mass-Framework/issues</a>里面提交建议或BUG什么了.</p>
+
+<h3>BUG提交与插件的友情贡献。</h3>
+
+<p>大家在github注册后，就可以在<a href="https://github.com/RubyLouvre/mass-Framework/issues">https://github.com/RubyLouvre/mass-Framework/issues</a>里面提交建议或BUG什么了。</p>
+<p>如果是想贡献力量，可以点击最上面的Fork按钮，拷贝一份作为自己的版本，然后在里面修改代码，添加插件，写完后通知我，好让我合并到主干上。</p>
+
 <p>by 司徒正美 （zhongqincheng）</p>
 <p>2011.11.15</p>
  <a href="http://www.cnblogs.com/rubylouvre/">http://www.cnblogs.com/rubylouvre/</a>
