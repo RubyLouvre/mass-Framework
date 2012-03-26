@@ -17,8 +17,8 @@ mass Framework
 <li>操作流，一种比异步列队（Deferred）更为强大的处理异步的机制，避免回调套嵌，将串行等待变成并行等待,一处合并，多处触发。</li>
 <li>强大的类工厂。（目前版本为v9）</li>
 <li>AS3式的补帧动画系统， 还支持回放呢！</li>
-<li>CSS3 transform2D支持， 你可以轻松旋转图片角度了。</li>
-<li>全面兼容CSS3高级伪类与jQuery自定义伪类的选择器引擎。</li>
+<li>CSS3 transform2D支持， 您可以轻松旋转图片角度了。</li>
+<li>第五代选择器引擎Icarus，全面兼容CSS3高级伪类与jQuery自定义伪类的。</li>
 <li>支持事件代理，多级hook的事件系统。</li>
 <li>lang_fix模块已经为您添加上ECMA262v5的绝对大多数新API的支持，因此可能痛快使用 String.prototype.trim,
  Array.prototype.forEach, Array.prototype.map,Array.prototype.filter, Array.prototype.reduce,
@@ -38,7 +38,7 @@ $.require("ready",function(){
 <p>上面的代面相当于：</p>
 $.require("ready,node",function(){
 /*待到domReady完成，并且在node.js模块加载完毕，执行回调*/
-   $("<pre>将日志打印到页面上</pre>").appendTo("body")
+   $("&lt;pre&gt;将日志打印到页面上&lt;/pre&gt;").appendTo("body")
 })
 </pre>
 <p>我们在请求node.js时，会自动加载其依赖，如lang.js,support.js,class.js,query.js,data.js等等，
@@ -46,7 +46,7 @@ IE下还会加载lang.js，但你无需理会它是怎么处理，只需专注�
 <p>如果嫌麻烦，直接像jQuery那样，不过会把许多无用的部分都加载下来了。</p>
 <pre>
 $(function(){
-  $("<pre>将日志打印到页面上</pre>").appendTo("body")
+  $("&lt;pre&gt;将日志打印到页面上&lt;/pre&gt;").appendTo("body")
 });
 </pre>
 <p>jQuery1.7最新的API它也支持了</p>
