@@ -24,18 +24,20 @@ mass Framework
  Array.prototype.forEach, Array.prototype.map,Array.prototype.filter, Array.prototype.reduce,
  Function.prototype.bind吧 。</li>
 <li>lang模块的提供语言链对象相当于把underscore.js这个库整合进来，你能想到语言扩展都有了。</li>
-<li>API 95%与jQuery神似。</li>
+<li>API 95%与jQuery神似，学习成本极低。</li>
 </ol>
 <h3>框架的使用：</h3>
 <p>点击上面的ZIP按钮将框架下载回来，然后解压取得src文件里面的JS文件，统统放到你的项目下，然后在页面上引用mass.js。</p>
 <p>一个简单的例子</p>
 <pre>
-$.require("ready",function(){//待到domReady完成，执行回调
+$.require("ready",function(){
+/*待到domReady完成，执行回调*/
    $.log("将日志打印到页面上",true)
 })
 </pre>
 <p>上面的代面相当于：</p>
-$.require("ready,node",function(){//待到domReady完成，并且在node.js模块加载完毕，执行回调
+$.require("ready,node",function(){
+/*待到domReady完成，并且在node.js模块加载完毕，执行回调*/
    $("<pre>将日志打印到页面上</pre>").appendTo("body")
 })
 </pre>

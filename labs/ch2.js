@@ -1,3 +1,10 @@
+/*
+$.require("ready,lang",function(){
+    $.lang("aaa_bbb").toLowerCase().capitalize().camelize().
+    split("").forEach(function(){
+        $.log(s);
+    });
+});
 function ui(width, height ,top, left, color, bgcolor,name, title, content ){
     this.width = width;
     this.height = height;
@@ -55,7 +62,7 @@ function ui( hash){
     $.extend(true, this, defaults, hash || {});//深拷贝属性
 }
 
-/*
+
     animate: function( prop, speed, easing, callback ) {
         var optall = jQuery.speed( speed, easing, callback );
 
