@@ -1,7 +1,7 @@
 //=========================================
 // 模块加载模块（核心模块）2012.1.29 by 司徒正美
 //=========================================
-(function( global, DOC ){
+void function( global, DOC ){
     var
     _$ = global.$, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,''),
@@ -396,7 +396,7 @@
     $.exports( "$"+  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
-})( this, this.document );
+}( this, this.document );
 /**
  2011.7.11
 @开头的为私有的系统变量，防止人们直接调用,
