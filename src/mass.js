@@ -28,7 +28,7 @@
      */
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
-            $.require( "ready,lang,attr,event,fx", expr );
+            $.require( "ready,lang,attr,event,fx,flow", expr );
         }else{
             if( !$.fn )
                 throw "must load the 'node' module!"
