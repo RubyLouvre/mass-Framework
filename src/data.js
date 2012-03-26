@@ -26,7 +26,7 @@ $.define("data", "lang", function(){
                 }
                 return getByName ? table[ name ] : table;
             }
-        },
+        },//仅内部调用
         _data:function(target,name,data){
             return $.data(target, name, data, true)
         },
