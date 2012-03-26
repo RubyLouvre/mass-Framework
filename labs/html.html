@@ -6,13 +6,297 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
             window.onload = function(){
-               var el = document.getElementById("aa");
-               el.xxx =777;
-               alert(el.xxx)
+                var el = document.getElementById("aa");
+                el.xxx =777;
+                alert(el.xxx)
             }
         </script>
     </head>
     <body>
-    <embed src="helloworld.swf"  id="aa"></embed>
+        <ul>
+            <li>语言扩展</li>
+            <li>DOM扩展</li>
+            <li>AJAX部分</li>
+            <li>废弃部分（新版本使用其他方法实现原有功能）</li>
+        </ul>
+        <p> Prototype.js的语言扩展覆盖面非常广，包括所有基本数据类型及从语言借鉴过来的“类”。
+            其中Enumerable 只是一个普通的方法包， ObjectRange，PeriodicalExecuter，Template
+            则用Class类工厂生产出来的。Class类工厂来自社区贡献，强大无比，
+            与mootools的类工厂不相伯仲。</p>
+        <p>DOM部分分五块.dom.js花了好大劲在IE下模拟Node, Element等对象，
+            并在Element原型上进行扩展。event.js就是跨浏览器的多投事件系统与domReady，
+            在早些年先进到不得了，那个observe，fire，stopObserving的命名真是太好了。
+            form.js是专门处理表单。layout是专门处理样式。selector.js是用于关联选择器引擎，
+            现在竟然用死对头的Sizzle——shit， 真是落魄！</p>
+        <p> AJAX部分是重头戏，早期框架最大的卖点，里面N个对象都是用类工厂制造的，并存在多层的继承关系。</p>
+        <h3> mootools</h3>
+        <p>比Prototype.js的入侵性更强，但由于API设计得非常优雅，官网上一大堆优质插件， 强大的团队， 因此对没有在原型扩展的反对浪潮中没落。</p>
+        <ul>
+            <li>Core 自1.3起,所有数据类型或原生对象都封装成Type类型,Type方法可以说是其第一类工厂</li>
+            <li>Type 对Number, Object(原Hash), String, Array, Function进行扩展, 事件对象的封装</li>
+            <li>Brower 检测浏览器与OS的类型与版本, Flash版本, XMLHTTP对象的创建方法</li>
+            <li>Class 第二类工厂</li>
+            <li>Slick mootools的新一代选择器引擎</li>
+            <li>Element 对元素的创建,克隆,插入,移除,样式操作,事件绑定进行封装</li>
+            <li>Request 新据交互</li>
+            <li>Fx 动画引擎</li>
+            <li>Utilities 对cookie, domReady, JSON, Flash(Swiff)提供便捷的工具方法</li>
+        </ul>
+        <h3>RightJS</h3>
+        <p>又一个在原型上进行扩展的框架。</p>
+        <ul>
+            <li>core 提供一个类工厂, Observer类, Option对象</li>
+            <li>lang对array, function, json, math, number, object, regexp, string进行扩展与修复</li>
+            <li>dom 提供各种dom 操作, 选择器寻找, 事件绑定与代理, cookie, domReady</li>
+            <li>fx 动画引擎</li>
+            <li>xhr 数据交互</li>
+            <li>olds 对旧式IE的各种兼容</li>
+        </ul>
+
+        <h3>MochiKit</h3>
+
+        <p>一个python风格的框架</p>
+        <ul>
+            <li>Base 提供命名空间, isXXX系列, 将操作符变成函数,还有N多工具方法</li>
+            <li>Async 数据交互以及从python引进Deferred(异步列队)</li>
+            <li>Color 颜色类型转换</li>
+            <li>DOM  节点的增删改查</li>
+            <li>Format 字符串与数字的格式化</li>
+            <li>DateTime 时间的格式化</li>
+            <li>DragAndDrop 拖放组件</li>
+            <li>Iter 一系列迭代器</li>
+            <li>Logger 调试用的日志</li>
+            <li>LoggingPane Logger带UI的升级版</li>
+            <li>MochiKit 用document.write引进框架的所有JS文件</li>
+            <li>Position 取得元素位置的相关方法</li>
+            <li>Selector 选择器引擎</li>
+            <li>Signal 事件系统</li>
+            <li>Sortable 排序组件</li>
+            <li>Style 样式操作</li>
+            <li>Test 单元测试</li>
+            <li>Visual 动画引擎</li>
+        </ul>
+        <h3>Ten</h3>
+        <p>日本著名博客社区Hatena的javascript框架, 由日本顶尖高手amachang开发,核心大致于2008年完工。
+            由Prototype.js影响， 但一点侵入性也没有，是最早期以命名空间为导向的框架的典范。 </p>
+        <ul>
+            <li>Ten对象，作为框架的基点，以后所有模块作为其属性进行扩展。</li>
+            <li>Ten.Class， 类工厂， 与Prototype.js1.6引入的类工厂很像，但比它早。</li>
+            <li>Ten.Function, Ten.Array， 两个方法包，提供一些工具方法。
+                除了这两个，Ten的其他模块都是由类工厂制造出来。</li>
+            <li>Ten.JSONP，估计世界上最早装备JSONP的几个javascript框架之一了。</li>
+            <li>Ten.XHR，基于XMLHttpRequest的数据交互。</li>
+            <li>Ten.Observer，提供订阅发布机制， Prototype.js的泊来物。</li>
+            <li>Ten.Event，Ten.EventDispatcher这两个类分别对事件对象与多投事件进行封装。</li>
+            <li>Ten.DOM DOM的增删改查，里面有一个addObserver提供domReady功能。</li>
+            <li>Ten.Element 用于创建元素。</li>
+            <li>Ten.Cookie cookie的操作。</li>
+            <li>Ten.Selector Ten._Selector Ten._SelectorNode与Ten.querySelector共同构建其选择器引擎。</li>
+            <li>Ten.Color 颜色的转换。</li>
+            <li>Ten.Style 样式的设置。</li>
+            <li>Ten.Geometry 元素位置的侦测。</li>
+            <li>Ten.Position 相当于一个Point类。</li>
+            <li>Ten.Logger 日志组件。</li>
+            <li>Ten.Browser 浏览器嗅探。</li>
+            <li>Ten.Deferred 由另一个日本顶类高手cho45发明的异步列队，
+                日本人对此异步列队的密集研究讨论持续了三年多，可见这东西非常NB。</li>
+        </ul>
+        <p>mass Framework</p>
+        <p>一个模块化，以大模块开发为目标，jQuery式的框架。里面涉及的HTML5新API数量，估计除了纯净的手机框架外，无人能敌。</p>
+        <ul>
+            <li>
+                mass.js 种子模块 提供类型识别 模块加载 糅合机制 日志 高速化判定 domReady 简单的事件绑定与移除 多库共存 多版本共存。
+                别看这么多功能，其实本模块体积是非常小的。
+            </li>
+            <li>lang.js 提供几个isXXX方法，parseXXX方法，以及一个语言链对象。此对象能对字符串，数字，对象，类数组对象进行优雅的链式操作，
+                相当于把Underscore.js这个库整进去，但两者实现机理完全不一样。</li>
+            <li>lang_fix.js 补丁模块, 提供ECMA262v5大部分新API的支持, 并修复IE一些BUG。</li>
+            <li>support.js 特征嗅探</li>
+            <li>class.js  类工厂</li>
+            <li>query.js 选择器引擎， 兼容CSS3所有伪类与jQuery所有自定义伪类。</li>
+            <li>node.js 提供一个节点链对象（与jQuery对象的API 95%兼容， 像wrap等不常用方法被剔除了）</li>
+            <li>data.js 数据缓存</li>
+            <li>css.js 相当于jquery的css dimensions offset的三合一加强版，因为它支持CSS3的transform2D。 </li>
+            <li>css_fx.js 补丁模块， 将对旧式IE的兼并代码独立出去。 </li>
+            <li>target.js 对事件对象进行封装，并提供自定义事件机制。</li>
+            <li>event.js 事件绑定与事件代理。 </li>
+            <li>flow.js 操作流，提供比异步列队更强大的处理异步的机制。</li>
+            <li>attr.js 属性操作，同jQuery。</li>
+            <li>ajax 数据交互。</li>
+            <li>fx 动画引擎。</li>
+        </ul>
+        <p>像YUI，EXT，dojo，Closure这些巨无霸就不说，肯定要啥有啥。</p>
+        <p>经过细节比较，我们很易得出以下结论</p>
+        <ol>
+            <li>选择器，domReady, ajax是现代框架的标配。</li>
+            <li>动画引擎，除非你的框架像Prototype.js那样拥有像script.aculo.us这样顶级的动画框架做后盾，最好也加上。</li>
+            <li>DOM操作是重中之重，节点的遍历，样式操作，属性操作也属于它的范畴，是否细分看你框架的模块。由于完全模块化了，
+                mass Framework基至可以将旧式IRE的兼容代码独立出去。</li>
+            <li>现在主流的事件系统都支持事件代理了。</li>
+            <li>对基本数据类型的操作是必须的，像jQuery还是不得不提供trim, camelCase, each, map等方法。
+                像Prototype.js等侵入式框架可以肆无忌惮地在原型上添加camelize等好用方法。</li>
+            <li>类型的判定必须不可少，常见形式是isXXX。</li>
+            <li>brower sniff已死， feather detect当立。</li>
+            <li>异步列队等处理回调的方案的流行</li>
+        </ol>
+        hatena.
+
+
+        /*                    Popup                          */
+        function OpenWindow( url, width, height, opt , name ) {
+	window.open( url, (name || "OutsideWindow"), "width="+(width || 714)+",height="+(height || 536)+","+(opt ||  "scrollbars=yes,menubar=yes,toolbar=yes,location=yes,status=yes,resizable=yes")).focus();
+        }
+
+        /* ////////// PNG Image Support //////////////////// */
+
+        PNG = function (id,src,altsrc) {
+
+	var png = document.createElement('img');
+	png.setAttribute('id',id);
+
+	if (browser.ua.indexOf('msie 5.0') != -1) {
+
+		// WinIE 5.0 neither supports PNG images nor image opacity filters
+		// if an alternative source is provided use this and continue
+		if (altsrc != null) png.src = altsrc;
+		else return;
+
+	} else if ((browser.appN.indexOf('microsoft') != -1) && (browser.ua.indexOf('mac') == -1)) {
+
+		// WinIE 5.5+ support
+		png.src = '/images/alpha/blank.gif';
+		png.runtimeStyle.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='"+src+"',sizingMethod='scale');";
+
+	} else {
+		png.src = src;
+	}
+
+	return png;
+        }
+
+
+        Function.method('apply', function (o, a) {
+		var s = [];
+		var r, call;
+
+		if (!o) { o = window; }
+		if (!a) { a = []; }
+
+		for (var i = 0; i < a.length; i++) {
+			s[i] = "a["+i+"]";
+		}
+
+		call = "o.__applyTemp__(" + s.join(",") + ");";
+
+		o.__applyTemp__ = this;
+		r = eval(call);
+		o.__applyTemp__ = null;
+		return r;
+	});
+
+
+        Array.method('pop', function () {
+        return this.splice(this.length - 1, 1)[0];
+        });
+        }
+        if (!isFunction(Array.prototype.push)) {
+        Array.method('push', function () {
+        this.splice.apply(this,
+        [this.length, 0].concat(Array.prototype.slice.apply(arguments)));
+        return this.length;
+        });
+        }
+        if (!isFunction(Array.prototype.shift)) {
+        Array.method('shift', function () {
+        return this.splice(0, 1)[0];
+        });
+        }
+        if (!isFunction(Array.prototype.splice)) {
+        Array.method('splice', function (s, d) {
+        var max = Math.max,
+        min = Math.min,
+        a = [], // The return value array
+        e,  // element
+        i = max(arguments.length - 2, 0),   // insert count
+        k = 0,
+        l = this.length,
+        n,  // new length
+        v,  // delta
+        x;  // shift count
+
+        s = s || 0;
+        if (s < 0) {
+        s += l;
+        }
+        s = max(min(s, l), 0);  // start point
+        d = max(min(isNumber(d) ? d : l, l - s), 0);    // delete count
+        v = i - d;
+        n = l + v;
+        while (k < d) {
+        e = this[s + k];
+        if (!isUndefined(e)) {
+        a[k] = e;
+        }
+        k += 1;
+        }
+        x = l - s - d;
+        if (v < 0) {
+        k = s + i;
+        while (x) {
+        this[k] = this[k - v];
+        k += 1;
+        x -= 1;
+        }
+        this.length = n;
+        } else if (v > 0) {
+        k = 1;
+        while (x) {
+        this[n - k] = this[l - k];
+        k += 1;
+        x -= 1;
+        }
+        }
+        for (k = 0; k < i; ++k) {
+        this[s + k] = arguments[k + 2];
+        }
+        return a;
+        });
+        }
+        if (!isFunction(Array.prototype.unshift)) {
+        Array.method('unshift', function () {
+        this.splice.apply(this,
+        [0, 0].concat(Array.prototype.slice.apply(arguments)));
+        return this.length;
+        });
+        }
+        if (!isFunction(Function.call)) {
+	Function.method('call', function () {
+		var o = arguments[0], s = [];
+
+		for (var i=1, len=arguments.length; i<len; i++) {
+			s.push("arguments["+i+"]");
+		}
+
+		o.__method = this;
+		r = eval("o.__method("+s.join(",")+")");
+		o.__method = null;
+		return r;
+	});
+        }
+        if(!isFunction(Array.copy)) {
+	Array.method('copy', function () { return [].concat(this); });
+        }
+        if(!isFunction(Array.shuffle)) {
+	Array.method('shuffle', function () {
+		for(var i = this.length, n, x;
+		i;
+		n = parseInt( Math.random() * i, 0 ), /*create random whole number in array range, parseInt is about twice as fast as Math.floor*/
+		x = this[--i], /*save current object and deincrement*/
+		this[i] = this[n], /*make current object equal to the object at our random index*/
+		this[n] = x) {} /*make random object equal to current saved object*/
+
+		return this.copy(); //return a copy
+	});
+        }
 </body>
 </html>

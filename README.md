@@ -1,27 +1,34 @@
 mass Framework
 ==================
-<p>这是一个前后端一体化的javascript框架。client部分用于前端，从零开始建起，不依赖于其他框架。sever则构建在node.js，需要node.js的环境支持。<p>
-<p>前后端都是以mass.js这个“模块加载模块”为起点，利用require方法构建框架，但它们内部的实现并不一样。后端的require只是node.js 原生require方法的一层薄薄的包装，
-而前端则通过script标签在iframe沙箱环境进行加载，组装。除此之外，前端专注于DOM的操作，后端则忙碌于IO的操作。前端的操作除了事件系统，Ajax与动画系统是异步之外，都是线性的同步操作。
-后端则需要挖掘CPU的利用率，许多操作都有两套方法（同步与异步），不过异步方法更受青睐，为此，mass Framework对此发展出三种不同层次的解决方案，让用户更方便地使用异步方法。</p>
-<p>前端是从模块加载开始，通过选择器构建<em>节点链对象</em>实现jQuery式的各种操作(数据缓存，样式操作，事件绑定，ajax调用，dom操作，属性操作），许多API都与jQuery非常相近。在语言底层，通过对ecma262v5新API的检测与补丁支持确保连IE6也能使用
- String.prototype.trim, Array.prototype.forEach, Array.prototype.map,Array.prototype.filter, Array.prototype.reduce, Function.prototype.bind 等高级API，
- 享受Prototype.js那种编程快感。另，还通过$.lang(aaa)生成<em>语言链对象</em>对字符串，
-数字，数组，类数组,对象这几种数据类型提供更多便捷操作, 这在保证不污染原型的同时, 亦能够进行链式操作。</p>
-<p>在大规模开发过程，mass Framework提供以下特征确保迅敏开发：</p>
+<p>一个模块化，以大模块开发为目标，jQuery式的框架。里面涉及的HTML5新API数量，估计除了纯净的手机框架外，无人能敌。<p>
+<p>mass Framework的模块化经过一年化调整与改良，大致分为四类：</p>
+<ol>
+<li>种子模块， mass.js，最精简的内核， 包含模块加载系统。</li>
+<li>补丁模块， lang_fix.js, css_fix.js，主要是用于兼容旧式IE的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
+<li>核心模块， 所有位于mass-Framework/src目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
+<li>外围模块， 位于mass-Framework/src/more的JS文件。</li>
+</ol>
+<p>mass Framework的优点：</p>
 <ol>
 <li>多库共存。</li>
 <li>多版本共存。</li>
-<li>模块系统，将不同业务的代码封存于不同的JS文件中，确保自治，加载时能自行处理依赖关系。(目前版本为v14)</li>
-<li>模板机制，提供format，hereDoc，tag, ejs 这四种级别的字符串拼接方法（后两个是用于生成HTML代码片断）。</li>
-<li>异步列队，将一组方法延迟到末来某一时间点时执行，并能应对时间上的异常捕获。</li>
-<li>操作流，将多个相关的回调组织起来，避免回调套嵌，将串行等待变成并行等待,一处合并，多处触发。</li>
-<li>自定义事件，方便设置UI的各种行为。</li>
-<li>强大的类工厂。（目前版本为v7）</li>
-<li>AS3式的补帧动画系统。</li>
-<li>CSS3 transform2D支持。</li>
+<li>模块系统，将不同业务的代码封存于不同的JS文件中，确保自治，加载时能自行处理依赖关系。(目前版本为v15)</li>
+<li>模板机制，提供format，hereDoc，tag, ejs（v9） 这四种级别的字符串拼接方法（后两个是用于生成HTML代码片断）。</li>
+<li>操作流，一种比异步列队（Deferred）更为强大的处理异步的机制，避免回调套嵌，将串行等待变成并行等待,一处合并，多处触发。</li>
+<li>强大的类工厂。（目前版本为v9）</li>
+<li>AS3式的补帧动画系统， 还支持回放呢！</li>
+<li>CSS3 transform2D支持， 你可以轻松旋转图片角度了。</li>
+<li>全面兼容CSS3高级伪类与jQuery自定义伪类的选择器引擎。</li>
+<li>支持事件代理，多级hook的事件系统。</li>
+<li>lang_fix模块已经为您添加上ECMA262v5的绝对大多数新API的支持，因此可能痛快使用 String.prototype.trim,
+ Array.prototype.forEach, Array.prototype.map,Array.prototype.filter, Array.prototype.reduce,
+ Function.prototype.bind吧 。</li>
+<li>lang模块的提供语言链对象相当于把underscore.js这个库整合进来，你能想到语言扩展都有了。</li>
+<li>API 95%与jQuery神似。</li>
 </ol>
-<p>后端部分，核心功能是手脚架，热部署，拦截器群集，MVC，ORM。它正在编写中，前三大功能基本成型。。。。</p>
+<p>框架的使用：</p>
+
+
 <h3>mass的合并</h3>
 <ol>
 <li>将模块加载模块mass.js里面的内容先复制到一个临时文件</li>
