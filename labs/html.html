@@ -5,11 +5,18 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
-            window.onload = function(){
-                var el = document.getElementById("aa");
-                el.xxx =777;
-                alert(el.xxx)
+
+
+            var array = "abcdefghijklmnopqrstuvwxyz".split("");
+            var remove = function(el, ii, array){
+                var i = array.indexOf(el)
+                array.splice(i,1)
             }
+            for(var i = 0, n = array.length; i < n; i++){
+               
+                remove(array[i], i, array)
+            }
+            console.log(array)
         </script>
     </head>
     <body>
