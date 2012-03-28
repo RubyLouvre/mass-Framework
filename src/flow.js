@@ -1,8 +1,8 @@
 $.define("flow", function(){
     //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
-    function OperateFlow( names,callback,reload){
+    function OperateFlow(){
         this.core = {};
-        if(typeof callback == "function")
+        if(typeof arguments[1] == "function")
             this.bind.apply(this, arguments);
     }
     OperateFlow.prototype = {
