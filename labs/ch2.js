@@ -1,4 +1,5 @@
 /*
+ *http://hongru.github.com/test/qqbrowser/index.html
 //jQuery1.12 浏览器嗅侦部分
 new function() {
     var b = navigator.userAgent.toLowerCase();
