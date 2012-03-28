@@ -16,6 +16,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         DOC.unselectable = "off";
         DOC.selectstart  = null;
     };
+   // https://github.com/mozilla/BrowserQuest/ 一个游戏
     //http://madrobby.github.com/scriptaculous/draggable/
     //http://www.cnblogs.com/rubylouvre/archive/2009/09/11/1563955.html
     var defaults = {
