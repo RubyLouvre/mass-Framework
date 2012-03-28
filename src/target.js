@@ -142,7 +142,7 @@ $.define("target","data", function(){
                 type = namespace.shift();
                 namespace.sort();
             }
-            event = (typeof event == "object" && "namespace" in event)? type : new jEvent(type);
+            event = (typeof event == "object" && typeof event.namespace == "string" )? type : new jEvent(type);
             event.target = target;
             event.namespace = namespace.join( "." );
             event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
@@ -229,7 +229,7 @@ $.define("target","data", function(){
         },
 
         fix: function( event ){
-            if( !("namespace" in event) ){
+            if( typeof event.namespace != "string" ){
                 var originalEvent = event
                 event = new jEvent(originalEvent);
                 for( var prop in originalEvent ){
