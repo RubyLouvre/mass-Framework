@@ -501,7 +501,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     
     var rroot = /^(?:body|html)$/i;
     $.implement({
-        position: function() {
+        position: function() {//取得元素相对于其offsetParent的坐标
             var ret =  this.offset(), node = this[0];
             if ( node && node.nodeType ===1 ) {
                 var offsetParent = this.offsetParent(),
