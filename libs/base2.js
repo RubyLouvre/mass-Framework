@@ -1684,28 +1684,5 @@ new function(_no_shrink_) { ///////////////  BEGIN: CLOSURE  ///////////////
     lang.base = base;
     lang.extend = extend;
 
-}; ////////////////////  END: CLOSURE  ///////////////////////////////////////////////  END: CLOSURE  /////////////////////////////////////
+}; ////////////////////  END: CLOSURE  ///////////////////////////
 
-function curry(fn) {
-    if (typeof fn != 'function') {//判定传参是否为函数
-        throw new Error("The argument must be a function.");
-    }
-    if (fn.arity == 0) {//一个已经废弃的属性了，等同于 Function.prototype.length
-        throw new Error("The function must have more than one argument.");
-    }
-    //转换为文本，并抽取出所有显式定义的参数
-    var funText = fn.toString();
-    var args = /function .*\((.*)\)(.*)/.exec(funText)[1].split(', ');
-    //第一重函数的传参
-    var firstArg = args.shift();
-    //第二重函数的传参
-    var restArgs = args.join(', ');
-    //第二重函数的函数体
-    var body = funText.replace(/function .*\(.*\) /, "");
-    var curriedText =
-    "function (" + firstArg + ") {" +
-    "return function (" + restArgs + ")" + body +
-    "}";
-    eval("var curried =" + curriedText);
-    return curried;
-}

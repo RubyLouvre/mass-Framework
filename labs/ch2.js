@@ -1,10 +1,128 @@
 /*
+ *http://hongru.github.com/test/qqbrowser/index.html
+//jQuery1.12 浏览器嗅侦部分
+new function() {
+    var b = navigator.userAgent.toLowerCase();
+
+    // Figure out what browser is being used
+    jQuery.browser = {
+        safari: /webkit/.test(b),
+        opera: /opera/.test(b),
+        msie: /msie/.test(b) && !/opera/.test(b),
+        mozilla: /mozilla/.test(b) && !/(compatible|webkit)/.test(b)
+    };
+
+    // Check to see if the W3C box model is being used
+    jQuery.boxModel = !jQuery.browser.msie || document.compatMode == "CSS1Compat";
+};
+
+
+(function(){
+    // jQuery 1.1.4 - New Wave Javascript
+    // Map over jQuery in case of overwrite
+    if ( typeof jQuery != "undefined" )
+        var _jQuery = jQuery;
+
+    var jQuery = window.jQuery = function(a,c) {
+        // If the context is global, return a new object
+        if ( window == this || !this.init )
+            return new jQuery(a,c);
+
+        return this.init(a,c);
+    };
+// 略
+})();
+
+var base2 = {
+    name:    "base2",
+    version: "1.0.2",
+    exports:
+    "Base,Package,Abstract,Module,Enumerable,Map,Collection,RegGrp," +
+    "Undefined,Null,This,True,False,assignID,detect,global",
+    namespace: ""
+};
+new function(_no_shrink_) { ///////////////  BEGIN: CLOSURE  ///////////////
+    var Undefined = K(), Null = K(null), True = K(true), False = K(false), This = function(){
+        return this
+    };
+
+    var global = This();
+    var base2 = global.base2;
+   // 略
+}; ////////////////////  END: CLOSURE  ///////////////////////////
+
+function a(){}
+var b = function(){};
+
+
+var b = function(){ console.log("hack") }()// hack
+
+void function(){ console.log("hack") }();
+typeof function(){ console.log("hack") }();
+++ function(){ console.log("hack") }();
+-- function(){ console.log("hack") }();
++ function(){ console.log("hack") }();
+- function(){ console.log("hack") }();
+~ function(){ console.log("hack") }();
+! function(){ console.log("hack") }();
+
+(function(){
+    console.log("outer")
+})();
+(function(){
+    console.log("inner")
+}());
+
+1+function(){ console.log("hack")}();
+1-function(){ console.log("hack")}();
+1^function(){ console.log("hack")}();
+0,function(){ console.log("hack")}();
+1 && function(){ console.log("hack")}();
+new function(){ console.log("hack")}();
+//.....
+//要多少有多少
+
+var a = function(){
+   console.log("其他要合并的文件")
+}
+(function(){
+  console.log("jQuery")
+})()//报错 相当于对undefined进行方法调用了
+
+;;;(function( global, DOC ){
+    var
+    _$ = global.$, //保存已有同名变量
+    namespace = DOC.URL.replace( /(#.+|\W)/g,'')
+    // 模块加载模块 略
+})(this, this.document);
+*/
+function Test(a, b,c ){
+    var that = this;
+    if(! (that instanceof Test)){
+        that.init.apply( that, arguments)
+    }
+    return that;
+}
+
+Test.prototype = {
+    init: function(a, b, c){
+        this.a = a;
+        this.b = b;
+        this.c = c;
+    }
+}
+
+/*
+
 $.require("ready,lang",function(){
     $.lang("aaa_bbb").toLowerCase().capitalize().camelize().
     split("").forEach(function(){
         $.log(s);
     });
 });
+
+
+
 function ui(width, height ,top, left, color, bgcolor,name, title, content ){
     this.width = width;
     this.height = height;
