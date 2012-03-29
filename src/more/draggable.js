@@ -16,7 +16,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         DOC.unselectable = "off";
         DOC.selectstart  = null;
     };
-   // https://github.com/mozilla/BrowserQuest/ 一个游戏
+    // https://github.com/mozilla/BrowserQuest/ 一个游戏
     //http://madrobby.github.com/scriptaculous/draggable/
     //http://www.cnblogs.com/rubylouvre/archive/2009/09/11/1563955.html
     var defaults = {
@@ -33,7 +33,11 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     //  dragend: function(e, ui){}
     }
     var Draggable = $.factory({
-        inherit: Widget.Class
+        inherit: Widget.Class,
+        destroy:function(){
+            $.unbind(this.handle || this.target[0], "mousedown", this.dragstart);
+            this._super();
+        }
     });
     function getEl( el ){
         if( el ){
@@ -84,6 +88,37 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 el.bind(type, hash[type])
             }
         });
+        var target = ui.handle || el[0];
+        ui.dragstart = $.bind(target , "mousedown", function(e){
+            Draggable.dragstart.call(target, window.event || e, ui)
+        });
+    }
+    Draggable.dragstart = function(e, ui){
+        var el = this;
+        ui.offset_x = e.clientX - el.offsetLeft;
+        ui.offset_y = e.clientY - el.offsetTop;
+        el.style.cursor = "pointer";
+        if( ui.ghosting ){
+            var _ghost = el.cloneNode(false);
+            el.parentNode.insertBefore( ui._ghost,el.nextSibling );
+            if( ui.handle ){
+                var _handle = ui.handle.cloneNode(false);
+                _ghost.appendChild( _handle );
+            }
+            if($.support.cssOpacity){
+                _ghost.style.opacity = 0.5;
+            }else{
+                _ghost.style.filter = "alpha(opacity=50)";
+            }
+            _ghost.className = "mass_ghosting";
+            ui._ghost = _ghost;
+        }
+        onUnselect();
+        Draggable.ui = ui;
+        $.bind(DOC,"mousemove",Draggable.dragover);
+        $.bind(DOC,"mouseup",  Draggable.dragend);
+        fixAndDispatch(el, "dragstart", e );
+        return false;
     }
     Draggable.dragover = function(eve){
         var ui =  Draggable.ui;
