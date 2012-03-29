@@ -36,6 +36,11 @@ $.define("draggable","node,css,target",function(){
     Draggable = function(el, hash){
         var ui = this,
         container = getEl(hash.container) || $.html,
+        coffset = $(container).offset(),
+        cleft = coffset.left,
+        ctop  = coffset.top,
+        cright = cleft + container.clientWidth,
+        cbottom = ctop + container.clientHeight,
         limit = hash.limit,
         lockX = hash.lockX,
         lockY = hash.lockY,
@@ -64,12 +69,8 @@ $.define("draggable","node,css,target",function(){
             _handle = $el.find("."+handle)[0];
         }
         var dragger = _handle || el, 
-        _html = dragger.innerHTML,
-        _cCoords = $(container).offset(),
-        _cLeft = _cCoords.left,
-        _cTop = _cCoords.top,
-        _cRight = ui._cLeft + container.clientWidth,
-        _cBottom = ui._cTop + container.clientHeight;
+        _html = dragger.innerHTML
+
 
         function dragoverCallback(e) {
             e = e || window.event;
@@ -94,13 +95,13 @@ $.define("draggable","node,css,target",function(){
                 var
                 _right = _left + el.offsetWidth ,
                 _bottom = _top + el.offsetHeight,
-                _left = Math.max(_left, _cLeft);
-                _top = Math.max(_top, _cTop);
-                if(_right > _cRight){
-                    _left = _cRight - el.offsetWidth - marginLeft - marginRight;
+                _left = Math.max(_left, cleft);
+                _top = Math.max(_top, ctop);
+                if(_right > cright){
+                    _left = cright - el.offsetWidth - marginLeft - marginRight;
                 }
-                if(_bottom > _cBottom){
-                    _top = _cBottom - el.offsetHeight  - marginTop - marginBottom;
+                if(_bottom > cbottom){
+                    _top = cbottom - el.offsetHeight  - marginTop - marginBottom;
                 }
             }
             lockX && ( _left = ui.lockX);
