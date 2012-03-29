@@ -100,12 +100,17 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         ui.offset_y = e.clientY - el.offsetTop;
         el.style.cursor = "pointer";
         if( ui.ghosting ){
-            var _ghost = el.cloneNode(false);
-            el.parentNode.insertBefore( _ghost,el.nextSibling );
+            var node = ui.target[0],
+            _ghost = node.cloneNode(false);
+            node.parentNode.appendChild( _ghost );
+            $.log(_ghost)
             if( ui.handle ){
                 var _handle = ui.handle.cloneNode(false);
                 _ghost.appendChild( _handle );
             }
+            _ghost.style.top = ui.target.offset().top +"px"
+            _ghost.style.left = ui.target.offset().left +"px"
+            _ghost.style.position = "absolute"
             if($.support.cssOpacity){
                 _ghost.style.opacity = 0.5;
             }else{
@@ -182,8 +187,15 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             var el = ui.target[0];
             $.unbind( DOC,"mousemove",Draggable.dragover );
             $.unbind( DOC,"mouseup",  Draggable.dragend );
-            if( ui.ghosting ){
-                el.parentNode.removeChild( ui._ghost );
+            if( ui._ghost ){
+                try{
+                    ui._ghost.parentNode.removeChild( ui._ghost );
+                }catch(e){
+                    console.log(ui._ghost.parentNode);
+                    console.log(el.parentNode.removeChild)
+                    $.log(e)
+                }
+             
             }
             if( ui.rewind ){//是否回到原来的位置
                 el.style.left = el.lockX   + "px";
