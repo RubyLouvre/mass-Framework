@@ -4,31 +4,57 @@
     <head>
         <title>333</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <style>
-            #aaa {
-                width:100px;
-                height:100px;
-                background:red;
-            }
+        <style type="text/css">
+            .drag {width:100px;height:100px;z-index:200;}
+            #drag1 {background:red}
+            #drag2 {background:#E8D098;}
+            #drag3 {background:#fff;}
+            #drag4 {background:#E8FFE8;margin-right:2px;margin-left:10px;}
+            #drag5 {background:#ff0;}
+            #drag6 {background:#66c;}
+            #drag7 {background:#FBFBEA;}
+            #drag8 {background:#E8E8FF;}
+            #drag9 {background:#00B271;}
+            #drag10 {background:#DDF3FF;}
+            .handle {width:80px;height:20px;background:aqua;}
+            #parent {width:300px;height:300px;background:blue;}
         </style>
         <script type="text/javascript" src="../src/mass.js">
 
         </script>
         <script>
             $.require("ready,more/draggable",function(){
-                $("#aaa").draggable({
-                    dragstart:function(e){
-                        console.log(e)
-                    }
-                });
-                 $("#aaa").bind("drag", function(e,ui){
-                     this.innerHTML = ui.x+" "+ui.y
-                 })
+                var p = $("#parent");
+                // $("#drag1").draggable({coords:true,rewind:true});
+                // $("#drag2").draggable({coords:true,area:p,limit:true,lockX:true});
+                //  $("#drag3").draggable({coords:true,area:p,limit:true,lockY:true});
+                // $("#drag4").draggable({coords:true,area:p,limit:true,handle:".handle"});
+               // $("#drag5").draggable({coords:true,scroll:true});
+                $("#drag6").draggable({coords:true,ghosting:true,limit:true,handle:".handle"})
+               // $("#drag7").draggable({coords:false,handle:".handle"});
+               // $("#drag8").draggable({coords:true,dragstart:function(){this.innerHTML= "拖动开始"}});
+             //   $("#drag9").draggable({dragstart:function(){this.innerHTML= "拖动中"}});
+             //   $("#drag10").draggable({coords:false,ghosting:true,dragend:function(){this.innerHTML= "拖动结束"}});
             })
         </script>
     </head>
-    <body>
-        <div id="aaa">
+    <body id="body">
+        <p>拖动时可能被选中的文本……………………</p>
+        <div id="parent">
+            <!--  <div id="drag1" class="drag">drag1测试rewind参数</div>
+              <div id="drag2" class="drag">drag2测试锁定X轴</div>
+          <div id="drag3" class="drag">drag3测试锁定Y轴</div>
+            <div id="drag4" class="drag"><div class="handle" >handle</div>drag4测试修正margin</div>
+            <div id="drag5" class="drag">drag5测试scroll参数</div>-->
+            <div id="drag6" class="drag">
+                <div class="handle" >drag6</div>
+                <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/202906/o_tear.gif" />
+                <div>测试影子拖动</div>
+            </div>
+           <!-- <div id="drag7" class="drag"><div class="handle" >handle</div>drag7测试关闭显示坐标</div>
+            <div id="drag8" class="drag">drag8测试onStart</div>
+            <div id="drag9" class="drag">drag9测试onDrag</div>
+            <div id="drag10" class="drag"><div class="handle" >handle</div>drag10测试onEnd</div>
         </div>
     </body>
 </html>

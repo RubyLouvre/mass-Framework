@@ -11,7 +11,7 @@ $.define("uibase","class,data", function(){
                 if(typeof this[method] === "function"){
                     return this[method].apply( this, [].slice.call(arguments,1) );
                 }else{
-                    this[method] = value;
+                    return this[method] = value;
                 }
             },
             getUI: function(){

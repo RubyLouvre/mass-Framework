@@ -16,7 +16,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         DOC.unselectable = "off";
         DOC.selectstart  = null;
     };
-    // https://github.com/mozilla/BrowserQuest/ 一个游戏
     //http://madrobby.github.com/scriptaculous/draggable/
     //http://www.cnblogs.com/rubylouvre/archive/2009/09/11/1563955.html
     var defaults = {
@@ -25,8 +24,9 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         lockY:   false,//默认false。当值为true时，锁定Y轴，只允许左右移动。
         handle: false,//手柄的类，当设置了此参数后，只允许用手柄拖动元素(比如Google的个性化主页，只拖拽标题就能拖动整个方块)。
         ghosting: false,//默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
-        revert: false,//默认false。当值为true时，让拖动元素在拖动后回到原来的位置。
-        scroll: false//默认false。当值为true时，允许滚动条随拖动元素移动。
+        rewind: false,//默认false。当值为true时，让拖动元素在拖动后回到原来的位置。
+        scroll: false,//默认false。当值为true时，允许滚动条随拖动元素移动。
+        coords :false
     //  area: "",
     //  dragstart: function(e, ui){}
     //  dragover: function(e, ui){}
@@ -39,9 +39,10 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             this._super();
         }
     });
+    Draggable.z = 999;
     function getEl( el ){
         if( el ){
-            if(typeof expr == "string"){
+            if(typeof el == "string"){
                 return $( el )[0];
             }else if( el.nodeType === 1 ){
                 return el;
@@ -70,16 +71,16 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         });
         var offset = el.offset();
         ui.lockX = ui.lockX && offset.left;
-        ui.lockY = ui.lockX && offset.top;
-        ui.handle = getEl( hash.handle );
-        ui._area  = getEl( hash.area );
+        ui.lockY = ui.lockY && offset.top;
+        ui.handle = getEl( hash.handle );//手柄
+        ui._area  = getEl( hash.area );//容器
         ui.area = ui._area || $.html;//可拖的区域，必须为元素节点，是否为定位元素无所谓。
         var aoffset = $( ui.area ).offset();
         //预先求得容器的边界
         ui.aleft = aoffset.left;
         ui.atop = aoffset.top;
-        ui.aright =  ui.cleft + ui.area.clientWidth;
-        ui.abottom = ui.ctop + ui.area.clientHeight;
+        ui.aright =  ui.aleft + ui.area.clientWidth;
+        ui.abottom = ui.atop + ui.area.clientHeight;
         if(ui.scroll && ui._area){
             ui._area.style.overflow = "auto";
         }
@@ -88,9 +89,9 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 el.bind(type, hash[type])
             }
         });
-        var target = ui.handle || el[0];
-        ui.dragstart = $.bind(target , "mousedown", function(e){
-            Draggable.dragstart.call(target, window.event || e, ui)
+        var obj = ui.handle || el[0];
+        ui.dragstart = $.bind(obj , "mousedown", function(e){
+            Draggable.dragstart.call(obj, window.event || e, ui)
         });
     }
     Draggable.dragstart = function(e, ui){
@@ -100,7 +101,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         el.style.cursor = "pointer";
         if( ui.ghosting ){
             var _ghost = el.cloneNode(false);
-            el.parentNode.insertBefore( ui._ghost,el.nextSibling );
+            el.parentNode.insertBefore( _ghost,el.nextSibling );
             if( ui.handle ){
                 var _handle = ui.handle.cloneNode(false);
                 _ghost.appendChild( _handle );
@@ -115,6 +116,10 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         }
         onUnselect();
         Draggable.ui = ui;
+        var target = _ghost || el
+        if(target.style.zIndex < Draggable.z){
+            target.style.zIndex = ++Draggable.z;
+        }
         $.bind(DOC,"mousemove",Draggable.dragover);
         $.bind(DOC,"mouseup",  Draggable.dragend);
         fixAndDispatch(el, "dragstart", e );
@@ -130,7 +135,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             if( ui.scroll ){
                 var
                 doc =  ui.area || ( $.support.boxModel ? DOC.body : $.html ),
-                offset = $(el).offset(),
+                offset = ui.target.offset(),
                 a = offset.left + el.offsetWidth,
                 b = doc.clientWidth,
                 c = offset.top + el.offsetHeight,
@@ -157,14 +162,17 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             }
             if( typeof ui.lockX === "number" ){
                 _left = ui.lockX;//保持原来的数值不变
+               
             }
-            if( typeof ui.lockX === "number" ){
+            if( typeof ui.lockY === "number" ){
                 _top = ui.lockY;//保持原来的数值不变
             }
             ui.x = _left;
             ui.y = _top;
+
             (ui._ghost || el).style.left = _left + "px";
             (ui._ghost || el).style.top = _top  + "px";
+            ui.coords && (( ui.handle || ui._ghost || el).innerHTML = _left + " x " + _top);
             fixAndDispatch(el, "dragover", e );
         }
     }
@@ -177,9 +185,10 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             if( ui.ghosting ){
                 el.parentNode.removeChild( ui._ghost );
             }
-            if( ui.revert ){//是否回到原来的位置
+            if( ui.rewind ){//是否回到原来的位置
                 el.style.left = el.lockX   + "px";
                 el.style.top = el.lockY  + "px";
+             
             }else{
                 el.style.left =  (ui._ghost || el).style.left;
                 el.style.top = (ui._ghost || el).style.top;
@@ -189,36 +198,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             delete Draggable.ui;
         }
     }
-
-    $(DOC).delegate(".mass_draggable","mousedown", function(e){
-        var el = this,
-        ui = $.data( el, "_mass_draggable" );
-        ui.offset_x = e.clientX - el.offsetLeft;
-        ui.offset_y = e.clientY - el.offsetTop;
-        el.style.cursor = "pointer";
-        if( ui.ghosting ){
-            var _ghost = el.cloneNode(false);
-            el.parentNode.insertBefore( ui._ghost,el.nextSibling );
-            if( ui.handle ){
-                var _handle = ui.handle.cloneNode(false);
-                _ghost.appendChild( _handle );
-            }
-            if($.support.cssOpacity){
-                _ghost.style.opacity = 0.5;
-            }else{
-                _ghost.style.filter = "alpha(opacity=50)";
-            }
-            _ghost.className = "mass_ghosting";
-            ui._ghost = _ghost;
-        }
-        onUnselect();
-        Draggable.ui = ui;
-        $.bind(DOC,"mousemove",Draggable.dragover);
-        $.bind(DOC,"mouseup",  Draggable.dragend);
-        fixAndDispatch(el, "dragstart", e );
-        return false;
-    });
-
 
     $.fn.draggable = Widget.create("draggable", Draggable, init )
 })
