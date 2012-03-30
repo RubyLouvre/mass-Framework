@@ -145,6 +145,7 @@ void function( global, DOC ){
             if( force ){
                 $.require( "ready", function(){
                     var div =  DOC.createElement("pre");
+                    div.className = "mass_sys_log";
                     div.innerHTML = text +"";//确保为字符串
                     DOC.body.appendChild(div)
                 });
