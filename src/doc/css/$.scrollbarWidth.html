@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.scrollbarWidth</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $.require("ready,css",function(){
+                    $.log($.scrollbarWidth(), true);
+                })
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.scrollbarWidth()</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>取得当前页面原生滚动条的宽度。</p>
+        <p>它的实现是经典的隋性函数。</p>
+        <pre class="brush:js;gutter:false;toolbar:false">
+      scrollbarWidth: function (){
+            if( $.scrollbarWidth.ret ){
+                return $.scrollbarWidth.ret
+            }
+            var test =  $('&lt;div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/&gt;').appendTo("body");
+            var ret = test[0].offsetWidth - test[0].clientWidth;
+            test.remove();
+            return $.scrollbarWidth.ret = ret;
+        },
+        </pre>
+        <p>使用起来很简单</p>
+        <pre class="brush:js;gutter:false;toolbar:false">
+                $.require("ready,css",function(){
+                    $.log($.scrollbarWidth(), true);
+                })
+        </pre>
+        <button class="button" onclick="exec1()">点我，执行代码</button>
+    </article>
+</body>
+</html>
