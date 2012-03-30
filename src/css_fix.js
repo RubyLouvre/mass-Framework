@@ -103,7 +103,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         });
 
         //注意：IE滤镜和其他浏览器定义的角度方向相反
-        var r = -$.all2rad(meta.rotate),
+        var r = -$._all2rad(meta.rotate),
         cos  = Math.cos(r ), sin = Math.sin(r),
         mtx   = [ 
         cos * meta.scaleX,  sin * meta.scaleX, 0,
