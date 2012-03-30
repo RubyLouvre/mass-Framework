@@ -59,7 +59,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 delete this.selector;
             }
         },
-        mass: '1.0',
+        mass: $.mass,
         length: 0,
         valueOf: function(){
             return Array.prototype.slice.call( this );

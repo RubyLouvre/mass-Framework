@@ -150,10 +150,8 @@
 
                 menu.delegate(".menu_item", "click", function(){
                     var path = $(this).attr("path");
-                    if(/\\_|\@|map|support|memcache|adapter|Object|Array|Number|String/.test(path)){
+                    if(/\._|\\_|\@|map|support|memcache|adapter|Object|Array|Number|String/.test(path)){
                         iframe.src = "public/404.html"
-                    }else if(/\\fn/.test(path)){
-                        iframe.src = "public/fn.html"
                     }else if(path){
                         iframe.src = path
                     }
