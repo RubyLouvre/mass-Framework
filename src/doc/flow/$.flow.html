@@ -21,14 +21,36 @@
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
 
-            $.require("ready,fx,event",function(){
-                $("#sample").click(function(){
-                    if ($("#sample div").is(":hidden")) {
-                        $("#sample div").show(1500);
-                    } else {
-                        $("#sample div").hide(1000);
+            $.require("ready,event,flow",function(){
+                var keystateTime = 0, i = 0;
+                function checkInterval(){
+                    if(!keystateTime){
+                        keystateTime = new Date;
+                    }else{//用于判定按键的时间间隔，如果太慢则让玩家重来
+                        var now = new Date - keystateTime;
+                        if(now > 500){
+                            keystateTime =  0;
+                        }
                     }
-                })
+                }
+                //创建一个事件流
+                var flow = $.flow("0_115,1_100,2_102", function(){
+                    if( keystateTime){
+                        $.log("开始攻击!!!!",true);
+                        setTimeout(function(){
+                            $("body > .mass_sys_log").remove();
+                        },1500)
+                    }
+                },true);
+                $(document).keypress(function(e){
+                    checkInterval();
+                    $.log(String.fromCharCode(e.which).toUpperCase() ,true);//显示用户按下什么键
+                    flow.fire(i+"_"+e.which);
+                    i++
+                    if(i == 3 || e.which === 13  ){//按enter键重试
+                        i = 0;
+                    }
+                });
             });
 
         </script>
@@ -64,25 +86,42 @@
             <li>flow.unbind(names,fn)，移除监听，fn可选，不存在则移除names对应的所有回调。</li>
         </ul>
         <fieldset ><legend>例子</legend>
+            <p>比如一个游戏，要通过QTE来打BOSS，需要迅速地按顺序按下S，D，F键发动攻击。如果使用普通事件监听来做，就非常复杂了。</p>
+            <p>这时就需要用到操作流了。</p>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("ready,fx,event",function(){
-                    $("#sample").click(function(){
-                        if ($("#sample div").is(":hidden")) {
-                            $("#sample div").show(1500);
-                        } else {
-                            $("#sample div").hide(1000);
+            $.require("ready,event,flow",function(){
+                var keystateTime = 0, i = 0;
+                function checkInterval(){
+                    if(!keystateTime){
+                        keystateTime = new Date;
+                    }else{//用于判定按键的时间间隔，如果太慢则让玩家重来
+                        var now = new Date - keystateTime;
+                        if(now > 500){
+                            keystateTime =  0;
                         }
-                    })
+                    }
+                }
+                //创建一个事件流
+                var flow = $.flow("0_115,1_100,2_102", function(){
+                    if( keystateTime){
+                        $.log("开始攻击!!!!",true);
+                        setTimeout(function(){
+                            $("body > .mass_sys_log").remove();
+                        },1500)
+                    }
+                },true);
+                $(document).keypress(function(e){
+                    checkInterval();
+                    $.log(String.fromCharCode(e.which).toUpperCase() ,true);//显示用户按下什么键
+                    flow.fire(i+"_"+e.which);
+                    i++
+                    if(i == 3 || e.which === 13  ){//按enter键重试
+                        i = 0;
+                    }
                 });
+            });
             </pre>
-            <div id="sample">
-                Click me!
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-                <div></div>
-            </div>
+            <p>请迅速地按下S，D，F键!</p>
 
         </fieldset>
 
