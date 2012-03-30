@@ -244,7 +244,6 @@ $.define("api", function(){
             }
         },
         "数据缓存模块": {
-            "memcache": "object",
             "data": "function",
             "_data": "function",
             "removeData": "function",
@@ -311,8 +310,8 @@ $.define("api", function(){
                 "siblings": "function",
                 "contents": "function"
             },
-            "match": "function",
-            "access": "function",
+           // "match": "function",
+           // "access": "function",
             "parseHTML": "function"
         },
         "派发器模块": {
@@ -552,8 +551,8 @@ $.define("api", function(){
                 "rotate": "number"
             },
             "css": "function",
-            "all2deg": "function",
-            "all2rad": "function",
+            "_all2deg": "function",
+            "_all2rad": "function",
             "_toMatrixArray": "function",
             "_toMatrixObject": "function",
             "transform": "function"

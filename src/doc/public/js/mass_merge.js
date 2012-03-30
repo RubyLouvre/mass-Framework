@@ -2742,7 +2742,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 delete this.selector;
             }
         },
-        mass: '1.0',
+        mass: $.mass,
         length: 0,
         valueOf: function(){
             return Array.prototype.slice.call( this );
@@ -3537,7 +3537,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         });
 
         //注意：IE滤镜和其他浏览器定义的角度方向相反
-        var r = -$.all2rad(meta.rotate),
+        var r = -$._all2rad(meta.rotate),
         cos  = Math.cos(r ), sin = Math.sin(r),
         mtx   = [ 
         cos * meta.scaleX,  sin * meta.scaleX, 0,
@@ -3670,15 +3670,15 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
         },
         //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
-        all2deg : function (value) {
+        _all2deg : function (value) {
             value += "";
             return ~value.indexOf("deg") ?  parseInt(value,10):
             ~value.indexOf("grad") ?  parseInt(value,10) * 2/1.8:
             ~value.indexOf("rad") ?   parseInt(value,10) * rad2deg:
             parseFloat(value);
         },
-        all2rad :function (value){
-            return $.all2deg(value) * deg2rad;
+        _all2rad :function (value){
+            return $._all2deg(value) * deg2rad;
         },
         //将 skewx(10deg) translatex(150px)这样的字符串转换成3*2的距阵
         _toMatrixArray: function( transform ) {
@@ -3713,7 +3713,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         break;
 
                     case "rotate":
-                        val = $.all2rad( val );
+                        val = $._all2rad( val );
                         curr[0] = Math.cos( val );
                         curr[1] = Math.sin( val );
                         curr[2] = -Math.sin( val );
@@ -3735,17 +3735,17 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         break;
 
                     case "skewX":
-                        curr[2] = Math.tan( $.all2rad( val ) );
+                        curr[2] = Math.tan( $._all2rad( val ) );
                         break;
 
                     case "skewY":
-                        curr[1] = Math.tan( $.all2rad( val ) );
+                        curr[1] = Math.tan( $._all2rad( val ) );
                         break;
 
                     case "skew":
                         val = val.split(",");
-                        curr[2] = Math.tan( $.all2rad( val[0]) );
-                        val[1] && ( curr[1] = Math.tan( $.all2rad( val[1] )) );
+                        curr[2] = Math.tan( $._all2rad( val[0]) );
+                        val[1] && ( curr[1] = Math.tan( $._all2rad( val[1] )) );
                         break;
 
                     case "matrix":
@@ -3856,7 +3856,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             });
             node.style[cssTransfrom]  =
             "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
-            "rotate(" + $.all2deg( meta.rotate )  + "deg) " +
+            "rotate(" + $._all2deg( meta.rotate )  + "deg) " +
             "translate(" + meta.translateX  + "px," + meta.translateY + "px)";
         }
     }
@@ -3869,7 +3869,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             node.style[ name ] = value;
         },
         "rotate:get":function( node ){
-            return $.all2deg(($.transform(node) || {}).rotate) ;
+            return $._all2deg(($.transform(node) || {}).rotate) ;
         },
         "rotate:set":function( node, name, value){
             $.transform(node, {
@@ -4035,7 +4035,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //=======================================================
     //获取body的offset
     function getBodyOffsetNoMargin(){
-        var el = document.body, ret = parseFloat($.css(el,"margin-top"))!== el.offsetTop;
+        var el = document.body, ret = parseFloat($.css(el,"marginTop"))!== el.offsetTop;
         function getBodyOffsetNoMargin(){
             return ret;//一次之后的执行结果
         }
@@ -4188,7 +4188,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 //2011.10.20 getWH不能获取隐藏元素的BUG
 //2011.10.21 修正width height的BUG
 //2011.11.10 添加top,left到cssAdapter
-//2011.11.21 all2deg,all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
+//2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
 //2012.3.2 getWH现在能获取多重隐藏元素的高宽了
 
 

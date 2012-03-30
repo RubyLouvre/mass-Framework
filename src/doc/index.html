@@ -147,7 +147,7 @@
                     }
                 });
                 var iframe = $("#iframe")[0];
-                var rskip = /\._|\\_|\:|\@|Map|support|memcache|Adapter|Object|Array|Number|String/
+                var rskip = /\._|\\_|\:|\@|Map|Adapter|Object|Array|Number|String/
                 menu.delegate(".menu_item", "click", function(){
                     var path = $(this).attr("path");
                     if(rskip.test(path)){
