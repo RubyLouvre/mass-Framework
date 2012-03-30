@@ -24,38 +24,40 @@
 
         </script>
         <script>
-            $.require("ready,more/draggable",function(){
-                var p = $("#parent");
-                $("#drag1").draggable({coords:true,rewind:true});
-                $("#drag2").draggable({coords:true,limit:p,lockX:true});
-                $("#drag3").draggable({coords:true,limit:p,lockY:true});
-                $("#drag4").draggable({coords:true,limit:p,handle:"handle"});
-                $("#drag5").draggable({coords:true,scroll:true});
-                $("#drag6").draggable({coords:true,ghosting:true,limit:p,handle:"handle"})
-                $("#drag7").draggable({coords:false,handle:"handle"});
-                $("#drag8").draggable({coords:true,dragstart:function(){this.innerHTML= "拖动开始"}});
-                $("#drag9").draggable({dragstart:function(){this.innerHTML= "拖动中"}});
-                $("#drag10").draggable({coords:false,ghosting:true,dragend:function(){this.innerHTML= "拖动结束"}});
-            })
+            $.require("ready,event,flow",function(){
+                var keystateTime = 0, i = 0;
+                function checkInterval(){
+                    if(!keystateTime){
+                        keystateTime = new Date;
+                    }else{//用于判定按键的时间间隔，如果太慢则让玩家重来
+                        var now = new Date - keystateTime;
+                        if(now > 500){
+                            keystateTime =  0;
+                        }
+                    }
+                }
+                //创建一个事件流
+                var flow = $.flow("0_115,1_100,2_102", function(){
+                    if( keystateTime){
+                        $.log("开始攻击!!!!",true);
+                        setTimeout(function(){
+                            $("body > .mass_sys_log").remove();
+                        },1500)
+                    }
+                },true);
+                $(document).keypress(function(e){
+                    checkInterval();
+                    $.log(String.fromCharCode(e.which).toUpperCase() ,true);//显示用户按下什么键
+                    flow.fire(i+"_"+e.which);
+                    i++
+                    if(i == 3 || e.which === 13  ){//按enter键重试
+                        i = 0;
+                    }
+                });
+            });
         </script>
     </head>
-    <body id="body">
-        <p>拖动时可能被选中的文本……………………</p>
-        <div id="parent">
-            <div id="drag1" class="drag">drag1测试rewind参数</div>
-            <div id="drag2" class="drag">drag2测试锁定X轴</div>
-            <div id="drag3" class="drag">drag3测试锁定Y轴</div>
-            <div id="drag4" class="drag"><div class="handle" >handle</div>drag4测试修正margin</div>
-            <div id="drag5" class="drag">drag5测试scroll参数</div>
-            <div id="drag6" class="drag">
-                <div class="handle" >drag6</div>
-                <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/202906/o_tear.gif" />
-                <div>测试影子拖动</div>
-            </div>
-            <div id="drag7" class="drag"><div class="handle" >handle</div>drag7测试关闭显示坐标</div>
-            <div id="drag8" class="drag">drag8测试onStart</div>
-            <div id="drag9" class="drag">drag9测试onDrag</div>
-            <div id="drag10" class="drag"><div class="handle" >handle</div>drag10测试onEnd</div>
-        </div>
+    <body>
+        <p>请迅速地按下S，D，F键!</p>
     </body>
 </html>
