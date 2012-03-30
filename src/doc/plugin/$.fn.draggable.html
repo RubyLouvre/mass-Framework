@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.fn.draggable</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/switchable/switchable.css"/>
+        <style>
+            .drag {width:100px;height:100px;z-index:200;}
+            #drag1 {background:red}
+            #drag2 {background:#E8D098;}
+            #drag3 {background:#fff;}
+            #drag4 {background:#E8FFE8;margin-right:2px;margin-left:10px;}
+            #drag5 {background:#ff0;}
+            #drag6 {background:#66c;}
+            #drag7 {background:#FBFBEA;}
+            #drag8 {background:#E8E8FF;}
+            #drag9 {background:#00B271;}
+            #drag10 {background:#DDF3FF;}
+            .handle {width:80px;height:20px;background:aqua;}
+            #parent {width:400px;height:300px;background:blue;}
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,more/draggable",function(){
+                var p = $("#parent");
+                $("#drag1").draggable({coords:true,rewind:true});
+                $("#drag2").draggable({coords:true,container:p,limit:true,lockX:true});
+                $("#drag3").draggable({coords:true,container:p,limit:true,lockY:true});
+                $("#drag4").draggable({coords:true,container:p,limit:true,handle:"handle"});
+                $("#drag5").draggable({coords:true,scroll:true});
+                $("#drag6").draggable({coords:true,ghosting:true,limit:true,handle:"handle"})
+                $("#drag7").draggable({coords:false,handle:"handle"});
+                $("#drag8").draggable({coords:true,dragstart:function(){this.innerHTML= "拖动开始"}});
+                $("#drag9").draggable({dragstart:function(){this.innerHTML= "拖动中"}});
+                $("#drag10").draggable({coords:false,ghosting:true,dragend:function(){this.innerHTML= "拖动结束"}});
+            })
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.draggable(settings)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>拖动组件。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>settings</dt>
+            <dd>可选。用于配置控件对象。但当这个对象第二次调用它时，
+                只有当其第一个参数为字符串或对象才有效，这样相当于调用其方法或重写一些属性。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p><span class="stress">settings的配置参数：</span></p>
+        <ul>
+            <li>limit:规定拖动块可活动的范围。有五种情况.
+                <ul>
+                    <li>如果是一个CSS表达式，将会通过选择器引擎找到第一个符合它的那个元素节点。</li>
+                    <li>如果是一个mass的节点链对象,取得其第一个元素。</li>
+                    <li>如果是一个元素节点，不做处理。</li>
+                    <li>如果是一个包含四个数字的数组，那么它们按照CSS规则，分别代表top, left, bottom, right的坐标</li>
+                    <li>如果用户没有指定，默认为根节点document.documentElement。</li>
+                </ul>
+            </li>
+
+            <li>lockX	boolean	默认false。当值为true时，锁定X轴，只允许上下移动。</li>
+            <li>lockY	boolean	默认false。当值为true时，锁定Y轴，只允许左右移动。</li>
+
+            <li>handle	string	手柄的类名，当设置了此参数后，只允许用手柄拖动元素。</li>
+            <li>ghosting	boolean	默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
+            </li>
+            <li>rewind	boolean	默认false。当值为true时，让拖动元素在拖动后回到原来的位置。。</li>
+            <li>coords	boolean	默认false。拖动时在手柄或影子元素上显示元素的坐标。</li>
+            <li>scroll	boolean	默认false。当值为true时，允许滚动条随拖动元素移动。</li>
+            <li>dragstart	function	在拖动前鼠标按下的那一瞬执行。</li>
+            <li>dragover	function	在拖动时执行。</li>
+            <li>dragend	function	在拖动后鼠标弹起的那一瞬执行。</li>
+            <li>switch_out_args:上面动画的参数， 默认为500。</li>
+            <li>switch_in:某一面板在变成激活状态时要进行的切换动画，默认是$.fn.slideDown。</li>
+            <li>switch_in_args:上面动画的参数， 默认为500。</li>
+        </ul>
+
+        <p>生成可切换对象(switchable)默认拥有以下方法，都是使用$(expr).tabs(method,args1,args2,args3)的形式进行调用：</p>
+        <ul>
+            <li>active(index, [callback],[e]): 切换到某一面板，index为面板的序号，从零开始。callback为回调函数，e为事件对象。回调函数中的this指向事件源对象或ui.target[0], 参数为e或ui</li>
+            <li>remove(index, [callback]): 移除到某一面板，index为面板的序号，从零开始。callback为回调函数，拥有一个参数，就是实例自身, this指向ui.target[0]。</li>
+            <li>add(index, trigger, panel): 在某一切换卡之后添加一个切换卡，trigger与panel为新切换卡的按钮与面板。</li>
+            <li>destroy(): 销毁切换卡实例，移除相关事件绑定。</li>
+            <li>invoke(method, args1, args2): 如果method为实例的一个方法，则调用此方法，将其他参数传进去，否则则重写或添加相关属性。</li>
+        </ul>
+        <p>经过我的观察与研究，无论是切换卡也好，轮播也好，幻灯片也好，它们的结构都是非常相似。其中用于装载内容的面板panel是必不可少，
+            而在这些控件中，基本上都会一个触发器（trigger）与之对应，另外，在轮播控件中，切换大多数是整体向左移动或整体向上移动，这就要求有一个容器，
+            其宽等于所有面板的宽或其高等于所有面板的高，因此网上许多轮播控件都采用dl，dt，dd结构，对应我的switchable控件，分别中ui.target, ui.triggers,
+            ui.panels，其中ui是可切换对象的实例，默认类名依次是.mass_swichable, .trigger, .panel。那么对非轮播控件，ui.target在外观的构建上也不是没有用处的，
+            毕竟多一层元素，我们可以用CSS把控件打扮得更漂亮。</p>
+        <p>下面是一个典型可切换对象的HTML结构</p>
+        <pre class="brush:xml;gutter:false;toolbar:false">
+        &lt;div class="sample"&gt;
+            &lt;div class="mass_switchable"&gt;
+                &lt;div class="trigger active"&gt;标题1&lt;/div&gt;
+                &lt;div class="panel active"&gt;面板1&lt;/div&gt;
+                &lt;div class="trigger"&gt;标题2&lt;/div&gt;
+                &lt;div class="panel"&gt;面板2&lt;/div&gt;
+                &lt;div class="trigger"&gt;标题3&lt;/div&gt;
+                &lt;div class="panel"&gt;面板3&lt;/div&gt;
+                &lt;div class="trigger"&gt;标题4&lt;/div&gt;
+                &lt;div class="panel"&gt;面板4&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        </pre>
+        <p> 默认情况下，控件会在ui.parent进行事件代理（代理trigger元素上的点击事件或mouseover事件），以实现面板的切换。
+            至于这些面板怎么切换，控件提供了三个入口，
+            switch_in回调(this指向正要变成激活状态的面板),
+            switch_out回调(this指向正要失去激活状态的面板)与
+            active_callback回调(this指向可切换对象, 我们可以ui.active_index得知处于激活状态的面板的索引值, 同时也是对应触发点的索引值)
+        </p>
+        <div style="display:none">
+            http://detail.tmall.com/item.htm?spm=1103qB9o.2-v9_S.s-3vAY2l&id=12473871046
+            http://www.madeincima.it/download/samples/jquery/easyAccordion/
+        </div>
+        <fieldset><legend>切换卡</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+            .tabs {
+                border:20px solid #E9EDF1;
+                position:relative;
+                width:400px;
+                height:200px;
+                background:#fff url(tabs_header.jpg) left top no-repeat;
+                overflow:hidden;
+            }
+            .tabs .trigger{
+                float:left;
+                height:40px;
+                line-height:40px;
+                margin-left:30px;
+                width:50px;
+                text-align:center;
+                cursor: pointer;
+                color:#fff;
+                font-weight:700;
+            }
+            .tabs .trigger.active{
+                color:yellow;
+            }
+            .tabs .panel{
+                position:absolute;
+                display:none;
+                top:40px;
+                left:0px;
+                width:398px;
+                height:150px;
+                background:#fff;
+                color: #000;
+                border:1px solid #595A5A;
+                border-radius: 4px 4px 4px 4px;
+                box-shadow: 5px 1px 3px  #8493A6;
+            }
+            .tabs .panel.active{
+                display:block;
+            }
+            .tabs .panel div{
+                margin:20px;
+            }
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+                $(".tabs").switchable({
+                    data: "1234".split("").map(function(el, i){
+                        return {
+                            trigger:"标题"+ (i+1),
+                            panel:"&lt;div&gt;面板"+(i+1)+"&lt;/div&gt;"
+                        }
+                    }),
+                    switch_in: function(){
+                        this.show();
+                    },
+                    switch_out: function(){
+                        this.hide();
+                    }
+                });
+            })
+            </pre>
+            <div class="tabs">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>滑动式的切换卡</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.green{
+    position:relative;
+    height:200px;
+    width:400px;
+    background:green;
+    overflow:hidden;
+}
+.green .triggers{
+    position:absolute;
+    top:5px;
+    left:20px;
+    height:30px;
+}
+.green .trigger{
+    height:20px;
+    display:inline-block;
+    float:left;
+    line-height:20px;
+    padding:1px 10px;
+    margin-right:5px;
+    color:#000;
+    background:#00FF7F;
+    text-align:center;
+}
+.green .active.trigger{
+    padding-bottom:8px;
+    color:#fff;
+    background:#a9ea00;
+}
+.green .panel{
+    display: none;
+    position:absolute;
+    width:400px;
+    height:175px;
+    top: 30px;
+    left:0px;
+    color:#000;
+    background:#a9ea00;
+}
+.green .active.panel{
+    display:block;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+                var green = $(".green").switchable({//第一次调用tabs方法是初始化tabs对象
+                    data:[
+                        {trigger:"标题1",panel:"面板1"},
+                        {trigger:"标题2",panel:"面板2"},
+                        {trigger:"标题3",panel:"面板3"},
+                        {trigger:"标题4",panel:"面板4"}],
+                    active_event: "mouseover"
+                }).switchable("getUI");
+                $('&lt;div class="triggers"&gt;&lt;/div&gt;').appendTo(green.target).append(green.triggers);
+                green.active(2);
+            })
+            </pre>
+            <div class="green">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>垂直手风琴</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.starfish  {
+    background:#DCDCDC;
+    width: 620px;
+    height:245px;
+    overflow:hidden;
+}
+.starfish .trigger{
+    height: 30px;
+    width: 600px;
+    background: url(mass_accordion_trigger.jpg) no-repeat top right #a9d06a;
+    padding: 0 10px 0 10px;
+    line-height: 30px;
+    color: #fff;
+    font-size: 12px;
+    color: #000;
+    border-bottom: 1px solid #cde99f;
+    cursor: pointer;
+}
+.starfish .trigger.active{
+    background: url(mass_accordion_trigger_active.jpg) no-repeat top right #e0542f;
+    color: #fff;
+    border-bottom: 1px solid #f68263;
+}
+.starfish .panel {
+    width: 600px;
+    height: 100px;
+    padding: 5px 10px 15px 10px;
+    color: #444;
+    display:none;
+    overflow: hidden;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+               $(".starfish").switchable({
+                    data:[
+                        {trigger:"标题1",panel:"这是一个简单的垂直手风琴"},
+                        {trigger:"标题2",panel:"只有最基本的功能"},
+                        {trigger:"标题3",panel:"&lt;div class=content&gt;面板3&lt;/div&gt;"},
+                        {trigger:"标题4",panel:"&lt;div class=content&gt;面板4&lt;/div&gt;"}
+                    ],
+                    switch_in: $.fn.slideDown,
+                    switch_out: $.fn.slideUp
+                });
+            })
+            </pre>
+            <div class="starfish">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>水平手风琴</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.elephant{
+    width:600px;
+    height:195px;
+    padding:30px;
+    background:#fff;
+    border:1px solid #b5c9e8;
+    position:relative;
+    overflow:hidden;
+}
+/* 这里要足够宽，能装下四个trigger与一个panel!*/
+.elephant .mass_switchable{
+    width:900px;
+    height:180px;
+}
+.elephant .trigger{
+    float:left;
+    width:56px;
+    height:180px;
+    font-size:14px;
+    font-weight:bold;
+    background:#fff url(elephant_trigger.jpg) 0 0 no-repeat;
+    color:#26526c;
+    cursor:pointer;
+}
+/* 让字体垂直显示*/
+.elephant .trigger span{
+    margin-left:20px;
+    margin-top:20px;
+    width:14px;
+    display:block;
+    height:140px;
+    color:#000;
+    letter-spacing:1px;
+    word-spacing:0;
+    text-align:right;
+}
+.elephant .trigger.active{
+    cursor:pointer;
+    background:#fff url(elephant_active.jpg) 0 0 no-repeat
+}
+.elephant .trigger.active span{
+    color:#fff;
+}
+
+.elephant .panel{
+    float:left;
+    padding:25px;
+    width:320px;
+    height:130px;
+    border:1px solid #dbe9ea;
+    border-left:0;
+    margin-right:3px;
+}
+.elephant  .panel h2{
+    font-size:25px;
+    margin-top:10px;
+    margin-bottom:10px;
+    font-family:serif;
+    color:#294F88;
+}
+.elephant  .panel  p{
+    font-family:serif;
+    font-size:14px;
+    line-height:17px;
+    color:#294F88;
+}
+/* 装饰用*/
+.elephant .panel img{
+    float:right;
+    margin:0 0 0 20px;
+    position:relative;
+    top:-20px
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+                var elephant = $(".elephant").switchable({
+                    data:[
+                        {
+                            trigger:"&lt;span&gt;第一张&lt;/span&gt;",
+                            panel:'&lt;h2&gt;First mammoth here&lt;/h2&gt;&lt;p&gt;&lt;img src="elephant0.png" /&gt;Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean commodo ligula eget dolor.&lt;/p&gt;'
+                        },
+                        {
+                            trigger:"&lt;span&gt;第二张&lt;/span&gt;",
+                            panel:'&lt;h2&gt;Over the moon!&lt;/h2&gt;&lt;p&gt;&lt;img src="elephant1.png"  /&gt;Aenean commodo ligula eget dolor. Aenean massa. Nascetur aenean commodo ligula eget dolor. Aenean massa eget. &lt;/p&gt;'
+                        },
+                        {
+                            trigger:"&lt;span&gt;第三张&lt;/span&gt;",
+                            panel:'&lt;h2&gt;Another mammoth&lt;/h2&gt;&lt;p&gt;&lt;img src="elephant2.png" /&gt;Ipsum dolor sit amet.Aenean ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur.&lt;/p&gt;'
+                        },
+                        {
+                            trigger:"&lt;span&gt;第四张&lt;/span&gt;",
+                            panel: '&lt;h2&gt;This is my favourite&lt;/h2&gt;&lt;p&gt;&lt;img src="elephant3.png"  /&gt;Cum sociis natoque penatibus et donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.&lt;/p&gt;'
+                        }
+                    ],
+                    switch_in: function(){
+                        this.fx(600,{
+                            width:"show",
+                            paddigLeft:"show",
+                            paddingRight:"show"})
+                    },
+                    switch_out: function(){
+                        this.fx(600,{
+                            width:"hide",
+                            paddigLeft:"hide",
+                            paddingRight:"hide"})
+                    }
+                }).switchable("getUI")
+                elephant.target.width( elephant.panels.innerWidth()+ elephant.triggers.innerWidth() * 5 );
+                elephant.panels.not(".active").fx(10,{
+                    width:"hide",
+                    paddigLeft:"hide",
+                    paddingRight:"hide"
+                });
+            })
+            </pre>
+            <div class="elephant">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>水平轮播</legend>
+            <p>鼠标移到控件之上会出现上一页与下一页。</p>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.winnower {
+    width:536px;
+    height:265px;
+    position:relative;
+    overflow:hidden;
+    border:2px solid #000;
+}
+.winnower .mass_switchable{
+    width:3000px;/*此宽可容纳所有面板*/
+    height:270px;
+}
+/* 平铺所有面板，实现整体往左移或往右移*/
+.winnower .panel{
+    float:left;
+    display:block;
+}
+/* 设置触发点*/
+.winnower .trigger{
+    position:absolute;
+    display: block;
+    width:15px;
+    height:15px;
+    z-index:100;
+    bottom: 20px;
+}
+/* 灰色的圆点 */
+.winnower .trigger a {
+    display:block;
+    width:15px;
+    height:15px;
+    text-decoration:none;
+    outline:none;
+    background: url("winnower_s.png") no-repeat 3px -12px transparent;
+}
+/* 橙色的圆点 */
+.winnower .trigger a:hover,.winnower .trigger.active a{
+    background-position:-15px -12px;
+}
+/*上一个与下一个*/
+.winnower .arrow{
+    position:absolute;
+    display:none;
+    z-index:100;
+    width:25px;
+    height:40px;
+    top:125px;
+    background: url("winnower_s.png") no-repeat scroll -40px 0px transparent;
+}
+.winnower .prev{
+    left:5px;
+}
+.winnower .next{
+    background: url("winnower_s.png") no-repeat scroll -90px 0px transparent;
+    right:5px;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+               var winnower = $(".winnower").switchable({
+                    data: "01234".split("").map(function(el,d){
+                        return {
+                            trigger:'&lt;a href="javascript:void(0)"&gt;&lt;/a&gt;',
+                            panel:'&lt;div&gt;&lt;img src="winnower'+d+'.jpg" /&gt;&lt;/div&gt;'
+                        };
+                    }),
+                    active_callback: function(){
+                        var w = -1 * this.panels.innerWidth() * this.active_index;
+                        this.target.fx(500, {"margin-left":w }  )
+                    }
+                }).switchable("getUI");
+                /* 调整触发器的位置,向它位于控件的左下角水平排列 */
+                winnower.triggers.each(function(el, i){
+                    $(el).css( "right", 100 - i * 17);
+                });
+                /* 生成上一页与下一页按钮 */
+                var winnowerUI = winnower.parent.append('&lt;div class="next arrow" &gt;&lt;/div&gt;').append('&lt;div class="prev arrow"&gt;&lt;/div&gt;')
+                var winnowerArrow = winnowerUI.find(".arrow");
+
+                winnowerUI.mouseenter(function(){
+                    winnowerArrow.show()
+                }).mouseleave(function(){
+                    winnowerArrow.hide()
+                });
+                winnowerArrow.click(function(){
+                    var next = $(this).hasClass("next");
+                    var length = winnower.triggers.length-1
+                    var i = winnower.active_index ;
+                    if(next){
+                        var index =  i+1 &gt; length ? 0 : i+1;
+                    }else{
+                        index = i-1 &lt; 0 ? length : i-1;
+                    }
+                    winnower.active( index, winnower.active_callback )
+                });
+            })
+            </pre>
+            <div class="winnower">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>以缩略图作为触发器的水平轮播</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.imac{
+    width:640px;
+    height:545px;
+    overflow:hidden;
+    border:2px solid #5296c7;
+}
+.imac .panel{
+    float:left;
+    width:640px;
+    height:480px;
+    display:block;
+}
+.imac .trigger{
+    display:inline-block;
+    margin-top:10px;
+    margin-right:10px;
+}
+.imac .trigger img{
+    display:inline-block;
+    border:1px solid #9cf;
+}
+.imac .trigger.active img,  .imac .trigger img:hover{
+    border: 1px solid #369;
+}
+/* 让所有触发器居中对齐 */
+.imac center {
+    width:640px;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+               var imac = $(".imac").switchable({
+                    data: "0123456".split("").map(function(el,d){
+                        return {
+                            trigger:'&lt;img src="imac'+d+'.jpg" width=50 height=46 /&gt;',
+                            panel:'&lt;img src="imac'+d+'.jpg" /&gt;'
+                        }
+                    }),
+                    active_callback: function(){
+                        var w = -1 * this.panels.innerWidth() * this.active_index;
+                        this.target.fx(500, {"margin-left":w }  )
+                    }
+                }).switchable("getUI");
+                imac.target.width(imac.panels.innerWidth() * 7 );
+                $("&lt;center&gt;&lt;/center&gt;").appendTo(".imac").append(imac.triggers);
+            })
+            </pre>
+            <div class="imac">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>通过淡入淡出进行切换的水平轮播</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.fade{
+    position:relative;
+    width:478px;
+    height:286px;
+    border:1px solid #666;
+    overflow:hidden;
+}
+.fade .panel{
+    position:absolute;
+}
+.fade .triggers{
+    position:absolute;
+    bottom:0;
+    background:#000;
+    height:30px;
+    width:478px;
+    filter: Alpha(Opacity=30);
+    opacity:0.3;
+    z-index:10;
+    cursor:pointer;
+}
+.fade .trigger {
+    position:absolute;
+    width:20px;
+    height:20px;
+    bottom: 5px;
+    z-index:100;
+}
+.fade .trigger a{
+    width:20px;
+    height:20px;
+    text-align:center;
+    line-height:20px;
+    display:inline-block;
+    color:#FFF;
+    border:#e5eaff 1px solid;
+    background:#6f4f67;
+    filter: Alpha(Opacity=80);
+    opacity:0.8;
+    text-decoration:none;
+    cursor:pointer
+}
+.fade .trigger a:hover, .fade .trigger.active a{
+    background:#900;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+               var fade = $(".fade").switchable({
+                    data: "0123".split("").map(function(el,d){
+                        return {
+                            panel:'&lt;img src="fade'+d+'.jpg" /&gt;',
+                            trigger:'&lt;a href="javascript:void(0)"&gt;'+(d+1)+"&lt;/a&gt;"
+                        }
+                    }),
+                    switch_in: function(){
+                        this.fx(600,{o:1})
+                    },
+                    switch_out: function(){
+                        this.fx(600,{o:0})
+                    },
+                    interval:2000,
+                    autoplay: true,
+                    pause_over_panel:true
+                }).switchable("getUI");
+                $("&lt;div class=triggers&gt;&lt;/div&gt;").appendTo(fade.target);
+
+                fade.triggers.each(function(el, i){
+                    if( i != 0){
+                        fade.panels.eq(i).css("opacity",0)
+                    }
+                    $(el).css("right",90- i * 24)
+                });
+            });
+            </pre>
+            <div class="fade">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>触发器与面板一体化的手风琴</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+.dew {
+    position:relative;
+    width:500px;
+    height:200px;
+    overflow:hidden;
+}
+.dew .panel{
+    position:absolute;
+}
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,more/switchable",function(){
+                var dew = $(".dew").switchable({
+                    data:"012345".split("").map(function(el,d){
+                        return {
+                            panel:'&lt;div&gt;&lt;img src="../public/styles/switchable/dew'+d+'.jpg" /&gt;&lt;/div&gt;'
+                        }
+                    }),
+                    count:0
+                }).switchable("getUI");
+
+                function switchIt(e){
+                    var index = $(this).index();
+                    var width = $(this).width();
+                    dew.panels.each(function(el,i){
+                        $(el).fx(500,{
+                            left:i * 36+( i &gt; index ? width - 36: 0),
+                            after:function(){
+                                dew.count += 1;
+                                if(dew.count == 6){
+                                    dew.count = 0
+                                    setTimeout(function(){
+                                        dew.panels.one("mouseover",switchIt);
+                                    },300);
+                                }
+                            }
+                        })
+                    });
+                }
+
+                dew.panels.each(function(el, i){
+                    $(el).css("left", i * 83);
+                }).one("mouseover",switchIt);
+
+                dew.target.mouseleave(function(){
+                    dew.panels.each(function(el, i){
+                        $(el).fx(500,{
+                            left: i * 83
+                        });
+                    });
+                });
+            });
+            </pre>
+            <div class="dew">
+
+            </div>
+        </fieldset>
+        <fieldset><legend>水平跑马灯</legend>
+            <pre class="brush:css;gutter:false;toolbar:true;collapse:true;">
+          .news{
+                width:200px;
+                height:24px;
+                border:1px solid black;
+                position:relative;
+                overflow:hidden;
+            }
+            .news .panel{
+                position:absolute;
+                top: 5px;
+                width:150px;
+            }
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+
+
+            $.require("ready,more/switchable",function( ){
+                var news = $(".news").switchable({
+                    data:[
+                        {panel :'&lt;span style="color:red"&gt;这是第一条新闻&lt;/span&gt;'},
+                        {panel :'&lt;span style="color:blue"&gt;这是第二条新闻&lt;/span&gt;'},
+                        {panel :'&lt;span style="color:#9932CC"&gt;这是第三条新闻&lt;/span&gt;'},
+                    ],
+                    autoplay:true,
+                    pause_over_panel: true,
+                    interval:2200,
+                    active_callback:function(i){
+                        this.panels.fx(2000, {
+                            "left": "-=150",
+                            after:function(){
+                                if($(this).hasClass("active")){
+                                    $(this).css("left",300);
+                                }
+                            }
+                        })
+                    }
+                }).switchable("getUI");
+                news.panels.each(function(el,i){
+                    $(this).css( "left", 150 * i );
+                });
+            })
+            </pre>
+            <div class="news">
+
+            </div>
+        </fieldset>
+    </article>
+</body>
+</html>

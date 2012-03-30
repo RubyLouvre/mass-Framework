@@ -35,23 +35,32 @@ $.define("draggable","node,css,target",function(){
     }
     Draggable = function(el, hash){
         var ui = this,
-        container = getEl(hash.container) || $.html,
+        limit = hash.limit,
+        container = getEl(limit) || $.html,
+        //确定其可活动的范围
         coffset = $(container).offset(),
         cleft = coffset.left,
         ctop  = coffset.top,
         cright = cleft + container.clientWidth,
         cbottom = ctop + container.clientHeight,
-        limit = hash.limit,
+        //是否锁定它只能往某一个方向活动
         lockX = hash.lockX,
         lockY = hash.lockY,
+        //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
         ghosting = hash.ghosting,
+        //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
         handle = hash.handle,
+        //默认false。当值为true时，让拖动元素在拖动后回到原来的位置
         rewind = hash.rewind,
+        //默认false。当值为true时，允许滚动条随拖动元素移动。
         scroll = hash.scroll,
+        //默认false。拖动时在手柄或影子元素上显示元素的坐标。
         coords =  hash.coords,
+        //三个回调函数，按照HTML5原生拖放的事件名命脉名
         dragstart =  hash.dragstart || $.noop,
         dragover =  hash.dragover || $.noop,
         dragend =  hash.dragend || $.noop,
+        //当拖动元素存在margin时，其右边与下边可能会超出容器，因此我们必须取出其相应的margin
         marginLeft = parseFloat($.css(el,"marginLeft")),
         marginRight = parseFloat($.css(el,"marginRight")),
         marginTop =  parseFloat($.css(el,"marginTop")),
@@ -61,15 +70,23 @@ $.define("draggable","node,css,target",function(){
         _handle,
         _top,
         _left;
+        //保存元素的起始坐标
         ui.lockX = offset.left;
         ui.lockY = offset.top;
         ui.target = $el
         el.style.position = "absolute";
+        //修正其可活动的范围，如果传入的坐标
+        if($.type(limit, "Array") && limit.length == 4){
+            ctop  = limit[0]
+            cright = limit[1],
+            cbottom = limit[2],
+            cleft = limit[3]
+        }
         if(handle){
             _handle = $el.find("."+handle)[0];
         }
         var dragger = _handle || el, 
-        _html = dragger.innerHTML
+        _html = dragger.innerHTML;
 
 
         function dragoverCallback(e) {

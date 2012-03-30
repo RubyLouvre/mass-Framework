@@ -27,11 +27,11 @@
             $.require("ready,more/draggable",function(){
                 var p = $("#parent");
                 $("#drag1").draggable({coords:true,rewind:true});
-                $("#drag2").draggable({coords:true,container:p,limit:true,lockX:true});
-                $("#drag3").draggable({coords:true,container:p,limit:true,lockY:true});
-                $("#drag4").draggable({coords:true,container:p,limit:true,handle:"handle"});
+                $("#drag2").draggable({coords:true,limit:p,lockX:true});
+                $("#drag3").draggable({coords:true,limit:p,lockY:true});
+                $("#drag4").draggable({coords:true,limit:p,handle:"handle"});
                 $("#drag5").draggable({coords:true,scroll:true});
-                $("#drag6").draggable({coords:true,ghosting:true,limit:true,handle:"handle"})
+                $("#drag6").draggable({coords:true,ghosting:true,limit:p,handle:"handle"})
                 $("#drag7").draggable({coords:false,handle:"handle"});
                 $("#drag8").draggable({coords:true,dragstart:function(){this.innerHTML= "拖动开始"}});
                 $("#drag9").draggable({dragstart:function(){this.innerHTML= "拖动中"}});
