@@ -1,7 +1,7 @@
 //=========================================
 // 模块加载模块（核心模块）2012.1.29 by 司徒正美
 //=========================================
-(function( global, DOC ){
+void function( global, DOC ){
     var
     _$ = global.$, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,''),
@@ -28,7 +28,7 @@
      */
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
-            $.require( "ready,lang,attr,event,fx", expr );
+            $.require( "ready,lang,attr,event,fx,flow", expr );
         }else{
             if( !$.fn )
                 throw "must load the 'node' module!"
@@ -397,7 +397,7 @@
 var module_value = {
                                     state:2
                                 };
-                                var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx".match($.rword);
+                                var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx,flow".match($.rword);
                                 for(var i=0, module;module = list[i++];){
                                     mapper["@"+module] = module_value;
                                 }//=========================================
@@ -1666,7 +1666,7 @@ $.define("data", "lang", function(){
                 }
                 return getByName ? table[ name ] : table;
             }
-        },
+        },//仅内部调用
         _data:function(target,name,data){
             return $.data(target, name, data, true)
         },
@@ -4079,7 +4079,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     
     var rroot = /^(?:body|html)$/i;
     $.implement({
-        position: function() {
+        position: function() {//取得元素相对于其offsetParent的坐标
             var ret =  this.offset(), node = this[0];
             if ( node && node.nodeType ===1 ) {
                 var offsetParent = this.offsetParent(),
@@ -4753,7 +4753,7 @@ $.define("target","data", function(){
                 type = namespace.shift();
                 namespace.sort();
             }
-            event = (typeof event == "object" && "namespace" in event)? type : new jEvent(type);
+            event = (typeof event == "object" && typeof event.namespace == "string" )? type : new jEvent(type);
             event.target = target;
             event.namespace = namespace.join( "." );
             event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
@@ -4840,7 +4840,7 @@ $.define("target","data", function(){
         },
 
         fix: function( event ){
-            if( !("namespace" in event) ){
+            if( typeof event.namespace != "string" ){
                 var originalEvent = event
                 event = new jEvent(originalEvent);
                 for( var prop in originalEvent ){
@@ -5980,8 +5980,108 @@ $.define("fx", "css",function(){
 //http://kangax.github.com/fabric.js/kitchensink/
 
         
+$.define("flow", function(){
+    //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
+    function OperateFlow(){
+        this.core = {};
+        if(typeof arguments[1] == "function")
+            this.bind.apply(this, arguments);
+    }
+    OperateFlow.prototype = {
+        constructor:OperateFlow,
+        bind:function(names,callback,reload){
+            var  core = this.core, deps = {},args = [];
+            names.replace($.rword,function(name){
+                name = "####"+name
+                if(!core[name]){
+                    core[name] ={
+                        unfire : [callback],//正在等待解发的回调
+                        fired:[]//已经触发的回调
+                    }
+                }else{
+                    core[name].unfire.unshift(callback)
+                }
+                if(!deps[name]){//去重
+                    args.push(name);
+                    deps[name] = 1;
+                }
+            });
+            callback.deps = deps;
+            callback.args = args;
+            callback.reload = !!reload;//默认每次重新加载
+        },
+        unbind : function(array,fn){//$.multiUnind("aaa,bbb")
+            if(/string|number/.test(typeof array) ){
+                var tmp = []
+                (array+"").replace($.rword,function(name){
+                    tmp.push( "####"+name)
+                });
+                array = tmp;
+            }
+            var removeAll = typeof fn !== "function";
+            for(var i = 0, name ; name = array[i++];){
+                var obj = this.core[name];
+                if(obj && obj.unfire){
+                    obj.state = 1;
+                    obj.unfire = removeAll ?  [] : obj.unfire.filter(function(el){
+                        return fn != el;
+                    });
+                    obj.fired = removeAll ?  [] : obj.fired.filter(function(el){
+                        return fn != el;
+                    });
+                }
+            }
+        },
+        _args : function (arr){
+            for(var i = 0, result = [], el; el = arr[i++];){
+                result.push( this.core[el].ret);
+            }
+            return result;
+        },
+        fire : function(name, args){
+            var core = this.core, obj = core["####"+name], deps;
+            if(!obj )
+                return ;
+            obj.ret = args;
+            obj.state = 2;
+            var unfire = obj.unfire,fired = obj.fired;
+                loop:
+                for (var i = unfire.length,repeat, fn; fn = unfire[--i]; ) {
+                    deps = fn.deps;
+                    for(var key in deps){
+                        if(deps.hasOwnProperty(key) && core[key].state != 2 ){
+                            continue loop;
+                        }
+                    }
+                    unfire.splice(i,1);
+                    fired.push(fn);
+                    repeat = true;
+                }
+            if(repeat){
+                return this.fire(name, args);
+            }else{
+                for (i = fired.length; fn = fired[--i]; ) {
+                    if(fn.deps["####"+name]){//只处理相关的
+                        fn.apply(this,this._args(fn.args));
+                        if(fn.reload){//所有数据必须重新加载
+                            fired.splice(i,1);
+                            unfire.push(fn);
+                            for(key in fn.deps){
+                                core[key].state = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $.flow  = function(names,callback,reload){//一个工厂方法
+        return new OperateFlow(names,callback,reload)
+    }
+})
 
-})( this, this.document );
+
+}( this, this.document );
 /**
  2011.7.11
 @开头的为私有的系统变量，防止人们直接调用,
