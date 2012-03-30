@@ -250,9 +250,9 @@ $.define("api", function(){
             "mergeData": "function"
         },
         "节点操作模块": {
-            "inherit": "function",
-            "implement": "function",
-            "extend": "function",
+          //  "inherit": "function",
+          //  "implement": "function",
+          //  "extend": "function",
             "fn": {
                 "init": "function",
                 "mass": "string",
