@@ -65,6 +65,7 @@ $.define("draggable","node,css,target",function(){
         marginRight = parseFloat($.css(el,"marginRight")),
         marginTop =  parseFloat($.css(el,"marginTop")),
         marginBottom = parseFloat($.css(el,"marginBottom")),
+        position = $.css(el, "position"),
         $el = $(el),
         offset =  $el.offset(),
         _handle,
@@ -74,6 +75,7 @@ $.define("draggable","node,css,target",function(){
         ui.lockX = offset.left;
         ui.lockY = offset.top;
         ui.target = $el
+
         el.style.position = "absolute";
         //修正其可活动的范围，如果传入的坐标
         if($.type(limit, "Array") && limit.length == 4){
@@ -91,6 +93,11 @@ $.define("draggable","node,css,target",function(){
 
         function dragoverCallback(e) {
             e = e || window.event;
+            //            if(DOC.selection){
+            //                DOC.selection.empty()
+            //            }else{
+            //                window.getSelection().removeAllRanges();
+            //            }
             _left = e.clientX - ui.offset_x ;
             _top = e.clientY - ui.offset_y;
             if(scroll){
@@ -137,6 +144,9 @@ $.define("draggable","node,css,target",function(){
             dragger.innerHTML = _html;
             el.style.left = ui[rewind ? "lockX" : "left"]  + "px";
             el.style.top =  ui[rewind ? "lockY" : "top"]  + "px";
+            if(rewind){
+                el.style.position = position;
+            }
             offUnselect();//恢复文字被选中功能
             fixAndDispatch(el, e || event, "dragend", dragend, ui);
         }
