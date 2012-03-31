@@ -605,13 +605,7 @@ $.define("api", function(){
                 "defineEvents": "function",
                 "isLocal": "boolean"
             },
-            "XHR": {
-                "inherit": "function",
-                "implement": "function",
-                "extend": "function",
-                "_init": "object",
-                "toString": "function"
-            },
+            "XHR": "function",
             "xhr": "function"
         }
     }
