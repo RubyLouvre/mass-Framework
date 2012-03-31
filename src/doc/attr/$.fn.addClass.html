@@ -27,6 +27,39 @@
         </script>
     </head>
     <body>
+
+    <article>
+        <h3>$.fn.addClass(className)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>为每个匹配的元素添加指定的类名.</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>className</dt>
+            <dd>必需。String。如果要添加多个类名，请用空字符隔开，如'aaa bbb ccc'</dd>
+        </dl>
+        <fieldset><legend>例子</legend>
+            <div class="test">aaaaa</div>
+            <div class="test">bbbbb</div>
+            <div class="test">ccccc</div>
+
+            <pre class="brush:xml;gutter:false;toolbar:false">
+                &lt;div class="test"&gt;aaaaa&lt;/div&gt;
+                &lt;div class="test"&gt;bbbbb&lt;/div&gt;
+                &lt;div class="test"&gt;ccccc&lt;/div&gt;
+                &lt;style&gt;
+                    .selected {
+                        color:red;
+                    }
+                &lt;/style&gt;
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+      $.require("ready,attr",function(){
+          $(".test").addClass("selected");
+       });
+            </pre>
+
+            <button onclick="exec1()">点我，执行代码</button>
+        </fieldset>
         <p>下面是几种实现方式比较：</p>
         <p>正则去重</p>
         <pre class="brush:js;gutter:false;toolbar:false;">
@@ -93,38 +126,6 @@
         },
         </pre>
 
-    <article>
-        <h3>$.fn.addClass(className)</h3>
-        <p><span class="stress">描述：</span></p>
-        <p>为每个匹配的元素添加指定的类名.</p>
-        <p><span class="stress">参数：</span></p>
-        <dl>
-            <dt>className</dt>
-            <dd>必需。String。如果要添加多个类名，请用空字符隔开，如'aaa bbb ccc'</dd>
-        </dl>
-        <fieldset><legend>例子</legend>
-            <div class="test">aaaaa</div>
-            <div class="test">bbbbb</div>
-            <div class="test">ccccc</div>
-
-            <pre class="brush:xml;gutter:false;toolbar:false">
-                &lt;div class="test"&gt;aaaaa&lt;/div&gt;
-                &lt;div class="test"&gt;bbbbb&lt;/div&gt;
-                &lt;div class="test"&gt;ccccc&lt;/div&gt;
-                &lt;style&gt;
-                    .selected {
-                        color:red;
-                    }
-                &lt;/style&gt;
-            </pre>
-            <pre class="brush:javascript;gutter:false;toolbar:false">
-      $.require("ready,attr",function(){
-          $(".test").addClass("selected");
-       });
-            </pre>
-
-            <button onclick="exec1()">点我，执行代码</button>
-        </fieldset>
     </article>
 </body>
 </html>

@@ -59,12 +59,10 @@ $.define("ajax","node,target", function(){
         dataType:"text",
         jsonp: "callback"
     };
- 
+    //将data转换为字符串，type转换为大写，添加hasContent，crossDomain属性，处理url
     function setOptions( opts ) {
-        // deep mix
         opts = $.Object.merge( {}, defaults, opts );
-        //判定是否跨域
-        if (opts.crossDomain == null) {
+        if (opts.crossDomain == null) { //判定是否跨域
             var parts = rurl.exec(opts.url.toLowerCase());
             opts.crossDomain = !!( parts &&
                 ( parts[ 1 ] != ajaxLocParts[ 1 ] || parts[ 2 ] != ajaxLocParts[ 2 ] ||
@@ -73,21 +71,18 @@ $.define("ajax","node,target", function(){
                     ( ajaxLocParts[ 3 ] || ( ajaxLocParts[ 1 ] === "http:" ?  80 : 443 ) ) )
                 );
         }
-        //转换data为一个字符串
         if ( opts.data && opts.data !== "string") {
             opts.data = $.param( opts.data );
         }
         // fix #90 ie7 about "//x.htm"
         opts.url = opts.url.replace(/^\/\//, ajaxLocParts[1] + "//");
-        //type必须为大写
         opts.type = opts.type.toUpperCase();
-        opts.hasContent = !rnoContent.test(opts.type);
- 
-        if (!opts.hasContent) {//如果为GET请求,则参数依附于url上
-            if (opts.data) {
+        opts.hasContent = !rnoContent.test(opts.type);//是否为post请求
+        if (!opts.hasContent) {
+            if (opts.data) {//如果为GET请求,则参数依附于url上
                 opts.url += (rquery.test(opts.url) ? "&" : "?" ) + opts.data;
             }
-            if ( opts.cache === false ) {
+            if ( opts.cache === false ) {//添加时间截
                 opts.url += (rquery.test(opts.url) ? "&" : "?" ) + "_time=" + Date.now();
             }
         }
@@ -207,11 +202,11 @@ $.define("ajax","node,target", function(){
  
     var ajax = $.ajax = function(opts) {
         if (!opts || !opts.url) {
-            return undefined;
+            throw "参数必须为Object并且拥有url属性";
         }
         opts = setOptions(opts);//规整化参数对象
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
-        var dummyXHR = new $.jXHR(opts), dataType = opts.dataType;
+        var dummyXHR = new $.XHR(opts), dataType = opts.dataType;
  
         if(opts.form && opts.form.nodeType ==1){
             dataType = "iframe";
@@ -270,9 +265,9 @@ $.define("ajax","node,target", function(){
     $.mix(ajax, $.target);
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
-         * jXHR类,用于模拟原生XMLHttpRequest的所有行为
+         * XHR类,用于模拟原生XMLHttpRequest的所有行为
          */
-    $.jXHR = $.factory({
+    $.XHR = $.factory({
         implement:$.target,
         init:function(option){
             $.mix(this, {
@@ -290,9 +285,9 @@ $.define("ajax","node,target", function(){
                 status:0,
                 transport:null
             });
- 
             this.defineEvents("complete success error");
-            this.setOptions(option);
+            $.log(this.requestHeaders)
+            this.setOptions("options",option);//创建一个options保存原始参数
         },
  
         fire: function(type){
@@ -315,15 +310,13 @@ $.define("ajax","node,target", function(){
             return this.state === 2 ? this.responseHeadersString : null;
         },
         getResponseHeader: function(key,/*internal*/ match) {
-            if (this.state === 2) {
-                if (!this.responseHeaders) {
-                    this.responseHeaders = {};
-                    while (( match = rheaders.exec(this.responseHeadersString) )) {
-                        this.responseHeaders[ match[1] ] = match[ 2 ];
-                    }
+            if(this.responseHeadersString){//如果成功返回，这必须是一段很长的字符串
+                while (( match = rheaders.exec(this.responseHeadersString) )) {
+                    this.responseHeaders[ match[1] ] = match[ 2 ];
                 }
-                match = this.responseHeaders[ key];
+                this.responseHeadersString = ""
             }
+            match = this.responseHeaders[ key];
             return match === undefined ? null : match;
         },
         // 重写 content-type 首部
@@ -431,8 +424,7 @@ $.define("ajax","node,target", function(){
                 options = dummyXHR.options;
                 $.log("XhrTransport.sending.....");
                 if (options.crossDomain && !allowCrossDomain) {
-                    $.error("do not allow crossdomain xhr !");
-                    return;
+                    throw "do not allow crossdomain xhr !"
                 }
  
                 var nativeXHR = new $.xhr(), i;
@@ -697,6 +689,6 @@ $.define("ajax","node,target", function(){
 });
 
 //2011.8.31
-//将会传送器的abort方法上传到$.jXHR.abort去处理
+//将会传送器的abort方法上传到$.XHR.abort去处理
 //修复serializeArray的bug
 //对XMLHttpRequest.abort进行try...catch

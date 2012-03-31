@@ -605,7 +605,7 @@ $.define("api", function(){
                 "defineEvents": "function",
                 "isLocal": "boolean"
             },
-            "jXHR": {
+            "XHR": {
                 "inherit": "function",
                 "implement": "function",
                 "extend": "function",
