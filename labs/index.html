@@ -24,36 +24,19 @@
 
         </script>
         <script>
-            $.require("ready,event,flow",function(){
-                var keystateTime = 0, i = 0;
-                function checkInterval(){
-                    if(!keystateTime){
-                        keystateTime = new Date;
-                    }else{//用于判定按键的时间间隔，如果太慢则让玩家重来
-                        var now = new Date - keystateTime;
-                        if(now > 500){
-                            keystateTime =  0;
-                        }
-                    }
+            $.require("ready,ajax",function(){
+                var xhr = new XDomainRequest();//$.xhr();
+                $.log(xhr.onerror);
+                xhr.onerror = function(){
+                    alert(1)
                 }
-                //创建一个事件流
-                var flow = $.flow("0_115,1_100,2_102", function(){
-                    if( keystateTime){
-                        $.log("开始攻击!!!!",true);
-                        setTimeout(function(){
-                            $("body > .mass_sys_log").remove();
-                        },1500)
-                    }
-                },true);
-                $(document).keypress(function(e){
-                    checkInterval();
-                    $.log(String.fromCharCode(e.which).toUpperCase() ,true);//显示用户按下什么键
-                    flow.fire(i+"_"+e.which);
-                    i++
-                    if(i == 3 || e.which === 13  ){//按enter键重试
-                        i = 0;
-                    }
-                });
+                xhr.onload = function(e){
+                    console.log(e.type)
+                    console.log(xhr.responseText)
+                }
+                xhr.open("GET","http://ss-o.net/json/wedataAutoPagerize.json")
+
+                xhr.send()
             });
         </script>
     </head>
