@@ -53,6 +53,11 @@
             <li>readyState： 用于对应原生XMLHttpRequest的readyState值，可能值有0，1， 4。 </li>
             <li>status： 状态码，如200，300，304等等 </li>
             <li>responseHeaders： 将上面的responseHeadersString转换成一个对象。 </li>
+            <li>abort(statusText):中止请求，statusText在用手动中止时为“abort”,在超时时为“timeout”</li>
+            <li>callback(status, statusText) :用于触发success,error,complete等回调，status为number，状态码，
+                statusText为string，对应的扼要描述。它们会成为实例对应的属性。</li>
+
+
             <li>onComplete(fn)： 添加complete回调。 </li>
             <li>onSuccess(fn)： 添加success回调。 </li>
             <li>onError(fn)： 添加error回调。 </li>
@@ -63,16 +68,20 @@
         </ul>
         <h3>流程</h3>
         <pre class="brush:js;gutter:false;toolbar:false;">
-$.get, $.post, $.upload ->
-$.ajax ->
-原生发送器的onreadystatechange, onload, onerror ->
-模拟发送器的_callback方法 ->
-模拟XMLHttpRequest的callback方法 ->
-用户绑定的各种回调方法（error, success, complete）
-注：
-原生发送器是指XMLHttpRequest, iframe, script等对象
-模拟发送器是指mass Framework的transportContructor实例，分ajax, script, iframe三种
-模拟XMLHttpRequest是指$.XHR实例
+$.getJSON, $.getScript
+　　　↓　　　　　↓
+　　　　　　$.get        $.post   $.upload
+              ↓           ↓        ↓
+                        $.ajax
+                           ↓
+       原生发送器的onreadystatechange(), onload(), onerror()
+                           ↓
+                 transport._callback()
+                           ↓
+                     $.XHR().callback()
+                           ↓
+             用户绑定的各种回调方法（error, success, complete）
+注：原生发送器是指XMLHttpRequest, iframe, script等对象
         </pre>
     </article>
 </body>

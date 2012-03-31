@@ -344,8 +344,6 @@ $.define("ajax","node,target", function(){
              */
         callback:function(status, statusText) {
             // 只能执行一次，防止重复执行
-            // 例如完成后，调用 abort
-            // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
             if (this.state == 2) {//2:已执行回调
                 return;
             }
@@ -357,10 +355,9 @@ $.define("ajax","node,target", function(){
                     statusText = "notmodified";
                     isSuccess = true;
                 } else {
-                    var text = this.responseText, xml = this.responseXML,dataType = this.options.dataType;
                     try{
-                        $.log(text)
-                        this.responseData = converters[dataType](this, text, xml);
+                        $.log("进$.XHR().callback()")
+                        this.responseData = converters[this.options.dataType](this, this.responseText, this.responseXML);
                         statusText = "success";
                         isSuccess = true;
                         $.log("dummyXHR.callback success");
@@ -370,24 +367,24 @@ $.define("ajax","node,target", function(){
                     }
                 }
  
+            }else  if (status < 0) {
+                status = 0;
             }
-            else {
-                if (status < 0) {
-                    status = 0;
-                }
-            }
- 
             this.status = status;
             this.statusText = statusText;
             if (this.timeoutID) {
                 clearTimeout(this.timeoutID);
             }
+            // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
             if (isSuccess) {
                 this.fire("success",this.responseData,statusText);
+                ajax.fire("success");
             } else {
                 this.fire("error",this.responseData,statusText);
+                ajax.fire("error");
             }
             this.fire("complete",this.responseData,statusText);
+            ajax.fire("complete");
             this.transport = undefined;
         }
     });
@@ -532,7 +529,7 @@ $.define("ajax","node,target", function(){
             }
             //当script的资源非JS文件时,发生的错误不可捕获
             script.onerror = script.onload = script.onreadystatechange = function(e) {
-                e = e || global.event;
+                e = e || event;
                 self._callback((e.type || "error").toLowerCase());
             };
             script.src = options.url
