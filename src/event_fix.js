@@ -13,26 +13,21 @@ $.define("event_fix", !!document.dispatchEvent, function(){
     function changeNotify( e ){
         if( e.propertyName === ( changeType[ this.type ] || "value") ){
             $._data( this, "_just_changed", true );
-            fixAndDispatch( $._data( this, "publisher" ), "change", e );
+            $.event._dispatch( $._data( this, "publisher" ), "change", e );
         }
     }
     function changeFire( e ){
-        var el = this;
-        if( !$._data( el,"_just_changed" ) ){
-            fixAndDispatch( $._data( el ,"publisher"), "change", e );
+        if( !$._data( this,"_just_changed" ) ){
+            $.event._dispatch( $._data( this ,"publisher"), "change", e );
         }else{
-            $.removeData( el, "_just_changed", true );
+            $.removeData( this, "_just_changed", true );
         }
     }
     function delegate( fn ){ 
-        return function(src, selector, type, adapter){
-            adapter = $.event.eventAdapter,
-            fix = !adapter[type] || !adapter[type].check || adapter[type].check( src );
-            if( fix || selector ){
-                return fn(src, type, fix);
-            }else{
-                return false;
-            }
+        return function( src, selector, type ){
+            var adapter = $.event.eventAdapter,
+            fix = !adapter[ type ] || !adapter[ type ].check || adapter[ type ].check( src );
+            return (fix || selector) ? fn(src, type, fix) : false;
         }
     }
     var facade = $.event = {
@@ -50,7 +45,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 setup: delegate(function( src ){
                     facade.bind.call( src, "click._reset keypress._reset", function( e ) {
                         if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
-                            fixAndDispatch( [ src ], "reset", e );
+                            facade._dispatch( [ src ], "reset", e );
                         }
                     });
                 }),
@@ -64,7 +59,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                     facade.bind.call( src, "click._submit keypress._submit", function( e ) {
                         var el = e.target, type = el.type;
                         if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
-                            fixAndDispatch( [ src ], "submit", e );
+                            facade._dispatch( [ src ], "submit", e );
                         }
                     });
                 }),
@@ -88,7 +83,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                             facade.bind.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
                             if(type === "change"){
-                                $._data(src, "_change_fire",$.bind(target, "change", changeFire.bind(target, e) ))
+                                $._data(src, "_change_fire", $.bind(target, "change", changeFire.bind(target, e) ));
                             }
                         }
                     }));

@@ -53,22 +53,16 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     });
     var eventAdapter  = $.event.eventAdapter
     $.mix(facade,{
-        bind : function( types, fn, selector, times ){
+        bind : function( hash ){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
-            //把需要的数据储存到里面,而现在我们就把一个叫@events的对象储放都它里面,
-            //而这个@event的表将用来放置各种事件类型与对应的回调函数
-            var target = this, events = $._data( target) , DOM =  $[ "@target" ] in target,
-            num = times || selector, all, tns ,type, namespace, adapter, item, queue, callback
-            if(target.nodeType === 3 || target.nodeType === 8 || !types ||  !fn  || !events) return ;
-
-            selector = selector && selector.length ? selector : false;
-            var uuid =  fn.uuid || (fn.uuid = $.uuid++ );
-            all = {
-                callback: fn,
-                uuid: uuid,
-                times: num > 0 ? num : Infinity
-            } //确保UUID，bag与callback的UUID一致
-            all.callback.uuid = all.uuid;
+            //把需要的数据储存到里面,而现在我们就把一个叫events的对象储放都它里面,
+            //而这个event的表将用来放置各种事件类型与对应的回调函数
+            var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
+            types = hash.type, fn = hash.callback,selector = hash.selector, callback;
+            if(target.nodeType === 3 || target.nodeType === 8 || !events){
+                return
+            }
+            hash.uuid =  fn.uuid || (fn.uuid = $.uuid++ ); //确保UUID，bag与callback的UUID一致
             if( DOM ){ //处理DOM事件
                 callback = events.callback ||  (events.callback = function( e ) {
                     return ((e || event).type !== fireType) ? facade.dispatch.apply( callback.target, arguments ) : void 0;
@@ -78,24 +72,21 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
             events = events.events || (events.events = {});
             //对多个事件进行绑定
-            types.replace( $.rword, function(type){
-                tns = rtypenamespace.exec( type ) || [];
-                type = tns[1];//取得事件类型
-                namespace = ( tns[2] || blank ).split( "." ).sort();//取得命名空间
-                //事件冒充只用于原生事件发送器
-                adapter = DOM && eventAdapter[ type ] || {};
-                type = (selector? adapter.delegateType : adapter.bindType ) || type;
-                adapter = DOM && eventAdapter[ type ] || {};
-                item = $.mix({
+            types.replace( $.rword, function( old ){
+                var tns = rtypenamespace.exec( old ) || [];//"focusin.aaa.bbb"
+                var namespace = ( tns[2] || blank ).split( "." ).sort()//取得命名空间 "aaa.bbb"
+                var adapter = DOM && eventAdapter[ tns[1] ] || {};// focusin -> focus
+                var type = (selector ? adapter.delegateType : adapter.bindType ) || tns[1];//focus
+                var item = $.mix({}, hash, {
                     type: type,
                     origType: tns[1],
-                    selector: selector,
                     namespace: namespace.join(".")
-                }, all);
+                });
                 //创建事件队列
-                queue = events[ type ] = events[ type ] ||  [];
+                var queue = events[ type ] = events[ type ] ||  [];
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if( DOM && !queue.length  ){
+                    adapter = eventAdapter[ type ] || {};
                     if (!adapter.setup || adapter.setup( target, selector, item.origType, callback ) === false ) {
                         // 为此元素这种事件类型绑定一个全局的回调，用户的回调则在此回调中执行
                         $.bind(target, type, callback, !!selector)
@@ -104,30 +95,36 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 addCallback( queue, item );//同一事件不能绑定重复回调
             });
         },
-        unbind: function( types, fn, selector ) {
+        unbind: function( hash ) {
             var target = this, events = $._data( target, "events");
-            if(!events) return;
-            var t, tns, type, origType, namespace, origCount, DOM =  $["@target"] in target,
+            if(!events || events.events) return;
+            var types = hash.types, fn = hash.callback, selector = hash.selector,
+            tns, type, origType, namespace, origCount, DOM =  $["@target"] in target,
             j, adapter, queue, item;
+            //将types进行映射并转换为数组
             types = DOM ? (types || blank).replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
             types = (types || blank).match( $.rword ) || [];
-            for ( t = 0; t < types.length; t++ ) {
+            for (var t = 0; t < types.length; t++ ) {
                 tns = rtypenamespace.exec( types[t] ) || [];
                 type = tns[1];
                 origType = type;
                 namespace = tns[2];
                 // 如果types只包含命名空间，则去掉所有拥有此命名空间的事件类型的回调
                 if ( !type  ) {
-                    namespace = namespace? "." + namespace : "";
+                    namespace = namespace ? "." + namespace : "";
                     for ( j in events ) {
-                        facade.unbind.call( target, j + namespace, fn, selector );
+                        facade.unbind.call( target, {
+                            type: j + namespace,
+                            callback: fn,
+                            selector: selector
+                        });
                     }
                     return;
                 }
                 //如果使用事件冒充则找到其正确事件类型
                 adapter = eventAdapter[ type ] || {};
                 type = ( selector? adapter.delegateType: adapter.bindType ) || type;
-                queue = events[ type ] || [];
+                queue =  events[ type ] || [];
                 origCount = queue.length;
                 namespace = namespace ? new RegExp("(^|\\.)" + namespace.split(".").sort().join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
                 //  namespace =  namespace?  namespace.split( "." ).sort().join(".") : null;
@@ -149,7 +146,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
                 if ( DOM && (queue.length === 0 && origCount !== queue.length) ) {//如果在回调队列的长度发生变化时才进行此分支
                     if ( !adapter.teardown || adapter.teardown( target, selector, origType, fn ) === false ) {
-                        $.unbind( target, type, $._data(target,"callback") );
+                        $.unbind( target, type, $._data( target, "callback") );
                     }
                     delete events[ type ];
                 }
@@ -253,7 +250,15 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
 
             return event.result;
         },
-
+        _dispatch: function( src, type, e ){
+            e = facade.fix( e );
+            e.type = type;
+            for(var i in src){
+                if(src.hasOwnProperty(i)){
+                    facade.dispatch.call( src[ i ], e );
+                }
+            }
+        },
         fix: function( event ){
             if( typeof event.namespace != "string" ){
                 var originalEvent = event
@@ -362,33 +367,33 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    $.target = {};
+    $.target = {
+        uniqueNumber : $.uuid++,
+        defineEvents : function( names ){
+            var events = [];
+            if(typeof names == "string"){
+                events = names.match( $.rword ) || [];
+            }else if($.isArray(names)){
+                events = names;
+            }
+            events.forEach(function(name){
+                var method = 'on'+name.replace(revent,function($, $1, $2) {
+                    return $2.toUpperCase();
+                });
+                if (!(method in this)) {
+                    this[method] = function() {
+                        return this.bind.apply(this, [].concat.apply([name], arguments));
+                    };
+                }
+            },this);
+        }
+    };
     "bind,unbind,fire".replace( $.rword, function( method ){
         $.target[ method ] = function(){
-            facade [method ].apply(this, arguments);
+            $.fn[ method ].apply(this, arguments);
             return this;
         }
     });
-    $.target.uniqueNumber = $.uuid++;
-    $.target.defineEvents = function( names ){
-        var events = [];
-        if(typeof names == "string"){
-            events = names.match( $.rword ) || [];
-        }else if($.isArray(names)){
-            events = names;
-        }
-        events.forEach(function(name){
-            var method = 'on'+name.replace(revent,function($, $1, $2) {
-                return $2.toUpperCase();
-            });
-            if (!(method in this)) {
-                this[method] = function() {
-                    return this.bind.apply(this, [].concat.apply([name], arguments));
-                };
-            }
-        },this);
-    }
-
     // $.log("加载event模块成功");
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
@@ -404,17 +409,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         el = null;
         return ret;
     };
-
-
-    function fixAndDispatch( src, type, e ){
-        e = facade.fix( e );
-        e.type = type;
-        for(var i in src){
-            if(src.hasOwnProperty(i)){
-                facade.dispatch.call( src[ i ], e );
-            }
-        }
-    }
 
     //用于在标准浏览器下模拟mouseenter与mouseleave
     //现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
@@ -432,7 +426,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                                 parent = parent.parentNode;
                             }
                             if ( parent !== src ) {
-                                fixAndDispatch( [ src ], orig, e );
+                                facade._dispatch( [ src ], orig, e );
                             }
                         } catch(err) { };
                     }));
@@ -450,9 +444,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             var notice = 0, focusinNotify = function (e) {
                 var src = e.target
                 do{//模拟冒泡
-                    var events = $._data( src,"events");
+                    var events = $._data( src, "events" );
                     if(events && events[$1]){
-                        fixAndDispatch( [ src ], $1, e );
+                        facade._dispatch( [ src ], $1, e );
                     }
                 } while (src = src.parentNode );
             }
@@ -507,59 +501,84 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         hover: function( fnIn, fnOut ) {
             return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
         },
-        on: function( types, fn, selector, times ) {
-            if ( typeof types === "object" ) {
-                for (var type in types ) {
-                    this.on( type,  types[ type ], selector, times );
-                }
-                return this;
-            }
-            if(!types || !fn){//必须指定事件类型与回调
-                return this;
-            }
-            return this.each( function() {//转交dispatch模块去处理
-                facade.bind.call( this, types, fn, selector, times );
-            });
-        },
-        off: function( types, fn ) {
+        on: function( types, selector, fn, times ) {
+            //要处理times 与 selector不存在的情况
             if ( typeof types === "object" ) {
                 for ( var type in types ) {
-                    this.off( type,types[ type ], fn  );
+                    this.on( type, selector, types[ type ], fn );
                 }
                 return this;
             }
-            var args = arguments
-            return this.each(function() {
-                facade.unbind.apply( this, args );
+            var hash = {};
+            for(var i = 0 ; i < arguments.length; i++ ){
+                var el = arguments[i];
+                if(typeof el == "number"){
+                    hash.times = el
+                }else if(typeof el == "function"){
+                    hash.callback = el
+                }if(typeof el === "string"){
+                    if(hash.type){
+                        hash.selector = el.trim()
+                    }else{
+                        hash.type = el.trim()
+                    }
+                }
+            }
+            if( !hash.type || !hash.callback ){//必须指定事件类型与回调
+                return this;
+            }
+            hash.times = hash.times > 0  ? hash.times : Infinity;
+            hash.selector =  hash.selector ? quickParse( hash.selector ) : false
+            return this.each( function() {//转交dispatch模块去处理
+                facade.bind.call( this, hash );
             });
         },
-        one: function( types, fn ) {
-            return this.on(  types, fn, null, 1 );
+        delegate: function( selector, types, fn, times ) {
+            return this.on( types, selector, fn, times);
+        },
+        live: function( types, fn, times ) {
+            $( this.ownerDocument ).on( types, this.selector, fn, times );
+            return this;
         },
         bind: function( types, fn, times ) {
             return this.on( types, fn, times );
         },
-        unbind: function( types, fn ) {
-            return this.off( types, fn );
+        one: function( types, fn ) {
+            return this.on( types, fn, 1 );
         },
-
-        live: function( types,  fn, times ) {
-            $( this.ownerDocument ).on( types, fn, this.selector,times );
-            return this;
-        },
-        die: function( types, fn ) {
-            $( this.ownerDocument ).off( types, fn, this.selector || "**" );
-            return this;
+        off: function( types, selector, fn ) {
+            if ( typeof types === "object" ) {
+                for ( var type in types ) {
+                    this.off( type, selector, types[ type ] );
+                }
+                return this;
+            }
+            var hash = {};
+            for(var i = 0 ; i < arguments.length; i++ ){
+                var el = arguments[i];
+                if(typeof el == "function"){
+                    hash.callback = el;
+                }if(typeof el === "string"){
+                    if(hash.type){
+                        hash.selector = el.trim();
+                    }else{
+                        hash.type = el.trim();
+                    }
+                }
+            }
+            return this.each(function() {
+                facade.unbind.call( this, hash );
+            });
         },
         undelegate: function( selector, types, fn ) {
             return arguments.length == 1? this.off( selector, "**" ) : this.off( types, fn, selector );
         },
-
-        delegate: function( selector, types, fn, times ) {
-            if(typeof selector === "string"){
-                selector = quickParse( selector ) || selector;
-            }
-            return this.on( types, fn, selector, times );
+        die: function( types, fn ) {
+            $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
+            return this;
+        },
+        unbind: function( types, fn ) {
+            return this.off( types, fn );
         },
         fire: function(  ) {
             var args = arguments;
