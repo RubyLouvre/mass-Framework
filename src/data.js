@@ -77,7 +77,8 @@ $.define("data", "lang", function(){
                     neoData.events = {};
                     for ( var type in events ) {
                         for (var i = 0, obj ; obj =  events[ type ][i++]; ) {
-                            $.event.bind.call( neo, type + ( obj.namespace ? "." : "" ) + obj.namespace, obj.handler, obj.selector, obj.times );
+                           // console.log(obj)
+                            $.event.bind.call( neo, obj );
                         }
                     }
                 }
