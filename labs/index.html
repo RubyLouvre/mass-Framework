@@ -5,42 +5,31 @@
         <title>draggable</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style type="text/css">
-            .drag {width:100px;height:100px;z-index:200;}
-            #drag1 {background:red}
-            #drag2 {background:#E8D098;}
-            #drag3 {background:#fff;}
-            #drag4 {background:#E8FFE8;margin-right:2px;margin-left:10px;}
-            #drag5 {background:#ff0;}
-            #drag6 {background:#66c;}
-            #drag7 {background:#FBFBEA;}
-            #drag8 {background:#E8E8FF;}
-            #drag9 {background:#00B271;}
-            #drag10 {background:#DDF3FF;}
-            .handle {width:80px;height:20px;background:aqua;}
-            #parent {width:300px;height:300px;background:blue;}
-            .mass_ghosting {background:black;}
+            div {
+                width:200px;
+                height:400px;
+                background:blue;
+            }
         </style>
         <script type="text/javascript" src="../src/mass.js">
 
         </script>
         <script>
-            $.require("ready,ajax",function(){
-                var xhr = new XDomainRequest();//$.xhr();
-                $.log(xhr.onerror);
-                xhr.onerror = function(){
-                    alert(1)
-                }
-                xhr.onload = function(e){
-                    console.log(e.type)
-                    console.log(xhr.responseText)
-                }
-                xhr.open("GET","http://ss-o.net/json/wedataAutoPagerize.json")
+            $.require("ready,event",function(){
+                // $("body").click(function(){
+                //     alert("22222222")
+                //  })
+                $("body").delegate("p","click",function(){
+                    alert("event delegate")
+                })
 
-                xhr.send()
             });
         </script>
     </head>
     <body>
         <p>请迅速地按下S，D，F键!</p>
+        <div>
+
+        </div>
     </body>
 </html>

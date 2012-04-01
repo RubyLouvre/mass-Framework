@@ -1,12 +1,7 @@
-//http://davidwalsh.name/snackjs
-//http://microjs.com/
-//http://westcoastlogic.com/lawnchair/
-//https://github.com/madrobby/emile
-//http://www.bobbyvandersluis.com/articles/clientside_scripting/
 //==========================================
 //  事件模块（包括伪事件对象，事件绑定与事件代理）
 //==========================================
-$.define("event", "node,target",function(){
+$.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     // $.log("已加载target模块")
     var fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
@@ -29,9 +24,35 @@ $.define("event", "node,target",function(){
             (!m[2] || (attrs.id || {}).value === m[2]) &&
             (!m[3] || m[3].test( (attrs[ "class" ] || {}).value ))
             );
-    };
-    $.eventAdapter = {};
-    var facade = $.event = {
+    }
+    //如果不存在添加一个
+    var facade = $.event = $.event || {};
+    //添加或增强二级属性eventAdapter
+    $.Object.merge(facade,{
+        eventAdapter:{
+            focus: {
+                delegateType: "focusin"
+            },
+            blur: {
+                delegateType: "focusout"
+            },
+            beforeunload: {
+                setup: function(src, _, _, fn ) {
+                    // We only want to do this special case on windows
+                    if ( $.type(src, "Window") ) {
+                        src.onbeforeunload = fn;
+                    }
+                },
+                teardown: function( src, _, _, fn ) {
+                    if ( src.onbeforeunload === fn ) {
+                        src.onbeforeunload = null;
+                    }
+                }
+            }
+        }
+    });
+    var eventAdapter  = $.event.eventAdapter
+    $.mix(facade,{
         bind : function( types, fn, selector, times ){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
             //把需要的数据储存到里面,而现在我们就把一个叫@events的对象储放都它里面,
@@ -62,9 +83,9 @@ $.define("event", "node,target",function(){
                 type = tns[1];//取得事件类型
                 namespace = ( tns[2] || blank ).split( "." ).sort();//取得命名空间
                 //事件冒充只用于原生事件发送器
-                adapter = DOM && $.eventAdapter[ type ] || {};
+                adapter = DOM && eventAdapter[ type ] || {};
                 type = (selector? adapter.delegateType : adapter.bindType ) || type;
-                adapter = DOM && $.eventAdapter[ type ] || {};
+                adapter = DOM && eventAdapter[ type ] || {};
                 item = $.mix({
                     type: type,
                     origType: tns[1],
@@ -104,7 +125,7 @@ $.define("event", "node,target",function(){
                     return;
                 }
                 //如果使用事件冒充则找到其正确事件类型
-                adapter = $.eventAdapter[ type ] || {};
+                adapter = eventAdapter[ type ] || {};
                 type = ( selector? adapter.delegateType: adapter.bindType ) || type;
                 queue = events[ type ] || [];
                 origCount = queue.length;
@@ -282,7 +303,7 @@ $.define("event", "node,target",function(){
                     if ("wheelDelta" in originalEvent){
                         var delta = originalEvent.wheelDelta/120;
                         //opera 9x系列的滚动方向与IE保持一致，10后修正
-                        if(window.opera && window.opera.version() < 10)
+                        if(top.opera && opera.version() < 10)
                             delta = -delta;
                         event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
                     }else if("detail" in originalEvent){
@@ -296,7 +317,7 @@ $.define("event", "node,target",function(){
             }
             return event;
         }
-    }
+    });
 
     var jEvent = $.Event = function ( event ) {
         this.originalEvent = event.substr ? {} : event;
@@ -368,7 +389,6 @@ $.define("event", "node,target",function(){
         },this);
     }
 
-
     // $.log("加载event模块成功");
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
@@ -385,30 +405,6 @@ $.define("event", "node,target",function(){
         return ret;
     };
 
-    var facade = $.event,
-
-    adapter = $.eventAdapter = {
-        focus: {
-            delegateType: "focusin"
-        },
-        blur: {
-            delegateType: "focusout"
-        },
-
-        beforeunload: {
-            setup: function(src, _, _, fn ) {
-                // We only want to do this special case on windows
-                if ( $.type(src, "Window") ) {
-                    src.onbeforeunload = fn;
-                }
-            },
-            teardown: function( src, _, _, fn ) {
-                if ( src.onbeforeunload === fn ) {
-                    src.onbeforeunload = null;
-                }
-            }
-        }
-    };
 
     function fixAndDispatch( src, type, e ){
         e = facade.fix( e );
@@ -427,7 +423,7 @@ $.define("event", "node,target",function(){
     //http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
     if( !+"\v1" || !$.eventSupport("mouseenter")){
         "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_,orig, fix){
-            adapter[ orig ]  = {
+            eventAdapter[ orig ]  = {
                 setup: function( src ){//使用事件冒充
                     $._data( src, orig+"_handle", $.bind( src, fix, function( e ){
                         var parent = e.relatedTarget;
@@ -460,7 +456,7 @@ $.define("event", "node,target",function(){
                     }
                 } while (src = src.parentNode );
             }
-            adapter[ $1 ] = {
+            eventAdapter[ $1 ] = {
                 setup: function( ) {
                     if ( notice++ === 0 ) {
                         document.addEventListener( $2, focusinNotify, true );
@@ -475,16 +471,16 @@ $.define("event", "node,target",function(){
         });
     }
     try{
-        //FF3使用DOMMouseScroll代替标准的mousewheel事件
+        //FF需要用DOMMouseScroll事件模拟mousewheel事件
         document.createEvent("MouseScrollEvents");
-        adapter.mousewheel = {
+        eventAdapter.mousewheel = {
             bindType    : "DOMMouseScroll",
             delegateType: "DOMMouseScroll"
         }
         try{
             //可能末来FF会支持标准的mousewheel事件，则需要删除此分支
             document.createEvent("WheelEvent");
-            delete adapter.mousewheel;
+            delete eventAdapter.mousewheel;
         }catch(e){};
     }catch(e){};
     //当一个元素，或者其内部任何一个元素获得焦点的时候会触发这个事件。
@@ -579,26 +575,25 @@ $.define("event", "node,target",function(){
         }
     });
 });
-//2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
-//2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
-//2011.11.23 简化rquickIs
-//2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
-//2012.2.8 添加mouseenter的分支判定，增强eventSupport
-//2012.2.9 完美支持valuechange事件
-//1. 各浏览器兼容                  2. this指针指向兼容                  3. event参数传递兼容.
 
 //2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
 //2011.9.17 事件发送器增加一个uniqueID属性
 //2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
 //2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
 //2011.9.29 简化bind与unbind
-//2011.10.13 模块名改为dispatcher
+//2011.10.13 emit模块更名dispatcher 模块 升级为v2
 //2011.10.23 简化facade.handle与fire
-//2011.10.26 更改命名空间的检测方法
+//2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
+//2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
+//2011.11.23 简化rquickIs
 //2011.11.23 重构facade.fix与quickIs
 //2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
 //2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
-//2011.10.13 模块名改为target
+//2012.1.13 dispatcher模块更名target模块 升级为v3
+//2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
+//2012.2.8 添加mouseenter的分支判定，增强eventSupport
+//2012.2.9 完美支持valuechange事件
+//2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
 
 
 
