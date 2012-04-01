@@ -1,5 +1,5 @@
 //数据交互模块
-$.define("ajax","node,target", function(){
+$.define("ajax","event", function(){
     //$.log("已加载ajax模块");
     var global = this, DOC = global.document, r20 = /%20/g,
     rCRLF = /\r?\n/g,
