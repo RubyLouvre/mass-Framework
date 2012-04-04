@@ -515,8 +515,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             var nodeName = clone.nodeName.toLowerCase();
             //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
             clone.clearAttributes();
-            //复制原对象的属性到克隆体中,但不包含原来的事件
-            clone.mergeAttributes( src );
+            //复制原对象的属性到克隆体中,但不包含原来的事件, ID,  NAME, uniqueNumber
+            clone.mergeAttributes( src,false );
             //IE6-8无法复制其内部的元素
             if ( nodeName === "object" ) {
                 clone.outerHTML = src.outerHTML;
