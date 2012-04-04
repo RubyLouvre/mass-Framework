@@ -62,7 +62,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             if(target.nodeType === 3 || target.nodeType === 8 || !events){
                 return
             }
-            hash.uuid =  fn.uuid || (fn.uuid = $.uuid++ ); //确保UUID，bag与callback的UUID一致
+            hash.uuid =  $.getUid(fn); //确保UUID，bag与callback的UUID一致
           
             if( DOM ){ //处理DOM事件
                 callback = events.callback ||  (events.callback = function( e ) {
@@ -370,7 +370,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
     $.target = {
-        uniqueNumber : $.uuid++,
+        uniqueNumber : $.getUid({}),
         defineEvents : function( names ){
             var events = [];
             if(typeof names == "string"){
