@@ -38,6 +38,7 @@ void function( global, DOC ){
     //多版本共存
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
+        commonNs.uuid = 1;
     }
     if(commonNs.mass !== mass  ){
         commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
@@ -155,11 +156,14 @@ void function( global, DOC ){
         },
         uuid: 1,
         getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
-            return node.uniqueNumber || ( node.uniqueNumber = $.uuid++ );
+            return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
+            if(node.nodeType !== 1){
+                return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
+            }
             var uid = node.getAttribute("uniqueNumber");
             if ( !uid ){
-                uid = $.uuid++;
+                uid = commonNs.uuid++;
                 node.setAttribute( "uniqueNumber", uid );
             }
             return uid;
