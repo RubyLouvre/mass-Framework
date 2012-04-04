@@ -47,8 +47,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
-        isArrayLike :  function (obj) {
-            if(!obj || obj.document || obj.nodeType || $.type(obj,"Function")) return false;
+        isArrayLike :  function (obj, str) {
+            var type = $.type(obj);
+            if(!obj || type == "Document" || type == "Window" || type == "Function" || (str && type == "String"))
+                return false;
             return isFinite(obj.length) ;
         },
         //将字符串中的占位符替换为对应的键值
