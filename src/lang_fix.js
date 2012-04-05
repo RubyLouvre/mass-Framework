@@ -1,9 +1,8 @@
 //=========================================
 //  语言补丁模块
 //==========================================
-$.define( "lang_fix",  function(){
+$.define( "lang_fix", !!Array.isArray, function(){
     // $.log("已加载语言补丁模块");
-    //Object扩展
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
     P = "prototype",
