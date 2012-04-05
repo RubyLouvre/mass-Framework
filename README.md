@@ -60,13 +60,14 @@ $(function(){
 </pre>
 <p>相比于jQuery只限于DOM的操作，mass Framework提供一个语言链对象进行链式操作</p>
 <pre>
-$.require("ready,lang",function(){
+$.require("ready,lang",function(){//对字符串进行链式操作
   $.lang("aaa_bbb").toLowerCase().capitalize().camelize().
-  split("").forEach(function(){
+  split("").forEach(function(){//转换为数组后继续“链”
     $.log(s);
   });
 });
 </pre>
+<p>语言链对象为字符串，数字，对象，数组以及类数组对象的链式操作提供了丰富无比的API接口。</p>
 <h3>文档的使用：</h3>
 <p>还是刚才解压出来的文件夹，里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。
 </p>
