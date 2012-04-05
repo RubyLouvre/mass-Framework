@@ -572,7 +572,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 facade.unbind.call( this, hash );
             });
         },
-        undelegate: function( selector, types, fn ) {
+        undelegate: function(selector, types, fn ) {
             return arguments.length == 1? this.off( selector, "**" ) : this.off( types, fn, selector );
         },
         die: function( types, fn ) {
@@ -596,25 +596,25 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
 });
-
-//2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
-//2011.9.17 事件发送器增加一个uniqueID属性
-//2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
-//2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
-//2011.9.29 简化bind与unbind
-//2011.10.13 emit模块更名dispatcher 模块 升级为v2
-//2011.10.23 简化facade.handle与fire
-//2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
-//2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
-//2011.11.23 简化rquickIs
-//2011.11.23 重构facade.fix与quickIs
-//2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
-//2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
-//2012.1.13 dispatcher模块更名target模块 升级为v3
-//2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
-//2012.2.8 添加mouseenter的分支判定，增强eventSupport
-//2012.2.9 完美支持valuechange事件
-//2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
+/**
+2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
+2011.9.17 事件发送器增加一个uniqueID属性
+2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
+2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
+2011.9.29 简化bind与unbind
+2011.10.13 emit模块更名dispatcher 模块 升级为v2
+2011.10.23 简化facade.handle与fire
+2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
+2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
+2011.11.23 简化rquickIs
+2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
+2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
+2012.1.13 dispatcher模块更名target模块 升级为v3
+2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
+2012.2.8 添加mouseenter的分支判定，增强eventSupport
+2012.2.9 完美支持valuechange事件
+2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
+*/
 
 
 
