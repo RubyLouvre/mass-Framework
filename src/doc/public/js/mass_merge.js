@@ -4997,7 +4997,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     };
     "bind,unbind,fire".replace( $.rword, function( method ){
-        $.target[ method ] = function(){
+        $.EventTarget[ method ] = function(){
             $.fn[ method ].apply(this, arguments);
             return this;
         }

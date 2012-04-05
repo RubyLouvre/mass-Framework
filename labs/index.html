@@ -9,7 +9,14 @@
         </script>
         <script>
             $.require("ready,event,attr",function(){
-                $.log($("body"))
+              
+                $(".aaa").click(function(){
+                    $.log(this.uniqueNumber)
+                });
+                $(".aaa").clone(true).addClass("blue").appendTo("body");
+                $(document).click(function(){
+                    $.log("document")
+                })
             })
         </script>
         <style>
