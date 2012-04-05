@@ -996,16 +996,16 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         //深拷贝当前数组
-        clone: function(target){
+        clone: function( target ){
             var i = target.length, result = [];
             while (i--) result[i] = cloneOf(target[i]);
             return result;
         },
         //取得第一个元素或对它进行操作
-        first: function(target, fn, scope){
+        first: function( target, fn, scope ){
             if($.type(fn,"Function")){
                 for(var i=0, n = target.length; i < n; i++){
-                    if(fn.call(scope,target[i],i,target)){
+                    if(fn.call( scope,target[i], i, target )){
                         return target[i];
                     }
                 }
@@ -1015,7 +1015,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
         },
         //取得最后一个元素或对它进行操作
-        last: function(target, fn, scope) {
+        last: function( target, fn, scope ) {
             if($.type(fn,"Function")){
                 for (var i=target.length-1; i > -1; i--) {
                     if (fn.call(scope, target[i], i, target)) {
@@ -1028,41 +1028,41 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
         },
         //判断数组是否包含此元素
-        contains: function (target, item) {
+        contains: function ( target, item ) {
             return !!~target.indexOf(item) ;
         },
         //http://msdn.microsoft.com/zh-cn/library/bb383786.aspx
         //移除 Array 对象中某个元素的第一个匹配项。
-        remove: function (target, item) {
+        remove: function ( target, item ) {
             var index = target.indexOf(item);
             if (~index ) return $.Array.removeAt(target, index);
             return null;
         },
         //移除 Array 对象中指定位置的元素。
-        removeAt: function (target, index) {
+        removeAt: function ( target, index ) {
             return target.splice(index, 1);
         },
         //对数组进行洗牌,但不影响原对象
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
-        shuffle: function (target) {
+        shuffle: function ( target ) {
             var shuff = target.concat(), j, x, i = shuff.length;
             for (; i > 0; j = parseInt(Math.random() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
             return shuff;
         },
         //从数组中随机抽选一个元素出来
-        random: function (target) {
-            return $.Array.shuffle(target)[0];
+        random: function ( target ) {
+            return $.Array.shuffle( target )[0];
         },
         //取得数字数组中值最小的元素
-        min: function(target) {
+        min: function( target ) {
             return Math.min.apply(0, target);
         },
         //取得数字数组中值最大的元素
-        max: function(target) {
+        max: function( target ) {
             return Math.max.apply(0, target);
         },
         //取得对象数组的每个元素的特定属性
-        pluck:function(target, name){
+        pluck:function( target, name ){
             var result = [], prop;
             target.forEach(function(item){
                 prop = item[name];
@@ -1072,7 +1072,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         },
         //根据对象的某个属性进行排序
-        sortBy: function(target, fn, scope) {
+        sortBy: function( target, fn, scope ) {
             var array =  target.map(function(item, index) {
                 return {
                     el: item,
@@ -1085,13 +1085,13 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return $.Array.pluck(array,'el');
         },
         // 以数组形式返回原数组中不为null与undefined的元素
-        compact: function (target) {
+        compact: function ( target ) {
             return target.filter(function (el) {
                 return el != null;
             });
         },
         //取差集(补集)
-        diff : function(target, array) {
+        diff : function( target, array ) {
             var result = target.slice();
             for ( var i = 0; i < result.length; i++ ) {
                 for ( var j = 0; j < array.length; j++ ) {
@@ -1104,7 +1104,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return result;
         },
-        merge: function(target, array){
+        merge: function( target, array ){
             var i = target.length, j = 0;
             for ( var n = array.length; j < n; j++ ) {
                 target[ i++ ] = array[ j ];
@@ -1113,18 +1113,18 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return target;
         },
         //取并集
-        union :function(target, array){
+        union :function( target, array ){
             $.Array.merge(target, array)
-            return $.Array.unique(target);
+            return $.Array.unique( target );
         },
         //取交集
-        intersect:function(target, array){
+        intersect:function( target, array ){
             return target.filter(function(n) {
                 return ~array.indexOf(n);
             });
         },
         // 返回没有重复值的新数组
-        unique: function (target) {
+        unique: function ( target ) {
             var result = [];
                 o:for(var i = 0, n = target.length; i < n; i++) {
                     for(var x = i + 1 ; x < n; x++) {
@@ -1274,30 +1274,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     return $.lang;
 });
 
-//2011.7.12 将toArray转移到lang模块下
-//2011.7.26 去掉toArray方法,添加globalEval,parseJSON,parseXML方法
-//2011.8.6  增加tag方法
-//2011.8.14 更新隐藏的命名空间,重构range方法,将node模块的parseHTML方法移到此处并大幅强化
-//2011.8.16 $.String2,$.Number2,$.Array2,$.Object2,globalEval 更名为$.String,$.Number,$.Array,$.Object,parseJS
-//2011.8.18 $.Object.merge不再设置undefined的值
-//2011.8.28 重构Array.unique
-//2011.9.11 重构$.isArray $.isFunction
-//2011.9.16 修复$.format BUG
-//2011.10.2 优化$.lang
-//2011.10.3 重写$.isPlainObject与jQuery的保持一致, 优化parseJS，
-//2011.10.4 去掉array.without（功能与array.diff相仿），更改object.widthout的参数
-//2011.10.6 使用位反操作代替 === -1, 添加array.intersect,array.union
-//2011.10.16 添加返回值
-//2011.10.21 修复Object.keys BUG
-//2011.10.26 优化quote ;将parseJSON parseXML中$.log改为$.error; FIX isPlainObject BUG;
-//2011.11.6 对parseXML中的IE部分进行强化
-//2011.12.22 修正命名空间
-//2012.1.17 添加dump方法
-//2012.1.20 重构$.String, $.Array, $.Number, $.Object, 让其变成一个函数v3
-//2012.1.27 让$.String等对象上的方法全部变成静态方法
-//2012.1.31 去掉$.Array.ensure，添加$.Array.merge
-//2012.3.17 v4 重构语言链对象
-//键盘控制物体移动 http://www.wushen.biz/move/
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
