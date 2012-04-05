@@ -924,24 +924,24 @@ $.define("query", function(){
     });
        
 });
-
-//2011.10.25重构$.unique
-//2011.10.26支持对拥有name值为id的控件的表单元素的查找，添加labed语句，让元素不存在时更快跳出主循环
-//2011.10.30让属性选择器支持拥有多个中括号与转义符的属性表达式，如‘input[name=brackets\\[5\\]\\[\\]]’
-//2011.10.31重构属性选择器处理无操作部分，使用hasAttribute来判定用户是否显示使用此属性，并支持checked, selected, disabled等布尔属性
-//2011.10.31重构关系选择器部分，让后代选择器也出现在switch分支中
-//2011.11.1 重构子元素过滤伪类的两个生成函数filterPseudoHasExp filterPseudoNoExp
-//2011.11.2 FIX处理 -of-type家族的BUG
-//2011.11.3 添加getAttribute hasAttribute API
-//2011.11.4 属性选择器对给出值或属性值为空字符串时进行快速过滤
-//2011.11.5 添加getElementsByXpath 增加对XML的支持
-//2011.11.6 重构getElementsByTagName 支持带命名空间的tagName
-//2011.11.6 处理IE67与opera9在getElementById中的BUG
-//2011.11.7 支持多上下文,对IE678的注释节点进行清除,优化querySelectorAll的使用
-//2011.11.8 处理分解nth-child参数的BUG，修正IE67下getAttribute对input[type=search]的支持，重构sortOrder标准浏览器的部分
-//调整swich...case中属性选择器的分支，因为reg_sequence允许出现"[  "的情况，因此会匹配不到，需要改为default
-//修改属性选择器$=的判定，原先attr.indexOf(val) == attr.length - val.length，会导致"PWD".indexOf("bar]")也有true
-//2011.11.9 增加getText 重构 getElementById与过滤ID部分
-//2011.11.10 exec一律改为match,对parseNth的结果进行缓存
-
+/**
+2011.10.25重构$.unique
+2011.10.26支持对拥有name值为id的控件的表单元素的查找，添加labed语句，让元素不存在时更快跳出主循环
+2011.10.30让属性选择器支持拥有多个中括号与转义符的属性表达式，如‘input[name=brackets\\[5\\]\\[\\]]’
+2011.10.31重构属性选择器处理无操作部分，使用hasAttribute来判定用户是否显示使用此属性，并支持checked, selected, disabled等布尔属性
+2011.10.31重构关系选择器部分，让后代选择器也出现在switch分支中
+2011.11.1 重构子元素过滤伪类的两个生成函数filterPseudoHasExp filterPseudoNoExp
+2011.11.2 FIX处理 -of-type家族的BUG
+2011.11.3 添加getAttribute hasAttribute API
+2011.11.4 属性选择器对给出值或属性值为空字符串时进行快速过滤
+2011.11.5 添加getElementsByXpath 增加对XML的支持
+2011.11.6 重构getElementsByTagName 支持带命名空间的tagName
+2011.11.6 处理IE67与opera9在getElementById中的BUG
+2011.11.7 支持多上下文,对IE678的注释节点进行清除,优化querySelectorAll的使用
+2011.11.8 处理分解nth-child参数的BUG，修正IE67下getAttribute对input[type=search]的支持，重构sortOrder标准浏览器的部分
+调整swich...case中属性选择器的分支，因为reg_sequence允许出现"[  "的情况，因此会匹配不到，需要改为default
+修改属性选择器$=的判定，原先attr.indexOf(val) == attr.length - val.length，会导致"PWD".indexOf("bar]")也有true
+2011.11.9 增加getText 重构 getElementById与过滤ID部分
+2011.11.10 exec一律改为match,对parseNth的结果进行缓存
+*/
 
