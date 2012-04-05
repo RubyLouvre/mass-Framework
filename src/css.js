@@ -600,16 +600,18 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         // console.log([a,b])
         });
 });
-//2011.9.5
-//将cssName改为隋性函数,修正msTransform Bug
-//2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
-//2011.10.10 重构position offset保持这两者行为一致，
-//2011.10.14 Fix $.css BUG，如果传入一个对象，它把到getter分支了。
-//2011.10.15 Fix $.css BUG  添加transform rotate API
-//2011.10.20 getWH不能获取隐藏元素的BUG
-//2011.10.21 修正width height的BUG
-//2011.11.10 添加top,left到cssAdapter
-//2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
-//2012.3.2 getWH现在能获取多重隐藏元素的高宽了
+/**
+2011.9.5
+将cssName改为隋性函数,修正msTransform Bug
+2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
+2011.10.10 重构position offset保持这两者行为一致，
+2011.10.14 Fix $.css BUG，如果传入一个对象，它把到getter分支了。
+2011.10.15 Fix $.css BUG  添加transform rotate API
+2011.10.20 getWH不能获取隐藏元素的BUG
+2011.10.21 修正width height的BUG
+2011.11.10 添加top,left到cssAdapter
+2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
+2012.3.2 getWH现在能获取多重隐藏元素的高宽了
+*/
 
 
