@@ -100,7 +100,7 @@ list里面的为要合并的模块名
     var module_value = {
         state:2
     };
-    var list = "ecma,lang,spec,support,class,data,query,node,css_ie,css,dispatcher,event,attr,fx,ajax".match($.rword);
+    var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr.event_fix,event,fx,flow,ajax".match($.rword);
     for(var i=0, module;module = list[i++];){
         mapper["@"+module] = module_value;
     }
