@@ -1,4 +1,6 @@
-//数据交互模块
+//=========================================
+//  数据交互模块
+//==========================================
 $.define("ajax","event", function(){
     //$.log("已加载ajax模块");
     var global = this, DOC = global.document, r20 = /%20/g,
@@ -676,10 +678,10 @@ $.define("ajax","event", function(){
     });
  
 });
-
-//2011.8.31
-//将会传送器的abort方法上传到$.XHR.abort去处理
-//修复serializeArray的bug
-//对XMLHttpRequest.abort进行try...catch
-//2012.3.31
-//v2 大重构,支持XMLHttpRequest
+/**
+2011.8.31
+将会传送器的abort方法上传到$.XHR.abort去处理
+修复serializeArray的bug
+对XMLHttpRequest.abort进行try...catch
+2012.3.31 v2 大重构,支持XMLHttpRequest
+*/
