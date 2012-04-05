@@ -602,14 +602,7 @@ $.define( "lang_fix",  function(){
         return fix(this, separator, limit);
     };
 });
-    
-//2011.7.26
-//移除Object.create方法,添加Object.getPrototypeOf方法
-//2011.11.16
-//重构Array.prototype.unshift (thx @abcd)
-//2011.12.22
-//修正命名空间
-//2012.3.19 添加对split的修复
+
 //=========================================
 // 类型扩展模块v3 by 司徒正美
 //=========================================
@@ -1572,19 +1565,6 @@ $.define("class", "lang",function(){
     }
 });
 
-//2011.7.11 将$["class"]改为$["@class"] v4
-//2011.7.25
-//继承链与方法链被重新实现。
-//在方法中调用父类的同名实例方法，由$super改为supermethod，保留父类的原型属性parent改为superclass v5
-//2011.8.6
-//在方法中调用父类的同名实例方法，由supermethod改为_super，保留父类的原型属性superclass改为_super v6
-//重新实现方法链
-//fix 子类实例不是父类的实例的bug
-//2011.8.14 更改隐藏namespace,增强setOptions
-//2011.10.7 include更名为implement 修复implement的BUG（能让人重写toString valueOf方法） v7
-//2012.1.29 修正setOptions中$.Object.merge方法的调用方式
-//2012.2.25 改进setOptions，可以指定在this上扩展还是在this.XXX上扩展
-//2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
 
 
 //==================================================
@@ -1609,9 +1589,9 @@ $.define("data", "lang", function(){
                     var attrs = target.attributes;
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
-                        name = attr.name;
-                        if ( name.indexOf( "data-" ) === 0 ) {
-                            $.parseData(target, name, id, _table);
+                        var key = attr.name;
+                        if ( key.indexOf( "data-" ) === 0 ) {
+                            $.parseData(target, key, id, _table);
                         }
                     }
                     table.parsedAttrs = true;
@@ -2631,25 +2611,6 @@ $.define("query", function(){
     });
        
 });
-
-//2011.10.25重构$.unique
-//2011.10.26支持对拥有name值为id的控件的表单元素的查找，添加labed语句，让元素不存在时更快跳出主循环
-//2011.10.30让属性选择器支持拥有多个中括号与转义符的属性表达式，如‘input[name=brackets\\[5\\]\\[\\]]’
-//2011.10.31重构属性选择器处理无操作部分，使用hasAttribute来判定用户是否显示使用此属性，并支持checked, selected, disabled等布尔属性
-//2011.10.31重构关系选择器部分，让后代选择器也出现在switch分支中
-//2011.11.1 重构子元素过滤伪类的两个生成函数filterPseudoHasExp filterPseudoNoExp
-//2011.11.2 FIX处理 -of-type家族的BUG
-//2011.11.3 添加getAttribute hasAttribute API
-//2011.11.4 属性选择器对给出值或属性值为空字符串时进行快速过滤
-//2011.11.5 添加getElementsByXpath 增加对XML的支持
-//2011.11.6 重构getElementsByTagName 支持带命名空间的tagName
-//2011.11.6 处理IE67与opera9在getElementById中的BUG
-//2011.11.7 支持多上下文,对IE678的注释节点进行清除,优化querySelectorAll的使用
-//2011.11.8 处理分解nth-child参数的BUG，修正IE67下getAttribute对input[type=search]的支持，重构sortOrder标准浏览器的部分
-//调整swich...case中属性选择器的分支，因为reg_sequence允许出现"[  "的情况，因此会匹配不到，需要改为default
-//修改属性选择器$=的判定，原先attr.indexOf(val) == attr.length - val.length，会导致"PWD".indexOf("bar]")也有true
-//2011.11.9 增加getText 重构 getElementById与过滤ID部分
-//2011.11.10 exec一律改为match,对parseNth的结果进行缓存
 
 
 
@@ -4112,17 +4073,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         // console.log([a,b])
         });
 });
-//2011.9.5
-//将cssName改为隋性函数,修正msTransform Bug
-//2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
-//2011.10.10 重构position offset保持这两者行为一致，
-//2011.10.14 Fix $.css BUG，如果传入一个对象，它把到getter分支了。
-//2011.10.15 Fix $.css BUG  添加transform rotate API
-//2011.10.20 getWH不能获取隐藏元素的BUG
-//2011.10.21 修正width height的BUG
-//2011.11.10 添加top,left到cssAdapter
-//2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
-//2012.3.2 getWH现在能获取多重隐藏元素的高宽了
+
 
 
 
