@@ -1,12 +1,12 @@
-/*
- * 样式操作模块的补丁模块
- */
+//=========================================
+//  样式补丁模块
+//==========================================
 $.define("css_fix", !!top.getComputedStyle, function(){
    // $.log("已加载css_fix模块");
-    var adapter = $.cssAdapter = {};
-    //=========================　处理　opacity　=========================
-    var  ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
+    var adapter = $.cssAdapter = {},
+    ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
     rnumpx = /^-?\d+(?:px)?$/i, rnum = /^-?\d/;
+     //=========================　处理　opacity　=========================
     adapter[ "opacity:get" ] = function( node, op ){
         //这是最快的获取IE透明值的方式，不需要动用正则了！
         if(node.filters.alpha){
