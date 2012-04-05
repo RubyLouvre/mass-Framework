@@ -510,23 +510,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
         };
     }
 
-    /*!
-     * Cross-Browser Split 1.1.1
-     * Copyright 2007-2012 Steven Levithan <stevenlevithan.com>
-     * Available under the MIT License
-     * ECMAScript compliant, uniform cross-browser split method
-     * // Basic use
-     * split('a b c d', ' ');
-     * // -> ['a', 'b', 'c', 'd']
-     *
-     * // With limit
-     * split('a b c d', ' ', 2);
-     * // -> ['a', 'b']
-     *
-     * // Backreferences in result array
-     * split('..word1 word2..', /([a-z]+)(\d+)/i);
-     * // -> ['..', 'word', '1', ' ', 'word', '2', '..']
-     */
+    
     var nativeSplit = String.prototype.split,
     compliantExecNpcg = /()??/.exec("")[1] === void 0, // NPCG: nonparticipating capturing group
     fix = function (str, separator, limit) {
@@ -548,13 +532,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
             // Doesn't need flags gy, but they don't hurt
             separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
         }
-        /* Values for `limit`, per the spec:
-             * If undefined: 4294967295 // Math.pow(2, 32) - 1
-             * If 0, Infinity, or NaN: 0
-             * If positive number: limit = Math.floor(limit); if (limit > 4294967295) limit -= 4294967296;
-             * If negative number: 4294967296 - Math.floor(Math.abs(limit))
-             * If other: Type-convert, then use the above rules
-             */
+        
         limit = limit === void 0 ?
         -1 >>> 0 : // Math.pow(2, 32) - 1
         limit >>> 0; // ToUint32(limit)
