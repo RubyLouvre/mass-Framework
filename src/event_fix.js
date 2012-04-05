@@ -1,3 +1,6 @@
+//=========================================
+//  事件补丁模块
+//==========================================
 $.define("event_fix", !!document.dispatchEvent, function(){
     //模拟IE678的reset,submit,change的事件代理
     var submitWhich = $.oneObject("13,108"),
@@ -74,12 +77,12 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 setup: delegate(function( src, type, fix ){
                     var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
                     $._data( src, "_beforeactivate", $.bind( src, "beforeactivate", function() {
-                        var e = src.document.parentWindow.event, target = e.srcElement;
+                        var e = src.document.parentWindow.event, target = e.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( rform.test( target.tagName) && !subscriber[ target.uniqueNumber ] ) {
-                            subscriber[ target.uniqueNumber] = target;//表明其已注册
+                        if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
+                            subscriber[ tid] = target;//表明其已注册
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
+                            publisher[ $.getUid(src) ] = src;//此孩子可能同时要向N个顶层元素报告变化
                             facade.bind.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
                             if(type === "change"){
