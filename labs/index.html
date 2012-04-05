@@ -9,11 +9,7 @@
         </script>
         <script>
             $.require("ready,event,attr",function(){
-                var a = $(".aaa").click(function(){
-                    $.log(this.uniqueNumber+"!")
-                });
-               a.data("bbb","ccc");
-               $.log(a.data("bbb"))
+                $.log($("body"))
             })
         </script>
         <style>

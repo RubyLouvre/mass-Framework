@@ -314,25 +314,6 @@ $.define("api", function(){
            // "access": "function",
             "parseHTML": "function"
         },
-        "派发器模块": {
-            "eventAdapter": "object",
-            "event": {
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "filter": "function",
-                "dispatch": "function",
-                "fix": "function"
-            },
-            "Event": "function",
-            "target": {
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "uniqueNumber": "number",
-                "defineEvents": "function"
-            }
-        },
         "属性操作模块": {
             "fn": {
                 "addClass": "function",
@@ -487,7 +468,24 @@ $.define("api", function(){
                 "keydown": "function",
                 "keyup": "function"
             },
-            "eventSupport": "function"
+            "eventSupport": "function",
+               "eventAdapter": "object",
+            "event": {
+                "bind": "function",
+                "unbind": "function",
+                "fire": "function",
+                "filter": "function",
+                "dispatch": "function",
+                "fix": "function"
+            },
+            "Event": "function",
+            "EventTarget": {
+                "bind": "function",
+                "unbind": "function",
+                "fire": "function",
+                "uniqueNumber": "number",
+                "defineEvents": "function"
+            }
         },
         "样式操作模块": {
             "fn": {
