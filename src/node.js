@@ -454,9 +454,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     $.implement({
         data: function( key, item ){
             return $.access( this, key, item, function( el, key ){
-                return  $.data( el, key );
-            }, function( el, key, item ){
-                $.data( el, key, item );
+                return  $.data( el, key, item );
             })
         },
         removeData: function( key, pv ) {
@@ -726,7 +724,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
 });
 
-/*
+/**
 2011.7.11 dom["class"]改为dom["@class"]
 2011.7.26 对init与parseHTML进行重构
 2011.9.22 去掉isInDomTree 重构cloneNode,manipulate,parseHTML
@@ -747,5 +745,4 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.11.7 重构find， 支持不插入文档的节点集合查找
 2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
 2012.3.9 添加一些数组方法
- *
  */
