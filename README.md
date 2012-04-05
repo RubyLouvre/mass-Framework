@@ -4,7 +4,7 @@ mass Framework
 <p>mass Framework的模块化经过一年化调整与改良，大致分为四类：</p>
 <ol>
 <li>种子模块， mass.js，最精简的内核， 包含模块加载系统。</li>
-<li>补丁模块， lang_fix.js, css_fix.js，主要是用于兼容旧式IE的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
+<li>补丁模块， lang_fix.js, css_fix.js, event_fix.js,主要是用于兼容旧式IE的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
 <li>核心模块， 所有位于mass-Framework/src目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
 <li>外围模块， 位于mass-Framework/src/more的JS文件。</li>
 </ol>
@@ -81,7 +81,8 @@ $.require("ready,lang",function(){
     var module_value = {
         state:2
     };
-    var list = "ecma,lang,spec,support,class,data,query,node,css_ie,css,dispatcher,event,attr,fx,ajax".match($.rword);
+    var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr.event_fix"+
+        "event,fx,flow,ajax".match($.rword);
     for(var i=0, module;module = list[i++];){
         mapper["@"+module] = module_value;
     }
@@ -104,7 +105,7 @@ list里面的为要合并的模块名
         mapper["@"+module] = module_value;
     }
 //然后把要合并的JS文件的内容直接抽取出来放在下面
-   $.define("ecma", function(){
+   $.define("lang_fix", function(){
 //XXXXXXXXXXXXXX
 });
    $.define("lang", function(){
