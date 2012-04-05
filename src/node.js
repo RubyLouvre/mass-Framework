@@ -28,7 +28,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             }
             //分支2:  让$实例与元素节点一样拥有ownerDocument属性
             var doc, nodes;//用作节点搜索的起点
-            if(/Array|NodeList|String/.test( $.type(context) )|| context && context.mass){//typeof context === "string"
+            if($.isArrayLike(context)){//typeof context === "string"
                 return $( context ).find( expr );
             }
             if ( expr.nodeType ) { //分支3:  处理节点参数
@@ -745,4 +745,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2011.11.7 重构find， 支持不插入文档的节点集合查找
 2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
 2012.3.9 添加一些数组方法
+2012.4.5 使用isArrayLike精简init方法
  */
