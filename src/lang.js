@@ -47,9 +47,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
-        isArrayLike :  function (obj, str) {
+        isArrayLike :  function (obj, str) {//是否包含字符串
             var type = $.type(obj);
-            if(!obj || type == "Document" || type == "Window" || type == "Function" || (str && type == "String"))
+            if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
             return isFinite(obj.length) ;
         },
@@ -142,14 +142,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
-        each : function(obj, fn, args ){
-            var go = 1, isArray = Array.isArray(args)
-            $.lang(obj).forEach( function (el, i){
-                if( go && fn.apply(el, isArray ? args : [el, i, obj]) === false){
-                    go = 0;
-                }
-            });
-        },
         dump : function(obj, indent) {
             indent = indent || "";
             if (obj === null)
@@ -246,6 +238,11 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     "Array,Function".replace($.rword, function(name){
         $["is"+name] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+name+"]";
+        }
+    });
+    "each,map".replace($.rword, function(name){
+        $[name] = function(obj, fn){
+            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn );
         }
     });
     if(Array.isArray){

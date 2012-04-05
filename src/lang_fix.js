@@ -233,11 +233,9 @@ $.define( "lang_fix",  function(){
         return fix(this, separator, limit);
     };
 });
-    
-//2011.7.26
-//移除Object.create方法,添加Object.getPrototypeOf方法
-//2011.11.16
-//重构Array.prototype.unshift (thx @abcd)
-//2011.12.22
-//修正命名空间
-//2012.3.19 添加对split的修复
+/**
+2011.7.26移除Object.create方法,添加Object.getPrototypeOf方法
+2011.11.16重构Array.prototype.unshift (thx @abcd)
+2011.12.22 修正命名空间
+2012.3.19 添加对split的修复
+*/
