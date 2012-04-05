@@ -20,9 +20,9 @@ $.define("data", "lang", function(){
                     var attrs = target.attributes;
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
-                        name = attr.name;
-                        if ( name.indexOf( "data-" ) === 0 ) {
-                            $.parseData(target, name, id, _table);
+                        var key = attr.name;
+                        if ( key.indexOf( "data-" ) === 0 ) {
+                            $.parseData(target, key, id, _table);
                         }
                     }
                     table.parsedAttrs = true;
