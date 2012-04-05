@@ -369,7 +369,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    $.target = {
+    //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
+    $.EventTarget = {
         uniqueNumber : $.getUid({}),
         defineEvents : function( names ){
             var events = [];
