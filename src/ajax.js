@@ -683,5 +683,5 @@ $.define("ajax","event", function(){
 将会传送器的abort方法上传到$.XHR.abort去处理
 修复serializeArray的bug
 对XMLHttpRequest.abort进行try...catch
-2012.3.31 v2 大重构,支持XMLHttpRequest
+2012.3.31 v2 大重构,支持XMLHttpRequest Level2
 */
