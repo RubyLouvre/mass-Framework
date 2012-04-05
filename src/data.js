@@ -5,7 +5,7 @@ $.define("data", "lang", function(){
     //$.log("已加载data模块");
     var remitter = /object|function/, rbrace = /^(?:\{.*\}|\[.*\])$/;
     $.mix( $, {
-        _db:{},
+        _db: {},
         // 读写数据
         data : function( target, name, data, pvt ) {
             if(target && remitter.test(typeof target)){//只处理HTML节点与普通对象
