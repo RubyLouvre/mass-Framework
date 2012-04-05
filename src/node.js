@@ -1,3 +1,6 @@
+//==================================================
+// 节点操作模块
+//==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
@@ -94,7 +97,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             return this.slice( 0, i );
         },
         first: function() {
-            return this.slice( 0,1 );
+            return this.slice( 0, 1 );
         },
         even: function() {
             return this.labor( this.valueOf().filter(function( _, i ) {

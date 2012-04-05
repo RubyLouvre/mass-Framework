@@ -2614,6 +2614,9 @@ $.define("query", function(){
 
 
 
+//==================================================
+// 节点操作模块
+//==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
@@ -2710,7 +2713,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             return this.slice( 0, i );
         },
         first: function() {
-            return this.slice( 0,1 );
+            return this.slice( 0, 1 );
         },
         even: function() {
             return this.labor( this.valueOf().filter(function( _, i ) {
@@ -3326,15 +3329,15 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
 });
 
 
-/*
- * 样式操作模块的补丁模块
- */
+//=========================================
+//  样式补丁模块
+//==========================================
 $.define("css_fix", !!top.getComputedStyle, function(){
    // $.log("已加载css_fix模块");
-    var adapter = $.cssAdapter = {};
-    //=========================　处理　opacity　=========================
-    var  ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
+    var adapter = $.cssAdapter = {},
+    ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
     rnumpx = /^-?\d+(?:px)?$/i, rnum = /^-?\d/;
+     //=========================　处理　opacity　=========================
     adapter[ "opacity:get" ] = function( node, op ){
         //这是最快的获取IE透明值的方式，不需要动用正则了！
         if(node.filters.alpha){
@@ -4077,6 +4080,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 
 
 
+//==================================================
+// 属性操作模块
+//==================================================
 $.define("attr","support,node", function( support ){
     // $.log("已加载attr模块")
     var rreturn = /\r/g,
@@ -4490,6 +4496,9 @@ $.define("attr","support,node", function( support ){
 2011.10.27 对prop attr val大重构
 */
 
+//=========================================
+//  事件补丁模块
+//==========================================
 $.define("event_fix", !!document.dispatchEvent, function(){
     //模拟IE678的reset,submit,change的事件代理
     var submitWhich = $.oneObject("13,108"),
@@ -4566,12 +4575,12 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 setup: delegate(function( src, type, fix ){
                     var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
                     $._data( src, "_beforeactivate", $.bind( src, "beforeactivate", function() {
-                        var e = src.document.parentWindow.event, target = e.srcElement;
+                        var e = src.document.parentWindow.event, target = e.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( rform.test( target.tagName) && !subscriber[ target.uniqueNumber ] ) {
-                            subscriber[ target.uniqueNumber] = target;//表明其已注册
+                        if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
+                            subscriber[ tid] = target;//表明其已注册
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
+                            publisher[ $.getUid(src) ] = src;//此孩子可能同时要向N个顶层元素报告变化
                             facade.bind.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
                             if(type === "change"){
@@ -4701,6 +4710,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
                 addCallback( queue, item );//同一事件不能绑定重复回调
             });
+            return this;
         },
         //外部的API已经确保typesr至少为空字符串
         unbind: function( hash, mappedTypes  ) {
@@ -4762,6 +4772,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 fn.target = null;
                 $.removeData( target, "events") ;
             }
+            return this;
         },
 
         fire: function( event ){
@@ -4821,7 +4832,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             var win = ( this.ownerDocument || this.document || this ).parentWindow || window,
             event = facade.fix( e || win.event ),
             queue = $._data(this,"events");//这个其实是对象events
-  
             if (  queue ) {
                 queue = queue[ event.type] || [];//到此处时才是数组
                 event.currentTarget = this;
@@ -4839,7 +4849,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                         result = item.callback.apply( item.selector ? src : this, args );
                         item.times--;
                         if(item.times === 0){
-                           facade.unbind.call( this, item)
+                            facade.unbind.call( this, item)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
@@ -4972,6 +4982,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return this;
         }
     };
+    var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup",
+    rmapper = /(\w+)_(\w+)/g;
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
     //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
@@ -4996,15 +5009,12 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             },this);
         }
     };
-    "bind,unbind,fire".replace( $.rword, function( method ){
-        $.EventTarget[ method ] = function(){
-            $.fn[ method ].apply(this, arguments);
+    "bind_on,unbind_off,fire_fire".replace( rmapper,function(_, type, mapper){
+        $.EventTarget[ type ] = function(){
+            $.fn[ mapper ].apply(this, arguments);
             return this;
         }
     });
-    // $.log("加载event模块成功");
-    var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
     $.eventSupport = function( eventName,el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
@@ -5017,56 +5027,50 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         el = null;
         return ret;
     };
-
-    //用于在标准浏览器下模拟mouseenter与mouseleave
-    //现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
-    //opera11,FF10也支持这四个事件,同时它们也成为w3c DOM3 Event的规范
-    //详见http://www.filehippo.com/pl/download_opera/changelog/9476/
-    //http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
+    
     if( !+"\v1" || !$.eventSupport("mouseenter")){
-        "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_,orig, fix){
-            eventAdapter[ orig ]  = {
+        "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
+            eventAdapter[ type ]  = {
                 setup: function( src ){//使用事件冒充
-                    $._data( src, orig+"_handle", $.bind( src, fix, function( e ){
+                    $._data( src, type+"_handle", $.bind( src, mapper, function( e ){
                         var parent = e.relatedTarget;
                         try {
                             while ( parent && parent !== src ) {
                                 parent = parent.parentNode;
                             }
                             if ( parent !== src ) {
-                                facade._dispatch( [ src ], orig, e );
+                                facade._dispatch( [ src ], type, e );
                             }
                         } catch(err) { };
                     }));
                 },
                 teardown: function(){
-                    $.unbind( this, fix, $._data( orig+"_handle" ) );
+                    $.unbind( this, mapper, $._data( type+"_handle" ) );
                 }
             };
         });
     }
-
     //在标准浏览器里面模拟focusin
     if( !$.eventSupport("focusin") ){
-        "focusin_focus,focusout_blur".replace( /(\w+)_(\w+)/g, function(_,$1, $2){
+        "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, focusinNotify = function (e) {
                 var src = e.target
                 do{//模拟冒泡
                     var events = $._data( src, "events" );
-                    if(events && events[$1]){
-                        facade._dispatch( [ src ], $1, e );
+                    if(events && events[ type ]){
+                        facade._dispatch( [ src ], type, e );
                     }
                 } while (src = src.parentNode );
             }
-            eventAdapter[ $1 ] = {
+            eventAdapter[ type ] = {
                 setup: function( ) {
                     if ( notice++ === 0 ) {
-                        document.addEventListener( $2, focusinNotify, true );
+                        document.addEventListener( mapper, focusinNotify, true );
                     }
                 },
                 teardown: function() {
                     if ( --notice === 0 ) {
-                        document.removeEventListener( $2, focusinNotify, true );
+                        document.removeEventListener( mapper, focusinNotify, true );
                     }
                 }
             };
@@ -5098,22 +5102,11 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
         return quick;
     }
-    $.implement({
-        toggle: function(/*fn1,fn2,fn3*/){
-            var fns = [].slice.call(arguments), i = 0;
-            return this.click(function(e){
-                var fn  = fns[i++] || fns[i = 0, i++];
-                fn.call( this, e );
-            })
-        },
-        hover: function( fnIn, fnOut ) {
-            return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
-        },
-        on: function( types, selector, fn, times ) {
-            //要处理times 与 selector不存在的情况
+    "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
+        $.fn[ method ] = function(types, selector, fn ){//$.fn.on $.fn.off
             if ( typeof types === "object" ) {
                 for ( var type in types ) {
-                    this.on( type, selector, types[ type ], fn );
+                    $.fn[ method ].call(this, type, selector, types[ type ], fn );
                 }
                 return this;
             }
@@ -5132,14 +5125,36 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     }
                 }
             }
-            if( !hash.type || !hash.callback ){//必须指定事件类型与回调
-                return this;
+            if(method === "on"){
+                if( !hash.type || !hash.callback ){//必须指定事件类型与回调
+                    return this;
+                }
+                hash.times = hash.times > 0  ? hash.times : Infinity;
+                hash.selector =  hash.selector ? quickParse( hash.selector ) : false
             }
-            hash.times = hash.times > 0  ? hash.times : Infinity;
-            hash.selector =  hash.selector ? quickParse( hash.selector ) : false
-            return this.each( function() {//转交dispatch模块去处理
-                facade.bind.call( this, hash );
-            });
+            if(typeof this.each === "function"){
+                return this.each(function() {
+                    facade[ mapper ].call( this, hash );
+                });
+            }else{
+                return facade[ mapper ].call( this, hash );
+            }
+        }
+        $.fn[ mapper ] = function(){// $.fn.bind $.fn.unbind
+            return this[ method ].apply(this, arguments );
+        }
+    });
+
+    $.implement({
+        toggle: function(/*fn1,fn2,fn3*/){
+            var fns = [].slice.call(arguments), i = 0;
+            return this.click(function(e){
+                var fn  = fns[i++] || fns[i = 0, i++];
+                fn.call( this, e );
+            })
+        },
+        hover: function( fnIn, fnOut ) {
+            return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
         },
         delegate: function( selector, types, fn, times ) {
             return this.on( types, selector, fn, times);
@@ -5148,35 +5163,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             $( this.ownerDocument ).on( types, this.selector, fn, times );
             return this;
         },
-        bind: function( types, fn, times ) {
-            return this.on( types, fn, times );
-        },
         one: function( types, fn ) {
             return this.on( types, fn, 1 );
-        },
-        off: function( types, selector, fn ) {
-            if ( typeof types === "object" ) {
-                for ( var type in types ) {
-                    this.off( type, selector, types[ type ] );
-                }
-                return this;
-            }
-            var hash = {}
-            for(var i = 0 ; i < arguments.length; i++ ){
-                var el = arguments[i];
-                if(typeof el == "function"){
-                    hash.callback = el;
-                }if(typeof el === "string"){
-                    if(hash.type != null){
-                        hash.selector = el.trim();
-                    }else{
-                        hash.type = el.trim();
-                    }
-                }
-            }
-            return this.each(function() {
-                facade.unbind.call( this, hash );
-            });
         },
         undelegate: function(selector, types, fn ) {
             return arguments.length == 1? this.off( selector, "**" ) : this.off( types, fn, selector );
@@ -5185,16 +5173,13 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
             return this;
         },
-        unbind: function( types, fn ) {
-            return this.off( types, fn );
-        },
         fire: function(  ) {
             var args = arguments;
             return this.each(function() {
                 $.event.fire.apply(this, args );
             });
         }
-    })
+    });
 
     types.replace( $.rword, function( type ){
         $.fn[ type ] = function( callback ){
@@ -5848,6 +5833,9 @@ $.define("fx", "css",function(){
 //http://kangax.github.com/fabric.js/kitchensink/
 
         
+//=========================================
+//  操作流模块
+//==========================================
 $.define("flow", function(){
     //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
     function OperateFlow(){
@@ -5948,7 +5936,9 @@ $.define("flow", function(){
     }
 })
 
-//数据交互模块
+//=========================================
+//  数据交互模块
+//==========================================
 $.define("ajax","event", function(){
     //$.log("已加载ajax模块");
     var global = this, DOC = global.document, r20 = /%20/g,
@@ -6609,12 +6599,6 @@ $.define("ajax","event", function(){
  
 });
 
-//2011.8.31
-//将会传送器的abort方法上传到$.XHR.abort去处理
-//修复serializeArray的bug
-//对XMLHttpRequest.abort进行try...catch
-//2012.3.31
-//v2 大重构,支持XMLHttpRequest
 
 
 }( this, this.document );
