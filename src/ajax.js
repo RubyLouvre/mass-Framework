@@ -259,13 +259,13 @@ $.define("ajax","event", function(){
         return dummyXHR;
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    $.mix(ajax, $.target);
+    $.mix(ajax, $.EventTarget);
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
          * XHR类,用于模拟原生XMLHttpRequest的所有行为
          */
     $.XHR = $.factory({
-        implement:$.target,
+        implement:$.EventTarget,
         init:function(option){
             $.mix(this, {
                 responseData:null,
