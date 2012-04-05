@@ -20,12 +20,7 @@ void function( global, DOC ){
         "undefined"               : "Undefined"
     },
     toString = class2type.toString;
-    /**
-     * @class $
-     * mass Framework拥有两个命名空间,
-     * 第一个是DOC.URL.replace(/(\W|(#.+))/g,'')，根据页面的地址动态生成
-     * 第二个是$，我们可以使用别名机制重写它
-     */
+    
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             $.require( "ready,lang,attr,event,fx,flow", expr );
@@ -38,6 +33,7 @@ void function( global, DOC ){
     //多版本共存
     if( typeof commonNs !== "function"){
         commonNs = $;//公用命名空间对象
+        commonNs.uuid = 1;
     }
     if(commonNs.mass !== mass  ){
         commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
@@ -48,12 +44,7 @@ void function( global, DOC ){
         return;
     }
 
-    /**
-     * 糅杂，为一个对象添加更多成员
-     * @param {Object} target 目标对象
-     * @param {Object} source 属性包
-     * @return  {Object} 目标对象
-     */
+    
     function mix( target, source ){
         var args = [].slice.call( arguments ), key,
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
@@ -81,10 +72,7 @@ void function( global, DOC ){
             url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
-        /**
-         * 将内部对象挂到window下，此时可重命名，实现多库共存
-         * @param {String} name 新的命名空间
-         */
+        
         exports: function( name ) {
             _$ && ( global.$ = _$ );//多库共存
             name = name || $[ "@name" ];//取得当前简短的命名空间
@@ -92,13 +80,7 @@ void function( global, DOC ){
             global[ namespace ] = commonNs;
             return global[ name ]  = this;
         },
-        /**
-         * 数组化
-         * @param {ArrayLike} nodes 要处理的类数组对象
-         * @param {Number} start 可选。要抽取的片断的起始下标。如果是负数，从后面取起
-         * @param {Number} end  可选。规定从何处结束选取
-         * @return {Array}
-         */
+        
         slice: function ( nodes, start, end ) {
             for(var i = 0, n = nodes.length, result = []; i < n; i++){
                 result[i] = nodes[i];
@@ -109,12 +91,7 @@ void function( global, DOC ){
                 return result;
             }
         },
-        /**
-         * 用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）
-         * @param {Any} obj 要检测的东西
-         * @param {String} str 可选，要比较的类型
-         * @return {String|Boolean}
-         */
+        
         type: function ( obj, str ){
             var result = class2type[ (obj == null || obj !== obj ) ? obj :  toString.call( obj ) ] || obj.nodeName || "#";
             if( result.charAt(0) === "#" ){//兼容旧式浏览器与处理个别情况,如window.opera
@@ -136,11 +113,7 @@ void function( global, DOC ){
             }
             return result;
         },
-        /**
-         * 用于调试
-         * @param {String} text 要打印的内容
-         * @param {Boolean} force 强逼打印到页面上
-         */
+        
         log: function ( text, force ){
             if( force ){
                 $.require( "ready", function(){
@@ -155,21 +128,19 @@ void function( global, DOC ){
         },
         uuid: 1,
         getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
-            return node.uniqueNumber || ( node.uniqueNumber = $.uuid++ );
+            return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
+            if(node.nodeType !== 1){
+                return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
+            }
             var uid = node.getAttribute("uniqueNumber");
             if ( !uid ){
-                uid = $.uuid++;
+                uid = commonNs.uuid++;
                 node.setAttribute( "uniqueNumber", uid );
             }
             return uid;
         },
-        /**
-         * 生成键值统一的对象，用于高速化判定
-         * @param {Array|String} array 如果是字符串，请用","或空格分开
-         * @param {Number} val 可选，默认为1
-         * @return {Object}
-         */
+        
         oneObject : function( array, val ){
             if( typeof array == "string" ){
                 array = array.match( $.rword ) || [];
@@ -201,12 +172,7 @@ void function( global, DOC ){
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
-    /**
-     * 加载模块。它会临时构建一个iframe沙箱环境，在里面创建script标签加载指定模块
-     * @param {String} name 模块名
-     * @param {String} url  模块的路径
-     * @param {String} mass  当前框架的版本号
-     */
+    
     function load( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
@@ -398,7 +364,7 @@ void function( global, DOC ){
 var module_value = {
                                     state:2
                                 };
-                                var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,target,event,fx,flow,ajax".match($.rword);
+                                var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr,event_fix,event,fx,flow,ajax".match($.rword);
                                 for(var i=0, module;module = list[i++];){
                                     mapper["@"+module] = module_value;
                                 }//=========================================
@@ -680,11 +646,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
             return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
         },
-        /**
-         * 是否为空对象
-         * @param {Object} obj
-         * @return {Boolean}
-         */
+        
         isEmptyObject: function(obj ) {
             for ( var i in obj ){
                 return false;
@@ -693,8 +655,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
-        isArrayLike :  function (obj) {
-            if(!obj || obj.document || obj.nodeType || $.type(obj,"Function")) return false;
+        isArrayLike :  function (obj, str) {//是否包含字符串
+            var type = $.type(obj);
+            if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
+                return false;
             return isFinite(obj.length) ;
         },
         //将字符串中的占位符替换为对应的键值
@@ -712,15 +676,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return  '' ;
             });
         },
-        /**
-         * 用于拼接多行HTML片断,免去写<与>与结束标签之苦
-         * @param {String} tag 可带属性的开始标签
-         * @param {String} innerHTML 可选
-         * @param {Boolean} xml 可选 默认false,使用HTML模式,需要处理空标签
-         * @example var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
-         * console.log(html+"");
-         * @return {Function}
-         */
+        
         tag:function (start, content, xml){
             xml = !!xml
             var chain = function(start, content, xml){
@@ -786,14 +742,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
-        each : function(obj, fn, args ){
-            var go = 1, isArray = Array.isArray(args)
-            $.lang(obj).forEach( function (el, i){
-                if( go && fn.apply(el, isArray ? args : [el, i, obj]) === false){
-                    go = 0;
-                }
-            });
-        },
         dump : function(obj, indent) {
             indent = indent || "";
             if (obj === null)
@@ -890,6 +838,11 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     "Array,Function".replace($.rword, function(name){
         $["is"+name] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+name+"]";
+        }
+    });
+    "each,map".replace($.rword, function(name){
+        $[name] = function(obj, fn){
+            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn );
         }
     });
     if(Array.isArray){
@@ -1497,12 +1450,7 @@ $.define("support", function(){
     });
     return support;
 });
-/**
-2011.9.7 优化attrProp判定
-2011.9.16所有延时判定的部分现在可以立即判定了
-2011.9.23增加fastFragment判定
-2012.1.28有些特征嗅探必须连接到DOM树上才能进行
-*/
+
 //=========================================
 // 类工厂模块
 //==========================================
@@ -1644,20 +1592,32 @@ $.define("class", "lang",function(){
 //==================================================
 $.define("data", "lang", function(){
     //$.log("已加载data模块");
-    var remitter = /object|function/
+    var remitter = /object|function/, rbrace = /^(?:\{.*\}|\[.*\])$/;
     $.mix( $, {
-        memcache:{},
+        _db: {},
         // 读写数据
         data : function( target, name, data, pvt ) {
             if(target && remitter.test(typeof target)){//只处理HTML节点与普通对象
-                var id = target.uniqueNumber || (target.uniqueNumber = $.uuid++);
+                var id = $.getUid(target), isEl = target.nodeType === 1
                 if(name === "@uuid"){
                     return id;
                 }
-                var memcache = target.nodeType === 1 ? $.memcache: target;
-                var table = memcache[ "@data_"+id ] || (memcache[ "@data_"+id ] = {});
+                var database = isEl ? $._db: target,
+                table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {}),
+                _table =  table.data || (table.data = {});
+                if(isEl && !table.parsedAttrs){
+                    var attrs = target.attributes;
+                    //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
+                    for ( var i = 0, attr; attr = attrs[i++];) {
+                        name = attr.name;
+                        if ( name.indexOf( "data-" ) === 0 ) {
+                            $.parseData(target, name, id, _table);
+                        }
+                    }
+                    table.parsedAttrs = true;
+                }
                 if ( !pvt ) {
-                    table = table.data || (table.data = {});
+                    table = _table;
                 }
                 var getByName = typeof name === "string";
                 if ( name && typeof name == "object" ) {
@@ -1665,21 +1625,47 @@ $.define("data", "lang", function(){
                 }else if(getByName && data !== void 0){
                     table[ name ] = data;
                 }
-                return getByName ? table[ name ] : table;
+                if(getByName){
+                    return isEl && !pvt && name.indexOf("data-") ? $.parseData( target, name, id, table ) : table[ name ]
+                }else{
+                    return table
+                }
             }
         },//仅内部调用
         _data:function(target,name,data){
             return $.data(target, name, data, true)
         },
+        parseData: function(target, name, id, table){
+            if( (name + id) in table){//如果已经转换过
+                return table[ name + id ];
+            }else{
+                var data = target.getAttribute( name );
+                if ( typeof data === "string") {//转换
+                    try {
+                        data = data === "true" ? true :
+                        data === "false" ? false :
+                        data === "null" ? null :
+                        isFinite( data ) ? +data :
+                        rbrace.test( data ) ? $.parseJSON( data ) :
+                        data;
+                    } catch( e ) {}
+                    table[ name + id ] = data
+                }else{
+                    data = void 0;
+                }
+                return data;
+            }
+        },
         //移除数据
         removeData : function(target, name, pvt){
             if(target && remitter.test(typeof target)){
-                var id = target.uniqueNumber;
+                var id =  $.getUid(target);
                 if (  !id ) {
                     return;
                 }
-                var memcache = target.nodeType === 1  ? $.memcache : target;
-                var table = memcache["@data_"+id], clear = 1, ret = typeof name == "string" ;
+                var  clear = 1, ret = typeof name == "string",
+                database = target.nodeType === 1  ? $._db : target,
+                table = database["@data_"+id] ;
                 if ( table && ret ) {
                     if(!pvt){
                         table = table.data
@@ -1688,7 +1674,7 @@ $.define("data", "lang", function(){
                         ret = table[ name ];
                         delete table[ name ];
                     }
-                    var cache = memcache["@data_"+id];
+                    var cache = database["@data_"+id];
                         loop:
                         for(var key in cache){
                             if(key == "data"){
@@ -1703,7 +1689,7 @@ $.define("data", "lang", function(){
                         }
                 }
                 if(clear){
-                    delete memcache["@data_"+id];
+                    delete database["@data_"+id];
                 }
                 return ret;
             }
@@ -1712,26 +1698,22 @@ $.define("data", "lang", function(){
         mergeData:function(neo, src){
             var srcData = $._data(src), neoData = $._data(neo), events = srcData.events;
             if(srcData && neoData){
-                $.Object.merge(neoData, srcData);
+                $.Object.merge( neoData, srcData );
                 if(events){
-                    delete neoData.handle;
+                    delete neoData.callback;
                     neoData.events = {};
                     for ( var type in events ) {
                         for (var i = 0, obj ; obj =  events[ type ][i++]; ) {
-                            $.event.bind.call( neo, type + ( obj.namespace ? "." : "" ) + obj.namespace, obj.handler, obj.selector, obj.times );
+                            $.event.bind.call( neo, obj );
                         }
                     }
                 }
             }
         }
     });
-    
 });
 
-//2011.9.27 uniqueID改为uniqueNumber 简化data与removeData
-//2011.9.28 添加$._data处理内部数据
-//2011.10.21 强化mergeData，可以拷贝事件
-//2012.1.31 简化$.Object.merge的调用
+
 
 //$.query v5 开发代号Icarus
 $.define("query", function(){
@@ -2036,17 +2018,7 @@ $.define("query", function(){
         }
         return result;
     };
-    /**
-         * 选择器
-         * @param {String} expr CSS表达式
-         * @param {Node}   context 上下文（可选）
-         * @param {Array}  result  结果集(内部使用)
-         * @param {Array}  lastResult  上次的结果集(内部使用)
-         * @param {Boolean}flag_xml 是否为XML文档(内部使用)
-         * @param {Boolean}flag_multi 是否出现并联选择器(内部使用)
-         * @param {Boolean}flag_dirty 是否出现通配符选择器(内部使用)
-         * @return {Array} result
-         */
+    
     //http://webbugtrack.blogspot.com/
     var Icarus = $.query = function(expr, contexts, result, lastResult, flag_xml,flag_multi,flag_dirty){
         result = result || [];
@@ -2711,7 +2683,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             }
             //分支2:  让$实例与元素节点一样拥有ownerDocument属性
             var doc, nodes;//用作节点搜索的起点
-            if(/Array|NodeList|String/.test( $.type(context) )|| context && context.mass){//typeof context === "string"
+            if($.isArrayLike(context)){//typeof context === "string"
                 return $( context ).find( expr );
             }
             if ( expr.nodeType ) { //分支3:  处理节点参数
@@ -2953,15 +2925,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             //取得第一个元素的属性
             return length ? getter( elems[0], key ) : void 0;
         },
-        /**
-         * 将字符串转换为文档碎片，如果没有传入文档碎片，自行创建一个
-         * 有关innerHTML与createElement创建节点的效率可见<a href="http://andrew.hedges.name/experiments/innerhtml/">这里</a><br/>
-         * 注意，它能执行元素的内联事件，如<br/>
-         * <pre><code>$.parseHTML("<img src=1 onerror=alert(22) />")</code></pre>
-         * @param {String} html 要转换为节点的字符串
-         * @param {Document} doc 可选
-         * @return {FragmentDocument}
-         */
+        
         parseHTML: function( html, doc ){
             doc = doc || this.nodeType === 9  && this || document;
             html = html.replace( rxhtml, "<$1></$2>" ).trim();
@@ -3107,14 +3071,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         }
         return ret;
     }
-    /**
-     * 实现insertAdjacentHTML的增强版
-     * @param {mass}  nodes mass实例
-     * @param {String} type 方法名
-     * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
-     * @param {Document}  doc 执行环境所在的文档
-     * @return {mass} 还是刚才的mass实例
-     */
+    
     function manipulate( nodes, type, item, doc ){
         var elems = $.slice( nodes ).filter(function( el ){
             return el.nodeType === 1;//转换为纯净的元素节点数组
@@ -3137,9 +3094,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     $.implement({
         data: function( key, item ){
             return $.access( this, key, item, function( el, key ){
-                return  $.data( el, key );
-            }, function( el, key, item ){
-                $.data( el, key, item );
+                return  $.data( el, key, item );
             })
         },
         removeData: function( key, pv ) {
@@ -3198,8 +3153,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             var nodeName = clone.nodeName.toLowerCase();
             //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
             clone.clearAttributes();
-            //复制原对象的属性到克隆体中,但不包含原来的事件
-            clone.mergeAttributes( src );
+            //复制原对象的属性到克隆体中,但不包含原来的事件, ID,  NAME, uniqueNumber
+            clone.mergeAttributes( src,false );
             //IE6-8无法复制其内部的元素
             if ( nodeName === "object" ) {
                 clone.outerHTML = src.outerHTML;
@@ -3409,29 +3364,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
 });
 
-/*
-2011.7.11 dom["class"]改为dom["@class"]
-2011.7.26 对init与parseHTML进行重构
-2011.9.22 去掉isInDomTree 重构cloneNode,manipulate,parseHTML
-2011.10.7 移除isFormElement
-2011.10.9 将遍历模块合并到节点模块
-2011.10.12 重构index closest
-2011.10.20 修复rid的BUG
-2011.10.21 添加even odd这两个切片方法 重构html方法
-2011.10.23 增加rcheckEls成员,它是一个成员
-2011.10.27 修正init方法中doc的指向错误
-由 doc = this.ownerDocument = expr.ownerDocument || expr.nodeType == 9 && expr || document 改为
-doc = this.ownerDocument =  scope.ownerDocument || scope ;
-2011.10.29 优化$.parseHTML 在IE6789下去掉所有为修正createAll特性而添加的补丁元素
-（原来是添加一个文本节点\u200b，而现在是<br class="fix_create_all"/>）
-/http://d.hatena.ne.jp/edvakf/20100205/1265338487
-2011.11.5 添加get方法 init的context参数可以是类数组对象
-2011.11.6 outerHTML支持对文档对象的处理，html可以取得XML数据岛的innerHTML,修正init中scope与ownerDocument的取得
-2011.11.7 重构find， 支持不插入文档的节点集合查找
-2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
-2012.3.9 添加一些数组方法
- *
- */
+
 /*
  * 样式操作模块的补丁模块
  */
@@ -4208,11 +4141,7 @@ $.define("attr","support,node", function( support ){
         return "form" in node && (valOne[ node.tagName ] || node.type);
     }
     $.implement({
-        /**
-             *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
-             *  如$("body").addClass("aaa");$("body").addClass("aaa bbb");
-             *  <a href="http://www.cnblogs.com/rubylouvre/archive/2011/01/27/1946397.html">相关链接</a>
-             */
+        
         addClass: function( item ){
             if ( typeof item == "string") {
                 for ( var i = 0, el; el = this[i++]; ) {
@@ -4610,10 +4539,123 @@ $.define("attr","support,node", function( support ){
 2011.10.27 对prop attr val大重构
 */
 
-//==================================================
-// 事件发送器模块
-//==================================================
-$.define("target","data", function(){
+$.define("event_fix", !!document.dispatchEvent, function(){
+    //模拟IE678的reset,submit,change的事件代理
+    var submitWhich = $.oneObject("13,108"),
+    submitInput = $.oneObject("submit,image"),
+    submitType  = $.oneObject("text,password,textarea"),
+    rform  = /^(?:textarea|input|select)$/i ,
+    changeType = {
+        "select-one": "selectedIndex",
+        "select-multiple": "selectedIndex",
+        "radio": "checked",
+        "checkbox": "checked"
+    }
+    function changeNotify( e ){
+        if( e.propertyName === ( changeType[ this.type ] || "value") ){
+            $._data( this, "_just_changed", true );
+            $.event._dispatch( $._data( this, "publisher" ), "change", e );
+        }
+    }
+    function changeFire( e ){
+        if( !$._data( this,"_just_changed" ) ){
+            $.event._dispatch( $._data( this ,"publisher"), "change", e );
+        }else{
+            $.removeData( this, "_just_changed", true );
+        }
+    }
+    function delegate( fn ){ 
+        return function( src, selector, type ){
+            var adapter = $.event.eventAdapter,
+            fix = !adapter[ type ] || !adapter[ type ].check || adapter[ type ].check( src );
+            return (fix || selector) ? fn(src, type, fix) : false;
+        }
+    }
+    var facade = $.event = {
+        eventAdapter:{
+            //input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
+            input: {
+                check: function(src){
+                    return rform.test(src.tagName) && !/^select/.test(src.type);
+                },
+                bindType: "change",
+                delegateType: "change"
+            },
+            //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
+            reset: {
+                setup: delegate(function( src ){
+                    facade.bind.call( src, "click._reset keypress._reset", function( e ) {
+                        if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
+                            facade._dispatch( [ src ], "reset", e );
+                        }
+                    });
+                }),
+                teardown: delegate(function( src ){
+                    facade.unbind.call( src, "._reset" );
+                })
+            },
+            //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
+            submit: {
+                setup: delegate(function( src ){
+                    facade.bind.call( src, "click._submit keypress._submit", function( e ) {
+                        var el = e.target, type = el.type;
+                        if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
+                            facade._dispatch( [ src ], "submit", e );
+                        }
+                    });
+                }),
+                teardown: delegate(function( src ){
+                    facade.unbind.call( src, "._submit" );
+                })
+            },
+            change: {//change事件的冒泡情况 IE6-9全灭
+                check: function(src){
+                    return rform.test(src.tagName) && /radio|checkbox/.test(src.type)
+                },
+                setup: delegate(function( src, type, fix ){
+                    var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
+                    $._data( src, "_beforeactivate", $.bind( src, "beforeactivate", function() {
+                        var e = src.document.parentWindow.event, target = e.srcElement;
+                        //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
+                        if ( rform.test( target.tagName) && !subscriber[ target.uniqueNumber ] ) {
+                            subscriber[ target.uniqueNumber] = target;//表明其已注册
+                            var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
+                            publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
+                            facade.bind.call( target,"propertychange._change", changeNotify );
+                            //允许change事件可以通过fireEvent("onchange")触发
+                            if(type === "change"){
+                                $._data(src, "_change_fire", $.bind(target, "change", changeFire.bind(target, e) ));
+                            }
+                        }
+                    }));
+                    if( fix ){//如果是事件绑定
+                        src.fireEvent("onbeforeactivate")
+                    }
+                }),
+                teardown: delegate(function( src, els, i ){
+                    $.unbind( src, "beforeactive", $._data( src, "_beforeactivate") );
+                    $.unbind( src, "change", $._data(src, "_change_fire")  );
+                    els = $.removeData( src, "subscriber", true ) || {};
+                    for( i in els){
+                        $.unbind( els[i],"._change" );
+                        var publisher = $._data( els[i], "publisher");
+                        if(publisher){
+                            delete publisher[ src.uniqueNumber ];
+                        }
+                    }
+                })
+            }
+        }
+    }
+});
+
+
+
+
+//==========================================
+//  事件模块（包括伪事件对象，事件绑定与事件代理）
+//==========================================
+$.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     // $.log("已加载target模块")
     var fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
@@ -4636,25 +4678,46 @@ $.define("target","data", function(){
             (!m[2] || (attrs.id || {}).value === m[2]) &&
             (!m[3] || m[3].test( (attrs[ "class" ] || {}).value ))
             );
-    };
-    $.eventAdapter = {};
-    var facade = $.event = {
-        bind : function( types, fn, selector, times ){
+    }
+    //如果不存在添加一个
+    var facade = $.event = $.event || {};
+    //添加或增强二级属性eventAdapter
+    $.Object.merge(facade,{
+        eventAdapter:{
+            focus: {
+                delegateType: "focusin"
+            },
+            blur: {
+                delegateType: "focusout"
+            },
+            beforeunload: {
+                setup: function(src, _, _, fn ) {
+                    // We only want to do this special case on windows
+                    if ( $.type(src, "Window") ) {
+                        src.onbeforeunload = fn;
+                    }
+                },
+                teardown: function( src, _, _, fn ) {
+                    if ( src.onbeforeunload === fn ) {
+                        src.onbeforeunload = null;
+                    }
+                }
+            }
+        }
+    });
+    var eventAdapter  = $.event.eventAdapter
+    $.mix(facade,{
+        bind : function( hash ){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
-            //把需要的数据储存到里面,而现在我们就把一个叫@events的对象储放都它里面,
-            //而这个@event的表将用来放置各种事件类型与对应的回调函数
-            var target = this, events = $._data( target) , DOM =  $[ "@target" ] in target,
-            num = times || selector, all, tns ,type, namespace, adapter, item, queue, callback
-            if(target.nodeType === 3 || target.nodeType === 8 || !types ||  !fn  || !events) return ;
-
-            selector = selector && selector.length ? selector : false;
-            var uuid =  fn.uuid || (fn.uuid = $.uuid++ );
-            all = {
-                callback: fn,
-                uuid: uuid,
-                times: num > 0 ? num : Infinity
-            } //确保UUID，bag与callback的UUID一致
-            all.callback.uuid = all.uuid;
+            //把需要的数据储存到里面,而现在我们就把一个叫events的对象储放都它里面,
+            //而这个event的表将用来放置各种事件类型与对应的回调函数
+            var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
+            types = hash.type, fn = hash.callback,selector = hash.selector, callback;
+            if(target.nodeType === 3 || target.nodeType === 8 || !events){
+                return
+            }
+            hash.uuid =  $.getUid(fn); //确保UUID，bag与callback的UUID一致
+          
             if( DOM ){ //处理DOM事件
                 callback = events.callback ||  (events.callback = function( e ) {
                     return ((e || event).type !== fireType) ? facade.dispatch.apply( callback.target, arguments ) : void 0;
@@ -4664,24 +4727,22 @@ $.define("target","data", function(){
             }
             events = events.events || (events.events = {});
             //对多个事件进行绑定
-            types.replace( $.rword, function(type){
-                tns = rtypenamespace.exec( type ) || [];
-                type = tns[1];//取得事件类型
-                namespace = ( tns[2] || blank ).split( "." ).sort();//取得命名空间
-                //事件冒充只用于原生事件发送器
-                adapter = DOM && $.eventAdapter[ type ] || {};
-                type = (selector? adapter.delegateType : adapter.bindType ) || type;
-                adapter = DOM && $.eventAdapter[ type ] || {};
+            types.replace( $.rword, function( old ){
+                var 
+                tns = rtypenamespace.exec( old ) || [],//"focusin.aaa.bbb"
+                namespace = ( tns[2] || blank ).split( "." ).sort(),//取得命名空间 "aaa.bbb"
+                adapter = DOM && eventAdapter[ tns[1] ] || {},// focusin -> focus
+                type = (selector ? adapter.delegateType : adapter.bindType ) || tns[1],//focus
+
+                queue = events[ type ] = events[ type ] ||  [],  //创建事件队列
                 item = $.mix({
                     type: type,
                     origType: tns[1],
-                    selector: selector,
                     namespace: namespace.join(".")
-                }, all);
-                //创建事件队列
-                queue = events[ type ] = events[ type ] ||  [];
+                }, hash, false); 
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if( DOM && !queue.length  ){
+                    adapter = eventAdapter[ type ] || {};
                     if (!adapter.setup || adapter.setup( target, selector, item.origType, callback ) === false ) {
                         // 为此元素这种事件类型绑定一个全局的回调，用户的回调则在此回调中执行
                         $.bind(target, type, callback, !!selector)
@@ -4690,30 +4751,36 @@ $.define("target","data", function(){
                 addCallback( queue, item );//同一事件不能绑定重复回调
             });
         },
-        unbind: function( types, fn, selector ) {
+        //外部的API已经确保typesr至少为空字符串
+        unbind: function( hash, mappedTypes  ) {
             var target = this, events = $._data( target, "events");
-            if(!events) return;
-            var t, tns, type, origType, namespace, origCount, DOM =  $["@target"] in target,
+            if(!events ) return;
+            var types = hash.type || "", selector = hash.selector, fn = hash.callback,
+            tns, type, origType, namespace, origCount, DOM =  $["@target"] in target,
             j, adapter, queue, item;
-            types = DOM ? (types || blank).replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
-            types = (types || blank).match( $.rword ) || [];
-            for ( t = 0; t < types.length; t++ ) {
-                tns = rtypenamespace.exec( types[t] ) || [];
-                type = tns[1];
-                origType = type;
+            //将types进行映射并转换为数组
+            types = DOM ? types.replace( rhoverHack, "mouseover$1 mouseout$1" ) : types;
+            types =  types.match( $.rword ) || [];
+            for (var t = 0; t < types.length; t++ ) {
+                //"aaa.bbb.ccc" -> ["aaa.bbb.ccc", "aaa", "bbb.ccc"]
+                tns = rtypenamespace.exec( types[t] ) || []
+                origType = type = tns[1];
                 namespace = tns[2];
                 // 如果types只包含命名空间，则去掉所有拥有此命名空间的事件类型的回调
                 if ( !type  ) {
-                    namespace = namespace? "." + namespace : "";
                     for ( j in events ) {
-                        facade.unbind.call( target, j + namespace, fn, selector );
+                        facade.unbind.call( target, {
+                            type: j + types[t],//说明这个types[t]为命名空间
+                            selector: selector,
+                            callback: fn
+                        }, true );
                     }
-                    return;
+                    continue;
                 }
                 //如果使用事件冒充则找到其正确事件类型
-                adapter = $.eventAdapter[ type ] || {};
-                type = ( selector? adapter.delegateType: adapter.bindType ) || type;
-                queue = events[ type ] || [];
+                adapter = eventAdapter[ type ] || {};
+                type = ( selector ? adapter.delegateType: adapter.bindType ) || type;
+                queue =  events[ type ] || [];
                 origCount = queue.length;
                 namespace = namespace ? new RegExp("(^|\\.)" + namespace.split(".").sort().join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
                 //  namespace =  namespace?  namespace.split( "." ).sort().join(".") : null;
@@ -4721,12 +4788,11 @@ $.define("target","data", function(){
                 if ( fn || namespace || selector ) {
                     for ( j = 0; j < queue.length; j++ ) {
                         item = queue[ j ];
-                        if ( !fn || fn.uuid === item.uuid ) {//如果指定了回调，只检测其UUID
-                            if ( !namespace ||  namespace.test( item.namespace )  ) {//如果指定了命名空间
-                                if ( !selector || selector === item.selector || selector === "**" && item.selector ) {
-                                    queue.splice( j--, 1 );
-                                }
-                            }
+                        if ( ( mappedTypes || origType === item.origType ) &&
+                            ( !fn || fn.uuid === item.uuid ) &&//如果指定了回调，只检测其UUID
+                            ( !namespace || namespace.test( item.namespace ) ) &&//如果指定了命名空间
+                            ( !selector || selector === item.selector || selector === "**" && item.selector ) ) {
+                            queue.splice( j--, 1 );
                         }
                     }
                 } else {
@@ -4735,7 +4801,7 @@ $.define("target","data", function(){
                 }
                 if ( DOM && (queue.length === 0 && origCount !== queue.length) ) {//如果在回调队列的长度发生变化时才进行此分支
                     if ( !adapter.teardown || adapter.teardown( target, selector, origType, fn ) === false ) {
-                        $.unbind( target, type, $._data(target,"callback") );
+                        $.unbind( target, type, $._data( target, "callback") );
                     }
                     delete events[ type ];
                 }
@@ -4804,6 +4870,7 @@ $.define("target","data", function(){
             var win = ( this.ownerDocument || this.document || this ).parentWindow || window,
             event = facade.fix( e || win.event ),
             queue = $._data(this,"events");//这个其实是对象events
+  
             if (  queue ) {
                 queue = queue[ event.type] || [];//到此处时才是数组
                 event.currentTarget = this;
@@ -4821,7 +4888,7 @@ $.define("target","data", function(){
                         result = item.callback.apply( item.selector ? src : this, args );
                         item.times--;
                         if(item.times === 0){
-                            facade.unbind.call( this, event.type, item.callback, item.selector );
+                           facade.unbind.call( this, item)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
@@ -4839,7 +4906,15 @@ $.define("target","data", function(){
 
             return event.result;
         },
-
+        _dispatch: function( src, type, e ){
+            e = facade.fix( e );
+            e.type = type;
+            for(var i in src){
+                if(src.hasOwnProperty(i)){
+                    facade.dispatch.call( src[ i ], e );
+                }
+            }
+        },
         fix: function( event ){
             if( typeof event.namespace != "string" ){
                 var originalEvent = event
@@ -4889,7 +4964,7 @@ $.define("target","data", function(){
                     if ("wheelDelta" in originalEvent){
                         var delta = originalEvent.wheelDelta/120;
                         //opera 9x系列的滚动方向与IE保持一致，10后修正
-                        if(window.opera && window.opera.version() < 10)
+                        if(top.opera && opera.version() < 10)
                             delta = -delta;
                         event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
                     }else if("detail" in originalEvent){
@@ -4903,8 +4978,8 @@ $.define("target","data", function(){
             }
             return event;
         }
-    }
-    
+    });
+
     var jEvent = $.Event = function ( event ) {
         this.originalEvent = event.substr ? {} : event;
         this.type = event.type || event;
@@ -4948,60 +5023,34 @@ $.define("target","data", function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    $.target = {};
+    //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
+    $.EventTarget = {
+        uniqueNumber : $.getUid({}),
+        defineEvents : function( names ){
+            var events = [];
+            if(typeof names == "string"){
+                events = names.match( $.rword ) || [];
+            }else if($.isArray(names)){
+                events = names;
+            }
+            events.forEach(function(name){
+                var method = 'on'+name.replace(revent,function($, $1, $2) {
+                    return $2.toUpperCase();
+                });
+                if (!(method in this)) {
+                    this[method] = function() {
+                        return this.bind.apply(this, [].concat.apply([name], arguments));
+                    };
+                }
+            },this);
+        }
+    };
     "bind,unbind,fire".replace( $.rword, function( method ){
         $.target[ method ] = function(){
-            facade [method ].apply(this, arguments);
+            $.fn[ method ].apply(this, arguments);
             return this;
         }
     });
-    $.target.uniqueNumber = $.uuid++;
-    $.target.defineEvents = function( names ){
-        var events = [];
-        if(typeof names == "string"){
-            events = names.match( $.rword ) || [];
-        }else if($.isArray(names)){
-            events = names;
-        }
-        events.forEach(function(name){
-            var method = 'on'+name.replace(revent,function($, $1, $2) {
-                return $2.toUpperCase();
-            });
-            if (!(method in this)) {
-                this[method] = function() {
-                    return this.bind.apply(this, [].concat.apply([name], arguments));
-                };
-            }
-        },this);
-    }
-    
-});
-
-//2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
-//2011.9.17 事件发送器增加一个uniqueID属性
-//2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
-//2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
-//2011.9.29 简化bind与unbind
-//2011.10.13 模块名改为dispatcher
-//2011.10.23 简化facade.handle与fire
-//2011.10.26 更改命名空间的检测方法
-//2011.11.23 重构facade.fix与quickIs
-//2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
-//2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
-//2011.10.13 模块名改为target
-
-
-
-
-//http://davidwalsh.name/snackjs
-//http://microjs.com/
-//http://westcoastlogic.com/lawnchair/
-//https://github.com/madrobby/emile
-//http://www.bobbyvandersluis.com/articles/clientside_scripting/
-//==========================================
-//  事件模块（包括伪事件对象，事件绑定与事件代理）
-//==========================================
-$.define("event", "node,target",function(){
     // $.log("加载event模块成功");
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup";
@@ -5018,50 +5067,6 @@ $.define("event", "node,target",function(){
         return ret;
     };
 
-    var facade = $.event,
-    rform  = /^(?:textarea|input|select)$/i ,
-    adapter = $.eventAdapter = {
-        focus: {
-            delegateType: "focusin"
-        },
-        blur: {
-            delegateType: "focusout"
-        },
-
-        beforeunload: {
-            setup: function(src, _, _, fn ) {
-                // We only want to do this special case on windows
-                if ( $.type(src, "Window") ) {
-                    src.onbeforeunload = fn;
-                }
-            },
-            teardown: function( src, _, _, fn ) {
-                if ( src.onbeforeunload === fn ) {
-                    src.onbeforeunload = null;
-                }
-            }
-        }
-    };
-
-    function fixAndDispatch( src, type, e ){
-        e = facade.fix( e );
-        e.type = type;
-        for(var i in src){
-            if(src.hasOwnProperty(i)){
-                facade.dispatch.call( src[ i ], e );
-            }
-        }
-    }
-
-    if(!$.eventSupport("input", document.createElement("input"))){
-           adapter.input = {
-            check: function(src){
-                return rform.test(src.tagName) && !/^select/.test(src.type);
-            },
-            bindType: "change",
-            delegateType: "change"
-        }
-    }
     //用于在标准浏览器下模拟mouseenter与mouseleave
     //现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
     //opera11,FF10也支持这四个事件,同时它们也成为w3c DOM3 Event的规范
@@ -5069,7 +5074,7 @@ $.define("event", "node,target",function(){
     //http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
     if( !+"\v1" || !$.eventSupport("mouseenter")){
         "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_,orig, fix){
-            adapter[ orig ]  = {
+            eventAdapter[ orig ]  = {
                 setup: function( src ){//使用事件冒充
                     $._data( src, orig+"_handle", $.bind( src, fix, function( e ){
                         var parent = e.relatedTarget;
@@ -5078,7 +5083,7 @@ $.define("event", "node,target",function(){
                                 parent = parent.parentNode;
                             }
                             if ( parent !== src ) {
-                                fixAndDispatch( [ src ], orig, e );
+                                facade._dispatch( [ src ], orig, e );
                             }
                         } catch(err) { };
                     }));
@@ -5090,127 +5095,19 @@ $.define("event", "node,target",function(){
         });
     }
 
-    var delegate = function( fn ){
-        return function(src,selector, type){
-            var fix = !adapter[type] || !adapter[type].check || adapter[type].check(src);
-            if( fix || selector ){
-                fn(src, type, fix);
-            }else{
-                return false;
-            }
-        }
-    }
-
-    if( !document.dispatchEvent ){
-        //模拟IE678的reset,submit,change的事件代理
-        var 
-        submitWhich = $.oneObject("13,108"),
-        submitInput = $.oneObject("submit,image"),
-        submitType  = $.oneObject("text,password,textarea"),
-
-        changeType = {
-            "select-one": "selectedIndex",
-            "select-multiple": "selectedIndex",
-            "radio": "checked",
-            "checkbox": "checked"
-        }
-        function changeNotify( e ){
-            if( e.propertyName === ( changeType[ this.type ] || "value") ){
-                $._data( this, "_just_changed", true );
-                fixAndDispatch( $._data( this, "publisher" ), "change", e );
-            }
-        }
-        function changeFire( e ){
-            var el = this;
-            if( !$._data( el,"_just_changed" ) ){
-                fixAndDispatch( $._data( el ,"publisher"), "change", e );
-            }else{
-                $.removeData( el, "_just_changed", true );
-            }
-        }
-        $.mix( adapter, {
-            //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
-            reset: {
-                setup: delegate(function( src ){
-                    facade.bind.call( src, "click._reset keypress._reset", function( e ) {
-                        if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
-                            fixAndDispatch( [ src ], "reset", e );
-                        }
-                    });
-                }),
-                teardown: delegate(function( src ){
-                    facade.unbind.call( src, "._reset" );
-                })
-            },
-            //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
-            submit: {
-                setup: delegate(function( src ){
-                    facade.bind.call( src, "click._submit keypress._submit", function( e ) {
-                        var el = e.target, type = el.type;
-                        if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
-                            fixAndDispatch( [ src ], "submit", e );
-                        }
-                    });
-                }),
-                teardown: delegate(function( src ){
-                    facade.unbind.call( src, "._submit" );
-                })
-            },
-            change: {
-                check: function(src){
-                    return rform.test(src.tagName) && /radio|checkbox/.test(src.type)
-                },
-                setup: delegate(function( src, type, fix ){
-                    var subscriber = $._data( src, "subscriber", {} );//用于保存订阅者的UUID
-                    $._data( src, "_beforeactivate", $.bind( src, "beforeactivate", function() {
-                        var e = src.document.parentWindow.event, target = e.srcElement;
-                        //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( rform.test( target.tagName) && !subscriber[ target.uniqueNumber ] ) {
-                            subscriber[ target.uniqueNumber] = target;//表明其已注册
-                            var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ src.uniqueNumber] = src;//此孩子可能同时要向N个顶层元素报告变化
-                            facade.bind.call( target,"propertychange._change", changeNotify );
-                            //允许change事件可以通过fireEvent("onchange")触发
-                            if(type === "change"){
-                                $._data(src, "_change_fire",$.bind(target, "change", changeFire.bind(target, e) ))
-                            }
-                        }
-                    }));
-                    if( fix ){//如果是事件绑定
-                        src.fireEvent("onbeforeactivate")
-                    }
-                }),
-                teardown: delegate(function( src, els, i ){
-                    $.unbind( src, "beforeactive", $._data( src, "_beforeactivate") );
-                    $.unbind( src, "change", $._data(src, "_change_fire")  );
-                    els = $.removeData( src, "subscriber", true ) || {};
-                    for( i in els){
-                        $.unbind( els[i],"._change" );
-                        var publisher = $._data( els[i], "publisher");
-                        if(publisher){
-                            delete publisher[ src.uniqueNumber ];
-                        }
-                    }
-                })
-            }
-        });
-    }
-
-
-
     //在标准浏览器里面模拟focusin
     if( !$.eventSupport("focusin") ){
         "focusin_focus,focusout_blur".replace( /(\w+)_(\w+)/g, function(_,$1, $2){
             var notice = 0, focusinNotify = function (e) {
                 var src = e.target
                 do{//模拟冒泡
-                    var events = $._data( src,"events");
+                    var events = $._data( src, "events" );
                     if(events && events[$1]){
-                        fixAndDispatch( [ src ], $1, e );
+                        facade._dispatch( [ src ], $1, e );
                     }
                 } while (src = src.parentNode );
             }
-            adapter[ $1 ] = {
+            eventAdapter[ $1 ] = {
                 setup: function( ) {
                     if ( notice++ === 0 ) {
                         document.addEventListener( $2, focusinNotify, true );
@@ -5225,16 +5122,16 @@ $.define("event", "node,target",function(){
         });
     }
     try{
-        //FF3使用DOMMouseScroll代替标准的mousewheel事件
+        //FF需要用DOMMouseScroll事件模拟mousewheel事件
         document.createEvent("MouseScrollEvents");
-        adapter.mousewheel = {
+        eventAdapter.mousewheel = {
             bindType    : "DOMMouseScroll",
             delegateType: "DOMMouseScroll"
         }
         try{
             //可能末来FF会支持标准的mousewheel事件，则需要删除此分支
             document.createEvent("WheelEvent");
-            delete adapter.mousewheel;
+            delete eventAdapter.mousewheel;
         }catch(e){};
     }catch(e){};
     //当一个元素，或者其内部任何一个元素获得焦点的时候会触发这个事件。
@@ -5261,59 +5158,84 @@ $.define("event", "node,target",function(){
         hover: function( fnIn, fnOut ) {
             return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
         },
-        on: function( types, fn, selector, times ) {
-            if ( typeof types === "object" ) {
-                for (var type in types ) {
-                    this.on( type,  types[ type ], selector, times );
-                }
-                return this;
-            }
-            if(!types || !fn){//必须指定事件类型与回调
-                return this;
-            }
-            return this.each( function() {//转交dispatch模块去处理
-                facade.bind.call( this, types, fn, selector, times );
-            });
-        },
-        off: function( types, fn ) {
+        on: function( types, selector, fn, times ) {
+            //要处理times 与 selector不存在的情况
             if ( typeof types === "object" ) {
                 for ( var type in types ) {
-                    this.off( type,types[ type ], fn  );
+                    this.on( type, selector, types[ type ], fn );
                 }
                 return this;
             }
-            var args = arguments
-            return this.each(function() {
-                facade.unbind.apply( this, args );
+            var hash = {};
+            for(var i = 0 ; i < arguments.length; i++ ){
+                var el = arguments[i];
+                if(typeof el == "number"){
+                    hash.times = el
+                }else if(typeof el == "function"){
+                    hash.callback = el
+                }if(typeof el === "string"){
+                    if(hash.type != null){
+                        hash.selector = el.trim()
+                    }else{
+                        hash.type = el.trim()
+                    }
+                }
+            }
+            if( !hash.type || !hash.callback ){//必须指定事件类型与回调
+                return this;
+            }
+            hash.times = hash.times > 0  ? hash.times : Infinity;
+            hash.selector =  hash.selector ? quickParse( hash.selector ) : false
+            return this.each( function() {//转交dispatch模块去处理
+                facade.bind.call( this, hash );
             });
         },
-        one: function( types, fn ) {
-            return this.on(  types, fn, null, 1 );
+        delegate: function( selector, types, fn, times ) {
+            return this.on( types, selector, fn, times);
+        },
+        live: function( types, fn, times ) {
+            $( this.ownerDocument ).on( types, this.selector, fn, times );
+            return this;
         },
         bind: function( types, fn, times ) {
             return this.on( types, fn, times );
         },
-        unbind: function( types, fn ) {
-            return this.off( types, fn );
+        one: function( types, fn ) {
+            return this.on( types, fn, 1 );
         },
-
-        live: function( types,  fn, times ) {
-            $( this.ownerDocument ).on( types, fn, this.selector,times );
-            return this;
+        off: function( types, selector, fn ) {
+            if ( typeof types === "object" ) {
+                for ( var type in types ) {
+                    this.off( type, selector, types[ type ] );
+                }
+                return this;
+            }
+            var hash = {}
+            for(var i = 0 ; i < arguments.length; i++ ){
+                var el = arguments[i];
+                if(typeof el == "function"){
+                    hash.callback = el;
+                }if(typeof el === "string"){
+                    if(hash.type != null){
+                        hash.selector = el.trim();
+                    }else{
+                        hash.type = el.trim();
+                    }
+                }
+            }
+            return this.each(function() {
+                facade.unbind.call( this, hash );
+            });
         },
-        die: function( types, fn ) {
-            $( this.ownerDocument ).off( types, fn, this.selector || "**" );
-            return this;
-        },
-        undelegate: function( selector, types, fn ) {
+        undelegate: function(selector, types, fn ) {
             return arguments.length == 1? this.off( selector, "**" ) : this.off( types, fn, selector );
         },
-
-        delegate: function( selector, types, fn, times ) {
-            if(typeof selector === "string"){
-                selector = quickParse( selector ) || selector;
-            }
-            return this.on( types, fn, selector, times );
+        die: function( types, fn ) {
+            $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
+            return this;
+        },
+        unbind: function( types, fn ) {
+            return this.off( types, fn );
         },
         fire: function(  ) {
             var args = arguments;
@@ -5329,13 +5251,7 @@ $.define("event", "node,target",function(){
         }
     });
 });
-//2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
-//2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
-//2011.11.23 简化rquickIs
-//2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
-//2012.2.8 添加mouseenter的分支判定，增强eventSupport
-//2012.2.9 完美支持valuechange事件
-//1. 各浏览器兼容                  2. this指针指向兼容                  3. event参数传递兼容. 
+
 
 
 
@@ -6081,9 +5997,8 @@ $.define("flow", function(){
     }
 })
 
-//数据请求模块
-
-$.define("ajax","node,target", function(){
+//数据交互模块
+$.define("ajax","event", function(){
     //$.log("已加载ajax模块");
     var global = this, DOC = global.document, r20 = /%20/g,
     rCRLF = /\r?\n/g,
@@ -6094,7 +6009,7 @@ $.define("ajax","node,target", function(){
     rquery = /\?/,
     rurl = /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+))?)?/,
     // Document location
-    ajaxLocation
+    ajaxLocation;
     // #8138, IE may throw an exception when accessing
     // a field from window.location if document.domain has been set
     try {
@@ -6172,9 +6087,8 @@ $.define("ajax","node,target", function(){
         return opts;
     }
  
-    "get,post".replace($.rword,function(method){
+    "get,post".replace( $.rword, function( method ){
         $[ method ] = function( url, data, callback, type ) {
-            // shift arguments if data argument was omitted
             if ( $.isFunction( data ) ) {
                 type = type || callback;
                 callback = data;
@@ -6200,19 +6114,8 @@ $.define("ajax","node,target", function(){
             return $.get( url, data, callback, "json" );
         },
 
-        /**无刷新上传
-             * @param {String} url 提交地址
-             * @param {HTMLElement} 元素
-             * @param {Object} data 普通对象（用于添加额外参数）
-             * @param {Function} 正向回调
-             * with parameter<br/>
-             * 1. data returned from this request with type specified by dataType<br/>
-             * 2. status of this request with type String<br/>
-             * 3. XhrObject of this request , for details {@link IO.XhrObject}
-             * @param {String} [dataType] 注明要返回何种数据类型("xml" or "json" or "text")
-             * @returns {IO.XhrObject}
-             */
-        upload: function(url, form, data, callback, dataType) {
+        
+        upload: function( url, form, data, callback, dataType ) {
             if ($.isFunction(data)) {
                 dataType = callback;
                 callback = data;
@@ -6227,10 +6130,10 @@ $.define("ajax","node,target", function(){
                 success: callback
             });
         },
-        serialize : function(form) {
-            return $.param($.serializeArray(form));
+        serialize : function( form ) {//formToURL
+            return $.param($.serializeArray(form) );
         },
-        serializeArray : function( form ){
+        serializeArray: function( form ){//formToArray
             var ret = []
             // 不直接转换form.elements，防止以下情况：   <form > <input name="elements"/><input name="test"/></form>
             $.slice( form || [] ).forEach(function( elem ){
@@ -6253,7 +6156,7 @@ $.define("ajax","node,target", function(){
             });
             return ret;
         },
-        param : function( object ) {//objectToQuery
+        param : function( object ) {//arrayToURL
             var ret = [];
             function add( key, value ){
                 ret[ ret.length ] = encode(key) + '=' + encode(value);
@@ -6283,7 +6186,7 @@ $.define("ajax","node,target", function(){
         }
     });
  
-    var ajax = $.ajax = function(opts) {
+    var ajax = $.ajax = function( opts ) {
         if (!opts || !opts.url) {
             throw "参数必须为Object并且拥有url属性";
         }
@@ -6291,10 +6194,10 @@ $.define("ajax","node,target", function(){
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
         var dummyXHR = new $.XHR(opts), dataType = opts.dataType;
  
-        if(opts.form && opts.form.nodeType ==1){
+        if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
-        }else if(dataType == "jsonp"){
-            if(opts.crossDomain){
+        }else if( dataType == "jsonp" ){
+            if( opts.crossDomain ){
                 ajax.fire("start", dummyXHR, opts.url,opts.jsonp);//用于jsonp请求
                 dataType = "script"
             }else{
@@ -6308,11 +6211,10 @@ $.define("ajax","node,target", function(){
         if (opts.contentType) {
             dummyXHR.setRequestHeader("Content-Type", opts.contentType);
         }
- 
         //添加dataType所需要的Accept首部
         dummyXHR.setRequestHeader( "Accept", accepts[ dataType ] ? accepts[ dataType ] +  ", */*; q=0.01"  : accepts[ "*" ] );
         for (var i in opts.headers) {
-            dummyXHR.setRequestHeader(i, opts.headers[ i ]);
+            dummyXHR.setRequestHeader( i, opts.headers[ i ] );
         }
  
         "Complete Success Error".replace( $.rword, function(name){
@@ -6334,10 +6236,10 @@ $.define("ajax","node,target", function(){
  
         try {
             dummyXHR.state = 1;//已发送
-            transport.send();
+            transport.request();
         } catch (e) {
             if (dummyXHR.status < 2) {
-                dummyXHR.callback(-1, e);
+                dummyXHR.dispatch( -1, e );
             } else {
                 $.log(e);
             }
@@ -6345,13 +6247,11 @@ $.define("ajax","node,target", function(){
         return dummyXHR;
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    $.mix(ajax, $.target);
+    $.mix(ajax, $.EventTarget);
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
-    /**
-         * XHR类,用于模拟原生XMLHttpRequest的所有行为
-         */
+    
     $.XHR = $.factory({
-        implement:$.target,
+        implement:$.EventTarget,
         init:function(option){
             $.mix(this, {
                 responseData:null,
@@ -6369,10 +6269,8 @@ $.define("ajax","node,target", function(){
                 transport:null
             });
             this.defineEvents("complete success error");
-            $.log(this.requestHeaders)
             this.setOptions("options",option);//创建一个options保存原始参数
         },
- 
         fire: function(type){
             var target = this, table = $._data( target,"events") ,args = $.slice(arguments,1);
             if(!table) return;
@@ -6383,12 +6281,10 @@ $.define("ajax","node,target", function(){
                 }
             }
         },
- 
         setRequestHeader: function(name, value) {
             this.requestHeaders[ name ] = value;
             return this;
         },
- 
         getAllResponseHeaders: function() {
             return this.state === 2 ? this.responseHeadersString : null;
         },
@@ -6414,21 +6310,14 @@ $.define("ajax","node,target", function(){
         abort: function(statusText) {
             statusText = statusText || "abort";
             if (this.transport) {
-                this.transport._callback(0, 1);
+                this.transport.respond(0, 1);
             }
-            this.callback(0, statusText);
+            this.dispatch(0, statusText);
             return this;
         },
-        /**
-             * 用于触发success,error,complete等回调
-             * http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-             * @param {Number} status 状态码
-             * @param {String} statusText 对应的扼要描述
-             */
-        callback:function(status, statusText) {
+        
+        dispatch: function(status, statusText) {
             // 只能执行一次，防止重复执行
-            // 例如完成后，调用 abort
-            // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
             if (this.state == 2) {//2:已执行回调
                 return;
             }
@@ -6440,50 +6329,48 @@ $.define("ajax","node,target", function(){
                     statusText = "notmodified";
                     isSuccess = true;
                 } else {
-                    var text = this.responseText, xml = this.responseXML,dataType = this.options.dataType;
                     try{
-                        $.log(text)
-                        this.responseData = converters[dataType](this, text, xml);
+                        this.responseData = converters[this.options.dataType](this, this.responseText, this.responseXML);
                         statusText = "success";
                         isSuccess = true;
-                        $.log("dummyXHR.callback success");
+                        $.log("dummyXHR.dispatch success");
                     } catch(e) {
-                        $.log("dummyXHR.callback parsererror")
+                        $.log("dummyXHR.dispatch parsererror")
                         statusText = "parsererror : " + e;
                     }
                 }
  
+            }else  if (status < 0) {
+                status = 0;
             }
-            else {
-                if (status < 0) {
-                    status = 0;
-                }
-            }
- 
             this.status = status;
             this.statusText = statusText;
             if (this.timeoutID) {
                 clearTimeout(this.timeoutID);
             }
+            // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
             if (isSuccess) {
                 this.fire("success",this.responseData,statusText);
+                ajax.fire("success");
             } else {
                 this.fire("error",this.responseData,statusText);
+                ajax.fire("error");
             }
             this.fire("complete",this.responseData,statusText);
+            ajax.fire("complete");
             this.transport = undefined;
         }
     });
  
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
-    //【XMLHttpRequest】传送器，专门用于上传
     var s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
     "ActiveXObject('Msxml2.XMLHTTP.3.0')",
     "ActiveXObject('Msxml2.XMLHTTP')",
     "ActiveXObject('Microsoft.XMLHTTP')"];
-    if( !-[1,] && global.ScriptEngineMinorVersion() === 7 && location.protocol === "file:"){
-        s.shift();
+    if(!+"\v1"){
+        var v = DOC.documentMode;
+        s[0] =  v == 8 ? "XDomainRequest" : location.protocol === "file:" ? "!" : s[0]
     }
     for(var i = 0 ,axo;axo = s[i++];){
         try{
@@ -6493,15 +6380,15 @@ $.define("ajax","node,target", function(){
             }
         }catch(e){}
     }
-    if ($.xhr) {
+    if ( $.xhr ) {
         var nativeXHR = new $.xhr(), allowCrossDomain = false;
         if ("withCredentials" in nativeXHR) {
             allowCrossDomain = true;
         }
-        //添加通用XMLHttpRequest传送器
+        //【XMLHttpRequest】传送器
         transports._default =  $.factory({
             //发送请求
-            send:function() {
+            send: function() {
                 var self = this,
                 dummyXHR = self.dummyXHR,
                 options = dummyXHR.options;
@@ -6509,7 +6396,6 @@ $.define("ajax","node,target", function(){
                 if (options.crossDomain && !allowCrossDomain) {
                     throw "do not allow crossdomain xhr !"
                 }
- 
                 var nativeXHR = new $.xhr(), i;
                 self.xhr = nativeXHR;
                 if (options.username) {
@@ -6536,37 +6422,40 @@ $.define("ajax","node,target", function(){
                 nativeXHR.send(options.hasContent && options.data || null);
                 //在同步模式中,IE6,7可能会直接从缓存中读取数据而不会发出请求,因此我们需要手动发出请求
                 if (!options.async || nativeXHR.readyState == 4) {
-                    self._callback();
+                    self.respond();
                 } else {
-                    nativeXHR.onreadystatechange = function() {
-                        self._callback();
+                    if (nativeXHR.onerror === null) { //如果支持onerror, onload新API
+                        nativeXHR.onload =  nativeXHR.onerror = function (e) {
+                            this.readyState = 4;//IE9 
+                            this.status = e.type === "load" ? 200 : 500;
+                            self.respond();
+                        };
+                    } else {
+                        nativeXHR.onreadystatechange = function() {
+                            self.respond();
+                        }
                     }
                 }
             },
- 
             //用于获取原始的responseXMLresponseText 修正status statusText
             //第二个参数为1时中止清求
-            _callback:function(event, isAbort) {
-                // Firefox throws exceptions when accessing properties
-                // of an xhr when a network error occured
+            respond: function(event, abort) {
+                // 如果网络问题时访问XHR的属性，在FF会抛异常
                 // http://helpful.knobs-dials.com/index.php/Component_returned_failure_code:_0x80040111_(NS_ERROR_NOT_AVAILABLE)
+                var self = this,nativeXHR = self.xhr, dummyXHR = self.dummyXHR, detachEvent = false;
                 try {
-                    var self = this,nativeXHR = self.xhr, dummyXHR = self.dummyXHR;
-                    if (isAbort || nativeXHR.readyState == 4) {
-                        nativeXHR.onreadystatechange = $.noop;
-                        if (isAbort) {
-                            // 完成以后 abort 不要调用
-                            if (nativeXHR.readyState !== 4) {
+                    if (abort || nativeXHR.readyState == 4) {
+                        detachEvent = true;
+                        if (abort) {
+                            if (nativeXHR.readyState !== 4) {  // 完成以后 abort 不要调用
                                 //IE的XMLHttpRequest.abort实现于 MSXML 3.0+
                                 //http://blogs.msdn.com/b/xmlteam/archive/2006/10/23/using-the-right-version-of-msxml-in-internet-explorer.aspx
-                                try{
-                                    nativeXHR.abort &&  nativeXHR.abort();
-                                }catch(e){};
+                                nativeXHR.abort();
                             }
                         } else {
-                            var status = nativeXHR.status;
+                            var status = nativeXHR.status,
+                            xml = nativeXHR.responseXML;
                             dummyXHR.responseHeadersString = nativeXHR.getAllResponseHeaders();
-                            var xml = nativeXHR.responseXML;
                             // Construct response list
                             if (xml && xml.documentElement /* #4958 */) {
                                 dummyXHR.responseXML = xml;
@@ -6576,6 +6465,7 @@ $.define("ajax","node,target", function(){
                             try {
                                 var statusText = nativeXHR.statusText;
                             } catch(e) {
+                                $.log("xhr statustext error : " + e);
                                 statusText = "";
                             }
                             //用于处理特殊情况,如果是一个本地请求,只要我们能获取数据就假当它是成功的
@@ -6586,45 +6476,45 @@ $.define("ajax","node,target", function(){
                             } else if (status === 1223) {
                                 status = 204;
                             }
-                            dummyXHR.callback(status, statusText);
+                            dummyXHR.dispatch(status, statusText);
                         }
                     }
                 } catch (firefoxAccessException) {
-                    $.log(firefoxAccessException)
-                    nativeXHR.onreadystatechange = $.noop;
-                    if (!isAbort) {
-                        dummyXHR.callback(-1, firefoxAccessException);
+                    detachEvent = true;
+                    $.log(firefoxAccessException);
+                    if (!abort) {
+                        dummyXHR.dispatch(-1, firefoxAccessException+"");
+                    }
+                }finally{
+                    if(detachEvent){
+                        nativeXHR.onerror = nativeXHR.onload = nativeXHR.onreadystatechange = $.noop;
                     }
                 }
             }
         });
- 
     }
     //【script节点】传送器，只用于跨域的情况
     transports.script = $.factory({
-        send:function() {
-            var self = this,
-            dummyXHR = self.dummyXHR,
-            options = dummyXHR.options,
+        request: function() {
+            var self = this, dummyXHR = self.dummyXHR, options = dummyXHR.options,
             head = $.head,
             script = self.script = DOC.createElement("script");
             script.async = "async";
             $.log("ScriptTransport.sending.....");
             if (options.charset) {
-                script.charset = options.charset
+                script.charset = options.charset;
             }
             //当script的资源非JS文件时,发生的错误不可捕获
             script.onerror = script.onload = script.onreadystatechange = function(e) {
-                e = e || global.event;
-                self._callback((e.type || "error").toLowerCase());
+                e = e || event;
+                self.respond((e.type || "error").toLowerCase());
             };
             script.src = options.url
             head.insertBefore(script, head.firstChild);
         },
  
-        _callback:function(event, isAbort) {
-            var node = this.script,
-            dummyXHR = this.dummyXHR;
+        respond: function(event, isAbort) {
+            var node = this.script, dummyXHR = this.dummyXHR;
             if (isAbort || $.rreadystate.test(node.readyState)  || event == "error"  ) {
                 node.onerror = node.onload = node.onreadystatechange = null;
                 var parent = node.parentNode;
@@ -6634,11 +6524,11 @@ $.define("ajax","node,target", function(){
                 }
                 //如果没有中止请求并没有报错
                 if (!isAbort && event != "error") {
-                    dummyXHR.callback(200, "success");
+                    dummyXHR.dispatch(200, "success");
                 }
                 // 非 ie<9 可以判断出来
                 else if (event == "error") {
-                    dummyXHR.callback(500, "scripterror");
+                    dummyXHR.dispatch(500, "scripterror");
                 }
             }
         }
@@ -6676,7 +6566,7 @@ $.define("ajax","node,target", function(){
         var input = DOC.createElement("input"), ret = [];
         input.type = 'hidden';
         $.serializeArray(data).forEach(function(obj){
-            var elem =  input.cloneNode(true);
+            var elem = input.cloneNode(true);
             elem.name = obj.name;
             elem.value = obj.value;
             form.appendChild(elem);
@@ -6687,9 +6577,8 @@ $.define("ajax","node,target", function(){
     //【iframe】传送器，专门用于上传
     //http://www.profilepicture.co.uk/tutorials/ajax-file-upload-xmlhttprequest-level-2/ 上传
     transports.iframe = $.factory({
-        send:function() {
-            var self = this,
-            dummyXHR = self.dummyXHR,
+        request: function() {
+            var dummyXHR = this.dummyXHR,
             options = dummyXHR.options,
             form = options.form
             //form.enctype的值
@@ -6702,7 +6591,6 @@ $.define("ajax","node,target", function(){
                 enctype:form.enctype,
                 method:form.method
             };
- 
             var iframe = createIframe(dummyXHR, this);
             //必须指定method与enctype，要不在FF报错
             //“表单包含了一个文件输入元素，但是其中缺少 method=POST 以及 enctype=multipart/form-data，所以文件将不会被发送。”
@@ -6714,18 +6602,18 @@ $.define("ajax","node,target", function(){
             this.fields = options.data ? addDataToForm(options.data, form) : [];
             this.form = form;//一个表单元素
             $.log("iframe transport...");
-            $(iframe).bind("load",this._callback).bind("error",this._callback);
+            $(iframe).bind("load",this.respond).bind("error",this.respond);
             form.submit();
         },
  
-        _callback:function(event  ) {
+        respond: function( event  ) {
             var iframe = this,
-            transport =  iframe.transport;
+            transport = iframe.transport;
             // 防止重复调用 , 成功后 abort
             if (!transport) {
                 return;
             }
-            $.log("transports.iframe _callback")
+            $.log("transports.iframe respond")
             var form = transport.form,
             eventType = event.type,
             dummyXHR = transport.dummyXHR;
@@ -6747,9 +6635,9 @@ $.define("ajax","node,target", function(){
                     // response is a xml document
                     dummyXHR.responseXML = doc;
                 }
-                dummyXHR.callback(200, "success");
+                dummyXHR.dispatch(200, "success");
             } else if (eventType == 'error') {
-                dummyXHR.callback(500, "error");
+                dummyXHR.dispatch(500, "error");
             }
             for(var i in transport.backups){
                 form[i] = transport.backups[i];
@@ -6758,14 +6646,13 @@ $.define("ajax","node,target", function(){
             transport.fields.forEach(function(elem){
                 elem.parentNode.removeChild(elem);
             });
-            $(iframe).unbind("load",transport._callback).unbind("error",transport._callback);
+            $(iframe).unbind("load",transport.respond).unbind("error",transport.respond);
             iframe.clearAttributes &&  iframe.clearAttributes();
             setTimeout(function() {
                 // Fix busy state in FF3
                 iframe.parentNode.removeChild(iframe);
                 $.log("iframe.parentNode.removeChild(iframe)")
             }, 0);
- 
         }
     });
  
@@ -6775,51 +6662,9 @@ $.define("ajax","node,target", function(){
 //将会传送器的abort方法上传到$.XHR.abort去处理
 //修复serializeArray的bug
 //对XMLHttpRequest.abort进行try...catch
+//2012.3.31
+//v2 大重构,支持XMLHttpRequest
 
 
 }( this, this.document );
-/**
- 2011.7.11
-@开头的为私有的系统变量，防止人们直接调用,
-dom.check改为dom["@emitter"]
-dom.namespace改为dom["mass"]
-去掉无用的dom.modules
-优化exports方法
-2011.8.4
-强化dom.log，让IE6也能打印日志
-重构fixOperaError与resolveCallbacks
-将provide方法合并到require中去
-2011.8.7
-重构define,require,resolve
-添加"@modules"属性到dom命名空间上
-增强domReady传参的判定
-2011.8.18 应对HTML5 History API带来的“改变URL不刷新页面”技术，让URL改变时让namespace也跟着改变！
-2011.8.20 去掉dom.K,添加更简单dom.noop，用一个简单的异步列队重写dom.ready与错误堆栈dom.stack
-2011.9.5  强化dom.type
-2011.9.19 强化dom.mix
-2011.9.24 简化dom.bind 添加dom.unbind
-2011.9.28 dom.bind 添加返回值
-2011.9.30 更改是否在顶层窗口的判定  global.frameElement == null --> self.eval === top.eval
-2011.10.1
-更改dom.uuid为dom["@uuid"],dom.basePath为dom["@path"]，以示它们是系统变量
-修复dom.require BUG 如果所有依赖模块之前都加载执行过，则直接执行回调函数
-移除dom.ready 只提供dom(function(){})这种简捷形式
-2011.10.4 强化对IE window的判定, 修复dom.require BUG dn === cn --> dn === cn && !callback._name
-2011.10.9
-简化fixOperaError中伪dom命名空间对象
-优化截取隐藏命名空间的正则， /(\W|(#.+))/g --〉  /(#.+|\\W)/g
-2011.10.13 dom["@emitter"] -> dom["@target"]
-2011.10.16 移除XMLHttpRequest的判定，回调函数将根据依赖列表生成参数，实现更彻底的模块机制
-2011.10.20 添加error方法，重构log方法
-2011.11.6  重构uuid的相关设施
-2011.11.11 多版本共存
-2011.12.19 增加define方法
-2011.12.22 加载用iframe内增加$变量,用作过渡.
-2012.1.15  更换$为命名空间
-2012.1.29  升级到v15
-2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
-2012.2.3 $.define的第二个参数可以为boolean, 允许文件合并后，在标准浏览器跳过补丁模块
-2012.2.23 修复内部对象泄漏，导致与外部$变量冲突的BUG
-不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
-*/
