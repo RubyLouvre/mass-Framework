@@ -18,21 +18,11 @@ $.define("data", "lang", function(){
                 _table =  table.data || (table.data = {});
                 if(isEl && !table.parsedAttrs){
                     var attrs = target.attributes;
-                    //将HTML5单一的字符串数据转化为mass多元化的数据
-                    for ( var i = 0, attr, val; attr = attrs[i++];) {
-                        name = attr.name, val = attr.value
-                        if ( name.indexOf( "data-" ) === 0 && typeof  value == "string" ) {
-                            try {
-                                data = val === "true" ? true :
-                                val === "false" ? false :
-                                val === "null" ? null :
-                                isFinite( val ) ? +val :
-                                rbrace.test( val ) ? $.parseJSON( val ) :
-                                val;
-                            } catch( e ) {
-                                val = undefined
-                            }
-                            _table[ name + id ] = val
+                    //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
+                    for ( var i = 0, attr; attr = attrs[i++];) {
+                        name = attr.name;
+                        if ( name.indexOf( "data-" ) === 0 ) {
+                            $.parseData(target, name, id, _table);
                         }
                     }
                     table.parsedAttrs = true;
@@ -46,11 +36,36 @@ $.define("data", "lang", function(){
                 }else if(getByName && data !== void 0){
                     table[ name ] = data;
                 }
-                return getByName ? table[ name + id ] || table[ name ] : table;
+                if(getByName){
+                    return isEl && !pvt && name.indexOf("data-") ? $.parseData( target, name, id, table ) : table[ name ]
+                }else{
+                    return table
+                }
             }
         },//仅内部调用
         _data:function(target,name,data){
             return $.data(target, name, data, true)
+        },
+        parseData: function(target, name, id, table){
+            if( (name + id) in table){//如果已经转换过
+                return table[ name + id ];
+            }else{
+                var data = target.getAttribute( name );
+                if ( typeof data === "string") {//转换
+                    try {
+                        data = data === "true" ? true :
+                        data === "false" ? false :
+                        data === "null" ? null :
+                        isFinite( data ) ? +data :
+                        rbrace.test( data ) ? $.parseJSON( data ) :
+                        data;
+                    } catch( e ) {}
+                    table[ name + id ] = data
+                }else{
+                    data = void 0;
+                }
+                return data;
+            }
         },
         //移除数据
         removeData : function(target, name, pvt){
