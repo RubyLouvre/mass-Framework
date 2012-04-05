@@ -1,5 +1,5 @@
 //=========================================
-// 模块加载模块（核心模块）2012.1.29 by 司徒正美
+// 模块加载模块（种子模块）2012.1.29 by 司徒正美
 //=========================================
 void function( global, DOC ){
     var
@@ -154,7 +154,7 @@ void function( global, DOC ){
                 global.console.log( text );
             }
         },
-        uuid: 1,
+        uuid: commonNs.uuid,
         getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
             return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
