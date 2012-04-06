@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.query</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+            .sample1{
+                background: #9932CC;
+            }
+            .sample1 div { width:60px; height:60px; margin:5px; float:left;
+                           background:green; border:10px outset;
+                           cursor:pointer; }
+            .sample1 p { color:red; margin:0; clear:left; }
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            $.require("ready,event,css",function(){
+                var n = 0;
+                var divs = $(".sample1 div").one("click", function(){
+                    var index = divs.index(this);
+                    $(this).css({ borderStyle:"inset",cursor:"auto" });
+                    $(".sample1 p").text("Div at index #" + index + " clicked." +
+                        "  That's " + ++n + " total clicks.");
+                });
+            });
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.query(expr, context)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>选择器引擎的入口，第一个参数为CSS表达式，第二参数为搜索起点（元素节点或文档对象）。</p>
+        <p>$.query(expr, context)相当于context.querySelectorAll(expr)，为此，不建议使用自定义伪类（冒号起头的表达式），
+            以便在IE8+，FF3.5+,chrome, opera10等浏览器中直接使用原生的querySelectorAll API。</p>
+        <p>有关querySelectorAll的使用可查看<a href="https://developer.mozilla.org/En/DOM/Document.querySelectorAll">这里</a></p>
+
+    </article>
+</body>
+</html>

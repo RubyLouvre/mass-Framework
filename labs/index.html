@@ -4,19 +4,41 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script type="text/javascript" src="../src/doc/public/js/mass_merge.js">
+        <script type="text/javascript" src="../src/mass.js">
 
         </script>
         <script>
-            $.require("ready,event,attr",function(){
+            $.require("ready,node,data",function(){
               
-                $(".aaa").click(function(){
+                /*  $(".aaa").click(function(){
                     $.log(this.uniqueNumber)
                 });
                 $(".aaa").clone(true).addClass("blue").appendTo("body");
                 $(document).click(function(){
                     $.log("document")
-                })
+                })*/
+                //   $.require("ready,data",function(){
+                var el = $("#test")[0]
+                var data = $.parseData(el,"data-obj");
+                $.log($.type( data ),true);
+                $.log($.dump(data),true);
+                var array = $.parseData(el,"data-arr");
+                $.log($.type( array ),true);
+                $.log($.dump(array),true);
+                var nan = $.parseData(el,"data-nan");
+                $.log($.type( nan ),true);
+                $.log($.dump( nan ),true);
+                 var str = $.parseData(el,"data-str");
+                $.log($.type( str ),true);
+                $.log($.dump( str ),true);
+                //   });
+
+             
+                /*   var  el =  $(".aaa")[0];
+                $.log($.data(el,"oooo"));
+                $.data(el,"oooo","ccc");
+                $.log($.data(el,"oooo"));
+                 */
             })
         </script>
         <style>
@@ -37,6 +59,7 @@
         </style>
     </head>
     <body>
+        <div id="test" data-obj="{a:'a',b:'b',c:'c'}" data-arr="[1,2,3,4]" data-nan="NaN" data-str="aaa"></div>
         <div class="aaa">
 
         </div>

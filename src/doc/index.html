@@ -100,19 +100,19 @@
 
             $.require("ready,more/menu,more/api",function( _,_,api ){
                 var pathMap = {
-                    "模块加载模块": "core/$",
-                    "特征嗅探模块": "support/$",
-                    "语言扩展模块": "lang/$",
-                    "类工厂模块":   "class/$",
-                    "选择器模块":   "query/$",
-                    "数据缓存模块": "data/$",
-                    "节点操作模块": "node/$",
-                    "属性操作模块": "attr/$",
-                    "事件模块":  "event/$",
-                    "样式操作模块": "css/$",
-                    "动画模块":     "fx/$",
-                    "操作流模块":   "flow/$",
-                    "AJAX模块":     "ajax/$"
+                    "模块加载模块":  "core/$",
+                    "特征侦探模块":  "support/$",
+                    "语言扩展模块":  "lang/$",
+                    "类工厂模块":    "class/$",
+                    "选择器模块":    "query/$",
+                    "数据缓存模块":  "data/$",
+                    "节点模块":      "node/$",
+                    "属性模块":      "attr/$",
+                    "事件模块":      "event/$",
+                    "样式模块":      "css/$",
+                    "动画模块":      "fx/$",
+                    "操作流模块":    "flow/$",
+                    "数据交互模块":  "ajax/$"
                 }
                 var makeData = function( json, path ){
                     return  Object.keys( json ).map(function(key){
@@ -146,7 +146,7 @@
                     }
                 });
                 var iframe = $("#iframe")[0];
-                var rskip = /\._|\\_|\:|\@|Map|Adapter|Object|Array|Number|String/
+                var rskip = /\._|\\_|\:|\@|Map|Adapter|^Object|Array|Number|String/
                 menu.delegate(".menu_item", "click", function(){
                     var path = $(this).attr("path");
                     if(rskip.test(path)){

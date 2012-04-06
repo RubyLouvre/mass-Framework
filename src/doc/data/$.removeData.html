@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta charset="utf-8" />        <title>$.removeData</title>
+        <meta charset="utf-8" />
+        <title>$.removeData</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
         <script src="../public/js/shCore.js" type="text/javascript" ></script>
@@ -17,9 +18,9 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-var exec1 = function(){
+            var exec1 = function(){
 
-                $.require("data,spec",function(){
+                $.require("ready,data",function(){
                     var a = {};
                     $.data(a,"name","司徒正美");
                     $.log($.dump(a),true);
@@ -27,7 +28,7 @@ var exec1 = function(){
                     $.log($.dump(a),true);
                 });
             
-}
+            }
         </script>
     </head>
     <body>
@@ -46,7 +47,7 @@ var exec1 = function(){
         <p>如果指定了name，则会返回与之对应的值，否则为undefined。</p>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
-                $.require("data,spec",function(){
+                $.require("ready,data",function(){
                     var a = {};
                     $.data(a,"name","司徒正美");
                     $.log($.dump(a),true);
@@ -54,7 +55,7 @@ var exec1 = function(){
                     $.log($.dump(a),true);
                 });
             </pre>
-            
+
             <button onclick="exec1()">点我，执行代码</button>
         </fieldset>
 

@@ -1,5 +1,5 @@
 //=========================================
-// 模块加载模块（核心模块）2012.1.29 by 司徒正美
+// 模块加载模块（种子模块）2012.1.29 by 司徒正美
 //=========================================
 void function( global, DOC ){
     var
@@ -126,7 +126,6 @@ void function( global, DOC ){
                 global.console.log( text );
             }
         },
-        uuid: 1,
         getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
             return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
@@ -812,7 +811,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     });
     "each,map".replace($.rword, function(name){
         $[name] = function(obj, fn){
-            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn );
+            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn ).value();
         }
     });
     if(Array.isArray){
@@ -1233,7 +1232,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
-                fn.call(scope, target[name], name, target);
+               return fn.call(scope, target[name], name, target);
             }, target);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
@@ -1525,7 +1524,7 @@ $.define("class", "lang",function(){
 //==================================================
 $.define("data", "lang", function(){
     //$.log("已加载data模块");
-    var remitter = /object|function/, rbrace = /^(?:\{.*\}|\[.*\])$/;
+    var remitter = /object|function/;
     $.mix( $, {
         _db: {},
         // 读写数据
@@ -1535,31 +1534,33 @@ $.define("data", "lang", function(){
                 if(name === "@uuid"){
                     return id;
                 }
-                var database = isEl ? $._db: target,
-                table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {}),
-                _table =  table.data || (table.data = {});
+                var getByName = typeof name === "string",
+                database = isEl ? $._db: target,
+                table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
+                    data:{}
+                });
+                var inner = table
                 if(isEl && !table.parsedAttrs){
                     var attrs = target.attributes;
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
                         var key = attr.name;
                         if ( key.indexOf( "data-" ) === 0 ) {
-                            $.parseData(target, key, id, _table);
+                            $.parseData(target, key, id, table.data);
                         }
                     }
                     table.parsedAttrs = true;
                 }
                 if ( !pvt ) {
-                    table = _table;
+                    table = table.data;
                 }
-                var getByName = typeof name === "string";
                 if ( name && typeof name == "object" ) {
                     $.mix(table, name);
                 }else if(getByName && data !== void 0){
                     table[ name ] = data;
                 }
                 if(getByName){
-                    return isEl && !pvt && name.indexOf("data-") ? $.parseData( target, name, id, table ) : table[ name ]
+                    return isEl && !pvt && name.indexOf("data-") === 0 ? $.parseData( target, name, id, inner ) : table[ name ];
                 }else{
                     return table
                 }
@@ -1569,20 +1570,19 @@ $.define("data", "lang", function(){
             return $.data(target, name, data, true)
         },
         parseData: function(target, name, id, table){
-            if( (name + id) in table){//如果已经转换过
+            if( table && (name + id) in table){//如果已经转换过
                 return table[ name + id ];
             }else{
                 var data = target.getAttribute( name );
                 if ( typeof data === "string") {//转换
                     try {
-                        data = data === "true" ? true :
-                        data === "false" ? false :
-                        data === "null" ? null :
-                        isFinite( data ) ? +data :
-                        rbrace.test( data ) ? $.parseJSON( data ) :
-                        data;
-                    } catch( e ) {}
-                    table[ name + id ] = data
+                        data = eval("0,"+ data );
+                    } catch( e ) {
+                        $.log("$.parseData error : "+ e)
+                    }
+                    if(table){
+                        table[ name + id ] = data
+                    }
                 }else{
                     data = void 0;
                 }
@@ -3010,8 +3010,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     $.implement({
         data: function( key, item ){
-            return $.access( this, key, item, function( el, key ){
-                return  $.data( el, key, item );
+            return $.access( this, key, item, function( ){
+                return  $.data.apply( null, arguments );
             })
         },
         removeData: function( key, pv ) {
