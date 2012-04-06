@@ -663,7 +663,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
-                fn.call(scope, target[name], name, target);
+               return fn.call(scope, target[name], name, target);
             }, target);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
