@@ -154,7 +154,6 @@ void function( global, DOC ){
                 global.console.log( text );
             }
         },
-        uuid: commonNs.uuid,
         getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
             return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
