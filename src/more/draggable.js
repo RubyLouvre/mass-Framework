@@ -9,6 +9,10 @@ $.define("draggable","event,css",function(){
             return false;
         }
     };
+    //https://github.com/jeremyckahn/dragon/blob/master/src/jquery.dragon.js
+    //http://www.jeasyui.com/tutorial/dd/dnd2.php
+    //http://superdit.com/2011/04/02/drag-drop-shopping-cart-using-jquery/
+    //http://club.sm160.com/showtopic-872125.aspx
     function offUnselect(){
         if(typeof userSelect === "string"){
             return $.html.style[userSelect] = "text";
