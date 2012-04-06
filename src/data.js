@@ -3,7 +3,7 @@
 //==================================================
 $.define("data", "lang", function(){
     //$.log("已加载data模块");
-    var remitter = /object|function/, rbrace = /^(?:\{.*\}|\[.*\])$/;
+    var remitter = /object|function/;
     $.mix( $, {
         _db: {},
         // 读写数据
@@ -49,20 +49,19 @@ $.define("data", "lang", function(){
             return $.data(target, name, data, true)
         },
         parseData: function(target, name, id, table){
-            if( (name + id) in table){//如果已经转换过
+            if( table && (name + id) in table){//如果已经转换过
                 return table[ name + id ];
             }else{
                 var data = target.getAttribute( name );
                 if ( typeof data === "string") {//转换
                     try {
-                        data = data === "true" ? true :
-                        data === "false" ? false :
-                        data === "null" ? null :
-                        isFinite( data ) ? +data :
-                        rbrace.test( data ) ? $.parseJSON( data ) :
-                        data;
-                    } catch( e ) {}
-                    table[ name + id ] = data
+                        data = eval("0,"+ data );
+                    } catch( e ) {
+                        $.log("$.parseData error : "+ e)
+                    }
+                    if(table){
+                        table[ name + id ] = data
+                    }
                 }else{
                     data = void 0;
                 }
