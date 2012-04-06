@@ -1,4 +1,4 @@
-$.define("draggable","node,css,target",function(){
+$.define("draggable","event,css",function(){
     var userSelect =  $.cssName("userSelect"), DOC = document;
     function onUnselect(){
         if(typeof userSelect === "string"){
@@ -179,7 +179,7 @@ $.define("draggable","node,css,target",function(){
     }
     Draggable.z = 99;
     $.fn.draggable = function( hash ){
-        hash = hash || {}
+        hash = hash || {};
         for(var i =0 ; i < this.length; i++){
             if(this[i] && this[i].nodeType === 1){
                 var ui = $.data(this[i],"_mass_draggable")

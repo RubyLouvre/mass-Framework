@@ -1,4 +1,4 @@
-$.define("draggable","node,css,target",function(){
+$.define("draggable","event,css",function(){
     var userSelect =  $.cssName("userSelect"), DOC = document;
     function onUnselect(){
         if(typeof userSelect === "string"){
@@ -87,7 +87,7 @@ $.define("draggable","node,css,target",function(){
         if(handle){
             _handle = $el.find("."+handle)[0];
         }
-        var dragger = _handle || el,
+        var dragger = _handle || el, 
         _html = dragger.innerHTML;
 
 
@@ -169,7 +169,7 @@ $.define("draggable","node,css,target",function(){
                     ghosting.style.filter = "alpha(opacity=50)";
                 }
             };
-
+          
             dragger.style.zIndex = ++Draggable.z;
             dragger.style.cursor = "pointer";
             onUnselect();//防止文字被选中
@@ -179,7 +179,7 @@ $.define("draggable","node,css,target",function(){
     }
     Draggable.z = 99;
     $.fn.draggable = function( hash ){
-        hash = hash || {}
+        hash = hash || {};
         for(var i =0 ; i < this.length; i++){
             if(this[i] && this[i].nodeType === 1){
                 var ui = $.data(this[i],"_mass_draggable")
