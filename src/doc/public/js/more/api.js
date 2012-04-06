@@ -15,6 +15,7 @@ $.define("api", function(){
             }
         }
     }
+    //将这一段置于种子模块临结束的最下方
     //    window.compare = {};
     //    window.API = {};
     //    var getAPI = function(name){
@@ -22,13 +23,23 @@ $.define("api", function(){
     //        _getAPI($, compare, ret, 0);
     //        API[ name ] = ret;
     //    }
-    //        $.require("ready,fx,attr,event,flow,ajax",function(){
-    //           delete API.core["1"]
-    //           $.log( JSON.stringify(window.API,null,2))
-    //        })
+    //    getAPI("core", $)
+    //    $.require("ready,fx,attr,event,flow,ajax",function(){
+    //        delete API.core["1"]
+    //        $.log( JSON.stringify(window.API,null,2))
+    //    })
+    //将  getAPI(token, assemble( callback, args ))放于require方法
+    //return transfer[ token ] = assemble( callback, args );
+    //这一语句之上
+    //将getAPI(obj.name, transfer[ obj.name ])置于
+    //transfer[ obj.name ] = assemble( obj.callback, obj.args );
+    //这一语句之下          
+
+
     //它利用上述方法与属性在mass.js这个文件的三处，求得整个框架的API
     return {
         "模块加载模块": {
+            "uuid": "number",
             "html": "object",
             "head": "object",
             "rword": "object",
@@ -41,7 +52,6 @@ $.define("api", function(){
             "slice": "function",
             "type": "function",
             "log": "function",
-            "uuid": "number",
             "getUid": "function",
             "oneObject": "function",
             "error": "function",
@@ -60,7 +70,10 @@ $.define("api", function(){
             "_checkDeps": "function",
             "_checkFail": "function"
         },
-        "特征嗅探模块": {
+        "操作流模块": {
+            "flow": "function"
+        },
+        "特征侦探模块": {
             "support": {
                 "insertTbody": "boolean",
                 "checkOn": "boolean",
@@ -95,13 +108,14 @@ $.define("api", function(){
             "tag": "function",
             "range": "function",
             "quote": "function",
-            "each": "function",
             "dump": "function",
             "parseJS": "function",
             "parseJSON": "function",
             "parseXML": "function",
             "isArray": "function",
             "isFunction": "function",
+            "each": "function",
+            "map": "function",
             "lang": "function",
             "String": {
                 "contains": "function",
@@ -120,7 +134,24 @@ $.define("api", function(){
                 "escapeRegExp": "function",
                 "padLeft": "function",
                 "padRight": "function",
-                "times": "function"
+                "times": "function",
+                "charAt": "function",
+                "charCodeAt": "function",
+                "concat": "function",
+                "indexOf": "function",
+                "lastIndexOf": "function",
+                "localeCompare": "function",
+                "match": "function",
+                "replace": "function",
+                "search": "function",
+                "slice": "function",
+                "split": "function",
+                "substring": "function",
+                "toLowerCase": "function",
+                "toLocaleLowerCase": "function",
+                "toUpperCase": "function",
+                "trim": "function",
+                "toJSON": "function"
             },
             "Array": {
                 "clone": "function",
@@ -141,7 +172,25 @@ $.define("api", function(){
                 "union": "function",
                 "intersect": "function",
                 "unique": "function",
-                "flatten": "function"
+                "flatten": "function",
+                "concat": "function",
+                "join": "function",
+                "pop": "function",
+                "push": "function",
+                "shift": "function",
+                "slice": "function",
+                "sort": "function",
+                "reverse": "function",
+                "splice": "function",
+                "unshiftindexOf": "function",
+                "lastIndexOf": "function",
+                "every": "function",
+                "some": "function",
+                "forEach": "function",
+                "map": "function",
+                "filter": "function",
+                "reduce": "function",
+                "reduceRight": "function"
             },
             "Number": {
                 "times": "function",
@@ -165,7 +214,11 @@ $.define("api", function(){
                 "pow": "function",
                 "sin": "function",
                 "sqrt": "function",
-                "tan": "function"
+                "tan": "function",
+                "toFixed": "function",
+                "toExponential": "function",
+                "toPrecision": "function",
+                "toJSON": "function"
             },
             "Object": {
                 "subset": "function",
@@ -173,7 +226,10 @@ $.define("api", function(){
                 "map": "function",
                 "clone": "function",
                 "merge": "function",
-                "without": "function"
+                "without": "function",
+                "hasOwnerProperty": "function",
+                "isPrototypeOf": "function",
+                "propertyIsEnumerable": "function"
             }
         },
         "类工厂模块": {
@@ -195,67 +251,69 @@ $.define("api", function(){
                 "hasAttribute": "function",
                 "filter": "function",
                 "pseudoAdapter": {
-                    "root": "function",
-                    "target": "object",
-                    "first-child": "object",
-                    "last-child": "object",
-                    "only-child": "object",
-                    "first-of-type": "object",
-                    "last-of-type": "object",
-                    "only-of-type": "object",
-                    "nth-child": "object",
-                    "nth-last-child": "object",
-                    "nth-of-type": "object",
-                    "nth-last-of-type": "object",
-                    "empty": "object",
-                    "link": "object",
-                    "lang": "object",
-                    "active": "function",
-                    "focus": "function",
-                    "indeterminate": "function",
-                    "enabled": "object",
-                    "disabled": "object",
-                    "checked": "object",
-                    "contains": "object",
-                    "selected": "function",
-                    "header": "function",
-                    "button": "function",
-                    "input": "function",
-                    "parent": "function",
-                    "has": "function",
-                    "first": "function",
-                    "last": "function",
-                    "even": "function",
-                    "odd": "function",
-                    "lt": "function",
-                    "gt": "function",
-                    "eq": "function",
-                    "hidden": "function",
-                    "visible": "function",
-                    "text": "function",
-                    "radio": "function",
-                    "checkbox": "function",
-                    "file": "function",
-                    "password": "function",
-                    "submit": "function",
-                    "image": "function",
-                    "reset": "function"
+//                    "root": "function",
+//                    "target": "object",
+//                    "first-child": "object",
+//                    "last-child": "object",
+//                    "only-child": "object",
+//                    "first-of-type": "object",
+//                    "last-of-type": "object",
+//                    "only-of-type": "object",
+//                    "nth-child": "object",
+//                    "nth-last-child": "object",
+//                    "nth-of-type": "object",
+//                    "nth-last-of-type": "object",
+//                    "empty": "object",
+//                    "link": "object",
+//                    "lang": "object",
+//                    "active": "function",
+//                    "focus": "function",
+//                    "indeterminate": "function",
+//                    "enabled": "object",
+//                    "disabled": "object",
+//                    "checked": "object",
+//                    "contains": "object",
+//                    "selected": "function",
+//                    "header": "function",
+//                    "button": "function",
+//                    "input": "function",
+//                    "parent": "function",
+//                    "has": "function",
+//                    "first": "function",
+//                    "last": "function",
+//                    "even": "function",
+//                    "odd": "function",
+//                    "lt": "function",
+//                    "gt": "function",
+//                    "eq": "function",
+//                    "hidden": "function",
+//                    "visible": "function",
+//                    "text": "function",
+//                    "radio": "function",
+//                    "checkbox": "function",
+//                    "file": "function",
+//                    "password": "function",
+//                    "submit": "function",
+//                    "image": "function",
+//                    "reset": "function"
                 }
             }
         },
         "数据缓存模块": {
+            "_db": "object",
             "data": "function",
             "_data": "function",
+            "parseData": "function",
             "removeData": "function",
             "mergeData": "function"
         },
-        "节点操作模块": {
-          //  "inherit": "function",
-          //  "implement": "function",
-          //  "extend": "function",
+        "节点模块": {
+            "inherit": "function",
+            "implement": "function",
+            "extend": "function",
             "fn": {
                 "init": "function",
-                "mass": "string",
+                "mass": "number",
                 "length": "number",
                 "valueOf": "function",
                 "toString": "function",
@@ -276,6 +334,13 @@ $.define("api", function(){
                 "html": "function",
                 "text": "function",
                 "outerHTML": "function",
+                "push": "function",
+                "unshift": "function",
+                "pop": "function",
+                "shift": "function",
+                "splice": "function",
+                "sort": "function",
+                "reverse": "function",
                 "remove": "function",
                 "empty": "function",
                 "append": "function",
@@ -310,14 +375,15 @@ $.define("api", function(){
                 "siblings": "function",
                 "contents": "function"
             },
-           // "match": "function",
-           // "access": "function",
+            "match": "function",
+            "access": "function",
             "parseHTML": "function"
         },
-        "属性操作模块": {
+        "属性模块": {
             "fn": {
+                "valueOf": "function",
+                "toString": "function",
                 "addClass": "function",
-                "class": "function",
                 "hasClass": "function",
                 "removeClass": "function",
                 "toggleClass": "function",
@@ -326,7 +392,8 @@ $.define("api", function(){
                 "removeAttr": "function",
                 "removeProp": "function",
                 "attr": "function",
-                "prop": "function"
+                "prop": "function",
+                "class": "function"
             },
             "attr": "function",
             "prop": "function",
@@ -424,19 +491,21 @@ $.define("api", function(){
             },
             "valAdapter": "object"
         },
-        "DOM事件模块": {
+        "事件模块": {
             "fn": {
+                "valueOf": "function",
+                "toString": "function",
+                "on": "function",
+                "bind": "function",
+                "off": "function",
+                "unbind": "function",
                 "toggle": "function",
                 "hover": "function",
-                "on": "function",
-                "off": "function",
-                "one": "function",
-                "bind": "function",
-                "unbind": "function",
-                "live": "function",
-                "die": "function",
-                "undelegate": "function",
                 "delegate": "function",
+                "live": "function",
+                "one": "function",
+                "undelegate": "function",
+                "die": "function",
                 "fire": "function",
                 "contextmenu": "function",
                 "click": "function",
@@ -468,27 +537,64 @@ $.define("api", function(){
                 "keydown": "function",
                 "keyup": "function"
             },
-            "eventSupport": "function",
-               "eventAdapter": "object",
             "event": {
+                "eventAdapter": {
+                    "focus": "object",
+                    "blur": "object",
+                    "beforeunload": "object",
+                    "focusin": "object",
+                    "focusout": "object",
+                    "mousewheel": "object"
+                },
                 "bind": "function",
                 "unbind": "function",
                 "fire": "function",
                 "filter": "function",
                 "dispatch": "function",
+                "_dispatch": "function",
                 "fix": "function"
             },
             "Event": "function",
             "EventTarget": {
+                "uniqueNumber": "number",
+                "defineEvents": "function",
+                "bind": "function",
+                "unbind": "function",
+                "fire": "function"
+            },
+            "eventSupport": "function"
+        },
+        "数据交互模块": {
+            "get": "function",
+            "post": "function",
+            "getScript": "function",
+            "getJSON": "function",
+            "upload": "function",
+            "serialize": "function",
+            "serializeArray": "function",
+            "param": "function",
+            "ajax": {
+                "uniqueNumber": "number",
+                "defineEvents": "function",
                 "bind": "function",
                 "unbind": "function",
                 "fire": "function",
-                "uniqueNumber": "number",
-                "defineEvents": "function"
-            }
+                "isLocal": "boolean",
+                "@data_14": "object"
+            },
+            "XHR": {
+                "inherit": "function",
+                "implement": "function",
+                "extend": "function",
+                "_init": "object",
+                "toString": "function"
+            },
+            "xhr": "function"
         },
-        "样式操作模块": {
+        "样式模块": {
             "fn": {
+                "valueOf": "function",
+                "toString": "function",
                 "css": "function",
                 "rotate": "function",
                 "innerHeight": "function",
@@ -556,7 +662,7 @@ $.define("api", function(){
             "transform": "function"
         },
         "动画模块": {
-            "fn": {
+            "fn": { 
                 "fx": "function",
                 "stop": "function",
                 "delay": "function",
@@ -582,30 +688,10 @@ $.define("api", function(){
             "show": "function",
             "hide": "function",
             "toggle": "function"
-        },
-        "操作流模块":{
-            "flow":"function"
-        },
-        "AJAX模块": {
-            "get": "function",
-            "post": "function",
-            "getScript": "function",
-            "getJSON": "function",
-            "upload": "function",
-            "serialize": "function",
-            "serializeArray": "function",
-            "param": "function",
-            "ajax": {
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "uniqueNumber": "number",
-                "defineEvents": "function",
-                "isLocal": "boolean"
-            },
-            "XHR": "function",
-            "xhr": "function"
         }
     }
+
+
+   
 })
 
