@@ -242,7 +242,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     });
     "each,map".replace($.rword, function(name){
         $[name] = function(obj, fn){
-            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn );
+            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn ).value();
         }
     });
     if(Array.isArray){
