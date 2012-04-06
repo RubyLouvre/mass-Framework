@@ -13,31 +13,33 @@ $.define("data", "lang", function(){
                 if(name === "@uuid"){
                     return id;
                 }
-                var database = isEl ? $._db: target,
-                table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {}),
-                _table =  table.data || (table.data = {});
+                var getByName = typeof name === "string",
+                database = isEl ? $._db: target,
+                table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
+                    data:{}
+                });
+                var inner = table
                 if(isEl && !table.parsedAttrs){
                     var attrs = target.attributes;
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
                         var key = attr.name;
                         if ( key.indexOf( "data-" ) === 0 ) {
-                            $.parseData(target, key, id, _table);
+                            $.parseData(target, key, id, table.data);
                         }
                     }
                     table.parsedAttrs = true;
                 }
                 if ( !pvt ) {
-                    table = _table;
+                    table = table.data;
                 }
-                var getByName = typeof name === "string";
                 if ( name && typeof name == "object" ) {
                     $.mix(table, name);
                 }else if(getByName && data !== void 0){
                     table[ name ] = data;
                 }
                 if(getByName){
-                    return isEl && !pvt && name.indexOf("data-") ? $.parseData( target, name, id, table ) : table[ name ]
+                    return isEl && !pvt && name.indexOf("data-") === 0 ? $.parseData( target, name, id, inner ) : table[ name ];
                 }else{
                     return table
                 }
