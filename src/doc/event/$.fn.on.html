@@ -44,22 +44,12 @@
     </head>
     <body>
         <article>
-            <h3>$.fn.on(types,[ fn ], [ selector ], [ times ])</h3>
+            <h3>$.fn.on(types， [ selector ], [ fn ], [ times ])</h3>
             <p><span class="stress">描述：</span></p>
-            <p>dom Framework实现事件绑定的入口函数, 通过它实现bind, live， delegate， one方法，
+            <p>mass Framework实现事件绑定的入口函数, 通过它实现bind, live， delegate， one方法，
                 进而实现hover, toggle, click, mouseover等方法……</p>
-            <p>它支持多种形式的传参方式:</p>
-            <pre class="brush:javascript;gutter:false;toolbar:false">
-$.fn.on(obj, selector, times)
-$.fn.on(obj times)
-$.fn.on(obj)
-$.fn.on(str, fn, selector, times)
-$.fn.on(str, fn, selector)
-$.fn.on(str, fn, times)
-$.fn.on(str, times)
-            </pre>
-            <p>它拥有一个更语义化的别名方法，叫bind。 </p>
-             <p>可点击<a href="$.fn.bind">这里</a>，查看《bind，live，delegate方法的区别》。 </p>
+            <p>我们只要将传参减去一个就是$.fn.bind方法了，$.fn.on(types , [ fn ], [ times ])，可点击<a href="$.fn.bind">这里</a>，查看《bind，live，delegate方法的区别》。 </p>
+           <p>或者将传参的位置调一调,就装成是$.fn.delegate方法,$.fn.on(selector, types,[ fn ], [ times ]).<p>
             <p><span class="stress">参数：</span></p>
             <dl>
                 <dt>types</dt>

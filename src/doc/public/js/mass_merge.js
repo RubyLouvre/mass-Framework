@@ -3010,8 +3010,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     $.implement({
         data: function( key, item ){
-            return $.access( this, key, item, function( ){
-                return  $.data.apply( null, arguments );
+            return $.access( this, key, item, function( el, key ){
+                return  $.data( el, key, item );
             })
         },
         removeData: function( key, pv ) {
@@ -4164,7 +4164,7 @@ $.define("attr","support,node", function( support ){
             var isBool = boolOne[ name ];
             return this.each(function() {
                 if( this.nodeType === 1 ){
-                    $[ "@remove_attr" ]( this, name, isBool );
+                    $._remove_attr( this, name, isBool );
                 }
             });
         },
@@ -4220,7 +4220,7 @@ $.define("attr","support,node", function( support ){
             "http-equiv": "httpEquiv"
         },
         //内部函数，原则上拒绝用户的调用
-        "@remove_attr": function( node, name, isBool ) {
+        _remove_attr: function( node, name, isBool ) {
             var propName;
             name = $.attrMap[ name ] || name;
             //如果支持removeAttribute，则使用removeAttribute
@@ -4351,7 +4351,7 @@ $.define("attr","support,node", function( support ){
         }
         attrAdapter[ method+":set" ] = function( node, name, value ){
             if ( value === false ) {//value只有等于false才移除此属性，其他一切值都当作赋为true
-                $[ "@remove_attr" ]( node, name, true );
+                $._remove_attr( node, name, true );
             } else {
                 if ( name in node ) {
                     node[ name ] = true;

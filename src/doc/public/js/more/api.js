@@ -385,13 +385,7 @@ $.define("api", function(){
                 "fix": "function"
             },
             "Event": "function",
-            "EventTarget": {
-                "uniqueNumber": "number",
-                "defineEvents": "function",
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function"
-            },
+            "EventTarget": "object",
             "eventSupport": "function"
         },
         "数据交互模块": {
