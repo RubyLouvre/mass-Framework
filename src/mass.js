@@ -154,7 +154,8 @@ void function( global, DOC ){
                 global.console.log( text );
             }
         },
-        getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
+        //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
+        getUid: global.getComputedStyle ? function( node ){
             return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
             if(node.nodeType !== 1){
