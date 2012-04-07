@@ -161,17 +161,19 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return this;
         },
 
-        fire: function( event ){
-            var target = this, namespace = [], type = event.type || event
-            if ( ~type.indexOf( "." ) ) {//处理命名空间
-                namespace = type.split(".");
-                type = namespace.shift();
-                namespace.sort();
+        fire: function( event ){//event的类型可能是字符串,原生事件对象,伪事件对象
+            var target = this, namespace = [], type = event.type || event;
+            if(!isFinite(event.mass)){
+                event = new jEvent(event);
+                if( ~type.indexOf( "." ) ) {//处理命名空间
+                    namespace = event.split(".");
+                    type = namespace.shift();
+                    namespace.sort();
+                    event.namespace = namespace.join( "." );
+                    event.namespace_re = event.namespace ? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
+                }
             }
-            event = (typeof event == "object" && typeof event.namespace == "string" )? type : new jEvent(type);
             event.target = target;
-            event.namespace = namespace.join( "." );
-            event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
             var args = [ event ].concat( $.slice(arguments,1) );
             if( $["@target"] in target){
                 var cur = target,  ontype = "on" + type;
@@ -263,7 +265,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         },
         fix: function( event ){
-            if( typeof event.namespace != "string" ){
+            if( !isFinite(event.mass) ){
                 var originalEvent = event
                 event = new jEvent(originalEvent);
                 for( var prop in originalEvent ){
@@ -328,10 +330,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     });
 
     var jEvent = $.Event = function ( event ) {
-        this.originalEvent = event.substr ? {} : event;
-        this.type = event.type || event;
+        this.originalEvent = event.type ? event: {};
+        this.type = (event.type || event).replace(/\..*/g,"");
         this.timeStamp  = Date.now();
-        this.namespace = "";//用于判定是否为伪事件对象
+        this.mass = $.mass;//用于判定是否为伪事件对象
     };
     // http://www.w3.org/TR/2003/WD-DOM-Level-3-Events-20030331/ecma-script-binding.html
     jEvent.prototype = {
@@ -597,7 +599,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
 2012.2.8 添加mouseenter的分支判定，增强eventSupport
 2012.2.9 完美支持valuechange事件
 2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
- */
+*/
 
 
 
