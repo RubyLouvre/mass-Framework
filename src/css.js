@@ -463,7 +463,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return ret;//第一次执行结果
     }
     function setOffset(elem, options){
-        if(elem && elem.nodeType == 1){
+        if(elem && elem.nodeType == 1 ){
             var position = $.css( elem, "position" );
             // set position first, in-case top/left are set even on static elem
             if ( position === "static" ) {
@@ -497,7 +497,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     }
     $.fn.offset = function(options){//取得第一个元素位于页面的坐标
         if ( arguments.length ) {
-            return options === undefined ? this :  this.each(function( ) {
+            return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
+            this.each(function() {
                 setOffset( this, options );
             });
         }

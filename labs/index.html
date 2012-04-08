@@ -8,7 +8,7 @@
         <script src="../src/mass.js" type="text/javascript" ></script>
         <style>
             .drag {width:100px;height:100px;z-index:200;}
-            #drag1 {background:red;position:absolute;}
+            #drag1 {background:red;position:absolute;border:5px solid #a9ea00;}
             #drag2 {background:#E8D098;}
             #drag3 {background:#fff;}
             #drag4 {background:#E8FFE8;margin-right:2px;margin-left:10px;}
@@ -19,22 +19,37 @@
             #drag9 {background:#00B271;}
             #drag10 {background:#DDF3FF;}
             .handle {width:80px;height:20px;background:aqua;}
-            #parent {width:400px;height:300px;background:blue;color:black;}
+            #parent {width:400px;height:300px;background:blue;color:black;border:10px solid green;padding:5px;}
         </style>
         <script type="text/javascript">
-            $.require("ready,more/drag",function(){
+            $.require("ready,more/draggable",function(){
                 //拖动分两部分,元素自身上的初始化与mousedown的绑定,全局上document的mousemove,mouseup的绑定
 
-
-                $(".drag").draggable();
-              
+/*               $("#drag1").offset({
+                    top:8,
+                    left:8
+                })
+         */
+                $("#drag1").draggable({
+                   limit:"#parent",
+                   dragover:function(e, ui){
+                       var offset = $(e.target).offset()
+                       $(e.target).html( offset.top+"  "+offset.left )
+                   }
+                })
 
             })
 
         </script>
     </head>
     <body>
-        <div class="drag" id="drag1"></div>
+        <div id="parent4">
+            <div class="drag" id="drag1"></div>
+            <!-- <div class="drag" id="drag2">
+                 <div class="handle"></div>
+             </div>-->
+        </div>
+
 
     </body>
 </html>
