@@ -1,4 +1,4 @@
-$.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
+$.define("waterfall","uibase, ejs,event,attr,fx",function(Widget){
     //$.log("已加载waterfall模块")
     var Waterfall = $.factory({
         inherit: Widget.Class,
@@ -23,15 +23,18 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
                     }
                     ui.tiles.push( tile );
                     img = tile.find(ui.img_expr)[0];
-                    if( img ){
+                    if( img ){//加载下一张图片
+                        var i = 0;
                         (function fn(){
                             //判定大图是否加载成功
-                            if(img.complete == true){
+                            if(img.complete == true || ++i > 15){
                                 ui.addTile( htmls.shift(), htmls, ui.getShortestColumn() );
                             }else{
-                                setTimeout( fn, 16 );
+                                setTimeout( fn, 20);
                             }
                         })();
+                    }else{
+                        ui.addTile( html, htmls, ui.getShortestColumn() );
                     }
                 }else {
                     ui.addTile( html, htmls, ui.getShortestColumn() );
@@ -64,7 +67,13 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
                 if( rollHeight >= top ) { //如果页面的滚动条拖动要处理的元素所在的位置
                     if(ui.fade){
                         tile.fx( ui.fade_time,{
-                            o:1
+                            o:1,
+                            after:function(){
+                                var index = ui.tiles.indexOf(tile);
+                                if(index>=0){
+                                    ui.tiles.splice(index,1);
+                                }
+                            }
                         });
                     }
                     callback.call( ui ,tile );//调用回调，让元素显示出来
@@ -80,7 +89,7 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
             });
         }
     });
-    var now = 0;
+    var  now = 0;
     $(window).scroll( function(){
         var time = new Date, els = Waterfall.scrollCallbacks;
         if(time - now > 13 ){

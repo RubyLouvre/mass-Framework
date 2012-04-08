@@ -3,7 +3,7 @@
     <head>
         <title>offset test by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <!--<script src="../libs/jquery.js" type="text/javascript" ></script>-->
+        <!-- <script src="../libs/jquery.js" type="text/javascript" ></script>-->
         <script src="../src/mass.js" type="text/javascript" ></script>
         <style>
             body{
@@ -32,30 +32,10 @@
             }
         </style>
         <script>
-            $(function(){
-                var el = $("#son");
-                var p = el.offsetParent();
-                var offset = p.offset();
-                var left = offset.left;
-                var top = offset.top;
-                var right = left+p.innerWidth();
-                var bottom = top+p.innerHeight();
-                var position  = el.position();
-               el.clone(true).addClass("copy").appendTo(p).css({
-                    top:position.top,
-                    left:position.left
-                });
-                console.log(position)
-                //  console.log([top, right, bottom, left])
+            $.require("ready,more/draggable",function(){
+                var el = $("#son").draggable()
+                
             });
-            window.onload = function(){
-                var el = document.getElementById("son");
-                el.innerHTML = el.offsetLeft+" * "+el.offsetTop
-           //     console.log( $(el).offset() )
-               // console.log( $(el).position() )
-
-   
-            }
 
         </script>
     </head>
@@ -65,6 +45,7 @@
 
             </div>
         </div>
+
         如果一个元素的父节点就是它的offsetParent,那么在
         FF11 chrome17 IE9 safari5 IE6 IE7 是28*28 即parent.paddingWidth + son.marginWidth
         IE8 opera11  是38* 38 即parent.paddingWidth + parent.borderWidth + son.padding

@@ -94,6 +94,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                         $.bind(target, type, callback, !!selector)
                     }
                 }
+           
                 addCallback( queue, item );//同一事件不能绑定重复回调
             });
             return this;
