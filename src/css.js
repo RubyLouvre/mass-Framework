@@ -462,8 +462,46 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return ret;//第一次执行结果
     }
-       
-    $.fn.offset = function(){//取得第一个元素位于页面的坐标
+    function setOffset(elem, options){
+        if(elem && elem.nodeType == 1){
+            var position = $.css( elem, "position" );
+            // set position first, in-case top/left are set even on static elem
+            if ( position === "static" ) {
+                elem.style.position = "relative";
+            }
+            var curElem = $( elem ),
+            curOffset = curElem.offset(),
+            curCSSTop = $.css( elem, "top" ),
+            curCSSLeft = $.css( elem, "left" ),
+            calculatePosition = ( position === "absolute" || position === "fixed" ) &&  [curCSSTop, curCSSLeft].indexOf("auto") > -1,
+            props = {}, curPosition = {}, curTop, curLeft;
+
+            // need to be able to calculate position if either top or left is auto and position is either absolute or fixed
+            if ( calculatePosition ) {
+                curPosition = curElem.position();
+                curTop = curPosition.top;
+                curLeft = curPosition.left;
+            } else {
+                curTop = parseFloat( curCSSTop ) || 0;
+                curLeft = parseFloat( curCSSLeft ) || 0;
+            }
+
+            if ( options.top != null ) {
+                props.top = ( options.top - curOffset.top ) + curTop;
+            }
+            if ( options.left != null ) {
+                props.left = ( options.left - curOffset.left ) + curLeft;
+            }
+            curElem.css( props );
+        }
+    }
+    $.fn.offset = function(options){//取得第一个元素位于页面的坐标
+        if ( arguments.length ) {
+            return options === undefined ? this :  this.each(function( ) {
+                setOffset( this, options );
+            });
+        }
+
         var node = this[0], owner = node && node.ownerDocument, pos = {
             left:0,
             top:0
