@@ -59,14 +59,14 @@
             <pre class="brush:javascript;gutter:false;toolbar:false">
                $(".inner").replace("&lt;dir&gt;新的内容&lt;/dir&gt;")
             </pre>
-            <button onclick="exec1()">点我，执行代码</button>
+            <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
             <pre class="brush:javascript;gutter:false;toolbar:false">
                 $("dir").each(function(el,i){
                     this.innerHTML = this.innerHTML + i
                 });
                 $("dir:nth-child(1)").replace($("dir:nth-child(2)"));
             </pre>
-            <button onclick="exec2()">点我，执行代码</button>
+            <button class="doc_btn" onclick="exec2()">点我，执行代码</button>
            
         </fieldset>
       

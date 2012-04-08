@@ -77,39 +77,39 @@
                 </pre>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $("&lt;li&gt;&lt;strong&gt;司徒正美&lt;/strong&gt;&lt;/li&gt;").beforeTo(".container li:first-child");            </pre>
-                <button onclick="exec1()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
      $("&lt;li&gt;&lt;em&gt;司徒正美&lt;/em&gt;&lt;script&gt;alert('动态执行代码！')&lt;\/script&gt;&lt;/li&gt;").after(".container:last-child");
                 </pre>
-                <button onclick="exec2()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec2()">点我，执行代码</button>
                 <p>选择某个元素再进操作</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
      $(".container").append("&lt;div&gt;append上去。&lt;/div&gt;");
                 </pre>
-                <button onclick="exec3()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec3()">点我，执行代码</button>
                 <p>传入某个元素再进操作</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
         var $body = $(document.body).data("aaa","CCC");
         $.log($body.data("aaa"),true)
                 </pre>
-                <button onclick="exec4()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec4()">点我，执行代码</button>
                 <p>传入NodeList进行操作</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
         var all = $(document.body.childNodes);
         $.log([all[0],all[2],all.length],true);//因mass实例已类数组对象，可以像数组那样操作
                 </pre>
-                <button onclick="exec5()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec5()">点我，执行代码</button>
                 <p>传入函数，相当于$.require("ready,node,event,fx",fn)</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
        $(function(){
             $.log("执行ready回调",true)
        });
                 </pre>
-                <button onclick="exec6()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec6()">点我，执行代码</button>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
        $.log($("body")[0],true);
                 </pre>
-                <button onclick="exec7()">点我，执行代码</button>
+                <button class="doc_btn" onclick="exec7()">点我，执行代码</button>
             </fieldset>
         </article>
     </body>

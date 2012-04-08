@@ -32,7 +32,7 @@ p .stress, legend{
     font-weight:bolder;
 }
 
-button {
+.doc_btn {
     border: 2px outset #000000;
     text-align:center;
     background: #101529;
