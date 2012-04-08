@@ -69,10 +69,7 @@ $.define("api", function(){
             "_checkDeps": "function",
             "_checkFail": "function"
         },
-        "操作流模块": {
-            "flow": "function"
-        },
-        "特征侦探模块": {},
+
         "语言扩展模块": {
             "isPlainObject": "function",
             "isNative": "function",
@@ -301,6 +298,76 @@ $.define("api", function(){
             "access": "function",
             "parseHTML": "function"
         },
+        "样式模块": {
+            "fn": {
+                "valueOf": "function",
+                "toString": "function",
+                "css": "function",
+                "rotate": "function",
+                "innerHeight": "function",
+                "outerHeight": "function",
+                "height": "function",
+                "innerWidth": "function",
+                "outerWidth": "function",
+                "width": "function",
+                "offset": "function",
+                "position": "function",
+                "offsetParent": "function",
+                "scrollLeft": "function",
+                "scrollTop": "function"
+            },
+            "cssAdapter": {
+                "_default:get": "function",
+                "_default:set": "function",
+                "rotate:get": "function",
+                "rotate:set": "function",
+                "height:get": "function",
+                "width:get": "function",
+                "userSelect:set": "function",
+                "left:get": "function",
+                "top:get": "function"
+            },
+            "cssMap": {
+                "c": "string",
+                "h": "string",
+                "o": "string",
+                "r": "string",
+                "w": "string",
+                "x": "string",
+                "y": "string",
+                "fs": "string",
+                "st": "string",
+                "sl": "string",
+                "sx": "string",
+                "sy": "string",
+                "tx": "string",
+                "ty": "string",
+                "bgc": "string",
+                "opacity": "string",
+                "float": "string",
+                "transform": "string",
+                "userSelect": "string"
+            },
+            "cssName": "function",
+            "scrollbarWidth": "function",
+            "cssNumber": {
+                "fontSizeAdjust": "number",
+                "fontWeight": "number",
+                "lineHeight": "number",
+                "opacity": "number",
+                "orphans": "number",
+                "widows": "number",
+                "zIndex": "number",
+                "zoom": "number",
+                "rotate": "number"
+            },
+            "css": "function",
+            "_all2deg": "function",
+            "_all2rad": "function",
+            "_toMatrixArray": "function",
+            "_toMatrixObject": "function",
+            "transform": "function"
+        },
         "属性模块": {
             "fn": {
                 "addClass": "function",
@@ -415,76 +482,7 @@ $.define("api", function(){
             },
             "xhr": "function"
         },
-        "样式模块": {
-            "fn": {
-                "valueOf": "function",
-                "toString": "function",
-                "css": "function",
-                "rotate": "function",
-                "innerHeight": "function",
-                "outerHeight": "function",
-                "height": "function",
-                "innerWidth": "function",
-                "outerWidth": "function",
-                "width": "function",
-                "offset": "function",
-                "position": "function",
-                "offsetParent": "function",
-                "scrollLeft": "function",
-                "scrollTop": "function"
-            },
-            "cssAdapter": {
-                "_default:get": "function",
-                "_default:set": "function",
-                "rotate:get": "function",
-                "rotate:set": "function",
-                "height:get": "function",
-                "width:get": "function",
-                "userSelect:set": "function",
-                "left:get": "function",
-                "top:get": "function"
-            },
-            "cssMap": {
-                "c": "string",
-                "h": "string",
-                "o": "string",
-                "r": "string",
-                "w": "string",
-                "x": "string",
-                "y": "string",
-                "fs": "string",
-                "st": "string",
-                "sl": "string",
-                "sx": "string",
-                "sy": "string",
-                "tx": "string",
-                "ty": "string",
-                "bgc": "string",
-                "opacity": "string",
-                "float": "string",
-                "transform": "string",
-                "userSelect": "string"
-            },
-            "cssName": "function",
-            "scrollbarWidth": "function",
-            "cssNumber": {
-                "fontSizeAdjust": "number",
-                "fontWeight": "number",
-                "lineHeight": "number",
-                "opacity": "number",
-                "orphans": "number",
-                "widows": "number",
-                "zIndex": "number",
-                "zoom": "number",
-                "rotate": "number"
-            },
-            "css": "function",
-            "_all2deg": "function",
-            "_all2rad": "function",
-            "_toMatrixArray": "function",
-            "_toMatrixObject": "function",
-            "transform": "function"
-        },
+
         "动画模块": {
             "fn": { 
                 "fx": "function",
@@ -512,7 +510,11 @@ $.define("api", function(){
             "show": "function",
             "hide": "function",
             "toggle": "function"
-        }
+        },
+        "操作流模块": {
+            "flow": "function"
+        },
+        "特征侦探模块": {}
     }
 
 

@@ -51,7 +51,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var type = $.type(obj);
             if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
-            return isFinite(obj.length) ;
+            return (obj.length >= 0) && (obj.length % 1 == 0);//非负整数
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html

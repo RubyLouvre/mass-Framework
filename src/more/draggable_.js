@@ -71,18 +71,16 @@ $.define("draggable","event,css",function(){
         marginBottom = parseFloat($.css(el,"marginBottom")),
         position = $.css(el, "position"),
         $el = $(el),
-        offset =  $el.offset(),
+        offset =  $el.position(),
         _handle,
         _top,
         _left;
         //保存元素的起始坐标
-          el.style.position = "absolute";
         ui.lockX = offset.left;
         ui.lockY = offset.top;
-$.log(ui.lockX +" : "+ui.lockY)
         ui.target = $el
 
-      
+        el.style.position = "absolute";
         //修正其可活动的范围，如果传入的坐标
         if($.type(limit, "Array") && limit.length == 4){
             ctop  = limit[0]
@@ -93,17 +91,17 @@ $.log(ui.lockX +" : "+ui.lockY)
         if(handle){
             _handle = $el.find("."+handle)[0];
         }
-        var dragger = _handle || el,
+        var dragger = _handle || el, 
         _html = dragger.innerHTML;
 
 
         function dragoverCallback(e) {
             e = e || window.event;
-            if(DOC.selection){
-                DOC.selection.empty()
-            }else{
-                window.getSelection().removeAllRanges();
-            }
+            //            if(DOC.selection){
+            //                DOC.selection.empty()
+            //            }else{
+            //                window.getSelection().removeAllRanges();
+            //            }
             _left = e.clientX - ui.offset_x ;
             _top = e.clientY - ui.offset_y;
             if(scroll){
@@ -175,7 +173,7 @@ $.log(ui.lockX +" : "+ui.lockY)
                     ghosting.style.filter = "alpha(opacity=50)";
                 }
             };
-
+          
             dragger.style.zIndex = ++Draggable.z;
             dragger.style.cursor = "pointer";
             onUnselect();//防止文字被选中
