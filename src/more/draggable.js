@@ -80,7 +80,7 @@ $.define("draggable","event,css,attr",function(){
                 this.limit[2]  = this.limit[2] - $el.outerWidth();
                 this.limit[3]  = this.limit[3] - $el.outerHeight();
             }
-           // $.log(this.limit)
+        // $.log(this.limit)
         }
         
     }
@@ -114,7 +114,7 @@ $.define("draggable","event,css,attr",function(){
             }else{
                 ghosting.style.filter = "alpha(opacity=50)";
             }
-            dragger = $(ghosting)
+            dragger = $(ghosting).addClass("mass_ghosting");
         };
         var offset = dragger.offset();
         dragger.addClass("mass_dragging");
@@ -124,7 +124,7 @@ $.define("draggable","event,css,attr",function(){
         dd.originalY = offset.top;
         if(dragger[0].setCapture){
             //设置鼠标捕获
-           // $.log(" support setCapture ")
+            // $.log(" support setCapture ")
             dragger[0].setCapture();
         }else{
             //阻止默认动作
@@ -160,10 +160,10 @@ $.define("draggable","event,css,attr",function(){
             dragger.removeClass("mass_dragging");
             dd.ghosting && dragger.remove();
             event && fixAndDispatch(dragger, event, "dragend");
-            if(dd.rewind){
-                dd.target.css({
-                    left:  dd.startX,
-                    top:    dd.startY
+            if(dd.rewind || dd.ghosting){
+                dd.target.fx( 500,{
+                    left:  dd.rewind ? dd.startX: dd.offsetX,
+                    top:   dd.rewind ? dd.startY: dd.offsetY
                 });
             }
             dragger = null;

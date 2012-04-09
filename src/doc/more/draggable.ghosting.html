@@ -1,0 +1,52 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>draggable ghosting</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            if (self!=top)
+                window.top.location.replace(self.location);
+        </script>
+
+        <style type="text/css">
+            .drag {
+                position: absolute;
+                border: 1px solid #89B;
+                background: #BCE;
+                height: 58px;
+                width: 58px;
+                cursor: move;
+                top: 120px;
+            }
+            body {
+                background: #FFF url("/src/doc/public/styles/draggable_snap.gif") repeat 0px 0px;
+            }
+            .mass_ghosting{
+                background:red;
+            }
+        </style>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script>
+            $.require("ready,more/draggable",function(){
+                $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
+                $(".drag").draggable({
+                    ghosting: true
+                });
+            });
+        </script>
+    </head>
+    <body>
+
+        <p>有时拖动的目标太大太复杂，我们可以复制一个幽灵元素进行拖动。 <a id="back" href="">返回</a></p>
+        <div class="drag" style="left:20px;"></div>
+        <div class="drag" style="left:100px;"></div>
+        <div class="drag" style="left:180px;"></div>
+        <pre>
+            $.require("ready,more/draggable",function(){
+              $(".drag").draggable({
+                    ghosting: true
+                });
+            });
+        </pre>
+    </body>
+</html>
