@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>draggable circles</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            if (self!=top)
+                window.top.location.replace(self.location);
+        </script>
+
+        <style type="text/css">
+            .drag {
+                position: absolute;
+                border: 1px solid #89B;
+                background: #BCE;
+                height: 58px;
+                width: 58px;
+                top: 180px;
+                cursor: move;
+                text-align: center;
+                font: 24px/62px "Courier New", Courier, monospace;
+                filter: alpha(opacity=75);
+                -moz-opacity: 0.75;
+                opacity: 0.75;
+            }
+            body {
+                background: #FFF url("/src/doc/public/styles/draggable_circles.gif") no-repeat 0px 0px;
+                margin: 0;
+                padding: 20px 20px 5px 20px;
+                color: #222;
+            }
+        </style>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script>
+            $.require("ready,more/draggable",function(){
+                $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
+                $(".drag").draggable({
+                    lockX: true, //阻止系统默认的移动方式
+                    lockY: true, //阻止系统默认的移动方式
+                    dragstart:function(e,dd){
+                        if(!dd.circles){
+                            dd.circles ={
+                                radius: 160,
+                                centerX: dd.originalX + 160 + 30,
+                                centerY: dd.originalY + 30
+                            }
+                        }
+                    },
+                    dragover:function(e, dd){
+                        var data = dd.circles,
+                        angle = Math.atan2( e.pageX - data.centerX, e.pageY - data.centerY );
+                        $( this ).css({
+                            top: data.centerY + Math.cos( angle ) * data.radius - 30,
+                            left: data.centerX + Math.sin( angle ) * data.radius - 30
+                        });
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+
+        <p>沿着圆形轨迹移动。 <a id="back" href="">返回</a></p>
+        <div class="drag" style="left:60px;">&bull;</div>
+        <div class="drag" style="left:170px;">&bull;</div>
+        <div class="drag" style="left:280px;">&bull;</div>
+        <pre>
+            $.require("ready,more/draggable",function(){
+                $(".drag").draggable({
+                    lockX: true, //阻止系统默认的移动方式
+                    lockY: true, //阻止系统默认的移动方式
+                    dragstart:function(e,dd){
+                        if(dd.circles){
+                            dd.circles ={
+                                radius: 160,
+                                centerX: dd.originalX + 160 + 30,
+                                centerY: dd.originalY + 30
+                            }
+                        }
+                    },
+                    dragover:function(e, dd){
+                        var data = dd.circles,
+                        angle = Math.atan2( e.pageX - data.centerX, e.pageY - data.centerY );
+                        $( this ).css({
+                            top: data.centerY + Math.cos( angle ) * data.radius - 30,
+                            left: data.centerX + Math.sin( angle ) * data.radius - 30
+                        });
+                    }
+                });
+            });
+        </pre>
+    </body>
+</html>

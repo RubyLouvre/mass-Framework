@@ -1,5 +1,5 @@
 $.define("draggable","event,css,attr",function(){
-    var  $doc = $(document), dragger, dd
+    var  $doc = $(document), dragger, dd//一些全局的东西
     function preventDefault (e) {
         e.preventDefault();
     }
@@ -8,32 +8,6 @@ $.define("draggable","event,css,attr",function(){
         e.namespace = "mass_ui";
         e.namespace_re = new RegExp("(^|\\.)" + "mass_ui" + "(\\.|$)");
         el.fire(e, dd);
-    }
-    function dragstart(event){
-        var el = event.currentTarget;
-        dragger = $(el);//每次只允许运行一个实例
-        dd = dragger.data("_mass_draggable")
-        if(dd.ghosting){
-            var ghosting = el.cloneNode(false);
-            el.parentNode.insertBefore(ghosting,el.nextSibling);
-            if( dd.handle){
-                dragger.find(dd.handle).appendTo(ghosting)
-            }
-            if($.support.cssOpacity){
-                ghosting.style.opacity = 0.5;
-            }else{
-                ghosting.style.filter = "alpha(opacity=50)";
-            }
-            dragger = $(ghosting)
-        };
-        var offset = dragger.offset();
-        dragger.addClass("mass_dragging");
-        dd.startX = event.pageX;
-        dd.startY = event.pageY;
-        dd.originalX = offset.left;
-        dd.originalY = offset.top;
-        dd.dragging = false;
-        fixAndDispatch(dragger, event, "dragstart");
     }
     function Draggable($el, opts){
         $el.data("drag_opts",opts);
@@ -60,7 +34,6 @@ $.define("draggable","event,css,attr",function(){
         //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
         this.ghosting = !!opts.ghosting;
         this.target = $el;
-
         //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
         this.handle = typeof opts.handle == "string" ? opts.handle : null;
         //默认true, 允许滚动条随拖动元素移动。
@@ -69,7 +42,6 @@ $.define("draggable","event,css,attr",function(){
             this.scrollSensitivity = opts.scrollSensitivity >= 0 ?  opts.scrollSensitivity : 20;
             this.scrollSpeed = opts.scrollSensitivity >= 0 ?  opts.scrollSpeed : 20;
             this.scrollParent = $el.scrollParent()[0]
-            $.log(this.scrollParent)
             this.overflowOffset = $el.scrollParent().offset();
         }
         "dragstart dragover dragend".replace($.rword, function(event){
@@ -108,7 +80,7 @@ $.define("draggable","event,css,attr",function(){
                 this.limit[2]  = this.limit[2] - $el.outerWidth();
                 this.limit[3]  = this.limit[3] - $el.outerHeight();
             }
-            $.log(this.limit)
+           // $.log(this.limit)
         }
         
     }
@@ -127,38 +99,88 @@ $.define("draggable","event,css,attr",function(){
         }
         return this;
     }
-
+    function dragstart(event){
+        var el = event.currentTarget;
+        dragger = $(el);//每次只允许运行一个实例
+        dd = dragger.data("_mass_draggable")
+        if(dd.ghosting){
+            var ghosting = el.cloneNode(false);
+            el.parentNode.insertBefore(ghosting,el.nextSibling);
+            if( dd.handle){
+                dragger.find(dd.handle).appendTo(ghosting)
+            }
+            if($.support.cssOpacity){
+                ghosting.style.opacity = 0.5;
+            }else{
+                ghosting.style.filter = "alpha(opacity=50)";
+            }
+            dragger = $(ghosting)
+        };
+        var offset = dragger.offset();
+        dragger.addClass("mass_dragging");
+        dd.startX = event.pageX;
+        dd.startY = event.pageY;
+        dd.originalX = offset.left;
+        dd.originalY = offset.top;
+        if(dragger[0].setCapture){
+            //设置鼠标捕获
+           // $.log(" support setCapture ")
+            dragger[0].setCapture();
+        }else{
+            //阻止默认动作
+            event.preventDefault();
+        };
+        //防止隔空拖动，为了性能起见，150ms才检测一下
+        dd.checkID = setInterval(dragstop, 150);
+        fixAndDispatch(dragger, event, "dragstart");
+    }
+    function dragstop(){
+        if( dd && dd.event ){
+            var offset = dragger.offset(),
+            left = offset.left,
+            top = offset.top,
+            event = dd.event,
+            pageX = event.pageX,
+            pageY = event.pageY
+            if( pageX <  left || pageY < top || pageX > left+dragger[0].offsetWidth ||  pageY > top+dragger[0].offsetHeight ){
+                dragend( event )
+            }
+        }
+    }
     function dragend(event){
         if(dragger){
+            if(dd.checkID){
+                clearInterval(dd.checkID);
+                delete dd.event;
+                delete dd.checkID;
+            }
+            if(dragger[0].releaseCapture){
+                dragger[0].releaseCapture();
+            }
             dragger.removeClass("mass_dragging");
-            dd.dragging = false;
             dd.ghosting && dragger.remove();
-            fixAndDispatch(dragger, event, "dragend");
+            event && fixAndDispatch(dragger, event, "dragend");
             if(dd.rewind){
                 dd.target.css({
                     left:  dd.startX,
                     top:    dd.startY
                 });
             }
-           
             dragger = null;
         }
     }
+
     $doc.on({
         "mouseup.mass_ui blur.mass_ui": dragend,
         "mousemove.mass_ui": function(event){
             if(dragger){
-                if(event.target !== dragger[0]){
-                    dragend(event)
-                    return
-                }
+                dd.event  = event;
                 //当前元素移动了多少距离
                 dd.deltaX = event.pageX - dd.startX;
                 dd.deltaY = event.pageY - dd.startY;
                 //现在的坐标
                 dd.offsetX = dd.deltaX + dd.originalX  ;
                 dd.offsetY = dd.deltaY + dd.originalY  ;
-
                 var obj = {}
                 if(!dd.lockX){//如果没有锁定X轴left,top,right,bottom
                     var left = obj.left = dd.limit ?  Math.min( dd.limit[2], Math.max( dd.limit[0], dd.offsetX )) : dd.offsetX

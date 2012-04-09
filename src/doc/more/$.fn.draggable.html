@@ -13,36 +13,11 @@
         <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
         <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
         <style>
-            .drag {width:100px;height:100px;z-index:200;}
-            #drag1 {background:red}
-            #drag2 {background:#E8D098;}
-            #drag3 {background:#fff;}
-            #drag4 {background:#E8FFE8;margin-right:2px;margin-left:10px;}
-            #drag5 {background:#ff0;}
-            #drag6 {background:#66c;}
-            #drag7 {background:#FBFBEA;}
-            #drag8 {background:#E8E8FF;}
-            #drag9 {background:#00B271;}
-            #drag10 {background:#DDF3FF;}
-            .handle {width:80px;height:20px;background:aqua;}
-            #parent {width:400px;height:300px;background:blue;color:black;}
+
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
-            $.require("ready,more/draggable",function(){
-                var p = $("#parent");
-                $("#drag1").draggable({coords:true,rewind:true});
-                $("#drag2").draggable({coords:true,container:p,limit:true,lockX:true});
-                $("#drag3").draggable({coords:true,container:p,limit:true,lockY:true});
-                $("#drag4").draggable({coords:true,container:p,limit:true,handle:"handle"});
-                $("#drag5").draggable({coords:true,scroll:true});
-                $("#drag6").draggable({coords:true,ghosting:true,limit:true,handle:"handle"})
-                $("#drag7").draggable({coords:false,handle:"handle"});
-                $("#drag8").draggable({coords:true,dragstart:function(){this.innerHTML= "拖动开始"}});
-                $("#drag9").draggable({dragstart:function(){this.innerHTML= "拖动中"}});
-                $("#drag10").draggable({coords:false,ghosting:true,dragend:function(){this.innerHTML= "拖动结束"}});
-            });
     
         </script>
     </head>
@@ -102,61 +77,10 @@
         </ul>
         <p><a href="/src/doc/more/draggable.basic.html">一个最简单的例子，不用传参，任意拖动</a></p>
         <p><a href="/src/doc/more/draggable.lock.html">锁定某一方向拖动</a></p>
-        <!--
-                <fieldset><legend>拖动</legend>
-                    <pre class="brush:xml;gutter:false;toolbar:true;collapse:true;">
-                &lt;p&gt;拖动时可能被选中的文本……………………&lt;/p&gt;
-                &lt;div id="parent"&gt;
-                    &lt;div id="drag1" class="drag"&gt;drag1测试rewind参数&lt;/div&gt;
-                    &lt;div id="drag2" class="drag"&gt;drag2测试锁定X轴&lt;/div&gt;
-                    &lt;div id="drag3" class="drag"&gt;drag3测试锁定Y轴&lt;/div&gt;
-                    &lt;div id="drag4" class="drag"&gt;&lt;div class="handle" &gt;handle&lt;/div&gt;drag4测试修正margin&lt;/div&gt;
-                    &lt;div id="drag5" class="drag"&gt;drag5测试scroll参数&lt;/div&gt;
-                    &lt;div id="drag6" class="drag"&gt;
-                        &lt;div class="handle" &gt;drag6&lt;/div&gt;
-                        &lt;img src="../public/styles/printer.png" /&gt;
-                        &lt;div&gt;测试影子拖动&lt;/div&gt;
-                    &lt;/div&gt;
-                    &lt;div id="drag7" class="drag"&gt;&lt;div class="handle" &gt;handle&lt;/div&gt;drag7测试关闭显示坐标&lt;/div&gt;
-                    &lt;div id="drag8" class="drag"&gt;drag8测试onStart&lt;/div&gt;
-                    &lt;div id="drag9" class="drag"&gt;drag9测试onDrag&lt;/div&gt;
-                    &lt;div id="drag10" class="drag"&gt;&lt;div class="handle" &gt;handle&lt;/div&gt;drag10测试onEnd&lt;/div&gt;
-                &lt;/div&gt;
-                    </pre>
-                    <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
-                  $.require("ready,more/draggable",function(){
-                        var p = $("#parent");
-                        $("#drag1").draggable({coords:true,rewind:true});
-                        $("#drag2").draggable({coords:true,container:p,limit:true,lockX:true});
-                        $("#drag3").draggable({coords:true,container:p,limit:true,lockY:true});
-                        $("#drag4").draggable({coords:true,container:p,limit:true,handle:"handle"});
-                        $("#drag5").draggable({coords:true,scroll:true});
-                        $("#drag6").draggable({coords:true,ghosting:true,limit:true,handle:"handle"})
-                        $("#drag7").draggable({coords:false,handle:"handle"});
-                        $("#drag8").draggable({coords:true,dragstart:function(){this.innerHTML= "拖动开始"}});
-                        $("#drag9").draggable({dragstart:function(){this.innerHTML= "拖动中"}});
-                        $("#drag10").draggable({coords:false,ghosting:true,dragend:function(){this.innerHTML= "拖动结束"}});
-                    })
-                    </pre>
-                    <p>拖动时可能被选中的文本……………………</p>
-                    <div id="parent">
-                        <div id="drag1" class="drag">drag1测试rewind参数</div>
-                        <div id="drag2" class="drag">drag2测试锁定X轴</div>
-                        <div id="drag3" class="drag">drag3测试锁定Y轴</div>
-                        <div id="drag4" class="drag"><div class="handle" >handle</div>drag4测试修正margin</div>
-                        <div id="drag5" class="drag">drag5测试scroll参数</div>
-                        <div id="drag6" class="drag">
-                            <div class="handle" >drag6</div>
-                            <img src="../public/styles/printer.png" />
-                            <div>测试影子拖动</div>
-                        </div>
-                        <div id="drag7" class="drag"><div class="handle" >handle</div>drag7测试关闭显示坐标</div>
-                        <div id="drag8" class="drag">drag8测试onStart</div>
-                        <div id="drag9" class="drag">drag9测试onDrag</div>
-                        <div id="drag10" class="drag"><div class="handle" >handle</div>drag10测试onEnd</div>
-                    </div>
-                </fieldset>
-        -->
+        <p><a href="/src/doc/more/draggable.grid.html">一个个格子地移动</a></p>
+        <p><a href="/src/doc/more/draggable.containment.html">在限定的范围中移动</a></p>
+        <p><a href="/src/doc/more/draggable.circles.html">沿着圆形轨迹移动</a></p>
+        <p><a href="/src/doc/more/draggable.handle.html">通过手柄进行拖动</a></p>
     </article>
 </body>
 </html>

@@ -31,7 +31,7 @@
                             var ret = bf.toString("utf8").replace("/*combine modules*/", replaced ).replace(rcomments,"");
                             fs.writeFile("./js/mass_merge.js",ret,"utf8",function(e){//生成新的js文件！
                                 if(e) {
-                                    console.log();
+                                    console.log("出错了 "+e);
                                 }else{
                                     console.log("合并成功")
                                 }
