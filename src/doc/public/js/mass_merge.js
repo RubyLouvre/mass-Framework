@@ -4625,7 +4625,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
 //==========================================
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     // $.log("已加载target模块")
-    var fireType = "", blank = "", rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
+    var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
     rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
     function addCallback(queue, obj){//添加回调包到列队中
         var check = true, fn = obj.callback;
@@ -4688,7 +4688,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
           
             if( DOM ){ //处理DOM事件
                 callback = events.callback ||  (events.callback = function( e ) {
-                    return ((e || event).type !== fireType) ? facade.dispatch.apply( callback.target, arguments ) : void 0;
+                    return ((e || event).type !== facade.fireType ) ? facade.dispatch.apply( callback.target, arguments ) : void 0;
                 });
                 callback.target = target;
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" )
@@ -4698,7 +4698,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             types.replace( $.rword, function( old ){
                 var 
                 tns = rtypenamespace.exec( old ) || [],//"focusin.aaa.bbb"
-                namespace = ( tns[2] || blank ).split( "." ).sort(),//取得命名空间 "aaa.bbb"
+                namespace = ( tns[2] || "" ).split( "." ).sort(),//取得命名空间 "aaa.bbb"
                 adapter = DOM && eventAdapter[ tns[1] ] || {},// focusin -> focus
                 type = (selector ? adapter.delegateType : adapter.bindType ) || tns[1],//focus
 
@@ -4818,10 +4818,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                         if (old) {   // 不用再触发内联事件
                             target[ ontype ] = null;
                         }
-                        fireType = type;
+                        facade.fireType = type;
                         target[ type ]();
                     }
-                    fireType = blank;
+                    delete facade.fireType ;
                     if ( old ) {
                         target[ ontype ] = old;
                     }

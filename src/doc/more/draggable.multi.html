@@ -31,13 +31,9 @@
                 $(".drag").click(function(){
                     $( this ).toggleClass("selected");
                 }).draggable({
-                    draginit: function(e, dd){
-                        $.log("ddddddddddd")
-                        if( $( this ).is('.selected')){
-                            $.log("dddddddddd")
+                    draginit:function(e, dd){
+                        if ( $( this ).is('.selected') )
                             dd.multi = $('.selected');
-                        }
-                         
                     }
                 })
             });
