@@ -1,202 +1,223 @@
-$.define("draggable","event,css",function(){
-    var userSelect =  $.cssName("userSelect"), DOC = document;
-    function onUnselect(){
-        if(typeof userSelect === "string"){
-            return $.html.style[userSelect] = "none";
-        }
-        DOC.unselectable  = "on";
-        DOC.selectstart   = function(){
-            return false;
-        }
-    };
-    //https://github.com/jeremyckahn/dragon/blob/master/src/jquery.dragon.js
-    //http://www.jeasyui.com/tutorial/dd/dnd2.php
-    //http://superdit.com/2011/04/02/drag-drop-shopping-cart-using-jquery/
-    //http://club.sm160.com/showtopic-872125.aspx
-    function offUnselect(){
-        if(typeof userSelect === "string"){
-            return $.html.style[userSelect] = "text";
-        }
-        DOC.unselectable = "off";
-        DOC.selectstart  = null;
-    };
-    function fixAndDispatch(el, e, type, fn, ui){
-        e = $.event.fix( e );
+$.define("draggable","event,css,attr",function(){
+    var  $doc = $(document), dragger, dd
+    function preventDefault (e) {
+        e.preventDefault();
+    }
+    function fixAndDispatch(el, e, type){
         e.type = type;
-        fn.call(el, e, ui);
+        e.namespace = "mass_ui";
+        e.namespace_re = new RegExp("(^|\\.)" + "mass_ui" + "(\\.|$)");
+        el.fire(e, dd);
     }
-    function getEl( el ){
-        if( el ){
-            if(typeof el == "string"){
-                return $( el )[0];
-            }else if( el.nodeType === 1 ){
-                return el;
-            }else if( el.mass ){
-                return el[0];
+    function dragstart(event){
+        var el = event.currentTarget;
+        dragger = $(el);//每次只允许运行一个实例
+        dd = dragger.data("_mass_draggable")
+        if(dd.ghosting){
+            var ghosting = el.cloneNode(false);
+            el.parentNode.insertBefore(ghosting,el.nextSibling);
+            if( dd.handle){
+                dragger.find(dd.handle).appendTo(ghosting)
             }
-        }
-        return null;
-    }
-    Draggable = function(el, hash){
-        var ui = this,
-        limit = hash.limit,
-        container = getEl(limit) || $.html,
-        //确定其可活动的范围
-        coffset = $(container).offset(),
-        cleft = coffset.left,
-        ctop  = coffset.top,
-        cright = cleft + container.clientWidth,
-        cbottom = ctop + container.clientHeight,
-        //是否锁定它只能往某一个方向活动
-        lockX = hash.lockX,
-        lockY = hash.lockY,
-        //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
-        ghosting = hash.ghosting,
-        //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
-        handle = hash.handle,
-        //默认false。当值为true时，让拖动元素在拖动后回到原来的位置
-        rewind = hash.rewind,
-        //默认false。当值为true时，允许滚动条随拖动元素移动。
-        scroll = hash.scroll,
-        //默认false。拖动时在手柄或影子元素上显示元素的坐标。
-        coords =  hash.coords,
-        //三个回调函数，按照HTML5原生拖放的事件名命脉名
-        dragstart =  hash.dragstart || $.noop,
-        dragover =  hash.dragover || $.noop,
-        dragend =  hash.dragend || $.noop,
-        //当拖动元素存在margin时，其右边与下边可能会超出容器，因此我们必须取出其相应的margin
-        marginLeft = parseFloat($.css(el,"marginLeft")),
-        marginRight = parseFloat($.css(el,"marginRight")),
-        marginTop =  parseFloat($.css(el,"marginTop")),
-        marginBottom = parseFloat($.css(el,"marginBottom")),
-        position = $.css(el, "position"),
-        $el = $(el),
-        offset =  $el.offset(),
-        _handle,
-        _top,
-        _left;
-        //保存元素的起始坐标
-          el.style.position = "absolute";
-        ui.lockX = offset.left;
-        ui.lockY = offset.top;
-$.log(ui.lockX +" : "+ui.lockY)
-        ui.target = $el
-
-      
-        //修正其可活动的范围，如果传入的坐标
-        if($.type(limit, "Array") && limit.length == 4){
-            ctop  = limit[0]
-            cright = limit[1],
-            cbottom = limit[2],
-            cleft = limit[3]
-        }
-        if(handle){
-            _handle = $el.find("."+handle)[0];
-        }
-        var dragger = _handle || el,
-        _html = dragger.innerHTML;
-
-
-        function dragoverCallback(e) {
-            e = e || window.event;
-            if(DOC.selection){
-                DOC.selection.empty()
+            if($.support.cssOpacity){
+                ghosting.style.opacity = 0.5;
             }else{
-                window.getSelection().removeAllRanges();
+                ghosting.style.filter = "alpha(opacity=50)";
             }
-            _left = e.clientX - ui.offset_x ;
-            _top = e.clientY - ui.offset_y;
-            if(scroll){
-                var doc = hash.container || ($.support.boxModel ?  $.html : DOC.body),
-                offset = ui.target.offset(),
-                a = offset.left + el.offsetWidth,
-                b = doc.clientWidth,
-                c = offset.top + el.offsetHeight,
-                d = doc.clientHeight;
-                if (a > b){
-                    doc.scrollLeft = a - b;
-                }
-                if (c > d){
-                    doc.scrollTop = c - d;
-                }
-                hash.container && (hash.container.style.overflow = "auto");
-            }
-            if(limit){
-                var
-                _right = _left + el.offsetWidth ,
-                _bottom = _top + el.offsetHeight,
-                _left = Math.max(_left, cleft);
-                _top = Math.max(_top, ctop);
-                if(_right > cright){
-                    _left = cright - el.offsetWidth - marginLeft - marginRight;
-                }
-                if(_bottom > cbottom){
-                    _top = cbottom - el.offsetHeight  - marginTop - marginBottom;
-                }
-            }
-            lockX && ( _left = ui.lockX);
-            lockY && ( _top = ui.lockY);
-            (ghosting || el).style.left = _left + "px";
-            (ghosting || el).style.top = _top  + "px";
-            ui.top = _top;
-            ui.left = _left
-            coords && ((_handle || ghosting || el).innerHTML = _left + " x " + _top);
-            fixAndDispatch(el, e, "dragover", dragover, ui)
-        }
-        function dragendCallback(e){
-            $.unbind(DOC, "mouseover",dragoverCallback);
-            $.unbind(DOC, "mouseup",  dragendCallback);
-            ghosting && el.parentNode.removeChild(ghosting);
-            dragger.innerHTML = _html;
-            el.style.left = ui[rewind ? "lockX" : "left"]  + "px";
-            el.style.top =  ui[rewind ? "lockY" : "top"]  + "px";
-//            if(rewind){
-//                el.style.position = position;
-//            }
-            offUnselect();//恢复文字被选中功能
-            fixAndDispatch(el, e || event, "dragend", dragend, ui);
-        }
-        ui.dragstart = $.bind(dragger, "mousedown",function(e){
-            e = e || event;
-            ui.offset_x = e.clientX - el.offsetLeft;
-            ui.offset_y = e.clientY - el.offsetTop;
-            $.bind(DOC, "mouseover",dragoverCallback);
-            $.bind(DOC, "mouseup",  dragendCallback);
-            if(ghosting){
-                ghosting = el.cloneNode(false);
-                el.parentNode.insertBefore(ghosting,el.nextSibling);
-                if(_handle){
-                    _handle = _handle.cloneNode(false);
-                    ghosting.appendChild(_handle);
-                }
-                if($.support.cssOpacity){
-                    ghosting.style.opacity = 0.5;
-                }else{
-                    ghosting.style.filter = "alpha(opacity=50)";
-                }
-            };
-
-            dragger.style.zIndex = ++Draggable.z;
-            dragger.style.cursor = "pointer";
-            onUnselect();//防止文字被选中
-            fixAndDispatch(el, e, "dragstart", dragstart, ui)
-            return false;
-        })
+            dragger = $(ghosting)
+        };
+        var offset = dragger.offset();
+        dragger.addClass("mass_dragging");
+        dd.startX = event.pageX;
+        dd.startY = event.pageY;
+        dd.originalX = offset.left;
+        dd.originalY = offset.top;
+        dd.dragging = false;
+        fixAndDispatch(dragger, event, "dragstart");
     }
-    Draggable.z = 99;
-    $.fn.draggable = function( hash ){
-        hash = hash || {};
+    function Draggable($el, opts){
+        $el.data("drag_opts",opts);
+        $el.attr('draggable', 'true');
+        $el.on('dragstart', preventDefault);//处理原生的dragstart事件
+        if (!opts.noCursor) {
+            if (opts.handle) {//添加表示能拖放的样式
+                $el.find(opts.handle).css('cursor', 'move');
+            } else {
+                $el.css('cursor', 'move');
+            }
+        }
+        var position = $el.position();
+        $el.css({
+            'top': position.top,
+            'left': position.left,
+            'position': 'absolute'
+        });
+        //是否锁定它只能往某一个方向活动
+        this.lockX = !!opts.lockX
+        this.lockY = !!opts.lockY;
+        //默认false。当值为true时，让拖动元素在拖动后回到原来的位置
+        this.rewind = !!opts.rewind;
+        //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
+        this.ghosting = !!opts.ghosting;
+        this.target = $el;
+
+        //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
+        this.handle = typeof opts.handle == "string" ? opts.handle : null;
+        //默认true, 允许滚动条随拖动元素移动。
+        this.scroll = typeof opts.scroll == "boolean" ? opts.scroll : true;
+        if(this.scroll){
+            this.scrollSensitivity = opts.scrollSensitivity >= 0 ?  opts.scrollSensitivity : 20;
+            this.scrollSpeed = opts.scrollSensitivity >= 0 ?  opts.scrollSpeed : 20;
+            this.scrollParent = $el.scrollParent()[0]
+            $.log(this.scrollParent)
+            this.overflowOffset = $el.scrollParent().offset();
+        }
+        "dragstart dragover dragend".replace($.rword, function(event){
+            var fn = opts[event];
+            if(typeof fn == "function"){
+                $el.on(event + ".mass_ui", fn)
+            }
+        });
+       
+        $el.on('mousedown',this.handle , dragstart);
+
+        var limit = opts.containment;
+        if(limit){
+            //修正其可活动的范围，如果传入的坐标
+            if($.type(limit, "Array") && limit.length ==4){//[x1,y1,x2,y2] left,top,right,bottom
+                this.limit = limit;
+            }else{
+                if(limit == 'parent')
+                    limit = $el[0].parentNode;
+                if(limit == 'document' || limit == 'window') {
+                    this.limit = [  limit == 'document' ? 0 : $(window).scrollLeft() , limit == 'document' ? 0 : $(window).scrollTop()]
+                    this.limit[2]  = this.limit[0] + $(limit == 'document'? document : window).width()
+                    this.limit[3]  = this.limit[1] + $(limit == 'document'? document : window).height()
+                }
+                if(!(/^(document|window|parent)$/).test(limit) && !this.limit) {
+                    var c = $(limit);
+                    if(c[0]){
+                        var offset = c.offset();
+                        this.limit = [ offset.left + parseFloat(c.css("borderLeftWidth")),offset.top + parseFloat(c.css("borderTopWidth")) ]
+                        this.limit[2]  = this.limit[0] + c.innerWidth()
+                        this.limit[3]  = this.limit[1] + c.innerHeight()
+                    }
+                }
+            }
+            if(this.limit){//减少拖动块的面积
+                this.limit[2]  = this.limit[2] - $el.outerWidth();
+                this.limit[3]  = this.limit[3] - $el.outerHeight();
+            }
+            $.log(this.limit)
+        }
+        
+    }
+
+    $.fn.draggable = function( opts ){
+        opts = opts || {};
         for(var i =0 ; i < this.length; i++){
             if(this[i] && this[i].nodeType === 1){
-                var ui = $.data(this[i],"_mass_draggable")
-                if(! ui  ){
-                    ui = new Draggable( this[i], hash );
-                    $.data( this[i],"_mass_draggable" , ui );
+                var $el = $(this[i])
+                var dd = $el.data("_mass_draggable")
+                if(! dd  ){
+                    dd = new Draggable( $el, opts );
+                    $el.data( "_mass_draggable" , dd );
                 }
             }
         }
         return this;
     }
+
+    function dragend(event){
+        if(dragger){
+            dragger.removeClass("mass_dragging");
+            dd.dragging = false;
+            dd.ghosting && dragger.remove();
+            fixAndDispatch(dragger, event, "dragend");
+            if(dd.rewind){
+                dd.target.css({
+                    left:  dd.startX,
+                    top:    dd.startY
+                });
+            }
+           
+            dragger = null;
+        }
+    }
+    $doc.on({
+        "mouseup.mass_ui blur.mass_ui": dragend,
+        "mousemove.mass_ui": function(event){
+            if(dragger){
+                if(event.target !== dragger[0]){
+                    dragend(event)
+                    return
+                }
+                //当前元素移动了多少距离
+                dd.deltaX = event.pageX - dd.startX;
+                dd.deltaY = event.pageY - dd.startY;
+                //现在的坐标
+                dd.offsetX = dd.deltaX + dd.originalX  ;
+                dd.offsetY = dd.deltaY + dd.originalY  ;
+
+                var obj = {}
+                if(!dd.lockX){//如果没有锁定X轴left,top,right,bottom
+                    var left = obj.left = dd.limit ?  Math.min( dd.limit[2], Math.max( dd.limit[0], dd.offsetX )) : dd.offsetX
+                    dragger[0].style.left = left+"px"
+                }
+                if(!dd.lockY){//如果没有锁定Y轴
+                    var top =  obj.top = dd.limit ?   Math.min( dd.limit[3], Math.max( dd.limit[1], dd.offsetY ) ) : dd.offsetY;
+                    dragger[0].style.top = top+"px"
+                }
+
+                if(dd.scroll){
+                    if(dd.scrollParent != document && dd.scrollParent.tagName != 'HTML') {
+                        if(!dd.lockX) {
+                            if((dd.overflowOffset.top + dd.scrollParent.offsetHeight) - event.pageY < dd.scrollSensitivity)
+                                dd.scrollParent.scrollTop = dd.scrollParent.scrollTop + dd.scrollSpeed;
+                            else if(event.pageY - dd.overflowOffset.top < dd.scrollSensitivity)
+                                dd.scrollParent.scrollTop = dd.scrollParent.scrollTop - dd.scrollSpeed;
+                        }
+                
+                        if(!dd.lockY) {
+                            if((dd.overflowOffset.left + dd.scrollParent.offsetWidth) - event.pageX < dd.scrollSensitivity)
+                                dd.scrollParent.scrollLeft = dd.scrollParent.scrollLeft + dd.scrollSpeed;
+                            else if(event.pageX - dd.overflowOffset.left < dd.scrollSensitivity)
+                                dd.scrollParent.scrollLeft =  dd.scrollParent.scrollLeft - dd.scrollSpeed;
+                        }
+                
+                    } else {
+                
+                        if(!dd.lockX) {
+                            if(event.pageY - $doc.scrollTop() < dd.scrollSensitivity)
+                                $doc.scrollTop($doc.scrollTop() - dd.scrollSpeed);
+                            else if($(window).height() - (event.pageY - $doc.scrollTop()) < dd.scrollSensitivity)
+                                $doc.scrollTop($doc.scrollTop() + dd.scrollSpeed);
+                        }
+                
+                        if(!dd.lockY) {
+                            if(event.pageX - $doc.scrollLeft() < dd.scrollSensitivity)
+                                $doc.scrollLeft($doc.scrollLeft() - dd.scrollSpeed);
+                            else if($(window).width() - (event.pageX - $doc.scrollLeft()) < dd.scrollSensitivity)
+                                $doc.scrollLeft($doc.scrollLeft() + dd.scrollSpeed);
+                        }
+                
+                    }
+                
+                }
+                //  dragger.offset(obj)
+                fixAndDispatch(dragger, event, "dragover");
+            }
+        },
+        "selectstart.mass_ui": function(e){
+            if(dragger){
+                preventDefault(e);
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                } else if (document.selection) {
+                    document.selection.clear();
+                }
+            }
+        }
+    });
+
 })
-
-

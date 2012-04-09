@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>draggable lock</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            if (self!=top)
+                window.top.location.replace(self.location);
+        </script>
+
+        <style type="text/css">
+            .drag {
+                position: absolute;
+                border: 1px solid #89B;
+                background: #BCE;
+                height: 58px;
+                width: 58px;
+                cursor: move;
+                top: 120px;
+            }
+            #drag1{
+                background:red;
+            }
+            #drag2{
+                background:blue
+            }
+        </style>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script>
+            $.require("ready,more/draggable",function(){
+                $.log("/src/doc/plugin.html?iframe_src=" + location.pathname)
+                $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
+                $("#drag1").draggable({
+                    lockX:true
+                });
+                $("#drag2").draggable({
+                    lockY:true
+                });
+                $("#drag3").draggable();
+            });
+
+        </script>
+    </head>
+    <body>
+
+        <p>红色的只能上下拖，蓝色的只能左右拖。 <a id="back" href="">返回</a></p>
+        <div class="drag" id="drag1" style="left:20px;"></div>
+        <div class="drag" id="drag2" style="left:100px;"></div>
+        <div class="drag" id="drag3" style="left:180px;"></div>
+        <pre>
+                $("#drag1").draggable({
+                    lockX:true
+                });
+                $("#drag2").draggable({
+                    lockY:true
+                });
+        </pre>
+    </body>
+</html>

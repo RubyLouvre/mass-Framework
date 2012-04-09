@@ -53,7 +53,17 @@
                     data:data
                 }).menu("getUI").target.delegate(".menu_item", "click", function(){
                     iframe.src = $(this).attr("path")
-                })
+                });
+                function getParam(name){//获取参数值 by司徒正美
+                    var sUrl = window.location.search.substr(1);
+                    var r = sUrl.match(new RegExp("(^|&)" + name + "=([^&]*)(&|$)"));
+                    return (r == null ? null : unescape(r[2]));
+                }
+                var iframe_src = getParam("iframe_src");
+                $.log(iframe_src)
+                if(iframe_src){
+                    iframe.src = iframe_src;
+                }
             })
         </script>
 

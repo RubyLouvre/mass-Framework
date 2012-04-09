@@ -31,7 +31,7 @@
                 })
          */
                 $("#drag1").draggable({
-                   containment:"window",
+                  // containment:"window",
                    dragover:function(e, ui){
                        var offset = $(e.target).offset()
                        $(e.target).html( offset.top+"  "+offset.left )

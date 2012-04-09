@@ -14,7 +14,6 @@ $.define("draggable","event,css,attr",function(){
         dragger = $(el);//每次只允许运行一个实例
         dd = dragger.data("_mass_draggable")
         if(dd.ghosting){
-            $.log("ppppppppppp")
             var ghosting = el.cloneNode(false);
             el.parentNode.insertBefore(ghosting,el.nextSibling);
             if( dd.handle){
@@ -29,10 +28,10 @@ $.define("draggable","event,css,attr",function(){
         };
         var offset = dragger.offset();
         dragger.addClass("mass_dragging");
-        dd.pageX = event.pageX;
-        dd.pageY = event.pageY;
-        dd.startX = offset.left;
-        dd.startY = offset.top;
+        dd.startX = event.pageX;
+        dd.startY = event.pageY;
+        dd.originalX = offset.left;
+        dd.originalY = offset.top;
         dd.dragging = false;
         fixAndDispatch(dragger, event, "dragstart");
     }
@@ -61,11 +60,18 @@ $.define("draggable","event,css,attr",function(){
         //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
         this.ghosting = !!opts.ghosting;
         this.target = $el;
-        //默认false。当值为true时，允许滚动条随拖动元素移动。
-        this.scroll = !!opts.scroll;
-        //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
-        this.handle = typeof opts.handle == "string" ? opts.handle : null
 
+        //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
+        this.handle = typeof opts.handle == "string" ? opts.handle : null;
+        //默认true, 允许滚动条随拖动元素移动。
+        this.scroll = typeof opts.scroll == "boolean" ? opts.scroll : true;
+        if(this.scroll){
+            this.scrollSensitivity = opts.scrollSensitivity >= 0 ?  opts.scrollSensitivity : 20;
+            this.scrollSpeed = opts.scrollSensitivity >= 0 ?  opts.scrollSpeed : 20;
+            this.scrollParent = $el.scrollParent()[0]
+            $.log(this.scrollParent)
+            this.overflowOffset = $el.scrollParent().offset();
+        }
         "dragstart dragover dragend".replace($.rword, function(event){
             var fn = opts[event];
             if(typeof fn == "function"){
@@ -121,29 +127,38 @@ $.define("draggable","event,css,attr",function(){
         }
         return this;
     }
-    $doc.on({
-        "mouseup.mass_ui blur.mass_ui": function(event){
-            if(dragger){
-                dragger.removeClass("mass_dragging");
-                dd.dragging = false;
-                dd.ghosting && dragger.remove();
-                fixAndDispatch(dragger, event, "dragover");
-                var rewind = dd.rewind;
+
+    function dragend(event){
+        if(dragger){
+            dragger.removeClass("mass_dragging");
+            dd.dragging = false;
+            dd.ghosting && dragger.remove();
+            fixAndDispatch(dragger, event, "dragend");
+            if(dd.rewind){
                 dd.target.css({
-                    left:  dd[rewind ? "startX" : "offsetX"],
-                    top:   dd[rewind ? "startY" : "offsetY"]
+                    left:  dd.startX,
+                    top:    dd.startY
                 });
-                dragger = null;
             }
-        },
+           
+            dragger = null;
+        }
+    }
+    $doc.on({
+        "mouseup.mass_ui blur.mass_ui": dragend,
         "mousemove.mass_ui": function(event){
             if(dragger){
+                if(event.target !== dragger[0]){
+                    dragend(event)
+                    return
+                }
                 //当前元素移动了多少距离
-                dd.deltaX = event.pageX - dd.pageX;
-                dd.deltaY = event.pageY - dd.pageY;
+                dd.deltaX = event.pageX - dd.startX;
+                dd.deltaY = event.pageY - dd.startY;
                 //现在的坐标
-                dd.offsetX = dd.deltaX + dd.startX ;
-                dd.offsetY = dd.deltaY + dd.startY ;
+                dd.offsetX = dd.deltaX + dd.originalX  ;
+                dd.offsetY = dd.deltaY + dd.originalY  ;
+
                 var obj = {}
                 if(!dd.lockX){//如果没有锁定X轴left,top,right,bottom
                     var left = obj.left = dd.limit ?  Math.min( dd.limit[2], Math.max( dd.limit[0], dd.offsetX )) : dd.offsetX
@@ -154,42 +169,41 @@ $.define("draggable","event,css,attr",function(){
                     dragger[0].style.top = top+"px"
                 }
 
-//                if(dd.scroll){
-//                    if(i.scrollParent[0] != document && i.scrollParent[0].tagName != 'HTML') {
-//
-//                        if(!dd.lockX) {
-//                            if((i.overflowOffset.top + i.scrollParent[0].offsetHeight) - event.pageY < dd.scrollSensitivity)
-//                                i.scrollParent[0].scrollTop = scrolled = i.scrollParent[0].scrollTop + o.scrollSpeed;
-//                            else if(event.pageY - i.overflowOffset.top < o.scrollSensitivity)
-//                                i.scrollParent[0].scrollTop = scrolled = i.scrollParent[0].scrollTop - o.scrollSpeed;
-//                        }
-//
-//                        if(!dd.lockY) {
-//                            if((i.overflowOffset.left + i.scrollParent[0].offsetWidth) - event.pageX < o.scrollSensitivity)
-//                                i.scrollParent[0].scrollLeft = scrolled = i.scrollParent[0].scrollLeft + o.scrollSpeed;
-//                            else if(event.pageX - i.overflowOffset.left < o.scrollSensitivity)
-//                                i.scrollParent[0].scrollLeft = scrolled = i.scrollParent[0].scrollLeft - o.scrollSpeed;
-//                        }
-//
-//                    } else {
-//
-//                      if(!dd.lockX) {
-//                            if(event.pageY - $(document).scrollTop() < o.scrollSensitivity)
-//                                scrolled = $(document).scrollTop($(document).scrollTop() - o.scrollSpeed);
-//                            else if($(window).height() - (event.pageY - $(document).scrollTop()) < o.scrollSensitivity)
-//                                scrolled = $(document).scrollTop($(document).scrollTop() + o.scrollSpeed);
-//                        }
-//
-//                       if(!dd.lockY) {
-//                            if(event.pageX - $(document).scrollLeft() < o.scrollSensitivity)
-//                                scrolled = $(document).scrollLeft($(document).scrollLeft() - o.scrollSpeed);
-//                            else if($(window).width() - (event.pageX - $(document).scrollLeft()) < o.scrollSensitivity)
-//                                scrolled = $(document).scrollLeft($(document).scrollLeft() + o.scrollSpeed);
-//                        }
-//
-//                    }
-//
-//                }
+                if(dd.scroll){
+                    if(dd.scrollParent != document && dd.scrollParent.tagName != 'HTML') {
+                        if(!dd.lockX) {
+                            if((dd.overflowOffset.top + dd.scrollParent.offsetHeight) - event.pageY < dd.scrollSensitivity)
+                                dd.scrollParent.scrollTop = dd.scrollParent.scrollTop + dd.scrollSpeed;
+                            else if(event.pageY - dd.overflowOffset.top < dd.scrollSensitivity)
+                                dd.scrollParent.scrollTop = dd.scrollParent.scrollTop - dd.scrollSpeed;
+                        }
+                
+                        if(!dd.lockY) {
+                            if((dd.overflowOffset.left + dd.scrollParent.offsetWidth) - event.pageX < dd.scrollSensitivity)
+                                dd.scrollParent.scrollLeft = dd.scrollParent.scrollLeft + dd.scrollSpeed;
+                            else if(event.pageX - dd.overflowOffset.left < dd.scrollSensitivity)
+                                dd.scrollParent.scrollLeft =  dd.scrollParent.scrollLeft - dd.scrollSpeed;
+                        }
+                
+                    } else {
+                
+                        if(!dd.lockX) {
+                            if(event.pageY - $doc.scrollTop() < dd.scrollSensitivity)
+                                $doc.scrollTop($doc.scrollTop() - dd.scrollSpeed);
+                            else if($(window).height() - (event.pageY - $doc.scrollTop()) < dd.scrollSensitivity)
+                                $doc.scrollTop($doc.scrollTop() + dd.scrollSpeed);
+                        }
+                
+                        if(!dd.lockY) {
+                            if(event.pageX - $doc.scrollLeft() < dd.scrollSensitivity)
+                                $doc.scrollLeft($doc.scrollLeft() - dd.scrollSpeed);
+                            else if($(window).width() - (event.pageX - $doc.scrollLeft()) < dd.scrollSensitivity)
+                                $doc.scrollLeft($doc.scrollLeft() + dd.scrollSpeed);
+                        }
+                
+                    }
+                
+                }
                 //  dragger.offset(obj)
                 fixAndDispatch(dragger, event, "dragover");
             }

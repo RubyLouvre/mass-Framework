@@ -126,7 +126,8 @@ void function( global, DOC ){
                 global.console.log( text );
             }
         },
-        getUid: global.getComputedStyle ? function( node ){//用于建立一个从元素到数据的引用，以及选择器去重操作
+        //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
+        getUid: global.getComputedStyle ? function( node ){
             return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
         }: function( node ){
             if(node.nodeType !== 1){
@@ -628,7 +629,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var type = $.type(obj);
             if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
-            return isFinite(obj.length) ;
+            var i = obj.length;
+            return ~~i === i && i >= 0 ;//非负整数
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
@@ -1232,7 +1234,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
-               return fn.call(scope, target[name], name, target);
+                return fn.call(scope, target[name], name, target);
             }, target);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
@@ -3891,8 +3893,47 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return ret;//第一次执行结果
     }
-       
-    $.fn.offset = function(){//取得第一个元素位于页面的坐标
+    function setOffset(elem, options){
+        if(elem && elem.nodeType == 1 ){
+            var position = $.css( elem, "position" );
+            // set position first, in-case top/left are set even on static elem
+            if ( position === "static" ) {
+                elem.style.position = "relative";
+            }
+            var curElem = $( elem ),
+            curOffset = curElem.offset(),
+            curCSSTop = $.css( elem, "top" ),
+            curCSSLeft = $.css( elem, "left" ),
+            calculatePosition = ( position === "absolute" || position === "fixed" ) &&  [curCSSTop, curCSSLeft].indexOf("auto") > -1,
+            props = {}, curPosition = {}, curTop, curLeft;
+
+            // need to be able to calculate position if either top or left is auto and position is either absolute or fixed
+            if ( calculatePosition ) {
+                curPosition = curElem.position();
+                curTop = curPosition.top;
+                curLeft = curPosition.left;
+            } else {
+                curTop = parseFloat( curCSSTop ) || 0;
+                curLeft = parseFloat( curCSSLeft ) || 0;
+            }
+
+            if ( options.top != null ) {
+                props.top = ( options.top - curOffset.top ) + curTop;
+            }
+            if ( options.left != null ) {
+                props.left = ( options.left - curOffset.left ) + curLeft;
+            }
+            curElem.css( props );
+        }
+    }
+    $.fn.offset = function(options){//取得第一个元素位于页面的坐标
+        if ( arguments.length ) {
+            return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
+            this.each(function() {
+                setOffset( this, options );
+            });
+        }
+
         var node = this[0], owner = node && node.ownerDocument, pos = {
             left:0,
             top:0
@@ -3955,6 +3996,20 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 }
                 return offsetParent;
             });
+        },
+        scrollParent: function() {
+            var scrollParent;
+            if ((window.VBArray && (/(static|relative)/).test(this.css('position'))) || (/absolute/).test(this.css('position'))) {
+                scrollParent = this.parents().filter(function() {
+                    return (/(relative|absolute|fixed)/).test($.css(this,'position')) && (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
+                }).eq(0);
+            } else {
+                scrollParent = this.parents().filter(function() {
+                    return (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
+                }).eq(0);
+            }
+
+            return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
         }
     });
 
@@ -4661,6 +4716,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                         $.bind(target, type, callback, !!selector)
                     }
                 }
+           
                 addCallback( queue, item );//同一事件不能绑定重复回调
             });
             return this;
@@ -4728,17 +4784,19 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return this;
         },
 
-        fire: function( event ){
-            var target = this, namespace = [], type = event.type || event
-            if ( ~type.indexOf( "." ) ) {//处理命名空间
-                namespace = type.split(".");
-                type = namespace.shift();
-                namespace.sort();
+        fire: function( event ){//event的类型可能是字符串,原生事件对象,伪事件对象
+            var target = this, namespace = [], type = event.type || event;
+            if(!isFinite(event.mass)){
+                event = new jEvent(event);
+                if( ~type.indexOf( "." ) ) {//处理命名空间
+                    namespace = type.split(".");
+                    type = namespace.shift();
+                    namespace.sort();
+                    event.namespace = namespace.join( "." );
+                    event.namespace_re = event.namespace ? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
+                }
             }
-            event = (typeof event == "object" && typeof event.namespace == "string" )? type : new jEvent(type);
             event.target = target;
-            event.namespace = namespace.join( "." );
-            event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
             var args = [ event ].concat( $.slice(arguments,1) );
             if( $["@target"] in target){
                 var cur = target,  ontype = "on" + type;
@@ -4830,7 +4888,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         },
         fix: function( event ){
-            if( typeof event.namespace != "string" ){
+            if( !isFinite(event.mass) ){
                 var originalEvent = event
                 event = new jEvent(originalEvent);
                 for( var prop in originalEvent ){
@@ -4895,10 +4953,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     });
 
     var jEvent = $.Event = function ( event ) {
-        this.originalEvent = event.substr ? {} : event;
-        this.type = event.type || event;
+        this.originalEvent = event.type ? event: {};
+        this.type = (event.type || event).replace(/\..*/g,"");
         this.timeStamp  = Date.now();
-        this.namespace = "";//用于判定是否为伪事件对象
+        this.mass = $.mass;//用于判定是否为伪事件对象
     };
     // http://www.w3.org/TR/2003/WD-DOM-Level-3-Events-20030331/ecma-script-binding.html
     jEvent.prototype = {
