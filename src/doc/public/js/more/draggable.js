@@ -34,6 +34,8 @@ $.define("draggable","event,css,attr",function(){
         //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
         this.ghosting = !!opts.ghosting;
         this.target = $el;
+        //动画持续时间
+        this.duration = isFinite(opts.duration) ? opts.duration : 500;
         //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
         this.handle = typeof opts.handle == "string" ? opts.handle : null;
         //默认true, 允许滚动条随拖动元素移动。
@@ -44,12 +46,14 @@ $.define("draggable","event,css,attr",function(){
             this.scrollParent = $el.scrollParent()[0]
             this.overflowOffset = $el.scrollParent().offset();
         }
-        "dragstart dragover dragend".replace($.rword, function(event){
+        "dragstart dragover dragend draginit".replace($.rword, function(event){
             var fn = opts[event];
             if(typeof fn == "function"){
                 $el.on(event + ".mass_ui", fn)
             }
         });
+        
+      
        
         $el.on('mousedown',this.handle , dragstart);
 
@@ -116,6 +120,11 @@ $.define("draggable","event,css,attr",function(){
             }
             dragger = $(ghosting).addClass("mass_ghosting");
         };
+
+        dragger.fire("draginit", dd);
+        if(dd.multi && dd.multi.lenth > 0){
+            $.log(dd.multi)
+        }
         var offset = dragger.offset();
         dragger.addClass("mass_dragging");
         dd.startX = event.pageX;
@@ -124,12 +133,14 @@ $.define("draggable","event,css,attr",function(){
         dd.originalY = offset.top;
         if(dragger[0].setCapture){
             //设置鼠标捕获
-            // $.log(" support setCapture ")
             dragger[0].setCapture();
         }else{
             //阻止默认动作
             event.preventDefault();
         };
+        if(dd.multi && dd.multi.length > 1){
+            $.log( dd.multi.not(dragger))
+        }
         //防止隔空拖动，为了性能起见，150ms才检测一下
         dd.checkID = setInterval(dragstop, 150);
         fixAndDispatch(dragger, event, "dragstart");
@@ -161,9 +172,9 @@ $.define("draggable","event,css,attr",function(){
             dd.ghosting && dragger.remove();
             event && fixAndDispatch(dragger, event, "dragend");
             if(dd.rewind || dd.ghosting){
-                dd.target.fx( 500,{
-                    left:  dd.rewind ? dd.startX: dd.offsetX,
-                    top:   dd.rewind ? dd.startY: dd.offsetY
+                dd.target.fx( dd.duration,{
+                    left:  dd.rewind ? dd.originalX: dd.offsetX,
+                    top:   dd.rewind ? dd.originalY: dd.offsetY
                 });
             }
             dragger = null;
