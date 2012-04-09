@@ -167,7 +167,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             if(!isFinite(event.mass)){
                 event = new jEvent(event);
                 if( ~type.indexOf( "." ) ) {//处理命名空间
-                    namespace = event.split(".");
+                    namespace = type.split(".");
                     type = namespace.shift();
                     namespace.sort();
                     event.namespace = namespace.join( "." );
