@@ -1,390 +1,209 @@
 $.define("draggable","event,css,attr",function(){
-
-    // add the jquery instance method
-    $.fn.drag = function( str, arg, opts ){
-        // figure out the event type
-        var type = typeof str == "string" ? str : "",
-        // figure out the event handler...
-        fn = $.isFunction( str ) ? str : $.isFunction( arg ) ? arg : null;
-        // fix the event type
-        if ( type.indexOf("drag") !== 0 )
-            type = "drag"+ type;
-        // were options passed
-        opts = ( str == fn ? arg : opts ) || {};
-        
-        //设置参数
-        this.data(drag.datakey,  $.mix( {
-            which: 1, // mouse button pressed to start drag sequence
-            distance: 0, // distance dragged before dragstart
-            not: ':input', // selector to suppress dragging on target elements
-            handle: null, // selector to match handle target elements
-            relative: false, // true to use "position", false to use "offset"
-            drop: true, // false to suppress drop events, true or selector to allow
-            click: false // false to suppress click events after dragend (no proxy)
-        },opts))
-
-        // trigger or bind event handler
-        return fn ? this.bind( type, fn ) : this.trigger( type );
-    };
-
-    // local refs (increase compression)
-    var facade = $.event,
-    eventAdapter = facade.special,//eventAdapter
-    // configure the drag special event
-    drag = eventAdapter.drag = {
-        // these are the default settings
-        defaults: {
-            which: 1, // mouse button pressed to start drag sequence
-            distance: 0, // distance dragged before dragstart
-            not: ':input', // selector to suppress dragging on target elements
-            handle: null, // selector to match handle target elements
-            relative: false, // true to use "position", false to use "offset"
-            drop: true, // false to suppress drop events, true or selector to allow
-            click: false // false to suppress click events after dragend (no proxy)
-        },
-
-        // the key name for stored drag data
-        datakey: "dragdata",
-
-        // the namespace for internal live events
-        livekey: "livedrag",
-
-        // count bound related events
-        add: function( obj ){
-            // read the interaction data
-            var data = $.data( this, drag.datakey ),
-            // read any passed options
-            opts = obj.data || {};
-            // count another realted event
-            data.related += 1;
-            // bind the live "draginit" delegator
-            if ( !data.live && obj.selector ){
-                data.live = true;
-                facade.add( this, "draginit."+ drag.livekey, drag.delegate );
+    var  $doc = $(document), dragger, dd
+    function preventDefault (e) {
+        e.preventDefault();
+    }
+    function fixAndDispatch(el, e, type){
+        e.type = type;
+        e.namespace = "mass_ui";
+        e.namespace_re = new RegExp("(^|\\.)" + "mass_ui" + "(\\.|$)");
+        el.fire(e, dd);
+    }
+    function dragstart(event){
+        var el = event.currentTarget;
+        dragger = $(el);//每次只允许运行一个实例
+        dd = dragger.data("_mass_draggable")
+        if(dd.ghosting){
+            $.log("ppppppppppp")
+            var ghosting = el.cloneNode(false);
+            el.parentNode.insertBefore(ghosting,el.nextSibling);
+            if( dd.handle){
+                dragger.find(dd.handle).appendTo(ghosting)
             }
-            // extend data options bound with this event
-            // don't iterate "opts" in case it is a node
-            $.each( drag.defaults, function( key, def ){
-                if ( opts[ key ] !== undefined )
-                    data[ key ] = opts[ key ];
-            });
-        },
-
-        // forget unbound related events
-        unbind: function(){
-            $.data( this, drag.datakey ).related -= 1;
-        },
-
-        // configure interaction, capture settings
-        setup: function(el){
-            //绑定mousedown开始拖动
-            $(el).on( "mousedown", drag.init );
-            // prevent image dragging in IE...
-            if ( el.attachEvent )
-                el.attachEvent("ondragstart", drag.dontstart );
-        },
-
-        // destroy configured interaction
-        teardown: function(){
-            // 如果related属性为零才解绑此事件
-            if ( $.data( this, drag.datakey ).related )
-                return;
-            // remove the stored data
-            $.removeData( this, drag.datakey );
-            // remove the mousedown event
-            facade.remove( this, "mousedown", drag.init );
-            // remove the "live" delegation
-            facade.remove( this, "draginit", drag.delegate );
-            // enable text selection
-            drag.textselect( true );
-            // un-prevent image dragging in IE...
-            if ( this.detachEvent )
-                this.detachEvent("ondragstart", drag.dontstart );
-        },
-
-        // initialize the interaction
-        init: function( event ){
-            // the drag/drop interaction data
-            var dd = event.data, results;
-            //对which
-            if ( dd.which > 0 && event.which != dd.which )
-                return;
-            //过滤选滤不支持的选择器
-            if ( $( event.target ).is( dd.not ) )
-                return;
-            // check for handle selector
-            if ( dd.handle && !$( event.target ).closest( dd.handle, event.currentTarget ).length )
-                return;
-            // store/reset some initial attributes
-            dd.propagates = 1;
-            dd.interactions = [ drag.interaction( this, dd ) ];
-            dd.target = event.target;
-            dd.pageX = event.pageX;
-            dd.pageY = event.pageY;
-            dd.dragging = null;
-            // handle draginit event...
-            results = drag.hijack( event, "draginit", dd );
-            // early cancel
-            if ( !dd.propagates )
-                return;
-            // flatten the result set
-            results = drag.flatten( results );
-            // insert new interaction elements
-            if ( results && results.length ){
-                dd.interactions = [];
-                $.each( results, function(){
-                    dd.interactions.push( drag.interaction( this, dd ) );
-                });
+            if($.support.cssOpacity){
+                ghosting.style.opacity = 0.5;
+            }else{
+                ghosting.style.filter = "alpha(opacity=50)";
             }
-            // remember how many interactions are propagating
-            dd.propagates = dd.interactions.length;
-            // locate and init the drop targets
-            if ( dd.drop !== false && eventAdapter.drop )
-                eventAdapter.drop.handler( event, dd );
-            // disable text selection
-            drag.textselect( false );
-            // bind additional events...
-            facade.add( document, "mousemove mouseup", drag.handler, dd );
-            // helps prevent text selection
-            return false;
-        },
-        // returns an interaction object
-        interaction: function( elem, dd ){
-            return {
-                drag: elem,
-                callback: new drag.callback(),
-                droppable: [],
-                offset: $( elem )[ dd.relative ? "position" : "offset" ]() || {
-                    top:0,
-                    left:0
-                }
-            };
-        },
-        // handle drag-releatd DOM events
-        handler: function( event ){
-            // read the data before hijacking anything
-            var dd = event.data;
-            // handle various events
-            switch ( event.type ){
-                // mousemove, check distance, start dragging
-                case !dd.dragging && 'mousemove':
-                    //  drag tolerance, x?+ y?= distance?
-                    if ( Math.pow(  event.pageX-dd.pageX, 2 ) + Math.pow(  event.pageY-dd.pageY, 2 ) < Math.pow( dd.distance, 2 ) )
-                        break; // distance tolerance not reached
-                    event.target = dd.target; // force target from "mousedown" event (fix distance issue)
-                    drag.hijack( event, "dragstart", dd ); // trigger "dragstart"
-                    if ( dd.propagates ) // "dragstart" not rejected
-                        dd.dragging = true; // activate interaction
-                // mousemove, dragging
-                case 'mousemove':
-                    if ( dd.dragging ){
-                        // trigger "drag"
-                        drag.hijack( event, "drag", dd );
-                        if ( dd.propagates ){
-                            // manage drop events
-                            if ( dd.drop !== false && eventAdapter.drop )
-                                eventAdapter.drop.handler( event, dd ); // "dropstart", "dropend"
-                            break; // "drag" not rejected, stop
-                        }
-                        event.type = "mouseup"; // helps "drop" handler behave
-                    }
-                // mouseup, stop dragging
-                case 'mouseup':
-                    facade.remove( document, "mousemove mouseup", drag.handler ); // remove page events
-                    if ( dd.dragging ){
-                        if ( dd.drop !== false && eventAdapter.drop )
-                            eventAdapter.drop.handler( event, dd ); // "drop"
-                        drag.hijack( event, "dragend", dd ); // trigger "dragend"
-                    }
-                    drag.textselect( true ); // enable text selection
-
-                    // if suppressing click events...
-                    if ( dd.click === false && dd.dragging ){
-                        jQuery.event.triggered = true;
-                        setTimeout(function(){
-                            jQuery.event.triggered = false;
-                        }, 20 );
-                        dd.dragging = false; // deactivate element
-                    }
-                    break;
+            dragger = $(ghosting)
+        };
+        var offset = dragger.offset();
+        dragger.addClass("mass_dragging");
+        dd.pageX = event.pageX;
+        dd.pageY = event.pageY;
+        dd.startX = offset.left;
+        dd.startY = offset.top;
+        dd.dragging = false;
+        fixAndDispatch(dragger, event, "dragstart");
+    }
+    function Draggable($el, opts){
+        $el.data("drag_opts",opts);
+        $el.attr('draggable', 'true');
+        $el.on('dragstart', preventDefault);//处理原生的dragstart事件
+        if (!opts.noCursor) {
+            if (opts.handle) {//添加表示能拖放的样式
+                $el.find(opts.handle).css('cursor', 'move');
+            } else {
+                $el.css('cursor', 'move');
             }
-        },
-
-        // identify potential delegate elements
-        delegate: function( event ){
-            // local refs
-            var elems = [], target,
-            // element event structure
-            events = $.data( this, "events" ) || {};
-            // query live events
-            $.each( events.live || [], function( i, obj ){
-                // no event type matches
-                if ( obj.preType.indexOf("drag") !== 0 )
-                    return;
-                // locate the element to delegate
-                target = $( event.target ).closest( obj.selector, event.currentTarget )[0];
-                // no element found
-                if ( !target )
-                    return;
-                // add an event handler
-                facade.add( target, obj.origType+'.'+drag.livekey, obj.origHandler, obj.data );
-                // remember new elements
-                if ( $.inArray( target, elems ) < 0 )
-                    elems.push( target );
-            });
-            // if there are no elements, break
-            if ( !elems.length )
-                return false;
-            // return the matched results, and clenup when complete
-            return $( elems ).bind("dragend."+ drag.livekey, function(){
-                facade.remove( this, "."+ drag.livekey ); // cleanup delegation
-            });
-        },
-
-        // re-use event object for custom events
-        hijack: function( event, type, dd, x, elem ){
-            // not configured
-            if ( !dd )
-                return;
-            // remember the original event and type
-            var orig = {
-                event:event.originalEvent,
-                type: event.type
-            },
-            // is the event drag related or drog related?
-            mode = type.indexOf("drop") ? "drag" : "drop",
-            // iteration vars
-            result, i = x || 0, ia, $elems, callback,
-            len = !isNaN( x ) ? x : dd.interactions.length;
-            // modify the event type
-            event.type = type;
-            // remove the original event
-            event.originalEvent = null;
-            // initialize the results
-            dd.results = [];
-            // handle each interacted element
-            do if ( ia = dd.interactions[ i ] ){
-                // validate the interaction
-                if ( type !== "dragend" && ia.cancelled )
-                    continue;
-                // set the dragdrop properties on the event object
-                callback = drag.properties( event, dd, ia );
-                // prepare for more results
-                ia.results = [];
-                // handle each element
-                $( elem || ia[ mode ] || dd.droppable ).each(function( p, subject ){
-                    // identify drag or drop targets individually
-                    callback.target = subject;
-                    // handle the event
-                    result = subject ? facade.handle.call( subject, event, callback ) : null;
-                    // stop the drag interaction for this element
-                    if ( result === false ){
-                        if ( mode == "drag" ){
-                            ia.cancelled = true;
-                            dd.propagates -= 1;
-                        }
-                        if ( type == "drop" ){
-                            ia[ mode ][p] = null;
-                        }
-                    }
-                    // assign any dropinit elements
-                    else if ( type == "dropinit" )
-                        ia.droppable.push( drag.element( result ) || subject );
-                    // accept a returned proxy element
-                    if ( type == "dragstart" )
-                        ia.proxy = $( drag.element( result ) || ia.drag )[0];
-                    // remember this result
-                    ia.results.push( result );
-                    // forget the event result, for recycling
-                    delete event.result;
-                    // break on cancelled handler
-                    if ( type !== "dropinit" )
-                        return result;
-                });
-                // flatten the results
-                dd.results[ i ] = drag.flatten( ia.results );
-                // accept a set of valid drop targets
-                if ( type == "dropinit" )
-                    ia.droppable = drag.flatten( ia.droppable );
-                // locate drop targets
-                if ( type == "dragstart" && !ia.cancelled )
-                    callback.update();
-            }
-            while ( ++i < len )
-            // restore the original event & type
-            event.type = orig.type;
-            event.originalEvent = orig.event;
-            // return all handler results
-            return drag.flatten( dd.results );
-        },
-
-        // extend the callback object with drag/drop properties...
-        properties: function( event, dd, ia ){
-            var obj = ia.callback;
-            // elements
-            obj.drag = ia.drag;
-            obj.proxy = ia.proxy || ia.drag;
-            // starting mouse position
-            obj.startX = dd.pageX;
-            obj.startY = dd.pageY;
-            // current distance dragged
-            obj.deltaX = event.pageX - dd.pageX;
-            obj.deltaY = event.pageY - dd.pageY;
-            // original element position
-            obj.originalX = ia.offset.left;
-            obj.originalY = ia.offset.top;
-            // adjusted element position
-            obj.offsetX = event.pageX - ( dd.pageX - obj.originalX );
-            obj.offsetY = event.pageY - ( dd.pageY - obj.originalY );
-            // assign the drop targets information
-            obj.drop = drag.flatten( ( ia.drop || [] ).slice() );
-            obj.available = drag.flatten( ( ia.droppable || [] ).slice() );
-            return obj;
-        },
-
-        // determine is the argument is an element or jquery instance
-        element: function( arg ){//如果是
-            if ( arg && ( arg.mass || arg.nodeType == 1 ) )
-                return arg;
-        },
-
-        // flatten nested jquery objects and arrays into a single dimension array
-        flatten: function( arr ){
-            return $.map( arr, function( member ){
-                return member && member.jquery ? $.makeArray( member ) :
-                member && member.length ? drag.flatten( member ) : member;
-            });
-        },
-
-        // toggles text selection attributes ON (true) or OFF (false)
-        textselect: function( bool ){
-            $( document )[ bool ? "unbind" : "bind" ]("selectstart", drag.dontstart )
-            .attr("unselectable", bool ? "off" : "on" )
-            .css("MozUserSelect", bool ? "" : "none" );
-        },
-        //用于selectstart事件与图片的ondragstart事件
-        dontstart: function(){
-            return false;
-        },
-
-        // a callback instance contructor
-        callback: function(){}
-
-    };
-
-    // callback methods
-    drag.callback.prototype = {
-        update: function(){
-            if ( eventAdapter.drop && this.available.length )
-                $.each( this.available, function( i ){
-                    eventAdapter.drop.locate( this, i );
-                });
         }
-    };
+        var position = $el.position();
+        $el.css({
+            'top': position.top,
+            'left': position.left,
+            'position': 'absolute'
+        });
+        //是否锁定它只能往某一个方向活动
+        this.lockX = !!opts.lockX
+        this.lockY = !!opts.lockY;
+        //默认false。当值为true时，让拖动元素在拖动后回到原来的位置
+        this.rewind = !!opts.rewind;
+        //默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，以减轻内存消耗。
+        this.ghosting = !!opts.ghosting;
+        this.target = $el;
+        //默认false。当值为true时，允许滚动条随拖动元素移动。
+        this.scroll = !!opts.scroll;
+        //手柄的类名，当设置了此参数后，只允许用手柄拖动元素。
+        this.handle = typeof opts.handle == "string" ? opts.handle : null
 
-    // share the same special event configuration with related events...
-    eventAdapter.draginit = eventAdapter.dragstart = eventAdapter.dragend = drag;
+        "dragstart dragover dragend".replace($.rword, function(event){
+            var fn = opts[event];
+            if(typeof fn == "function"){
+                $el.on(event + ".mass_ui", fn)
+            }
+        });
+       
+        $el.on('mousedown',this.handle , dragstart);
 
+        var limit = opts.containment;
+        if(limit){
+            //修正其可活动的范围，如果传入的坐标
+            if($.type(limit, "Array") && limit.length ==4){//[x1,y1,x2,y2] left,top,right,bottom
+                this.limit = limit;
+            }else{
+                if(limit == 'parent')
+                    limit = $el[0].parentNode;
+                if(limit == 'document' || limit == 'window') {
+                    this.limit = [  limit == 'document' ? 0 : $(window).scrollLeft() , limit == 'document' ? 0 : $(window).scrollTop()]
+                    this.limit[2]  = this.limit[0] + $(limit == 'document'? document : window).width()
+                    this.limit[3]  = this.limit[1] + $(limit == 'document'? document : window).height()
+                }
+                if(!(/^(document|window|parent)$/).test(limit) && !this.limit) {
+                    var c = $(limit);
+                    if(c[0]){
+                        var offset = c.offset();
+                        this.limit = [ offset.left + parseFloat(c.css("borderLeftWidth")),offset.top + parseFloat(c.css("borderTopWidth")) ]
+                        this.limit[2]  = this.limit[0] + c.innerWidth()
+                        this.limit[3]  = this.limit[1] + c.innerHeight()
+                    }
+                }
+            }
+            if(this.limit){//减少拖动块的面积
+                this.limit[2]  = this.limit[2] - $el.outerWidth();
+                this.limit[3]  = this.limit[3] - $el.outerHeight();
+            }
+            $.log(this.limit)
+        }
+        
+    }
 
+    $.fn.draggable = function( opts ){
+        opts = opts || {};
+        for(var i =0 ; i < this.length; i++){
+            if(this[i] && this[i].nodeType === 1){
+                var $el = $(this[i])
+                var dd = $el.data("_mass_draggable")
+                if(! dd  ){
+                    dd = new Draggable( $el, opts );
+                    $el.data( "_mass_draggable" , dd );
+                }
+            }
+        }
+        return this;
+    }
+    $doc.on({
+        "mouseup.mass_ui blur.mass_ui": function(event){
+            if(dragger){
+                dragger.removeClass("mass_dragging");
+                dd.dragging = false;
+                dd.ghosting && dragger.remove();
+                fixAndDispatch(dragger, event, "dragover");
+                var rewind = dd.rewind;
+                dd.target.css({
+                    left:  dd[rewind ? "startX" : "offsetX"],
+                    top:   dd[rewind ? "startY" : "offsetY"]
+                });
+                dragger = null;
+            }
+        },
+        "mousemove.mass_ui": function(event){
+            if(dragger){
+                //当前元素移动了多少距离
+                dd.deltaX = event.pageX - dd.pageX;
+                dd.deltaY = event.pageY - dd.pageY;
+                //现在的坐标
+                dd.offsetX = dd.deltaX + dd.startX ;
+                dd.offsetY = dd.deltaY + dd.startY ;
+                var obj = {}
+                if(!dd.lockX){//如果没有锁定X轴left,top,right,bottom
+                    var left = obj.left = dd.limit ?  Math.min( dd.limit[2], Math.max( dd.limit[0], dd.offsetX )) : dd.offsetX
+                    dragger[0].style.left = left+"px"
+                }
+                if(!dd.lockY){//如果没有锁定Y轴
+                    var top =  obj.top = dd.limit ?   Math.min( dd.limit[3], Math.max( dd.limit[1], dd.offsetY ) ) : dd.offsetY;
+                    dragger[0].style.top = top+"px"
+                }
+
+//                if(dd.scroll){
+//                    if(i.scrollParent[0] != document && i.scrollParent[0].tagName != 'HTML') {
+//
+//                        if(!dd.lockX) {
+//                            if((i.overflowOffset.top + i.scrollParent[0].offsetHeight) - event.pageY < dd.scrollSensitivity)
+//                                i.scrollParent[0].scrollTop = scrolled = i.scrollParent[0].scrollTop + o.scrollSpeed;
+//                            else if(event.pageY - i.overflowOffset.top < o.scrollSensitivity)
+//                                i.scrollParent[0].scrollTop = scrolled = i.scrollParent[0].scrollTop - o.scrollSpeed;
+//                        }
+//
+//                        if(!dd.lockY) {
+//                            if((i.overflowOffset.left + i.scrollParent[0].offsetWidth) - event.pageX < o.scrollSensitivity)
+//                                i.scrollParent[0].scrollLeft = scrolled = i.scrollParent[0].scrollLeft + o.scrollSpeed;
+//                            else if(event.pageX - i.overflowOffset.left < o.scrollSensitivity)
+//                                i.scrollParent[0].scrollLeft = scrolled = i.scrollParent[0].scrollLeft - o.scrollSpeed;
+//                        }
+//
+//                    } else {
+//
+//                      if(!dd.lockX) {
+//                            if(event.pageY - $(document).scrollTop() < o.scrollSensitivity)
+//                                scrolled = $(document).scrollTop($(document).scrollTop() - o.scrollSpeed);
+//                            else if($(window).height() - (event.pageY - $(document).scrollTop()) < o.scrollSensitivity)
+//                                scrolled = $(document).scrollTop($(document).scrollTop() + o.scrollSpeed);
+//                        }
+//
+//                       if(!dd.lockY) {
+//                            if(event.pageX - $(document).scrollLeft() < o.scrollSensitivity)
+//                                scrolled = $(document).scrollLeft($(document).scrollLeft() - o.scrollSpeed);
+//                            else if($(window).width() - (event.pageX - $(document).scrollLeft()) < o.scrollSensitivity)
+//                                scrolled = $(document).scrollLeft($(document).scrollLeft() + o.scrollSpeed);
+//                        }
+//
+//                    }
+//
+//                }
+                //  dragger.offset(obj)
+                fixAndDispatch(dragger, event, "dragover");
+            }
+        },
+        "selectstart.mass_ui": function(e){
+            if(dragger){
+                preventDefault(e);
+                if (window.getSelection) {
+                    window.getSelection().removeAllRanges();
+                } else if (document.selection) {
+                    document.selection.clear();
+                }
+            }
+        }
+    });
 
 })
