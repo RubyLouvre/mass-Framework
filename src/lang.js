@@ -51,7 +51,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var type = $.type(obj);
             if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
-            return (obj.length >= 0) && (obj.length % 1 == 0);//非负整数
+            var i = obj.length;
+            return ~~i === i && i >= 0 ;//非负整数
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
@@ -663,7 +664,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
-               return fn.call(scope, target[name], name, target);
+                return fn.call(scope, target[name], name, target);
             }, target);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
