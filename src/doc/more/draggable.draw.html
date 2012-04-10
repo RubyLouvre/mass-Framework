@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>draggable draw</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            if (self!=top)
+                window.top.location.replace(self.location);
+        </script>
+
+        <style type="text/css">
+            #draw {
+                border: 1px solid #AAA;
+                background: #EEE;
+            }
+        </style>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script>
+            $.require("ready,more/draggable",function(){
+                $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
+                var canvas
+                if(window.VBArray  ){
+                    $('pre').html("IE678不支持canvas")
+                }else{
+                    canvas = $('#draw')[0].getContext('2d');
+                    canvas.strokeStyle = "#137";
+                    canvas.lineCap = 'round';
+                    canvas.lineWidth = 4;
+                    canvas.beginPath();
+                }
+                $('#draw').draggable({
+                    lockX: true,
+                    lockY: true,
+                    dragstart: function( e, dd ){
+                        if(canvas){
+                            canvas.moveTo( e.pageX - dd.originalX, e.pageY - dd.originalY )
+                        }
+                    },
+                    dragover: function( e, dd ){
+                        if(canvas){
+                            canvas.lineTo( e.pageX - dd.originalX, e.pageY - dd.originalY );
+                            canvas.clearRect(0,0,680,300);
+                            canvas.stroke();
+                        }
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <p>通过拖动画图。 <a id="back" href="">返回</a></p>
+        <pre>
+          $.require("ready,more/draggable",function(){
+                var canvas
+                if(window.VBArray  ){
+                    $('pre').html("IE678不支持canvas")
+                }else{
+                    canvas = $('#draw')[0].getContext('2d');
+                    canvas.strokeStyle = "#137";
+                    canvas.lineCap = 'round';
+                    canvas.lineWidth = 4;
+                    canvas.beginPath();
+                }
+                $('#draw').draggable({
+                    lockX: true,
+                    lockY: true,
+                    dragstart: function( e, dd ){
+                        if(canvas){
+                            canvas.moveTo( e.pageX - dd.originalX, e.pageY - dd.originalY )
+                        }
+                    },
+                    dragover: function( e, dd ){
+                        if(canvas){
+                            canvas.lineTo( e.pageX - dd.originalX, e.pageY - dd.originalY );
+                            canvas.clearRect(0,0,680,300);
+                            canvas.stroke();
+                        }
+                    }
+                });
+            });
+        </pre>
+    <canvas id="draw" width="680" height="300"></canvas>
+</body>
+</html>

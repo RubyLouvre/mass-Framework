@@ -31,11 +31,11 @@
                 $(".drag").click(function(){
                     $( this ).toggleClass("selected");
                 }).draggable({
-                    draginit:function(e, dd){
-                        if ( $( this ).is('.selected') )
-                            dd.multi = $('.selected');
+                    dragstart:function(e, dd){
+                        dd.multi = $('.selected');
                     }
-                })
+                });
+                
             });
 
         </script>
@@ -48,14 +48,13 @@
         <div class="drag" style="left:180px;" id="drag3"></div>
         <pre>
             $.require("ready,more/draggable",function(){
-                $(".drag").draggable({
-                    dragstart:function(){
-                        $( this ).addClass("active");
-                    },
-                    dragend:function(){
-                        $( this ).removeClass("active");
+                $(".drag").click(function(){
+                    $( this ).toggleClass("selected");
+                }).draggable({
+                    dragstart:function(e, dd){
+                        dd.multi = $('.selected');
                     }
-                })
+                });
             });
         </pre>
     </body>

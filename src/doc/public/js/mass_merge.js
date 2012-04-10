@@ -4795,8 +4795,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     event.namespace = namespace.join( "." );
                     event.namespace_re = event.namespace ? new RegExp("(^|\\.)" + namespace.join("\\.(?:.*\\.)?") + "(\\.|$)") : null;
                 }
+                event.target = target;
             }
-            event.target = target;
             var args = [ event ].concat( $.slice(arguments,1) );
             if( $["@target"] in target){
                 var cur = target,  ontype = "on" + type;

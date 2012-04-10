@@ -52,9 +52,12 @@
             <li><em>ghosting</em>：boolean 默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，
                 以减轻内存消耗，并且它拥有一个名为mass_ghosting的类名，半透明。</li>
             <li><em>rewind</em>：boolean	默认false。当值为true时，让拖动元素在拖动后回到原来的位置。。</li>
-
+            <li><em>strict</em>：boolean	默认true。当值为true时，监视鼠标的位置，一旦超过出拖动块就立即停止。</li>
             <li><em>scroll</em>：boolean	默认false。当值为true时，允许滚动条随拖动元素移动。</li>
             <li><em>dragstart</em>：function	在拖动前鼠标按下的那一瞬执行。</li>
+            <li><em>click</em>：function	默认为false。当我们点击页面时依次发生的事件为mousedown mouseup click
+                但有时我们想在点击后做一些事情才拖动元素，这时就需要将click设置为false，意即阻止浏览器的默认行为
+            </li>
             <li><em>dragover</em>：function	在拖动时执行。</li>
             <li><em>dragend</em>：function	在拖动后鼠标弹起的那一瞬执行。</li>
             <li><em>addClasses</em>：boolean	是否为正在拖动的元素添加一个叫mass_dragging的类名，它会在拖动结束自动移除，默认是true。</li>
@@ -89,6 +92,10 @@
         <p><a href="/src/doc/more/draggable.top.html">让拖动的元素总是在最上面</a></p>
         <p><a href="/src/doc/more/draggable.rewind.html">拖动结束回到原位</a></p>
         <p><a href="/src/doc/more/draggable.multi.html">同时拖动多个方块</a></p>
+        <p><a href="/src/doc/more/draggable.click.html">阻止点击事件的默认行为</a></p>
+        <p><a href="/src/doc/more/draggable.resize.html">通过拖动调整大小</a></p>
+        <p><a href="/src/doc/more/draggable.resize2.html">八个角都能调整大小的拖动块，点击变色后通多点拖动</a></p>
+        <p><a href="/src/doc/more/draggable.draw.html">通过拖动画图</a></p>
     </article>
 </body>
 </html>
