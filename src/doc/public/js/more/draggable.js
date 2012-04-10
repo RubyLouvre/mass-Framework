@@ -18,7 +18,7 @@ $.define("draggable","event,css,attr",function(){
             })
         }
     }
-    //用于触发用户绑定的dragstart dragover dragend回调, 第一个参数为事件对象, 第二个为dd对象
+    //用于触发用户绑定的dragstart drag dragend回调, 第一个参数为事件对象, 第二个为dd对象
     function dispatch( event, dragger, dd , type ){
         event.type = type;
         event.namespace = "mass_ui";
@@ -81,7 +81,7 @@ $.define("draggable","event,css,attr",function(){
                 target.css('cursor', 'move');
             }
         }
-        "dragstart dragover dragend".replace($.rword, function(event){
+        "dragstart drag dragend".replace($.rword, function(event){
             var fn = hash[ event ];
             if(typeof fn == "function"){
                 target.on(event + ".mass_ui", fn)
@@ -147,7 +147,7 @@ $.define("draggable","event,css,attr",function(){
         }else{ //阻止默认动作
             event.preventDefault();
         };
-        $dragger = dragger;//暴露到外围作用域，供dragover与dragend与dragstop调用
+        $dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
         dispatch(  event, dragger, dd,  "dragstart" );
         //开始批处理dragstart
         if( ! multi ){
@@ -159,7 +159,7 @@ $.define("draggable","event,css,attr",function(){
         }
     }
 
-    function dragover(event, multi ){
+    function drag(event, multi ){
         if( $dragger ){
             var dd = $dragger.data("_mass_draggable");
             dd.event  = event;//这个供dragstop API调用
@@ -214,10 +214,10 @@ $.define("draggable","event,css,attr",function(){
                 }
             }
 
-            dispatch( event, $dragger, dd, "dragover");
-            //开始批处理dragover
+            dispatch( event, $dragger, dd, "drag");
+            //开始批处理drag
             if( !multi ){
-                patch( event, $dragger, dd, dragover );
+                patch( event, $dragger, dd, drag );
             }
         }
     }
@@ -277,7 +277,7 @@ $.define("draggable","event,css,attr",function(){
 
     $doc.on({
         "mouseup.mass_ui blur.mass_ui": dragend,
-        "mousemove.mass_ui":  dragover,
+        "mousemove.mass_ui":  drag,
         "selectstart.mass_ui": function(e){
             if( $dragger ){
                 preventDefault(e);

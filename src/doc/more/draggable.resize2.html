@@ -80,7 +80,7 @@
                     lockX: true,
                     lockY: true,
                     //  handle:'.handle',
-                    dragover: function(e, dd){
+                    drag: function(e, dd){
                       //  $.log(dd)
                         var props = {};
                         if ( dd.attr.indexOf("E") > -1 ){
@@ -160,7 +160,7 @@
                     lockX: true,
                     lockY: true,
                     //  handle:'.handle',
-                    dragover: function(e, dd){
+                    drag: function(e, dd){
                         var props = {};
                         if ( dd.attr.indexOf("E") > -1 ){
                             props.width = Math.max( 32, dd.width + dd.deltaX );

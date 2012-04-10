@@ -46,7 +46,7 @@
                             }
                         }
                     },
-                    dragover:function(e, dd){
+                    drag:function(e, dd){
                         var data = dd.circles,
                         angle = Math.atan2( e.pageX - data.centerX, e.pageY - data.centerY );
                         $( this ).css({
@@ -78,7 +78,7 @@
                             }
                         }
                     },
-                    dragover:function(e, dd){
+                    drag:function(e, dd){
                         var data = dd.circles,
                         angle = Math.atan2( e.pageX - data.centerX, e.pageY - data.centerY );
                         $( this ).css({

@@ -41,7 +41,7 @@
                     lockX: true,
                     lockY: true,
                     handle:'.handle',
-                    dragover: function(e, dd){
+                    drag: function(e, dd){
                         $( this ).css({
                             width: Math.max( 20, dd.width + dd.deltaX ),
                             height: Math.max( 20, dd.height + dd.deltaY )
@@ -74,7 +74,7 @@
                     lockX: true,
                     lockY: true,
                     handle:'.handle',
-                    dragover: function(e, dd){
+                    drag: function(e, dd){
                         $( this ).css({
                             width: Math.max( 20, dd.width + dd.deltaX ),
                             height: Math.max( 20, dd.height + dd.deltaY )

@@ -29,8 +29,8 @@
                 $(".drag").draggable({
                     lockX: true, //阻止系统默认的移动方式
                     lockY: true, //阻止系统默认的移动方式
-                    dragover:function(e, dd){
-                        $( this ).css({////使用dragover回调，自己设置如何移动
+                    drag:function(e, dd){
+                        $( this ).css({////使用drag回调，自己设置如何移动
                             top: Math.round( dd.offsetY / 20 ) * 20,
                             left: Math.round( dd.offsetX / 20 ) * 20
                         });
@@ -50,7 +50,7 @@
                 $(".drag").draggable({
                     lockX: true, //阻止系统默认的移动方式
                     lockY: true, //阻止系统默认的移动方式
-                    dragover:function(e, dd){//使用dragover回调，自己设置如何移动
+                    drag:function(e, dd){//使用drag回调，自己设置如何移动
                         $( this ).css({
                             top: Math.round( dd.offsetY / 20 ) * 20,
                             left: Math.round( dd.offsetX / 20 ) * 20

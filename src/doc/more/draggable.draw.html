@@ -36,7 +36,7 @@
                             canvas.moveTo( e.pageX - dd.originalX, e.pageY - dd.originalY )
                         }
                     },
-                    dragover: function( e, dd ){
+                    drag: function( e, dd ){
                         if(canvas){
                             canvas.lineTo( e.pageX - dd.originalX, e.pageY - dd.originalY );
                             canvas.clearRect(0,0,680,300);
@@ -69,7 +69,7 @@
                             canvas.moveTo( e.pageX - dd.originalX, e.pageY - dd.originalY )
                         }
                     },
-                    dragover: function( e, dd ){
+                    drag: function( e, dd ){
                         if(canvas){
                             canvas.lineTo( e.pageX - dd.originalX, e.pageY - dd.originalY );
                             canvas.clearRect(0,0,680,300);
