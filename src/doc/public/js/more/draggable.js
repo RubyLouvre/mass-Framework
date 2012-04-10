@@ -27,7 +27,7 @@ $.define("draggable","event,css,attr",function(){
     }
     //用于实现多点拖动
     function patch( event, dragger, dd, callback){
-        if( dd.multi && $.isArrayLike(dd.multi) ){
+        if( dd.multi && $.isArrayLike(dd.multi) && dd.multi.length > 0){
             for(var j = 0, node; node = dd.multi[j]; j++){
                 if( node != dragger[0] ){//防止环引用，导致死循环
                     $dragger = $(node)
@@ -60,6 +60,7 @@ $.define("draggable","event,css,attr",function(){
         //DD拖动数据对象,用于储存经过修整的用户设置
         dd = {
             target: target,
+            multi:  $.isArrayLike(hash.multi)? hash.multi : null,
             handle : typeof hash.handle == "string" ? hash.handle : null,
             scroll : typeof hash.scroll == "boolean" ? hash.scroll : true,
             strict : typeof hash.strict == "boolean" ? hash.strict  : true
