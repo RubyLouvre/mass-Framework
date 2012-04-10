@@ -46,11 +46,14 @@
                         document就是文档对象，取其左上角与右下角的坐标。</li>
                 </ul>
             </li>
+            <li><em>noCursor</em>：boolean 默认false。拖动时我们基本都会给个标识说明它能拖动，一般是改变其光标的样式为move，但如果不想改变这个样式，
+                或者你自己已经用图标做了一个好看的光标了，那么就设置它为true吧。</li>
+            <li><em>live</em>：boolean	如果为true，则使用事件代理。</li>
             <li><em>lockX</em>：boolean	默认false。当值为true时，锁定X轴，只允许上下移动。</li>
             <li><em>lockY</em>：boolean	默认false。当值为true时，锁定Y轴，只允许左右移动。</li>
             <li><em>handle</em>：string	手柄的类名，当设置了此参数后，只允许用手柄拖动元素。</li>
-            <li><em>ghosting</em>：boolean 默认false。当值为true时，会生成一个与拖动元素相仿的影子元素，拖动时只拖动影子元素，
-                以减轻内存消耗，并且它拥有一个名为mass_ghosting的类名，半透明。</li>
+            <li><em>ghosting</em>：boolean 默认false。当值为true时，会生成一个幽灵元素，拖动时只拖动幽灵，以减轻内存消耗。
+                此幽灵元素拥有一个名为mass_ghosting的类名，半透明。</li>
             <li><em>rewind</em>：boolean	默认false。当值为true时，让拖动元素在拖动后回到原来的位置。。</li>
             <li><em>strict</em>：boolean	默认true。当值为true时，监视鼠标的位置，一旦超过出拖动块就立即停止。</li>
             <li><em>scroll</em>：boolean	默认false。当值为true时，允许滚动条随拖动元素移动。</li>
@@ -89,6 +92,7 @@
         <p><a href="/src/doc/more/draggable.handle.html">通过手柄进行拖动</a></p>
         <p><a href="/src/doc/more/draggable.active.html">在拖动时高亮元素</a></p>
         <p><a href="/src/doc/more/draggable.ghosting.html">使用幽灵元素进行拖动</a></p>
+        <p><a href="/src/doc/more/draggable.live.html">使用事件代理</a></p>
         <p><a href="/src/doc/more/draggable.top.html">让拖动的元素总是在最上面</a></p>
         <p><a href="/src/doc/more/draggable.rewind.html">拖动结束回到原位</a></p>
         <p><a href="/src/doc/more/draggable.multi.html">同时拖动多个方块</a></p>
