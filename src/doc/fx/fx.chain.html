@@ -3,6 +3,10 @@
     <head>
         <meta charset="utf-8" />        
         <title>连续倒带</title>
+        <script>
+            if (self!=top)
+                window.top.location.replace(self.location);
+        </script>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script src="../public/js/common.js" type="text/javascript" ></script>
         <script src="../public/js/shCore.js" type="text/javascript" ></script>
@@ -30,6 +34,9 @@
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
+            $.require("ready,attr",function(){
+                $("#back").prop("href","/src/doc/index.html?iframe_src=fx/$.fn.fx.html")
+            });
             var exec1 = function(){
                 $.require("ready,fx",function(){
                     $(".sample").fx(500,{
@@ -91,7 +98,7 @@
                 }).fx(1000, { tx: 0, ty: 0, rewind: 1 });
             }
         </pre>
-        <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="$.fn.fx.html">返回</a></p>
+        <p><input onclick="exec1()" class="doc_btn" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>      
         <div class="sample">
             <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
             <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
@@ -99,7 +106,6 @@
             <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
             <div><img src="../public/styles/mass_fn_fx_record.jpg" width="100" height="100"/></div>
         </div>
-
 
     </body>
 </html>
