@@ -43,7 +43,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             scroll : typeof hash.scroll == "boolean" ? hash.scroll : true,
             strict : typeof hash.strict == "boolean" ? hash.strict : true
         });
-        "lockX lockY rewind ghosting click".replace( $.rword, function( key ){
+        "lockX lockY revert ghosting click".replace( $.rword, function( key ){
             dd[ key] = !!hash[ key ];
         })
         if( dd.scroll ){
@@ -214,10 +214,10 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             dragger.removeClass("mass_dragging");
             dd.ghosting && dragger.remove();
             dd.dispatch( event, dragger,  "dragend" );
-            if(dd.rewind || dd.ghosting){
+            if(dd.revert || dd.ghosting){
                 dd.target.fx( 500,{
-                    left:  dd.rewind ? dd.originalX: dd.offsetX,
-                    top:   dd.rewind ? dd.originalY: dd.offsetY
+                    left:  dd.revert ? dd.originalX: dd.offsetX,
+                    top:   dd.revert ? dd.originalY: dd.offsetY
                 });
             }
             if(dd.dragging && dd.click === false){//阻止"非刻意"的点击事件,因为我们每点击页面,都是依次触发mousedown mouseup click事件

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>draggable rewind</title>
+        <title>draggable revert</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
             if (self!=top)
@@ -25,7 +25,7 @@
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
 
                 $(".drag").draggable({
-                    rewind: true
+                    revert: true
                 });
 
             });
@@ -40,7 +40,7 @@
         <pre>
             $.require("ready,more/draggable",function(){
               $(".drag").draggable({
-                    rewind: true
+                    revert: true
                 });
             });
         </pre>

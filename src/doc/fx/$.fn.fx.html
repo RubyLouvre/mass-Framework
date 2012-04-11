@@ -44,7 +44,7 @@
             还支持scrollTop与scrollLeft这两个属性进行动画变化。还可以指定动画开始前的回调函数before,
             动画每一帧时的回调函数frame,
             动画结束时的回调函数after,
-            经及动画进行倒带效果rewind，record（即让元素回来开始时的样子）
+            经及动画进行倒带效果revert，record（即让元素回来开始时的样子）
         </p>
         <p><span class="stress">props属性一览表：</span></p>
         <table class="table1">
@@ -54,7 +54,7 @@
             <tr><td>before</td><td>动画开始时的回调函数。</td></tr>
             <tr><td>frame</td><td>每次执行补间后执行的回调函数。</td></tr>
             <tr><td>after</td><td>动画结束时的回调函数。</td></tr>
-            <tr><td>rewind</td><td>是否开始倒带。</td></tr>
+            <tr><td>revert</td><td>是否开始倒带。</td></tr>
             <tr><td>record</td><td>将当前动画设置转录到负向列队，从而实现多个动画的倒带。</td></tr>
         </table>
         <p>before, after, frame这三个回调的参数情况:</p>
@@ -63,7 +63,7 @@
             <tr><td>node</td><td>当前执行动画的元素节点，当然我们也可以直接在回调函数使用this取得它</td></tr>
             <tr><td>props</td><td>当前动画所进行渐变的属性集合。这是一个对象，键名为样式名，值为样式值。</td></tr>
             <tr><td>fx</td><td>动画描述对象，可以通过它看到当前动画更详尽的执行情况，比如它从何时开始执行(startTime),
-                    那些属性正在改名（props，就是第二个参数的那个东西），用户配置，如何正在倒带，它还有个叫rewinding，值为1。</td></tr>
+                    那些属性正在改名（props，就是第二个参数的那个东西），用户配置，如何正在倒带，它还有个叫reverting，值为1。</td></tr>
         </table>
         <p><span class="stress">CSS属性名的简写一览表：</span></p>
         <table class="table1">
@@ -88,11 +88,11 @@
         <div><a href="/src/doc/fx/transform.rotate.html">旋转</a></div>
         <div><a href="/src/doc/fx/transform.scale.html">缩放</a></div>
         <div><a href="/src/doc/fx/transform.translate.html">位移(translate在IE678兼容性不好)</a></div>
-        <div><a href="/src/doc/fx/rewind.a.html">倒带示例1</a></div>
-        <div><a href="/src/doc/fx/rewind.ab.html">倒带示例2</a></div>
-        <div><a href="/src/doc/fx/rewind.abc.html">倒带示例3</a></div>
-        <div><a href="/src/doc/fx/rewind.abcd.html">倒带示例4</a></div>
-        <div><a href="/src/doc/fx/rewind.abcde.html">倒带示例5</a></div>
+        <div><a href="/src/doc/fx/revert.a.html">倒带示例1</a></div>
+        <div><a href="/src/doc/fx/revert.ab.html">倒带示例2</a></div>
+        <div><a href="/src/doc/fx/revert.abc.html">倒带示例3</a></div>
+        <div><a href="/src/doc/fx/revert.abcd.html">倒带示例4</a></div>
+        <div><a href="/src/doc/fx/revert.abcde.html">倒带示例5</a></div>
         <div><a href="/src/doc/fx/fx.chain.html">连续倒带(translate在IE678兼容性不好)</a></div>
         <div><a href="/src/doc/fx/fx.scroll.html">滚动条</a></div>
     </article>

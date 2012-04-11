@@ -39,7 +39,7 @@
                     fx(2000, { w: 300, record:  1 }). // B
                     fx(2000, { h: 300 }). // C
                     fx(2000, { fs: "*=3", record: 1 }). // D
-                    fx(2000, { bgc: "red", rewind: 1 }); // E
+                    fx(2000, { bgc: "red", revert: 1 }); // E
                 });
                 //A -> B -> C -> D -> E -> !E -> !D -> !B
                 //!号表示回退效果
@@ -55,7 +55,7 @@
                     fx(2000, { w: 300, record:  1 }). // B
                     fx(2000, { h: 300 }). // C
                     fx(2000, { fs: "*=3", record: 1 }). // D
-                    fx(2000, { bgc: "red", rewind: 1 }); // E
+                    fx(2000, { bgc: "red", revert: 1 }); // E
                 });
                //A -> B -> C -> D -> E -> !E -> !D -> !B
                //!号表示回退效果

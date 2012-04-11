@@ -86,7 +86,7 @@ $.define("fx", "css",function(){
         }
         nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
     }
-    var keyworks = $.oneObject("before,frame,after,easing,rewind,record");
+    var keyworks = $.oneObject("before,frame,after,easing,revert,record");
     //处理特效的入口函数,用于将第二个参数，拆分为两个对象props与config，然后再为每个匹配的元素指定一个双向列队对象linked
     //linked对象包含两个列队，每个列队装载着不同的特效对象
     $.fn.fx = function( duration, hash ){
@@ -177,7 +177,7 @@ $.define("fx", "css",function(){
                     linked.positive.shift(); //去掉播放完的动画
                     mix = config.after;
                     mix &&  mix.call( node, node, fx.props, fx ) ;
-                    if (config.rewind && linked.negative.length) {
+                    if (config.revert && linked.negative.length) {
                         //开始倒带,将负向列队的动画加入播放列表中
                         [].unshift.apply(linked.positive, linked.negative.reverse())
                         linked.negative = []; // 清空负向列队
@@ -203,9 +203,9 @@ $.define("fx", "css",function(){
     }
     function fxBuilder( node, linked, props, config ){
         var ret = "var style = node.style,t2d = {}, adapter = $.fxAdapter, _defaultTween = adapter._default.tween;",
-        rewindConfig = $.Object.merge( {}, config ),
+        revertConfig = $.Object.merge( {}, config ),
         transfromChanged = 0,
-        rewindProps = {};
+        revertProps = {};
         var orig = config.orig = {}, parts, to, from, val, unit, easing, op, type
         for(var name in props){
             val = props[name] //取得结束值
@@ -291,20 +291,20 @@ $.define("fx", "css",function(){
             if(type == "color"){
                 from = "rgb("+from.join(",")+")"
             }
-            rewindProps[ name ] = [ from , easing ];
+            revertProps[ name ] = [ from , easing ];
         }
        
         if( transfromChanged ){
             ret += 'adapter.transform.set(node, t2d, isEnd, per);'
         }
-        if ( config.record || config.rewind ) {
-            delete rewindConfig.record;
-            delete rewindConfig.rewind;
+        if ( config.record || config.revert ) {
+            delete revertConfig.record;
+            delete revertConfig.revert;
             linked.negative.push({
                 startTime: 0,
-                rewinding: 1,//标识正在倒带
-                config: rewindConfig,
-                props: rewindProps
+                reverting: 1,//标识正在倒带
+                config: revertConfig,
+                props: revertProps
             });
         }
         //生成补间函数

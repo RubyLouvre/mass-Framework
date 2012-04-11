@@ -35,7 +35,7 @@
             });
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { w: 300, rewind: 1 }); // A
+                    $(".box").fx(2000, { w: 300, revert: 1 }); // A
                 });
             }
         </script>
@@ -44,7 +44,7 @@
     <article>
         <p><input onclick="exec1()" class="doc_btn" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>        <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { w: 300, rewind: 1 }); // A
+                    $(".box").fx(2000, { w: 300, revert: 1 }); // A
                 });
         </pre>
         <div style="position:relative;">

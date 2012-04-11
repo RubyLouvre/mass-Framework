@@ -56,14 +56,14 @@
             function action() {
                 $(".sample div").each(function(node, i) {
                     $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1,after:function(node,props,fx){
-                            if( fx.rewinding && i == 4){
-                                $(".sample").fx(800,{ rewind:1})
+                            if( fx.reverting && i == 4){
+                                $(".sample").fx(800,{ revert:1})
                             }
                         } });
                 }).fx(1000, { mbtx: 0, mbty: 0, record: 1 }).each(function(node, i) {
                     $(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", record: 1 });
                     $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1 });
-                }).fx(1000, { tx: 0, ty: 0, rewind: 1 });
+                }).fx(1000, { tx: 0, ty: 0, revert: 1 });
             }
         </script>
     </head>
@@ -88,14 +88,14 @@
             function action() {
                 $(".sample div").each(function(node, i) {
                     $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1,after:function(node,props,fx){
-                            if( fx.rewinding && i == 4){
-                                $(".sample").fx(800,{ rewind:1})
+                            if( fx.reverting && i == 4){
+                                $(".sample").fx(800,{ revert:1})
                             }
                         } });
                 }).fx(1000, { mbtx: 0, mbty: 0, record: 1 }).each(function(node, i) {
                     $(node).fx( 1000, { tx: 400, ty: 400,bgc:"red", record: 1 });
                     $(node).fx( 1000, { tx: i * 100, ty: i * 100, record: 1 });
-                }).fx(1000, { tx: 0, ty: 0, rewind: 1 });
+                }).fx(1000, { tx: 0, ty: 0, revert: 1 });
             }
         </pre>
         <p><input onclick="exec1()" class="doc_btn" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>      

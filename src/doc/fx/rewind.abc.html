@@ -35,9 +35,9 @@
             });
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { bgc: "red", rewind: 1 }).//背景由蓝变红，再由红退倒回蓝
+                    $(".box").fx(2000, { bgc: "red", revert: 1 }).//背景由蓝变红，再由红退倒回蓝
                     fx(2000, { w: 300, record:   1 }). // 宽度拉长到300
-                    fx(2000, { h: 300, rewind: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
+                    fx(2000, { h: 300, revert: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
                 }); 
             }
         </script>
@@ -46,9 +46,9 @@
     <article>
         <p><input onclick="exec1()" class="doc_btn" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>        <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { bgc: "red", rewind: 1 }).//背景由蓝变红，再由红退倒回蓝
+                    $(".box").fx(2000, { bgc: "red", revert: 1 }).//背景由蓝变红，再由红退倒回蓝
                     fx(2000, { w: 300, record:   1 }). // 宽度拉长到300
-                    fx(2000, { h: 300, rewind: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
+                    fx(2000, { h: 300, revert: 1 }); // 高度拉长到300 高度倒退到100 宽度倒退到100
                 });
         </pre>
         <div style="position:relative;">

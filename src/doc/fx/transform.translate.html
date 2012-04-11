@@ -34,9 +34,9 @@
             });
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(800, { tx:"+=300",ty:"+=40", rewind:1 }); // 位移
-                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40", rewind:1 });
-                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px", rewind:1 });
+                    $(".box").fx(800, { tx:"+=300",ty:"+=40", revert:1 }); // 位移
+                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40", revert:1 });
+                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px", revert:1 });
                 });
             }
         </script>
@@ -47,9 +47,9 @@
         <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>
         <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(800, { tx:"+=300",ty:"+=40", rewind:1 }); // 位移
-                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40", rewind:1 });
-                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px", rewind:1 });
+                    $(".box").fx(800, { tx:"+=300",ty:"+=40", revert:1 }); // 位移
+                    //相当于 $(".box").fx(800, { translateX:"+=30",translateY:"+=40", revert:1 });
+                    //相当于 $(".box").fx(800, { translateX:"+=30px",translateY:"+=40px", revert:1 });
                 });
         </pre>
         <div style="position:relative;height: 400px;">
