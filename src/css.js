@@ -328,7 +328,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return ret === "" ? "auto" : ret;
         };
     }
-
+    /**http://www.quirksmode.org/dom/w3c_cssom.html#t40
     //=========================　处理　width height　=========================
     // clientWidth         = node.style.width + padding
     // https://developer.mozilla.org/en/DOM/element.clientWidth
@@ -353,6 +353,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
+    */
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     cssPair = {
         Width:['Left', 'Right'],
