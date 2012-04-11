@@ -25,6 +25,7 @@ $.define("uibase","class,data", function(){
         }),
         create: function( widget, UI, init){//ui的名字, ui的类, ui的初始方法
             return function( method ){//创建一个用于操作UI控件的原型方法
+                init = typeof init =="function" ? init : $.noop;
                 for(var i =0 ; i < this.length; i++){
                     if(this[i] && this[i].nodeType === 1){
                         var ui = $.data(this[i],"_mass_"+widget)
