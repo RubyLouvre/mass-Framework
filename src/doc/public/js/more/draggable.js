@@ -26,12 +26,12 @@ $.define("draggable","event,css,attr",function(){
         dragger.fire( event, dd );
     }
     //用于实现多点拖动
-    function patch( event, dragger, dd, callback){
+    function patch( event, dragger, dd, callback, l, t){
         if( dd.multi && $.isArrayLike(dd.multi) && dd.multi.length > 0){
             for(var j = 0, node; node = dd.multi[j]; j++){
                 if( node != dragger[0] ){//防止环引用，导致死循环
                     $dragger = $(node)
-                    callback( event, node );
+                    callback( event, node, l, t );
                 }
             }
             $dragger = dragger;
@@ -90,28 +90,28 @@ $.define("draggable","event,css,attr",function(){
         var limit = hash.containment;
         if( limit ){  //修正其可活动的范围，如果传入的坐标
             if($.type(limit, "Array") && limit.length ==4){//[x1,y1,x2,y2] left,top,right,bottom
-                this.limit = limit;
+                dd.limit = limit;
             }else{
                 if(limit == 'parent')
                     limit = node.parentNode;
                 if(limit == 'document' || limit == 'window') {
-                    this.limit = [  limit == 'document' ? 0 : $(window).scrollLeft() , limit == 'document' ? 0 : $(window).scrollTop()]
-                    this.limit[2]  = this.limit[0] + $(limit == 'document'? document : window).width()
-                    this.limit[3]  = this.limit[1] + $(limit == 'document'? document : window).height()
+                    dd.limit = [  limit == 'document' ? 0 : $(window).scrollLeft() , limit == 'document' ? 0 : $(window).scrollTop()]
+                    dd.limit[2]  = dd.limit[0] + $(limit == 'document'? document : window).width()
+                    dd.limit[3]  = dd.limit[1] + $(limit == 'document'? document : window).height()
                 }
                 if(!(/^(document|window|parent)$/).test(limit) && !this.limit) {
                     var c = $(limit);
                     if( c[0] ){
                         var offset = c.offset();
-                        this.limit = [ offset.left + parseFloat(c.css("borderLeftWidth")),offset.top + parseFloat(c.css("borderTopWidth")) ]
-                        this.limit[2]  = this.limit[0] + c.innerWidth()
-                        this.limit[3]  = this.limit[1] + c.innerHeight()
+                        dd.limit = [ offset.left + parseFloat(c.css("borderLeftWidth")),offset.top + parseFloat(c.css("borderTopWidth")) ]
+                        dd.limit[2]  = dd.limit[0] + c.innerWidth()
+                        dd.limit[3]  = dd.limit[1] + c.innerHeight()
                     }
                 }
             }
-            if(this.limit){//减少拖动块的面积
-                this.limit[2]  = this.limit[2] - target.outerWidth();
-                this.limit[3]  = this.limit[3] - target.outerHeight();
+            if(dd.limit){//减少拖动块的面积
+                dd.limit[2]  = dd.limit[2] - target.outerWidth();
+                dd.limit[3]  = dd.limit[3] - target.outerHeight();
             }
         }
         target.on( 'dragstart', preventDefault );//处理原生的dragstart事件
@@ -159,9 +159,10 @@ $.define("draggable","event,css,attr",function(){
         }
     }
 
-    function drag(event, multi ){
+    function drag(event, multi,  docLeft, docTop ){
         if( $dragger ){
             var dd = $dragger.data("_mass_draggable");
+
             dd.event  = event;//这个供dragstop API调用
             //当前元素移动了多少距离
             dd.deltaX = event.pageX - dd.startX;
@@ -189,14 +190,16 @@ $.define("draggable","event,css,attr",function(){
                     }
 
                     if(!dd.lockY) {
-                        if((dd.overflowOffset.left + dd.scrollParent.offsetWidth) - event.pageX < dd.scrollSensitivity)
+
+                        if((dd.overflowOffset.left + dd.scrollParent.offsetWidth ) - event.pageX < dd.scrollSensitivity)
                             dd.scrollParent.scrollLeft = dd.scrollParent.scrollLeft + dd.scrollSpeed;
                         else if(event.pageX - dd.overflowOffset.left < dd.scrollSensitivity)
                             dd.scrollParent.scrollLeft =  dd.scrollParent.scrollLeft - dd.scrollSpeed;
                     }
 
                 } else {
-                    var docTop = $doc.scrollTop(), docLeft = $doc.scrollTop();
+                    docLeft = docLeft || $doc.scrollTop();
+                    docTop = docTop || $doc.scrollTop();
                     if(!dd.lockX) {
                         if(event.pageY - docTop < dd.scrollSensitivity)
                             $doc.scrollTop( docTop - dd.scrollSpeed);
@@ -217,7 +220,7 @@ $.define("draggable","event,css,attr",function(){
             dispatch( event, $dragger, dd, "drag");
             //开始批处理drag
             if( !multi ){
-                patch( event, $dragger, dd, drag );
+                patch( event, $dragger, dd, drag, docLeft, docTop  );
             }
         }
     }
