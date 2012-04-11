@@ -3759,31 +3759,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return ret === "" ? "auto" : ret;
         };
     }
-
-    //=========================　处理　width height　=========================
-    // clientWidth         = node.style.width + padding
-    // https://developer.mozilla.org/en/DOM/element.clientWidth
-    // offsetWidth           = node.style.width + padding + border
-    // https://developer.mozilla.org/en/DOM/element.offsetWidth
-    // getBoundingClientRect = node.style.width + padding + border
-    // https://developer.mozilla.org/en/DOM/element.getBoundingClientRect
-    //   [CSS2.1 盒子模型] http://www.w3.org/TR/CSS2/box.html
-    //       B-------border----------+ -> border
-    //       |                       |
-    //       |  P----padding----+    | -> padding
-    //       |  |               |    |
-    //       |  |  C-content-+  |    | -> content
-    //       |  |  |         |  |    |
-    //       |  |  |         |  |    |
-    //       |  |  +---------+  |    |
-    //       |  |               |    |
-    //       |  +---------------+    |
-    //       |                       |
-    //       +-----------------------+
-    //       B = event.offsetX/Y in WebKit
-    //           event.layerX/Y  in Gecko
-    //       P = event.offsetX/Y in IE6 ~ IE8
-    //       C = event.offsetX/Y in Opera
+    
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     cssPair = {
         Width:['Left', 'Right'],

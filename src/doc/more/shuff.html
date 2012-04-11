@@ -93,5 +93,60 @@ Wijmo
 上海-Dark(858587868)  15:17:10
 jQWidgets
 
+  - Responsive Web Design:
+	基本上他只是的"概念"，one UI Design which is suitable for all devices… 透过些 CSS (media query) or JS 技术达成
+
+ - 关键要素… 技術上感覺不太有難度，但 前端/开发者 必须 work very closely together, 因为 grid layout design 必须双方都很理解 grid / design 限制
+
+  - Top Responsive Web CSS Framework:
+	1. LESS Framework4 (http://lessframework.com/)
+	2. Foundation (http://foundation.zurb.com/)
+	3. Golden Grid System (http://goldengridsystem.com/)
+	个人最喜欢 LESS4 Framework，前几个出来算很有用也容易懂得 responsive design css framework
+
+  - How to Detect HTML Feature
+	最好解释和使用的应该就是 Modernizr （www.http://modernizr.com/）
+
+偶也是主要用自己的前端框架Kit，https://github.com/xueduany/KitJs，
+目前观察，国内HTML5分两方向
+一个纯canvas，3D，主用用在游戏，实景3D，旅游等
+一种2D，面向Web/通讯，主要用在电子商务网站，SNS等等
+之前在淘宝的时候，主要
+1.去Cookies，80%以上的Cookies操作使用localStorge代替
+2.界面效果渐进增强，诸如Css3很多新特性，都有应用(IE还是用js anim)
+其他诸如Socket，Canvas用的比较少，出于风险考虑，不过内部项目用的都是比较多
+
+MVC也是前年D2，听豆瓣的童鞋做的分享，个人感觉结合NodeJs，MVC还是有一定影响，单纯的为MVC而MVC意义不大
+HTML5 Detect主要还是依赖浏览器侦测和Css Hacker
+
+Js Complier,比较看好google闭包编译，不过目前国内大多数还是用的YUI Complier，淘宝只是改进为服务器Ant
+
+Responsive web design 也是随着HTML5和Css3的media query开始火起来的
+对于传统布局开发而言，主要还是
+1.grid layout到底是选择float还是inline，也就是你说的Fixed Grid/Column Design
+2.大量的repeat style value，不过随着Less的火爆，这个问题开始迎刃而解
+我目前正在研究这两块，碰撞才能出火花，没别的，大家对于感兴趣的部分都可以说说。
+
+Responsive web design 我的理解，它的要素有三
+* Grid/Layout
+* Font
+* Media
+
+其中Grid/Layout设计是重点，目前我接触的布局框架也有10来种了，但看到的布局框架总逃不出这两类：
+* Fixed Grid/Column Design （几乎都是）
+* Frameless Desgin http://framelessgrid.com/  （概念较新）
+
+现在来说，几乎非常活跃的CSS Framework都已经在支持RWD。你提到的几个大致都是固定列式设计
+但 Gold Grid System 有点不同，虽然他是固定列(18)但是它的设计思路是来自Frameless（事实上这个两个framework都是出自同一个作者的手笔）。
+
+目前我对于 Frameless 设计思路比较感兴趣，但感觉无从下手，似乎这只是一种思路，或者一般情况下只要遵循它的范本照搬即可，这方面你有研究么？
+
+
+昨天写邮件, 本意是向我老大邀功, 说我的 html5 player 在play stream上, 又有了大的进步(解决了多段平滑播放, 以及声音连续, 2个video, 1个audio的同步问题), 然后发邮件求表扬, 说很多都是在工作时间外完成的.
+
+
+结果, 居然等到了大boss的回复. 说, 好. 继续做下去, 赶快将他做成产品级...
+完了. 鸭梨山大了.
+
     </body>
 </html>

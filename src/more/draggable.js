@@ -1,56 +1,35 @@
-$.define("draggable","event,css,attr",function(){
-    //拖动组件 by 司徒正美 https://github.com/RubyLouvre
-    $.fn.draggable = function( hash ){
-        hash = hash || {};
-        var selector = this.selector;
-        if( hash.live == true){
-            if(typeof selector === "string" && selector.length > 0 ){
-                $(this.ownerDocument).on("mousedown.mass_ui",selector,(function(hash){
-                    return function(e){
-                        draginit(e.target, hash);
-                    }
-                })(hash));
-            }
-            return this;
-        } else{
-            return this.each(function( ){
-                draginit(this, hash);
-            })
-        }
-    }
-    //用于触发用户绑定的dragstart drag dragend回调, 第一个参数为事件对象, 第二个为dd对象
-    function dispatch( event, dragger, dd , type ){
-        event.type = type;
-        event.namespace = "mass_ui";
-        event.namespace_re = new RegExp("(^|\\.)" + "mass_ui" + "(\\.|$)");
-        dragger.fire( event, dd );
-    }
-    //用于实现多点拖动
-    function patch( event, dragger, dd, callback, l, t){
-        if( dd.multi && $.isArrayLike(dd.multi) && dd.multi.length > 0){
-            for(var j = 0, node; node = dd.multi[j]; j++){
-                if( node != dragger[0] ){//防止环引用，导致死循环
-                    $dragger = $(node)
-                    callback( event, node, l, t );
-                }
-            }
-            $dragger = dragger;
-        }
-    }
-
+$.define("draggable","more/uibase,event,attr,fx",function(Widget){
     var $doc = $(document), $dragger//一些全局的东西
 
+    var Draggable = $.factory({
+        inherit: Widget.Class,
+        //用于触发用户绑定的dragstart drag dragend回调, 第一个参数为事件对象, 第二个为dd对象
+        dispatch: function ( event, dragger , type ){
+            event.type = type;
+            event.namespace = "mass_ui";
+            event.namespace_re = new RegExp("(^|\\.)" + "mass_ui" + "(\\.|$)");
+            dragger.fire( event, this );
+        },
+        //用于实现多点拖动
+        patch: function ( event, dragger, callback, l, t){
+            if( this.multi && $.isArrayLike(this.multi) && this.multi.length > 0){
+                for(var j = 0, node; node = this.multi[j]; j++){
+                    if( node != dragger[0] ){//防止环引用，导致死循环
+                        $dragger = $(node)
+                        callback( event, node, l, t );
+                    }
+                }
+                $dragger = dragger;
+            }
+        }
+    });
     function preventDefault ( event ) {
         event.preventDefault();
     }
-    function draginit( node, hash ){
-        if(node.nodeType != 1){
-            return
-        }
-        var target = $(node), dd = target.data("_mass_draggable");
-        if( dd && dd.target ){
-            return
-        }
+    //初始化拖动对象
+    function init( dd, hash ){
+         $.log("init...")
+        var target = dd.target =  dd.parent ;
         var position = target.position();
         target.css({
             'top': position.top,
@@ -58,13 +37,12 @@ $.define("draggable","event,css,attr",function(){
             'position': 'absolute'
         }).attr('draggable', 'true');
         //DD拖动数据对象,用于储存经过修整的用户设置
-        dd = {
-            target: target,
-            multi:  $.isArrayLike(hash.multi)? hash.multi : null,
+        $.mix( dd, {
+            multi:  $.isArrayLike( hash.multi ) ? hash.multi : null,
             handle : typeof hash.handle == "string" ? hash.handle : null,
             scroll : typeof hash.scroll == "boolean" ? hash.scroll : true,
-            strict : typeof hash.strict == "boolean" ? hash.strict  : true
-        };
+            strict : typeof hash.strict == "boolean" ? hash.strict : true
+        });
         "lockX lockY rewind ghosting click".replace( $.rword, function( key ){
             dd[ key] = !!hash[ key ];
         })
@@ -93,7 +71,7 @@ $.define("draggable","event,css,attr",function(){
                 dd.limit = limit;
             }else{
                 if(limit == 'parent')
-                    limit = node.parentNode;
+                    limit = target[0].parentNode;
                 if(limit == 'document' || limit == 'window') {
                     dd.limit = [  limit == 'document' ? 0 : $(window).scrollLeft() , limit == 'document' ? 0 : $(window).scrollTop()]
                     dd.limit[2]  = dd.limit[0] + $(limit == 'document'? document : window).width()
@@ -116,7 +94,8 @@ $.define("draggable","event,css,attr",function(){
         }
         target.on( 'dragstart', preventDefault );//处理原生的dragstart事件
         target.on( 'mousedown', dd.handle, dragstart );//绑定拖动事件
-        target.data( "_mass_draggable", dd );
+        $.log("init...")
+       // target.data( "_mass_draggable", dd );
     }
 
     function dragstart(event, multi ){
@@ -148,21 +127,18 @@ $.define("draggable","event,css,attr",function(){
             event.preventDefault();
         };
         $dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
-        dispatch(  event, dragger, dd,  "dragstart" );
-        //开始批处理dragstart
-        if( ! multi ){
-            patch( event, dragger, dd, dragstart );
+        dd.dispatch(  event, dragger,  "dragstart" );
+        if( ! multi ){ //开始批处理dragstart
+            dd.patch( event, dragger,  dragstart );
             //防止隔空拖动，为了性能起见，150ms才检测一下
             if(dd.strict){
                 dd.checkID = setInterval( dragstop, 150);
             }
         }
     }
-
     function drag(event, multi,  docLeft, docTop ){
         if( $dragger ){
             var dd = $dragger.data("_mass_draggable");
-
             dd.event  = event;//这个供dragstop API调用
             //当前元素移动了多少距离
             dd.deltaX = event.pageX - dd.startX;
@@ -217,29 +193,27 @@ $.define("draggable","event,css,attr",function(){
                 }
             }
 
-            dispatch( event, $dragger, dd, "drag");
+            dd.dispatch( event, $dragger, "drag");
             //开始批处理drag
             if( !multi ){
-                patch( event, $dragger, dd, drag, docLeft, docTop  );
+                dd.patch( event, $dragger, drag, docLeft, docTop  );
             }
         }
     }
-
     function dragend( event, multi ){
         if($dragger){
             var dragger = $dragger
             var dd = $dragger.data("_mass_draggable");
             if(dd.checkID){
                 clearInterval(dd.checkID);
-                delete dd.event;
-                delete dd.checkID;
+                dd.event = dd.checkID = null;
             }
             if(dragger[0].releaseCapture){
                 dragger[0].releaseCapture();
             }
             dragger.removeClass("mass_dragging");
             dd.ghosting && dragger.remove();
-            dispatch( event, dragger, dd,  "dragend" );
+            dd.dispatch( event, dragger,  "dragend" );
             if(dd.rewind || dd.ghosting){
                 dd.target.fx( 500,{
                     left:  dd.rewind ? dd.originalX: dd.offsetX,
@@ -254,13 +228,11 @@ $.define("draggable","event,css,attr",function(){
                 dd.dragging = false;
             }
             if( !multi ){
-                patch( event, $dragger, dd,  dragend );
+                dd.patch( event, $dragger, dragend );
                 $dragger = null;
             }
-
         }
     }
-
     function dragstop(){
         if( $dragger ){
             var dd = $dragger.data("_mass_draggable");
@@ -271,7 +243,7 @@ $.define("draggable","event,css,attr",function(){
                 event = dd.event,
                 pageX = event.pageX,
                 pageY = event.pageY
-                if( pageX <  left || pageY < top || pageX > left+$dragger[0].offsetWidth ||  pageY > top+$dragger[0].offsetHeight ){
+                if( pageX <  left || pageY < top || pageX > left + $dragger[0].offsetWidth ||  pageY > top + $dragger[0].offsetHeight ){
                     dragend( event )
                 }
             }
@@ -292,5 +264,19 @@ $.define("draggable","event,css,attr",function(){
             }
         }
     });
-
-})
+    $.fn.draggable = function(hash){
+        if( hash && hash.live == true){
+            var selector = this.selector;
+            if(typeof selector === "string" && selector.length > 0 ){
+                $(this.ownerDocument).on("mousedown.mass_ui",selector,(function(hash){
+                    return function(e){
+                        init( new Draggable("draggable", e.target), hash);
+                    }
+                })(hash));
+            }
+            return this;
+        }else{
+            return Widget.create("draggable", Draggable, init ).call(this, hash)
+        }
+    }
+});
