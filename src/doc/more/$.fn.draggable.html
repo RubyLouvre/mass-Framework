@@ -57,21 +57,30 @@
             <li><em>rewind</em>：boolean	默认false。当值为true时，让拖动元素在拖动后回到原来的位置。。</li>
             <li><em>strict</em>：boolean	默认true。当值为true时，监视鼠标的位置，一旦超过出拖动块就立即停止。</li>
             <li><em>scroll</em>：boolean	默认false。当值为true时，允许滚动条随拖动元素移动。</li>
-            <li><em>dragstart</em>：function	在拖动前鼠标按下的那一瞬执行。</li>
+
             <li><em>click</em>：function	默认为false。当我们点击页面时依次发生的事件为mousedown mouseup click
                 但有时我们想在点击后做一些事情才拖动元素，这时就需要将click设置为false，意即阻止浏览器的默认行为
             </li>
+            <li><em>drag</em>：function	在拖动前鼠标按下的那一瞬执行。</li>
             <li><em>dragover</em>：function	在拖动时执行。</li>
             <li><em>dragend</em>：function	在拖动后鼠标弹起的那一瞬执行。</li>
             <li><em>addClasses</em>：boolean	是否为正在拖动的元素添加一个叫mass_dragging的类名，它会在拖动结束自动移除，默认是true。</li>
             <li><em>duration</em>：Number 当ghosting或rewind为true，它会执行一个平滑的动画到目的地，这是它的持续时间，默认是500ms。</li>
         </ul>
-
+        <p>drag, dragstart, dragend这三个都是HTML5标准的原生事件名称。</p>
         <p>生成拖动对象拥有以下属性：</p>
         <ul>
             <li>lockX: 锁定X轴</li>
             <li>lockY: 锁定Y轴</li>
-            <li>multi: ArrayLike, 一个节点数组或节点集合，你可以在dragstart时设置它;</li>
+            <li>multi: ArrayLike, 一个节点数组或节点集合，你可以在dragstart时设置它;比如:
+                <pre class="brush:js;gutter:false;toolbar:false;">
+                $(".blue").draggable({//每次用户只能拖动一个
+                    dragstart:function(e, dd){
+                        dd.multi = $('.red');//但程序能帮你带上这几个移动
+                    }
+                });
+                </pre>
+                意思是在拖动当前那<strong style="color:blue">1</strong>个蓝色的方块的同时,顺带拖动<strong style="color:red">所有</strong>匹配.red类名的红色方块元素。</li>
             <li>startX:Number, mousedown事件发生时得到的event.pageX;</li>
             <li>startY:Number, mousedown事件发生时得到的event.pageY;</li>
             <li>originalX:Number, mousedown事件发生时元素相对于页面的X坐标;</li>
