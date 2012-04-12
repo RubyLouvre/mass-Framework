@@ -328,8 +328,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return ret === "" ? "auto" : ret;
         };
     }
-    /**http://www.quirksmode.org/dom/w3c_cssom.html#t40
     //=========================　处理　width height　=========================
+    /**
+    // http://www.quirksmode.org/dom/w3c_cssom.html#t40
     // clientWidth         = node.style.width + padding
     // https://developer.mozilla.org/en/DOM/element.clientWidth
     // offsetWidth           = node.style.width + padding + border
@@ -476,7 +477,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             curCSSLeft = $.css( elem, "left" ),
             calculatePosition = ( position === "absolute" || position === "fixed" ) &&  [curCSSTop, curCSSLeft].indexOf("auto") > -1,
             props = {}, curPosition = {}, curTop, curLeft;
-
             // need to be able to calculate position if either top or left is auto and position is either absolute or fixed
             if ( calculatePosition ) {
                 curPosition = curElem.position();
