@@ -65,7 +65,6 @@
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
         <script>
             $.require("ready,more/draggable",function(){
-                $.log("/src/doc/plugin.html?iframe_src=" + location.pathname)
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
                 $(".drag").click(function(){
                     $( this ).toggleClass("selected");
@@ -75,7 +74,7 @@
                         dd.attr = $( e.target ).attr("class");
                         dd.width = $( this ).width();
                         dd.height = $( this ).height();
-                        $.log(dd.attr)
+                        //$.log(dd.attr)
                     },
                     lockX: true,
                     lockY: true,

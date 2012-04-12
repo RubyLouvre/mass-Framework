@@ -3759,6 +3759,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return ret === "" ? "auto" : ret;
         };
     }
+    //=========================　处理　width height　=========================
     
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     cssPair = {
@@ -3882,7 +3883,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             curCSSLeft = $.css( elem, "left" ),
             calculatePosition = ( position === "absolute" || position === "fixed" ) &&  [curCSSTop, curCSSLeft].indexOf("auto") > -1,
             props = {}, curPosition = {}, curTop, curLeft;
-
             // need to be able to calculate position if either top or left is auto and position is either absolute or fixed
             if ( calculatePosition ) {
                 curPosition = curElem.position();
@@ -4601,8 +4601,11 @@ $.define("event_fix", !!document.dispatchEvent, function(){
 //==========================================
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     // $.log("已加载target模块")
-    var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,
-    rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g;
+    var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,  rmapper = /(\w+)_(\w+)/g,
+    rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g,
+    supportTouch = $.support.touch = "createTouch" in document || 'ontouchstart' in window
+    || window.DocumentTouch && document instanceof DocumentTouch;
+    $.log("supportTouch"+supportTouch);
     function addCallback(queue, obj){//添加回调包到列队中
         var check = true, fn = obj.callback;
         for ( var i = 0, el; el = queue[i++]; ) {
@@ -4650,6 +4653,14 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
     var eventAdapter  = $.event.eventAdapter
+    if(supportTouch){
+        "mousedown_touchstart,mousemove_touchmove,mouseup_touchend".replace( rmapper, function( _, type, mapper){
+            eventAdapter[ type ] = {
+                bindType    : mapper,
+                delegateType: mapper
+            }
+        });
+    }
     $.mix(facade,{
         bind : function( hash ){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
@@ -4887,6 +4898,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 if( /^(?:mouse|contextmenu)|click/.test(event.type) ){
                     //如果不存在pageX/Y则结合clientX/Y做一双出来
                     if ( event.pageX == null && event.clientX != null ) {
+                        $.log("e.touches[0] "+e.touches[0])
                         var doc = event.target.ownerDocument || document,
                         html = doc.documentElement, body = doc.body;
                         event.pageX = event.clientX + (html && html.scrollLeft || body && body.scrollLeft || 0) - (html && html.clientLeft || body && body.clientLeft || 0);
@@ -4970,8 +4982,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     };
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup",
-    rmapper = /(\w+)_(\w+)/g;
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup"
+  
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
     //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
