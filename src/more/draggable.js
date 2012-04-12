@@ -28,7 +28,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     }
     //初始化拖动对象
     function init( dd, hash ){
-         $.log("init...")
+        $.log("init...")
         var target = dd.target =  dd.parent ;
         var position = target.position();
         target.css({
@@ -94,14 +94,15 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         }
         target.on( 'dragstart', preventDefault );//处理原生的dragstart事件
         target.on( 'mousedown', dd.handle, dragstart );//绑定拖动事件
-        $.log("init...")
-       // target.data( "_mass_draggable", dd );
+        dd.dropinit && dd.dropinit(hash);
+    // target.data( "_mass_draggable", dd );
     }
 
     function dragstart(event, multi ){
         var el = multi || event.currentTarget;//如果是多点拖动，存在第二个参数
         var dragger = $(el);
         var dd = dragger.data( "_mass_draggable" );
+
         if(dd.ghosting){//创建幽灵元素
             var ghosting = el.cloneNode(false);
             el.parentNode.insertBefore( ghosting,el.nextSibling );
@@ -126,8 +127,9 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         }else{ //阻止默认动作
             event.preventDefault();
         };
-        $dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
+        $dragger = dd.dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
         dd.dispatch(  event, dragger,  "dragstart" );
+        dd.dropstart && dd.dropstart( event );
         if( ! multi ){ //开始批处理dragstart
             dd.patch( event, dragger,  dragstart );
             //防止隔空拖动，为了性能起见，150ms才检测一下
@@ -155,7 +157,9 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 var top =  dd.limit ?   Math.min( dd.limit[3], Math.max( dd.limit[1], dd.offsetY ) ) : dd.offsetY;
                 $dragger[0].style.top = top+"px"
             }
-
+            if(dd.drop){
+                dd.drop()
+            }
             if( dd.scroll ){
                 if(dd.scrollParent != document && dd.scrollParent.tagName != 'HTML') {
                     if(!dd.lockX) {
@@ -194,6 +198,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             }
 
             dd.dispatch( event, $dragger, "drag");
+            dd.drop && dd.drop( event );
             //开始批处理drag
             if( !multi ){
                 dd.patch( event, $dragger, drag, docLeft, docTop  );
@@ -279,4 +284,5 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             return Widget.create("draggable", Draggable, init ).call(this, hash)
         }
     }
+    return Draggable;
 });
