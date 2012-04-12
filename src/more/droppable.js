@@ -1,14 +1,8 @@
 $.define("droppable","more/draggable",function(Draggable){
-    var nextType = {
-        drag: "dragenter",
-        dragenter: "dragover",
-        dragover: "dragleave",
-        drop: "dragleave"
-    }
     Draggable.implement({
         dropinit: function( hash ){
             this.accept = $(hash.accept);
-            this.eventType = "dragenter"
+            this.mode = this.modes[hash.mode] ||  "intersect"
         },
         locate: function( $elem ){
             var posi = $elem.offset() || {},
@@ -25,6 +19,7 @@ $.define("droppable","more/draggable",function(Draggable){
             };
         },
         dropstart: function(){
+            this.droptype = "dragstart"
             var els = this.accept, rects = []
             if( els ){
                 els =  els.mass ? els : $(els);
@@ -36,29 +31,40 @@ $.define("droppable","more/draggable",function(Draggable){
                     }
                 }
             }
-            this.droppers = rects 
+            this.droppers = rects
         },
         drop: function(){
-            $.log("dsddddd")
-            $.log(this)
             var tolerance = this.tolerance || this.modes[ this.mode ];
-        //            var xy = [ this.event.pageX, this.event.pageY ], drg, drp
-        //            if ( tolerance )
-        //                drg = this.locate( this.dragger );
-        //            for( var i = 0, n = this.droppers.length; i < n ; i++ ){
-        //                drp = this.droppers[i]
-        //                this.winner = tolerance ? tolerance.call( this, this.event, drg, drp )
-        //                // mouse position is always the fallback
-        //                : this.contains( drp, xy ) ? 1 : 0;
-        //                if(this.winner ){
-        //                    this.eventType = nextType[ this.eventType ]
-        //
-        //                 //   this.dispatch(this.event, drg );
-        //
-        //
-        //                    break;
-        //                }
-        //            }
+            var xy = [ this.event.pageX, this.event.pageY ], drg, drp
+            if ( tolerance )
+                drg = this.locate( this.dragger );
+            for( var i = 0, n = this.droppers.length; i < n ; i++ ){
+                drp = this.droppers[i]
+                //如果用户自定义相交规则
+                this.winner = tolerance ? tolerance.call( this, this.event, drg, drp )
+                : this.contains( drp, xy ) ? 1 : 0;
+                if(this.winner){
+                    if(this.droptype === "dragstart" ){
+                        this.droptype = "dragenter"//进入放置对象
+                    }else if(this.droptype === "dragenter"){
+                        this.droptype = "dragover"//在放置对象上方移动
+                    }
+                    this.dispatch(this.event, this.dragger, this.droptype );
+                    break;
+                }else{
+                    if(this.droptype === "dragover"){
+                        this.droptype = "dragleave"//离开放置对象
+                        this.dispatch(this.event, this.dragger, "dragleave" );
+                        break;
+                    }
+                }
+            }
+        },
+        dropend: function( event ){
+            if(this.droptype === "dragover"){
+                this.droptype = "drop"
+                this.dispatch( event, this.dragger, "drop" );
+            }
         },
         //target 拥有四个坐标属性， test可能是相同的对象，也可能只是一个数组[x, y]
         //判定target是否包含test
@@ -68,21 +74,21 @@ $.define("droppable","more/draggable",function(Draggable){
         },
         modes: {
             //有时光标虽然没有进入放置对象,但拖动块已经与放置对象相交了
-            'intersect': function( event, dragger, dropper ){
+            intersect: function( event, dragger, dropper ){
                 return this.contains( dropper, [ event.pageX, event.pageY ] ) ? // check cursor
                 1e9 : this.modes.overlap.apply( this, arguments ); // check overlap
             },
             //返回拖动块遮住了放置对象的多少面积   // (y2 - y1) * (x2 - x2)
-            'overlap': function( event, dragger, dropper ){//
+            overlap: function( event, dragger, dropper ){//
                 return Math.max( 0, Math.min( dropper.bottom, dragger.bottom ) - Math.max( dropper.top, dragger.top ) )
-                * Math.max( 0, Math.min( dropper.right, dragger.right ) - Math.max( dropper.left, dragger.left ) );
+                    * Math.max( 0, Math.min( dropper.right, dragger.right ) - Math.max( dropper.left, dragger.left ) );
             },
             // 拖动块完全位于放置对象之中
-            'fit': function( event, dragger, dropper ){
+            fit: function( event, dragger, dropper ){
                 return this.contains( dropper, dragger ) ? 1 : 0;
             },
             // center of the proxy is contained within target bounds
-            'middle': function( event, dragger, dropper ){
+            middle: function( event, dragger, dropper ){
                 return this.contains( dropper, [ dragger.left + dragger.width * .5, dragger.top + dragger.height * .5 ] ) ? 1 : 0;
             }
         }
