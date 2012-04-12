@@ -5,7 +5,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         inherit: Widget.Class,
         //用于触发用户绑定的dragstart drag dragend回调, 第一个参数为事件对象, 第二个为dd对象
         dispatch: function ( event, dragger , type ){
-            event.type = type;
+            event.type = type || this.eventType;
             event.namespace = "mass_ui";
             event.namespace_re = new RegExp("(^|\\.)" + "mass_ui" + "(\\.|$)");
             dragger.fire( event, this );
@@ -95,7 +95,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         target.on( 'dragstart', preventDefault );//处理原生的dragstart事件
         target.on( 'mousedown', dd.handle, dragstart );//绑定拖动事件
         dd.dropinit && dd.dropinit(hash);
-    // target.data( "_mass_draggable", dd );
     }
 
     function dragstart(event, multi ){
@@ -128,7 +127,8 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             event.preventDefault();
         };
         $dragger = dd.dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
-        dd.dispatch(  event, dragger,  "dragstart" );
+        dd.eventType = "dragstart"
+        dd.dispatch(  event, dragger);
         dd.dropstart && dd.dropstart( event );
         if( ! multi ){ //开始批处理dragstart
             dd.patch( event, dragger,  dragstart );
@@ -148,7 +148,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             //现在的坐标
             dd.offsetX = dd.deltaX + dd.originalX  ;
             dd.offsetY = dd.deltaY + dd.originalY  ;
-            dd.dragging = true;//这个用于dragend API
+              dd.eventType = "drag"
             if(!dd.lockX){//如果没有锁定X轴left,top,right,bottom
                 var left = dd.limit ?  Math.min( dd.limit[2], Math.max( dd.limit[0], dd.offsetX )) : dd.offsetX
                 $dragger[0].style.left = left+"px"
@@ -197,7 +197,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 }
             }
 
-            dd.dispatch( event, $dragger, "drag");
+            dd.dispatch( event, $dragger );
             dd.drop && dd.drop( event );
             //开始批处理drag
             if( !multi ){
@@ -225,12 +225,12 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                     top:   dd.revert ? dd.originalY: dd.offsetY
                 });
             }
-            if(dd.dragging && dd.click === false){//阻止"非刻意"的点击事件,因为我们每点击页面,都是依次触发mousedown mouseup click事件
+            if(dd.eventType == "drag" && dd.click === false){//阻止"非刻意"的点击事件,因为我们每点击页面,都是依次触发mousedown mouseup click事件
                 $.event.fireType = "click";
                 setTimeout(function(){
                     delete $.event.fireType
                 }, 30)
-                dd.dragging = false;
+                dd.eventType = "dragend";
             }
             if( !multi ){
                 dd.patch( event, $dragger, dragend );

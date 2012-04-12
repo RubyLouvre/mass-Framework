@@ -1,7 +1,14 @@
 $.define("droppable","more/draggable",function(Draggable){
+    var nextType = {
+        drag: "dragenter",
+        dragenter: "dragover",
+        dragover: "dragleave",
+        drop: "dragleave"
+    }
     Draggable.implement({
         dropinit: function( hash ){
             this.accept = $(hash.accept);
+            this.eventType = "dragenter"
         },
         locate: function( $elem ){
             var posi = $elem.offset() || {},
@@ -32,17 +39,26 @@ $.define("droppable","more/draggable",function(Draggable){
             this.droppers = rects 
         },
         drop: function(){
+            $.log("dsddddd")
+            $.log(this)
             var tolerance = this.tolerance || this.modes[ this.mode ];
-            var xy = [ this.event.pageX, this.event.pageY ], drg, drp
-            if ( tolerance )
-                drg = this.locate( this.dragger );
-            for( var i = 0, n = this.droppers.length; i < n ; i++ ){
-                drp = this.droppers[i]
-                this.winner = tolerance ? tolerance.call( this, this.event, drg, drp )
-                // mouse position is always the fallback
-                : this.contains( drp, xy ) ? 1 : 0;
-                $.log(this.winner)
-            }
+        //            var xy = [ this.event.pageX, this.event.pageY ], drg, drp
+        //            if ( tolerance )
+        //                drg = this.locate( this.dragger );
+        //            for( var i = 0, n = this.droppers.length; i < n ; i++ ){
+        //                drp = this.droppers[i]
+        //                this.winner = tolerance ? tolerance.call( this, this.event, drg, drp )
+        //                // mouse position is always the fallback
+        //                : this.contains( drp, xy ) ? 1 : 0;
+        //                if(this.winner ){
+        //                    this.eventType = nextType[ this.eventType ]
+        //
+        //                 //   this.dispatch(this.event, drg );
+        //
+        //
+        //                    break;
+        //                }
+        //            }
         },
         //target 拥有四个坐标属性， test可能是相同的对象，也可能只是一个数组[x, y]
         //判定target是否包含test
@@ -51,8 +67,8 @@ $.define("droppable","more/draggable",function(Draggable){
                 && ( test[1] || test.top ) >= target.top && ( test[1] || test.bottom ) <= target.bottom );
         },
         modes: {
+            //有时光标虽然没有进入放置对象,但拖动块已经与放置对象相交了
             'intersect': function( event, dragger, dropper ){
-                //有时光标虽然没有进入放置对象,但拖动块已经与放置对象相交了
                 return this.contains( dropper, [ event.pageX, event.pageY ] ) ? // check cursor
                 1e9 : this.modes.overlap.apply( this, arguments ); // check overlap
             },

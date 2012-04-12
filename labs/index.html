@@ -22,7 +22,7 @@
                 var li = $("<li>").html(key.number).css("backgroundColor", key.bgcolor).attr("draggable", "true");
                 //$.log(li);
                 li[0].addEventListener("dragstart", function(e) {
-                    e.dataTransfer.effectAllowed = "copyMove";
+                    e.dataTransfer.effectAllowed = "move";//copyMove
                     e.dataTransfer.setData("text/plain", this.innerHTML);
                     $.log(this.innerHTML);
                     [ ].forEach.call(document.querySelectorAll("#player .default"),
