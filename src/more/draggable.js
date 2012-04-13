@@ -1,5 +1,11 @@
 $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     var $doc = $(document), $dragger//一些全局的东西
+    //支持触模设备
+    var supportTouch = $.support.touch = "createTouch" in document || 'ontouchstart' in window
+    || window.DocumentTouch && document instanceof DocumentTouch;
+    var onstart = supportTouch ? "touchstart" : "mousedown"
+    var ondrag = supportTouch ? "touchmove" : "mousemove"
+    var onend = supportTouch ? "touchend" : "mouseup"
     var Draggable = $.factory({
         inherit: Widget.Class,
         //用于触发用户绑定的dragstart drag dragend回调, 第一个参数为事件对象, 第二个为dd对象
@@ -92,7 +98,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             }
         }
         target.on( 'dragstart.mass_dd', preventDefault );//处理原生的dragstart事件
-        target.on( "mousedown.mass_dd", dd.handle, dragstart );//绑定拖动事件
+        target.on( onstart + ".mass_dd", dd.handle, dragstart );//绑定拖动事件
         dd.dropinit && dd.dropinit(hash);
     }
 
@@ -253,8 +259,8 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         }
     }
 
-    $doc.on( "mousemove.mass_dd", drag)
-    $doc.on( "mouseup.mass_dd blur.mass_dd touchcancel.mass_dd", dragend)
+    $doc.on( ondrag +".mass_dd", drag)
+    $doc.on( onend + ".mass_dd blur.mass_dd", dragend)
     $doc.on("selectstart.mass_dd",function(e){
         if( $dragger ){
             preventDefault(e);
@@ -270,7 +276,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         if( hash && hash.live == true){
             var selector = this.selector;
             if(typeof selector === "string" && selector.length > 0 ){
-                $(this.ownerDocument).on( "mousedown.mass_dd",selector,(function(h){
+                $(this.ownerDocument).on( onstart + ".mass_dd",selector,(function(h){
                     return function(e){
                         create.call($(e.target), h || {})
                     }

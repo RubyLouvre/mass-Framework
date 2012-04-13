@@ -4,10 +4,7 @@
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     // $.log("已加载target模块")
     var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,  rmapper = /(\w+)_(\w+)/g,
-    rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g,
-    supportTouch = $.support.touch = "createTouch" in document || 'ontouchstart' in window
-    || window.DocumentTouch && document instanceof DocumentTouch;
-    $.log("supportTouch"+supportTouch);
+    rtypenamespace = /^([^\.]*)?(?:\.(.+))?$/, revent = /(^|_|:)([a-z])/g
     function addCallback(queue, obj){//添加回调包到列队中
         var check = true, fn = obj.callback;
         for ( var i = 0, el; el = queue[i++]; ) {
@@ -292,7 +289,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 if( /^(?:mouse|contextmenu)|click/.test(event.type) ){
                     //如果不存在pageX/Y则结合clientX/Y做一双出来
                     if ( event.pageX == null && event.clientX != null ) {
-                        $.log("e.touches[0] "+e.touches[0])
                         var doc = event.target.ownerDocument || document,
                         html = doc.documentElement, body = doc.body;
                         event.pageX = event.clientX + (html && html.scrollLeft || body && body.scrollLeft || 0) - (html && html.clientLeft || body && body.clientLeft || 0);
@@ -312,6 +308,11 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
                 if ( event.which == null ) {//处理键盘事件
                     event.which = event.charCode != null ? event.charCode : event.keyCode;
+                }
+                if( window.Touch && event.touches && event.touches[0] ){
+                    $.log("fix touch pageXY")
+                    event.pageX = event.touches[0].pageX
+                    event.pageY = event.touches[0].pageY
                 }
                 //处理滚轮事件
                 if( event.type === "mousewheel" ){
@@ -475,14 +476,6 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
             };
         });
     }
-    if( supportTouch ){
-        "mousedown_touchstart,mousemove_touchmove,mouseup_touchend".replace( rmapper, function( _, type, mapper){
-            eventAdapter[ type ] = {
-                bindType    : mapper,
-                delegateType: mapper
-            }
-        });
-    }
     try{
         //FF需要用DOMMouseScroll事件模拟mousewheel事件
         document.createEvent("MouseScrollEvents");
@@ -612,7 +605,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
 2012.2.8 添加mouseenter的分支判定，增强eventSupport
 2012.2.9 完美支持valuechange事件
 2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
-2012.4.12 支持触摸事件
+2012.4.12 修正触摸屏下的pageX pageY
 */
 
 
