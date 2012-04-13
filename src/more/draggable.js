@@ -46,7 +46,8 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             multi:  $.isArrayLike( hash.multi ) ? hash.multi : null,
             handle : typeof hash.handle == "string" ? hash.handle : null,
             scroll : typeof hash.scroll == "boolean" ? hash.scroll : true,
-            strict : typeof hash.strict == "boolean" ? hash.strict : true
+            strict : typeof hash.strict == "boolean" ? hash.strict : true,
+            returning : typeof hash.returning == "boolean" ? hash.returning : true
         });
         "lockX lockY revert ghosting click".replace( $.rword, function( key ){
             dd[ key] = !!hash[ key ];
@@ -212,6 +213,8 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         if($dragger){
             var dragger = $dragger
             var dd = $dragger.data("_mass_dd");
+            $.log("------");
+            $.log(dd.dragger)
             if(dd.checkID){
                 clearInterval(dd.checkID);
                 dd.event = dd.checkID = null;
@@ -219,11 +222,11 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             if(dragger[0].releaseCapture){
                 dragger[0].releaseCapture();
             }
+            dd.dropend &&  dd.dropend( event )
             dragger.removeClass("mass_dragging");
             dd.ghosting && dragger.remove();
-            dd.dropend &&  dd.dropend( event )
-            dd.dispatch( event, dragger,  "dragend" );
-            if(dd.revert || dd.ghosting){
+            dd.dispatch( event, dragger, "dragend" );
+            if(dd.revert || dd.ghosting && dd.returning){
                 dd.target.fx( 500,{
                     left:  dd.revert ? dd.originalX: dd.offsetX,
                     top:   dd.revert ? dd.originalY: dd.offsetY

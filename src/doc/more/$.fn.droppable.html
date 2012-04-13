@@ -1,116 +1,80 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
     <head>
-        <title>droppable</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script>
-            if (self!=top)
-                window.top.location.replace(self.location);
-        </script>
-
-        <style type="text/css">
-            .drag {
-                position: absolute;
-                border: 1px solid #89B;
-                background: #BCE;
-                height: 58px;
-                width: 58px;
-                cursor: move;
-                top: 110px;
-                line-height: 58px;
-                text-align: center;
-            }
-            .size2 {
-                height: 118px;
-                line-height: 118px;
-            }
-            .size3 {
-                height: 178px;
-                line-height: 178px;
-            }
-            .drop {
-                float: right;
-                table-layout: fixed;
-            }
-            .drop td {
-                width: 95px;
-                height: 65px;
-                padding: 0;
-                border: 1px dashed #888;
-                background: #EEE;
-                font-size: 10px;
-                line-height: 12px;
-                overflow: hidden;
-                text-align: center;
-            }
-            td.dropped {
-                background-color: #EBC;
-                border-color: #B89;
-            }
-            td.active {
-                background-color: #CEB;
-                border-color: #9B8;
-            }
-            input {
-                color:red;
-            }
-        </style>
+        <meta charset="utf-8" />
+        <title>$.fn.droppable</title>
         <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
-        <script>
-            $.require("ready,more/droppable",function(){
-                $.log("/src/doc/plugin.html?iframe_src=" + location.pathname)
-                $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.droppable.html")
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style>
 
-                $('.drag').droppable({
-                    accept:"#drop",
-                    mode:"intersect",
-                    dragenter:function(){
-                        $.log("dragenter....")
-                    },
-                    dragover:function(){
-                        $.log("dragover....")
-                    },
-                    dragleave:function(){
-                        $.log("dragleave....")
-                    },
-                    drop:function(){
-                        $.log("drop....")
-                    }
-                });
-
-
-            });
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
 
         </script>
     </head>
     <body>
-        <p>
-            <input type="text" value="aaa" readonly/>
-        </p>
-        <p>阻止点击事件的默认行为 <a id="back" href="">返回</a></p>
-        <table class="drop" cellspacing="10">
-            <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-            <tr><td>&nbsp;</td><td>&nbsp;</td><td colspan="2">&nbsp;</td></tr>
-            <tr><td>&nbsp;</td><td rowspan="2">&nbsp;</td><td colspan="2" rowspan="2" id="drop">&nbsp;</td></tr>
-            <tr><td>&nbsp;</td></tr>
-        </table>
-        <div class="drag size1" style="left:20px;"></div>
-        <div class="drag size2" style="left:100px;"></div>
-        <div class="drag size3" style="left:180px;"></div>
+    <article>
+        <h3>$.fn.droppable(settings)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>拖放组件的第二个部件，为拖动对象增加“可投掷”功能，用于处理拖动块与靶场的关系。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>settings</dt>
+            <dd>可选。用于配置控件对象。但当这个对象第二次调用它时，
+                只有当其第一个参数为字符串或对象才有效，这样相当于调用其方法或重写一些属性。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p><span class="stress">settings的配置参数：</span></p>
+        <ul>
+            <li><em>range</em>：用于圈定靶场的位置
+                <ul>
+                    <li>如果是一个CSS表达式，将转化一个mass的节点链对象。</li>
+                    <li>如果是一个mass的节点链对象,不处理。</li>
+                    <li>如果是一个元素节点，将转化一个mass的节点链对象。</li>
+                    <li>如果是一个元素数组，将转化一个mass的节点链对象</li>
+                </ul>
+                建议在dragstart时设置。
+            </li>
+            <li><em>hoverClass</em>： 当光标进入靶场时，为靶场添加的类名。</li>
+            <li><em>activeClass</em>：当拖动块移动时，为靶场添加的类名,提示用户要把它投掷到这里。</li>
+            <li><em>dragenter</em>：function 当光标进入靶场时，执行此回调。</li>
+            <li><em>dragover</em>：function 当光标进入靶场后，执行此回调。</li>
+            <li><em>dragleave</em>：function 当光标进入靶场时，执行此回调。</li>
+            <li><em>drop</em>：function 当光标进入靶场后，留在其上移动时放开鼠标时，执行此回调。</li>
 
-
-        <pre>
-            $.require("ready,more/draggable",function(){
-                $('.drag').click(function(){
-                    $( this ).append("Clicked!&lt;br/&gt;");
-                });
-                $("#blue").draggable({
-                    click: true
-                });
-                $("#red").draggable({
-                    click: false//默认是阻止
-                });
-            });
-        </pre>
-    </body>
+        </ul>
+        <p>dragenter, dragover, dragleave, drop这三个都是HTML5标准的原生事件名称。</p>
+        <p>生成拖动对象比原生多了以下属性：</p>
+        <ul>
+            <li><em>droppers</em>：一个对象数组，里面装载的是靶场的坐标宽高的消息（elem, width, height, top, bottom, left, right）</li>
+            <li><em>dropper</em>：mass实例，当前光标进入的靶场</li>
+        </ul>
+        <div><a href="/src/doc/more/droppable.basic.html">测试drop参数</a></div>
+        <div><a href="/src/doc/more/droppable.dragenter.html">测试dragenter, dragleave参数</a></div>
+        <div><a href="/src/doc/more/droppable.hoverClass.html">测试hoverClass参数，如果是简单地添加类名，它比上例更方便</a></div>
+        <div><a href="/src/doc/more/droppable.activeClass.html">测试activeClass参数，移动时高亮靶场</a></div>
+        <div><a href="/src/doc/more/droppable.dragover.html">测试dragover参数</a></div>
+        <div><a href="/src/doc/more/droppable.ghosting.html">演示影子拖动</a></div>
+        <div><a href="/src/doc/more/draggable.active.html">在拖动时高亮元素</a></div>
+        <div><a href="/src/doc/more/draggable.ghosting.html">使用幽灵元素进行拖动</a></div>
+        <div><a href="/src/doc/more/draggable.live.html">使用事件代理</a></div>
+        <div><a href="/src/doc/more/draggable.top.html">让拖动的元素总是在最上面</a></div>
+        <div><a href="/src/doc/more/draggable.revert.html">拖动结束回到原位</a></div>
+        <div><a href="/src/doc/more/draggable.otherDraggers.html">同时拖动多个方块</a></div>
+        <div><a href="/src/doc/more/draggable.click.html">阻止点击事件的默认行为</a></div>
+        <div><a href="/src/doc/more/draggable.resize.html">通过拖动调整大小</a></div>
+        <div><a href="/src/doc/more/draggable.resize2.html">八个角都能调整大小的拖动块，点击变色后通多点拖动</a></div>
+        <div><a href="/src/doc/more/draggable.draw.html">通过拖动画图</a></div>
+    </article>
+</body>
 </html>

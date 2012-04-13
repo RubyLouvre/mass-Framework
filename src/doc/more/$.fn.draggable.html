@@ -25,7 +25,7 @@
     <article>
         <h3>$.fn.draggable(settings)</h3>
         <p><span class="stress">描述：</span></p>
-        <p>拖动组件。</p>
+        <p>拖放组件的第一个部件，提供最基本功的拖拽功能。</p>
         <p><span class="stress">参数：</span></p>
         <dl>
             <dt>settings</dt>
@@ -57,7 +57,8 @@
             <li><em>revert</em>：boolean	默认false。当值为true时，让拖动元素在拖动后回到原来的位置。。</li>
             <li><em>strict</em>：boolean	默认true。当值为true时，监视鼠标的位置，一旦超过出拖动块就立即停止。</li>
             <li><em>scroll</em>：boolean	默认false。当值为true时，允许滚动条随拖动元素移动。</li>
-
+            <li><em>returning</em>：boolean	默认true。还魂,用于与幽灵元素配套使用，
+                当拖拽结束时让原拖动块以动画方式抵达幽灵元素消失的地方。</li>
             <li><em>click</em>：function	默认为false。当我们点击页面时依次发生的事件为mousedown mouseup click
                 但有时我们想在点击后做一些事情才拖动元素，这时就需要将click设置为false，意即阻止浏览器的默认行为
             </li>
@@ -72,11 +73,11 @@
         <ul>
             <li>lockX: 锁定X轴</li>
             <li>lockY: 锁定Y轴</li>
-            <li>multi: ArrayLike, 一个节点数组或节点集合，你可以在dragstart时设置它;比如:
+            <li>otherDraggers: ArrayLike, 一个节点数组或节点集合，你可以在dragstart时设置它;比如:
                 <pre class="brush:js;gutter:false;toolbar:false;">
                 $(".blue").draggable({//每次用户只能拖动一个
                     dragstart:function(e, dd){
-                        dd.multi = $('.red');//但程序能帮你带上这几个移动
+                        dd.otherDraggers = $('.red');//但程序能帮你带上这几个移动
                     }
                 });
                 </pre>
@@ -104,7 +105,7 @@
         <div><a href="/src/doc/more/draggable.live.html">使用事件代理</a></div>
         <div><a href="/src/doc/more/draggable.top.html">让拖动的元素总是在最上面</a></div>
         <div><a href="/src/doc/more/draggable.revert.html">拖动结束回到原位</a></div>
-        <div><a href="/src/doc/more/draggable.multi.html">同时拖动多个方块</a></div>
+        <div><a href="/src/doc/more/draggable.otherDraggers.html">同时拖动多个方块</a></div>
         <div><a href="/src/doc/more/draggable.click.html">阻止点击事件的默认行为</a></div>
         <div><a href="/src/doc/more/draggable.resize.html">通过拖动调整大小</a></div>
         <div><a href="/src/doc/more/draggable.resize2.html">八个角都能调整大小的拖动块，点击变色后通多点拖动</a></div>
