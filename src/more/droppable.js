@@ -39,12 +39,12 @@ $.define("droppable","more/draggable",function(Draggable){
         drop: function(){
             //此事件在draggable的drag事件上执行
             var xy = [ this.event.pageX, this.event.pageY ],
-            uuid = this.dragger.data("@uuid"),droppers = this.droppers,
-            drg = this.locate( this.dragger ), drp, type;
+            uuid = this.target.data("@uuid"),droppers = this.droppers,
+            drg = this.locate( this.dragger ), drp, type; 
             for( var i = 0, n = droppers.length; i < n ; i++ ){
                 drp = droppers[i];
                 if( !droppers.actived && this.activeClass){
-                    drp.elem.addClass(this.activeClass)
+                    drp.elem.addClass(this.activeClass);
                 }
                 var isEnter = this.contains( drp, xy );//判定光标是否进入到dropper的内部
                 if(isEnter){
@@ -68,15 +68,16 @@ $.define("droppable","more/draggable",function(Draggable){
             droppers.actived = 1;
         },
         dropend: function( event ){
-            var uuid = this.dragger.data("@uuid"), drp
+            var uuid = this.target.data("@uuid"), drp;
             for( var i = 0, n = this.droppers.length; i < n ; i++ ){
                 drp = this.droppers[i];
                 if(  this.activeClass ){
                     drp.elem.removeClass(this.activeClass);
                 }
                 if(drp["###" + uuid]){
-                    $.log("xxxxxxxxxxxxxxxxxx");
-                    $.log(this.dragger);
+                    if( this.ghosting ){
+                        this.dragger = this.target;
+                    }
                     this.dispatch( event, this.dragger, "drop" );
                     delete drp["###"+uuid]
                 }
