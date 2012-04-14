@@ -213,8 +213,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         if($dragger){
             var dragger = $dragger
             var dd = $dragger.data("_mass_dd");
-            $.log("------");
-            $.log(dd.dragger)
             if(dd.checkID){
                 clearInterval(dd.checkID);
                 dd.event = dd.checkID = null;
@@ -222,16 +220,17 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             if(dragger[0].releaseCapture){
                 dragger[0].releaseCapture();
             }
-            dd.dropend &&  dd.dropend( event )
             dragger.removeClass("mass_dragging");
-            dd.ghosting && dragger.remove();
-            dd.dispatch( event, dragger, "dragend" );
+           
             if(dd.revert || dd.ghosting && dd.returning){
-                dd.target.fx( 500,{
+                dd.target.fx( 500,{//先让拖动块回到幽灵元素的位置
                     left:  dd.revert ? dd.originalX: dd.offsetX,
                     top:   dd.revert ? dd.originalY: dd.offsetY
                 });
             }
+            dd.ghosting && dragger.remove();//再移除幽灵元素
+            dd.dropend &&  dd.dropend( event );//先执行drop回调
+            dd.dispatch( event, dragger, "dragend" );//再执行dragend回调
             if(dd.dragtype == "drag" && dd.click === false){//阻止"非刻意"的点击事件,因为我们每点击页面,都是依次触发mousedown mouseup click事件
                 $.event.fireType = "click";
                 setTimeout(function(){
