@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>draggable handle</title>
+        <title>draggable top</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
             if (self!=top)
@@ -16,44 +16,33 @@
                 height: 58px;
                 width: 58px;
                 top: 120px;
-            }
-            .handle {
-                background: #9AC;
-                border-bottom: 1px solid #89B;
                 cursor: move;
-                font-size: 10px;
-                line-height: 10px;
-                padding: 2px 0;
-                text-align: center;
-                color: #222;
             }
         </style>
-        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+          <script src="../../public/js/mass_merge.js" type="text/javascript" ></script>
         <script>
             $.require("ready,more/draggable",function(){
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.draggable.html")
                 $(".drag").draggable({
-                    handle:".handle"
+                    dragstart: function(){//这种方式只适用于拖动的元素都位于同一个父节点,并且z-index都一样的情况
+                        $( this ).appendTo( this.parentNode );
+                    }
                 });
             });
         </script>
     </head>
     <body>
 
-        <p>通过手柄进行拖动。 <a id="back" href="">返回</a></p>
-        <div class="drag" style="left:20px;">
-            <div class="handle">HANDLE</div>
-        </div>
-        <div class="drag" style="left:100px;">
-            <div class="handle">HANDLE</div>
-        </div>
-        <div class="drag" style="left:180px;">
-            <div class="handle">HANDLE</div>
-        </div>
+        <p>让拖动的元素总是在最上面。 <a id="back" href="">返回</a></p>
+        <div class="drag" style="left:20px;"></div>
+        <div class="drag" style="left:100px;"></div>
+        <div class="drag" style="left:180px;"></div>
         <pre>
             $.require("ready,more/draggable",function(){
-               $(".drag").draggable({
-                    handle:".handle"
+              $(".drag").draggable({//这种方式只适用于拖动的元素都位于同一个父节点,并且z-index都一样的情况
+                    dragstart: function(){
+                        $( this ).appendTo( this.parentNode );
+                    }
                 });
             });
         </pre>

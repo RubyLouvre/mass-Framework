@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>droppable basic</title>
+        <title>droppable dragenter</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
             if (self!=top)
@@ -37,24 +37,23 @@
                 line-height: 15px;
                 overflow: hidden;
             }
-            .dropped {
-                background-color:red;/* #EBC;*/
-                border-color: #B89;
+            .active {
+                background-color: #CEB;
+                border-color: #9B8;
             }
             pre{
-                 position: absolute;
-                 top:300px;
+                position: absolute;
+                top:300px;
             }
         </style>
-        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../../public/js/mass_merge.js" type="text/javascript" ></script>
         <script>
             $.require("ready,more/droppable",function(){
+
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.droppable.html")
                 $('.drag').droppable({
                     range:".drop",
-                    drop:function(event,dd){
-                        dd.dropper.toggleClass('dropped');
-                    }
+                    hoverClass:"active"
                 })
             });
 
@@ -62,7 +61,7 @@
     </head>
     <body>
 
-        <p>拖动左边的方块，在右边的大方块上放下 <a id="back" href="">返回</a></p>
+        <p>拖动左边的方块，在右边的大方块上经过 <a id="back" href="">返回</a></p>
         <div class="drop"></div>
         <div class="drag blue" style="left:20px;"></div>
         <div class="drag blue" style="left:100px;"></div>
@@ -71,9 +70,7 @@
             $.require("ready,more/droppable",function(){
                 $('.drag').droppable({
                     range:".drop",
-                    drop:function(event,dd){
-                        dd.dropper.toggleClass('dropped');
-                    }
+                    hoverClass:"active"
                 })
             });
         </pre>

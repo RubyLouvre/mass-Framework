@@ -40,7 +40,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             'top': position.top,
             'left': position.left,
             'position': 'absolute'
-        }).attr('mass_dd', 'true');
+        });
         //DD拖动数据对象,用于储存经过修整的用户设置
         $.mix( dd, {
             multi:  $.isArrayLike( hash.multi ) ? hash.multi : null,

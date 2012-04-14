@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>droppable dragenter</title>
+        <title>droppable dragover</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
             if (self!=top)
@@ -14,46 +14,53 @@
                 height:100%;
                 background:#FFF5EE;
             }
-
             .drag {
                 position: absolute;
                 border: 1px solid #89B;
                 background: #BCE;
                 height: 58px;
                 width: 58px;
+                text-align: center;
+                line-height: 58px;
                 cursor: move;
                 top: 100px;
-                line-height: 58px;
-                text-align: center;
+                font-size: 32px;
             }
             .drop {
                 float: right;
-                width: 291px;
-                height: 299px;
-                padding: 0 4px;
+                width: 99px;
+                height: 99px;
                 border: 1px dashed #888;
                 background: #EEE;
-                font-size: 10px;
-                line-height: 15px;
-                overflow: hidden;
+                margin: 0 10px 0 0;
+                text-align: center;
+                line-height: 99px;
             }
-            .active {
-                background-color: #CEB;
-                border-color: #9B8;
+            .dropped {
+                background-color: #EBC;
+                border-color: #B89;
             }
             pre{
                 position: absolute;
                 top:300px;
             }
         </style>
-        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../../public/js/mass_merge.js" type="text/javascript" ></script>
         <script>
             $.require("ready,more/droppable",function(){
 
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.droppable.html")
                 $('.drag').droppable({
                     range:".drop",
-                    hoverClass:"active"
+                    dragover: function(event, dd){
+                        dd.dragger.text(dd.dropper.text())
+                    },
+                    dragleave: function(event, dd){
+                        dd.dragger.text("")
+                    },
+                    drop: function(event, dd){
+                        dd.dropper.toggleClass("dropped");
+                    }
                 })
             });
 
@@ -62,15 +69,26 @@
     <body>
 
         <p>拖动左边的方块，在右边的大方块上经过 <a id="back" href="">返回</a></p>
-        <div class="drop"></div>
-        <div class="drag blue" style="left:20px;"></div>
-        <div class="drag blue" style="left:100px;"></div>
-        <div class="drag blue" style="left:180px;"></div>
+        <div class="drop">C</div>
+        <div class="drop">B</div>
+        <div class="drop">A</div>
+        <div class="drag" style="left:20px;"></div>
+        <div class="drag" style="left:100px;"></div>
+        <div class="drag" style="left:180px;"></div>
+
         <pre>
             $.require("ready,more/droppable",function(){
                 $('.drag').droppable({
                     range:".drop",
-                    hoverClass:"active"
+                    dragover: function(event, dd){
+                        dd.dragger.text(dd.dropper.text())
+                    },
+                    dragleave: function(event, dd){
+                        dd.dragger.text("")
+                    },
+                    drop: function(event, dd){
+                        dd.dropper.toggleClass("dropped");
+                    }
                 })
             });
         </pre>

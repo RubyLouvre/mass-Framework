@@ -51,7 +51,7 @@
             <li><em>dragover</em>：function 当光标进入靶场后，执行此回调。</li>
             <li><em>dragleave</em>：function 当光标进入靶场时，执行此回调。</li>
             <li><em>drop</em>：function 当光标进入靶场后，留在其上移动时放开鼠标时，执行此回调。</li>
-
+            <li><em>tolerance</em>：function/string 自定义相交规则,默认跟W3C的保持一致,即当鼠标进入靶场才触发dragenter,离开则触发dragleave。</li>
         </ul>
         <p>dragenter, dragover, dragleave, drop这三个都是HTML5标准的原生事件名称。</p>
         <p>生成拖动对象比原生多了以下属性：</p>
@@ -59,16 +59,16 @@
             <li><em>droppers</em>：一个对象数组，里面装载的是靶场的坐标宽高的消息（elem, width, height, top, bottom, left, right）</li>
             <li><em>dropper</em>：mass实例，当前光标进入的靶场</li>
         </ul>
-        <div><a href="/src/doc/more/droppable.basic.html">测试drop参数</a></div>
-        <div><a href="/src/doc/more/droppable.dragenter.html">测试dragenter, dragleave参数</a></div>
-        <div><a href="/src/doc/more/droppable.hoverClass.html">测试hoverClass参数，如果是简单地添加类名，它比上例更方便</a></div>
-        <div><a href="/src/doc/more/droppable.activeClass.html">测试activeClass参数，移动时高亮靶场</a></div>
-        <div><a href="/src/doc/more/droppable.dragover.html">测试dragover参数</a></div>
-        <div><a href="/src/doc/more/droppable.ghosting.html">演示影子拖动</a></div>
-        <div><a href="/src/doc/more/droppable.active.html">在拖动时高亮元素</a></div>
-        <div><a href="/src/doc/more/droppable.ghosting.html">使用幽灵元素进行拖动</a></div>
-        <div><a href="/src/doc/more/droppable.live.html">使用事件代理</a></div>
-        <div><a href="/src/doc/more/droppable.top.html">让拖动的元素总是在最上面</a></div>
+        <div><a href="/src/doc/more/droppable/basic.html">测试drop参数</a></div>
+        <div><a href="/src/doc/more/droppable/dragenter.html">测试dragenter, dragleave参数</a></div>
+        <div><a href="/src/doc/more/droppable/hoverClass.html">测试hoverClass参数，如果是简单地添加类名，它比上例更方便</a></div>
+        <div><a href="/src/doc/more/droppable/activeClass.html">测试activeClass参数，移动时高亮靶场</a></div>
+        <div><a href="/src/doc/more/droppable/dragover.html">测试dragover参数</a></div>
+        <div><a href="/src/doc/more/droppable/ghosting.html">演示影子拖动</a></div>
+        <div><a href="/src/doc/more/droppable/active.html">在拖动时高亮元素</a></div>
+        <div><a href="/src/doc/more/droppable/ghosting.html">使用幽灵元素进行拖动</a></div>
+        <div><a href="/src/doc/more/droppable/live.html">演示其事件代理</a></div>
+        <div><a href="/src/doc/more/droppable/overlap.html">测试overlap相交模式</a></div>
         <div><a href="/src/doc/more/droppable.revert.html">拖动结束回到原位</a></div>
         <div><a href="/src/doc/more/draggable.otherDraggers.html">同时拖动多个方块</a></div>
         <div><a href="/src/doc/more/draggable.click.html">阻止点击事件的默认行为</a></div>
