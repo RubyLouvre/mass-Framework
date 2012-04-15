@@ -51,7 +51,15 @@
             <li><em>dragover</em>：function 当光标进入靶场后，执行此回调。</li>
             <li><em>dragleave</em>：function 当光标进入靶场时，执行此回调。</li>
             <li><em>drop</em>：function 当光标进入靶场后，留在其上移动时放开鼠标时，执行此回调。</li>
-            <li><em>tolerance</em>：function/string 自定义相交规则,默认跟W3C的保持一致,即当鼠标进入靶场才触发dragenter,离开则触发dragleave。</li>
+            <li><em>tolerance</em>：function/string 自定义触发模式,默认是pointer模式，也即W3C的模式,当鼠标进入靶场才触发dragenter回调,离开则触发dragleave回调。
+                此外还有如下模式可供选择:
+                <ul>
+                    <li>intersect: 当拖动块与靶场存在重叠部分，就触发dragenter回调。</li>
+                    <li>middle: 只有当拖动块有一半的面积进入靶场，才触发dragenter回调。</li>
+                    <li>fit: 只有当拖动块完全位于靶场之内，才触发dragenter回调。</li>
+                </ul>
+
+            </li>
         </ul>
         <p>dragenter, dragover, dragleave, drop这三个都是HTML5标准的原生事件名称。</p>
         <p>生成拖动对象比原生多了以下属性：</p>
@@ -68,13 +76,13 @@
         <div><a href="/src/doc/more/droppable/active.html">在拖动时高亮元素</a></div>
         <div><a href="/src/doc/more/droppable/ghosting.html">使用幽灵元素进行拖动</a></div>
         <div><a href="/src/doc/more/droppable/live.html">演示其事件代理</a></div>
-        <div><a href="/src/doc/more/droppable/overlap.html">测试overlap相交模式</a></div>
-        <div><a href="/src/doc/more/droppable.revert.html">拖动结束回到原位</a></div>
-        <div><a href="/src/doc/more/draggable.otherDraggers.html">同时拖动多个方块</a></div>
-        <div><a href="/src/doc/more/draggable.click.html">阻止点击事件的默认行为</a></div>
-        <div><a href="/src/doc/more/draggable.resize.html">通过拖动调整大小</a></div>
-        <div><a href="/src/doc/more/draggable.resize2.html">八个角都能调整大小的拖动块，点击变色后通多点拖动</a></div>
-        <div><a href="/src/doc/more/draggable.draw.html">通过拖动画图</a></div>
+        <div><a href="/src/doc/more/droppable/intersect.html">测试intersect触发模式</a></div>
+        <div><a href="/src/doc/more/droppable/middle.html">测试middle触发模式</a></div>
+        <div><a href="/src/doc/more/droppable/fit.html">测试fit触发模式</a></div>
+        <div><a href="/src/doc/more/droppable/tolerance.html">自定义触发模式</a></div>
+        <div><a href="/src/doc/more/droppable.resize.html">通过拖动调整大小</a></div>
+        <div><a href="/src/doc/more/droppable.resize2.html">八个角都能调整大小的拖动块，点击变色后通多点拖动</a></div>
+        <div><a href="/src/doc/more/droppable.draw.html">通过拖动画图</a></div>
     </article>
 </body>
 </html>

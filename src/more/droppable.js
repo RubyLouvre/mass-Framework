@@ -51,12 +51,13 @@ $.define("droppable","more/draggable",function(Draggable){
                 }
                 //判定光标是否进入到dropper的内部
                 var isEnter = tolerance ? tolerance.call(this, this.event, drg, drp ): this.contains( drp, xy );
-              //  $.log(isEnter)
+                //  $.log(isEnter)
                 if(isEnter){
                     if(!drp["###" + uuid]){//如果是第一次进入,则触发dragenter事件
                         drp["###"+uuid] = 1;
+                        this.hoverClass && drp.elem.addClass(this.hoverClass);
                         this.dropper = drp.elem;
-                        this.hoverClass && this.dropper.addClass(this.hoverClass);
+                        $.log(this.dropper.data("@uuid")+"!!")
                         type = "dragenter"
                     }else{//标识已进入
                         type = "dragover"
@@ -64,8 +65,8 @@ $.define("droppable","more/draggable",function(Draggable){
                     this.dispatch(this.event, this.dragger, type );
                 }else{//如果光标离开放置对象
                     if(drp["###"+uuid]){
-                        $.log("pppppppppppppppp")
-                        this.hoverClass && this.dropper.removeClass(this.hoverClass);
+                        this.hoverClass && drp.elem.removeClass(this.hoverClass);
+                        this.dropper = drp.elem;//处理覆盖多个靶场
                         this.dispatch(this.event, this.dragger, "dragleave" );
                         delete drp["###"+uuid]
                     }
@@ -77,42 +78,44 @@ $.define("droppable","more/draggable",function(Draggable){
             var uuid = this.target.data("@uuid"), drp;
             for( var i = 0, n = this.droppers.length; i < n ; i++ ){
                 drp = this.droppers[i];
-                if(  this.activeClass ){
-                    drp.elem.removeClass(this.activeClass);
-                }
+                this.activeClass && drp.elem.removeClass(this.activeClass);
                 if(drp["###" + uuid]){
                     if( this.ghosting ){
                         this.dragger = this.target;
                     }
+                    this.dropper = drp.elem;
                     this.dispatch( event, this.dragger, "drop" );
                     delete drp["###"+uuid]
                 }
             }
         },
-        //target 拥有四个坐标属性， dragger可能是相同的对象，也可能只是一个数组[x, y]
-        //判定dropper是否包含dragger
+        // 判定dropper是否包含dragger
         contains: function(  dropper, dragger ){
             return ( ( dragger[0] || dragger.left ) >= dropper.left && ( dragger[0] || dragger.right ) <= dropper.right
                 && ( dragger[1] || dragger.top ) >= dropper.top && ( dragger[1] || dragger.bottom ) <= dropper.bottom );
         },
+        // 求出两个方块的重叠面积
+        overlap: function( dragger, dropper ){
+            return Math.max( 0, Math.min( dropper.bottom, dragger.bottom ) - Math.max( dropper.top, dragger.top ) )
+            * Math.max( 0, Math.min( dropper.right, dragger.right ) - Math.max( dropper.left, dragger.left ) );
+        },
         modes: {
-            //判定是否相交
+            // 拖动块是否与靶场相交，允许覆盖多个靶场
             intersect: function( event, dragger, dropper ){
-                return this.contains( dropper, [ event.pageX, event.pageY ] ) ? // check cursor
-                1e9 : this.modes.overlap.apply( this, arguments ); // check overlap
+                return this.contains( dropper, [ event.pageX, event.pageY ] ) ? 
+                true : this.overlap( dragger, dropper );
             },
-            //求出两个方块的重叠面积
-            overlap: function( event, dragger, dropper ){
-                return Math.max( 0, Math.min( dropper.bottom, dragger.bottom ) - Math.max( dropper.top, dragger.top ) )
-                * Math.max( 0, Math.min( dropper.right, dragger.right ) - Math.max( dropper.left, dragger.left ) );
+            // 判定光标是否在靶场之内
+            pointer: function( event, dragger, dropper ){
+                return this.contains( dropper, [ event.pageX, event.pageY ] )
             },
-            //判定是否完全位于靶场
+            // 判定是否完全位于靶场
             fit: function( event,  dragger, dropper  ){
-                return this.contains( dropper, dragger ) ? 1 : 0
+                return this.contains( dropper, dragger ) //? 1 : 0
             },
-            // center of the proxy is contained within target bounds
+            // 至少有一半进入耙场才触发dragenter
             middle: function( event, dragger, dropper ){
-                return this.contains( dropper, [ dragger.left + dragger.width * .5, dragger.top + dragger.height * .5 ] )? 1 : 0
+                return this.contains( dropper, [ dragger.left + dragger.width * .5, dragger.top + dragger.height * .5 ] )//? 1 : 0
             }
         }
     })

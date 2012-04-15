@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>droppable overlap</title>
+        <title>droppable middle</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
             if (self!=top)
@@ -49,7 +49,7 @@
                 text-align: center;
             }
             td.dropped {
-                background-color: #EBC;
+                background-color: #EBC!important;
                 border-color: #B89;
             }
             td.active {
@@ -66,32 +66,24 @@
             $.require("ready,more/droppable",function(){
 
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.droppable.html");
-                var num = 1;
-                $('#add').click(function(){
-                    $('<div class="drop" />')
-                    .text( num++ )
-                    .appendTo( document.body )
-                    .css({
-                        top: Math.random() * ( $( window ).height() - 100 ) + 20,
-                        left: Math.random() * ( $( window ).width() - 100 ) + 20
-                    });
-                });
-
                 $('.drag').droppable({
                     range:".drop td",
                     hoverClass: "active",
-                    tolerance: "overlap",
+                    tolerance: "middle",
                     drop: function(event, dd){
                         dd.dropper.toggleClass("dropped");
+                    },
+                    dragleave:function(event, dd){
+                        dd.dropper.removeClass("dropped");
                     }
-                })
+                });
             });
 
         </script>
     </head>
     <body>
 
-        <p>只要存在覆盖部分就触发dragenter回调。 <a id="back" href="">返回</a></p>
+        <p> 只有当拖动块有一半的面积进入靶场，才触发dragenter回调。 <a id="back" href="">返回</a></p>
         <table class="drop" cellspacing="10">
             <tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
             <tr><td>&nbsp;</td><td>&nbsp;</td><td colspan="2">&nbsp;</td></tr>
@@ -104,13 +96,13 @@
         <pre>
             $.require("ready,more/droppable",function(){
                 $('.drag').droppable({
-                    range:".drop",
-                    ghosting:true,
-                    returning:false,
+                    range:".drop td",
+                    hoverClass: "active",
+                    tolerance: "middle",
                     drop: function(event, dd){
                         dd.dropper.toggleClass("dropped");
                     }
-                })
+                });
             });
         </pre>
     </body>
