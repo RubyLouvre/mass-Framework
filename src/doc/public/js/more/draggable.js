@@ -1,5 +1,18 @@
 $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     var $doc = $(document), $dragger//一些全局的东西
+    var userSelect = $.cssName("user-select");
+    function onUnselect(){
+        if(typeof userSelect === "string"){
+            return document.documentElement.style[userSelect] = "none";
+        }
+        document.unselectable  = "on";
+    };
+    function offUnselect(){
+        if(typeof userSelect === "string"){
+            return document.documentElement.style[userSelect] = "text";
+        }
+        document.unselectable  = "off";
+    };
     //支持触模设备
     var supportTouch = $.support.touch = "createTouch" in document || 'ontouchstart' in window
     || window.DocumentTouch && document instanceof DocumentTouch;
@@ -36,6 +49,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         hash = hash || {};
         var target = dd.target =  dd.parent ;
         var position = target.position();
+        $.log(position)
         target.css({
             'top': position.top,
             'left': position.left,
@@ -106,6 +120,8 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     function dragstart(event, multi ){
         var el = multi || event.currentTarget;//如果是多点拖动，存在第二个参数
         var dragger = $(el), dd = dragger.data( "_mass_dd" );
+
+        onUnselect();
         if(dd.ghosting){//创建幽灵元素
             var ghosting = el.cloneNode(false);
             el.parentNode.insertBefore( ghosting,el.nextSibling );
@@ -131,9 +147,10 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         }else{ //阻止默认动作
             event.preventDefault();
         };
-        $dragger = dd.dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
-        dd.dragtype = "dragstart"
-        dd.dispatch(  event, dragger,  "dragstart");
+        dd.dragger = dragger;//暴露到外围作用域，供drag与dragend与dragstop调用
+        dd.dragtype = "dragstart";//    先执行dragstart ,再执行dropstart
+        dd.dispatch(  event, dragger,  "dragstart");//允许dragger在回调中被改写
+        $dragger = dd.dragger;
         dd.dropstart && dd.dropstart( event );
         if( ! multi ){ //开始批处理dragstart
             dd.patch( event, dragger,  dragstart );
@@ -221,7 +238,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 dragger[0].releaseCapture();
             }
             dragger.removeClass("mass_dragging");
-           
             if(dd.revert || dd.ghosting && dd.returning){
                 dd.target.fx( 500,{//先让拖动块回到幽灵元素的位置
                     left:  dd.revert ? dd.originalX: dd.offsetX,
@@ -242,6 +258,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 dd.patch( event, $dragger, dragend );
                 $dragger = null;
             }
+            offUnselect();
         }
     }
     function dragstop(){
@@ -278,7 +295,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         if( hash && hash.live == true){
             var selector = this.selector;
             if(typeof selector === "string" && selector.length > 0 ){
-                $(this.ownerDocument).on( onstart + ".mass_dd",selector,(function(h){
+                $(this.ownerDocument).on( onstart + ".mass_dd",selector,(function(h){               
                     return function(e){
                         create.call($(e.target), h || {})
                     }

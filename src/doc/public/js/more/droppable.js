@@ -1,5 +1,6 @@
 $.define("droppable","more/draggable",function(Draggable){
     //http://help.dottoro.com/ljrkqflw.php
+    //https://github.com/MattSurabian/DuckHunt-JS 一个JS游戏
     Draggable.implement({
         dropinit: function( hash ){
             this.range = $(hash.range);//设置靶场（放置对象）
@@ -23,10 +24,11 @@ $.define("droppable","more/draggable",function(Draggable){
             };
         },
         dropstart: function(){
-            var els = this.range
+            var els = this.range;
             this.droppers = []
             if( els ){
                 els =  els.mass ? els : $(els);
+               
                 if(els.length === 1){
                     this.droppers.push( this.locate(els) )
                 }else{
@@ -57,7 +59,6 @@ $.define("droppable","more/draggable",function(Draggable){
                         drp["###"+uuid] = 1;
                         this.hoverClass && drp.elem.addClass(this.hoverClass);
                         this.dropper = drp.elem;
-                        $.log(this.dropper.data("@uuid")+"!!")
                         type = "dragenter"
                     }else{//标识已进入
                         type = "dragover"

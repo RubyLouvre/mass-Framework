@@ -75,19 +75,21 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             if( !fn ){
                 name = cssMap( name );
             }
-            if( value === void 0){ //取值
-                return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, cssMap(name) );
-            }else {//设值
-                var temp;
-                if ( typeof value === "string" && (temp = rrelNum.exec( value )) ) {
-                    value = ( +( temp[1] + 1) * + temp[2] ) + parseFloat( $.css( node , name, void 0, 1 ) );
+            if(node.style){
+                if( value === void 0){ //取值
+                    return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, cssMap(name) );
+                }else {//设值
+                    var temp;
+                    if ( typeof value === "string" && (temp = rrelNum.exec( value )) ) {
+                        value = ( +( temp[1] + 1) * + temp[2] ) + parseFloat( $.css( node , name, void 0, 1 ) );
+                    }
+
+                    if ( isFinite( value ) && !$.cssNumber[ name ] ) {
+                        value += "px";
+                    }
+                    fn = (adapter[name+":set"] || adapter[ "_default:set" ]);
+                    fn( node, name, value );
                 }
-               
-                if ( isFinite( value ) && !$.cssNumber[ name ] ) {
-                    value += "px";
-                }
-                fn = (adapter[name+":set"] || adapter[ "_default:set" ]);
-                fn( node, name, value );
             }
         },
         //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
@@ -298,6 +300,27 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             });
         }
     },false);
+    adapter[ "zIndex:get" ] = function( node,name, position, value ) {
+        while ( node.nodeType !== 9 ) {
+            // Ignore z-index if position is set to a value where z-index is ignored by the browser
+            // This makes behavior of this function consistent across browsers
+            // WebKit always returns auto if the element is positioned
+            position = $.css(node, "position" );
+            if ( position === "absolute" || position === "relative" || position === "fixed" ) {
+                // IE returns 0 when zIndex is not specified
+                // other browsers return a string
+                // we ignore the case of nested elements with an explicit value of 0
+                // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
+                value = parseInt( adapter[ "_default:get" ](node,"zIndex"), 10 );
+                if ( !isNaN( value ) && value !== 0 ) {
+                    return value;
+                }
+            }
+            node = node.parentNode;
+        }
+
+        return 0;
+    }
 
     if ( document.defaultView && document.defaultView.getComputedStyle ) {
         adapter[ "_default:get" ] = function( node, name ) {
@@ -354,7 +377,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
-    */
+     */
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     cssPair = {
         Width:['Left', 'Right'],
@@ -666,6 +689,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2011.11.10 添加top,left到cssAdapter
 2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
 2012.3.2 getWH现在能获取多重隐藏元素的高宽了
-*/
+ */
 
 

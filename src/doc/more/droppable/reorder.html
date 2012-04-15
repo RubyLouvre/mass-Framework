@@ -1,0 +1,124 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>droppable selection</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            if (self!=top)
+                window.top.location.replace(self.location);
+        </script>
+
+        <style type="text/css">
+            html,body {
+                width:100%;
+                height:100%;
+                background:#FFF5EE;
+            }
+            ol {
+                float: left;
+                margin: 0 40px 0 0;
+                padding: 0;
+                position:relative;
+            }
+            li {
+                list-style-position: inside;
+                border: 1px solid #89B;
+                background: #BCE;
+                padding: 2px 5px;
+                margin: 2px 0;
+                width: 275px;
+                cursor: move;
+            }
+            .dragging {
+                background-color: #BEE;
+                border-color: #8BB;
+            }
+            pre{
+                position: absolute;
+                top:300px;
+            }
+        </style>
+        <script src="../../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script>
+            $.require("ready,more/droppable",function(){
+
+                $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.droppable.html");
+
+                $("li").droppable({
+                    dragstart:function(event,dd){
+                        dd.dragger.addClass('dragging');
+                    },
+                    drag:function( ev, dd ){
+                        dd.dragger.css({
+                            top: Math.min( ev.pageY, dd.startY ),
+                            left: Math.min( ev.pageX, dd.startX ),
+                            height: Math.abs( ev.pageY - dd.startY ),
+                            width: Math.abs( ev.pageX - dd.startX )
+                        });
+                    },
+                    dragend:function(event,dd){
+                        dd.dragger.remove()
+                    },
+                    range:"li",
+                    tolerance: "intersect",
+                    hoverClass:"active",
+                    drop: function(event, dd){
+                        dd.dropper.toggleClass("dropped");
+                    }
+                });
+            });
+
+        </script>
+    </head>
+    <body>
+
+        <p>通过拖动创建临时的拖动块圈定复数个靶场。 <a id="back" href="">返回</a></p>
+        <ol>
+            <li>Alpha</li>
+            <li>Bravo</li>
+            <li>Charlie</li>
+            <li>Delta</li>
+            <li>Echo</li>
+            <li>Foxtrot</li>
+            <li>Golf</li>
+        </ol>
+        <ol>
+            <li>Hotel</li>
+            <li>India</li>
+            <li>Juliet</li>
+            <li>Kilo</li>
+            <li>Lima</li>
+            <li>Mike</li>
+            <li>November</li>
+        </ol>
+        <pre>
+ $.require("ready,more/droppable",function(){
+                $("html").droppable({
+                    dragstart:function(event,dd){
+                        dd.dragger =  $('&lt;div class="selection" /&gt;')
+                        .css('opacity', .65 )
+                        .appendTo( "bodu" );
+                        dd.dragger.data("_mass_dd",dd)
+                    },
+                    drag:function( ev, dd ){
+                        dd.dragger.css({
+                            top: Math.min( ev.pageY, dd.startY ),
+                            left: Math.min( ev.pageX, dd.startX ),
+                            height: Math.abs( ev.pageY - dd.startY ),
+                            width: Math.abs( ev.pageX - dd.startX )
+                        });
+                    },
+                    dragend:function(event,dd){
+                        dd.dragger.remove()
+                    },
+                    range:".drop",
+                    tolerance: "intersect",
+                    hoverClass:"active",
+                    drop: function(event, dd){
+                        dd.dropper.toggleClass("dropped");
+                    }
+                });
+});
+        </pre>
+    </body>
+</html>
