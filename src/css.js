@@ -689,6 +689,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2011.11.10 添加top,left到cssAdapter
 2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
 2012.3.2 getWH现在能获取多重隐藏元素的高宽了
+2012.4.15 对zIndex进行适配,对$.css进行元素节点检测
  */
 
 
