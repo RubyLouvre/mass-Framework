@@ -54,6 +54,7 @@
                     range:".drop",
                     ghosting:true,
                     returning:false,
+                    //注意如果为靶场添加太多类名，dropped的样式可能不生效，需要提高优先级，设置important
                     drop: function(event, dd){
                         dd.dropper.toggleClass("dropped");
                     }
@@ -75,6 +76,7 @@
                     range:".drop",
                     ghosting:true,
                     returning:false,
+                   //注意如果为靶场添加太多类名，dropped的样式可能不生效，需要提高优先级，设置important
                     drop: function(event, dd){
                         dd.dropper.toggleClass("dropped");
                     }

@@ -32,14 +32,14 @@
                 height: 64px;
                 padding: 0;
                 border: 1px dashed #888;
-                background: #EEE;
+/*               background: #EEE;*/
                 line-height: 64px;
                 text-align: center;
                 overflow: hidden;
                 background: #EEE;
             }
             .dropped {
-                background-color: #EBC;
+                background-color: #EBC!important;
                 border-color: #B89;
             }
             .active {
@@ -87,14 +87,24 @@
         <div class="drag" style="left:180px;"></div>
         <pre>
             $.require("ready,more/droppable",function(){
+                var num = 1;
+                $('#add').click(function(){
+                    $('&lt;div class="drop" /&gt;')
+                    .text( num++ )
+                    .appendTo( document.body )
+                    .css({
+                        top: Math.random() * ( $( window ).height() - 100 ) + 20,
+                        left: Math.random() * ( $( window ).width() - 100 ) + 20
+                    });
+                });
+
                 $('.drag').droppable({
                     range:".drop",
-                    ghosting:true,
-                    returning:false,
+                    activeClass: "active",
                     drop: function(event, dd){
                         dd.dropper.toggleClass("dropped");
                     }
-                })
+                });
             });
         </pre>
     </body>
