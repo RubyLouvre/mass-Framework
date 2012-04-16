@@ -48,7 +48,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     function init( dd, hash ){
         hash = hash || {};
         var target = dd.target =  dd.parent ;
-
         //DD拖动数据对象,用于储存经过修整的用户设置
         $.mix( dd, {
             multi:  $.isArrayLike( hash.multi ) ? hash.multi : null,
@@ -60,16 +59,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         "lockX lockY revert ghosting click".replace( $.rword, function( key ){
             dd[ key] = !!hash[ key ];
         });
-
-        if(!dd.ghosting &&  !(/^(?:r|a|f)/).test(target.css("position") )){
-            var position = target.position();
-            $.log(position)
-            target.css({
-                'top': position.top,
-                'left': position.left,
-                'position': 'absolute'
-            });
-        }
 
         if( dd.scroll ){
             dd.scrollSensitivity = hash.scrollSensitivity >= 0 ?  hash.scrollSensitivity : 20;
@@ -184,9 +173,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 var top =  dd.limit ?   Math.min( dd.limit[3], Math.max( dd.limit[1], dd.offsetY ) ) : dd.offsetY;
                 $dragger[0].style.top = top+"px"
             }
-            if(dd.drop){
-                dd.drop()
-            }
+
             if( dd.scroll ){
                 if(dd.scrollParent != document && dd.scrollParent.tagName != 'HTML') {
                     if(!dd.lockX) {
@@ -256,7 +243,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 $.event.fireType = "click";
                 setTimeout(function(){
                     delete $.event.fireType
-                }, 30)
+                }, 30 );
                 dd.dragtype = "dragend";
             }
             if( !multi ){
