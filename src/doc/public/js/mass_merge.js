@@ -3733,14 +3733,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     },false);
     adapter[ "zIndex:get" ] = function( node,name, position, value ) {
         while ( node.nodeType !== 9 ) {
-            // Ignore z-index if position is set to a value where z-index is ignored by the browser
-            // This makes behavior of this function consistent across browsers
-            // WebKit always returns auto if the element is positioned
+           //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
             position = $.css(node, "position" );
             if ( position === "absolute" || position === "relative" || position === "fixed" ) {
-                // IE returns 0 when zIndex is not specified
-                // other browsers return a string
-                // we ignore the case of nested elements with an explicit value of 0
                 // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
                 value = parseInt( adapter[ "_default:get" ](node,"zIndex"), 10 );
                 if ( !isNaN( value ) && value !== 0 ) {
@@ -3795,7 +3790,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         display: "block" 
     }
     var showHidden = function(node, array){
-        if( !node.offsetWidth ){
+        if( node && node.nodeType ==1 && !node.offsetWidth ){
             var obj = { 
                 node: node
             }
@@ -3804,15 +3799,15 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 node.style[ name ] = cssShow[ name ];
             }
             array.push( obj );
-        }
-        if(!node.offsetWidth){
-            showHidden(node.parentNode, array)
+            if(!node.offsetWidth){//如果设置了offsetWidth还是为零，说明父节点也是隐藏元素，继续往上递归
+                showHidden(node.parentNode, array)
+            }
         }
     }
     
     function getWH( node, name, extra  ) {//注意 name是首字母大写
         var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
-        showHidden(node, hidden )
+        showHidden( node, hidden );
         var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
         val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
         extra = extra || 0;

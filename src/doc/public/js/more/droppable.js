@@ -3,14 +3,17 @@ $.define("droppable","more/draggable",function(Draggable){
     //https://github.com/MattSurabian/DuckHunt-JS 一个JS游戏
     Draggable.implement({
         dropinit: function( hash ){
-            this.range = $(hash.range);//设置靶场（放置对象）
+            this.range = hash.range;//设置靶场（它仅在拖动时才在文档中匹配元素）
             this.hoverClass = hash.hoverClass;
             this.activeClass = hash.activeClass
             this.tolerance = typeof hash.tolerance === "function" ? hash.tolerance : this.modes[hash.tolerance];
         },
         //取得放置对象的坐标宽高等信息
         locate: function( $elem ){
-            var posi = $elem.offset() || {},
+            var posi = $elem.offset()||{
+                top:0,
+                left:0
+            } ,
             height = $elem.outerHeight(),
             width = $elem.outerWidth()
             return  {
@@ -25,10 +28,9 @@ $.define("droppable","more/draggable",function(Draggable){
         },
         dropstart: function(){
             var els = this.range;
-            this.droppers = []
+            this.droppers = [];
             if( els ){
                 els =  els.mass ? els : $(els);
-               
                 if(els.length === 1){
                     this.droppers.push( this.locate(els) )
                 }else{
@@ -38,32 +40,31 @@ $.define("droppable","more/draggable",function(Draggable){
                 }
             }
         },
-        drop: function(){
+        drop: function( event ){
             //此事件在draggable的drag事件上执行
-            var xy = [ this.event.pageX, this.event.pageY ],tolerance = this.tolerance,
-            uuid = this.target.data("@uuid"), droppers = this.droppers,
-            drg, drp, type;
-            if ( tolerance )
-                drg = this.locate( this.dragger )
-            //  tolerance//自己规定何时触发dragenter dragleave
+            var xy = [ event.pageX, event.pageY ],tolerance = this.tolerance,
+            uuid = this.target.data("@uuid"), droppers = this.droppers, drg, drp, type;
+            if ( tolerance ){//自己规定何时触发dragenter dragleave
+                drg = this.locate( this.dragger );
+            }
             for( var i = 0, n = droppers.length; i < n ; i++ ){
                 drp = droppers[i];
                 if( !droppers.actived && this.activeClass){
                     drp.elem.addClass(this.activeClass);
                 }
                 //判定光标是否进入到dropper的内部
-                var isEnter = tolerance ? tolerance.call(this, this.event, drg, drp ): this.contains( drp, xy );
-                //  $.log(isEnter)
+                var isEnter = tolerance ? tolerance.call( this, event, drg, drp ): this.contains( drp, xy );
                 if(isEnter){
                     if(!drp["###" + uuid]){//如果是第一次进入,则触发dragenter事件
                         drp["###"+uuid] = 1;
-                        this.hoverClass && drp.elem.addClass(this.hoverClass);
+                        this.hoverClass && drp.elem.addClass( this.hoverClass );
                         this.dropper = drp.elem;
                         type = "dragenter"
                     }else{//标识已进入
                         type = "dragover"
                     }
-                    this.dispatch(this.event, this.dragger, type );
+                   
+                    this.dispatch( event, this.dragger, type );
                 }else{//如果光标离开放置对象
                     if(drp["###"+uuid]){
                         this.hoverClass && drp.elem.removeClass(this.hoverClass);
@@ -96,14 +97,14 @@ $.define("droppable","more/draggable",function(Draggable){
                 && ( dragger[1] || dragger.top ) >= dropper.top && ( dragger[1] || dragger.bottom ) <= dropper.bottom );
         },
         // 求出两个方块的重叠面积
-        overlap: function( dragger, dropper ){
+        overlap: function( dropper, dragger  ){
             return Math.max( 0, Math.min( dropper.bottom, dragger.bottom ) - Math.max( dropper.top, dragger.top ) )
             * Math.max( 0, Math.min( dropper.right, dragger.right ) - Math.max( dropper.left, dragger.left ) );
         },
         modes: {
             // 拖动块是否与靶场相交，允许覆盖多个靶场
             intersect: function( event, dragger, dropper ){
-                return this.contains( dropper, [ event.pageX, event.pageY ] ) ? 
+                return this.contains( dropper, [ event.pageX, event.pageY ] ) ?
                 true : this.overlap( dragger, dropper );
             },
             // 判定光标是否在靶场之内

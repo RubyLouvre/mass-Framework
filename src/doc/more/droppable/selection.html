@@ -15,6 +15,8 @@
                 background:#FFF5EE;
             }
             .selection {
+                width:1px;
+                height:1px;
                 position: absolute;
                 border: 1px solid #89B;
                 background: #BCE;
@@ -60,15 +62,15 @@
                     dragstart:function(event,dd){
                         dd.dragger =  $('<div class="selection" />')
                         .css('opacity', .65 )
-                        .appendTo( "bodu" );
+                        .appendTo( "body" ); 
                         dd.dragger.data("_mass_dd",dd)
                     },
-                    drag:function( ev, dd ){
+                    drag:function( event, dd ){
                         dd.dragger.css({
-                            top: Math.min( ev.pageY, dd.startY ),
-                            left: Math.min( ev.pageX, dd.startX ),
-                            height: Math.abs( ev.pageY - dd.startY ),
-                            width: Math.abs( ev.pageX - dd.startX )
+                            top: Math.min( event.pageY, dd.startY ),
+                            left: Math.min( event.pageX, dd.startX ),
+                            height: Math.abs( event.pageY - dd.startY ),
+                            width: Math.abs( event.pageX - dd.startX )
                         });
                     },
                     dragend:function(event,dd){
@@ -88,31 +90,31 @@
     <body>
 
         <p>通过拖动创建临时的拖动块圈定复数个靶场。 <a id="back" href="">返回</a></p>
-        <div class="drop">Jack</div>
-        <div class="drop">Kate</div>
-        <div class="drop">Hugo</div>
-        <div class="drop">James</div>
-        <div class="drop">John</div>
-        <div class="drop">Jin</div>
-        <div class="drop">Sun</div>
-        <div class="drop">Sayid</div>
-        <div class="drop">Walt</div>
-        <div class="drop">Michael</div>
-        <div class="drop">Claire</div>
-        <div class="drop">Aaron</div>
-        <div class="drop">Charlie</div>
-        <div class="drop">Desmond</div>
-        <div class="drop">Penny</div>
-        <div class="drop">Ben</div>
-        <div class="drop">Juliet</div>
-        <div class="drop">Richard</div>
-        <div class="drop">Alex</div>
-        <div class="drop">Miles</div>
-        <div class="drop">Charlotte</div>
-        <div class="drop">Daniel</div>
-        <div class="drop">Vincent</div>
-        <div class="drop">Frank</div>
-        <div class="drop">Jacob</div>
+        <div class="drop">虐杀原形</div>
+        <div class="drop">生化尖兵</div>
+        <div class="drop">天鹅绒刺客</div>
+        <div class="drop">战争机器</div>
+        <div class="drop">忍者龙剑传</div>
+        <div class="drop">丧尸围城</div>
+        <div class="drop">分裂细胞</div>
+        <div class="drop">失落的星球</div>
+        <div class="drop">刺客信条</div>
+        <div class="drop">鬼泣</div>
+        <div class="drop">装甲核心</div>
+        <div class="drop">波斯王子</div>
+        <div class="drop">高达无双</div>
+        <div class="drop">忍者之刃</div>
+        <div class="drop">猎天使魔女</div>
+        <div class="drop">但丁地狱</div>
+        <div class="drop">荒野大镖客</div>
+        <div class="drop">九十九夜</div>
+        <div class="drop">黑手党</div>
+        <div class="drop">征服</div>
+        <div class="drop">黑色洛城</div>
+        <div class="drop">无间战神</div>
+        <div class="drop">无尽隐秘</div>
+        <div class="drop">神鬼寓言</div>
+        <div class="drop">最后遗迹</div>
         <pre>
  $.require("ready,more/droppable",function(){
                 $("html").droppable({

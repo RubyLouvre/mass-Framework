@@ -4,24 +4,25 @@
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script type="text/javascript" src="../src/mass.js">
+        <script type="text/javascript" src="../libs/jquery.js">
 
         </script>
         <script>
-            $.require("ready,node,event",function(){
-
-
-            })
+           $(function(){
+               alert($("#aaa").css("z-index"))
+           });
         </script>
         <style>
             html, body{
                 width:100%;
                 height:100%;
             }
-            .aaa {
+            #aaa {
                 width:100px;
                 height:100px;
                 background:red;
+                position:absolute;
+              
             }
             .blue{
                 width:200px;
@@ -32,7 +33,7 @@
     </head>
     <body>
         <div id="test" data-obj="{a:'a',b:'b',c:'c'}" data-arr="[1,2,3,4]" data-nan="NaN" data-str="aaa"></div>
-        <div class="aaa">
+        <div id="aaa">
 
         </div>
 

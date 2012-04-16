@@ -33,6 +33,9 @@
                 background-color: #BEE;
                 border-color: #8BB;
             }
+            .active{
+                background-color: red;
+            }
             pre{
                 position: absolute;
                 top:300px;
@@ -45,25 +48,17 @@
                 $("#back").prop("href","/src/doc/plugin.html?iframe_src=more/$.fn.droppable.html");
 
                 $("li").droppable({
-                    dragstart:function(event,dd){
-                        dd.dragger.addClass('dragging');
-                    },
-                    drag:function( ev, dd ){
-                        dd.dragger.css({
-                            top: Math.min( ev.pageY, dd.startY ),
-                            left: Math.min( ev.pageX, dd.startX ),
-                            height: Math.abs( ev.pageY - dd.startY ),
-                            width: Math.abs( ev.pageX - dd.startX )
-                        });
-                    },
-                    dragend:function(event,dd){
-                        dd.dragger.remove()
+                    drop:function(event,dd){
+                        var fn = dd.dropper.data("_insert");
+                        if(fn ){
+                            dd.dragger[fn](dd.dropper);
+                        }
                     },
                     range:"li",
-                    tolerance: "intersect",
-                    hoverClass:"active",
-                    drop: function(event, dd){
-                        dd.dropper.toggleClass("dropped");
+                    tolerance: function( event, dragger, dropper ){
+                        var test = event.pageY > ( dropper.top + dropper.height / 2 );
+                        dropper.elem.data("_insert", test ? "afterTo" : "beforeTo")
+                        return this.contains( dropper, [ event.pageX, event.pageY ] );
                     }
                 });
             });
@@ -82,7 +77,7 @@
             <li>Foxtrot</li>
             <li>Golf</li>
         </ol>
-        <ol>
+        <ol id="aa">
             <li>Hotel</li>
             <li>India</li>
             <li>Juliet</li>
@@ -92,33 +87,22 @@
             <li>November</li>
         </ol>
         <pre>
- $.require("ready,more/droppable",function(){
-                $("html").droppable({
-                    dragstart:function(event,dd){
-                        dd.dragger =  $('&lt;div class="selection" /&gt;')
-                        .css('opacity', .65 )
-                        .appendTo( "bodu" );
-                        dd.dragger.data("_mass_dd",dd)
+            $.require("ready,more/droppable",function(){
+                $("li").droppable({
+                    drop:function(event,dd){
+                        var fn = dd.dropper.data("_insert");
+                        if(fn ){
+                            dd.dragger[fn](dd.dropper);
+                        }
                     },
-                    drag:function( ev, dd ){
-                        dd.dragger.css({
-                            top: Math.min( ev.pageY, dd.startY ),
-                            left: Math.min( ev.pageX, dd.startX ),
-                            height: Math.abs( ev.pageY - dd.startY ),
-                            width: Math.abs( ev.pageX - dd.startX )
-                        });
-                    },
-                    dragend:function(event,dd){
-                        dd.dragger.remove()
-                    },
-                    range:".drop",
-                    tolerance: "intersect",
-                    hoverClass:"active",
-                    drop: function(event, dd){
-                        dd.dropper.toggleClass("dropped");
+                    range:"li",
+                    tolerance: function( event, dragger, dropper ){
+                        var test = event.pageY > ( dropper.top + dropper.height / 2 );
+                        dropper.elem.data("_insert", test ? "afterTo" : "beforeTo")
+                        return this.contains( dropper, [ event.pageX, event.pageY ] );
                     }
                 });
-});
+            });
         </pre>
     </body>
 </html>
