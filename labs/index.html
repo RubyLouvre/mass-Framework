@@ -1,16 +1,28 @@
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!DOCTYPE HTML>
 <html>
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script type="text/javascript" src="../libs/jquery.js">
-
-        </script>
         <script>
-           $(function(){
-               alert($("#aaa").css("z-index"))
-           });
+
+            function shimCloneNode( outerHTML ) {
+                var div = document.createElement( "div" );
+                document.body.appendChild(div)
+                div.innerHTML = outerHTML;
+                document.body.removeChild(div)
+                return div.firstChild;
+            }
+          //  document.createElement( 'nav' );
+         //   document.createElement( 'NAV' );
+
+            window.onload = function(){
+                var nav = document.getElementById("aaa")
+                alert(nav.outerHTML)
+             //   var newNav = shimCloneNode( nav.outerHTML );
+              //  alert(newNav.tagName)
+               // document.body.appendChild( newNav)
+            }
         </script>
         <style>
             html, body{
@@ -22,20 +34,12 @@
                 height:100px;
                 background:red;
                 position:absolute;
-              
-            }
-            .blue{
-                width:200px;
-                height:200px;
-                background:blue;
+
             }
         </style>
     </head>
     <body>
-        <div id="test" data-obj="{a:'a',b:'b',c:'c'}" data-arr="[1,2,3,4]" data-nan="NaN" data-str="aaa"></div>
-        <div id="aaa">
+    <nav id="aaa">dddddddddddd</nav>
 
-        </div>
-
-    </body>
+</body>
 </html>
