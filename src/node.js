@@ -4,6 +4,7 @@
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
+
     if( !support.cloneHTML5 ){
         "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
         "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace( $.rword, function( tag ){
@@ -473,9 +474,12 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
+
     function shimCloneNode( outerHTML ) {
         var div = document.createElement( "div" );
+        document.body.appendChild(div)
         div.innerHTML = outerHTML;
+        document.body.removeChild(div)
         return div.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
