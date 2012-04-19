@@ -38,6 +38,9 @@ $.define("droppable","more/draggable",function(Draggable){
             }
         },
         drop: function( event ){
+            if(typeof this.droplive == "boolean"){
+                this.dropstart()
+            }
             //此事件在draggable的drag事件上执行
             var xy = [ event.pageX, event.pageY ],tolerance = this.tolerance,
             uuid = this.target.data("@uuid"), droppers = this.droppers, drg, drp, type;
@@ -56,6 +59,7 @@ $.define("droppable","more/draggable",function(Draggable){
                         drp["###"+uuid] = 1;
                         this.hoverClass && drp.elem.addClass( this.hoverClass );
                         this.dropper = drp.elem;
+                        $.log("dddddddddd")
                         type = "dragenter"
                     }else{//标识已进入
                         type = "dragover"

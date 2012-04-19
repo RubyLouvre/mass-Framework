@@ -1,0 +1,55 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <script src="jquery-1.5.1.js"></script>
+    <script src="ui/jquery.ui.core.js"></script>
+    <script src="ui/jquery.ui.widget.js"></script>
+    <script src="ui/jquery.ui.mouse.js"></script>
+    <script src="ui/jquery.ui.draggable.js"></script>
+    <script src="jquery-collision-1.0.1.js"></script>
+    <style>
+      * { position: absolute; margin: 0; padding: 0; border: 0; }
+      body, h2, h3, #board { position: relative; }
+      #player    { width: 100px; height: 100px;
+                   background-color: rgba( 0, 0, 255, 0.5 );
+                   filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#880000FF, endColorstr=#880000FF);
+                 }
+      .obstacle  { background-color: #ff0000; }
+      .breakable { background-color: #00ff00; width: 100px; height: 25px; }
+      #obs1      { width: 120px; height: 120px; }
+      #obs2      { width:  80px; height:  80px; }
+      .overlap   { pointer-events: none; border: 1px solid black; margin: -1px; }
+      #board     { width: 400px; height: 250px; background-color: #888888;  }
+    </style>
+    <script>
+      function showOverlap(event,ui)
+      {
+	      $(".overlap").remove();
+        var overlap = $("#player").collision( ".obstacle", { as: "<div/>" } );
+        overlap.addClass("overlap").appendTo("body");
+        var breakable = $("#player").collision( ".breakable" ); // no "as", so we get the things we collided with instead of new div's
+        breakable.remove();
+      }
+      $(function() {
+            $( ".draggable" ).each(function(){$(this).draggable({ containment: "#board" });});
+            $( ".draggable" ).each(function(){$(this).bind("dragstart",showOverlap);})
+            $( ".draggable" ).each(function(){$(this).bind("dragstop", showOverlap);})
+            $( ".draggable" ).each(function(){$(this).bind("drag",     showOverlap);})
+      });
+    </script>
+  </head>
+  <body>
+    <h2>Drag red and blue blocks over each other</h2>
+    <h3>Player and obstacles show overlap</h3>
+    <h3>Player destroys breakables</h3>
+    <div id="board">
+      <div class="draggable ui-widget-content obstacle" style="left:  0px; top:  0px;" id="obs1"   >Obstacle</div>
+      <div class="draggable ui-widget-content obstacle" style="left:120px; top:120px;" id="obs2"   >Obstacle</div>
+      <div class="draggable ui-widget-content"          style="left:240px; top: 20px;" id="player" >Player</div>
+      <div class="breakable"                            style="left:  0px; top:200px;" id="break1" >Breakable</div>
+      <div class="breakable"                            style="left:120px; top:210px;" id="break2" >Breakable</div>
+      <div class="breakable"                            style="left:240px; top:220px;" id="break3" >Breakable</div>
+    </div>
+  </body>
+</html>

@@ -5290,7 +5290,7 @@ $.define("fx", "css",function(){
     function nextTick() {
         var nodes = heartbeat.nodes, i = 0, n = nodes.length;
         for (; i < n; i++) {
-            if (animate(nodes[i]) === false) {//在这里操作元素的样式或属性进行渐变
+            if ( animate(nodes[i]) === false) {//在这里操作元素的样式或属性进行渐变
                 nodes.splice(i, 1);
                 i -= 1;
                 n -= 1;
@@ -5339,7 +5339,11 @@ $.define("fx", "css",function(){
     }
 
     function animate( node ) {//linked对象包含两个列队（positive与negative）
-        var linked = $._data( node,"fx") ,  fx = linked.positive[0],  now, isEnd, mix;
+        var linked = $._data( node,"fx") ;
+        if(!linked){//如果在动画过程中，元素被移除掉
+            return false;
+        }
+        var fx = linked.positive[0],  now, isEnd, mix;
         if( isFinite( fx ) ){//如果此时调用了delay方法，fx肯定是整型
             setTimeout(function(){
                 linked.positive.shift();
@@ -5656,7 +5660,7 @@ $.define("fx", "css",function(){
                 _default = parseDisplay(node.nodeName),
                 display = node.style.display = (old || _default);
                 $._data(node, "olddisplay", display);
-              //  node.style.visibility = "visible";
+                //  node.style.visibility = "visible";
                 if(props && ("width" in props || "height" in props)){//如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
                     if ( display === "inline" && $.css( node, "float" ) === "none" ) {
@@ -5690,7 +5694,7 @@ $.define("fx", "css",function(){
                     var after = config.after;
                     config.after = function( node, fx, props ){
                         node.style.display = "none";
-                     //   node.style.visibility = "hidden";
+                        //   node.style.visibility = "hidden";
                         if ( config.overflow != null && !$.support.keepSize  ) {
                             [ "", "X", "Y" ].forEach(function (postfix,index) {
                                 node.style[ "overflow" + postfix ] = config.overflow[index]
