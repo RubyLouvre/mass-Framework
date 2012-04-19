@@ -54,13 +54,13 @@
                 $('.drag').droppable({
                     range:".drop",
                     hoverClass: "active",
-                    tolerance:  function( event, proxy, target ){
-                        var r = target.width / 2, x = target.left + r, y = target.top + r,
-                        h = Math.min( Math.abs( x - proxy.left ), Math.abs( x - proxy.right ) ),
-                        v = Math.min( Math.abs( y - proxy.top ), Math.abs( y - proxy.bottom ) );
-                        if ( proxy.top < y && proxy.bottom > y )
+                    tolerance:  function( event, drg, drp ){
+                        var r = drp.width / 2, x = drp.left + r, y = drp.top + r,
+                        h = Math.min( Math.abs( x - drg.left ), Math.abs( x - drg.right ) ),
+                        v = Math.min( Math.abs( y - drg.top ), Math.abs( y - drg.bottom ) );
+                        if ( drg.top < y && drg.bottom > y )
                             return h <= r ? 1 : 0;
-                        else if ( proxy.left < x && proxy.right > x )
+                        else if ( drg.left < x && drg.right > x )
                             return v <= r ? 1 : 0;
                         else
                             return Math.sqrt( h * h + v * v ) <= r ? 1 : 0;
@@ -90,13 +90,13 @@
                 $('.drag').droppable({
                     range:".drop",
                     hoverClass: "active",
-                    tolerance:  function( event, proxy, target ){
-                        var r = target.width / 2, x = target.left + r, y = target.top + r,
-                        h = Math.min( Math.abs( x - proxy.left ), Math.abs( x - proxy.right ) ),
-                        v = Math.min( Math.abs( y - proxy.top ), Math.abs( y - proxy.bottom ) );
-                        if ( proxy.top < y && proxy.bottom > y )
+                    tolerance:  function( event, drg, drp ){
+                        var r = drp.width / 2, x = drp.left + r, y = drp.top + r,
+                        h = Math.min( Math.abs( x - drg.left ), Math.abs( x - drg.right ) ),
+                        v = Math.min( Math.abs( y - drg.top ), Math.abs( y - drg.bottom ) );
+                        if ( drg.top < y && drg.bottom > y )
                             return h <= r ? 1 : 0;
-                        else if ( proxy.left < x && proxy.right > x )
+                        else if ( drg.left < x && drg.right > x )
                             return v <= r ? 1 : 0;
                         else
                             return Math.sqrt( h * h + v * v ) <= r ? 1 : 0;

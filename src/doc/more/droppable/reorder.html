@@ -57,7 +57,7 @@
                     range:"li",
                     tolerance: function( event, dragger, dropper ){
                         var test = event.pageY > ( dropper.top + dropper.height / 2 );
-                        dropper.elem.data("_insert", test ? "afterTo" : "beforeTo")
+                        dropper.elem.data("_insert", test ? "afterTo" : "beforeTo");
                         return this.contains( dropper, [ event.pageX, event.pageY ] );
                     }
                 });
