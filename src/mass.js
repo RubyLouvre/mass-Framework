@@ -56,10 +56,10 @@ void function( global, DOC ){
      * @return  {Object} 目标对象
      */
     function mix( target, source ){
-        var args = [].slice.call( arguments ), key,
+        var args = [].slice.call( arguments ), key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        target = target || {};
-        for(var i = 1; source = args[i++];){
+        target = target || {};//如果只传入一个参数，则是拷贝对象
+        for(var i = 1; source = args[i++];){//允许对象糅杂，用户保证都是对象
             for ( key in source ) {
                 if (ride || !(key in target)) {
                     target[ key ] = source[ key ];
