@@ -52,7 +52,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
             var i = obj.length;
-            return ~~i === i && i >= 0 ;//非负整数
+            return i > 0 &&  parseInt( i )=== i;//非负整数
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
