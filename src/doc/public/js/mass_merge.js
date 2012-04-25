@@ -46,10 +46,10 @@ void function( global, DOC ){
 
     
     function mix( target, source ){
-        var args = [].slice.call( arguments ), key,
+        var args = [].slice.call( arguments ), key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        target = target || {};
-        for(var i = 1; source = args[i++];){
+        target = target || {};//如果只传入一个参数，则是拷贝对象
+        for(var i = 1; source = args[i++];){//允许对象糅杂，用户保证都是对象
             for ( key in source ) {
                 if (ride || !(key in target)) {
                     target[ key ] = source[ key ];
@@ -200,20 +200,54 @@ void function( global, DOC ){
         });
     }
     //收集依赖列表对应模块的返回值，传入目标模块中执行
-    function assemble( fn, args ){
+    function setup( fn, args,module ){
         for ( var i = 0,argv = [], name; name = args[i++]; ) {
             argv.push( transfer[name] );
         }
-        return fn.apply( global, argv );
+        var ret =  fn.apply( global, argv );
+        if($["@debug"]){
+            for( i in $){
+                debug(i, $, module)
+            }
+            for(i in $.fn){
+                debug(i, $.fn, module, 1)
+            }
+        }
+        return ret;
     }
+
+    function debug(name, obj, module, p){
+        var fn = obj[name];
+        if(name != "constructor" && typeof fn == "function" && !fn["@debug"] ){
+            obj[name] = function(){
+                function ret(){
+                    try{
+                        return  fn.apply(obj,arguments)
+                    }catch(e){
+                        $.log("[[ "+module+"::"+ (p ? "$.fn." : "$.") +  name+" ]] gone wrong");
+                        $.log(e+"");
+                        throw e;
+                    }
+                }
+                for(var i in fn){
+                    ret[i] = fn[i]
+                }
+                ret.toString = fn.toString;
+                ret.valueOf = fn.valueOf;
+                ret["@debug"] = module+"::"+ (p ? "$.fn." : "$.") +  name
+                return ret;
+            }();
+        }
+    }
+
+
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
             fn && fn.call && list.push( fn );
             return self;
         }
-        self.method = "shift";
         self.fire = function( fn ){
-            while( fn = list[ self.method ]() ){
+            while( fn = list.shift() ){
                 fn();
             }
             return list.length ? self : self.complete();
@@ -222,8 +256,6 @@ void function( global, DOC ){
         return self;
     }
 
-    var errorstack = $.stack = deferred();
-    errorstack.method = "pop";
     mix( $, {
         mix: mix,
         //绑定事件(简化版)
@@ -240,7 +272,7 @@ void function( global, DOC ){
             el.detachEvent( "on"+type, fn || $.noop );
         },
         //请求模块
-        require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
+        require: function( deps, callback ){//依赖列表,正向回调
             var _deps = {}, args = [], dn = 0, cn = 0;
             ( deps +"" ).replace( $.rword, function( url, name, match ){
                 dn++;
@@ -261,15 +293,12 @@ void function( global, DOC ){
             if( dn === cn ){//在依赖都已执行过或没有依赖的情况下
                 if( token && !( token in transfer ) ){
                     mapper[ token ].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
-                    return transfer[ token ] = assemble( callback, args );
+                    return transfer[ token ] = setup( callback, args, token );
                 }else if( !token ){//普通的回调可执行无数次
-                    return assemble( callback, args );
+                    return setup( callback, args, token );
                 }
             }
             token = token || "@cb"+ ( cbi++ ).toString(32);
-            if( errback ){
-                $.stack( errback );//压入错误堆栈
-            }
             mapper[ token ] = {//创建或更新模块的状态
                 callback:callback,
                 name: token,
@@ -308,7 +337,7 @@ void function( global, DOC ){
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     tokens.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    transfer[ obj.name ] = assemble( obj.callback, obj.args );
+                    transfer[ obj.name ] = setup( obj.callback, obj.args, obj.name  );
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
                 }
@@ -318,8 +347,7 @@ void function( global, DOC ){
         //用于检测这模块有没有加载成功
         _checkFail : function( name, error ){
             if( error || !mapper[ name ].state ){
-                this.stack( Function( $["@name"] +'.log("fail to load module [ '+name+' ]")') );
-                this.stack.fire();//打印错误堆栈
+                this.log("fail to load module [ "+name+' ]!!');
             }
         }
     });
@@ -6620,4 +6648,3 @@ $.define("ajax","event", function(){
 
 
 }( this, this.document );
-

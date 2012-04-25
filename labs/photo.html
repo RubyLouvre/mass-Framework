@@ -39,13 +39,13 @@
                     var index = el.parent().index();
                     this.className = "active";
                     var curr = $(this).parent().index()
-                  //  console.log(index- curr)
+                    //  console.log(index- curr)
                     if(el.length ){
                        
-console.log((index- curr)+"70px")
-                            $(".photos").animate({
-                                "margin-left": (index- curr)+"70px"
-                            },1000)
+                        console.log((index- curr)+"70px")
+                        $(".photos").animate({
+                            "margin-left": (index- curr)+"70px"
+                        },1000)
                       
 
                     }
@@ -60,7 +60,7 @@ console.log((index- curr)+"70px")
                         $(this).html("").append(img)
                     })
                 })
-//http://www.lisaluckyphoto.com/galleries.cfm?galleryID=6
+                //http://www.lisaluckyphoto.com/galleries.cfm?galleryID=6
 
             })
         </script>
@@ -94,15 +94,20 @@ console.log((index- curr)+"70px")
         </style>
     </head>
     <body>
-        <div class="">
-            <center>
-                <div class="show"></div>
-            </center>
-        </div>
-        <div class="marquee">
-            <div class="photos">
+        <select>
+            <option>
+            <span>df</span>
+        </option>
+    </select>
+    <div class="">
+        <center>
+            <div class="show"></div>
+        </center>
+    </div>
+    <div class="marquee">
+        <div class="photos">
 
-            </div>
         </div>
-    </body>
+    </div>
+</body>
 </html>
