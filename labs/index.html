@@ -2,15 +2,28 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title></title>
+        <title>cccc</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link type="text/css" rel="stylesheet" href="test.jscss" />
-        <script type="text/javascript" language="javascript" src="test.jscss"></script>
+
+        <script type="text/javascript" src="../src/mass.js">
+
+        </script>
+        <script>
+            $.require("ready,node,event",function(){
+                //$.log($.fn.append+"")
+               $("body").append("<div>xxxxx444</div>");
+
+               $("body").on("click","div",function(){
+                   alert(this.innerHTML)
+               })
+            })
+        </script>
     </head>
     <body>
         <div class="enemy">敌人</div>
-        <div class="enemy">敌人</div>
-        <div class="enemy">敌人</div>
+        <div class="enemy">敌人3</div>
+        <div class="enemy">敌人5</div>
         <div class="me">me</div>
+       
     </body>
 </html>
