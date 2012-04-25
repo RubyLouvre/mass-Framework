@@ -247,6 +247,9 @@ void function( global, DOC ){
             for( i in $){
                 debug(i, $, module)
             }
+//            for(i in $.prototype){
+//                debug(i, $.prototype, module, 1)
+//            }
             for(i in $.fn){
                 debug(i, $.fn, module, 1)
             }
@@ -256,25 +259,33 @@ void function( global, DOC ){
 
     function debug(name, obj, module, p){
         var fn = obj[name];
-        if(name != "constructor" && typeof fn == "function" && !fn["@debug"] ){
-            obj[name] = function(){
+        if( name != "init" && name !="constructor" && name.charAt(0) != "_" && typeof fn == "function" && !fn["@debug"] ){
+            
+            obj[name] = function(f){
+      
                 function ret(){
                     try{
-                        return  fn.apply(obj,arguments)
+                        $.log(f+"");
+                        return f.apply( obj, arguments );
                     }catch(e){
                         $.log("[[ "+module+"::"+ (p ? "$.fn." : "$.") +  name+" ]] gone wrong");
                         $.log(e+"");
                         throw e;
                     }
                 }
-                for(var i in fn){
-                    ret[i] = fn[i]
+                for(var i in f){
+                    ret[i] = f[i]
                 }
-                ret.toString = fn.toString;
-                ret.valueOf = fn.valueOf;
+                //$.log(fn.toString())
+                ret.toString = function(){
+                    return f.toString()
+                }
+                ret.valueOf = f.valueOf;
                 ret["@debug"] = module+"::"+ (p ? "$.fn." : "$.") +  name
                 return ret;
-            }();
+            }(fn);
+             //obj[name].toString = fn.toString;
+
         }
     }
 
