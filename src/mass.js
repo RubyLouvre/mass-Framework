@@ -242,15 +242,15 @@ void function( global, DOC ){
             HEAD.removeChild( iframe );//移除iframe
         });
     }
-    function debug(obj , name, module, p){
+    function debug(obj, name, module, p){
         var fn = obj[name];
         if(  typeof fn == "function" && !fn["@debug"]){
             if( rdebug.test( name )){
                 fn["@debug"] = name;
             }else{
-                obj[name] = function(){
+                var method = obj[name] = function(){
                     try{
-                        return  obj[name]["@debug"].apply(obj,arguments)
+                        return  method["@debug"].apply(this,arguments)
                     }catch(e){
                         $.log("[[ "+module+"::"+(p? "$.fn." :"$.")+name+" ]] gone wrong");
                         $.log(e);
@@ -258,11 +258,15 @@ void function( global, DOC ){
                     }
                 }
                 for(var i in fn){
-                    obj[name][i] = fn[i];
+                   method[i] = fn[i];
                 }
-                obj[name]["@debug"] = fn;
-                obj[name].toString = fn.toString;
-                obj[name].valueOf = fn.valueOf;
+                method["@debug"] = fn;
+                method.toString = function(){
+                    return fn.toString()
+                }
+                method.valueOf = function(){
+                    return fn.valueOf();
+                }
             }
         }
     }
@@ -276,8 +280,8 @@ void function( global, DOC ){
             for( i in $){
                 debug($, i, name);
             }
-            for( i in $.fn){
-                debug($.fn, i, name,1);
+            for( i in $.prototype){
+                debug($.prototype, i, name,1);
             }
         }
         return ret;
