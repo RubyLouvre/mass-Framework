@@ -13,9 +13,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
-    $.mix($,{
+    $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
-        isPlainObject : function (obj){
+        isPlainObject: function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
                 return false;
             }
@@ -30,7 +30,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return true;
         },
         //判定method是否为obj的原生方法，如$.isNative(global,"JSON")
-        isNative : function(obj, method) {
+        isNative: function(obj, method) {
             var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
             return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
         },
@@ -47,16 +47,16 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
-        isArrayLike :  function (obj, str) {//是否包含字符串
+        isArrayLike:  function (obj, str) {//是否包含字符串
             var type = $.type(obj);
             if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
             var i = obj.length;
-            return i > 0 &&  parseInt( i )=== i;//非负整数
+            return i > 0 &&  parseInt( i ) === i;//非负整数
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
-        format : function(str, object){
+        format: function(str, object){
             var array = $.slice(arguments,1);
             return str.replace(rformat, function(match, name){
                 if (match.charAt(0) == '\\')
@@ -78,7 +78,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
          * console.log(html+"");
          * @return {Function}
          */
-        tag:function (start, content, xml){
+        tag: function (start, content, xml){
             xml = !!xml
             var chain = function(start, content, xml){
                 var html = arguments.callee.html;
@@ -100,7 +100,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         // Generate an integer Array containing an arithmetic progression. A port of
         // the native Python `range()` function. See
         // [the Python documentation](http://docs.python.org/library/functions.html#range).
-        range : function(start, stop, step) {
+        range: function(start, stop, step) {
             if (arguments.length <= 1) {
                 stop = start || 0;
                 start = 0;
@@ -116,7 +116,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return range;
         },
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
-        quote : global.JSON && JSON.stringify || String.quote ||  (function(){
+        quote: global.JSON && JSON.stringify || String.quote ||  (function(){
             var meta = {
                 '\t':'t',
                 '\n':'n',
@@ -143,7 +143,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
-        dump : function(obj, indent) {
+        dump: function(obj, indent) {
             indent = indent || "";
             if (obj === null)
                 return indent + "null";
