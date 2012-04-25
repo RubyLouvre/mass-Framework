@@ -176,7 +176,7 @@ $.define("attr","support,node", function( support ){
         }
     });
     $.fn["class"] = $.fn.addClass;
-    $.extend({
+    $.mix({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
         },
