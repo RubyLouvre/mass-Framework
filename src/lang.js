@@ -153,7 +153,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return indent + "[object Document]";
             if (obj.nodeType)
                 return indent + "[object " + (obj.tagName || "Node") +"]";
-            var arr = [],type = $.type(obj),self = arguments.callee,next = indent +  "\t";
+            var arr = [],type = $.type(obj),self = $.dump ,next = indent +  "\t";
             switch (type) {
                 case "Boolean":
                 case "Number":
