@@ -56,11 +56,14 @@ void function( global, DOC ){
      * @return  {Object} 目标对象
      */
     function mix( target, source ){
-        var args = [].slice.call( arguments ), key,//如果最后参数是布尔，判定是否覆写同名属性
+        var args = [].slice.call( arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        target = target || {};//如果只传入一个参数，则是拷贝对象
-        for(var i = 1; source = args[i++];){//允许对象糅杂，用户保证都是对象
-            for ( key in source ) {
+        if(args.length === 1){
+            target = !this.window ? this : {} ;
+            i = 0;
+        }
+        while((source = args[i++])){
+            for ( key in source ) {//允许对象糅杂，用户保证都是对象
                 if (ride || !(key in target)) {
                     target[ key ] = source[ key ];
                 }
@@ -71,6 +74,7 @@ void function( global, DOC ){
     mix( $, {//为此版本的命名空间对象添加成员
         html: DOC.documentElement,
         head: HEAD,
+        mix: mix,
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
@@ -191,6 +195,7 @@ void function( global, DOC ){
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
+    rdebug =  /^(init|constructor|lang|query)$|^is/,
     tokens = [],//需要处理的模块名列表
     transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
     cbi = 1e5 ;//用于生成回调函数的名字
@@ -237,59 +242,50 @@ void function( global, DOC ){
             HEAD.removeChild( iframe );//移除iframe
         });
     }
-    //收集依赖列表对应模块的返回值，传入目标模块中执行
-    function setup( fn, args,module ){
-        for ( var i = 0,argv = [], name; name = args[i++]; ) {
-            argv.push( transfer[name] );
-        }
-        var ret =  fn.apply( global, argv );
-        if($["@debug"]){
-            for( i in $){
-                debug(i, $, module)
+    function debug(obj, name, module, p){
+        var fn = obj[name];
+        if(  typeof fn == "function" && !fn["@debug"]){
+            if( rdebug.test( name )){
+                fn["@debug"] = name;
+            }else{
+                var method = obj[name] = function(){
+                    try{
+                        return  method["@debug"].apply(this,arguments)
+                    }catch(e){
+                        $.log("[[ "+module+"::"+(p? "$.fn." :"$.")+name+" ]] gone wrong");
+                        $.log(e);
+                        throw e;
+                    }
+                }
+                for(var i in fn){
+                   method[i] = fn[i];
+                }
+                method["@debug"] = fn;
+                method.toString = function(){
+                    return fn.toString()
+                }
+                method.valueOf = function(){
+                    return fn.valueOf();
+                }
             }
-//            for(i in $.prototype){
-//                debug(i, $.prototype, module, 1)
-//            }
-            for(i in $.fn){
-                debug(i, $.fn, module, 1)
+        }
+    }
+    //收集依赖列表对应模块的返回值，传入目标模块中执行
+    function setup( name, deps, fn ){
+        for ( var i = 0,argv = [], d; d = deps[i++]; ) {
+            argv.push( transfer[d] );
+        }
+        var ret = fn.apply( global, argv );
+        if($["@debug"]){//如果打开调试机制
+            for( i in $){
+                debug($, i, name);
+            }
+            for( i in $.prototype){
+                debug($.prototype, i, name,1);
             }
         }
         return ret;
     }
-
-    function debug(name, obj, module, p){
-        var fn = obj[name];
-        if( name != "init" && name !="constructor" && name.charAt(0) != "_" && typeof fn == "function" && !fn["@debug"] ){
-            
-            obj[name] = function(f){
-      
-                function ret(){
-                    try{
-                        $.log(f+"");
-                        return f.apply( obj, arguments );
-                    }catch(e){
-                        $.log("[[ "+module+"::"+ (p ? "$.fn." : "$.") +  name+" ]] gone wrong");
-                        $.log(e+"");
-                        throw e;
-                    }
-                }
-                for(var i in f){
-                    ret[i] = f[i]
-                }
-                //$.log(fn.toString())
-                ret.toString = function(){
-                    return f.toString()
-                }
-                ret.valueOf = f.valueOf;
-                ret["@debug"] = module+"::"+ (p ? "$.fn." : "$.") +  name
-                return ret;
-            }(fn);
-             //obj[name].toString = fn.toString;
-
-        }
-    }
-
-
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
             fn && fn.call && list.push( fn );
@@ -304,9 +300,8 @@ void function( global, DOC ){
         self.complete = $.noop;
         return self;
     }
-
-    mix( $, {
-        mix: mix,
+    $.mix({
+        stack : deferred(),
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
             el.addEventListener( type, fn, !!phase );
@@ -321,7 +316,7 @@ void function( global, DOC ){
             el.detachEvent( "on"+type, fn || $.noop );
         },
         //请求模块
-        require: function( deps, callback ){//依赖列表,正向回调
+        require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
             var _deps = {}, args = [], dn = 0, cn = 0;
             ( deps +"" ).replace( $.rword, function( url, name, match ){
                 dn++;
@@ -342,12 +337,15 @@ void function( global, DOC ){
             if( dn === cn ){//在依赖都已执行过或没有依赖的情况下
                 if( token && !( token in transfer ) ){
                     mapper[ token ].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
-                    return transfer[ token ] = setup( callback, args, token );
+                    return transfer[ token ] = setup( token, args, callback );
                 }else if( !token ){//普通的回调可执行无数次
-                    return setup( callback, args, token );
+                    return  setup( token, args, callback );
                 }
             }
             token = token || "@cb"+ ( cbi++ ).toString(32);
+            if( errback ){
+                $.stack( errback );//压入错误堆栈
+            }
             mapper[ token ] = {//创建或更新模块的状态
                 callback:callback,
                 name: token,
@@ -386,7 +384,7 @@ void function( global, DOC ){
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     tokens.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    transfer[ obj.name ] = setup( obj.callback, obj.args, obj.name  );
+                    transfer[ obj.name ] = setup( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
                 }
@@ -396,7 +394,8 @@ void function( global, DOC ){
         //用于检测这模块有没有加载成功
         _checkFail : function( name, error ){
             if( error || !mapper[ name ].state ){
-                this.log("fail to load module [ "+name+' ]!!');
+                this.log("Failed to load [[ "+name+" ]]")
+                this.stack.fire();//打印错误堆栈
             }
         }
     });
@@ -430,6 +429,11 @@ void function( global, DOC ){
         });
         if( $.html.doScroll && self.eval === top.eval ){
             doScrollCheck();
+        }
+    }
+    for(var i in $){
+        if(typeof $[i] == "function"){
+            $[i]["@debug"] = i;
         }
     }
     //https://developer.mozilla.org/en/DOM/window.onpopstate
@@ -483,8 +487,13 @@ dom.namespace改为dom["mass"]
 2012.1.30 修正_checkFail中的BUG，更名_resolveCallbacks为_checkDeps
 2012.2.3 $.define的第二个参数可以为boolean, 允许文件合并后，在标准浏览器跳过补丁模块
 2012.2.23 修复内部对象泄漏，导致与外部$变量冲突的BUG
-2012.4.5 升级UUID系统，让多个不同版本的mass对象共享一个递增数
-2012.4.15  升级到v16 增加debug功能
+2012.4.5 升级UUID系统，以便页面出现多个版本共存时，让它们共享一个计数器。
+2012.4.25  升级到v16
+简化_checkFail方法，如果出现死链接，直接打印模块名便是，不用再放入错误栈中了。
+简化deferred列队，统一先进先出。
+改进$.mix方法，允许只存在一个参数，直接将属性添加到$命名空间上。
+内部方法assemble更名为setup，并强化调试机制，每加入一个新模块， 都会遍历命名空间与原型上的方法，重写它们，添加try catch逻辑。
+
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */

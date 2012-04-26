@@ -24,7 +24,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         }
         return document;
     }
-    $.mix( $, $.mutators ).implement({
+    $.mix( $.mutators ).implement({
         init:function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -232,7 +232,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     var HTML = $.html;
     var commonRange = document.createRange && document.createRange();
     var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
-    $.extend({
+    $.mix({
         match: function( node, expr, i ){
             if( $.type( expr, "Function" ) ){
                 return expr.call( node, node, i );
@@ -703,7 +703,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         },
         children: function( el ){
             return  el.children ? $.slice( el.children ) :
-            lang( el.childNodes ).filter(function( node ){
+            $.slice( el.childNodes ).filter(function( node ){
                 return node.nodeType === 1;
             });
         },
@@ -718,9 +718,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }).forEach(function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
-            $.slice(this).forEach(function( el ){
+            for(var i = 0, el ; el = this[i++];){
                 nodes = nodes.concat( method( el, expr ) );
-            });
+            }
             if( /Until/.test( name ) ){
                 expr = null
             }

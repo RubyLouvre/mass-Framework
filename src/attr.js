@@ -148,7 +148,7 @@ $.define("attr","support,node", function( support ){
             });
         }
     });
-        
+
     "attr,prop".replace($.rword, function( method ){
         $[ method ] = function( node, name, value ) {
             if(node  && ( $["@target"] in node )){
@@ -167,7 +167,7 @@ $.define("attr","support,node", function( support ){
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
                     }
-                } //获取属性 
+                } //获取属性
                 return (adapter[name+":get"] || adapter["@"+ (notxml ? "html" : "xml")+":get"])( node, name, '', orig );
             }
         };
@@ -176,7 +176,7 @@ $.define("attr","support,node", function( support ){
         }
     });
     $.fn["class"] = $.fn.addClass;
-    $.extend({
+    $.mix({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
         },
@@ -208,7 +208,7 @@ $.define("attr","support,node", function( support ){
                 node[ name ] = value;
             }
         },
-            
+
         attrAdapter: {
             "@xml:get": function( node, name ){
                 return  node.getAttribute( name ) || void 0 ;
@@ -220,7 +220,7 @@ $.define("attr","support,node", function( support ){
                 // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
                 var attributeNode = node.getAttributeNode( "tabIndex" );
                 return attributeNode && attributeNode.specified ?
-                parseInt( attributeNode.value, 10 )  : 
+                parseInt( attributeNode.value, 10 )  :
                 rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
             },
             "value:get": function( node, name, _, orig ) {
@@ -285,7 +285,7 @@ $.define("attr","support,node", function( support ){
         propAdapter[ "@html:"+method ] = propAdapter[ "@xml:"+method ];
         propAdapter[ "tabIndex:"+method ] = attrAdapter[ "tabIndex:"+method ];
     });
-               
+
     //========================propAdapter 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
@@ -305,8 +305,8 @@ $.define("attr","support,node", function( support ){
             for( ;!parent.add; parent.selectedIndex, parent = parent.parentNode){};
             return node.selected;
         }
-    }    
-        
+    }
+
     //========================attrAdapter 的相关修正==========================
     var bools = $["@bools"];
     var boolOne = $.oneObject( support.attrProp ? bools.toLowerCase() : bools );
@@ -350,7 +350,7 @@ $.define("attr","support,node", function( support ){
             return (node.style.cssText = "" + value);
         }
     }
-              
+
     if( !support.attrProp ){
         //如果我们不能通过el.getAttribute("class")取得className,必须使用el.getAttribute("className")
         //又如formElement[name] 相等于formElement.elements[name]，会返回其辖下的表单元素， 这时我们就需要用到特性节点了
@@ -373,7 +373,7 @@ $.define("attr","support,node", function( support ){
                 node.setAttributeNode( ret );
             }
             ret.nodeValue = value + "";
-        }  
+        }
         attrAdapter[ "contentEditable:set" ] =  function( node, name, value ) {
             if ( value === "" ) {
                 value = "false";
@@ -386,7 +386,7 @@ $.define("attr","support,node", function( support ){
             }
         });
     }
-        
+
     //=========================valAdapter 的相关修正==========================
     //checkbox的value默认为on，唯有Chrome 返回空字符串
     if ( !support.checkOn ) {
