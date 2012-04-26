@@ -493,7 +493,8 @@ dom.namespace改为dom["mass"]
 简化deferred列队，统一先进先出。
 改进$.mix方法，允许只存在一个参数，直接将属性添加到$命名空间上。
 内部方法assemble更名为setup，并强化调试机制，每加入一个新模块， 都会遍历命名空间与原型上的方法，重写它们，添加try catch逻辑。
-
+http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
+https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
 
 */
