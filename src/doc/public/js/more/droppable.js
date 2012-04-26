@@ -30,17 +30,12 @@ $.define("droppable","more/draggable",function(Draggable){
             var els = this.range;
             this.droppers = [];
             if( els ){
-                var self = this.dragger[0]
                 els =  els.mass ? els : $(els);
                 if(els.length === 1){
-                    if( els[0] != self ){
-                        this.droppers.push( this.locate(els) )
-                    }
+                    this.droppers.push( this.locate(els) )
                 }else{
                     for(var i = 0 ,elem ; elem = els[i++]; ){
-                        if(elem != self ){
-                            this.droppers.push( this.locate( $( elem ) ) )
-                        }
+                        this.droppers.push( this.locate( $( elem ) ) )
                     }
                 }
             }
@@ -70,14 +65,12 @@ $.define("droppable","more/draggable",function(Draggable){
                     }
                    
                     this.dispatch( event, this.dragger, type );
-                  //  break;
                 }else{//如果光标离开放置对象
                     if(drp["###"+uuid]){
                         this.hoverClass && drp.elem.removeClass(this.hoverClass);
                         this.dropper = drp.elem;//处理覆盖多个靶场
                         this.dispatch(this.event, this.dragger, "dragleave" );
-                        delete drp["###"+uuid];
-                     //   break;
+                        delete drp["###"+uuid]
                     }
                 }
             }

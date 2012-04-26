@@ -10,10 +10,7 @@ $.define("droppable","more/draggable",function(Draggable){
         },
         //取得放置对象的坐标宽高等信息
         locate: function( $elem ){
-            var posi = $elem.offset()||{
-                top:0,
-                left:0
-            } ,
+            var posi = $elem.offset() || {},
             height = $elem.outerHeight(),
             width = $elem.outerWidth()
             return  {
@@ -30,28 +27,26 @@ $.define("droppable","more/draggable",function(Draggable){
             var els = this.range;
             this.droppers = [];
             if( els ){
-                var self = this.dragger[0]
                 els =  els.mass ? els : $(els);
                 if(els.length === 1){
-                    if( els[0] != self ){
-                        this.droppers.push( this.locate(els) )
-                    }
+                    this.droppers.push( this.locate(els) )
                 }else{
                     for(var i = 0 ,elem ; elem = els[i++]; ){
-                        if(elem != self ){
-                            this.droppers.push( this.locate( $( elem ) ) )
-                        }
+                        this.droppers.push( this.locate( $( elem ) ) )
                     }
                 }
             }
         },
         drop: function( event ){
+            if(typeof this.droplive == "boolean"){
+                this.dropstart()
+            }
             //此事件在draggable的drag事件上执行
             var xy = [ event.pageX, event.pageY ],tolerance = this.tolerance,
             uuid = this.target.data("@uuid"), droppers = this.droppers, drg, drp, type;
-            if ( tolerance ){//自己规定何时触发dragenter dragleave
-                drg = this.locate( this.dragger );
-            }
+            if ( tolerance )
+                drg = this.locate( this.dragger )
+            //  tolerance//自己规定何时触发dragenter dragleave
             for( var i = 0, n = droppers.length; i < n ; i++ ){
                 drp = droppers[i];
                 if( !droppers.actived && this.activeClass){
@@ -64,20 +59,18 @@ $.define("droppable","more/draggable",function(Draggable){
                         drp["###"+uuid] = 1;
                         this.hoverClass && drp.elem.addClass( this.hoverClass );
                         this.dropper = drp.elem;
+                        $.log("dddddddddd")
                         type = "dragenter"
                     }else{//标识已进入
                         type = "dragover"
                     }
-                   
                     this.dispatch( event, this.dragger, type );
-                  //  break;
                 }else{//如果光标离开放置对象
                     if(drp["###"+uuid]){
                         this.hoverClass && drp.elem.removeClass(this.hoverClass);
                         this.dropper = drp.elem;//处理覆盖多个靶场
                         this.dispatch(this.event, this.dragger, "dragleave" );
-                        delete drp["###"+uuid];
-                     //   break;
+                        delete drp["###"+uuid]
                     }
                 }
             }
@@ -104,14 +97,14 @@ $.define("droppable","more/draggable",function(Draggable){
                 && ( dragger[1] || dragger.top ) >= dropper.top && ( dragger[1] || dragger.bottom ) <= dropper.bottom );
         },
         // 求出两个方块的重叠面积
-        overlap: function( dropper, dragger  ){
+        overlap: function( dragger, dropper ){
             return Math.max( 0, Math.min( dropper.bottom, dragger.bottom ) - Math.max( dropper.top, dragger.top ) )
             * Math.max( 0, Math.min( dropper.right, dragger.right ) - Math.max( dropper.left, dragger.left ) );
         },
         modes: {
             // 拖动块是否与靶场相交，允许覆盖多个靶场
             intersect: function( event, dragger, dropper ){
-                return this.contains( dropper, [ event.pageX, event.pageY ] ) ?
+                return this.contains( dropper, [ event.pageX, event.pageY ] ) ? 
                 true : this.overlap( dragger, dropper );
             },
             // 判定光标是否在靶场之内

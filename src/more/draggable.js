@@ -155,9 +155,8 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
         }
     }
     function drag(event, multi,  docLeft, docTop ){
-        if( $dragger && $dragger[0] ){
+        if( $dragger ){
             var dd = $dragger.data("_mass_dd");
-          
             dd.event  = event;//这个供dragstop API调用
             //当前元素移动了多少距离
             dd.deltaX = event.pageX - dd.startX;
@@ -165,7 +164,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
             //现在的坐标
             dd.offsetX = dd.deltaX + dd.originalX  ;
             dd.offsetY = dd.deltaY + dd.originalY  ;
-          
+            dd.dragtype = "drag"
             if(!dd.lockX){//如果没有锁定X轴left,top,right,bottom
                 var left = dd.limit ?  Math.min( dd.limit[2], Math.max( dd.limit[0], dd.offsetX )) : dd.offsetX
                 $dragger[0].style.left = left+"px"
@@ -212,7 +211,6 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
                 }
             }
             dd.dispatch( event, $dragger, "drag" );
-           // $.log(dd.dragger)
             dd.drop && dd.drop(  event );
             //开始批处理drag
             if( !multi ){
@@ -257,7 +255,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     }
     function dragstop(){
         if( $dragger ){
-            var dd = $dragger.data( "_mass_dd" );
+            var dd = $dragger.data("_mass_dd");
             if(dd.event){
                 var offset = $dragger.offset(),
                 left = offset.left,
@@ -286,7 +284,7 @@ $.define("draggable","more/uibase,event,attr,fx",function(Widget){
     });
     var create = Widget.create("dd", Draggable, init );
     $.fn.draggable = function(hash){
-        if( hash && hash.live == true){//如果使用了事件代理，则延迟初始化
+        if( hash && hash.live == true){
             var selector = this.selector;
             if(typeof selector === "string" && selector.length > 0 ){
                 $(this.ownerDocument).on( onstart + ".mass_dd",selector,(function(h){               

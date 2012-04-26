@@ -30,20 +30,20 @@ mix( $, {//为此版本的命名空间对象添加成员
     "@name": "$",
     "@debug": true,
     "@target": w3c ? "addEventListener" : "attachEvent",
-//……其他想要添加的属性或方法
+    //……其他想要添加的属性或方法
 })
 
 
-    slice: function ( nodes, start, end ) {
-        for(var i = 0, n = nodes.length, result = []; i < n; i++){
-            result[i] = nodes[i];
-        }
-        if ( arguments.length > 1 ) {
-            return result.slice( start , ( end || result.length ) );
-        } else {
-            return result;
-        }
+slice: function ( nodes, start, end ) {
+    for(var i = 0, n = nodes.length, result = []; i < n; i++){
+        result[i] = nodes[i];
     }
+    if ( arguments.length > 1 ) {
+        return result.slice( start , ( end || result.length ) );
+    } else {
+        return result;
+    }
+}
 
 
 typeof null// "object"
@@ -96,3 +96,71 @@ function isUndefined ( obj ){
 
 window == document // IE678 true;
 document == window // IE678 false;
+
+//var isArrayLike = selector.length && selector[selector.length - 1] !== undefined && !selector.nodeType;
+//
+//isFunction: function( fn ) {
+//    return !!fn && typeof fn != "string" && !fn.nodeName &&
+//        fn.constructor != Array && /^[\s[]?function/.test( fn + "" );
+//    }
+//class2type = {}
+//jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" "), function(i, name) {
+//    class2type[ "[object " + name + "]" ] = name.toLowerCase();
+//});
+//type: function( obj ) {
+//    return obj == null ?
+//        String( obj ) :
+//        class2type[ toString.call(obj) ] || "object";
+//},
+//jquery1.43~1.64
+
+//    isNaN: function( obj ) {
+//        return obj == null || !rdigit.test( obj ) || isNaN( obj );
+//    },
+//    //jquery1.7 就是isNaN的取反版
+//    isNumeric: function( obj ) {
+//        return obj != null && rdigit.test( obj ) && !isNaN( obj );
+//    },
+//    //jquery1.71~1.72
+//    isNumeric: function( obj ) {
+//        return !isNaN( parseFloat(obj) ) && isFinite( obj );
+//    }
+
+class2type = {
+    "[object HTMLDocument]"   : "Document",
+    "[object HTMLCollection]" : "NodeList",
+    "[object StaticNodeList]" : "NodeList",
+    "[object IXMLDOMNodeList]": "NodeList",
+    "[object DOMWindow]"      : "Window"  ,
+    "[object global]"         : "Window"  ,
+    "null"                    : "Null"    ,
+    "NaN"                     : "NaN"     ,
+    "undefined"               : "Undefined"
+},
+toString = class2type.toString;
+"Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList"
+.replace( $.rword, function( name ){
+    class2type[ "[object " + name + "]" ] = name;
+});
+type: function ( obj, str ){
+    var result = class2type[ (obj == null || obj !== obj ) ? obj :  toString.call( obj ) ]
+        || obj.nodeName || "#";
+    if( result.charAt(0) === "#" ){//兼容旧式浏览器与处理个别情况,如window.opera
+        //利用IE678 window == document为true,document == window竟然为false的神奇特性
+        if( obj == obj.document && obj.document != obj ){
+            result = 'Window'; //返回构造器名字
+        }else if( obj.nodeType === 9 ) {
+            result = 'Document';//返回构造器名字
+        }else if( obj.callee ){
+            result = 'Arguments';//返回构造器名字
+        }else if( isFinite( obj.length ) && obj.item ){
+            result = 'NodeList'; //处理节点集合
+        }else{
+            result = toString.call( obj ).slice( 8, -1 );
+        }
+    }
+    if( str ){
+        return str === result;
+    }
+    return result;
+},
