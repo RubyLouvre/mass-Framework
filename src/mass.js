@@ -78,7 +78,7 @@ void function( global, DOC ){
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
-        "@debug": true,
+//        "@debug": true,
         "@target": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
@@ -244,7 +244,7 @@ void function( global, DOC ){
     }
     function debug(obj, name, module, p){
         var fn = obj[name];
-        if(  typeof fn == "function" && !fn["@debug"]){
+        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
             if( rdebug.test( name )){
                 fn["@debug"] = name;
             }else{
@@ -431,7 +431,7 @@ void function( global, DOC ){
         }
     }
     for(var i in $){
-        if(typeof $[i] == "function"){
+        if( !$[i].mass && typeof $[i] == "function"){
             $[i]["@debug"] = i;
         }
     }
