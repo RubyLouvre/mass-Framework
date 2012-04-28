@@ -93,6 +93,40 @@ function isNull ( obj ){
 function isUndefined ( obj ){
     return obj === void 0;
 }
+function isArray( arr ) {
+    return aar instanceof Array;
+}
+function isArray( arr ) {
+    return !!arr && arr.constructor == Array;
+}
+function isArray(arr) {//Prototype.js1.6.0.3
+    return arr != null && typeof arr === "object" &&
+        'splice' in arr && 'join' in arr;
+}
+function isArray(arr){//Douglas Crockford
+    return typeof arr.sort == 'function'
+}
+function isArray(array){//kriszyp
+    var result = false;
+    try{new array.constructor(Math.pow(2, 32))}catch(e){result=/Array/.test(e.message)};
+    return result;
+};
+function isArray(o) {// kangax
+    try {
+        Array.prototype.toString.call(o); return true;
+    } catch(e) { }
+    return false;
+};
+function isArray(o) {//kangax
+    if (o && typeof o == 'object' && typeof o.length == 'number' && isFinite(o.length)) {
+        var _origLength = o.length;o[o.length] = '__test__';
+        var _newLength = o.length; o.length = _origLength;
+        return _newLength == _origLength + 1;
+    }
+    return false;
+}
+
+
 
 window == document // IE678 true;
 document == window // IE678 false;
