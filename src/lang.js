@@ -45,14 +45,17 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return true;
         },
-        //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
-        //select.options集合（它们两个都有item与length属性）
+        //限定为Array, Arguments, NodeList与拥有非负整数的length属性的Object对象，视情况添加字符串
         isArrayLike:  function (obj, str) {//是否包含字符串
             var type = $.type(obj);
-            if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
-                return false;
-            var i = obj.length;
-            return i > 0 &&  parseInt( i ) === i;//非负整数
+            if(type === "Array" || type === "NodeList" || type === "Arguments" || str && type === "String"){
+                return true;
+            }
+            if( type === "Object" ){
+                var i = obj.length;
+                return i >= 0 &&  parseInt( i ) === i;//非负整数
+            }
+            return false;
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
@@ -250,7 +253,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         $.isArray = Array.isArray;
     }
 
-    var arrayLike = $.oneObject("NodeList,Arguments,Object");
     //这只是一个入口
     $.lang = function(obj, type){
         return adjust(new Chain, obj, type)
@@ -258,7 +260,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     //调整Chain实例的重要属性
     function adjust(chain, obj, type){
         type = type || $.type(obj);
-        if(arrayLike[type] && isFinite(obj.length)){
+        if( type != "Array" && $.isArrayLike(type) ){
             obj = $.slice(obj);
             type = "Array";
         }
@@ -270,10 +272,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     var Chain = function(){ }
     Chain.prototype = {
         constructor: Chain,
-        valueOf:function(){
+        valueOf: function(){
             return this.target;
         },
-        toString:function(){
+        toString: function(){
             return this.target + "";
         },
         value: function(){
