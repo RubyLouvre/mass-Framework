@@ -397,7 +397,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 });
                 if (!(method in this)) {
                     this[method] = function() {
-                        return this.bind.apply(this, [].concat.apply([name], arguments));
+                        return $.fn.on.apply(this, [].concat.apply([name], arguments));
                     };
                 }
             },this);
@@ -541,7 +541,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
             }
         }
         $.fn[ mapper ] = function(){// $.fn.bind $.fn.unbind
-            return this[ method ].apply(this, arguments );
+            return $.fn[ method ].apply(this, arguments );
         }
     });
 
