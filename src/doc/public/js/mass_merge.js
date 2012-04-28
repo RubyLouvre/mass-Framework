@@ -26,7 +26,7 @@ void function( global, DOC ){
             $.require( "ready,lang,attr,event,fx,flow", expr );
         }else{
             if( !$.fn )
-                throw "must load the 'node' module!"
+                throw "@node module is required!"
             return new $.fn.init( expr, context );
         }
     }
@@ -46,11 +46,14 @@ void function( global, DOC ){
 
     
     function mix( target, source ){
-        var args = [].slice.call( arguments ), key,//如果最后参数是布尔，判定是否覆写同名属性
+        var args = [].slice.call( arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        target = target || {};//如果只传入一个参数，则是拷贝对象
-        for(var i = 1; source = args[i++];){//允许对象糅杂，用户保证都是对象
-            for ( key in source ) {
+        if(args.length === 1){
+            target = !this.window ? this : {} ;
+            i = 0;
+        }
+        while((source = args[i++])){
+            for ( key in source ) {//允许对象糅杂，用户保证都是对象
                 if (ride || !(key in target)) {
                     target[ key ] = source[ key ];
                 }
@@ -61,6 +64,7 @@ void function( global, DOC ){
     mix( $, {//为此版本的命名空间对象添加成员
         html: DOC.documentElement,
         head: HEAD,
+        mix: mix,
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
@@ -158,6 +162,7 @@ void function( global, DOC ){
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
+    rdebug =  /^(init|constructor|lang|query)$|^is/,
     tokens = [],//需要处理的模块名列表
     transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
     cbi = 1e5 ;//用于生成回调函数的名字
@@ -199,48 +204,49 @@ void function( global, DOC ){
             HEAD.removeChild( iframe );//移除iframe
         });
     }
-    //收集依赖列表对应模块的返回值，传入目标模块中执行
-    function setup( fn, args,module ){
-        for ( var i = 0,argv = [], name; name = args[i++]; ) {
-            argv.push( transfer[name] );
-        }
-        var ret =  fn.apply( global, argv );
-        if($["@debug"]){
-            for( i in $){
-                debug(i, $, module)
-            }
-            for(i in $.fn){
-                debug(i, $.fn, module, 1)
-            }
-        }
-        return ret;
-    }
-
-    function debug(name, obj, module, p){
+    function debug(obj, name, module, p){
         var fn = obj[name];
-        if(name != "constructor" && typeof fn == "function" && !fn["@debug"] ){
-            obj[name] = function(){
-                function ret(){
+        if(  typeof fn == "function" && !fn["@debug"]){
+            if( rdebug.test( name )){
+                fn["@debug"] = name;
+            }else{
+                var method = obj[name] = function(){
                     try{
-                        return  fn.apply(obj,arguments)
+                        return  method["@debug"].apply(this,arguments)
                     }catch(e){
-                        $.log("[[ "+module+"::"+ (p ? "$.fn." : "$.") +  name+" ]] gone wrong");
-                        $.log(e+"");
+                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
                         throw e;
                     }
                 }
                 for(var i in fn){
-                    ret[i] = fn[i]
+                   method[i] = fn[i];
                 }
-                ret.toString = fn.toString;
-                ret.valueOf = fn.valueOf;
-                ret["@debug"] = module+"::"+ (p ? "$.fn." : "$.") +  name
-                return ret;
-            }();
+                method["@debug"] = fn;
+                method.toString = function(){
+                    return fn.toString()
+                }
+                method.valueOf = function(){
+                    return fn.valueOf();
+                }
+            }
         }
     }
-
-
+    //收集依赖列表对应模块的返回值，传入目标模块中执行
+    function setup( name, deps, fn ){
+        for ( var i = 0,argv = [], d; d = deps[i++]; ) {
+            argv.push( transfer[d] );
+        }
+        var ret = fn.apply( global, argv );
+        if($["@debug"]){//如果打开调试机制
+            for( i in $){
+                debug($, i, name);
+            }
+            for( i in $.prototype){
+                debug($.prototype, i, name,1);
+            }
+        }
+        return ret;
+    }
     function deferred(){//一个简单的异步列队
         var list = [],self = function(fn){
             fn && fn.call && list.push( fn );
@@ -255,9 +261,8 @@ void function( global, DOC ){
         self.complete = $.noop;
         return self;
     }
-
-    mix( $, {
-        mix: mix,
+    $.mix({
+        stack : deferred(),
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
             el.addEventListener( type, fn, !!phase );
@@ -272,7 +277,7 @@ void function( global, DOC ){
             el.detachEvent( "on"+type, fn || $.noop );
         },
         //请求模块
-        require: function( deps, callback ){//依赖列表,正向回调
+        require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
             var _deps = {}, args = [], dn = 0, cn = 0;
             ( deps +"" ).replace( $.rword, function( url, name, match ){
                 dn++;
@@ -293,12 +298,15 @@ void function( global, DOC ){
             if( dn === cn ){//在依赖都已执行过或没有依赖的情况下
                 if( token && !( token in transfer ) ){
                     mapper[ token ].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
-                    return transfer[ token ] = setup( callback, args, token );
+                    return transfer[ token ] = setup( token, args, callback );
                 }else if( !token ){//普通的回调可执行无数次
-                    return setup( callback, args, token );
+                    return  setup( token, args, callback );
                 }
             }
             token = token || "@cb"+ ( cbi++ ).toString(32);
+            if( errback ){
+                $.stack( errback );//压入错误堆栈
+            }
             mapper[ token ] = {//创建或更新模块的状态
                 callback:callback,
                 name: token,
@@ -337,7 +345,7 @@ void function( global, DOC ){
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     tokens.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    transfer[ obj.name ] = setup( obj.callback, obj.args, obj.name  );
+                    transfer[ obj.name ] = setup( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
                 }
@@ -347,7 +355,8 @@ void function( global, DOC ){
         //用于检测这模块有没有加载成功
         _checkFail : function( name, error ){
             if( error || !mapper[ name ].state ){
-                this.log("fail to load module [ "+name+' ]!!');
+                this.log("Failed to load [[ "+name+" ]]")
+                this.stack.fire();//打印错误堆栈
             }
         }
     });
@@ -381,6 +390,11 @@ void function( global, DOC ){
         });
         if( $.html.doScroll && self.eval === top.eval ){
             doScrollCheck();
+        }
+    }
+    for(var i in $){
+        if(typeof $[i] == "function"){
+            $[i]["@debug"] = i;
         }
     }
     //https://developer.mozilla.org/en/DOM/window.onpopstate
@@ -623,9 +637,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
-    $.mix($,{
+    $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
-        isPlainObject : function (obj){
+        isPlainObject: function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
                 return false;
             }
@@ -640,7 +654,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return true;
         },
         //判定method是否为obj的原生方法，如$.isNative(global,"JSON")
-        isNative : function(obj, method) {
+        isNative: function(obj, method) {
             var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
             return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
         },
@@ -653,16 +667,16 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
         //select.options集合（它们两个都有item与length属性）
-        isArrayLike :  function (obj, str) {//是否包含字符串
+        isArrayLike:  function (obj, str) {//是否包含字符串
             var type = $.type(obj);
             if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
                 return false;
             var i = obj.length;
-            return ~~i === i && i >= 0 ;//非负整数
+            return i > 0 &&  parseInt( i ) === i;//非负整数
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
-        format : function(str, object){
+        format: function(str, object){
             var array = $.slice(arguments,1);
             return str.replace(rformat, function(match, name){
                 if (match.charAt(0) == '\\')
@@ -676,7 +690,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             });
         },
         
-        tag:function (start, content, xml){
+        tag: function (start, content, xml){
             xml = !!xml
             var chain = function(start, content, xml){
                 var html = arguments.callee.html;
@@ -698,7 +712,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         // Generate an integer Array containing an arithmetic progression. A port of
         // the native Python `range()` function. See
         // [the Python documentation](http://docs.python.org/library/functions.html#range).
-        range : function(start, stop, step) {
+        range: function(start, stop, step) {
             if (arguments.length <= 1) {
                 stop = start || 0;
                 start = 0;
@@ -714,7 +728,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return range;
         },
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
-        quote : global.JSON && JSON.stringify || String.quote ||  (function(){
+        quote: global.JSON && JSON.stringify || String.quote ||  (function(){
             var meta = {
                 '\t':'t',
                 '\n':'n',
@@ -741,7 +755,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return    '"' + str.replace(reg, regFn)+ '"';
             }
         })(),
-        dump : function(obj, indent) {
+        dump: function(obj, indent) {
             indent = indent || "";
             if (obj === null)
                 return indent + "null";
@@ -751,7 +765,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return indent + "[object Document]";
             if (obj.nodeType)
                 return indent + "[object " + (obj.tagName || "Node") +"]";
-            var arr = [],type = $.type(obj),self = arguments.callee,next = indent +  "\t";
+            var arr = [],type = $.type(obj),self = $.dump ,next = indent +  "\t";
             switch (type) {
                 case "Boolean":
                 case "Number":
@@ -2623,7 +2637,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         }
         return document;
     }
-    $.mix( $, $.mutators ).implement({
+    $.mix( $.mutators ).implement({
         init:function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -2831,7 +2845,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     var HTML = $.html;
     var commonRange = document.createRange && document.createRange();
     var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
-    $.extend({
+    $.mix({
         match: function( node, expr, i ){
             if( $.type( expr, "Function" ) ){
                 return expr.call( node, node, i );
@@ -3287,7 +3301,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         },
         children: function( el ){
             return  el.children ? $.slice( el.children ) :
-            lang( el.childNodes ).filter(function( node ){
+            $.slice( el.childNodes ).filter(function( node ){
                 return node.nodeType === 1;
             });
         },
@@ -3302,9 +3316,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }).forEach(function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
-            $.slice(this).forEach(function( el ){
+            for(var i = 0, el ; el = this[i++];){
                 nodes = nodes.concat( method( el, expr ) );
-            });
+            }
             if( /Until/.test( name ) ){
                 expr = null
             }
@@ -4260,7 +4274,7 @@ $.define("attr","support,node", function( support ){
             });
         }
     });
-        
+
     "attr,prop".replace($.rword, function( method ){
         $[ method ] = function( node, name, value ) {
             if(node  && ( $["@target"] in node )){
@@ -4279,7 +4293,7 @@ $.define("attr","support,node", function( support ){
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
                     }
-                } //获取属性 
+                } //获取属性
                 return (adapter[name+":get"] || adapter["@"+ (notxml ? "html" : "xml")+":get"])( node, name, '', orig );
             }
         };
@@ -4288,7 +4302,7 @@ $.define("attr","support,node", function( support ){
         }
     });
     $.fn["class"] = $.fn.addClass;
-    $.extend({
+    $.mix({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
         },
@@ -4320,7 +4334,7 @@ $.define("attr","support,node", function( support ){
                 node[ name ] = value;
             }
         },
-            
+
         attrAdapter: {
             "@xml:get": function( node, name ){
                 return  node.getAttribute( name ) || void 0 ;
@@ -4332,7 +4346,7 @@ $.define("attr","support,node", function( support ){
                 // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
                 var attributeNode = node.getAttributeNode( "tabIndex" );
                 return attributeNode && attributeNode.specified ?
-                parseInt( attributeNode.value, 10 )  : 
+                parseInt( attributeNode.value, 10 )  :
                 rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
             },
             "value:get": function( node, name, _, orig ) {
@@ -4397,7 +4411,7 @@ $.define("attr","support,node", function( support ){
         propAdapter[ "@html:"+method ] = propAdapter[ "@xml:"+method ];
         propAdapter[ "tabIndex:"+method ] = attrAdapter[ "tabIndex:"+method ];
     });
-               
+
     //========================propAdapter 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
@@ -4417,8 +4431,8 @@ $.define("attr","support,node", function( support ){
             for( ;!parent.add; parent.selectedIndex, parent = parent.parentNode){};
             return node.selected;
         }
-    }    
-        
+    }
+
     //========================attrAdapter 的相关修正==========================
     var bools = $["@bools"];
     var boolOne = $.oneObject( support.attrProp ? bools.toLowerCase() : bools );
@@ -4462,7 +4476,7 @@ $.define("attr","support,node", function( support ){
             return (node.style.cssText = "" + value);
         }
     }
-              
+
     if( !support.attrProp ){
         //如果我们不能通过el.getAttribute("class")取得className,必须使用el.getAttribute("className")
         //又如formElement[name] 相等于formElement.elements[name]，会返回其辖下的表单元素， 这时我们就需要用到特性节点了
@@ -4485,7 +4499,7 @@ $.define("attr","support,node", function( support ){
                 node.setAttributeNode( ret );
             }
             ret.nodeValue = value + "";
-        }  
+        }
         attrAdapter[ "contentEditable:set" ] =  function( node, name, value ) {
             if ( value === "" ) {
                 value = "false";
@@ -4498,7 +4512,7 @@ $.define("attr","support,node", function( support ){
             }
         });
     }
-        
+
     //=========================valAdapter 的相关修正==========================
     //checkbox的value默认为on，唯有Chrome 返回空字符串
     if ( !support.checkOn ) {
@@ -4529,7 +4543,6 @@ $.define("attr","support,node", function( support ){
 2011.10.22 FIX boolaAdapter.set方法
 2011.10.27 对prop attr val大重构
 */
-
 //=========================================
 //  事件补丁模块
 //==========================================
@@ -6648,3 +6661,4 @@ $.define("ajax","event", function(){
 
 
 }( this, this.document );
+

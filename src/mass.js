@@ -31,7 +31,7 @@ void function( global, DOC ){
             $.require( "ready,lang,attr,event,fx,flow", expr );
         }else{
             if( !$.fn )
-                throw "must load the 'node' module!"
+                throw "@node module is required!"
             return new $.fn.init( expr, context );
         }
     }
@@ -252,8 +252,7 @@ void function( global, DOC ){
                     try{
                         return  method["@debug"].apply(this,arguments)
                     }catch(e){
-                        $.log("[[ "+module+"::"+(p? "$.fn." :"$.")+name+" ]] gone wrong");
-                        $.log(e);
+                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
                         throw e;
                     }
                 }
