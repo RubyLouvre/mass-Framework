@@ -9,13 +9,9 @@
 
         </script>
         <script>
-            $.require("ready,node,event",function(){
+            $.require("ready,lang",function(){
                 //$.log($.fn.append+"")
-               $("body").append("<div>xxxxx444</div>");
-
-               $("body").on("click","div",function(){
-                   alert(this.innerHTML)
-               })
+              $.log( $.lang("aaabbbcc").contains("bbb").value())
             })
         </script>
     </head>

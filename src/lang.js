@@ -232,7 +232,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 xml = undefined;
             }
             if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
-                $.log( "Invalid XML: " + data );
+                $.error( "Invalid XML: " + data );
             }
             return xml;
         }

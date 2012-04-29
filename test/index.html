@@ -4,19 +4,19 @@
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <title>mass Frameword 测试页面</title>
         <link href="spec.css" rel="stylesheet" type="text/css"/>
-        <script src="/client/mass.js"></script>
+        <script src="../src/mass.js"></script>
         <script>
             var testcases = "",
-            url = "mass,lang_fix,lang,support,class,data,node,css,target";
-           url = "attr"
+            url = "mass,lang,support,class,data,node,css,target";
+            url = "node"
             url.replace($.rword,function(name){
                 testcases += ",test/"+name
             });
 
             $.require("ready"+testcases, function(){
-             //   $.log($["@modules"])
+                //   $.log($["@modules"])
             });
-//http://trip.taobao.com/
+            //http://trip.taobao.com/
         </script>
         <script>
 

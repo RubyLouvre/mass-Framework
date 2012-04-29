@@ -33,8 +33,7 @@
     <article>
         <h3>$.isArrayLike</h3>
         <p><span class="stress">描述：</span></p>
-        <p>判定是否是类数组对象。类数组对象包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象，
-            form.elements,select.options集合（它们两个都有item与length属性）</p>
+        <p>限定为Array, Arguments, NodeList与拥有非负整数的length属性的Object对象，视情况添加字符串</p>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("lang",function(){

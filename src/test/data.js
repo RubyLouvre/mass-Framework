@@ -1,6 +1,6 @@
 $.define("data","more/spec,data",function(){
     $.fixture('数据缓存模块-data', {
-        "$.data":function(){
+        data: function(){
             //使用了data方法的元素或对象都会添加一个叫uniqueNumber的数字属性
             $.data(document.body,"test1",[1,2,3]);
             expect(typeof document.body.uniqueNumber === "number").ok();
@@ -16,7 +16,7 @@ $.define("data","more/spec,data",function(){
             });
            
         },
-        "$.mergeData":function(){
+        mergeData: function(){
             var a = {};
             //写入数揣
             $.data(a,"name","司徒正美");
@@ -38,13 +38,13 @@ $.define("data","more/spec,data",function(){
             delete $.data(b).sex;
             expect($.data(a)).same($.data(b))
         },
-        "$.removeData":function(){
+        removeData: function(){
             var val = $.removeData(document.body,"test1");
             expect(val).same([1,2,3]);
             $.removeData(document.body);
             expect($.data(document.body)).same({});
         },
-        "$.parseData":function(){
+        parseData: function(){
             document.body.setAttribute("data-object","{a:1,b:2,c:3}")
             var data = $.parseData(document.body, "data-object")
             expect(data).same({
