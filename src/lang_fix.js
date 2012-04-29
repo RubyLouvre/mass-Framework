@@ -137,7 +137,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
             return this.getFullYear() - 1900;
         };
         Date[P].setYear = function(year) {
-            return this.setFullYear(year + 1900);
+            return this.setFullYear(year );//+ 1900
         };
     }
 
