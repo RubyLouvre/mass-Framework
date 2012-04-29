@@ -1,6 +1,84 @@
 $.define("lang","lang,more/spec",function( $$ ){
     $.log("已加载text/lang模块")
     $.fixture("语言扩展模块-lang",{
+        'Object.keys': function() {
+            expect(Object.keys({
+                aa:1,
+                bb:2,
+                cc:3
+            })).same(["aa","bb","cc"]);
+            //测试特殊属性
+            var array = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","), testobj = {}
+            for(var i = 0, el; el = array[i++];){
+                testobj[el] = i;
+            };
+            expect(Object.keys(testobj)).same(array);
+        },
+
+        "Array#map":function(){
+            var ret = [1, 2, 3, 4].map(function(a, b) {
+                return a + b;
+            });
+            expect(ret).same( [1, 3, 5, 7] );
+        },
+        "Array#filter":function(){
+            var ret = [1, 2, 3, 4, 5, 6, 7, 8].filter(function(a, b) {
+                return a > 4
+            });
+            expect(ret).same( [5, 6, 7, 8] );
+        },
+        "Array#reduce":function(){
+            var ret = [1, 2, 3, 4].reduce(function(a, b) {
+                return a + b;
+            }, 10);
+            expect(ret).eq(20);
+        },
+        "Array#reduceRight":function(){
+            var flattened = [[0, 1], [2, 3], [4, 5]].reduceRight(function(a, b) {
+                return a.concat(b);
+            }, []);
+            expect(flattened).same([4, 5, 2, 3, 0, 1]);
+        },
+        "isDuckType": function(){
+            //测试鸭子类型
+            var a = function(){}
+            a.prototype.toString = function(){
+                return "[object XXX]"
+            }
+            var aa = new a()
+            expect( Object.prototype.toString.call(aa) ).eq("[object Object]")
+        },
+        "$.isArray": function(){
+            var iframe = document.createElement('iframe');
+            document.body.appendChild(iframe);
+            xArray = window.frames[window.frames.length-1].Array;
+            var arr = new xArray(1,2,3); // [1,2,3]
+            expect( $.isArray(arr) ).ok();
+            expect( $.isArray([]) ).ok();
+            document.body.removeChild(iframe);
+            expect( $.isArray(function test(a,b,c){}) ).ng();
+            expect( $.isArray(/test/) ).ng();
+            expect( $.isArray( "test") ).ng();
+            expect( $.isArray(window) ).ng();
+            expect( $.isArray({
+                0: 0,
+                1: 1,
+                2: 2,
+                length: 3,
+                sort: function(){}
+            }) ).ng();
+        },
+        "String#trim":function(){
+            expect('  test  '.trim() ).eq('test');
+        },
+        Date: function(){
+            expect( /^\d+$/.test( Date.now() ) ).ok();
+            var date = new Date("2012/4/29");
+            expect( date.getYear() ).eq( 112 );
+            date.setYear( 2014 );
+            expect( date.getYear() ).eq( 114 );
+        },
+
         "$.isPlainObject": function() {
             //不能DOM, BOM与自定义"类"的实例
             expect( $.isPlainObject([])).ng();
@@ -56,7 +134,6 @@ $.define("lang","lang,more/spec",function( $$ ){
             expect( $.isNative(Function.prototype,"bind") ).log();
         },
         "$.range":function(){
-
             expect( $.range(10)).same([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
             expect( $.range(1, 11)).same([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
             expect( $.range(0, 30, 5)).same([0, 5, 10, 15, 20, 25]);
@@ -94,15 +171,6 @@ $.define("lang","lang,more/spec",function( $$ ){
             var str = "<note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
             expect( $.parseXML(str).nodeType).eq(9)//[object XMLDocument]
         },
-        "isA": function(){
-            //测试不可改
-            var a = function(){}
-            a.prototype.toString = function(){
-                return "[object XXX]"
-            }
-            var aa = new a()
-            expect( Object.prototype.toString.call(aa) ).eq("[object Object]")
-        },
         "$.String": function(){
             expect( $.String.contains("aaabbbcc", "bbb") ).ok();
             expect( $.String.startsWith('http://index', 'http') ).ok();
@@ -122,10 +190,15 @@ $.define("lang","lang,more/spec",function( $$ ){
             expect( $.lang("fooBar").underscored() ).eq("foo_bar");
             expect( $.lang("foo-bar").underscored() ).eq("foo_bar");
             expect( $.lang("foo-bar").capitalize().camelize()).eq("FooBar");
+            expect( $.lang("10.23").toInt()).eq( 10 );
+            expect( $.lang("1.23").toFloat()).eq( 1.23 );
+            expect( $.lang("animals.sheep[1]").escapeRegExp() ).eq("animals\\.sheep\\[1\\]");
+            expect( $.lang("2").padLeft(4) ).eq("0002");
+            expect( $.lang("2").padRight(4," ") ).eq("2   ");
+            expect( $.lang("ruby").times(2) ).eq("rubyruby");
         },
 
         "$.Array":function(){
-
             var a = ["aaa",1,2,undefined,3,4,null,{
                 2:2
             } ];
@@ -212,7 +285,7 @@ $.define("lang","lang,more/spec",function( $$ ){
                 third: 'Tuesday'
             };
             var b = [];
-             $.lang(a).forEach(function(value){
+            $.lang(a).forEach(function(value){
                 b.push(value);
             });
             expect( b ).same(["Sunday","Monday","Tuesday"]);
@@ -272,5 +345,5 @@ $.define("lang","lang,more/spec",function( $$ ){
        
     });
 });
-   //2012.4.29,重新更新这里大部分测试用例
+//2012.4.29,重新更新这里大部分测试用例
 
