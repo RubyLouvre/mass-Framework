@@ -53,20 +53,20 @@ pre a{
     color:#000;
     text-decoration:none;
     outline:none;
-    position:relative;
+/*    position:relative;*/
 }
 pre a:hover{
-    background:#FFFFE0;
+/*    background:#FFFFE0;*/
 }
 pre a form{
-    position:absolute;
+/*    position:absolute;*/
     top:-5em;
     left:0px;
-    display:none;
+/*    display:none;*/
 }
 pre a:hover form{
-    display:block;
-    width:90%;
+/*    display:block;
+    width:90%;*/
 }
 .mass-spec-detail pre{
     margin: 1em;
