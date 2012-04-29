@@ -2,6 +2,7 @@
 // 模块加载模块（种子模块）2012.1.29 by 司徒正美
 //=========================================
 void function( global, DOC ){
+  
     var
     _$ = global.$, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,''),
@@ -71,6 +72,7 @@ void function( global, DOC ){
         }
         return target;
     }
+
     mix( $, {//为此版本的命名空间对象添加成员
         html: DOC.documentElement,
         head: HEAD,
@@ -82,7 +84,7 @@ void function( global, DOC ){
         "@target": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
-            node = scripts[ scripts.length - 1 ];
+            node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
             url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
@@ -495,5 +497,5 @@ dom.namespace改为dom["mass"]
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
-
+http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
 */
