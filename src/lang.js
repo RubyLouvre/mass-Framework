@@ -272,9 +272,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     var Chain = function(){ }
     Chain.prototype = {
         constructor: Chain,
-        valueOf: function(){
-            return this.target;
-        },
         toString: function(){
             return this.target + "";
         },
