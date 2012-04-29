@@ -104,19 +104,19 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         // the native Python `range()` function. See
         // [the Python documentation](http://docs.python.org/library/functions.html#range).
         range: function(start, stop, step) {
-            if (arguments.length <= 1) {
+            step || (step = 1);
+            if (arguments.length < 2) {
                 stop = start || 0;
                 start = 0;
             }
-            step = arguments[2] || 1;
-            var len = Math.max(Math.ceil((stop - start) / step), 0);
-            var idx = 0;
-            var range = new Array(len);
-            while(idx < len) {
-                range[idx++] = start;
+            var index = -1,
+            length = Math.max(Math.ceil((stop - start) / step), 0),
+            result = Array(length);
+            while (++index < length) {
+                result[index] = start;
                 start += step;
             }
-            return range;
+            return result;
         },
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
         quote: global.JSON && JSON.stringify || String.quote ||  (function(){
