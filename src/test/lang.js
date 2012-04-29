@@ -345,5 +345,5 @@ $.define("lang","lang,more/spec",function( $$ ){
        
     });
 });
-//2012.4.29,重新更新这里大部分测试用例
-
+//2012.4.29
+//将原lang与lang_fix的测试全部合在一起，增加Date, isArray, map, filter等测试
