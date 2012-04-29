@@ -43,7 +43,26 @@ $.define("data","more/spec,data",function(){
             expect(val).same([1,2,3]);
             $.removeData(document.body);
             expect($.data(document.body)).same({});
+        },
+        "$.parseData":function(){
+            document.body.setAttribute("data-object","{a:1,b:2,c:3}")
+            var data = $.parseData(document.body, "data-object")
+            expect(data).same({
+                a:1,
+                b:2,
+                c:3
+            });
+            document.body.setAttribute("data-array","[1,2,3]")
+            data = $.parseData(document.body, "data-array");
+            expect(data).same([1,2,3]);
+            document.body.setAttribute("data-null","null");
+            data = $.parseData(document.body, "data-null");
+            expect(data).eq(null);
+            document.body.setAttribute("data-num","20120429");
+            data = $.parseData(document.body, "data-num");
+            expect(data).eq(20120429);
         }
 
     });
 });
+//2012.4.29 添加$.parseData测试
