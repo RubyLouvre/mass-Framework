@@ -76,8 +76,33 @@ $.define("class","more/spec,class",function(){
             var v = new VS("小明");
             expect(v.valueOf()).eq("小明111");
             expect(v.toString()).eq("小明222");
-           
+
+            v.setOptions("xxx",{
+                a: 111,
+                b: 222
+            });
+            expect(v.xxx.a ).eq(111);
+            expect(v.xxx.b ).eq(222);
+            v.setOptions({
+                c: 333,
+                d: 444
+            });
+            expect(v.c ).eq(333);
+            expect(v.d ).eq(444);
+            v.setOptions({
+                e: 555,
+                f: 666
+            },{
+                e: 777,
+                f: 888
+            },{
+                e: 999,
+                f: "yyy"
+            });
+            expect(v.e ).eq(999);
+            expect(v.f ).eq("yyy");
         }
 
     });
 });
+//2012.4.29 增加setOptions的测试
