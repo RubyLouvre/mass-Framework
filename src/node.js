@@ -254,15 +254,13 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             setter = setter || getter;
             //为所有元素设置N个属性
             if ( typeof key === "object" ) {
-                for ( var k in key ) {
-                    for ( var i = 0; i < length; i++ ) {
-                        setter( elems[i], k, key[ k ] );
-                    }
+                for ( var i = 0; i < length; i++ ) {
+                    setter( elems[i], key );
                 }
                 return elems;
             }
             if ( value !== void 0 ) {
-                if( key === 0 ){
+                if( key === 0 ){//0法则
                     setter.call( elems, value );
                 }else{
                     for ( i = 0; i < length; i++ ) {
@@ -457,8 +455,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     $.implement({
         data: function( key, item ){
-            return $.access( this, key, item, function( el, key ){
-                return  $.data( el, key, item );
+            return $.access( this, key, item, function( ){
+                return  $.data.apply( null, arguments );
             })
         },
         removeData: function( key, pv ) {
@@ -753,4 +751,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
 2012.3.9 添加一些数组方法
 2012.4.5 使用isArrayLike精简init方法
+2012.4.29 重构$.access与$.fn.data
  */
