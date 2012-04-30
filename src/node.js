@@ -254,8 +254,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             setter = setter || getter;
             //为所有元素设置N个属性
             if ( typeof key === "object" ) {
-                for ( var i = 0; i < length; i++ ) {
-                    setter( elems[i], key );
+                for(var k in key){
+                    for ( var i = 0; i < length; i++ ) {
+                        setter( elems[i], k, key[k] );
+                    }
                 }
                 return elems;
             }
