@@ -64,7 +64,7 @@ $.define("spec","lang", function(){
     }();
     /**
 *expect($.type("string")).eq("String");
-*<a hidefocus="true" href="javascript:void(0);">expect($.type("string")).eq("String");</a>
+*<kbd">expect($.type("string")).eq("String");</kbd>
 */
     function retouch(str){
         for(var step = 1, section = 0, i = 1, n = str.length; i < n; i++){
@@ -76,7 +76,7 @@ $.define("spec","lang", function(){
                     section++;
                     if(section == 2){
                         return str.slice(0,i+1) +
-                        str.slice(i+1, i+3).replace(/\s*;?\s*/,";</a>\n")+
+                        str.slice(i+1, i+3).replace(/\s*;?\s*/,";</kbd>\n")+
                         str.slice(i+3)
                     }
                 }
@@ -102,8 +102,8 @@ $.define("spec","lang", function(){
             _should: function(method, expected){//上面方法的内部实现,比较真伪,并渲染结果到页面
                 var actual = this.actual;
                 var bool = false;
-                //每一条expect语句都对应一个A标签
-                var elem = this.node.getElementsByTagName("a")[this.count]
+                //每一条expect语句都对应一个KBD标签
+                var elem = this.node.getElementsByTagName("kbd")[this.count]
                 switch(method){
                     case "ok"://布尔真测试
                         bool = actual === true;
@@ -211,7 +211,7 @@ $.define("spec","lang", function(){
                 </div>
                 */
                 var html = ['<div id="#{0}" class="mass-spec-case">',
-                '<p class="mass-spec-slide"><a href="javascript:void(0)">#{1}</a></p>',
+                '<p class="mass-spec-slide"><a '+(!"1"[0]? 'href="javascript:void(0);"' : "")+'>#{1}</a></p>',
                 '<ul class="mass-spec-detail" style="display:none;"></ul></div>'].join('');
                 get("mass-spec-cases").appendChild(parseHTML( $.format(html, fixtureId, title)) );
             }
@@ -233,7 +233,7 @@ $.define("spec","lang", function(){
                         var body = (assert+"").replace(/</g,"&lt;").replace(/>/g,"&gt;");
                         body = body.split("expect").map(function(segment){
                             return segment.charAt(0) === "(" ? retouch(segment) : segment;
-                        }).join('<a href="javascript:void(0);" hidefocus="true" >expect');
+                        }).join('<kbd>expect');
                         var node = parseHTML($.format('<li id="#{0}">#{1}<pre>#{2}</pre></li>', methodId, name, uni2hanzi(body)));
                         /** 最后变成以下样子
                         <li id="方法名(即asserts对象里面的每个键名)" class="通过|不通过|出错">
@@ -258,7 +258,7 @@ $.define("spec","lang", function(){
                         assert(title+"#"+name);//执行测试套件
                     }catch(err){
                         bag.status = "error"
-                        var el = node.getElementsByTagName("a")[ bag.count + 1];
+                        var el = node.getElementsByTagName("kbd")[ bag.count + 1];
                         if(el){
                             el.appendChild( parseHTML('<form class="mass-spec-diff"><pre>'+err+'</pre></form>'));
                             el.className = "mass-assert-error";//高亮这一行,变成深红色
@@ -303,4 +303,5 @@ $.define("spec","lang", function(){
 //2011.10.27   runTest添加参数，用于等特一定做量的测试模块都加载完毕才执行
 //2011.10.31 去掉deferred模块的依赖，依靠ready列队自行添加测试的模块
 //2012.1.28  升级到v3，大大增强错误定位的能力
-//2012.4.30  升级到v4 去掉 Expect.Client,Expect.PASS,Expect.index,Expect.Class等属性,然后更好的机制来定位错误
+//2012.4.30  升级到v4 去掉 Expect.Client,Expect.PASS,Expect.index,Expect.Class等属性,
+//然后更好的机制来定位错误
