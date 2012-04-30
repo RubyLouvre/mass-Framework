@@ -63,8 +63,8 @@ $.define("spec","lang", function(){
         };
     }();
     /**
-*expect($.type("string")).eq("String");
-*<kbd">expect($.type("string")).eq("String");</kbd>
+*expect($.type("string")).eq("String"); ==>
+*<kbd>expect($.type("string")).eq("String");</kbd>
 */
     function retouch(str){
         for(var step = 1, section = 0, i = 1, n = str.length; i < n; i++){
@@ -239,9 +239,9 @@ $.define("spec","lang", function(){
                         <li id="方法名(即asserts对象里面的每个键名)" class="通过|不通过|出错">
                             方法名
                             <pre>
-                               <a hidefocus="true" href="javascript:void(0);">expect语句</a>
-                               <a hidefocus="true" href="javascript:void(0);">expect语句</a>
-                               <a hidefocus="true" href="javascript:void(0);">expect语句</a>
+                               <kbd>expect语句</kbd>
+                               <kbd>expect语句</kbd>
+                               <kbd>expect语句</kbd>
                                ...
                             </pre>
                         </li>*/
