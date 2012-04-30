@@ -2,7 +2,7 @@
 // 样式操作模块 by 司徒正美
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
-    //$.log( "已加载css模块" );
+    $.log( "已加载css模块" );
     var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
     rad2deg = 180/Math.PI,
     deg2rad = Math.PI/180,
@@ -45,7 +45,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     });
 
     //http://www.w3.org/TR/2009/WD-css3-2d-transforms-20091201/#introduction
-    $.mix($, {
+    $.mix({
         cssMap: cssMap,
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: function( name, host, test ){
@@ -71,11 +71,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         },
         //这里的属性不需要自行添加px
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
-        css: function( node, name, value, fn){
-            if( !fn ){
-                name = cssMap( name );
-            }
+        css: function( node, name, value){
             if(node.style){
+                name = cssMap( name );
                 if( value === void 0){ //取值
                     return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, cssMap(name) );
                 }else {//设值
@@ -87,8 +85,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     if ( isFinite( value ) && !$.cssNumber[ name ] ) {
                         value += "px";
                     }
-                    fn = (adapter[name+":set"] || adapter[ "_default:set" ]);
-                    fn( node, name, value );
+                    (adapter[name+":set"] || adapter[ "_default:set" ])( node, name, value );
                 }
             }
         },
@@ -302,7 +299,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     },false);
     adapter[ "zIndex:get" ] = function( node,name, position, value ) {
         while ( node.nodeType !== 9 ) {
-           //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
+            //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
             position = $.css(node, "position" );
             if ( position === "absolute" || position === "relative" || position === "fixed" ) {
                 // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
