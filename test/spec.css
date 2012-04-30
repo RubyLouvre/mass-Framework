@@ -20,6 +20,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    background: #A9EA00;
 }
 .mass-spec-detail li{
     margin: 0;
@@ -47,7 +48,7 @@
     color:#fff;
 }
 
-pre a{
+pre kbd{
     display:inline-block;
     width:90%;
     color:#000;
@@ -55,19 +56,14 @@ pre a{
     outline:none;
 /*    position:relative;*/
 }
-pre a:hover{
-/*    background:#FFFFE0;*/
-}
-pre a form{
+
+pre kbd form{
 /*    position:absolute;*/
     top:-5em;
     left:0px;
 /*    display:none;*/
 }
-pre a:hover form{
-/*    display:block;
-    width:90%;*/
-}
+
 .mass-spec-detail pre{
     margin: 1em;
     position:relative;
