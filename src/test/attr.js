@@ -1,7 +1,7 @@
 $.define("attr","more/spec,attr",function(){
     var iframe =  $("<iframe id='test_attr' style='display:none;width:0px;height:0px;' src='/test/attr.html' frameBorder=0  />" ).appendTo("body");//
     window.attrTestCall = function(){
-        $.fixture("属性操作模块-attr",{
+        $.fixture("属性模块-attr",{
             "$.fn.attr":function(){
                 var idoc = iframe.contents()[0];
                 //shortcuts
@@ -169,7 +169,7 @@ $.define("attr","more/spec,attr",function(){
     
     var iframe2 =  $("<iframe id='test_attr' src='/test/attr2.html' style='display:none;width:0px;height:0px;' frameBorder=0  />" ).appendTo("body");//
     window.classNameTestCall = function(){
-        $.fixture("属性操作模块-attr(className相关)",{
+        $.fixture("属性模块-attr(className部分)",{
             "className":function(){
                 var idoc  =  iframe2.contents()[0];
                 var a = $('#foo-class a',idoc);

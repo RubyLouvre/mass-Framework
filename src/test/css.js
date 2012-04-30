@@ -1,17 +1,17 @@
-$.define("css","more/random,more/spec,node,css",function(random){
-  
-    $.fixture("样式操作模块-css",{
+$.define("css","ready,more/random,more/spec,node,css",function(_,random){
+
+    $.fixture("样式模块-css",{
         "$.css()":function(){
             var node = $('<div id="test-div" width="8px" height="5px"' +
                 'style="padding-left: 2px; ' +
                 'background: transparent; ' +
-                '' +
                 'float: left; ' +
                 'border: 5px solid rgb(0,0,0);">x</div>').appendTo("body")
           
             var isWebkit = !!navigator.vendor;
-        
+       
             expect( node[0].tagName ).eq( "DIV" );
+          
             expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px" );
             node.css( 'width',"+=2px" );
             expect( node.css('width') ).eq( document.documentMode < 9 ? "9px" : "10px" );
@@ -89,7 +89,6 @@ $.define("css","more/random,more/spec,node,css",function(random){
             var node = $('<div id="test-div" ' +
                 'style="padding-left: 2pt; ' +
                 'background: transparent; ' +
-                '' +
                 'float: left; ' +
                 'border: 5px solid rgb(0,0,0);">x</div>').appendTo("body");
             expect( node.width() ).near(  7, 1.35 );
