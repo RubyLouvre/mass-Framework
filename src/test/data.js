@@ -33,6 +33,7 @@ $.define("data","more/spec,data",function(){
             $.data(b,"sex","man");
             //合并数据
             $.mergeData(b,a);
+         //   alert($.data(b))
             expect($.data(a)).log()
             expect($.data(b)).log()
             delete $.data(b).sex;

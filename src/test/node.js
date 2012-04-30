@@ -93,8 +93,7 @@ $.define("test/node","more/spec,node",function($$){
 
         },
         data: function(){
-            // '<ul id="aaa"><li class="_travel" id="aaaa"><b>foo</b></li><li class="_travel" id="bar">bar</li><li id="baz">baz</li></ul>'
-            //  var ul = $("#aaa",idoc2)
+
             var children = ul.children();
             children.data("_test_children","司徒正美");
             //测试批量赋值

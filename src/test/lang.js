@@ -111,7 +111,7 @@ $.define("lang","lang,more/spec",function( $$ ){
             expect( $.isArrayLike(window)).ng();
             //用于下面的对arguments的判定
             expect( $.type(arguments)).eq("Arguments");
-            expect( arguments.length ).eq( 0 );
+            expect( isFinite(arguments.length) ).ok()
             expect( $.isArrayLike(arguments)).ok();
             expect( $.isArrayLike(document.links)).ok();
             expect( $.isArrayLike(document.documentElement.childNodes)).ok();
