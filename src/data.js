@@ -5,7 +5,7 @@ $.define("data", "lang", function(){
     //$.log("已加载data模块");
     var remitter = /object|function/;
     $.mix( $, {
-        _db: {},
+        "@data": {},
         // 读写数据
         data : function( target, name, data, pvt ) {
             if(target && remitter.test(typeof target)){//只处理HTML节点与普通对象
@@ -14,7 +14,7 @@ $.define("data", "lang", function(){
                     return id;
                 }
                 var getByName = typeof name === "string",
-                database = isEl ? $._db: target,
+                database = isEl ? $["@data"]: target,
                 table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
                     data:{}
                 });
@@ -76,7 +76,7 @@ $.define("data", "lang", function(){
                     return;
                 }
                 var  clear = 1, ret = typeof name == "string",
-                database = target.nodeType === 1  ? $._db : target,
+                database = target.nodeType === 1  ? $["@data"] : target,
                 table = database["@data_"+id] ;
                 if ( table && ret ) {
                     if(!pvt){
@@ -131,4 +131,5 @@ $.define("data", "lang", function(){
 2011.10.21 强化mergeData，可以拷贝事件
 2012.1.31 简化$.Object.merge的调用
 2012.4.5 修正mergeData BUG, 让$.data能获取HTML5 data-*
+2012.5.2 $._db -> $["@data]
 */
