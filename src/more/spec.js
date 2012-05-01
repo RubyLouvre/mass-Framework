@@ -193,8 +193,8 @@ $.define("spec","lang", function(){
         }
     });
     //暴露到全局作用域
-    global.expect = function(actual){
-        var id = arguments.callee.caller.arguments[0];
+    global.expect = function(actual, id){
+        id = id || arguments.callee.caller.arguments[0];
         return new Expect(actual, id);
     };
     $.fixture = function( title, asserts ) {
