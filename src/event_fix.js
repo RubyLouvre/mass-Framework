@@ -3,10 +3,7 @@
 //==========================================
 $.define("event_fix", !!document.dispatchEvent, function(){
     //模拟IE678的reset,submit,change的事件代理
-    var submitWhich = $.oneObject("13,108"),
-    submitInput = $.oneObject("submit,image"),
-    submitType  = $.oneObject("text,password,textarea"),
-    rform  = /^(?:textarea|input|select)$/i ,
+    var rform  = /^(?:textarea|input|select)$/i ,
     changeType = {
         "select-one": "selectedIndex",
         "select-multiple": "selectedIndex",
@@ -29,10 +26,11 @@ $.define("event_fix", !!document.dispatchEvent, function(){
     function delegate( fn ){ 
         return function( src, selector, type ){
             var adapter = $.event.eventAdapter,
-            fix = !adapter[ type ] || !adapter[ type ].check || adapter[ type ].check( src );
+            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src );
             return (fix || selector) ? fn(src, type, fix) : false;
         }
     }
+
     var facade = $.event = {
         eventAdapter:{
             //input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
@@ -43,33 +41,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 bindType: "change",
                 delegateType: "change"
             },
-            //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
-            reset: {
-                setup: delegate(function( src ){
-                    $.fn.on.call( src, "click._reset keypress._reset", function( e ) {
-                        if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
-                            facade._dispatch( [ src ], "reset", e );
-                        }
-                    });
-                }),
-                teardown: delegate(function( src ){
-                    facade.unbind.call( src, "._reset" );
-                })
-            },
-            //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
-            submit: {
-                setup: delegate(function( src ){
-                    $.fn.on.call( src, "click._submit keypress._submit", function( e ) {
-                        var el = e.target, type = el.type;
-                        if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
-                            facade._dispatch( [ src ], "submit", e );
-                        }
-                    });
-                }),
-                teardown: delegate(function( src ){
-                    facade.unbind.call( src, "._submit" );
-                })
-            },
+
             change: {//change事件的冒泡情况 IE6-9全灭
                 check: function(src){
                     return rform.test(src.tagName) && /radio|checkbox/.test(src.type)
@@ -109,7 +81,27 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             }
         }
     }
+    var adapter = facade.eventAdapter;
+    //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
+    //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
+    "submit,reset".replace( $.rword, function( type ){
+        adapter[ type ] = {
+            setup: delegate(function( src ){
+                $.fn.on.call( src, "click._"+type+" keypress._"+type, function( e ) {
+                    var el = e.target;
+                    if( el.form && (adapter[ type ].keyCode[ e.which] || adapter[ type ].kind[  el.type ] ) ){
+                        facade._dispatch( [ src ], type, e );
+                    }
+                });
+            }),
+            keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
+            kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
+            teardown: delegate(function( src ){
+                facade.unbind.call( src, "._"+type );
+            })
+        };
+    });
 });
-
+//2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 
 
