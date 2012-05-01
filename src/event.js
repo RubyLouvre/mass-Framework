@@ -57,13 +57,15 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
             //把需要的数据储存到里面,而现在我们就把一个叫events的对象储放都它里面,
             //而这个event的表将用来放置各种事件类型与对应的回调函数
+            if(arguments.length > 1 ){
+                throw "$.event bind method only need one argument, and it's a hash!"
+            }
             var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
             types = hash.type, fn = hash.callback,selector = hash.selector, callback;
             if(target.nodeType === 3 || target.nodeType === 8 || !events){
                 return
             }
             hash.uuid =  $.getUid(fn); //确保UUID，bag与callback的UUID一致
-          
             if( DOM ){ //处理DOM事件
                 callback = events.callback ||  (events.callback = function( e ) {
                     return ((e || event).type !== facade.fireType ) ? facade.dispatch.apply( callback.target, arguments ) : void 0;
@@ -74,7 +76,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             events = events.events || (events.events = {});
             //对多个事件进行绑定
             types.replace( $.rword, function( old ){
-                var 
+                var
                 tns = rtypenamespace.exec( old ) || [],//"focusin.aaa.bbb"
                 namespace = ( tns[2] || "" ).split( "." ).sort(),//取得命名空间 "aaa.bbb"
                 adapter = DOM && eventAdapter[ tns[1] ] || {},// focusin -> focus
@@ -85,7 +87,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     type: type,
                     origType: tns[1],
                     namespace: namespace.join(".")
-                }, hash, false); 
+                }, hash, false);
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if( DOM && !queue.length  ){
                     adapter = eventAdapter[ type ] || {};
@@ -398,7 +400,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 });
                 if (!(method in this)) {
                     this[method] = function() {
-                        //  $.log([].concat.apply([name], arguments))
                         return $.fn.on.apply(this, [].concat.apply([name], arguments));
                     };
                 }
