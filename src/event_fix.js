@@ -83,7 +83,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                             subscriber[ tid] = target;//表明其已注册
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid(src) ] = src;//此孩子可能同时要向N个顶层元素报告变化
-                            facade.bind.call( target,"propertychange._change", changeNotify );
+                            $.fn.bind.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
                             if(type === "change"){
                                 $._data(src, "_change_fire", $.bind(target, "change", changeFire.bind(target, e) ));
