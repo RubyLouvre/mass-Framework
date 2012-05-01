@@ -317,7 +317,16 @@
 
             <p>推而广之，我们可以限制这个回调函数只能调用两次或三次，而不像YUI，jQuery的那样只能调用一次！</p>
         </fieldset>
-
+        <p>event.stopImmediatePropagation</p>
+        <p>如果某个元素有多个相同类型事件的事件监听函数,则当该类型的事件触发时,
+            多个事件监听函数将按照顺序依次执行.如果某个监听函数执行了 event.stopImmediatePropagation()方法,
+            则除了该事件的冒泡行为被阻止之外(event.stopPropagation方法的作用),
+            该元素绑定的其余相同类型事件的监听函数的执行也将被阻止.</p>
+        <table class="compat-table"> <tbody>
+                <tr> <th>Feature</th>
+                    <th>Firefox (Gecko)</th>
+                    <th>Chrome</th> <th>Internet Explorer</th> <th>Opera</th> <th>Safari</th> </tr> <tr> <td>Basic support</td> <td>10.0 (10)
+                    </td> <td><span style="color: #888" title="Please update this with the earliest version of support.">(Yes)</span></td> <td>9.0</td> <td><span style="color: #888" title="Please update this with the earliest version of support.">(Yes)</span></td> <td><span style="color: #888" title="Please update this with the earliest version of support.">(Yes)</span></td> </tr> </tbody> </table>
     </article>
 </body>
 </html>

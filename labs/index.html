@@ -8,18 +8,45 @@
         <script type="text/javascript" src="../src/mass.js">
 
         </script>
+        <style>
+            .enemy{
+                background:red;
+            }
+        </style>
         <script>
-            $.require("ready,lang",function(){
-                //$.log($.fn.append+"")
-              $.log( $.lang("aaabbbcc").contains("bbb").value())
+            $.require("ready,event,more/spec",function(){
+                $("form").submit(function(){
+                    $.log("dddddddddddddd")
+                });
+          
             })
         </script>
     </head>
     <body>
-        <div class="enemy">敌人</div>
-        <div class="enemy">敌人3</div>
-        <div class="enemy">敌人5</div>
-        <div class="me">me</div>
+        <form id="form1" action="javascript:void(0)">
+            <input type="checkbox" id="input1">
+            <select id="select1">
+                <option>11111</option>
+                <option>222222</option>
+                <option>333333</option>
+            </select>
+            <input type="submit" value="submit" id="submit1"/>
+        </form>
 
+        var form = $("#form1")[0];
+        form.attachEvent("onsubmit",function(){
+        $.log(window.event)
+        });
+
+        function fireEvent(el, type, e){
+        if ( document.dispatchEvent ){
+        e = document.createEvent("HTMLEvents");
+        e.initEvent(type, true, true );
+        el.dispatchEvent( e );
+        }else {
+        el.fireEvent( 'on'+type );
+        }
+        }
+        fireEvent(form, "submit");
     </body>
 </html>
