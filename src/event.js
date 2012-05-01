@@ -208,6 +208,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }else{//普通对象的自定义事件
                 facade.dispatch.apply(target, args);
             }
+            return this;
         },
         filter: function( cur, parent, expr ){
             var matcher = typeof expr === "function"? expr : expr.input ? quickIs : $.match
@@ -397,6 +398,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 });
                 if (!(method in this)) {
                     this[method] = function() {
+                        //  $.log([].concat.apply([name], arguments))
                         return $.fn.on.apply(this, [].concat.apply([name], arguments));
                     };
                 }
@@ -532,7 +534,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
                 hash.times = hash.times > 0  ? hash.times : Infinity;
                 hash.selector =  hash.selector ? quickParse( hash.selector ) : false
             }
-            if(typeof this.each === "function"){
+            if(this.mass && this.each){
                 return this.each(function() {
                     facade[ mapper ].call( this, hash );
                 });
@@ -575,9 +577,13 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
         },
         fire: function(  ) {
             var args = arguments;
-            return this.each(function() {
-                $.event.fire.apply(this, args );
-            });
+            if(this.mass && this.each){
+                return this.each(function() {
+                    $.event.fire.apply(this, args );
+                });
+            }else{
+                return $.event.fire.apply(this, args );
+            }
         }
     });
 
@@ -606,6 +612,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
 2012.2.9 完美支持valuechange事件
 2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
 2012.4.12 修正触摸屏下的pageX pageY
+2012.5.1 让$.fn.fire支持自定义事件
 */
 
 
