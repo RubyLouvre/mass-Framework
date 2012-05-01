@@ -46,7 +46,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
             reset: {
                 setup: delegate(function( src ){
-                    facade.bind.call( src, "click._reset keypress._reset", function( e ) {
+                    $.fn.on.call( src, "click._reset keypress._reset", function( e ) {
                         if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
                             facade._dispatch( [ src ], "reset", e );
                         }
@@ -59,7 +59,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
             submit: {
                 setup: delegate(function( src ){
-                    facade.bind.call( src, "click._submit keypress._submit", function( e ) {
+                    $.fn.on.call( src, "click._submit keypress._submit", function( e ) {
                         var el = e.target, type = el.type;
                         if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
                             facade._dispatch( [ src ], "submit", e );
@@ -83,7 +83,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                             subscriber[ tid] = target;//表明其已注册
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid(src) ] = src;//此孩子可能同时要向N个顶层元素报告变化
-                            $.fn.bind.call( target,"propertychange._change", changeNotify );
+                            $.fn.on.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
                             if(type === "change"){
                                 $._data(src, "_change_fire", $.bind(target, "change", changeFire.bind(target, e) ));
@@ -99,7 +99,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                     $.unbind( src, "change", $._data(src, "_change_fire")  );
                     els = $.removeData( src, "subscriber", true ) || {};
                     for( i in els){
-                        $.unbind( els[i],"._change" );
+                        facade.unbind.call( els[i], "._change" );
                         var publisher = $._data( els[i], "publisher");
                         if(publisher){
                             delete publisher[ src.uniqueNumber ];
