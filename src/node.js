@@ -4,14 +4,6 @@
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
-
-    if( !support.cloneHTML5 ){
-        "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace( $.rword, function( tag ){
-            document.createElement( tag );////让IE6789支持HTML5的新标签
-            document.createElement( tag.toUpperCase() );
-        });
-    }
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
@@ -474,20 +466,19 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-
-    function shimCloneNode( outerHTML ) {
-        var div = document.createElement( "div" );
-        document.body.appendChild(div)
+    var div = document.createElement( "div" );
+    function shimCloneNode( outerHTML, tree ) {
+        tree.appendChild(div);
         div.innerHTML = outerHTML;
-        document.body.removeChild(div)
+        tree.removeChild(div);
         return div.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var outerHTML = node.outerHTML;
+        var outerHTML = document.createElement(node.nodeName).outerHTML;
         //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
         var neo = !support.cloneHTML5 && node.outerHTML && (outerHTML.indexOf( unknownTag ) === 0) ?
-        shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
+        shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
             if(!support.cloneNode ){
