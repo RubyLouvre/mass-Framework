@@ -475,10 +475,13 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var outerHTML = document.createElement(node.nodeName).outerHTML;
+        var bool //!undefined === true;
         //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-        var neo = !support.cloneHTML5 && node.outerHTML && (outerHTML.indexOf( unknownTag ) === 0) ?
-        shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
+        if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
+            var outerHTML = document.createElement(node.nodeName).outerHTML;
+            bool = outerHTML.indexOf( unknownTag ) // !0 === true;
+        }
+        var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
             if(!support.cloneNode ){
