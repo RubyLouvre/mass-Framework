@@ -466,7 +466,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-    var div = document.createElement( "div" );
+    var div = document.createElement( "div" );//缓存parser，防止反复创建
     function shimCloneNode( outerHTML, tree ) {
         tree.appendChild(div);
         div.innerHTML = outerHTML;
