@@ -21,6 +21,7 @@ void function( global, DOC ){
         "undefined"               : "Undefined"
     },
     toString = class2type.toString;
+
     /**
      * @class $
      * mass Framework拥有两个命名空间,
@@ -191,6 +192,7 @@ void function( global, DOC ){
             return result;
         }
     });
+
     $.noop = $.error = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
@@ -259,7 +261,7 @@ void function( global, DOC ){
                     }
                 }
                 for(var i in fn){
-                   method[i] = fn[i];
+                    method[i] = fn[i];
                 }
                 method["@debug"] = fn;
                 method.toString = function(){
@@ -428,7 +430,11 @@ void function( global, DOC ){
                 fireReady();
             }
         });
-        if( $.html.doScroll && self.eval === top.eval ){
+        if( $.html.doScroll && self.eval === top.eval ){ //支持HTML5
+            ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+                "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
+                document.createElement(tag);
+            });
             doScrollCheck();
         }
     }
