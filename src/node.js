@@ -129,6 +129,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         },
         //取得或设置节点的innerHTML属性
         html: function( item ){
+            item = item === void 0 ? item : item == null ?  '' : item+""
             return $.access(this, 0, item, function( el ){//getter
                 //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
                 //为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
@@ -137,29 +138,28 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
-            }, function(){//setter
-                item = item == null ?  '' : item+"";////这里的隐式转换也是防御性编程的一种
+            }, function(el, _, value){//setter
                 //接着判断innerHTML属性是否符合标准,不再区分可读与只读
                 //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
                 //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
-                if ( support.innerHTML && (!rcreate.test(item) && !rnest.test(item)) ) {
+                if ( support.innerHTML && (!rcreate.test(value) && !rnest.test(value)) ) {
                     try {
-                        for ( var i = 0, node; node = this[ i++ ]; ) {
-                            if ( node.nodeType === 1 ) {
-                                $.slice( node[TAGS]("*") ).forEach( cleanNode );
-                                node.innerHTML = item;
+                        for ( var i = 0; el = this[ i++ ]; ) {
+                            if ( el.nodeType === 1 ) {
+                                $.slice( el[TAGS]("*") ).forEach( cleanNode );
+                                el.innerHTML = value;
                             }
                         }
                         return;
                     } catch(e) {};
                 }
-                this.empty().append( item );
-            });
+                this.empty().append( value );
+            }, this);
         },
         // 取得或设置节点的text或innerText或textContent属性
         text: function( item ){
-            return $.access(this, 0, item, function( el ){//getter
-                if( !el ){
+            return $.access(this, 0, item, function( el ){
+                if( !el ){//getter
                     return "";
                 }else if(el.tagName == "OPTION" || el.tagName === "SCRIPT"){
                     return el.text;
@@ -167,7 +167,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return el.textContent || el.innerText || $.getText( [el] );
             }, function(){//setter
                 this.empty().append( this.ownerDocument.createTextNode( item ));
-            });
+            },this);
         },
         // 取得或设置节点的outerHTML
         outerHTML: function( item ){
@@ -176,9 +176,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                     return "outerHTML" in el ? el.outerHTML :outerHTML( el );
                 }
                 return null;
-            }, function( ){
+            }, function(){
                 this.empty().replace( item );
-            });
+            }, this);
         }
     });
     $.fn = $.prototype;
@@ -241,30 +241,25 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             }
         },
         //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
-        access: function( elems, key, value, getter, setter ) {
+        access: function( elems, key, value, getter, setter, bind ) {
             var length = elems.length;
-            setter = setter || getter;
-            //为所有元素设置N个属性
+            setter = typeof setter === "function" ? setter : getter;
+            bind = arguments[arguments.length - 1];
             if ( typeof key === "object" ) {
-                for(var k in key){
+                for(var k in key){            //为所有元素设置N个属性
                     for ( var i = 0; i < length; i++ ) {
-                        setter( elems[i], k, key[k] );
+                        setter.call( bind, elems[i], k, key[k] );
                     }
                 }
                 return elems;
             }
             if ( value !== void 0 ) {
-                if( key === 0 ){//0法则
-                    setter.call( elems, value );
-                }else{
-                    for ( i = 0; i < length; i++ ) {
-                        setter( elems[i], key, value );
-                    }
+                for ( i = 0; i < length; i++ ) {
+                    setter.call(bind, elems[i], key, value );
                 }
                 return elems;
-            }
-            //取得第一个元素的属性
-            return length ? getter( elems[0], key ) : void 0;
+            } //取得第一个元素的属性, getter的参数总是很小的
+            return length ? getter.call( bind, elems[0], key ) : void 0;
         },
         /**
          * 将字符串转换为文档碎片，如果没有传入文档碎片，自行创建一个
@@ -449,8 +444,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     $.implement({
         data: function( key, item ){
-            return $.access( this, key, item, function( ){
-                return  $.data.apply( null, arguments );
+            return $.access( this, key, item, function(el){
+                return  $.data( el, key, item );
             })
         },
         removeData: function( key, pv ) {
@@ -748,4 +743,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.3.9 添加一些数组方法
 2012.4.5 使用isArrayLike精简init方法
 2012.4.29 重构$.access与$.fn.data
+2012.5.4 $.access添加第六个可选参数，用于绑定作用域，因此顺带重构了html, text, outerHTML,data原型方法
  */
