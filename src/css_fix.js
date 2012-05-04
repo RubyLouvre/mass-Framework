@@ -2,11 +2,11 @@
 //  样式补丁模块
 //==========================================
 $.define("css_fix", !!top.getComputedStyle, function(){
-   // $.log("已加载css_fix模块");
+    // $.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {},
     ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
     rnumpx = /^-?\d+(?:px)?$/i, rnum = /^-?\d/;
-     //=========================　处理　opacity　=========================
+    //=========================　处理　opacity　=========================
     adapter[ "opacity:get" ] = function( node, op ){
         //这是最快的获取IE透明值的方式，不需要动用正则了！
         if(node.filters.alpha){
@@ -79,66 +79,80 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         }
         return ret === "" ? "auto" : border[ret] ||  ret;
     }
-    $.transform = function( node, param ){
-        var meta = $._data(node,"transform"), ident  = "DXImageTransform.Microsoft.Matrix",arr = [1,0,0,1,0,0], m
+    var ident  = "DXImageTransform.Microsoft.Matrix"
+
+    adapter[ "transform:get" ] = function(node){
+        var meta = $._data(node,"transform")
         if(!meta){
             //http://msdn.microsoft.com/en-us/library/ms533014(v=vs.85).aspx
-            m = node.filters ? node.filters[ident] : 0;
-            arr = m ? [m.M11, m.M12, m.M21, m.M22, m.Dx, m.Dy] : arr;
-            meta = $._toMatrixObject(arr);
-            meta.rotate = - meta.rotate;
+            var m = node.filters ? node.filters[ident] : 0;
+            var arr = m ? [m.M11, m.M12, m.M21, m.M22, m.Dx, m.Dy] : [1,0,0,1,0,1];
+            meta = Matrix2D()
+            meta.reset.apply(meta, arr)
             //保存到缓存系统，省得每次都计算
             $._data(node,"transform",meta);
         }
-        if(arguments.length === 1){
-            return meta;//getter
-        }
-        //setter
-        meta = $._data(node,"transform",{
-            scaleX:     param.scaleX     === void 0 ? meta.scaleX     : param.scaleX,
-            scaleY:     param.scaleY     === void 0 ? meta.scaleY     : param.scaleY,
-            rotate:     param.rotate     === void 0 ? meta.rotate     : param.rotate,
-            translateX: param.translateX === void 0 ? meta.translateX : parseInt(param.translateX)|0,
-            translateY: param.translateY === void 0 ? meta.translateY : parseInt(param.translateY)|0
-        });
-
-        //注意：IE滤镜和其他浏览器定义的角度方向相反
-        var r = -$._all2rad(meta.rotate),
-        cos  = Math.cos(r ), sin = Math.sin(r),
-        mtx   = [ 
-        cos * meta.scaleX,  sin * meta.scaleX, 0,
-        -sin * meta.scaleY, cos * meta.scaleY, 0,
-        meta.translateX,    meta.translateY,   1],
-        cxcy= $._data(node,"cxcy");
-        if (!cxcy) {
-            var rect = node.getBoundingClientRect(),
-            cx = (rect.right  - rect.left) / 2, // center x
-            cy = (rect.bottom - rect.top)  / 2; // center y
-            if(node.currentStyle.hasLayout){
-                node.style.zoom = 1;
-            }
-            //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
-            //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
-            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
-            cxcy =  $._data(node,"cxcy", {
-                cx: cx, 
-                cy: cy
-            });
-        }
-        m = node.filters[ident];
-        m.M11 = mtx[0];
-        m.M12 = mtx[1];
-        m.M21 = mtx[3];
-        m.M22 = mtx[4];
-        m.Dx  = mtx[6];
-        m.Dy  = mtx[7];
-        // recalc center
-        rect = node.getBoundingClientRect();
-        cx = (rect.right  - rect.left) / 2;
-        cy = (rect.bottom - rect.top)  / 2;
-        node.style.marginLeft = cxcy.cx - cx + "px";
-        node.style.marginTop  = cxcy.cy - cy + "px";
+        return meta.toString()
     }
+    var mmap = {}
+    "skewX,skewY,scaleX,scaleY,translateX,translateY".replace($.rword, function(name){
+        mmap[name.toLowerCase()] = name
+    });
+    adapter[ "transform:set" ] = function(node, name, value){
+        var meta = $._data(node,"transform")
+        if(!meta){
+            adapter[ "transform:get" ](node)
+            meta = $._data(node,"transform")
+        }
+         //注意：IE滤镜和其他浏览器定义的角度方向相反
+        value.replace(/(\w+\)(([^)]+)\)/g,function(a,b,c){
+            b = mmap[b] || b;
+            c = c.replace(/px/g,"").match($.rword) || []
+            meta[b].apply(meta, c);
+            var m = node.filters[ident];
+            m.M11 = meta.a
+            m.M12 = -meta.b
+            m.M21 = -meta.c
+            m.M22 = meta.d
+            m.Dx  = meta.tx;
+            m.Dy  = meta.ty;
+            //下面是复杂的位移代码
+        })
+
+        
+    }
+
+//    $.transform = function( node, param ){
+//        cxcy= $._data(node,"cxcy");
+//        if (!cxcy) {
+//            var rect = node.getBoundingClientRect(),
+//            cx = (rect.right  - rect.left) / 2, // center x
+//            cy = (rect.bottom - rect.top)  / 2; // center y
+//            if(node.currentStyle.hasLayout){
+//                node.style.zoom = 1;
+//            }
+//            //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
+//            //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
+//            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
+//            cxcy =  $._data(node,"cxcy", {
+//                cx: cx,
+//                cy: cy
+//            });
+//        }
+//        m = node.filters[ident];
+//        m.M11 = mtx[0];
+//        m.M12 = mtx[1];
+//        m.M21 = mtx[3];
+//        m.M22 = mtx[4];
+//        m.Dx  = mtx[6];
+//        m.Dy  = mtx[7];
+//        // recalc center
+//        rect = node.getBoundingClientRect();
+//        cx = (rect.right  - rect.left) / 2;
+//        cy = (rect.bottom - rect.top)  / 2;
+//        node.style.marginLeft = cxcy.cx - cx + "px";
+//        node.style.marginTop  = cxcy.cy - cy + "px";
+//    }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
