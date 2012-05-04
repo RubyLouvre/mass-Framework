@@ -3,11 +3,8 @@
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     $.log( "已加载css模块" );
-    var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
-    rad2deg = 180/Math.PI,
-    deg2rad = Math.PI/180,
-    supportFloat32Array = "Float32Array" in window,
-    prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
+
+    var prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
     adapter = $.cssAdapter = $.cssAdapter || {};
     function cssMap(name){
         return cssMap[name] ||  $.String.camelize( name );
@@ -36,8 +33,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     }
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     $.implement({
-        css : function( name, value ){
-            return $.access( this, name, value, $.css );
+        css : function( name, value , neo){
+            if(typeof name === "string"){
+                neo = $.cssName(name)
+                neo = neo != name ? neo : false
+            }
+            return $.access( this, name, value, $.css, neo  );
         },
         rotate : function( value ){
             return  this.css( "rotate", value ) ;
@@ -65,7 +66,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 return $.scrollbarWidth.ret
             }
             var test =  $('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body");
-            var ret = test[0].offsetWidth - test[0].clientWidth;              
+            var ret = test[0].offsetWidth - test[0].clientWidth;
             test.remove();
             return $.scrollbarWidth.ret = ret;
         },
@@ -73,213 +74,25 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function( node, name, value){
             if(node.style){
-                name = cssMap( name );
+                name = typeof this === "string" ? this : cssMap( name );
                 if( value === void 0){ //取值
-                    return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, cssMap(name) );
+                    return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
                 }else {//设值
                     var temp;
                     if ( typeof value === "string" && (temp = rrelNum.exec( value )) ) {
                         value = ( +( temp[1] + 1) * + temp[2] ) + parseFloat( $.css( node , name, void 0, 1 ) );
                     }
-
                     if ( isFinite( value ) && !$.cssNumber[ name ] ) {
                         value += "px";
                     }
                     (adapter[name+":set"] || adapter[ "_default:set" ])( node, name, value );
                 }
             }
-        },
-        //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
-        _all2deg : function (value) {
-            value += "";
-            return ~value.indexOf("deg") ?  parseInt(value,10):
-            ~value.indexOf("grad") ?  parseInt(value,10) * 2/1.8:
-            ~value.indexOf("rad") ?   parseInt(value,10) * rad2deg:
-            parseFloat(value);
-        },
-        _all2rad :function (value){
-            return $._all2deg(value) * deg2rad;
-        },
-        //将 skewx(10deg) translatex(150px)这样的字符串转换成3*2的距阵
-        _toMatrixArray: function( transform ) {
-            transform = transform.split(")");
-            var  i = -1, l = transform.length -1, split, prop, val,
-            prev = supportFloat32Array ? new Float32Array(6) : [],
-            curr = supportFloat32Array ? new Float32Array(6) : [],
-            rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0];
-            prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
-            prev[1] = prev[2] = prev[4] = prev[5] = 0;
-            // Loop through the transform properties, parse and multiply them
-            while ( ++i < l ) {
-                split = transform[i].split("(");
-                prop = split[0].trim();
-                val = split[1];
-                curr[0] = curr[3] = 1;
-                curr[1] = curr[2] = curr[4] = curr[5] = 0;
-
-                switch (prop) {
-                    case "translateX":
-                        curr[4] = parseInt( val, 10 );
-                        break;
-
-                    case "translateY":
-                        curr[5] = parseInt( val, 10 );
-                        break;
-
-                    case "translate":
-                        val = val.split(",");
-                        curr[4] = parseInt( val[0], 10 );
-                        curr[5] = parseInt( val[1] || 0, 10 );
-                        break;
-
-                    case "rotate":
-                        val = $._all2rad( val );
-                        curr[0] = Math.cos( val );
-                        curr[1] = Math.sin( val );
-                        curr[2] = -Math.sin( val );
-                        curr[3] = Math.cos( val );
-                        break;
-
-                    case "scaleX":
-                        curr[0] = +val;
-                        break;
-
-                    case "scaleY":
-                        curr[3] = val;
-                        break;
-
-                    case "scale":
-                        val = val.split(",");
-                        curr[0] = val[0];
-                        curr[3] = val.length > 1 ? val[1] : val[0];
-                        break;
-
-                    case "skewX":
-                        curr[2] = Math.tan( $._all2rad( val ) );
-                        break;
-
-                    case "skewY":
-                        curr[1] = Math.tan( $._all2rad( val ) );
-                        break;
-
-                    case "skew":
-                        val = val.split(",");
-                        curr[2] = Math.tan( $._all2rad( val[0]) );
-                        val[1] && ( curr[1] = Math.tan( $._all2rad( val[1] )) );
-                        break;
-
-                    case "matrix":
-                        val = val.split(",");
-                        curr[0] = val[0];
-                        curr[1] = val[1];
-                        curr[2] = val[2];
-                        curr[3] = val[3];
-                        curr[4] = parseInt( val[4], 10 );
-                        curr[5] = parseInt( val[5], 10 );
-                        break;
-                }
-
-                // Matrix product (array in column-major order)
-                rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
-                rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
-                rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
-                rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
-                rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
-                rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
-
-                prev = [ rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5] ];
-            }
-            return rslt;
-        },
-        // 将矩阵转换为一个含有 rotate, scale and skew 属性的对象
-        // http://hg.mozilla.org/mozilla-central/file/7cb3e9795d04/layout/style/nsStyleAnimation.cpp
-        _toMatrixObject: function(/*Array*/matrix) {
-            var scaleX
-            , scaleY
-            , XYshear
-            , A = matrix[0]
-            , B = matrix[1]
-            , C = matrix[2]
-            , D = matrix[3] ;
-            // matrix is singular and cannot be interpolated
-            if ( A * D - B * C ) {
-                // step (3)
-                scaleX = Math.sqrt( A * A + B * B );
-                A /= scaleX;
-                B /= scaleX;
-                // step (4)
-                XYshear  = A * C + B * D;
-                C -= A * XYshear ;
-                D -= B * XYshear ;
-                // step (5)
-                scaleY = Math.sqrt( C * C + D * D );
-                C /= scaleY;
-                D /= scaleY;
-                XYshear /= scaleY;
-                // step (6)
-                // A*D - B*C should now be 1 or -1
-                if ( A * D < B * C ) {
-                    A = -A;
-                    B = -B;
-                    C = -C;
-                    B = -B;
-                    D = -D;
-                    XYshear = -XYshear;
-                    scaleX = -scaleX;
-                }
-
-            } else {
-                B = A = scaleX = scaleY = XYshear = 0;
-            }
-            return {
-                translateX: +matrix[4],
-                translateY: +matrix[5],
-                rotate: Math.atan2(B, A),
-                scaleX: scaleX,
-                scaleY: scaleY,
-                skew: [XYshear, 0]
-            }
         }
-      
+    
+
     });
-    //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
-    var cssTransfrom = $.cssName("transform");
-    if(cssTransfrom){
-        // gerrer(node) 返回一个包含 scaleX,scaleY, rotate, translateX,translateY, translateZ的对象
-        // setter(node, { rotate: 30 })返回自身
-        $.transform = function( node,  param ){
-            var meta = $._data(node,"transform"),arr = [1,0,0,1,0,0], m
-            if(!meta){
-                //将CSS3 transform属性中的数值分解出来
-                var style = $.css( node ,cssTransfrom );
-                if(~style.indexOf("matrix")){
-                    m = rmatrix.exec(style);
-                    arr = [m[1], m[2], m[3], m[4], m[5], m[6]];
-                }else if(style.length > 6){
-                    arr = $._toMatrixArray(style)
-                }
-                meta = $._toMatrixObject(arr);
-                //保存到缓存系统，省得每次都计算
-                $._data( node,"transform",meta);
-            }
 
-            if(arguments.length === 1){
-                return meta;//getter
-            }
-            //setter
-            meta = $._data(node,"transform",{
-                scaleX:     param.scaleX     === void 0 ? meta.scaleX     : param.scaleX,
-                scaleY:     param.scaleY     === void 0 ? meta.scaleY     : param.scaleY,
-                rotate:     param.rotate     === void 0 ? meta.rotate     : param.rotate,
-                translateX: param.translateX === void 0 ? meta.translateX : parseInt(param.translateX)|0,
-                translateY: param.translateY === void 0 ? meta.translateY : parseInt(param.translateY)|0
-            });
-            node.style[cssTransfrom]  =
-            "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
-            "rotate(" + $._all2deg( meta.rotate )  + "deg) " +
-            "translate(" + meta.translateX  + "px," + meta.translateY + "px)";
-        }
-    }
     //IE9 FF等支持getComputedStyle
     $.mix(adapter, {
         "_default:get" :function( node, name){
@@ -292,12 +105,185 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return $._all2deg(($.transform(node) || {}).rotate) ;
         },
         "rotate:set":function( node, name, value){
-            $.transform(node, {
-                rotate:value
-            });
+            adapter[cssTransfrom + ":set"](node, cssTransfrom, "rotate("+value+"deg)")
         }
     },false);
-    adapter[ "zIndex:get" ] = function( node,name, position, value ) {
+
+    //http://www.createjs.com/Docs/EaselJS/ColorMatrixFilter.js.html
+    //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/flash/geom/Matrix.html
+    // ┌     ┐┌            ┐
+    // │ a b ││  M11  -M12 │
+    // │ c d ││  -M21  M22 │
+    // └     ┘└            ┘
+    var Matrix2D = $.factory({
+        init: function(a, b, c, d, tx, ty){
+            this.a =  isFinite(a) ? parseFloat(a) : 1;//缩放或旋转图像时影响像素沿 x 轴定位的值。
+            this.b =  parseFloat(b) || 0;//旋转或倾斜图像时影响像素沿 y 轴定位的值。
+            this.c =  parseFloat(c) || 0;//旋转或倾斜图像时影响像素沿 x 轴定位的值。
+            this.d =  isFinite(d) ? parseFloat(d) : 1;//缩放或旋转图像时影响像素沿 y 轴定位的值。
+            this.tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
+            this.ty = parseFloat(ty) || 0;//沿 y 轴平移每个点的距离。
+        },
+        reset: function(){
+            this.constructor.apply(this,arguments)
+            return this
+        },
+        //http://msdn.microsoft.com/zh-tw/library/system.windows.media.matrix.append.aspx
+        //这个运算等于将这个 Matrix 结构乘以 matrix 参数。
+        //在複合转换中，个别转换的顺序非常重要。 例如，如果先旋转、再缩放，然后平移，则取得的结果会与先平移、再旋转，
+        //然后缩放的结果不同。 顺序很重要的原因之一是，旋转和缩放这类的转换是根据座标系统的原点来进行。
+        //缩放中心位于原点的对象所产生的结果，与缩放已从原点移开的对象不同。 同样地，
+        //旋转中心位于原点的对象所产生的结果，也会与旋转已从原点移开的对象不同。
+        append : function(a, b, c, d, tx, ty) {
+            var a1 = this.a;
+            var b1 = this.b;
+            var c1 = this.c;
+            var d1 = this.d;
+
+            this.a  = a*a1+b*c1;
+            this.b  = a*b1+b*d1;
+            this.c  = c*a1+d*c1;
+            this.d  = c*b1+d*d1;
+            this.tx = tx*a1+ty*c1+this.tx;
+            this.ty = tx*b1+ty*d1+this.ty;
+        },
+        appendTransform : function(x, y, scaleX, scaleY, rotation, skewX, skewY) {
+            if (rotation%360) {//后三个参数均为角度制
+                var r = rotation*Matrix2D.DEG_TO_RAD;
+                var cos = Math.cos(r);
+                var sin = Math.sin(r);
+            } else {
+                cos = 1;
+                sin = 0;
+            }
+
+            if (skewX || skewY) {
+                // TODO: can this be combined into a single append?
+                skewX *= Matrix2D.DEG_TO_RAD;
+                skewY *= Matrix2D.DEG_TO_RAD;
+                this.append(Math.cos(skewY), Math.sin(skewY), -Math.sin(skewX), Math.cos(skewX), x, y);
+                this.append(cos*scaleX, sin*scaleX, -sin*scaleY, cos*scaleY, 0, 0);
+            } else {
+                this.append(cos*scaleX, sin*scaleX, -sin*scaleY, cos*scaleY, x, y);
+            }
+        },
+        //Applies a rotation transformation to the matrix.
+        rotate : function(angle) {//以弧度为单位的旋转角度。
+            angle = rad(angle)
+            var cos = Math.cos(angle);
+            var sin = Math.sin(angle);
+
+            var a1 = this.a;
+            var c1 = this.c;
+            var tx1 = this.tx;
+
+            this.a = a1*cos-this.b*sin;
+            this.b = a1*sin+this.b*cos;
+            this.c = c1*cos-this.d*sin;
+            this.d = c1*sin+this.d*cos;
+            this.tx = tx1*cos-this.ty*sin;
+            this.ty = tx1*sin+this.ty*cos;
+        },
+
+        //Applies a scale transformation to the matrix.
+        scale : function(x, y) {
+            this.a *= x;
+            this.d *= y;
+            this.tx *= x;
+            this.ty *= y;
+        },
+        scaleX : function(sx){
+            this.scale(sx, 1);
+        },
+
+        scaleY : function(sy){
+            this.scale(1, sy);
+        },
+        //Applies a skew transformation to the matrix.
+        skew : function(skewX, skewY) {
+            skewX = rad(skewX);//角
+            skewY = rad(skewY);
+            this.append(Math.cos(skewY), Math.sin(skewY), -Math.sin(skewX), Math.cos(skewX), 0, 0);
+        },
+        skewX : function(ax){
+            this.skew(ax, 0)
+        },
+
+        skewY : function(ay){
+            this.skew(0, ay);
+        },
+        translate : function(x, y) {
+            this.tx += x;
+            this.ty += y;
+        },
+        translateX: function(x){
+            this.translate(x, 0)
+        },
+        translateY: function(y){
+            this.translate(0, y)
+        },
+        // Decomposes the matrix into transform properties (x, y, scaleX, scaleY, and rotation). Note that this these values
+        //may not match the transform properties you used to generate the matrix, though they will produce the same visual
+        //results.
+        decompose : function() {
+            var object = {}
+            object.x = this.tx;
+            object.y = this.ty;
+            object.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
+            object.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
+
+            var skewX = Math.atan2(-this.c, this.d);
+            var skewY = Math.atan2(this.b, this.a);
+
+            if (skewX == skewY) {
+                object.rotation = skewY/Matrix2D.DEG_TO_RAD;
+                if (this.a < 0 && this.d >= 0) {
+                    object.rotation += (object.rotation <= 0) ? 180 : -180;
+                }
+                object.skewX = object.skewY = 0;
+            } else {
+                object.skewX = skewX/Matrix2D.DEG_TO_RAD;
+                object.skewY = skewY/Matrix2D.DEG_TO_RAD;
+            }
+            return object;
+        },
+        toString: function(){
+            return $.format("matrix(#{0},#{1},#{2},#{3},#{4},#{5})",
+                this.a,this.b,this.c,this.b,this.tx,this.ty);
+        }
+
+    });
+    Matrix2D.DEG_TO_RAD = Math.PI/180;
+    function rad(value) {
+        value += "";
+        return  parseFloat(value) * ( ~value.indexOf("deg") ? Math.PI/180 : 1)
+    }
+
+
+    //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
+    var cssTransfrom = $.cssName("transform");
+    // if(cssTransfrom === "MozTransform"){
+    adapter[cssTransfrom + ":set"] = function(node, name, value){
+        if(value.indexOf("matrix")!=-1 && cssTransfrom === "MozTransform"){
+            value = value.replace(/([\d.-]+)\s*,\s*([\d.-]+)\s*\)/,"$1px, $2px)")
+        }
+        node.style[name] = value;
+        $.log(adapter[ "_default:get"](node,name))
+    }
+    //  }
+    //  http://granular.cs.umu.se/browserphysics/?cat=7
+    //=========================　处理　user-select　=========================
+    //https://developer.mozilla.org/en/CSS/-moz-user-select
+    //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
+    //具体支持情况可见下面网址
+    //http://help.dottoro.com/lcrlukea.php
+    var userSelect =  $.cssName("userSelect");
+    if(typeof userSelect === "string"){
+        adapter[ userSelect+":set" ] = function( node, name, value ) {
+            return node.style[ userSelect ] = value;
+        };
+    }
+    adapter[ "zIndex:get" ] = function( node, name, value, position ) {
         while ( node.nodeType !== 9 ) {
             //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
             position = $.css(node, "position" );
@@ -310,7 +296,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
             node = node.parentNode;
         }
-
         return 0;
     }
 
@@ -375,14 +360,14 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
     }
-    var cssShow = { 
-        position: "absolute", 
-        visibility: "hidden", 
-        display: "block" 
+    var cssShow = {
+        position: "absolute",
+        visibility: "hidden",
+        display: "block"
     }
     var showHidden = function(node, array){
         if( node && node.nodeType ==1 && !node.offsetWidth ){
-            var obj = { 
+            var obj = {
                 node: node
             }
             for ( name in cssShow ) {
@@ -395,7 +380,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
         }
     }
-    
+
     function getWH( node, name, extra  ) {//注意 name是首字母大写
         var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
         showHidden( node, hidden );
@@ -458,18 +443,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         };
 
     });
-    
-    //=========================　处理　user-select　=========================
-    //https://developer.mozilla.org/en/CSS/-moz-user-select
-    //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
-    //具体支持情况可见下面网址
-    //http://help.dottoro.com/lcrlukea.php
-    var userSelect =  $.cssName("userSelect");
-    if(typeof userSelect === "string"){
-        adapter[ "userSelect:set" ] = function( node, _, value ) {
-            return node.style[ userSelect ] = value;
-        };
-    }
+
+
     //=======================================================
     //获取body的offset
     function getBodyOffsetNoMargin(){
@@ -553,7 +528,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return pos;
     }
 
-    
+
     var rroot = /^(?:body|html)$/i;
     $.implement({
         position: function() {//取得元素相对于其offsetParent的坐标
@@ -670,20 +645,20 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         });
 });
 /**
-2011.9.5
-将cssName改为隋性函数,修正msTransform Bug
+2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 2011.10.10 重构position offset保持这两者行为一致，
-2011.10.14 Fix $.css BUG，如果传入一个对象，它把到getter分支了。
 2011.10.15 Fix $.css BUG  添加transform rotate API
-2011.10.20 getWH不能获取隐藏元素的BUG
 2011.10.21 修正width height的BUG
 2011.11.10 添加top,left到cssAdapter
 2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
 2012.3.2 getWH现在能获取多重隐藏元素的高宽了
 2012.4.15 对zIndex进行适配,对$.css进行元素节点检测
 2012.4.16 重构showHidden
+2012.5.4 css v2
 http://boobstagram.fr/archive
+    //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
+  
  */
 
 
