@@ -92,7 +92,7 @@ $.define("test/node","more/spec,node",function($$){
             expect( style[0].nodeType ).eq(1)
 
         },
-        data: function(){
+        "$.fn.data": function(){
 
             var children = ul.children();
             children.data("_test_children","司徒正美");

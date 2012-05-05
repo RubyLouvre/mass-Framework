@@ -1,7 +1,7 @@
 $.define("css","ready,more/random,more/spec,node,css",function(_,random){
 
     $.fixture("样式模块-css",{
-        "$.css()":function(){
+        "$.css":function(){
             var node = $('<div id="test-div" width="8px" height="5px"' +
                 'style="padding-left: 2px; ' +
                 'background: transparent; ' +
@@ -85,7 +85,7 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             style.remove();
             test_filter.remove();
         },
-        "$.width/height()":function(){
+        "$.width/height":function(){
             var node = $('<div id="test-div" ' +
                 'style="padding-left: 2pt; ' +
                 'background: transparent; ' +
@@ -143,6 +143,17 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             style.remove();
             node.remove();
         },
+        "$.ccs('transform')": function() {
+            var node = $('<div style="background:red;width:100px;height:100px;">test</div>').appendTo("body")
+            var data = node.css("transform","rotate(15deg) translateX(230px) scale(1.5)").data("matrix",void 0, true);
+
+            expect( data.a.toFixed(2)).near( "1.45", 0.001 );
+            expect(data.b.toFixed(2)).near( "0.39", 0.001 );
+            expect(data.c.toFixed(2)).near( "-0.39", 0.001 );
+            expect(data.d.toFixed(2)).near( "1.45", 0.001 );
+            expect(data.tx.toFixed(2)).near( "222.16", 0.001 );
+            expect(data.ty.toFixed(2)).near( "59.53", 0.001 );
+        },
         "$.ccs('rorate')": function() {
             var tag = random.str(5,"rorate");
             var style = $("<style>." + tag + "  {\
@@ -155,8 +166,7 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             var node = $("<div class='" + tag + "' style='" +
                 "width:20px;height:20px; '/>").appendTo("body");
             expect( node.css("rotate")).log();
-            //"取得rorate的弧度制值"
-            expect( node.css("rotate")).near( -1.5707, 0.0001);
+            expect( node.css("rotate")).near( "-90", 0.0001);
             style.remove();
             node.remove();
         },
@@ -165,7 +175,6 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
         },
         "$.css(el,left)": function(){
             var node = $("<div style='position:absolute;'/>").appendTo("body");
-             
             expect( node.css("left") ).eq((node[0].offsetLeft - document.documentElement.clientLeft) + "px");
             expect( node.offset() ).log();
             expect( node.css("left") ).log();
