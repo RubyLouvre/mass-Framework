@@ -443,9 +443,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         return nodes;
     }
     $.implement({
-        data: function( key, item ){
+        data: function( key, item, pv ){
             return $.access( this, key, item, function(el){
-                return  $.data( el, key, item );
+                return  $.data( el, key, item,  pv === true  );
             })
         },
         removeData: function( key, pv ) {
@@ -672,7 +672,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         parentsUntil: function( el, expr ){
             return travel( el, "parentNode", expr ).reverse();
         },
-        next: function( el ){
+        next: function( el ){//nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
             return travel( el, "nextSibling", true );
         },
         nextAll: function( el ){
@@ -690,7 +690,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         prevUntil: function( el, expr ){
             return travel( el, "previousSibling", expr ).reverse();
         },
-        children: function( el ){
+        children: function( el ){//支持情况chrome1+ FF3.5+,IE5+,opera10+,safari4+
             return  el.children ? $.slice( el.children ) :
             $.slice( el.childNodes ).filter(function( node ){
                 return node.nodeType === 1;
