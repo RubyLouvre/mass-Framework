@@ -18,42 +18,27 @@
             }
         </style>
         <script>
-            var Matrix = function(){
-                for(var i = 0; i < 9; i++){
-                    //Math.floor(i /3) 决定行号 x轴
-                    //i % 3 决定列号 y 轴
-                    this[ Math.floor(i / 3) +","+(i % 3) ] = arguments[i];
-                }
-            }
-            Matrix.prototype.multiply = function(matrix) {
-                var ret = new Matrix(0,0,0,0,0,0,0,0,0);
-                for(var key in ret){
-                    if(~key.indexOf(",")){
-                        var r = key.charAt(0), c = key.charAt(2)
-                        for(var i = 0; i < 3; i++ ){
-                            ret[key] += (this[r+","+i] * matrix[i+","+c])
-                           
-                        }
-                    }
-                }
-                for(var key in ret){
-                    if(~key.indexOf(",")){
-                        this[key] = ret[key]
-                    }
-                }
-                return this
-            }
-            var a = new Matrix(2, 8, 10, 11, 3, 7, 6, 9, 4);
-            var b = new Matrix(12, 9, 4, 5, 2, 21, 8, 4, 6);
-            console.log(a.multiply(b))
-            //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
-            //$.require("ready,node,css",function(a,b,c){
-            //顺时针转45度，然后再转45度
+            $.require("ready,css",function(){
+                var data = $("#test").css("transform"," rotate(90deg)")//rotate(45deg)
+                .data("matrix",void 0, true)
+                data.decompose2D()
+                $.log(")))))))))))))))))))))");
+
+                $.log(data.a)
+                $.log(data.b)
+                $.log(data.c)
+                $.log(data.d)
+                $.log(data.tx)
+                $.log(data.ty);
+            });
+                //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
+                //$.require("ready,node,css",function(a,b,c){
+                //顺时针转45度，然后再转45度
               
-            //   var d = new D(1.41421, 1.41421, -1.41421, 1.41421, -17.0711, 1.2132);
-            //  console.log(d.reset(0,1,5,-0.2,1.4,14))
-            //matrix(1.44889, 0.388229, -0.388229, 1.44889, 222.163px, 59.5284px)
-            /*  var transform = "skewx( 10deg ) translate(150px,20px)"
+                //   var d = new D(1.41421, 1.41421, -1.41421, 1.41421, -17.0711, 1.2132);
+                //  console.log(d.reset(0,1,5,-0.2,1.4,14))
+                //matrix(1.44889, 0.388229, -0.388229, 1.44889, 222.163px, 59.5284px)
+                /*  var transform = "skewx( 10deg ) translate(150px,20px)"
                 transform.replace(/(\w+)\(([^)]+)\)/g,function(a,b,c){
                     b = map[b] || b
                     console.log(a);
@@ -63,7 +48,7 @@
                     console.log(d)
                 })*/
 
-            // })
+                // })
         </script>
     </head>
     <body>
@@ -81,7 +66,10 @@
         $.log(data.c)
         $.log(data.d)
         $.log(data.tx)
-        $.log(data.ty)
+        $.log(data.ty);
+
+
+
         <!--                transform = transform.split(")");
                 var  i = -1, l = transform.length -1, split, prop, val;
                 while(++i < l){
