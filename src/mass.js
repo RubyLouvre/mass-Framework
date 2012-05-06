@@ -199,7 +199,7 @@ void function( global, DOC ){
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
-    rdebug =  /^(init|constructor|lang|query)$|^is/,
+    rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/,
     tokens = [],//需要处理的模块名列表
     transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
     cbi = 1e5 ;//用于生成回调函数的名字
