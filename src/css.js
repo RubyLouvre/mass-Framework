@@ -134,10 +134,20 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
     //优化HTML5应用的体验细节，例如全屏的处理与支持，横屏的响应，图形缩放的流畅性和不失真，点触的响应与拖曳，Websocket的完善
     //http://www.createjs.com/Docs/EaselJS/ColorMatrixFilter.js.html
-    //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/flash/geom/Matrix.html
+    //关于JavaScript中计算精度丢失的问题 http://rockyee.iteye.com/blog/891538
+    function toFixed(d){
+        return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
+    }
     function rad(value) {
-        value += "";
-        return  parseFloat(value) * ( ~value.indexOf("deg") ? Math.PI/180 : 1)
+        if(isFinite(value)) {
+            return parseFloat(value);
+        }
+        if(~value.indexOf("deg")) {
+            return parseInt(value,10) * (Math.PI * 2 / 360);
+        } else if (~value.indexOf("grad")) {
+            return parseInt(value,10) * (Math.PI/200);
+        }
+        return parseFloat(value,10)
     }
     var Matrix = $.factory({
         init: function(xd,yd){
@@ -180,15 +190,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         get2D: function(){
             return "matrix("+[ this["0,0"],this["1,0"],this["0,1"],this["1,1"],this["2,0"],this["2,1"] ]+")";
         },
-        //http://msdn.microsoft.com/zh-tw/library/system.windows.media.matrix.append.aspx
-        //这个运算等于将这个 Matrix 结构乘以 matrix 参数。
-        //在複合转换中，个别转换的顺序非常重要。 例如，如果先旋转、再缩放，然后平移，则取得的结果会与先平移、再旋转，
-        //然后缩放的结果不同。 顺序很重要的原因之一是，旋转和缩放这类的转换是根据座标系统的原点来进行。
-        //缩放中心位于原点的对象所产生的结果，与缩放已从原点移开的对象不同。 同样地，
-        //旋转中心位于原点的对象所产生的结果，也会与旋转已从原点移开的对象不同。
         multiply: function(matrix){
             var tmp = new Matrix(Math.max(this.xd, matrix.xd),Math.max(this.yd, matrix.yd));
-            var n = tmp.xd * tmp.yd
+            var n = tmp.xd * tmp.yd, d
             for(var key in tmp){
                 if(key.match(/(\d+),(\d+)/)){
                     var r = RegExp.$1, c = RegExp.$2
@@ -198,17 +202,18 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 }
             }
             for( key in tmp) {
-                if(tmp.hasOwnProperty(key)){
-                    this[key] = tmp[key];
+                d = tmp[key]
+                if(typeof d === "number"){
+                    this[key] = toFixed(d)
                 }
             }
             return this
         },
-        //http://www.w3.org/TR/css3-2d-transforms/
+        //http://www.w3.org/TR/SVG/coords.html#RotationDefined
         translate: function(tx, ty) {
             tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
             ty = parseFloat(ty) || 0;//沿 y 轴平移每个点的距离。
-            var m = (new Matrix()).set2D(1 ,0 ,tx, 0, 1, ty);
+            var m = (new Matrix()).set2D(1 ,0, 0, 1, tx, ty);
             this.multiply(m)
         },
         translateX: function(tx) {
@@ -220,7 +225,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         scale: function(sx, sy){
             sx = isFinite(sx) ? parseFloat(sx) : 1 ;
             sy = isFinite(sy) ? parseFloat(sy) : 1 ;
-            var m = (new Matrix()).set2D( sx, 0, 0, 0, sy, 0);
+            var m = (new Matrix()).set2D( sx, 0, 0, sy, 0, 0);
             this.multiply(m)
         },
         scaleX: function(sx) {
@@ -230,31 +235,32 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             this.scale(1, sy)
         },
         rotate: function(angle){
-            angle = rad(angle)
+            angle = rad(angle);
             var cos = Math.cos(angle);
             var sin = Math.sin(angle);
-            var m = (new Matrix()).set2D( cos, -sin, 0, sin, cos, 0);
+            var m = (new Matrix()).set2D( cos, sin, -sin, cos, 0, 0);
             this.multiply(m)
         },
         skew: function(ax, ay){
-            var m = (new Matrix()).set2D( 1, Math.tan( rad(ax) ), 0, Math.tan( rad(ay) ), 1, 0);
+            var m = (new Matrix()).set2D( 1, Math.tan( rad(ax) ), Math.tan( rad(ay) ), 1, 0, 0);
             this.multiply(m)
         },
         skewX: function(ax){
-            this.skew(ax, "0");
+            this.skew(ax, 0);
         },
         skewY: function(ay){
-            this.skew("0", ay);
+            this.skew(0, ay);
         },
+        /**
         // ┌       ┐┌            ┐
         // │ a c tx││  M11  -M12 │
         // │ b d ty││  -M21  M22 │
         // └       ┘└            ┘
+        //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/flash/geom/Matrix.html
+        //参考自http://www.createjs.com/Docs/EaselJS/Matrix2D.js.html p.decompose方法
+        //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象*/
         decompose2D: function(){
-            //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/flash/geom/Matrix.html
-            //只能用于transform 2D http://www.w3.org/TR/css3-2d-transforms/
-            //参考自http://www.createjs.com/Docs/EaselJS/Matrix2D.js.html p.decompose方法
-            var ret = {}//添加FLASH表示法与CSS3最原始的表示法
+            var ret = {}
             this.a = this["0,0"]
             this.b = this["0,1"]
             this.c = this["1,0"]
@@ -286,32 +292,34 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     });
     Matrix.DEG_TO_RAD = Math.PI/180;
     $.Matrix = Matrix
-   
 
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
     cssTransfrom = $.cssName("transform");
     //缓存结果
-    function dataTransfrom(node){
-        var matrix = $._data( node, "matrix" ) || new Matrix();
-        matrix.set2D.apply(matrix, getter(node, cssTransfrom).match(/[-.\d]+/g));
-        return $._data(node, "matrix", matrix );
-    }
-    adapter[cssTransfrom + ":set"] = function(node, name, value){
-        if(value.indexOf("matrix")!=-1 && name === "MozTransform"){
-            value = value.replace(/([\d.-]+)\s*,\s*([\d.-]+)\s*\)/,"$1px, $2px)")
+    if(cssTransfrom){
+        function dataTransfrom(node){
+            var matrix = $._data( node, "matrix" ) || new Matrix();
+            matrix.set2D.apply(matrix, getter(node, cssTransfrom).match(/[-+.e\d]+/g).map(function(d){
+                return toFixed(d*1)
+            }));
+            return $._data(node, "matrix", matrix );
         }
-        node.style[name] = value;
-        dataTransfrom(node);
+        adapter[cssTransfrom + ":set"] = function(node, name, value){
+            if(value.indexOf("matrix")!=-1 && name === "MozTransform"){
+                value = value.replace(/([\d.-]+)\s*,\s*([\d.-]+)\s*\)/,"$1px, $2px)")
+            }
+            node.style[name] = value;
+            dataTransfrom(node);
+        }
     }
-
     adapter["rotate:get"] = function( node ){
         return dataTransfrom(node).decompose2D().rotation;
     }
     adapter["rotate:set"] = function( node, name, value){      
         adapter[cssTransfrom + ":set"](node, cssTransfrom, "rotate("+value+"deg)")
     }
-    //  http://granular.cs.umu.se/browserphysics/?cat=7
+    //http://granular.cs.umu.se/browserphysics/?cat=7
     //=========================　处理　user-select　=========================
     //https://developer.mozilla.org/en/CSS/-moz-user-select
     //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
@@ -338,8 +346,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return 0;
     }
-
-
 
     //=========================　处理　width height　=========================
     /**
