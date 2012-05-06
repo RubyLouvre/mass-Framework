@@ -19,26 +19,35 @@
         </style>
         <script>
             $.require("ready,css",function(){
-                var data = $("#test").css("transform"," rotate(90deg)")//rotate(45deg)
-                .data("matrix",void 0, true)
-                data.decompose2D()
-                $.log(")))))))))))))))))))))");
+             
+        var matrix = $("#test").css("transform","rotate(45deg) rotate(45deg)").data("matrix",void 0, true)
+                matrix.decompose2D();
+                $.log("a  : "+matrix.a)
+                $.log("b  : "+matrix.b)
+                $.log("c  : "+matrix.c)
+                $.log("d  : "+matrix.d)
+                $.log("tx  : "+matrix.tx)
+                $.log("ty  : "+matrix.ty);
 
-                $.log(data.a)
-                $.log(data.b)
-                $.log(data.c)
-                $.log(data.d)
-                $.log(data.tx)
-                $.log(data.ty);
+         
+           /*     var matrix = new $.Matrix(3,3,1,0,0,0,1,0,0,0,1);
+                matrix.rotate.apply(matrix,["90deg"]);
+                matrix.decompose2D();
+                $.log("a  : "+matrix.a)
+                $.log("b  : "+matrix.b)
+                $.log("c  : "+matrix.c)
+                $.log("d  : "+matrix.d)
+                $.log("tx  : "+matrix.tx)
+                $.log("ty  : "+matrix.ty);*/
             });
-                //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
-                //$.require("ready,node,css",function(a,b,c){
-                //顺时针转45度，然后再转45度
+            //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
+            //$.require("ready,node,css",function(a,b,c){
+            //顺时针转45度，然后再转45度
               
-                //   var d = new D(1.41421, 1.41421, -1.41421, 1.41421, -17.0711, 1.2132);
-                //  console.log(d.reset(0,1,5,-0.2,1.4,14))
-                //matrix(1.44889, 0.388229, -0.388229, 1.44889, 222.163px, 59.5284px)
-                /*  var transform = "skewx( 10deg ) translate(150px,20px)"
+            //   var d = new D(1.41421, 1.41421, -1.41421, 1.41421, -17.0711, 1.2132);
+            //  console.log(d.reset(0,1,5,-0.2,1.4,14))
+            //matrix(1.44889, 0.388229, -0.388229, 1.44889, 222.163px, 59.5284px)
+            /*  var transform = "skewx( 10deg ) translate(150px,20px)"
                 transform.replace(/(\w+)\(([^)]+)\)/g,function(a,b,c){
                     b = map[b] || b
                     console.log(a);
@@ -48,7 +57,7 @@
                     console.log(d)
                 })*/
 
-                // })
+            // })
         </script>
     </head>
     <body>
@@ -57,6 +66,7 @@
                 test
             </div>
         </div>
+        <!--
         var data = $("#test").css("transform"," rotate(90deg)")//rotate(45deg)
         .data("matrix",void 0, true);
         $.log(")))))))))))))))))))))");
@@ -68,9 +78,23 @@
         $.log(data.tx)
         $.log(data.ty);
 
+        var $el = $("#test")
+        var matrix = $el.css("transform","rotate(90deg)").data("matrix",void 0, true)
+        //打印浏览器使用getComputedStyle得到结果
+        $.log($el.css("transform"))
+        //打印经过$.Matrix处理过的结果
+        $.log( matrix.get2D() );
+        //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
+        matrix.decompose2D();
+        $.log(matrix.a)
+        $.log(matrix.b)
+        $.log(matrix.c)
+        $.log(matrix.d)
+        $.log(matrix.tx)
+        $.log(matrix.ty);
 
-
-        <!--                transform = transform.split(")");
+    translate(-10px,-20px) scale(2) rotate(45deg) translate(5px,10px);
+        transform = transform.split(")");
                 var  i = -1, l = transform.length -1, split, prop, val;
                 while(++i < l){
                     split = transform[i].split("(");
@@ -79,7 +103,7 @@
                     console.log(prop)
                       console.log(val)
                 }-->
-        translate(-10px,-20px) scale(2) rotate(45deg) translate(5px,10px);
+
 
     </body>
 </html>

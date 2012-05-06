@@ -36,11 +36,9 @@ var cssSandpaper = new function(){
     var reGradient = /gradient\([\s\S]*\)/g;
     var reHSL = /hsl\([\s\S]*\)/g;
 
-    // This regexp from the article
-    // http://james.padolsey.com/javascript/javascript-comment-removal-revisted/
-    var reMultiLineComment = /\/\/.+?(?=\n|\r|$)|\/\*[\s\S]+?\*\//g;
 
-    var reAtRule = /@[^\{\};]*;|@[^\{\};]*\{[^\}]*\}/g;
+
+
 
     var reFunctionSpaces = /\(\s*/g
     var reMatrixFunc = /matrix\(([^\,]+),([^\,]+),([^\,]+),([^\,]+),([^\,]+),([^\,]+)\)/g
