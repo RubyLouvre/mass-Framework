@@ -143,16 +143,27 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             style.remove();
             node.remove();
         },
+        "Matrix": function(){
+            var a = new $.Matrix(3,3,2,8,10,11,3,7,6,9,4);
+            var b = new $.Matrix(3,3,12,9,4,5,2,21,8,4,6);
+            var c = a.multiply(b);
+            expect( c.get().join(",") ).eq("144,74,236,203,133,149,149,88,237");
+            var d = new $.Matrix(2,2).set(1,1,2,0);
+            expect( d.get().join(",") ).eq("1,1,2,0");
+            var e = new $.Matrix(3,2).set(0,2,3,1,1,2);
+            expect( e.get().join(",") ).eq("0,2,3,1,1,2");
+            var g = d.multiply(e);
+            expect( g.get().join(",") ).eq("1,3,5,0,4,6");
+        },
         "$.ccs('transform')": function() {
             var node = $('<div style="background:red;width:100px;height:100px;">test</div>').appendTo("body")
             var data = node.css("transform","rotate(15deg) translateX(230px) scale(1.5)").data("matrix",void 0, true);
-
-            expect( data.a.toFixed(2)).near( "1.45", 0.001 );
-            expect(data.b.toFixed(2)).near( "0.39", 0.001 );
-            expect(data.c.toFixed(2)).near( "-0.39", 0.001 );
-            expect(data.d.toFixed(2)).near( "1.45", 0.001 );
-            expect(data.tx.toFixed(2)).near( "222.16", 0.001 );
-            expect(data.ty.toFixed(2)).near( "59.53", 0.001 );
+            expect( data["0,0"].toFixed(2) ).near( "1.45", 0.001 );
+            expect( data["0,1"].toFixed(2) ).near( "0.39", 0.001 );
+            expect( data["1,0"].toFixed(2) ).near( "-0.39", 0.001 );
+            expect( data["1,1"].toFixed(2) ).near( "1.45", 0.001 );
+            expect( data["2,0"].toFixed(2) ).near( "222.16", 0.001 );
+            expect( data["2,1"].toFixed(2) ).near( "59.53", 0.001 );
         },
         "$.ccs('rorate')": function() {
             var tag = random.str(5,"rorate");
