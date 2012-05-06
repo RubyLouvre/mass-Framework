@@ -257,6 +257,7 @@ $.define("spec","lang", function(){
                     try{
                         assert(title+"#"+name);//执行测试套件
                     }catch(err){
+                        $.log(err)
                         bag.status = "error"
                         var el = node.getElementsByTagName("kbd")[ bag.count + 1];
                         if(el){
