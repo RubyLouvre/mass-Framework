@@ -85,21 +85,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     }
     var ident  = "DXImageTransform.Microsoft.Matrix"
 
-    adapter[ "transform:get" ] = function(node){
-        var matrix = $._data(node,"matrix")
-        if(!matrix){
-            //http://msdn.microsoft.com/en-us/library/ms533014(v=vs.85).aspx
-            var m = node.filters ? node.filters[ident] : 0;
-            m = m ? [m.M11, m.M12, m.M21, m.M22, m.Dx, m.Dy] : [1,0,0,1,0,0];
-            matrix = new $.Matrix().
-            matrix.set2D.apply(matrix, m)
-            //保存到缓存系统，省得每次都计算
-            $._data(node,"matrix",matrix);
-        }
-        return matrix.toString()
-    }
-
-    adapter[ "transform:set" ] = function(node, name, value){
+    adapter[ "transform:get" ] = function(node, name){
         var matrix = $._data(node,"matrix")
         if(!matrix){
             if(!node.currentStyle.hasLayout){
@@ -108,21 +94,47 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
             //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
             node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
-            matrix = new $.Matrix()
+            //http://msdn.microsoft.com/en-us/library/ms533014(v=vs.85).aspx
+            var m = node.filters ? node.filters[ident] : 0, arr = [1,0,0,1,0,0]
+            if( m ){
+                arr = [];
+                "M11,M12,M21,M22,Dx,Dy".replace($.rword, function(d){
+                    arr.push( m[d] )
+                })
+            }
+            matrix = new $.Matrix();
+            matrix.set2D.apply(matrix, arr)
+            //保存到缓存系统，省得每次都计算
+            $._data(node,"matrix",matrix);
         }
+        return name === true ? matrix : matrix.get2D()
+    }
+
+    adapter[ "transform:set" ] = function(node, name, value){
+        var matrix =  adapter[ "transform:get" ](node, true)
         //注意：IE滤镜和其他浏览器定义的角度方向相反
         value.toLowerCase().replace(rtransform,function(a,b,c){
-            c = c.replace(/px/g,"").match($.rword) || []
-            matrix[b].apply(matrix, ["90deg"]);
+            c = c.replace(/px/g,"").match($.rword) || [];
+            matrix[b].apply(matrix, c);     
             var m = node.filters[ident];
-            m.M11 = matrix.a
-            m.M12 = matrix.c
-            m.M21 = matrix.b
-            m.M22 = matrix.d
-            m.Dx  = matrix.tx;
-            m.Dy  = matrix.ty;
-           $._data(node,"matrix",matrix)
+            m.M11 = matrix["0,0"]
+            m.M12 = -matrix["0,1"]
+            m.M21 = -matrix["1,0"]
+            m.M22 = matrix["1,1"]
+            m.Dx  = matrix["2,0"]
+            m.Dy  = matrix["2,1"]
+            //            matrix.decompose2D()
+            //            m.M11 = matrix.a
+            //            m.M12 = -matrix.b
+            //            m.M21 = -matrix.c
+            //            m.M22 = matrix.d
+            //            m.Dx  = matrix.tx
+            //            m.Dy  = matrix.ty
+            $._data(node,"matrix",matrix)
         //下面是复杂的位移代码
+        //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
+        //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
+        //https://github.com/puppybits/QTransform
         })
 
         
