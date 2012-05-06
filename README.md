@@ -1,11 +1,7 @@
 mass Framework
 ==================
-<p>贡献者列表：</p>
-<ul>
-   <li> abcd </li>
-   <li> sapjax </li>
-   <li> 教主Franky </li>
-</ul>
+<p>贡献者列表(排名不分先后)：</p>
+<p>abcd(1群) ,sapjax(2群) ,教主Franky(2群), 一三一四君(2B群) </p>
 <p>一个模块化，以大模块开发为目标，jQuery式的框架。里面涉及的HTML5新API数量，估计除了纯净的手机框架外，无人能敌。<p>
 <p>mass Framework的模块化经过一年化调整与改良，大致分为四类：</p>
 <ol>
