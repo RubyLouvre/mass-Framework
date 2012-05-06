@@ -16,11 +16,122 @@
                 height:100px;
 
             }
+            .transform-box,
+.box-parent{
+ width:99px;
+ height:99px;
+ border:solid 1px #000;
+ background-color:#AA0;
+ -moz-transform-origin: 0 0;
+ -webkit-transform-origin: 0 0;
+}
+
+.box-parent{
+	background-color:#ADA2A5;
+	margin:30px;
+	width:100px;
+	height:100px;
+}
+
+#ie-limitations{
+	background-color:#ADA2A5;
+	padding: 1em;
+	color:#fff;
+}
+
+p{width:85%;}
+
+.transform-example{margin:15px 15px;}
+
+.section{margin-top:20px;}
+
+.example-holder{
+	padding:20px;
+}
+
+.example-holder .box-parent{
+	margin-top:0px;
+	margin-left: 0px;
+}
+
+.origin-example{
+	position:relative;
+	z-index:0;
+	margin-bottom: 110px;
+	margin-left: 80px;
+	overflow:visible;
+}
+
+.origin-example .transform-box{
+	position:absolute;
+	z-index:2;
+	overflow:visible;
+	-moz-transform: rotate(45deg) skewX(33deg) translate(29px, -18px);
+	-webkit-transform: rotate(45deg) skewX(33deg) translate(29px, -18px);
+    filter: progid:DXImageTransform.Microsoft.Matrix(M11='0.7071',M12='-0.2479',M21='0.7071',M22='1.1663', sizingMethod='auto expand', FilterType='bilinear');
+}
+
+.bounding-box {
+	width:97px;
+	height: 187px;
+	background-color:#09f;
+	position:absolute;
+	opacity:0.4;
+	filter:alpha(opacity=40);
+	z-index:1;
+}
+
+.step2 div {
+	left:-100px !important;
+	top: 17px  !important;
+}
+
+.step3{
+	margin-bottom:40px;
+}
+
+.step3 div{
+	left:-75px;
+	top: -50px;
+}
+
+.step4 div{
+	left:75.0758px;
+	top: -17.8834px;
+}
+
+.step5, .proof{
+	margin-top: 123px;
+	margin-bottom:10px;
+}
+
+.step5 div{
+	left:26.5px;
+	top:-112px;
+}
+
+#original-el{
+	position:absolute;
+}
+
+#true-transform {
+	-moz-transform: rotate(45deg) skewX(33deg);
+	-moz-transform-origin: 150% 33%;
+	-webkit-transform: rotate(45deg) skewX(33deg);
+	-webkit-transform-origin: 150% 33%;
+}
+
+.proof{
+ padding-left: 78px;
+}
+
+.ex-1{margin-top:80px;}
+
         </style>
         <script>
             $.require("ready,css",function(){
-             
-        var matrix = $("#test").css("transform","rotate(45deg) rotate(45deg)").data("matrix",void 0, true)
+      /*  
+                var matrix = $("#test").css("transform","skewx( 10deg ) rotate(45deg)").data("matrix",void 0, true)
                 matrix.decompose2D();
                 $.log("a  : "+matrix.a)
                 $.log("b  : "+matrix.b)
@@ -30,7 +141,7 @@
                 $.log("ty  : "+matrix.ty);
 
          
-           /*     var matrix = new $.Matrix(3,3,1,0,0,0,1,0,0,0,1);
+          translate(150px,20px)    var matrix = new $.Matrix(3,3,1,0,0,0,1,0,0,0,1);
                 matrix.rotate.apply(matrix,["90deg"]);
                 matrix.decompose2D();
                 $.log("a  : "+matrix.a)
@@ -61,11 +172,18 @@
         </script>
     </head>
     <body>
-        <div style="background:green;padding:100px;">
+        <div class="box-parent origin-example step1">
+			<div class="transform-box" >
+
+			</div>
+			<div class="bounding-box"> </div>
+			</div>
+
+<!--        <div style="background:green;padding:100px;">
             <div id="test">
                 test
             </div>
-        </div>
+        </div>-->
         <!--
         var data = $("#test").css("transform"," rotate(90deg)")//rotate(45deg)
         .data("matrix",void 0, true);

@@ -177,18 +177,18 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return  ret ;
         },
         set2D: function(a,b,c,d,tx,ty){
-            this.a =  this["0,0"] = parseFloat(a);
-            this.b =  this["0,1"] = parseFloat(b);
-            this.c =  this["1,0"] = parseFloat(c);
-            this.d =  this["1,1"] = parseFloat(d);
-            this.tx = this["2,0"] = parseFloat(tx);
-            this.ty = this["2,1"] = parseFloat(ty);
+            this.a =  this["0,0"] = a * 1
+            this.b =  this["0,1"] = b * 1
+            this.c =  this["1,0"] = c * 1
+            this.d =  this["1,1"] = d * 1
+            this.tx = this["2,0"] = tx * 1
+            this.ty = this["2,1"] = ty * 1
             this["0,2"] = this["1,2"] = 0
             this["2,2"] = 1;
             return this;
         },
         get2D: function(){
-            return "matrix("+[ this["0,0"],this["1,0"],this["0,1"],this["1,1"],this["2,0"],this["2,1"] ]+")";
+            return "matrix("+[ this["0,0"],this["0,1"],this["1,0"],this["1,1"],this["2,0"],this["2,1"] ]+")";
         },
         multiply: function(matrix){
             var tmp = new Matrix(Math.max(this.xd, matrix.xd),Math.max(this.yd, matrix.yd));
@@ -209,6 +209,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
             return this
         },
+        //http://www.zweigmedia.com/RealWorld/tutorialsf1/frames3_2.html
         //http://www.w3.org/TR/SVG/coords.html#RotationDefined
         translate: function(tx, ty) {
             tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
@@ -346,9 +347,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return 0;
     }
-
+//http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+//http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#matrix-anim-class
     //=========================　处理　width height　=========================
-    /**
+    /**框架一般处在低层应用平台和高层业务逻辑之间的中间层。
     // http://www.quirksmode.org/dom/w3c_cssom.html#t40
     // clientWidth         = node.style.width + padding
     // https://developer.mozilla.org/en/DOM/element.clientWidth
@@ -675,6 +677,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.4.15 对zIndex进行适配,对$.css进行元素节点检测
 2012.4.16 重构showHidden
 2012.5.4 css v2
+//本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
     //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
   

@@ -70,6 +70,11 @@ window.onload = function(){
 
 isNaN("aaa") //true
 
+if(typeof window.ActiveXObject != "undefined"){
+    var xhr = new ActiveXObject("Msxml2.XMLHTTP");
+    alert(typeof xhr.abort);
+}
+
 typeof new Boolean(1);//"object"
 typeof new Number(1);//"object"
 typeof new String("aa");//"object"
