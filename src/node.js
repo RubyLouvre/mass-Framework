@@ -476,6 +476,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             var outerHTML = document.createElement(node.nodeName).outerHTML;
             bool = outerHTML.indexOf( unknownTag ) // !0 === true;
         }
+        //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
         var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
