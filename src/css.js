@@ -253,12 +253,11 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             this.skew(0, ay);
         },
         /**
-        // ┌       ┐┌            ┐
-        // │ a c tx││  M11  -M12 │
-        // │ b d ty││  -M21  M22 │
-        // └       ┘└            ┘
+        // ┌       ┐┌              ┐
+        // │ a c tx││  M11  -M12 tx│
+        // │ b d ty││  -M21  M22 tx│
+        // └       ┘└              ┘
         //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/flash/geom/Matrix.html
-        //参考自http://www.createjs.com/Docs/EaselJS/Matrix2D.js.html p.decompose方法
         //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象*/
         decompose2D: function(){
             var ret = {}
