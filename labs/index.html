@@ -19,10 +19,12 @@
             .transform-box{
                 width:100px;
                 height:100px;
-                background:red;
-                position:relative;
-                top:-50px;
-                left:-50px;
+                background:blue;
+                /*            position:relative;
+                             top:-50px;
+                             left:-50px;
+                   
+                */
             }
             .bounding-box{
                 position:absolute;
@@ -38,12 +40,13 @@
         </style>
         <script>
             $.require("ready,css",function(){
-             var d = new $.Matrix(3,2).set(0,2,3,1,1,2);
-          //  expect( d.get().join(",") ).eq("0,2,3,1,1,2");
+                // UA.core为浏览器核心,取值为trident,webkit,gecko,presto或undefined
+                // UA.ie为ie浏览器版本号,取值5,6,7,8,9...
+                // 如何判断浏览器本文不再描述,可以参考https://github.com/kissyteam/kissy/blob/master/src/ua/base.js
+                // 或者也可采用其他特征来区分浏览器
+        
 
-            var e = new $.Matrix(2,2).set(1,1,2,0);
-            $.log(d.cross(e).get())
-                // $(".transform-box").css("transform","rotate(45deg)")
+                $(".transform-box").css("transform","rotate(45deg)")
             })
    
             //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html

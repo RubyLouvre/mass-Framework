@@ -93,17 +93,16 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             }
             //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
             //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
-            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
-            //http://msdn.microsoft.com/en-us/library/ms533014(v=vs.85).aspx
-            var m = node.filters ? node.filters[ident] : 0, arr = [1,0,0,1,0,0]
-            if( m ){
-                arr = [];
-                "M11,M12,M21,M22,Dx,Dy".replace($.rword, function(d){
-                    arr.push( m[d] )
-                })
+            if(!node.filters[ident]){
+                var old = node.currentStyle.filter;//防止覆盖已有的滤镜
+                node.style.filter =  (old ? old +"," : "") + " progid:" + ident + "(sizingMethod='auto expand')";
             }
+            var args = [], m = node.filters[ident]
+            "M11,M12,M21,M22,Dx,Dy".replace($.rword, function(d){
+                args.push( m[d] )
+            });
             matrix = new $.Matrix();
-            matrix.set2D.apply(matrix, arr)
+            matrix.set2D.apply(matrix, args);
             //保存到缓存系统，省得每次都计算
             $._data(node,"matrix",matrix);
         }
@@ -111,30 +110,52 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     }
 
     adapter[ "transform:set" ] = function(node, name, value){
-        var matrix =  adapter[ "transform:get" ](node, true)
+        var matrix = adapter[ "transform:get" ](node, true)
         //注意：IE滤镜和其他浏览器定义的角度方向相反
-        value.toLowerCase().replace(rtransform,function(a,b,c){
-            c = c.replace(/px/g,"").match($.rword) || [];
-            if(b == "rotate"){
-                c.push(-1)
+        // original layout
+        var x = node.offsetLeft;
+        var y = node.offsetTop;
+        var w = node.offsetWidth;
+        var h = node.offsetHeight;
+        // save some divisions
+        var halfW = w / 2;
+        var halfH = h / 2;
+        node.style.position = "relative"
+        value.toLowerCase().replace(rtransform,function(_,method,value){
+            value = value.replace(/px/g,"").match($.rword) || [];
+            if(method == "rotate"){
+                value.push(-1)
             }
-            matrix[b].apply(matrix, c);     
-            var m = node.filters[ident];
-            m.M11 = matrix["0,0"]
-            m.M12 = matrix["0,1"]
-            m.M21 = matrix["1,0"]
-            m.M22 = matrix["1,1"]
-            m.Dx  = matrix["2,0"]
-            m.Dy  = matrix["2,1"]
-            //            matrix.decompose2D()
-            //            m.M11 = matrix.a
-            //            m.M12 = -matrix.b
-            //            m.M21 = -matrix.c
-            //            m.M22 = matrix.d
-            //            m.Dx  = matrix.tx
-            //            m.Dy  = matrix.ty
+            matrix[method].apply(matrix, value);
+           // http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+            var m = node.filters[ident];;
+            var a = matrix["0,0"]
+            var b = matrix["0,1"]
+            var c = matrix["1,0"]
+            var d = matrix["1,1"]
+            var tx = matrix["0,2"]
+            var ty = matrix["1,2"]
+            m.M11 = a
+            m.M12 = b
+            m.M21 = c
+            m.M22 = d
+            m.Dx  = tx
+            m.Dy  = ty
             $._data(node,"matrix",matrix)
-        //下面是复杂的位移代码
+            //下面是复杂的位移代码
+            // horizontal shift
+            a = Math.abs(a); // or go ternary
+            c = Math.abs(c);
+            var sx = (a - 1)*halfW + c*halfH;
+
+            // vertical shift
+            b = Math.abs(b);
+            d = Math.abs(d);
+            var sy = b*halfW + (d - 1)*halfH;
+            // translation, corrected for origin shift
+            // rounding helps, but doesn't eliminate, integer jittering
+            node.style.left = Math.round(x + tx - sx) + 'px';
+            node.style.top =  Math.round(y + ty - sy) + 'px';
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
         //https://github.com/puppybits/QTransform
