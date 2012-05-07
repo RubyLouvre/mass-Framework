@@ -149,14 +149,17 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             var c = a.cross(b);
             expect( c.get().join(",") ).eq("144,74,236,203,133,149,149,88,237");
 
-             var d = new $.Matrix(3,2).set(0,2,3,1,1,2);
+            var d = new $.Matrix(3,2).set(0,2,3,1,1,2);
             expect( d.get().join(",") ).eq("0,2,3,1,1,2");
 
             var e = new $.Matrix(2,2).set(1,1,2,0);
             expect( e.get().join(",") ).eq("1,1,2,0");
            
             var g = d.cross(e);
-            expect( g.get().join(",") ).eq("1,3,5,0,4,6");
+            expect( g.get().join(",") ).eq("4,0,0,3,1,0");
+
+            var v = (new $.Matrix(2,2,1,0,0,-1)).vector(3,2);
+            expect( v.join(",") ).eq("3,-2")
         },
         "$.ccs('transform')": function() {
             var node = $('<div style="background:red;width:100px;height:100px;">test</div>').appendTo("body")

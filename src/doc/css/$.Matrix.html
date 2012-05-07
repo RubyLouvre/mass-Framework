@@ -23,15 +23,15 @@
     </head>
     <body>
     <article>
-        <h3>$.Matrix(xd,yd)</h3>
+        <h3>$.Matrix(rows,cols)</h3>
         <p><span class="stress">描述：</span></p>
-        <p>用于创建矩阵，默认是3*3的矩阵。</p>
+        <p>用于创建矩阵，默认是3行3列矩阵。</p>
         <p><span class="stress">参数：</span></p>
         <dl>
-            <dt>xd</dt>
-            <dd>可选。X轴的维度</dd>
-            <dt>yd</dt>
-            <dd>可选。Y轴的维度</dd>
+            <dt>rows</dt>
+            <dd>可选。行数</dd>
+            <dt>cols</dt>
+            <dd>可选。列数</dd>
         </dl>
 
         <fieldset><legend>例子</legend>
@@ -46,7 +46,7 @@ $.require("ready,css",function(){
 });
             </pre>
         </fieldset>
-        <p>创建一个2*2的矩阵</p>
+        <p>创建一个2行2列矩阵</p>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("ready,css",function(){
@@ -79,7 +79,7 @@ $.require("ready,css",function(){
             </pre>
         </fieldset>
         <p>我们可以通过d["0,0"]得到1，d["0,1"]得到2，d["1,0"]得到3，d["1，1"]得到4，d["x,y"]中的X表示行数，Y表示列数，
-            它们可以通过d.xd,d.yd取得。</p>
+            它们可以通过d.rows,d.cols取得。</p>
         <p><strong>get()</strong>:将矩阵转换为数组，以方便查看。</p>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
@@ -89,13 +89,13 @@ $.require("ready,css",function(){
 });
             </pre>
         </fieldset>
-        <p><strong>multiply( matrix )</strong>:矩阵乘法，什么translate，shew，scale，rotate都依靠它实现的。</p>
+        <p><strong>cross( matrix )</strong>:矩阵乘法，什么translate，shew，scale，rotate都依靠它实现的。</p>
         <fieldset><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("ready,css",function(){
             var a = new $.Matrix(3,3,2,8,10,11,3,7,6,9,4);
             var b = new $.Matrix(3,3,12,9,4,5,2,21,8,4,6);
-            var c = a.multiply(b);
+            var c = a.cross(b);
         // ┌         ┐   ┌        ┐  ┌             ┐
         // │ 2  8 10 │   │ 12 9 4 │  │ 144 74  236 │
         // │ 11 3  7 │ * │ 5 2 21 │= │ 203 133 149 │
@@ -107,7 +107,7 @@ $.require("ready,css",function(){
 
             var e = new $.Matrix(3,2).set(0,2,3,1,1,2);
 
-            var g = d.multiply(e);
+            var g = d.cross(e);
             $.log( g.get() ) //[ 1, 3, 5, 0, 4, 6 ];
 });
             </pre>
@@ -136,7 +136,14 @@ $.require("ready,css",function(){
         </fieldset>
         <p><strong>decompose2D()</strong>：分解原始数值,得到a,b,c,e,tx,ty属性,
             以及返回一个包含x,y,scaleX,scaleY,skewX（角度）,skewY（角度）,rotation（角度）的对象</p>
-
+<fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+       ┌     ┐  ┌   ┐  ┌         ┐
+       │ a b │ *│ p │= │ ap + bq │
+       │ c d │  │ q │  │ cp + dq │
+       └     ┘  └   ┘  └         ┘
+            </pre>
+        </fieldset>
     </article>
 </body>
 </html>

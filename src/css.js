@@ -189,10 +189,19 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         get2D: function(){
             return "matrix("+[ this["0,0"],this["0,1"],this["1,0"],this["1,1"],this["2,0"],this["2,1"] ]+")";
         },
+        vector: function(aa, b, a){
+            if($.isArray(aa)){
+                a = aa[0],
+                b = aa[1]
+            }else{
+                a = aa
+            }
+            return [this["0,0"]*a +  this["0,1"]*b,this["1,0"]*a +  this["1,1"]*b]
+        },
         cross: function(matrix){
-           // if(this.cols == matrix.rows){
+            if(this.cols === matrix.rows){
                 var ret = new Matrix(this.rows, matrix.cols);
-                var n = Math.max(this.rows, matrix.rows) * Math.max(this.cols, matrix.cols)
+                var n = Math.max(this.rows, matrix.cols)
                 for(var key in ret){
                     if(key.match(/(\d+),(\d+)/)){
                         var r = RegExp.$1, c = RegExp.$2
@@ -202,11 +211,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     }
                 }
                 return ret
-         //   }else{
-           //     throw "cross error"
-          //  }
-
-          
+            }else{
+                throw "cross error: this.cols !== matrix.rows"
+            }
         },
         //http://www.zweigmedia.com/RealWorld/tutorialsf1/frames3_2.html
         //http://www.w3.org/TR/SVG/coords.html#RotationDefined
@@ -235,7 +242,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             this.scale(1, sy)
         },
         rotate: function(angle, fix){//matrix.rotate(60)==>顺时针转60度
-            fix = fix ? fix : 1;
+            fix = fix === -1 ? fix : 1;
             angle = rad(angle);
             var cos = Math.cos(angle);
             var sin = Math.sin(angle);

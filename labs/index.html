@@ -38,45 +38,17 @@
         </style>
         <script>
             $.require("ready,css",function(){
-                   var n = new $.Matrix(3,4, 1,5,-7, 1,1,0, 0,-1,1, 2,0,0)//3*4
-                var m = new $.Matrix(4,2, 2,0,1,1, 1,2,0,1);//4*2
-             
-                $.log(m.cross(n))
+             var d = new $.Matrix(3,2).set(0,2,3,1,1,2);
+          //  expect( d.get().join(",") ).eq("0,2,3,1,1,2");
+
+            var e = new $.Matrix(2,2).set(1,1,2,0);
+            $.log(d.cross(e).get())
                 // $(".transform-box").css("transform","rotate(45deg)")
             })
-            //   360-45 = 315
-            /*
-                var matrix = $("#test").css("transform","skewx( 10deg ) rotate(45deg)").data("matrix",void 0, true)
-                matrix.decompose2D();
-                $.log("a  : "+matrix.a)
-                $.log("b  : "+matrix.b)
-                $.log("c  : "+matrix.c)
-                $.log("d  : "+matrix.d)
-                $.log("tx  : "+matrix.tx)
-                $.log("ty  : "+matrix.ty);
-
-         
-          translate(150px,20px)    var matrix = new $.Matrix(3,3,1,0,0,0,1,0,0,0,1);
-                matrix.rotate.apply(matrix,["90deg"]);
-                matrix.decompose2D();
-            });
+   
             //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
-            //$.require("ready,node,css",function(a,b,c){
-            //顺时针转45度，然后再转45度
-              
-            //   var d = new D(1.41421, 1.41421, -1.41421, 1.41421, -17.0711, 1.2132);
-            //  console.log(d.reset(0,1,5,-0.2,1.4,14))
-            //matrix(1.44889, 0.388229, -0.388229, 1.44889, 222.163px, 59.5284px)
-            /*  var transform = "skewx( 10deg ) translate(150px,20px)"
-                transform.replace(/(\w+)\(([^)]+)\)/g,function(a,b,c){
-                    b = map[b] || b
-                    console.log(a);
-                    console.log(b)
-                 console.log(c)
-                    var d = c.replace(/px/g,"").match($.rword)
-                    console.log(d)
-                })*/
 
+      
           
         </script>
     </head>
@@ -90,22 +62,6 @@
             </div>
         </div>
 
-        <!--        <div style="background:green;padding:100px;">
-                    <div id="test">
-                        test
-                    </div>
-                </div>
-
-    translate(-10px,-20px) scale(2) rotate(45deg) translate(5px,10px);
-        transform = transform.split(")");
-                var  i = -1, l = transform.length -1, split, prop, val;
-                while(++i < l){
-                    split = transform[i].split("(");
-                    prop = split[0].trim();
-                    val = split[1];
-                    console.log(prop)
-                      console.log(val)
-                }-->
 
 
     </body>
