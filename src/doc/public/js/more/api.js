@@ -348,6 +348,7 @@ $.define("api", function(){
                 "transform": "string",
                 "userSelect": "string"
             },
+            "Matrix": "function",
             "cssName": "function",
             "scrollbarWidth": "function",
             "cssNumber": {
