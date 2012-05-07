@@ -210,6 +210,16 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         }
                     }
                 }
+                for(key in this){
+                    if(typeof this[key] == "number"){
+                        delete this[key]
+                    }
+                }
+                for(key in ret){
+                    if(typeof ret[key] == "number"){
+                        this[key] = toFixed(ret[key])
+                    }
+                }
                 return ret
             }else{
                 throw "cross error: this.cols !== matrix.rows"
