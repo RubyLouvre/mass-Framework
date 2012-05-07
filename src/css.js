@@ -133,7 +133,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
     //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
     //优化HTML5应用的体验细节，例如全屏的处理与支持，横屏的响应，图形缩放的流畅性和不失真，点触的响应与拖曳，Websocket的完善
-    //http://www.createjs.com/Docs/EaselJS/ColorMatrixFilter.js.html
     //关于JavaScript中计算精度丢失的问题 http://rockyee.iteye.com/blog/891538
     function toFixed(d){
         return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
