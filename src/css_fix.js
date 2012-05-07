@@ -115,11 +115,14 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         //注意：IE滤镜和其他浏览器定义的角度方向相反
         value.toLowerCase().replace(rtransform,function(a,b,c){
             c = c.replace(/px/g,"").match($.rword) || [];
+            if(b == "rotate"){
+                c.push(-1)
+            }
             matrix[b].apply(matrix, c);     
             var m = node.filters[ident];
             m.M11 = matrix["0,0"]
-            m.M12 = -matrix["0,1"]
-            m.M21 = -matrix["1,0"]
+            m.M12 = matrix["0,1"]
+            m.M21 = matrix["1,0"]
             m.M22 = matrix["1,1"]
             m.Dx  = matrix["2,0"]
             m.Dy  = matrix["2,1"]

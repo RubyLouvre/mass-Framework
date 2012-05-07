@@ -141,24 +141,24 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         if(isFinite(value)) {
             return parseFloat(value);
         }
-        if(~value.indexOf("deg")) {
-            return parseInt(value,10) * (Math.PI * 2 / 360);
-        } else if (~value.indexOf("grad")) {
+        if(~value.indexOf("deg")) {//圆角制。
+            return parseInt(value,10) * (Math.PI / 180);
+        } else if (~value.indexOf("grad")) {//梯度制。一个直角的100等分之一。一个圆圈相当于400grad。
             return parseInt(value,10) * (Math.PI/200);
-        }
+        }//弧度制，360=2π
         return parseFloat(value,10)
     }
     var Matrix = $.factory({
-        init: function(xd,yd){
-            this.xd = xd || 3;
-            this.yd = yd || 3;
+        init: function(rows,cols){
+            this.rows = rows || 3;
+            this.cols = cols || 3;
             this.set.apply(this, [].slice.call(arguments,2))
         },
         set: function(){//用于设置元素
-            for(var i = 0, n = this.xd * this.yd; i < n; i++){
+            for(var i = 0, n = this.rows * this.cols; i < n; i++){
                 //Math.floor(i /3) 决定行号 x轴
                 //i % 3 决定列号 y 轴
-                this[ Math.floor(i / this.xd) +","+(i % this.xd) ] = parseFloat(arguments[i]) || 0;
+                this[ Math.floor(i / this.rows) +","+(i % this.rows) ] = parseFloat(arguments[i]) || 0;
             }
             return this;
         },
@@ -189,24 +189,24 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         get2D: function(){
             return "matrix("+[ this["0,0"],this["0,1"],this["1,0"],this["1,1"],this["2,0"],this["2,1"] ]+")";
         },
-        multiply: function(matrix){
-            var tmp = new Matrix(Math.max(this.xd, matrix.xd),Math.max(this.yd, matrix.yd));
-            var n = tmp.xd * tmp.yd, d
-            for(var key in tmp){
-                if(key.match(/(\d+),(\d+)/)){
-                    var r = RegExp.$1, c = RegExp.$2
-                    for(var i = 0; i < n; i++ ){
-                        tmp[key] += ( (this[r+","+i] || 0) * (matrix[i+","+c]||0 ));//X轴*Y轴
+        cross: function(matrix){
+           // if(this.cols == matrix.rows){
+                var ret = new Matrix(this.rows, matrix.cols);
+                var n = Math.max(this.rows, matrix.rows) * Math.max(this.cols, matrix.cols)
+                for(var key in ret){
+                    if(key.match(/(\d+),(\d+)/)){
+                        var r = RegExp.$1, c = RegExp.$2
+                        for(var i = 0; i < n; i++ ){
+                            ret[key] += ( (this[r+","+i] || 0) * (matrix[i+","+c]||0 ));//X轴*Y轴
+                        }
                     }
                 }
-            }
-            for( key in tmp) {
-                d = tmp[key]
-                if(typeof d === "number"){
-                    this[key] = toFixed(d)
-                }
-            }
-            return this
+                return ret
+         //   }else{
+           //     throw "cross error"
+          //  }
+
+          
         },
         //http://www.zweigmedia.com/RealWorld/tutorialsf1/frames3_2.html
         //http://www.w3.org/TR/SVG/coords.html#RotationDefined
@@ -214,7 +214,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
             ty = parseFloat(ty) || 0;//沿 y 轴平移每个点的距离。
             var m = (new Matrix()).set2D(1 ,0, 0, 1, tx, ty);
-            this.multiply(m)
+            this.cross(m)
         },
         translateX: function(tx) {
             this.translate(tx, 0)
@@ -226,7 +226,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             sx = isFinite(sx) ? parseFloat(sx) : 1 ;
             sy = isFinite(sy) ? parseFloat(sy) : 1 ;
             var m = (new Matrix()).set2D( sx, 0, 0, sy, 0, 0);
-            this.multiply(m)
+            this.cross(m)
         },
         scaleX: function(sx) {
             this.scale(sx, 1)
@@ -234,16 +234,17 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         scaleY: function(sy) {
             this.scale(1, sy)
         },
-        rotate: function(angle){
+        rotate: function(angle, fix){//matrix.rotate(60)==>顺时针转60度
+            fix = fix ? fix : 1;
             angle = rad(angle);
             var cos = Math.cos(angle);
             var sin = Math.sin(angle);
-            var m = (new Matrix()).set2D( cos, sin, -sin, cos, 0, 0);
-            this.multiply(m)
+            var m = (new Matrix()).set2D( cos,fix * sin , fix * -sin, cos, 0, 0);
+            this.cross(m)
         },
         skew: function(ax, ay){
             var m = (new Matrix()).set2D( 1, Math.tan( rad(ax) ), Math.tan( rad(ay) ), 1, 0, 0);
-            this.multiply(m)
+            this.cross(m)
         },
         skewX: function(ax){
             this.skew(ax, 0);
@@ -345,8 +346,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return 0;
     }
-//http://extremelysatisfactorytotalitarianism.com/blog/?p=922
-//http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#matrix-anim-class
+    //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+    //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#matrix-anim-class
     //=========================　处理　width height　=========================
     /**框架一般处在低层应用平台和高层业务逻辑之间的中间层。
     // http://www.quirksmode.org/dom/w3c_cssom.html#t40

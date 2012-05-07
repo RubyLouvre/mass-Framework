@@ -146,13 +146,16 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
         "Matrix": function(){
             var a = new $.Matrix(3,3,2,8,10,11,3,7,6,9,4);
             var b = new $.Matrix(3,3,12,9,4,5,2,21,8,4,6);
-            var c = a.multiply(b);
+            var c = a.cross(b);
             expect( c.get().join(",") ).eq("144,74,236,203,133,149,149,88,237");
-            var d = new $.Matrix(2,2).set(1,1,2,0);
-            expect( d.get().join(",") ).eq("1,1,2,0");
-            var e = new $.Matrix(3,2).set(0,2,3,1,1,2);
-            expect( e.get().join(",") ).eq("0,2,3,1,1,2");
-            var g = d.multiply(e);
+
+             var d = new $.Matrix(3,2).set(0,2,3,1,1,2);
+            expect( d.get().join(",") ).eq("0,2,3,1,1,2");
+
+            var e = new $.Matrix(2,2).set(1,1,2,0);
+            expect( e.get().join(",") ).eq("1,1,2,0");
+           
+            var g = d.cross(e);
             expect( g.get().join(",") ).eq("1,3,5,0,4,6");
         },
         "$.ccs('transform')": function() {
