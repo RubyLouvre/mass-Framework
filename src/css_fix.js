@@ -102,72 +102,61 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                 // console.log(m[d])
                 args.push( m[d] )
             });
-
-            matrix = new $.Matrix();
-            matrix.set2D.apply(matrix, args);
+            matrix = new $.Matrix2D();
+            matrix.set.apply(matrix, args);
         //保存到缓存系统，省得每次都计算
-        //https://github.com/heygrady/jquery.transform.js
         }
         return name === true ? matrix : matrix.get2D()
     }
-
+    //deg	degrees, 角度
+    //grad	grads, 百分度
+    //rad	radians, 弧度
+    function toRadian(value) {
+        return ~value.indexOf("deg") ?
+        parseInt(value,10) * (Math.PI * 2 / 360):
+        ~value.indexOf("grad") ?
+        parseInt(value,10) * (Math.PI/200):
+        parseFloat(value);
+    }
     adapter[ "transform:set" ] = function(node, name, value){
-        var matrix = adapter[ "transform:get" ](node, true)
+        var m = adapter[ "transform:get" ](node, true)
         //注意：IE滤镜和其他浏览器定义的角度方向相反
-        var w = $(node).width();
-        var h = $(node).height();
-        value.toLowerCase().replace(rtransform,function(_,method,value){
-           
-            value = value.replace(/px/g,"").match($.rword) || [];
-            
-            if(method == "rotate"){
-                value.push(-1)
+        value.toLowerCase().replace(rtransform,function(_,method,array){
+            array = array.replace(/px/g,"").match($.rword) || [];
+            if(/skew|rotate/.test(method)){
+                array[0] = toRadian(array[0] );//IE矩阵滤镜的方向是相反的
+                array[1] = toRadian(array[1] || "0");
             }
-
-            matrix[method].apply(matrix, value);
-            //  http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
-            var m = node.filters[ident];;
-            var a = matrix["0,0"]
-            var b = matrix["0,1"]
-            var c = matrix["1,0"]
-            var d = matrix["1,1"]
-            var tx = matrix["2,0"]
-            var ty = matrix["2,1"]
-            m.M11 = a
-            m.M12 = b
-            m.M21 = c
-            m.M22 = d
-            console.log("a "+a)
-            console.log("b "+b)
-            console.log("c "+d)
-            console.log("d "+d)
-            //  m.Dx  = tx
-            // m.Dy  = ty
-            $._data(node,"matrix",matrix)
-            //下面是复杂的位移代码
-            node.style.position = "relative";
-
-            var width = $(node).outerWidth();
-            var height = $(node).outerHeight();
-            console.log("tx : "+tx)
-             console.log("ty : "+ty)
-            var x = (w - width)/2//100* a;
-            var y = (h - height)/2 //100*b;
-            node.style.top = x + "px"
-            node.style.left = y +"px"
-
-          
+            method = method.replace(/(x|y)$/i,function(_,b){
+                return b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
+            });
+            m[method].apply(m, array);
+            //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
+            var filter = node.filters[ident];
+            filter.M11 =  filter.M22 = 1;//取得未变形前的宽高
+            filter.M12 =  filter.M21 = 0;
+            var width = node.offsetWidth;
+            var height = node.offsetHeight;
+            filter.M11 = m.a;
+            filter.M12 = m.c;//★★★注意这里的顺序
+            filter.M21 = m.b;
+            filter.M22 = m.d;
+            filter.Dx  = m.tx;
+            filter.Dy  = m.ty;
+            $._data(node,"matrix",m);
+            var tw =  node.offsetWidth, th = node.offsetHeight;//取得变形后高宽
+            if( tw !== width || th !== height || method.indexOf("translate") == 0 ){
+                node.style.position = "relative";
+                node.style.left = (width - tw)/2 +  m.tx + "px";
+                node.style.top = (height - th)/2 +  m.ty + "px";
+            }
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
-        //https://github.com/puppybits/QTransform
         });
     }
-    
-
-    
 });
-//2011.10.21 去掉opacity:setter 的style.visibility处理
-//2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
+    //2011.10.21 去掉opacity:setter 的style.visibility处理
+    //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
 
    
