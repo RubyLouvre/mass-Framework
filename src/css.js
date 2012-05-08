@@ -176,8 +176,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         },
         set2D: function(a,b,c,d,tx,ty){
             this.a =  this["0,0"] = a * 1
-            this.b =  this["0,1"] = b * 1
-            this.c =  this["1,0"] = c * 1
+            this.b =  this["1,0"] = b * 1
+            this.c =  this["0,1"] = c * 1
             this.d =  this["1,1"] = d * 1
             this.tx = this["2,0"] = tx * 1
             this.ty = this["2,1"] = ty * 1
@@ -186,16 +186,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this;
         },
         get2D: function(){
-            return "matrix("+[ this["0,0"],this["0,1"],this["1,0"],this["1,1"],this["2,0"],this["2,1"] ]+")";
-        },
-        vector: function(aa, b, a){
-            if($.isArray(aa)){
-                a = aa[0],
-                b = aa[1]
-            }else{
-                a = aa
-            }
-            return [this["0,0"]*a +  this["0,1"]*b,this["1,0"]*a +  this["1,1"]*b]
+            return "matrix("+[ this["0,0"],this["1,0"],this["0,1"],this["1,1"],this["2,0"],this["2,1"] ]+")";
         },
         cross: function(matrix){
             if(this.cols === matrix.rows){
@@ -279,8 +270,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         decompose2D: function(){
             var ret = {}
             this.a = this["0,0"]
-            this.b = this["0,1"]
-            this.c = this["1,0"]
+            this.b = this["1,0"]
+            this.c = this["0,1"]
             this.d = this["1,1"]
             ret.x = this.tx = this["2,0"]
             ret.y = this.ty = this["2,1"]
