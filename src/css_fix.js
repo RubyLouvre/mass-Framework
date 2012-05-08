@@ -135,6 +135,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             var d = matrix["1,1"]
             var tx = matrix["0,2"]
             var ty = matrix["1,2"]
+            console.log(matrix["0,2"])
             m.M11 = a
             m.M12 = b
             m.M21 = c

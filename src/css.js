@@ -227,10 +227,14 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         },
         //http://www.zweigmedia.com/RealWorld/tutorialsf1/frames3_2.html
         //http://www.w3.org/TR/SVG/coords.html#RotationDefined
+        //http://www.mathamazement.com/Lessons/Pre-Calculus/08_Matrices-and-Determinants/coordinate-transformation-matrices.html
         translate: function(tx, ty) {
             tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
             ty = parseFloat(ty) || 0;//沿 y 轴平移每个点的距离。
+           
             var m = (new Matrix()).set2D(1 ,0, 0, 1, tx, ty);
+
+         
             this.cross(m)
         },
         translateX: function(tx) {
