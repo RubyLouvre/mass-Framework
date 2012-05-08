@@ -99,6 +99,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             node.style[ name ] = value;
         }
     },false);
+    //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if ( document.defaultView && document.defaultView.getComputedStyle ) {
         adapter[ "_default:get" ] = function( node, name ) {
             var ret, defaultView, computedStyle;
@@ -147,7 +148,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return parseInt(value,10) * (Math.PI/200);
         }//弧度制，360=2π
         return parseFloat(value,10)
-    }
+    }//http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
     var Matrix = $.factory({
         init: function(rows,cols){
             this.rows = rows || 3;
@@ -156,8 +157,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         },
         set: function(){//用于设置元素
             for(var i = 0, n = this.rows * this.cols; i < n; i++){
-                //Math.floor(i /3) 决定行号 x轴
-                //i % 3 决定列号 y 轴
                 this[ Math.floor(i / this.rows) +","+(i % this.rows) ] = parseFloat(arguments[i]) || 0;
             }
             return this;

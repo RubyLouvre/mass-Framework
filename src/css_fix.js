@@ -105,8 +105,8 @@ $.define("css_fix", !!top.getComputedStyle, function(){
 
             matrix = new $.Matrix();
             matrix.set2D.apply(matrix, args);
-            //保存到缓存系统，省得每次都计算
-            $._data(node,"matrix",matrix);
+        //保存到缓存系统，省得每次都计算
+        //https://github.com/heygrady/jquery.transform.js
         }
         return name === true ? matrix : matrix.get2D()
     }
@@ -114,21 +114,18 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     adapter[ "transform:set" ] = function(node, name, value){
         var matrix = adapter[ "transform:get" ](node, true)
         //注意：IE滤镜和其他浏览器定义的角度方向相反
-        // original layout
-        var x = node.offsetLeft;
-        var y = node.offsetTop;
-        var w = node.offsetWidth;
-        var h = node.offsetHeight;
-        // save some divisions
-
-        node.style.position = "relative"
+        var w = $(node).width();
+        var h = $(node).height();
         value.toLowerCase().replace(rtransform,function(_,method,value){
+           
             value = value.replace(/px/g,"").match($.rword) || [];
+            
             if(method == "rotate"){
                 value.push(-1)
             }
+
             matrix[method].apply(matrix, value);
-            // http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+            //  http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
             var m = node.filters[ident];;
             var a = matrix["0,0"]
             var b = matrix["0,1"]
@@ -140,27 +137,35 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             m.M12 = b
             m.M21 = c
             m.M22 = d
-          //  m.Dx  = tx
-           // m.Dy  = ty
+            console.log("a "+a)
+            console.log("b "+b)
+            console.log("c "+d)
+            console.log("d "+d)
+            //  m.Dx  = tx
+            // m.Dy  = ty
             $._data(node,"matrix",matrix)
             //下面是复杂的位移代码
-            var wb = node.offsetWidth;
-            var hb = node.offsetHeight;
-console.log(wb)
-console.log(hb)
-            // determine how far origin has shifted
-            var sx = (wb - w) / 2;
-            var sy = (hb - h) / 2;
-            // translation, corrected for origin shift
-            // rounding helps, but doesn't eliminate, integer jittering
-            node.style.left = (sx + tx - 13) + 'px';
-            node.style.top =  (sy + ty - 13) + 'px';
+            node.style.position = "relative";
+
+            var width = $(node).outerWidth();
+            var height = $(node).outerHeight();
+            console.log("tx : "+tx)
+             console.log("ty : "+ty)
+            var x = (w - width)/2//100* a;
+            var y = (h - height)/2 //100*b;
+            node.style.top = x + "px"
+            node.style.left = y +"px"
+
+          
+        //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
         //https://github.com/puppybits/QTransform
         });
     }
+    
 
+    
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里

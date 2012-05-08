@@ -6,9 +6,8 @@
         <title>transform by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-        <script type="text/javascript" src="../src/mass.js">
-
-        </script>
+        <script type="text/javascript" src="../src/mass.js"> </script>
+       
         <style>
 
 
@@ -20,11 +19,6 @@
                 width:100px;
                 height:100px;
                 background:blue;
-                /*            position:relative;
-                             top:-50px;
-                             left:-50px;
-
-                */
             }
             .bounding-box{
                 position:absolute;
@@ -40,20 +34,23 @@
         </style>
         <script>
             $.require("ready,css",function(){
-                // UA.core为浏览器核心,取值为trident,webkit,gecko,presto或undefined
-                // UA.ie为ie浏览器版本号,取值5,6,7,8,9...
-                // 如何判断浏览器本文不再描述,可以参考https://github.com/kissyteam/kissy/blob/master/src/ua/base.js
-                // 或者也可采用其他特征来区分浏览器
-                var m = new $.Matrix(3,3).set2D(1,0,0,1,0,0);
+ // translate(100px)
+              var a =  $(".transform-box").css("transform","rotate(45deg) skewX(33deg)").data("matrix",void 0, true)
+                console.log(a)
+        var m = (new $.Matrix()).set2D(1, 0, 0 ,1,0,0)
+       m.rotate("45deg")
+         m.skewX("33deg")
+            console.log(m)
+    // rotate(45deg) skewX(33deg);
+            //   m.cross(b)
+               // console.log(m)
 
-                m.translate(100,100);
-
-
-                $(".transform-box").css("transform","translate(100px) rotate(20deg)")
             })
    
             //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
-
+            //$(function(){
+            //   $(".transform-box").css("transform","rotate(45deg) translate(100px)")
+            //})
       
           
         </script>
