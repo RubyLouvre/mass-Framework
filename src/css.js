@@ -138,17 +138,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     function toFixed(d){
         return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
     }
-    function rad(value) {
-        if(isFinite(value)) {
-            return parseFloat(value);
-        }
-        if(~value.indexOf("deg")) {//圆角制。
-            return parseInt(value,10) * (Math.PI / 180);
-        } else if (~value.indexOf("grad")) {//梯度制。一个直角的100等分之一。一个圆圈相当于400grad。
-            return parseInt(value,10) * (Math.PI/200);
-        }//弧度制，360=2π
-        return parseFloat(value,10)
-    }
     //http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
     //http://help.dottoro.com/lcebdggm.php
     var Matrix2D = $.factory({
@@ -168,23 +157,19 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             this.ty = tx*b1+ty*d1+this.ty;
             return this;
         },
-        rotate : function(angle, fix) {
-            fix = fix === "fix" ? -1 : 1
-            angle = rad(angle)
-            var cos = Math.cos(angle);
-            var sin = Math.sin(angle);
-            return this.cross(cos, fix * sin, fix * -sin, cos, 0, 0)
+        rotate : function( radian ) {
+            var cos = Math.cos(radian);
+            var sin = Math.sin(radian);
+            return this.cross(cos,  sin,  -sin, cos, 0, 0)
         },
         skew : function(sx, sy) {
-            var xRad = rad(sx);
-            var yRad = rad(sy);
-            return this.cross(1, Math.tan( yRad ), Math.tan( xRad ), 1, 0, 0, 0, 0);
+            return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0, 0, 0);
         },
-        skewX: function(sx){
-            return this.skew(sx)
+        skewX: function(radian){
+            return this.skew(radian)
         },
-        skewY: function(sy){
-            return this.skew("0",sy)
+        skewY: function(radian){
+            return this.skew(0,radian)
         },
         scale : function(x, y) {
             this.a *= x;
@@ -201,16 +186,16 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         },
 
         translate : function(x, y) {
-            this.tx += x;
-            this.ty += y;
+            this.tx += parseFloat(x);
+            this.ty += parseFloat(y) || 0;
             return this;
         },
         translateX : function(x) {
-            this.tx += x;
+            this.tx += parseFloat(x);
             return this;
         },
         translateY : function(y) {
-            this.ty += y;
+            this.ty += parseFloat(y);
             return this;
         },
         toString: function(){
