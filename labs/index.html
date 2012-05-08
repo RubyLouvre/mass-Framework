@@ -7,7 +7,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
         <script type="text/javascript" src="../src/mass.js"> </script>
-       
+
         <style>
 
 
@@ -34,16 +34,16 @@
         </style>
         <script>
             $.require("ready,css",function(){
- // translate(100px)
-              var a =  $(".transform-box").css("transform","rotate(45deg) skewX(33deg)").data("matrix",void 0, true)
+                // translate(100px)
+                var a =  $(".transform-box").css("transform","rotate(45deg) skewX(33deg) ").data("matrix",void 0, true)//
                 console.log(a)
-        var m = (new $.Matrix()).set2D(1, 0, 0 ,1,0,0)
-       m.rotate("45deg")
-         m.skewX("33deg")
-            console.log(m)
-    // rotate(45deg) skewX(33deg);
-            //   m.cross(b)
-               // console.log(m)
+                var m = (new $.Matrix()).set2D(1, 0, 0 ,1,0,0)
+                m.rotate("45deg").skew("33deg","0");
+
+                console.log(m)
+                // rotate(45deg) skewX(33deg);
+                //   m.cross(b)
+                // console.log(m)
 
             })
    
