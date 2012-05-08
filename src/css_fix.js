@@ -99,8 +99,10 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             }
             var args = [], m = node.filters[ident]
             "M11,M12,M21,M22,Dx,Dy".replace($.rword, function(d){
+                // console.log(m[d])
                 args.push( m[d] )
             });
+
             matrix = new $.Matrix();
             matrix.set2D.apply(matrix, args);
             //保存到缓存系统，省得每次都计算
@@ -118,8 +120,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         var w = node.offsetWidth;
         var h = node.offsetHeight;
         // save some divisions
-        var halfW = w / 2;
-        var halfH = h / 2;
+
         node.style.position = "relative"
         value.toLowerCase().replace(rtransform,function(_,method,value){
             value = value.replace(/px/g,"").match($.rword) || [];
@@ -127,75 +128,39 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                 value.push(-1)
             }
             matrix[method].apply(matrix, value);
-           // http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+            // http://extremelysatisfactorytotalitarianism.com/blog/?p=922
             var m = node.filters[ident];;
             var a = matrix["0,0"]
             var b = matrix["0,1"]
             var c = matrix["1,0"]
             var d = matrix["1,1"]
-            var tx = matrix["0,2"]
-            var ty = matrix["1,2"]
-            console.log(matrix["0,2"])
+            var tx = matrix["2,0"]
+            var ty = matrix["2,1"]
             m.M11 = a
             m.M12 = b
             m.M21 = c
             m.M22 = d
-            m.Dx  = tx
-            m.Dy  = ty
+          //  m.Dx  = tx
+           // m.Dy  = ty
             $._data(node,"matrix",matrix)
             //下面是复杂的位移代码
-            // horizontal shift
-            a = Math.abs(a); // or go ternary
-            c = Math.abs(c);
-            var sx = (a - 1)*halfW + c*halfH;
-
-            // vertical shift
-            b = Math.abs(b);
-            d = Math.abs(d);
-            var sy = b*halfW + (d - 1)*halfH;
+            var wb = node.offsetWidth;
+            var hb = node.offsetHeight;
+console.log(wb)
+console.log(hb)
+            // determine how far origin has shifted
+            var sx = (wb - w) / 2;
+            var sy = (hb - h) / 2;
             // translation, corrected for origin shift
             // rounding helps, but doesn't eliminate, integer jittering
-            node.style.left = Math.round(x + tx - sx) + 'px';
-            node.style.top =  Math.round(y + ty - sy) + 'px';
+            node.style.left = (sx + tx - 13) + 'px';
+            node.style.top =  (sy + ty - 13) + 'px';
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
         //https://github.com/puppybits/QTransform
-        })
-
-        
+        });
     }
 
-//    $.transform = function( node, param ){
-//        cxcy= $._data(node,"cxcy");
-//        if (!cxcy) {
-//            var rect = node.getBoundingClientRect(),
-//            cx = (rect.right  - rect.left) / 2, // center x
-//            cy = (rect.bottom - rect.top)  / 2; // center y
-//            if(node.currentStyle.hasLayout){
-//                node.style.zoom = 1;
-//            }
-//            //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
-//            //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
-//            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
-//            cxcy =  $._data(node,"cxcy", {
-//                cx: cx,
-//                cy: cy
-//            });
-//        }
-//        m = node.filters[ident];
-//        m.M11 = mtx[0];
-//        m.M12 = mtx[1];
-//        m.M21 = mtx[3];
-//        m.M22 = mtx[4];
-//        m.Dx  = mtx[6];
-//        m.Dy  = mtx[7];
-//        // recalc center
-//        rect = node.getBoundingClientRect();
-//        cx = (rect.right  - rect.left) / 2;
-//        cy = (rect.bottom - rect.top)  / 2;
-//        node.style.marginLeft = cxcy.cx - cx + "px";
-//        node.style.marginTop  = cxcy.cy - cy + "px";
-//    }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里

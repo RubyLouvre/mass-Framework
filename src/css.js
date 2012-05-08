@@ -220,7 +220,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         this[key] = toFixed(ret[key])
                     }
                 }
-                return ret
+                return this
             }else{
                 throw "cross error: this.cols !== matrix.rows"
             }
@@ -231,10 +231,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         translate: function(tx, ty) {
             tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
             ty = parseFloat(ty) || 0;//沿 y 轴平移每个点的距离。
-           
             var m = (new Matrix()).set2D(1 ,0, 0, 1, tx, ty);
-
-         
             this.cross(m)
         },
         translateX: function(tx) {
@@ -346,7 +343,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
     //具体支持情况可见下面网址
     //http://help.dottoro.com/lcrlukea.php
-    var userSelect =  $.cssName("userSelect");
+    var userSelect = $.cssName("userSelect");
     if(typeof userSelect === "string"){
         adapter[ userSelect+":set" ] = function( node, name, value ) {
             return node.style[ name ] = value;

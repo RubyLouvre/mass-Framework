@@ -23,7 +23,7 @@
                 /*            position:relative;
                              top:-50px;
                              left:-50px;
-                   
+
                 */
             }
             .bounding-box{
@@ -44,9 +44,12 @@
                 // UA.ie为ie浏览器版本号,取值5,6,7,8,9...
                 // 如何判断浏览器本文不再描述,可以参考https://github.com/kissyteam/kissy/blob/master/src/ua/base.js
                 // 或者也可采用其他特征来区分浏览器
-        
+                var m = new $.Matrix(3,3).set2D(1,0,0,1,0,0);
 
-                $(".transform-box").css("transform","translate(100px, 100px)")
+                m.translate(100,100);
+
+
+                $(".transform-box").css("transform","translate(100px) rotate(20deg)")
             })
    
             //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
