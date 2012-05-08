@@ -229,28 +229,27 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this;
         },
         decompose : function() {
-            // TODO: it would be nice to be able to solve for whether the matrix can be decomposed into only scale/rotation
-            // even when scale is negative
-            var target = {};
-            target.x = this.tx;
-            target.y = this.ty;
-            target.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
-            target.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
+            //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
+            var ret = {};
+            ret.x = this.tx;
+            ret.y = this.ty;
+            ret.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
+            ret.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
 
             var skewX = Math.atan2(-this.c, this.d);
             var skewY = Math.atan2(this.b, this.a);
 
             if (skewX == skewY) {
-                target.rotation = skewY/Matrix2D.DEG_TO_RAD;
+                ret.rotation = skewY/Matrix2D.DEG_TO_RAD;
                 if (this.a < 0 && this.d >= 0) {
-                    target.rotation += (target.rotation <= 0) ? 180 : -180;
+                    ret.rotation += (ret.rotation <= 0) ? 180 : -180;
                 }
-                target.skewX = target.skewY = 0;
+                ret.skewX = ret.skewY = 0;
             } else {
-                target.skewX = skewX/Matrix2D.DEG_TO_RAD;
-                target.skewY = skewY/Matrix2D.DEG_TO_RAD;
+                ret.skewX = skewX/Matrix2D.DEG_TO_RAD;
+                ret.skewY = skewY/Matrix2D.DEG_TO_RAD;
             }
-            return target;
+            return ret;
         }
     });
 
