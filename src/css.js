@@ -148,175 +148,124 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return parseInt(value,10) * (Math.PI/200);
         }//弧度制，360=2π
         return parseFloat(value,10)
-    }//http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
-    var Matrix = $.factory({
-        init: function(rows,cols){
-            this.rows = rows || 3;
-            this.cols = cols || 3;
-            this.set.apply(this, [].slice.call(arguments,2))
+    }
+    //http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
+    //http://help.dottoro.com/lcebdggm.php
+    var Matrix2D = $.factory({
+        init: function(a,b,c,d,tx,ty){
+            this.set(a,b,c, d,tx,ty)
         },
-        set: function(){//用于设置元素
-            for(var i = 0, n = this.rows * this.cols; i < n; i++){
-                this[ Math.floor(i / this.rows) +","+(i % this.rows) ] = parseFloat(arguments[i]) || 0;
-            }
+        cross: function(a, b, c, d, tx, ty) {
+            var a1 = this.a;
+            var b1 = this.b;
+            var c1 = this.c;
+            var d1 = this.d;
+            this.a  = a*a1+b*c1;
+            this.b  = a*b1+b*d1;
+            this.c  = c*a1+d*c1;
+            this.d  = c*b1+d*d1;
+            this.tx = tx*a1+ty*c1+this.tx;
+            this.ty = tx*b1+ty*d1+this.ty;
             return this;
         },
-        get: function(){//转变成数组
-            var array = [], ret = []
-            for(var key in this){
-                if(~key.indexOf(",")){
-                    array.push( key )
-                }
-            }
-            array.sort() ;
-            for(var i = 0; i < array.length; i++){
-                ret[i] = this[array[i]]
-            }
-            return  ret ;
-        },
-        set2D: function(a,b,c,d,tx,ty){
-            this.a =  this["0,0"] = a * 1
-            this.b =  this["1,0"] = b * 1
-            this.c =  this["0,1"] = c * 1
-            this.d =  this["1,1"] = d * 1
-            this.tx = this["2,0"] = tx * 1
-            this.ty = this["2,1"] = ty * 1
-            this["0,2"] = this["1,2"] = 0
-            this["2,2"] = 1;
-            return this;
-        },
-        get2D: function(){
-            return "matrix("+[ this["0,0"],this["1,0"],this["0,1"],this["1,1"],this["2,0"],this["2,1"] ]+")";
-        },
-        cross: function(matrix){
-            if(this.cols === matrix.rows){
-                var ret = new Matrix(this.rows, matrix.cols);
-                var n = Math.max(this.rows, matrix.cols)
-                for(var key in ret){
-                    if(key.match(/(\d+),(\d+)/)){
-                        var r = RegExp.$1, c = RegExp.$2
-                        for(var i = 0; i < n; i++ ){
-                            ret[key] += ( (this[r+","+i] || 0) * (matrix[i+","+c]||0 ));//X轴*Y轴
-                        }
-                    }
-                }
-                for(key in this){
-                    if(typeof this[key] == "number"){
-                        delete this[key]
-                    }
-                }
-                for(key in ret){
-                    if(typeof ret[key] == "number"){
-                        this[key] = toFixed(ret[key])
-                    }
-                }
-                return this
-            }else{
-                throw "cross error: this.cols !== matrix.rows"
-            }
-        },
-        //http://www.zweigmedia.com/RealWorld/tutorialsf1/frames3_2.html
-        //http://www.w3.org/TR/SVG/coords.html#RotationDefined
-        //http://www.mathamazement.com/Lessons/Pre-Calculus/08_Matrices-and-Determinants/coordinate-transformation-matrices.html
-        translate: function(tx, ty) {
-            tx = parseFloat(tx) || 0;//沿 x 轴平移每个点的距离。
-            ty = parseFloat(ty) || 0;//沿 y 轴平移每个点的距离。
-            var m = (new Matrix()).set2D(1 ,0, 0, 1, tx, ty);
-            this.cross(m)
-        },
-        translateX: function(tx) {
-            this.translate(tx, 0)
-        },
-        translateY: function(ty) {
-            this.translate(0, ty)
-        },
-        scale: function(sx, sy){
-            sx = isFinite(sx) ? parseFloat(sx) : 1 ;
-            sy = isFinite(sy) ? parseFloat(sy) : 1 ;
-            var m = (new Matrix()).set2D( sx, 0, 0, sy, 0, 0);
-            this.cross(m)
-        },
-        scaleX: function(sx) {
-            this.scale(sx, 1)
-        },
-        scaleY: function(sy) {
-            this.scale(1, sy)
-        },
-        rotate: function(angle, fix){//matrix.rotate(60)==>顺时针转60度
-            fix = fix === -1 ? fix : 1;
-            angle = rad(angle);
+        rotate : function(angle, fix) {
+            fix = fix === "fix" ? -1 : 1
+            angle = rad(angle)
             var cos = Math.cos(angle);
-            var sin = Math.sin(angle);// a, b, c, d
-            var m = (new Matrix()).set2D( cos,fix * sin , fix * -sin, cos, 0, 0);
-            return this.cross(m)
+            var sin = Math.sin(angle);
+            return this.cross(cos, fix * sin, fix * -sin, cos, 0, 0)
         },
-        skew: function(ax, ay){
-            var xRad = rad(ax);
-            var yRad;
+        skew : function(sx, sy) {
+            var xRad = rad(sx);
+            var yRad = rad(sy);
+            return this.cross(1, Math.tan( yRad ), Math.tan( xRad ), 1, 0, 0, 0, 0);
+        },
+        skewX: function(sx){
+            return this.skew(sx)
+        },
+        skewY: function(sy){
+            return this.skew("0",sy)
+        },
+        scale : function(x, y) {
+            this.a *= x;
+            this.d *= y;
+            this.tx *= x;
+            this.ty *= y;
+            return this;
+        },
+        scaleX: function(x){
+            return this.scale(x ,1)
+        },
+        scaleY: function(y){
+            return this.scale(1 ,y)
+        },
 
-            if (ay != null) {
-                yRad = rad(ay)
-            } else {
-                yRad = xRad
-            }
-            var m = (new Matrix()).set2D( 1, Math.tan( xRad ), Math.tan( yRad ), 1, 0, 0);
-            return this.cross(m)
+        translate : function(x, y) {
+            this.tx += x;
+            this.ty += y;
+            return this;
         },
-        skewX: function(ax){
-            return this.skew(ax, 0);
+        translateX : function(x) {
+            this.tx += x;
+            return this;
         },
-        skewY: function(ay){
-            this.skew(0, ay);
+        translateY : function(y) {
+            this.ty += y;
+            return this;
         },
-        /**
-        // ┌       ┐┌              ┐
-        // │ a c tx││  M11  -M12 tx│
-        // │ b d ty││  -M21  M22 tx│
-        // └       ┘└              ┘
-        //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/flash/geom/Matrix.html
-        //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象*/
-        decompose2D: function(){
-            var ret = {}
-            this.a = this["0,0"]
-            this.b = this["1,0"]
-            this.c = this["0,1"]
-            this.d = this["1,1"]
-            ret.x = this.tx = this["2,0"]
-            ret.y = this.ty = this["2,1"]
-
-            ret.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
-            ret.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
+        toString: function(){
+            return "matrix("+this.get()+")";
+        },
+        get: function(){
+            return [this.a,this.b,this.c,this.d,this.tx,this.ty]
+        },
+        set: function(a, b, c, d, tx, ty){
+            this.a = a * 1;
+            this.b = b * 1 || 0;
+            this.c = c * 1 || 0;
+            this.d = d * 1;
+            this.tx = tx * 1 || 0;
+            this.ty = ty * 1 || 0;
+            return this;
+        },
+        decompose : function() {
+            // TODO: it would be nice to be able to solve for whether the matrix can be decomposed into only scale/rotation
+            // even when scale is negative
+            var target = {};
+            target.x = this.tx;
+            target.y = this.ty;
+            target.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
+            target.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
 
             var skewX = Math.atan2(-this.c, this.d);
             var skewY = Math.atan2(this.b, this.a);
 
             if (skewX == skewY) {
-                ret.rotation = skewY/Matrix.DEG_TO_RAD;
+                target.rotation = skewY/Matrix2D.DEG_TO_RAD;
                 if (this.a < 0 && this.d >= 0) {
-                    ret.rotation += (ret.rotation <= 0) ? 180 : -180;
+                    target.rotation += (target.rotation <= 0) ? 180 : -180;
                 }
-                ret.skewX = ret.skewY = 0;
+                target.skewX = target.skewY = 0;
             } else {
-                ret.skewX = skewX/Matrix.DEG_TO_RAD;
-                ret.skewY = skewY/Matrix.DEG_TO_RAD;
+                target.skewX = skewX/Matrix2D.DEG_TO_RAD;
+                target.skewY = skewY/Matrix2D.DEG_TO_RAD;
             }
-            return ret;
+            return target;
         }
     });
-    "translateX,translateY,scaleX,scaleY,skewX,skewY".replace($.rword, function(n){
-        Matrix.prototype[n.toLowerCase()] = Matrix.prototype[n]
-    });
-    Matrix.DEG_TO_RAD = Math.PI/180;
-    $.Matrix = Matrix
 
+    Matrix2D.DEG_TO_RAD = Math.PI/180;
+
+    $.Matrix2D = Matrix2D
+    
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
     cssTransfrom = $.cssName("transform");
     //缓存结果
     if(cssTransfrom){
         function dataTransfrom(node){
-            var matrix = $._data( node, "matrix" ) || new Matrix();
-            matrix.set2D.apply(matrix, getter(node, cssTransfrom).match(/[-+.e\d]+/g).map(function(d){
+            var matrix = $._data( node, "matrix" ) || new Matrix2D();
+            matrix.set.apply(matrix, getter(node, cssTransfrom).match(/[-+.e\d]+/g).map(function(d){
                 return toFixed(d*1)
             }));
             return $._data(node, "matrix", matrix );
@@ -330,7 +279,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
     }
     adapter["rotate:get"] = function( node ){
-        return dataTransfrom(node).decompose2D().rotation;
+        return dataTransfrom(node).decompose().rotation;
     }
     adapter["rotate:set"] = function( node, name, value){      
         adapter[cssTransfrom + ":set"](node, cssTransfrom, "rotate("+value+"deg)")
@@ -390,7 +339,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
- */
+     */
  
     var cssPair = {
         Width:['Left', 'Right'],
@@ -696,6 +645,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 http://boobstagram.fr/archive
     //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
   
-*/
+ */
 
 
