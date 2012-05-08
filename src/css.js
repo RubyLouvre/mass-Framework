@@ -246,16 +246,24 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             fix = fix === -1 ? fix : 1;
             angle = rad(angle);
             var cos = Math.cos(angle);
-            var sin = Math.sin(angle);
+            var sin = Math.sin(angle);// a, b, c, d
             var m = (new Matrix()).set2D( cos,fix * sin , fix * -sin, cos, 0, 0);
-            this.cross(m)
+            return this.cross(m)
         },
         skew: function(ax, ay){
-            var m = (new Matrix()).set2D( 1, Math.tan( rad(ax) ), Math.tan( rad(ay) ), 1, 0, 0);
-            this.cross(m)
+            var xRad = rad(ax);
+            var yRad;
+
+            if (ay != null) {
+                yRad = rad(ay)
+            } else {
+                yRad = xRad
+            }
+            var m = (new Matrix()).set2D( 1, Math.tan( xRad ), Math.tan( yRad ), 1, 0, 0);
+            return this.cross(m)
         },
         skewX: function(ax){
-            this.skew(ax, 0);
+            return this.skew(ax, 0);
         },
         skewY: function(ay){
             this.skew(0, ay);
