@@ -113,9 +113,9 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     //rad	radians, 弧度
     function toRadian(value) {
         return ~value.indexOf("deg") ?
-        parseInt(value,10) * (Math.PI * 2 / 360):
+        parseInt(value,10) *  Math.PI/180:
         ~value.indexOf("grad") ?
-        parseInt(value,10) * (Math.PI/200):
+        parseInt(value,10) * Math.PI/200:
         parseFloat(value);
     }
     adapter[ "transform:set" ] = function(node, name, value){
@@ -147,8 +147,13 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             var tw =  node.offsetWidth, th = node.offsetHeight;//取得变形后高宽
             if( tw !== width || th !== height || method.indexOf("translate") == 0 ){
                 node.style.position = "relative";
-                node.style.left = (width - tw)/2 +  m.tx + "px";
-                node.style.top = (height - th)/2 +  m.ty + "px";
+console.log((width - tw)/2)
+console.log((height - th)/2)
+                node.style.left = (width - tw)/2 +m.tx +(width - tw)/2  + "px";//-8-18
+                node.style.top = (height - th)/2 +m.ty -(height - th)/2 + "px";//-8+18
+                console.log(method)
+                 console.log((width - tw)/2 +m.tx +(width - tw)/2)
+                console.log((height - th)/2 +m.ty -(height - th)/2)
             }
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
