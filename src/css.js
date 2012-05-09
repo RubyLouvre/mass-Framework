@@ -39,9 +39,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 neo = neo != name ? neo : false
             }
             return $.access( this, name, value, $.css, neo  );
-        },
-        rotate : function( value ){
-            return  this.css( "rotate", value ) ;
         }
     });
 
@@ -160,12 +157,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             this.ty = toFixed(tx*b1+ty*d1+this.ty);
             return this;
         },
-        rotate : function( radian ) {
+        rotate: function( radian ) {
             var cos = Math.cos(radian);
             var sin = Math.sin(radian);
             return this.cross(cos,  sin,  -sin, cos, 0, 0)
         },
-        skew : function(sx, sy) {
+        skew: function(sx, sy) {
             return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0);
         },
         skewX: function(radian){
@@ -174,7 +171,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         skewY: function(radian){
             return this.skew(0, radian);
         },
-        scale : function(x, y) {
+        scale: function(x, y) {
             return this.cross( toFloat(x, 1) ,0, 0, toFloat(y, 1), 0, 0)
         },
         scaleX: function(x){
@@ -186,10 +183,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         translate : function(x, y) {
             return this.cross(1, 0, 0, 1, toFloat(x, 0), toFloat(x, 0) );
         },
-        translateX : function(x) {
+        translateX: function(x) {
             return this.translate(x, 0);
         },
-        translateY : function(y) {
+        translateY: function(y) {
             return this.translate(0, y);
         },
         toString: function(){
@@ -206,6 +203,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             this.tx = tx * 1 || 0;
             this.ty = ty * 1 || 0;
             return this;
+        },
+        matrix:function(a, b, c, d, tx, ty){
+            return this.cross(a, b, c, d, toFloat(tx), toFloat(ty))
         },
         decompose : function() {
             //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
@@ -233,32 +233,21 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     });
 
     $.Matrix2D = Matrix2D
-    
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
     cssTransfrom = $.cssName("transform");
-    //缓存结果
-    if(cssTransfrom){
-        function dataTransfrom(node){
+    if( cssTransfrom ){
+        adapter[cssTransfrom + ":set"] = function(node, name, value){
+            if(value.indexOf("matrix")!== -1 && cssTransfrom === "MozTransform"){
+                value = value.replace(/([\d.-]+)\s*,\s*([\d.-]+)\s*\)/,"$1px, $2px)")
+            }
+            node.style[name] = value;
             var matrix = $._data( node, "matrix" ) || new Matrix2D();
             matrix.set.apply(matrix, getter(node, cssTransfrom).match(/[-+.e\d]+/g).map(function(d){
                 return toFixed(d*1)
             }));
-            return $._data(node, "matrix", matrix );
+           $._data(node, "matrix", matrix );
         }
-        adapter[cssTransfrom + ":set"] = function(node, name, value){
-            if(value.indexOf("matrix")!=-1 && name === "MozTransform"){
-                value = value.replace(/([\d.-]+)\s*,\s*([\d.-]+)\s*\)/,"$1px, $2px)")
-            }
-            node.style[name] = value;
-            dataTransfrom(node);
-        }
-    }
-    adapter["rotate:get"] = function( node ){
-        return dataTransfrom(node).decompose().rotation;
-    }
-    adapter["rotate:set"] = function( node, name, value){      
-        adapter[cssTransfrom + ":set"](node, cssTransfrom, "rotate("+value+"deg)")
     }
     //http://granular.cs.umu.se/browserphysics/?cat=7
     //=========================　处理　user-select　=========================
@@ -599,9 +588,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
 
-    "margin,padding,borderWidth".replace(/([a-z]+)([^,]*)/g,function(s,a,b){
-        // console.log([a,b])
-        });
 });
 /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
@@ -614,11 +600,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.3.2 getWH现在能获取多重隐藏元素的高宽了
 2012.4.15 对zIndex进行适配,对$.css进行元素节点检测
 2012.4.16 重构showHidden
-2012.5.4 css v2
+2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css v2
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
-    //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
-  
  */
 
 
