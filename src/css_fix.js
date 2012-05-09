@@ -123,13 +123,17 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         //注意：IE滤镜和其他浏览器定义的角度方向相反
         value.toLowerCase().replace(rtransform,function(_,method,array){
             array = array.replace(/px/g,"").match($.rword) || [];
-            if(/skew|rotate/.test(method)){
+            if(/skew|rotate/.test(method)){//角度必须带单位
                 array[0] = toRadian(array[0] );//IE矩阵滤镜的方向是相反的
                 array[1] = toRadian(array[1] || "0");
+            }
+            if(method == "scale" && array[1] == void 0){
+                array[1] = array[0] //sy如果没有定义等于sx
             }
             method = method.replace(/(x|y)$/i,function(_,b){
                 return b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
             });
+            
             m[method].apply(m, array);
             //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
             var filter = node.filters[ident];
@@ -147,13 +151,8 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             var tw =  node.offsetWidth, th = node.offsetHeight;//取得变形后高宽
             if( tw !== width || th !== height || method.indexOf("translate") == 0 ){
                 node.style.position = "relative";
-console.log((width - tw)/2)
-console.log((height - th)/2)
-                node.style.left = (width - tw)/2 +m.tx +(width - tw)/2  + "px";//-8-18
-                node.style.top = (height - th)/2 +m.ty -(height - th)/2 + "px";//-8+18
-                console.log(method)
-                 console.log((width - tw)/2 +m.tx +(width - tw)/2)
-                console.log((height - th)/2 +m.ty -(height - th)/2)
+                node.style.left = (width - tw)/2  + m.tx + "px";
+                node.style.top = (height - th)/2  + m.ty + "px";
             }
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
