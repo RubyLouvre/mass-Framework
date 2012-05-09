@@ -238,7 +238,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             matrix.set.apply(matrix, getter(node, cssTransfrom).match(/[-+.e\d]+/g).map(function(d){
                 return toFixed(d*1)
             }));
-           $._data(node, "matrix", matrix );
+            $._data(node, "matrix", matrix );
         }
     }
     //http://granular.cs.umu.se/browserphysics/?cat=7
@@ -248,7 +248,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //具体支持情况可见下面网址
     //http://help.dottoro.com/lcrlukea.php
     var userSelect = $.cssName("userSelect");
-    if(typeof userSelect === "string"){
+    if( userSelect ){
         adapter[ userSelect+":set" ] = function( node, name, value ) {
             return node.style[ name ] = value;
         };
