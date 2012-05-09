@@ -584,6 +584,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
+2011.9.20 v2
 2011.10.10 重构position offset保持这两者行为一致，
 2011.10.15 Fix $.css BUG  添加transform rotate API
 2011.10.21 修正width height的BUG
@@ -592,7 +593,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.3.2 getWH现在能获取多重隐藏元素的高宽了
 2012.4.15 对zIndex进行适配,对$.css进行元素节点检测
 2012.4.16 重构showHidden
-2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css v2
+2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
  */
