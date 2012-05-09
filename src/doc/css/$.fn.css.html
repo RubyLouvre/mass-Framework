@@ -77,6 +77,9 @@
                 },function(){ 
                     $(this).css("backgroundColor","transparent")
                 });
+                //CSS3旋转
+                $("fieldset img").lt(2).css("transform","rotate(-7deg)")
+                $("fieldset img").gt(2).css("transform","rotate(7deg)")
                 
                 var p = $("#highlightword")
                 var text = p.text().replace(/([\u2E80-\u9FFF])/g,'<span>$1</span>');
@@ -120,39 +123,39 @@
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.css(name, [ val ])</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>$.fn.css对于元素的样式读写提供跨浏览器的便捷途径。在老式IE中，不支持getComputedStyle，需要联合currentStyle， runtimeStyle，offsetWidth,
-                pixelLeft等各种私自实现，才取得当前样式值，并且它们在对于opacity， float，userSelect等操作都与其他浏览器不一致。不过，也不全错在IE中，比如
-                FF是不支持backgroundPositionXY，$.fn.css也对此差异进行屏蔽。即便如此，css对许多样式是无能为力的，如带前缀的私有属性，如-moz-,-webkit-，
-                这基本上来自于CSS3，圆角，盒子阴影，倒影，列布局，动画等等，还有一些缩写属性，
-                如font, border, marger, padding, background，请把它们分解成更细的单位，如backgroundColor。另外，属性名不区分连字符风格与驼峰风格，双方均可。
-            </p>
-            <p>此方法是属性于get one set all操作，根据传入参数决定其是读操作还是写操作。</p>
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>name</dt>
-                <dd>必需。第一种情况，String。数据的名字。如果只有它一个参数，则进行读操作，当前样式。</dd>
-                <dd>必需。第一种情况，一个普通的Object，进行写操作，同时对所有匹配元素设置多个样式，返回实例本身。</dd>
-                <dt>val</dt>
-                <dd>可选。样式的值。如果是数值，对于表示尺寸的样式，如width,height, fontSize等，会补上px单位，然后进行样式设置，返回实例本身</dd>
-            </dl>
+    <article>
+        <h3>$.fn.css(name, [ val ])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>$.fn.css对于元素的样式读写提供跨浏览器的便捷途径。在老式IE中，不支持getComputedStyle，需要联合currentStyle， runtimeStyle，offsetWidth,
+            pixelLeft等各种私自实现，才取得当前样式值，并且它们在对于opacity， float，userSelect等操作都与其他浏览器不一致。不过，也不全错在IE中，比如
+            FF是不支持backgroundPositionXY，$.fn.css也对此差异进行屏蔽。即便如此，css对许多样式是无能为力的，如带前缀的私有属性，如-moz-,-webkit-，
+            这基本上来自于CSS3，圆角，盒子阴影，倒影，列布局，动画等等，还有一些缩写属性，
+            如font, border, marger, padding, background，请把它们分解成更细的单位，如backgroundColor。另外，属性名不区分连字符风格与驼峰风格，双方均可。
+        </p>
+        <p>此方法是属性于get one set all操作，根据传入参数决定其是读操作还是写操作。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>name</dt>
+            <dd>必需。第一种情况，String。数据的名字。如果只有它一个参数，则进行读操作，当前样式。</dd>
+            <dd>必需。第一种情况，一个普通的Object，进行写操作，同时对所有匹配元素设置多个样式，返回实例本身。</dd>
+            <dt>val</dt>
+            <dd>可选。样式的值。如果是数值，对于表示尺寸的样式，如width,height, fontSize等，会补上px单位，然后进行样式设置，返回实例本身</dd>
+        </dl>
 
 
-            <fieldset><legend>例子</legend>
-                <div class="skimover">
-                    <div>perspective</div>
-                    <div>transform</div>
-                    <div>transition</div>
-                    <div>animation</div>
-                    <div>maskImage</div>
-                    <div>textShadow</div>
-                    <div>textStroke</div>
-                    <div>boxReflect</div>
-                    <div>boxReflect</div>
-                </div>
-                <pre class="brush:xml;gutter:false;toolbar:false">
+        <fieldset><legend>例子</legend>
+            <div class="skimover">
+                <div>perspective</div>
+                <div>transform</div>
+                <div>transition</div>
+                <div>animation</div>
+                <div>maskImage</div>
+                <div>textShadow</div>
+                <div>textStroke</div>
+                <div>boxReflect</div>
+                <div>boxReflect</div>
+            </div>
+            <pre class="brush:xml;gutter:false;toolbar:false">
                 &lt;div class="skimover"&gt;
                     &lt;div&gt;perspective&lt;/div&gt;
                     &lt;div&gt;transform&lt;/div&gt;
@@ -165,8 +168,8 @@
                     &lt;div&gt;boxReflect&lt;/div&gt;
                 &lt;/div&gt;
 
-                </pre>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("ready,node,css,event",function(){
      $(".skimover div").hover(function(){
         $(this).css("backgroundColor","#008080")
@@ -174,16 +177,16 @@ $.require("ready,node,css,event",function(){
         $(this).css("backgroundColor","transparent")
     });
 });
-                </pre>
+            </pre>
 
-            </fieldset>
-            <fieldset><legend>例子</legend>
-                <p id="highlightword">通过点击高亮选中的汉字！！</p>
+        </fieldset>
+        <fieldset><legend>例子</legend>
+            <p id="highlightword">通过点击高亮选中的汉字！！</p>
 
-                <pre class="brush:xml;gutter:false;toolbar:false">
+            <pre class="brush:xml;gutter:false;toolbar:false">
                 &lt;p id="highlightword"&gt;通过点击高亮选中的汉字！！&lt;/p&gt;
-                </pre>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
+            </pre>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,node,css,event",function(){     
                 var p = $("#highlightword")
                 var text = p.text().replace(/([\u2E80-\u9FFF])/g,'&lt;span&gt;$1&lt;/span&gt;');
@@ -192,16 +195,30 @@ $.require("ready,node,css,event",function(){
                     $(e.target).css({"background-color":"yellow",color:"#000"});
                 });
             });
-                </pre>
+            </pre>
 
-            </fieldset>
-            <fieldset style="height:800px"><legend>例子</legend>
+        </fieldset>
+        <fieldset><legend>CSS3旋转</legend>
 
-                <div id="testcontainer" style="float: left;">
-                    <div id="source" class="testclass" style="color: white; background-color: red; border-bottom-style: solid;border-bottom-color: black;">
-                        <p>
-                            内部样式:</p>
-                        <pre>
+            <img class="image_test_1" src="../public/styles/css_rotate_mm1.jpg" />
+            <img class="image_test_2" src="../public/styles/css_rotate_mm2.jpg" />
+            <img class="image_test_3" src="../public/styles/css_rotate_mm3.jpg" />
+            <img class="image_test_4" src="../public/styles/css_rotate_mm4.jpg" />
+            <img class="image_test_5" src="../public/styles/css_rotate_mm5.jpg" />
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,css",function(){
+                $("fieldset img").lt(2).css("transform","rotate(-7deg)")
+                $("fieldset img").gt(2).css("transform","rotate(7deg)")
+            })
+            </pre>
+        </fieldset>
+        <fieldset style="height:800px"><legend>例子</legend>
+
+            <div id="testcontainer" style="float: left;">
+                <div id="source" class="testclass" style="color: white; background-color: red; border-bottom-style: solid;border-bottom-color: black;">
+                    <p>
+                        内部样式:</p>
+                    <pre>
 <code>#source { 
 color:blue !important;
 font-family:"courier new";
@@ -221,32 +238,32 @@ background-color:white !important;
 }
 
 </code></pre>
-                        <p>内联样式</p>
-                        <pre><code>style= "color:white;
+                    <p>内联样式</p>
+                    <pre><code>style= "color:white;
 background-color:red;
 border-bottom-style:solid;
 border-bottom-color:black;"
                 </code></pre>
-                    </div>
-                    <input type="button" id="getcss" value="开始获取样式"/> 
                 </div>
+                <input type="button" id="getcss" value="开始获取样式"/>
+            </div>
 
-                <div style="float: left; width: 49%">
-                    <div id="results">
+            <div style="float: left; width: 49%">
+                <div id="results">
 
-                    </div>
                 </div>
+            </div>
 
-            </fieldset>
-            <fieldset ><legend>例子</legend>
-                <div class="fade">fade</div>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
+        </fieldset>
+        <fieldset ><legend>例子</legend>
+            <div class="fade">fade</div>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
                 $.require("ready,node,css",function(){
                     $(".fade").css("opacity",.1)
                 })
-                </pre>
-                <button class="doc_btn" onclick="exec3()">点我，执行代码</button>
-            </fieldset>
-        </article>
-    </body>
+            </pre>
+            <button class="doc_btn" onclick="exec3()">点我，执行代码</button>
+        </fieldset>
+    </article>
+</body>
 </html>

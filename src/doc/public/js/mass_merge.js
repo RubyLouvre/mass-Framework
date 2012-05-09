@@ -2,6 +2,7 @@
 // 模块加载模块（种子模块）2012.1.29 by 司徒正美
 //=========================================
 void function( global, DOC ){
+  
     var
     _$ = global.$, //保存已有同名变量
     namespace = DOC.URL.replace( /(#.+|\W)/g,''),
@@ -20,6 +21,7 @@ void function( global, DOC ){
         "undefined"               : "Undefined"
     },
     toString = class2type.toString;
+
     
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
@@ -61,6 +63,7 @@ void function( global, DOC ){
         }
         return target;
     }
+
     mix( $, {//为此版本的命名空间对象添加成员
         html: DOC.documentElement,
         head: HEAD,
@@ -72,7 +75,7 @@ void function( global, DOC ){
         "@target": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
-            node = scripts[ scripts.length - 1 ];
+            node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
             url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
@@ -156,13 +159,14 @@ void function( global, DOC ){
             return result;
         }
     });
+
     $.noop = $.error = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
-    rdebug =  /^(init|constructor|lang|query)$|^is/,
+    rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/,
     tokens = [],//需要处理的模块名列表
     transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
     cbi = 1e5 ;//用于生成回调函数的名字
@@ -206,7 +210,7 @@ void function( global, DOC ){
     }
     function debug(obj, name, module, p){
         var fn = obj[name];
-        if(  typeof fn == "function" && !fn["@debug"]){
+        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
             if( rdebug.test( name )){
                 fn["@debug"] = name;
             }else{
@@ -219,7 +223,7 @@ void function( global, DOC ){
                     }
                 }
                 for(var i in fn){
-                   method[i] = fn[i];
+                    method[i] = fn[i];
                 }
                 method["@debug"] = fn;
                 method.toString = function(){
@@ -388,12 +392,16 @@ void function( global, DOC ){
                 fireReady();
             }
         });
-        if( $.html.doScroll && self.eval === top.eval ){
+        if( $.html.doScroll && self.eval === top.eval ){ //支持HTML5
+            ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+                "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
+                document.createElement(tag);
+            });
             doScrollCheck();
         }
     }
     for(var i in $){
-        if(typeof $[i] == "function"){
+        if( !$[i].mass && typeof $[i] == "function"){
             $[i]["@debug"] = i;
         }
     }
@@ -548,7 +556,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
             return this.getFullYear() - 1900;
         };
         Date[P].setYear = function(year) {
-            return this.setFullYear(year + 1900);
+            return this.setFullYear(year );//+ 1900
         };
     }
 
@@ -665,14 +673,17 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return true;
         },
-        //包括Array,Arguments,NodeList,HTMLCollection,IXMLDOMNodeList与自定义类数组对象
-        //select.options集合（它们两个都有item与length属性）
+        //限定为Array, Arguments, NodeList与拥有非负整数的length属性的Object对象，视情况添加字符串
         isArrayLike:  function (obj, str) {//是否包含字符串
             var type = $.type(obj);
-            if(!obj || type == "Document" || type == "Window" || type == "Function" || (!str && type == "String"))
-                return false;
-            var i = obj.length;
-            return i > 0 &&  parseInt( i ) === i;//非负整数
+            if(type === "Array" || type === "NodeList" || type === "Arguments" || str && type === "String"){
+                return true;
+            }
+            if( type === "Object" ){
+                var i = obj.length;
+                return i >= 0 &&  parseInt( i ) === i;//非负整数
+            }
+            return false;
         },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
@@ -713,19 +724,19 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         // the native Python `range()` function. See
         // [the Python documentation](http://docs.python.org/library/functions.html#range).
         range: function(start, stop, step) {
-            if (arguments.length <= 1) {
+            step || (step = 1);
+            if (arguments.length < 2) {
                 stop = start || 0;
                 start = 0;
             }
-            step = arguments[2] || 1;
-            var len = Math.max(Math.ceil((stop - start) / step), 0);
-            var idx = 0;
-            var range = new Array(len);
-            while(idx < len) {
-                range[idx++] = start;
+            var index = -1,
+            length = Math.max(Math.ceil((stop - start) / step), 0),
+            result = Array(length);
+            while (++index < length) {
+                result[index] = start;
                 start += step;
             }
-            return range;
+            return result;
         },
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
         quote: global.JSON && JSON.stringify || String.quote ||  (function(){
@@ -841,7 +852,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 xml = undefined;
             }
             if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
-                $.log( "Invalid XML: " + data );
+                $.error( "Invalid XML: " + data );
             }
             return xml;
         }
@@ -862,7 +873,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         $.isArray = Array.isArray;
     }
 
-    var arrayLike = $.oneObject("NodeList,Arguments,Object");
     //这只是一个入口
     $.lang = function(obj, type){
         return adjust(new Chain, obj, type)
@@ -870,7 +880,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     //调整Chain实例的重要属性
     function adjust(chain, obj, type){
         type = type || $.type(obj);
-        if(arrayLike[type] && isFinite(obj.length)){
+        if( type != "Array" && $.isArrayLike(type) ){
             obj = $.slice(obj);
             type = "Array";
         }
@@ -882,10 +892,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     var Chain = function(){ }
     Chain.prototype = {
         constructor: Chain,
-        valueOf:function(){
-            return this.target;
-        },
-        toString:function(){
+        toString: function(){
             return this.target + "";
         },
         value: function(){
@@ -1570,7 +1577,7 @@ $.define("data", "lang", function(){
     //$.log("已加载data模块");
     var remitter = /object|function/;
     $.mix( $, {
-        _db: {},
+        "@data": {},
         // 读写数据
         data : function( target, name, data, pvt ) {
             if(target && remitter.test(typeof target)){//只处理HTML节点与普通对象
@@ -1579,7 +1586,7 @@ $.define("data", "lang", function(){
                     return id;
                 }
                 var getByName = typeof name === "string",
-                database = isEl ? $._db: target,
+                database = isEl ? $["@data"]: target,
                 table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
                     data:{}
                 });
@@ -1641,7 +1648,7 @@ $.define("data", "lang", function(){
                     return;
                 }
                 var  clear = 1, ret = typeof name == "string",
-                database = target.nodeType === 1  ? $._db : target,
+                database = target.nodeType === 1  ? $["@data"] : target,
                 table = database["@data_"+id] ;
                 if ( table && ret ) {
                     if(!pvt){
@@ -1696,7 +1703,7 @@ $.define("data", "lang", function(){
 $.define("query", function(){
    // $.log("已加载选择器模块")
     var global = this, DOC = global.document;
-    $.mix($,{
+    $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
         isXML : function(el){
             var doc = el.ownerDocument || el
@@ -2617,14 +2624,6 @@ $.define("query", function(){
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     // $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
-
-    if( !support.cloneHTML5 ){
-        "abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video".replace( $.rword, function( tag ){
-            document.createElement( tag );////让IE6789支持HTML5的新标签
-            document.createElement( tag.toUpperCase() );
-        });
-    }
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
@@ -2750,6 +2749,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         },
         //取得或设置节点的innerHTML属性
         html: function( item ){
+            item = item === void 0 ? item : item == null ?  '' : item+""
             return $.access(this, 0, item, function( el ){//getter
                 //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
                 //为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
@@ -2758,29 +2758,28 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el)
                 }
                 return null;
-            }, function(){//setter
-                item = item == null ?  '' : item+"";////这里的隐式转换也是防御性编程的一种
+            }, function(el, _, value){//setter
                 //接着判断innerHTML属性是否符合标准,不再区分可读与只读
                 //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
                 //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
-                if ( support.innerHTML && (!rcreate.test(item) && !rnest.test(item)) ) {
+                if ( support.innerHTML && (!rcreate.test(value) && !rnest.test(value)) ) {
                     try {
-                        for ( var i = 0, node; node = this[ i++ ]; ) {
-                            if ( node.nodeType === 1 ) {
-                                $.slice( node[TAGS]("*") ).forEach( cleanNode );
-                                node.innerHTML = item;
+                        for ( var i = 0; el = this[ i++ ]; ) {
+                            if ( el.nodeType === 1 ) {
+                                $.slice( el[TAGS]("*") ).forEach( cleanNode );
+                                el.innerHTML = value;
                             }
                         }
                         return;
                     } catch(e) {};
                 }
-                this.empty().append( item );
-            });
+                this.empty().append( value );
+            }, this);
         },
         // 取得或设置节点的text或innerText或textContent属性
         text: function( item ){
-            return $.access(this, 0, item, function( el ){//getter
-                if( !el ){
+            return $.access(this, 0, item, function( el ){
+                if( !el ){//getter
                     return "";
                 }else if(el.tagName == "OPTION" || el.tagName === "SCRIPT"){
                     return el.text;
@@ -2788,7 +2787,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return el.textContent || el.innerText || $.getText( [el] );
             }, function(){//setter
                 this.empty().append( this.ownerDocument.createTextNode( item ));
-            });
+            },this);
         },
         // 取得或设置节点的outerHTML
         outerHTML: function( item ){
@@ -2797,9 +2796,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                     return "outerHTML" in el ? el.outerHTML :outerHTML( el );
                 }
                 return null;
-            }, function( ){
+            }, function(){
                 this.empty().replace( item );
-            });
+            }, this);
         }
     });
     $.fn = $.prototype;
@@ -2862,30 +2861,25 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             }
         },
         //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
-        access: function( elems, key, value, getter, setter ) {
+        access: function( elems, key, value, getter, setter, bind ) {
             var length = elems.length;
-            setter = setter || getter;
-            //为所有元素设置N个属性
+            setter = typeof setter === "function" ? setter : getter;
+            bind = arguments[arguments.length - 1];
             if ( typeof key === "object" ) {
-                for ( var k in key ) {
+                for(var k in key){            //为所有元素设置N个属性
                     for ( var i = 0; i < length; i++ ) {
-                        setter( elems[i], k, key[ k ] );
+                        setter.call( bind, elems[i], k, key[k] );
                     }
                 }
                 return elems;
             }
             if ( value !== void 0 ) {
-                if( key === 0 ){
-                    setter.call( elems, value );
-                }else{
-                    for ( i = 0; i < length; i++ ) {
-                        setter( elems[i], key, value );
-                    }
+                for ( i = 0; i < length; i++ ) {
+                    setter.call(bind, elems[i], key, value );
                 }
                 return elems;
-            }
-            //取得第一个元素的属性
-            return length ? getter( elems[0], key ) : void 0;
+            } //取得第一个元素的属性, getter的参数总是很小的
+            return length ? getter.call( bind, elems[0], key ) : void 0;
         },
         
         parseHTML: function( html, doc ){
@@ -3054,9 +3048,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         return nodes;
     }
     $.implement({
-        data: function( key, item ){
-            return $.access( this, key, item, function( el, key ){
-                return  $.data( el, key, item );
+        data: function( key, item, pv ){
+            return $.access( this, key, item, function(el){
+                return  $.data( el, key, item,  pv === true  );
             })
         },
         removeData: function( key, pv ) {
@@ -3072,20 +3066,23 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-
-    function shimCloneNode( outerHTML ) {
-        var div = document.createElement( "div" );
-        document.body.appendChild(div)
+    var div = document.createElement( "div" );//缓存parser，防止反复创建
+    function shimCloneNode( outerHTML, tree ) {
+        tree.appendChild(div);
         div.innerHTML = outerHTML;
-        document.body.removeChild(div)
+        tree.removeChild(div);
         return div.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var outerHTML = node.outerHTML;
+        var bool //!undefined === true;
         //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-        var neo = !support.cloneHTML5 && node.outerHTML && (outerHTML.indexOf( unknownTag ) === 0) ?
-        shimCloneNode( outerHTML ): node.cloneNode(true), src, neos, i;
+        if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
+            var outerHTML = document.createElement(node.nodeName).outerHTML;
+            bool = outerHTML.indexOf( unknownTag ) // !0 === true;
+        }
+        //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
+        var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
             if(!support.cloneNode ){
@@ -3281,7 +3278,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         parentsUntil: function( el, expr ){
             return travel( el, "parentNode", expr ).reverse();
         },
-        next: function( el ){
+        next: function( el ){//nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
             return travel( el, "nextSibling", true );
         },
         nextAll: function( el ){
@@ -3299,7 +3296,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         prevUntil: function( el, expr ){
             return travel( el, "previousSibling", expr ).reverse();
         },
-        children: function( el ){
+        children: function( el ){//支持情况chrome1+ FF3.5+,IE5+,opera10+,safari4+
             return  el.children ? $.slice( el.children ) :
             $.slice( el.childNodes ).filter(function( node ){
                 return node.nodeType === 1;
@@ -3334,11 +3331,14 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
 //  样式补丁模块
 //==========================================
 $.define("css_fix", !!top.getComputedStyle, function(){
-   // $.log("已加载css_fix模块");
+    //$.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {},
-    ropacity = /opacity=([^)]*)/i,  ralpha = /alpha\([^)]*\)/i,
-    rnumpx = /^-?\d+(?:px)?$/i, rnum = /^-?\d/;
-     //=========================　处理　opacity　=========================
+    ropacity = /opacity=([^)]*)/i,
+    ralpha = /alpha\([^)]*\)/i,
+    rnumpx = /^-?\d+(?:px)?$/i, 
+    rtransform = /(\w+)\(([^)]+)\)/g,
+    rnum = /^-?\d/;
+    //=========================　处理　opacity　=========================
     adapter[ "opacity:get" ] = function( node, op ){
         //这是最快的获取IE透明值的方式，不需要动用正则了！
         if(node.filters.alpha){
@@ -3350,6 +3350,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         }
         return (op  ? op /100 :op)+"";//如果是零就不用除100了
     }
+    //http://www.freemathhelp.com/matrix-multiplication.html
     //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
     adapter[ "opacity:set" ] = function( node, _, value ){
         var currentStyle = node.currentStyle, style = node.style;
@@ -3381,7 +3382,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     border = {
         thin:   ie8 ? '1px' : '2px',
         medium: ie8 ? '3px' : '4px',
-        thick: ie8 ? '5px' : '6px'
+        thick:  ie8 ? '5px' : '6px'
     };
     adapter[ "_default:get" ] = function(node, name){
         var ret = node.currentStyle && node.currentStyle[name];
@@ -3411,80 +3412,89 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         }
         return ret === "" ? "auto" : border[ret] ||  ret;
     }
-    $.transform = function( node, param ){
-        var meta = $._data(node,"transform"), ident  = "DXImageTransform.Microsoft.Matrix",arr = [1,0,0,1,0,0], m
-        if(!meta){
-            //http://msdn.microsoft.com/en-us/library/ms533014(v=vs.85).aspx
-            m = node.filters ? node.filters[ident] : 0;
-            arr = m ? [m.M11, m.M12, m.M21, m.M22, m.Dx, m.Dy] : arr;
-            meta = $._toMatrixObject(arr);
-            meta.rotate = - meta.rotate;
-            //保存到缓存系统，省得每次都计算
-            $._data(node,"transform",meta);
-        }
-        if(arguments.length === 1){
-            return meta;//getter
-        }
-        //setter
-        meta = $._data(node,"transform",{
-            scaleX:     param.scaleX     === void 0 ? meta.scaleX     : param.scaleX,
-            scaleY:     param.scaleY     === void 0 ? meta.scaleY     : param.scaleY,
-            rotate:     param.rotate     === void 0 ? meta.rotate     : param.rotate,
-            translateX: param.translateX === void 0 ? meta.translateX : parseInt(param.translateX)|0,
-            translateY: param.translateY === void 0 ? meta.translateY : parseInt(param.translateY)|0
-        });
+    var ident  = "DXImageTransform.Microsoft.Matrix"
 
-        //注意：IE滤镜和其他浏览器定义的角度方向相反
-        var r = -$._all2rad(meta.rotate),
-        cos  = Math.cos(r ), sin = Math.sin(r),
-        mtx   = [ 
-        cos * meta.scaleX,  sin * meta.scaleX, 0,
-        -sin * meta.scaleY, cos * meta.scaleY, 0,
-        meta.translateX,    meta.translateY,   1],
-        cxcy= $._data(node,"cxcy");
-        if (!cxcy) {
-            var rect = node.getBoundingClientRect(),
-            cx = (rect.right  - rect.left) / 2, // center x
-            cy = (rect.bottom - rect.top)  / 2; // center y
-            if(node.currentStyle.hasLayout){
+    adapter[ "transform:get" ] = function(node, name){
+        var m = $._data(node,"matrix")
+        if(!m){
+            if(!node.currentStyle.hasLayout){
                 node.style.zoom = 1;
             }
             //IE9下请千万别设置  <meta content="IE=8" http-equiv="X-UA-Compatible"/>
             //http://www.cnblogs.com/Libra/archive/2009/03/24/1420731.html
-            node.style.filter += " progid:" + ident + "(sizingMethod='auto expand')";
-            cxcy =  $._data(node,"cxcy", {
-                cx: cx, 
-                cy: cy
-            });
+            if(!node.filters[ident]){
+                var old = node.currentStyle.filter;//防止覆盖已有的滤镜
+                node.style.filter =  (old ? old +"," : "") + " progid:" + ident + "(sizingMethod='auto expand')";
+            }
+            var f = node.filters[ident];
+            m = new $.Matrix2D( f.M11, f.M12, f.M21, f.M22, f.Dx, f.Dy);
+            $._data(node,"matrix",m ) //保存到缓存系统，省得每次都计算
         }
-        m = node.filters[ident];
-        m.M11 = mtx[0];
-        m.M12 = mtx[1];
-        m.M21 = mtx[3];
-        m.M22 = mtx[4];
-        m.Dx  = mtx[6];
-        m.Dy  = mtx[7];
-        // recalc center
-        rect = node.getBoundingClientRect();
-        cx = (rect.right  - rect.left) / 2;
-        cy = (rect.bottom - rect.top)  / 2;
-        node.style.marginLeft = cxcy.cx - cx + "px";
-        node.style.marginTop  = cxcy.cy - cy + "px";
+        return name === true ? m : m.toString();
+    }
+    //deg	degrees, 角度
+    //grad	grads, 百分度
+    //rad	radians, 弧度
+    function toRadian(value) {
+        return ~value.indexOf("deg") ?
+        parseInt(value,10) *  Math.PI/180:
+        ~value.indexOf("grad") ?
+        parseInt(value,10) * Math.PI/200:
+        parseFloat(value);
+    }
+    adapter[ "transform:set" ] = function(node, name, value){
+        var m = adapter[ "transform:get" ](node, true)
+        //注意：IE滤镜和其他浏览器定义的角度方向相反
+        value.toLowerCase().replace(rtransform,function(_,method,array){
+            array = array.replace(/px/g,"").match($.rword) || [];
+            if(/skew|rotate/.test(method)){//角度必须带单位
+                array[0] = toRadian(array[0] );//IE矩阵滤镜的方向是相反的
+                array[1] = toRadian(array[1] || "0");
+            }
+            if(method == "scale" && array[1] == void 0){
+                array[1] = array[0] //sy如果没有定义等于sx
+            }
+            if(method !== "matrix"){
+                method = method.replace(/(x|y)$/i,function(_,b){
+                    return  b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
+                })
+            }
+            m[method].apply(m, array);
+            //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
+            var filter = node.filters[ident];
+            filter.M11 =  filter.M22 = 1;//取得未变形前的宽高
+            filter.M12 =  filter.M21 = 0;
+            var width = node.offsetWidth;
+            var height = node.offsetHeight;
+            filter.M11 = m.a;
+            filter.M12 = m.c;//★★★注意这里的顺序
+            filter.M21 = m.b;
+            filter.M22 = m.d;
+            filter.Dx  = m.tx;
+            filter.Dy  = m.ty;
+            $._data(node,"matrix",m);
+            var tw =  node.offsetWidth, th = node.offsetHeight;//取得变形后高宽
+            node.style.position = "relative";
+            node.style.left = (width - tw)/2  + m.tx + "px";
+            node.style.top = (height - th)/2  + m.ty + "px";
+        //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+        //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
+        //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
+        });
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
+//2012.5.9 完美支持CSS3 transform 2D
 
+   
 //=========================================
 // 样式操作模块 by 司徒正美
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
-    //$.log( "已加载css模块" );
-    var rmatrix = /\(([^,]*),([^,]*),([^,]*),([^,]*),([^,p]*)(?:px)?,([^)p]*)(?:px)?/,
-    rad2deg = 180/Math.PI,
-    deg2rad = Math.PI/180,
-    supportFloat32Array = "Float32Array" in window,
-    prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
+    $.log( "已加载css模块" );
+
+    var prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
     adapter = $.cssAdapter = $.cssAdapter || {};
     function cssMap(name){
         return cssMap[name] ||  $.String.camelize( name );
@@ -3513,16 +3523,17 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     }
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     $.implement({
-        css : function( name, value ){
-            return $.access( this, name, value, $.css );
-        },
-        rotate : function( value ){
-            return  this.css( "rotate", value ) ;
+        css : function( name, value , neo){
+            if(typeof name === "string"){
+                neo = $.cssName(name)
+                neo = neo != name ? neo : false
+            }
+            return $.access( this, name, value, $.css, neo  );
         }
     });
 
     //http://www.w3.org/TR/2009/WD-css3-2d-transforms-20091201/#introduction
-    $.mix($, {
+    $.mix({
         cssMap: cssMap,
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: function( name, host, test ){
@@ -3542,264 +3553,47 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 return $.scrollbarWidth.ret
             }
             var test =  $('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body");
-            var ret = test[0].offsetWidth - test[0].clientWidth;              
+            var ret = test[0].offsetWidth - test[0].clientWidth;
             test.remove();
             return $.scrollbarWidth.ret = ret;
         },
         //这里的属性不需要自行添加px
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
-        css: function( node, name, value, fn){
-            if( !fn ){
-                name = cssMap( name );
-            }
+        css: function( node, name, value){
             if(node.style){
+                name = typeof this === "string" ? this : cssMap( name );
                 if( value === void 0){ //取值
-                    return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, cssMap(name) );
+                    return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
                 }else {//设值
                     var temp;
                     if ( typeof value === "string" && (temp = rrelNum.exec( value )) ) {
                         value = ( +( temp[1] + 1) * + temp[2] ) + parseFloat( $.css( node , name, void 0, 1 ) );
                     }
-
                     if ( isFinite( value ) && !$.cssNumber[ name ] ) {
                         value += "px";
                     }
-                    fn = (adapter[name+":set"] || adapter[ "_default:set" ]);
-                    fn( node, name, value );
+                    (adapter[name+":set"] || adapter[ "_default:set" ])( node, name, value );
                 }
-            }
-        },
-        //CSS3新增的三种角度单位分别为deg(角度)， rad(弧度)， grad(梯度或称百分度 )。
-        _all2deg : function (value) {
-            value += "";
-            return ~value.indexOf("deg") ?  parseInt(value,10):
-            ~value.indexOf("grad") ?  parseInt(value,10) * 2/1.8:
-            ~value.indexOf("rad") ?   parseInt(value,10) * rad2deg:
-            parseFloat(value);
-        },
-        _all2rad :function (value){
-            return $._all2deg(value) * deg2rad;
-        },
-        //将 skewx(10deg) translatex(150px)这样的字符串转换成3*2的距阵
-        _toMatrixArray: function( transform ) {
-            transform = transform.split(")");
-            var  i = -1, l = transform.length -1, split, prop, val,
-            prev = supportFloat32Array ? new Float32Array(6) : [],
-            curr = supportFloat32Array ? new Float32Array(6) : [],
-            rslt = supportFloat32Array ? new Float32Array(6) : [1,0,0,1,0,0];
-            prev[0] = prev[3] = rslt[0] = rslt[3] = 1;
-            prev[1] = prev[2] = prev[4] = prev[5] = 0;
-            // Loop through the transform properties, parse and multiply them
-            while ( ++i < l ) {
-                split = transform[i].split("(");
-                prop = split[0].trim();
-                val = split[1];
-                curr[0] = curr[3] = 1;
-                curr[1] = curr[2] = curr[4] = curr[5] = 0;
-
-                switch (prop) {
-                    case "translateX":
-                        curr[4] = parseInt( val, 10 );
-                        break;
-
-                    case "translateY":
-                        curr[5] = parseInt( val, 10 );
-                        break;
-
-                    case "translate":
-                        val = val.split(",");
-                        curr[4] = parseInt( val[0], 10 );
-                        curr[5] = parseInt( val[1] || 0, 10 );
-                        break;
-
-                    case "rotate":
-                        val = $._all2rad( val );
-                        curr[0] = Math.cos( val );
-                        curr[1] = Math.sin( val );
-                        curr[2] = -Math.sin( val );
-                        curr[3] = Math.cos( val );
-                        break;
-
-                    case "scaleX":
-                        curr[0] = +val;
-                        break;
-
-                    case "scaleY":
-                        curr[3] = val;
-                        break;
-
-                    case "scale":
-                        val = val.split(",");
-                        curr[0] = val[0];
-                        curr[3] = val.length > 1 ? val[1] : val[0];
-                        break;
-
-                    case "skewX":
-                        curr[2] = Math.tan( $._all2rad( val ) );
-                        break;
-
-                    case "skewY":
-                        curr[1] = Math.tan( $._all2rad( val ) );
-                        break;
-
-                    case "skew":
-                        val = val.split(",");
-                        curr[2] = Math.tan( $._all2rad( val[0]) );
-                        val[1] && ( curr[1] = Math.tan( $._all2rad( val[1] )) );
-                        break;
-
-                    case "matrix":
-                        val = val.split(",");
-                        curr[0] = val[0];
-                        curr[1] = val[1];
-                        curr[2] = val[2];
-                        curr[3] = val[3];
-                        curr[4] = parseInt( val[4], 10 );
-                        curr[5] = parseInt( val[5], 10 );
-                        break;
-                }
-
-                // Matrix product (array in column-major order)
-                rslt[0] = prev[0] * curr[0] + prev[2] * curr[1];
-                rslt[1] = prev[1] * curr[0] + prev[3] * curr[1];
-                rslt[2] = prev[0] * curr[2] + prev[2] * curr[3];
-                rslt[3] = prev[1] * curr[2] + prev[3] * curr[3];
-                rslt[4] = prev[0] * curr[4] + prev[2] * curr[5] + prev[4];
-                rslt[5] = prev[1] * curr[4] + prev[3] * curr[5] + prev[5];
-
-                prev = [ rslt[0],rslt[1],rslt[2],rslt[3],rslt[4],rslt[5] ];
-            }
-            return rslt;
-        },
-        // 将矩阵转换为一个含有 rotate, scale and skew 属性的对象
-        // http://hg.mozilla.org/mozilla-central/file/7cb3e9795d04/layout/style/nsStyleAnimation.cpp
-        _toMatrixObject: function(/*Array*/matrix) {
-            var scaleX
-            , scaleY
-            , XYshear
-            , A = matrix[0]
-            , B = matrix[1]
-            , C = matrix[2]
-            , D = matrix[3] ;
-            // matrix is singular and cannot be interpolated
-            if ( A * D - B * C ) {
-                // step (3)
-                scaleX = Math.sqrt( A * A + B * B );
-                A /= scaleX;
-                B /= scaleX;
-                // step (4)
-                XYshear  = A * C + B * D;
-                C -= A * XYshear ;
-                D -= B * XYshear ;
-                // step (5)
-                scaleY = Math.sqrt( C * C + D * D );
-                C /= scaleY;
-                D /= scaleY;
-                XYshear /= scaleY;
-                // step (6)
-                // A*D - B*C should now be 1 or -1
-                if ( A * D < B * C ) {
-                    A = -A;
-                    B = -B;
-                    C = -C;
-                    B = -B;
-                    D = -D;
-                    XYshear = -XYshear;
-                    scaleX = -scaleX;
-                }
-
-            } else {
-                B = A = scaleX = scaleY = XYshear = 0;
-            }
-            return {
-                translateX: +matrix[4],
-                translateY: +matrix[5],
-                rotate: Math.atan2(B, A),
-                scaleX: scaleX,
-                scaleY: scaleY,
-                skew: [XYshear, 0]
             }
         }
-      
+    
+
     });
-    //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
-    var cssTransfrom = $.cssName("transform");
-    if(cssTransfrom){
-        // gerrer(node) 返回一个包含 scaleX,scaleY, rotate, translateX,translateY, translateZ的对象
-        // setter(node, { rotate: 30 })返回自身
-        $.transform = function( node,  param ){
-            var meta = $._data(node,"transform"),arr = [1,0,0,1,0,0], m
-            if(!meta){
-                //将CSS3 transform属性中的数值分解出来
-                var style = $.css( node ,cssTransfrom );
-                if(~style.indexOf("matrix")){
-                    m = rmatrix.exec(style);
-                    arr = [m[1], m[2], m[3], m[4], m[5], m[6]];
-                }else if(style.length > 6){
-                    arr = $._toMatrixArray(style)
-                }
-                meta = $._toMatrixObject(arr);
-                //保存到缓存系统，省得每次都计算
-                $._data( node,"transform",meta);
-            }
 
-            if(arguments.length === 1){
-                return meta;//getter
-            }
-            //setter
-            meta = $._data(node,"transform",{
-                scaleX:     param.scaleX     === void 0 ? meta.scaleX     : param.scaleX,
-                scaleY:     param.scaleY     === void 0 ? meta.scaleY     : param.scaleY,
-                rotate:     param.rotate     === void 0 ? meta.rotate     : param.rotate,
-                translateX: param.translateX === void 0 ? meta.translateX : parseInt(param.translateX)|0,
-                translateY: param.translateY === void 0 ? meta.translateY : parseInt(param.translateY)|0
-            });
-            node.style[cssTransfrom]  =
-            "scale(" + meta.scaleX + "," + meta.scaleY + ") " +
-            "rotate(" + $._all2deg( meta.rotate )  + "deg) " +
-            "translate(" + meta.translateX  + "px," + meta.translateY + "px)";
-        }
-    }
     //IE9 FF等支持getComputedStyle
     $.mix(adapter, {
-        "_default:get" :function( node, name){
-            return node.style[ name ];
-        },
         "_default:set" :function( node, name, value){
             node.style[ name ] = value;
-        },
-        "rotate:get":function( node ){
-            return $._all2deg(($.transform(node) || {}).rotate) ;
-        },
-        "rotate:set":function( node, name, value){
-            $.transform(node, {
-                rotate:value
-            });
         }
     },false);
-    adapter[ "zIndex:get" ] = function( node,name, position, value ) {
-        while ( node.nodeType !== 9 ) {
-           //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
-            position = $.css(node, "position" );
-            if ( position === "absolute" || position === "relative" || position === "fixed" ) {
-                // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
-                value = parseInt( adapter[ "_default:get" ](node,"zIndex"), 10 );
-                if ( !isNaN( value ) && value !== 0 ) {
-                    return value;
-                }
-            }
-            node = node.parentNode;
-        }
-
-        return 0;
-    }
-
+    //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if ( document.defaultView && document.defaultView.getComputedStyle ) {
         adapter[ "_default:get" ] = function( node, name ) {
             var ret, defaultView, computedStyle;
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
+         
             var underscored = name == "cssFloat" ? "float" :
             name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
             rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
@@ -3810,6 +3604,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
             }
+              
             // A tribute to the "awesome hack by Dean Edwards"
             // WebKit uses "computed value (percentage if specified)" instead of "used value" for margins
             // which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
@@ -3823,21 +3618,171 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return ret === "" ? "auto" : ret;
         };
     }
+    //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
+    //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
+    //优化HTML5应用的体验细节，例如全屏的处理与支持，横屏的响应，图形缩放的流畅性和不失真，点触的响应与拖曳，Websocket的完善
+    //关于JavaScript中计算精度丢失的问题 http://rockyee.iteye.com/blog/891538
+    function toFixed(d){
+        return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
+    }
+    function toFloat(d, x){
+        return isFinite(d) ? parseFloat(d) : x || 0
+    }
+    //http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
+    //http://help.dottoro.com/lcebdggm.php
+    var Matrix2D = $.factory({
+        init: function(){
+            this.set.apply(this, arguments);
+        },
+        cross: function(a, b, c, d, tx, ty) {
+            var a1 = this.a;
+            var b1 = this.b;
+            var c1 = this.c;
+            var d1 = this.d;
+            this.a  = toFixed(a*a1+b*c1);
+            this.b  = toFixed(a*b1+b*d1);
+            this.c  = toFixed(c*a1+d*c1);
+            this.d  = toFixed(c*b1+d*d1);
+            this.tx = toFixed(tx*a1+ty*c1+this.tx);
+            this.ty = toFixed(tx*b1+ty*d1+this.ty);
+            return this;
+        },
+        rotate: function( radian ) {
+            var cos = Math.cos(radian);
+            var sin = Math.sin(radian);
+            return this.cross(cos,  sin,  -sin, cos, 0, 0)
+        },
+        skew: function(sx, sy) {
+            return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0);
+        },
+        skewX: function(radian){
+            return this.skew(radian, 0);
+        },
+        skewY: function(radian){
+            return this.skew(0, radian);
+        },
+        scale: function(x, y) {
+            return this.cross( toFloat(x, 1) ,0, 0, toFloat(y, 1), 0, 0)
+        },
+        scaleX: function(x){
+            return this.scale(x ,1);
+        },
+        scaleY: function(y){
+            return this.scale(1 ,y);
+        },
+        translate : function(x, y) {
+            return this.cross(1, 0, 0, 1, toFloat(x, 0), toFloat(x, 0) );
+        },
+        translateX: function(x) {
+            return this.translate(x, 0);
+        },
+        translateY: function(y) {
+            return this.translate(0, y);
+        },
+        toString: function(){
+            return "matrix("+this.get()+")";
+        },
+        get: function(){
+            return [this.a,this.b,this.c,this.d,this.tx,this.ty];
+        },
+        set: function(a, b, c, d, tx, ty){
+            this.a = a * 1;
+            this.b = b * 1 || 0;
+            this.c = c * 1 || 0;
+            this.d = d * 1;
+            this.tx = tx * 1 || 0;
+            this.ty = ty * 1 || 0;
+            return this;
+        },
+        matrix:function(a, b, c, d, tx, ty){
+            return this.cross(a, b, c, d, toFloat(tx), toFloat(ty))
+        },
+        decompose : function() {
+            //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
+            var ret = {};
+            ret.x = this.tx;
+            ret.y = this.ty;
+            ret.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
+            ret.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
+
+            var skewX = Math.atan2(-this.c, this.d);
+            var skewY = Math.atan2(this.b, this.a);
+
+            if (skewX == skewY) {
+                ret.rotation = skewY/ Math.PI * 180;
+                if (this.a < 0 && this.d >= 0) {
+                    ret.rotation += (ret.rotation <= 0) ? 180 : -180;
+                }
+                ret.skewX = ret.skewY = 0;
+            } else {
+                ret.skewX = skewX/ Math.PI * 180;
+                ret.skewY = skewY/ Math.PI * 180;
+            }
+            return ret;
+        }
+    });
+
+    $.Matrix2D = Matrix2D
+    var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
+    //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
+    cssTransfrom = $.cssName("transform");
+    if( cssTransfrom ){
+        adapter[cssTransfrom + ":set"] = function(node, name, value){
+            if(value.indexOf("matrix")!== -1 && cssTransfrom === "MozTransform"){
+                value = value.replace(/([\d.-]+)\s*,\s*([\d.-]+)\s*\)/,"$1px, $2px)")
+            }
+            node.style[name] = value;
+            var matrix = $._data( node, "matrix" ) || new Matrix2D();
+            matrix.set.apply(matrix, getter(node, cssTransfrom).match(/[-+.e\d]+/g).map(function(d){
+                return toFixed(d*1)
+            }));
+           $._data(node, "matrix", matrix );
+        }
+    }
+    //http://granular.cs.umu.se/browserphysics/?cat=7
+    //=========================　处理　user-select　=========================
+    //https://developer.mozilla.org/en/CSS/-moz-user-select
+    //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
+    //具体支持情况可见下面网址
+    //http://help.dottoro.com/lcrlukea.php
+    var userSelect = $.cssName("userSelect");
+    if(typeof userSelect === "string"){
+        adapter[ userSelect+":set" ] = function( node, name, value ) {
+            return node.style[ name ] = value;
+        };
+    }
+    adapter[ "zIndex:get" ] = function( node, name, value, position ) {
+        while ( node.nodeType !== 9 ) {
+            //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
+            position = $.css(node, "position" );
+            if ( position === "absolute" || position === "relative" || position === "fixed" ) {
+                // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
+                value = parseInt( adapter[ "_default:get" ](node,"zIndex"), 10 );
+                if ( !isNaN( value ) && value !== 0 ) {
+                    return value;
+                }
+            }
+            node = node.parentNode;
+        }
+        return 0;
+    }
+    //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
+    //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#matrix-anim-class
     //=========================　处理　width height　=========================
     
-    var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
-    cssPair = {
+ 
+    var cssPair = {
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
     }
-    var cssShow = { 
-        position: "absolute", 
-        visibility: "hidden", 
-        display: "block" 
+    var cssShow = {
+        position: "absolute",
+        visibility: "hidden",
+        display: "block"
     }
     var showHidden = function(node, array){
         if( node && node.nodeType ==1 && !node.offsetWidth ){
-            var obj = { 
+            var obj = {
                 node: node
             }
             for ( name in cssShow ) {
@@ -3850,7 +3795,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
         }
     }
-    
+
     function getWH( node, name, extra  ) {//注意 name是首字母大写
         var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
         showHidden( node, hidden );
@@ -3911,20 +3856,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 return this.css( lower, size );
             }
         };
-
     });
-    
-    //=========================　处理　user-select　=========================
-    //https://developer.mozilla.org/en/CSS/-moz-user-select
-    //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
-    //具体支持情况可见下面网址
-    //http://help.dottoro.com/lcrlukea.php
-    var userSelect =  $.cssName("userSelect");
-    if(typeof userSelect === "string"){
-        adapter[ "userSelect:set" ] = function( node, _, value ) {
-            return node.style[ userSelect ] = value;
-        };
-    }
+
     //=======================================================
     //获取body的offset
     function getBodyOffsetNoMargin(){
@@ -4008,7 +3941,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return pos;
     }
 
-    
+
     var rroot = /^(?:body|html)$/i;
     $.implement({
         position: function() {//取得元素相对于其offsetParent的坐标
@@ -4120,9 +4053,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
 
-    "margin,padding,borderWidth".replace(/([a-z]+)([^,]*)/g,function(s,a,b){
-        // console.log([a,b])
-        });
 });
 
 
@@ -4548,10 +4478,7 @@ $.define("attr","support,node", function( support ){
 //==========================================
 $.define("event_fix", !!document.dispatchEvent, function(){
     //模拟IE678的reset,submit,change的事件代理
-    var submitWhich = $.oneObject("13,108"),
-    submitInput = $.oneObject("submit,image"),
-    submitType  = $.oneObject("text,password,textarea"),
-    rform  = /^(?:textarea|input|select)$/i ,
+    var rform  = /^(?:textarea|input|select)$/i ,
     changeType = {
         "select-one": "selectedIndex",
         "select-multiple": "selectedIndex",
@@ -4574,10 +4501,11 @@ $.define("event_fix", !!document.dispatchEvent, function(){
     function delegate( fn ){ 
         return function( src, selector, type ){
             var adapter = $.event.eventAdapter,
-            fix = !adapter[ type ] || !adapter[ type ].check || adapter[ type ].check( src );
+            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src );
             return (fix || selector) ? fn(src, type, fix) : false;
         }
     }
+
     var facade = $.event = {
         eventAdapter:{
             //input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
@@ -4588,33 +4516,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 bindType: "change",
                 delegateType: "change"
             },
-            //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
-            reset: {
-                setup: delegate(function( src ){
-                    facade.bind.call( src, "click._reset keypress._reset", function( e ) {
-                        if(  e.target.form && (e.which === 27  ||  e.target.type == "reset") ){
-                            facade._dispatch( [ src ], "reset", e );
-                        }
-                    });
-                }),
-                teardown: delegate(function( src ){
-                    facade.unbind.call( src, "._reset" );
-                })
-            },
-            //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
-            submit: {
-                setup: delegate(function( src ){
-                    facade.bind.call( src, "click._submit keypress._submit", function( e ) {
-                        var el = e.target, type = el.type;
-                        if( el.form &&  ( submitInput[type] || submitWhich[ e.which ] && submitType[type]) ){
-                            facade._dispatch( [ src ], "submit", e );
-                        }
-                    });
-                }),
-                teardown: delegate(function( src ){
-                    facade.unbind.call( src, "._submit" );
-                })
-            },
+
             change: {//change事件的冒泡情况 IE6-9全灭
                 check: function(src){
                     return rform.test(src.tagName) && /radio|checkbox/.test(src.type)
@@ -4628,7 +4530,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                             subscriber[ tid] = target;//表明其已注册
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid(src) ] = src;//此孩子可能同时要向N个顶层元素报告变化
-                            facade.bind.call( target,"propertychange._change", changeNotify );
+                            $.fn.on.call( target,"propertychange._change", changeNotify );
                             //允许change事件可以通过fireEvent("onchange")触发
                             if(type === "change"){
                                 $._data(src, "_change_fire", $.bind(target, "change", changeFire.bind(target, e) ));
@@ -4644,7 +4546,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                     $.unbind( src, "change", $._data(src, "_change_fire")  );
                     els = $.removeData( src, "subscriber", true ) || {};
                     for( i in els){
-                        $.unbind( els[i],"._change" );
+                        facade.unbind.call( els[i], "._change" );
                         var publisher = $._data( els[i], "publisher");
                         if(publisher){
                             delete publisher[ src.uniqueNumber ];
@@ -4654,8 +4556,28 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             }
         }
     }
+    var adapter = facade.eventAdapter;
+    //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
+    //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
+    "submit,reset".replace( $.rword, function( type ){
+        adapter[ type ] = {
+            setup: delegate(function( src ){
+                $.fn.on.call( src, "click._"+type+" keypress._"+type, function( e ) {
+                    var el = e.target;
+                    if( el.form && (adapter[ type ].keyCode[ e.which] || adapter[ type ].kind[  el.type ] ) ){
+                        facade._dispatch( [ src ], type, e );
+                    }
+                });
+            }),
+            keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
+            kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
+            teardown: delegate(function( src ){
+                facade.unbind.call( src, "._"+type );
+            })
+        };
+    });
 });
-
+//2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 
 
 
@@ -4718,13 +4640,15 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             //它将在原生事件派发器或任何能成为事件派发器的普通JS对象添加一个名叫uniqueNumber的属性,用于关联一个缓存体,
             //把需要的数据储存到里面,而现在我们就把一个叫events的对象储放都它里面,
             //而这个event的表将用来放置各种事件类型与对应的回调函数
+            if(arguments.length > 1 ){
+                throw "$.event bind method only need one argument, and it's a hash!"
+            }
             var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
             types = hash.type, fn = hash.callback,selector = hash.selector, callback;
             if(target.nodeType === 3 || target.nodeType === 8 || !events){
                 return
             }
             hash.uuid =  $.getUid(fn); //确保UUID，bag与callback的UUID一致
-          
             if( DOM ){ //处理DOM事件
                 callback = events.callback ||  (events.callback = function( e ) {
                     return ((e || event).type !== facade.fireType ) ? facade.dispatch.apply( callback.target, arguments ) : void 0;
@@ -4735,7 +4659,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             events = events.events || (events.events = {});
             //对多个事件进行绑定
             types.replace( $.rword, function( old ){
-                var 
+                var
                 tns = rtypenamespace.exec( old ) || [],//"focusin.aaa.bbb"
                 namespace = ( tns[2] || "" ).split( "." ).sort(),//取得命名空间 "aaa.bbb"
                 adapter = DOM && eventAdapter[ tns[1] ] || {},// focusin -> focus
@@ -4746,7 +4670,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     type: type,
                     origType: tns[1],
                     namespace: namespace.join(".")
-                }, hash, false); 
+                }, hash, false);
                 //只有原生事件发送器才能进行DOM level2 多投事件绑定
                 if( DOM && !queue.length  ){
                     adapter = eventAdapter[ type ] || {};
@@ -4869,6 +4793,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }else{//普通对象的自定义事件
                 facade.dispatch.apply(target, args);
             }
+            return this;
         },
         filter: function( cur, parent, expr ){
             var matcher = typeof expr === "function"? expr : expr.input ? quickIs : $.match
@@ -5058,7 +4983,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 });
                 if (!(method in this)) {
                     this[method] = function() {
-                        return this.bind.apply(this, [].concat.apply([name], arguments));
+                        return $.fn.on.apply(this, [].concat.apply([name], arguments));
                     };
                 }
             },this);
@@ -5187,7 +5112,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 hash.times = hash.times > 0  ? hash.times : Infinity;
                 hash.selector =  hash.selector ? quickParse( hash.selector ) : false
             }
-            if(typeof this.each === "function"){
+            if(this.mass && this.each){
                 return this.each(function() {
                     facade[ mapper ].call( this, hash );
                 });
@@ -5196,7 +5121,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         }
         $.fn[ mapper ] = function(){// $.fn.bind $.fn.unbind
-            return this[ method ].apply(this, arguments );
+            return $.fn[ method ].apply(this, arguments );
         }
     });
 
@@ -5230,9 +5155,13 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         },
         fire: function(  ) {
             var args = arguments;
-            return this.each(function() {
-                $.event.fire.apply(this, args );
-            });
+            if(this.mass && this.each){
+                return this.each(function() {
+                    $.event.fire.apply(this, args );
+                });
+            }else{
+                return $.event.fire.apply(this, args );
+            }
         }
     });
 

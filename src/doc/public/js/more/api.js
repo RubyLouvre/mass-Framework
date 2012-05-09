@@ -303,7 +303,6 @@ $.define("api", function(){
                 "valueOf": "function",
                 "toString": "function",
                 "css": "function",
-                "rotate": "function",
                 "innerHeight": "function",
                 "outerHeight": "function",
                 "height": "function",
@@ -319,8 +318,6 @@ $.define("api", function(){
             "cssAdapter": {
                 "_default:get": "function",
                 "_default:set": "function",
-                "rotate:get": "function",
-                "rotate:set": "function",
                 "height:get": "function",
                 "width:get": "function",
                 "userSelect:set": "function",
@@ -358,8 +355,7 @@ $.define("api", function(){
                 "orphans": "number",
                 "widows": "number",
                 "zIndex": "number",
-                "zoom": "number",
-                "rotate": "number"
+                "zoom": "number"
             },
             "css": "function",
             "Matrix2D": "function"
