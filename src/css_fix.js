@@ -2,7 +2,7 @@
 //  样式补丁模块
 //==========================================
 $.define("css_fix", !!top.getComputedStyle, function(){
-    $.log("已加载css_fix模块");
+    //$.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {},
     ropacity = /opacity=([^)]*)/i,
     ralpha = /alpha\([^)]*\)/i,
@@ -86,8 +86,8 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     var ident  = "DXImageTransform.Microsoft.Matrix"
 
     adapter[ "transform:get" ] = function(node, name){
-        var matrix = $._data(node,"matrix")
-        if(!matrix){
+        var m = $._data(node,"matrix")
+        if(!m){
             if(!node.currentStyle.hasLayout){
                 node.style.zoom = 1;
             }
@@ -97,16 +97,12 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                 var old = node.currentStyle.filter;//防止覆盖已有的滤镜
                 node.style.filter =  (old ? old +"," : "") + " progid:" + ident + "(sizingMethod='auto expand')";
             }
-            var args = [], m = node.filters[ident]
-            "M11,M12,M21,M22,Dx,Dy".replace($.rword, function(d){
-                // console.log(m[d])
-                args.push( m[d] )
-            });
-            matrix = new $.Matrix2D();
-            matrix.set.apply(matrix, args);
-        //保存到缓存系统，省得每次都计算
+            var f = node.filters[ident];
+            m = new $.Matrix2D( f.M11, f.M12, f.M21, f.M22, f.Dx, f.Dy);
+            $._data(node,"matrix",m ) //保存到缓存系统，省得每次都计算
+            console.log("==============")
         }
-        return name === true ? matrix : matrix.get2D()
+        return name === true ? m : m.toString();
     }
     //deg	degrees, 角度
     //grad	grads, 百分度
@@ -130,10 +126,11 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             if(method == "scale" && array[1] == void 0){
                 array[1] = array[0] //sy如果没有定义等于sx
             }
-            method = method.replace(/(x|y)$/i,function(_,b){
-                return b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
-            });
-            
+            if(method !== "matrix"){
+                method = method.replace(/(x|y)$/i,function(_,b){
+                    return  b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
+                })
+            }
             m[method].apply(m, array);
             //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
             var filter = node.filters[ident];
@@ -149,18 +146,17 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             filter.Dy  = m.ty;
             $._data(node,"matrix",m);
             var tw =  node.offsetWidth, th = node.offsetHeight;//取得变形后高宽
-            if( tw !== width || th !== height || method.indexOf("translate") == 0 ){
-                node.style.position = "relative";
-                node.style.left = (width - tw)/2  + m.tx + "px";
-                node.style.top = (height - th)/2  + m.ty + "px";
-            }
+            node.style.position = "relative";
+            node.style.left = (width - tw)/2  + m.tx + "px";
+            node.style.top = (height - th)/2  + m.ty + "px";
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
         });
     }
 });
-    //2011.10.21 去掉opacity:setter 的style.visibility处理
-    //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
+//2011.10.21 去掉opacity:setter 的style.visibility处理
+//2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
+//$.Matrix2D支持matrix方法，去掉rotate方法 css v2
 
    
