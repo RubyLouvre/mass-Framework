@@ -13,17 +13,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         c:   "color",
         h:   "height",
         o:   "opacity",
-        r:   "rotate",
         w:   "width",
         x:   "left",
         y:   "top",
         fs:  "fontSize",
         st:  "scrollTop",
         sl:  "scrollLeft",
-        sx:  "scaleX",
-        sy:  "scaleY",
-        tx:  "translateX",
-        ty:  "translateY",
         bgc: "backgroundColor",
         opacity: "opacity",//fix IE
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
@@ -42,7 +37,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
     });
 
-    //http://www.w3.org/TR/2009/WD-css3-2d-transforms-20091201/#introduction
     $.mix({
         cssMap: cssMap,
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
@@ -87,7 +81,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
         }
     
-
     });
 
     //IE9 FF等支持getComputedStyle
@@ -103,7 +96,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-         
             var underscored = name == "cssFloat" ? "float" :
             name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
             rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
