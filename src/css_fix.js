@@ -100,7 +100,6 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             var f = node.filters[ident];
             m = new $.Matrix2D( f.M11, f.M12, f.M21, f.M22, f.Dx, f.Dy);
             $._data(node,"matrix",m ) //保存到缓存系统，省得每次都计算
-            console.log("==============")
         }
         return name === true ? m : m.toString();
     }
@@ -157,6 +156,6 @@ $.define("css_fix", !!top.getComputedStyle, function(){
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
-//$.Matrix2D支持matrix方法，去掉rotate方法 css v2
+//2012.5.9 完美支持CSS3 transform 2D
 
    
