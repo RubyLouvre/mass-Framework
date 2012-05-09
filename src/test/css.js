@@ -143,50 +143,18 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             style.remove();
             node.remove();
         },
-        "Matrix": function(){
-            var a = new $.Matrix(3,3,2,8,10,11,3,7,6,9,4);
-            var b = new $.Matrix(3,3,12,9,4,5,2,21,8,4,6);
-            var c = a.cross(b);
-            expect( c.get().join(",") ).eq("144,74,236,203,133,149,149,88,237");
 
-            var d = new $.Matrix(3,2).set(0,2,3,1,1,2);
-            expect( d.get().join(",") ).eq("0,2,3,1,1,2");
-
-            var e = new $.Matrix(2,2).set(1,1,2,0);
-            expect( e.get().join(",") ).eq("1,1,2,0");
-           
-            var g = d.cross(e);
-            expect( g.get().join(",") ).eq("4,0,0,3,1,0");
-
-            var v = (new $.Matrix(2,2,1,0,0,-1)).vector(3,2);
-            expect( v.join(",") ).eq("3,-2")
-        },
         "$.ccs('transform')": function() {
             var node = $('<div style="background:red;width:100px;height:100px;">test</div>').appendTo("body")
             var data = node.css("transform","rotate(15deg) translateX(230px) scale(1.5)").data("matrix",void 0, true);
-            expect( data["0,0"].toFixed(2) ).near( "1.45", 0.001 );
-            expect( data["0,1"].toFixed(2) ).near( "0.39", 0.001 );
-            expect( data["1,0"].toFixed(2) ).near( "-0.39", 0.001 );
-            expect( data["1,1"].toFixed(2) ).near( "1.45", 0.001 );
-            expect( data["2,0"].toFixed(2) ).near( "222.16", 0.001 );
-            expect( data["2,1"].toFixed(2) ).near( "59.53", 0.001 );
+            expect( data.a.toFixed(2) ).near( "1.45", 0.001 );
+            expect( data.b.toFixed(2) ).near( "0.39", 0.001 );
+            expect( data.c.toFixed(2) ).near( "-0.39", 0.001 );
+            expect( data.d.toFixed(2) ).near( "1.45", 0.001 );
+            expect( data.tx.toFixed(2) ).near( "222.16", 0.001 );
+            expect( data.ty.toFixed(2) ).near( "59.53", 0.001 );
         },
-        "$.ccs('rorate')": function() {
-            var tag = random.str(5,"rorate");
-            var style = $("<style>." + tag + "  {\
-                     -webkit-transform: rotate(-90deg);\
-                     -moz-transform: rotate(-90deg);\
-                     -o-transform:rotate(-90deg);\
-                     -ms-transform:rotate(-90deg);\
-                     filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=3);\
-                   }</style>").appendTo("head");
-            var node = $("<div class='" + tag + "' style='" +
-                "width:20px;height:20px; '/>").appendTo("body");
-            expect( node.css("rotate")).log();
-            expect( node.css("rotate")).near( "-90", 0.0001);
-            style.remove();
-            node.remove();
-        },
+
         "$.scrollbarWidth": function() {
             expect( $.scrollbarWidth() ).log()
         },
