@@ -138,23 +138,26 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     function toFixed(d){
         return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
     }
+    function toFloat(d, x){
+        return isFinite(d) ? parseFloat(d) : x || 0
+    }
     //http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
     //http://help.dottoro.com/lcebdggm.php
     var Matrix2D = $.factory({
-        init: function(a,b,c,d,tx,ty){
-            this.set(a,b,c, d,tx,ty)
+        init: function(){
+            this.set.apply(this, arguments);
         },
         cross: function(a, b, c, d, tx, ty) {
             var a1 = this.a;
             var b1 = this.b;
             var c1 = this.c;
             var d1 = this.d;
-            this.a  = a*a1+b*c1;
-            this.b  = a*b1+b*d1;
-            this.c  = c*a1+d*c1;
-            this.d  = c*b1+d*d1;
-            this.tx = tx*a1+ty*c1+this.tx;
-            this.ty = tx*b1+ty*d1+this.ty;
+            this.a  = toFixed(a*a1+b*c1);
+            this.b  = toFixed(a*b1+b*d1);
+            this.c  = toFixed(c*a1+d*c1);
+            this.d  = toFixed(c*b1+d*d1);
+            this.tx = toFixed(tx*a1+ty*c1+this.tx);
+            this.ty = toFixed(tx*b1+ty*d1+this.ty);
             return this;
         },
         rotate : function( radian ) {
@@ -163,46 +166,37 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this.cross(cos,  sin,  -sin, cos, 0, 0)
         },
         skew : function(sx, sy) {
-            return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0, 0, 0);
+            return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0);
         },
         skewX: function(radian){
-            return this.skew(radian)
+            return this.skew(radian, 0);
         },
         skewY: function(radian){
-            return this.skew(0,radian)
+            return this.skew(0, radian);
         },
         scale : function(x, y) {
-            this.a *= x;
-            this.d *= y;
-            this.tx *= x;
-            this.ty *= y;
-            return this;
+            return this.cross( toFloat(x, 1) ,0, 0, toFloat(y, 1), 0, 0)
         },
         scaleX: function(x){
-            return this.scale(x ,1)
+            return this.scale(x ,1);
         },
         scaleY: function(y){
-            return this.scale(1 ,y)
+            return this.scale(1 ,y);
         },
-
         translate : function(x, y) {
-            this.tx += parseFloat(x);
-            this.ty += parseFloat(y) || 0;
-            return this;
+            return this.cross(1, 0, 0, 1, toFloat(x, 0), toFloat(x, 0) );
         },
         translateX : function(x) {
-            this.tx += parseFloat(x);
-            return this;
+            return this.translate(x, 0);
         },
         translateY : function(y) {
-            this.ty += parseFloat(y);
-            return this;
+            return this.translate(0, y);
         },
         toString: function(){
             return "matrix("+this.get()+")";
         },
         get: function(){
-            return [this.a,this.b,this.c,this.d,this.tx,this.ty]
+            return [this.a,this.b,this.c,this.d,this.tx,this.ty];
         },
         set: function(a, b, c, d, tx, ty){
             this.a = a * 1;
@@ -225,20 +219,18 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             var skewY = Math.atan2(this.b, this.a);
 
             if (skewX == skewY) {
-                ret.rotation = skewY/Matrix2D.DEG_TO_RAD;
+                ret.rotation = skewY/ Math.PI * 180;
                 if (this.a < 0 && this.d >= 0) {
                     ret.rotation += (ret.rotation <= 0) ? 180 : -180;
                 }
                 ret.skewX = ret.skewY = 0;
             } else {
-                ret.skewX = skewX/Matrix2D.DEG_TO_RAD;
-                ret.skewY = skewY/Matrix2D.DEG_TO_RAD;
+                ret.skewX = skewX/ Math.PI * 180;
+                ret.skewY = skewY/ Math.PI * 180;
             }
             return ret;
         }
     });
-
-    Matrix2D.DEG_TO_RAD = Math.PI/180;
 
     $.Matrix2D = Matrix2D
     
@@ -410,9 +402,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 return this.css( lower, size );
             }
         };
-
     });
-
 
     //=======================================================
     //获取body的offset
