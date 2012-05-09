@@ -348,7 +348,6 @@ $.define("api", function(){
                 "transform": "string",
                 "userSelect": "string"
             },
-            "Matrix": "function",
             "cssName": "function",
             "scrollbarWidth": "function",
             "cssNumber": {
@@ -363,11 +362,7 @@ $.define("api", function(){
                 "rotate": "number"
             },
             "css": "function",
-            "_all2deg": "function",
-            "_all2rad": "function",
-            "_toMatrixArray": "function",
-            "_toMatrixObject": "function",
-            "transform": "function"
+            "Matrix2D": "function"
         },
         "属性模块": {
             "fn": {

@@ -18,7 +18,7 @@
                 width:100px;
                 height:100px;
                 background:blue;
-             
+
             }
             .bounding-box{
                 position:absolute;
@@ -35,8 +35,9 @@
         <script>
             $.require("ready,css",function(){
                 // translate(100px)
-               var a =  $(".transform-box").css("transform","rotate(60deg) translate(20px,20px)").data("matrix",void 0, true)//rotate(45deg)skew(33deg,0)
-       console.log(a.get())// skew(33deg,0)
+              var a =  $(".transform-box").css("transform","skew( -17deg, 45deg) rotate(-125deg)").data("matrix",void 0, true)//rotate(45deg)skew(33deg,0)
+       console.log(a.decompose())// skew(33deg,0)
+               // skew(33deg,0)rotate(45deg)  scale(2)
                 // var m = new $.Matrix2D(1, 0, 0 ,1,0,0)
                 //   m.rotate("45deg").skew("33deg","0");
                 // console.log(m.get())// skew(33deg)
@@ -57,15 +58,15 @@
             <div class="bounding-box">
             </div>
             <div class="transform-box" >
-                1111111111111!
+                司徒正美
             </div>
         </div>
-   
-   -moz-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0px, 0px);
-                -webkit-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0, 0);
-                  -ms-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0, 0);
+
+        -moz-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0px, 0px);
+        -webkit-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0, 0);
+        -ms-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0, 0);
         zoom:1;
-     filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.707107,M12=-0.247906,M21=0.707107,M22=1.16631,SizingMethod='auto expand')
+        filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.707107,M12=-0.247906,M21=0.707107,M22=1.16631,SizingMethod='auto expand')
 
     </body>
 </html>
