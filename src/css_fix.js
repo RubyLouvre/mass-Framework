@@ -131,7 +131,6 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                 })
             }
             m[method].apply(m, array);
-            //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
             var filter = node.filters[ident];
             filter.M11 =  filter.M22 = 1;//取得未变形前的宽高
             filter.M12 =  filter.M21 = 0;
