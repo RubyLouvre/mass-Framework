@@ -1,7 +1,7 @@
 mass Framework
 ==================
 <p>贡献者列表(排名不分先后)：</p>
-<p>abcd(1群) ,sapjax(2群) ,教主Franky(2群), 一三一四君(2B群) </p>
+<p>abcd(1群) ,sapjax(2群) ,教主Franky(2群), 一三一四君(2B群), <a href="https://github.com/riophae">riophae</a> </p>
 <p>一个模块化，以大模块开发为目标，jQuery式的框架。里面涉及的HTML5新API数量，估计除了纯净的手机框架外，无人能敌。<p>
 <p>mass Framework的模块化经过一年化调整与改良，大致分为四类：</p>
 <ol>
@@ -45,7 +45,7 @@ $.require("ready,node",function(){
 })
 </pre>
 <p>我们在请求node.js时，会自动加载其依赖，如lang.js,support.js,class.js,query.js,data.js等等，
-IE下还会加载lang.js，但你无需理会它是怎么处理，只需专注于你的业务逻辑就行了。</p>
+IE下还会加载lang_fix.js，但你无需理会它是怎么处理，只需专注于你的业务逻辑就行了。</p>
 <p>如果嫌麻烦，直接像jQuery那样，不过会把许多无用的部分都加载下来了。</p>
 <pre>
 $(function(){
