@@ -128,7 +128,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
     }
     function toFloat(d, x){
-        return isFinite(d) ? parseFloat(d) : x || 0
+        return isFinite(d) ? d: parseFloat(d) || x
     }
     //http://zh.wikipedia.org/wiki/%E7%9F%A9%E9%98%B5
     //http://help.dottoro.com/lcebdggm.php
@@ -173,7 +173,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this.scale(1 ,y);
         },
         translate : function(x, y) {
-            return this.cross(1, 0, 0, 1, toFloat(x, 0), toFloat(x, 0) );
+            return this.cross(1, 0, 0, 1, toFloat(x, 0), toFloat(y, 0))
         },
         translateX: function(x) {
             return this.translate(x, 0);
@@ -197,7 +197,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this;
         },
         matrix:function(a, b, c, d, tx, ty){
-            return this.cross(a, b, c, d, toFloat(tx), toFloat(ty))
+            return this.cross(a, b, c, d, toFloat(tx, 0), toFloat(ty, 0))
         },
         decompose : function() {
             //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
@@ -594,6 +594,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.4.15 对zIndex进行适配,对$.css进行元素节点检测
 2012.4.16 重构showHidden
 2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
+2012.5.10 FIX toFloat BUG
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
  */
