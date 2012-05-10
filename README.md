@@ -1,7 +1,8 @@
 mass Framework
 ==================
-<p>贡献者列表(排名不分先后)：</p>
+<h3>mass Framework的贡献者列表(排名不分先后)：</h3>
 <p>abcd(1群) ,sapjax(2群) ,教主Franky(2群), 一三一四君(2B群), <a href="https://github.com/riophae">riophae</a> </p>
+<hr/>
 <p>一个模块化，以大模块开发为目标，jQuery式的框架。里面涉及的HTML5新API数量，估计除了纯净的手机框架外，无人能敌。<p>
 <p>mass Framework的模块化经过一年化调整与改良，大致分为四类：</p>
 <ol>
@@ -10,6 +11,12 @@ mass Framework
 <li>核心模块， 所有位于mass-Framework/src目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
 <li>外围模块， 位于mass-Framework/src/more的JS文件。</li>
 </ol>
+<hr/>
+<h3>mass Framework的源码阅读顺序</h3>
+<p>都是位于src目录下，里面的子目录是外围模块。</p>
+<p>mass.js -> lang.js -> lang_fix.js -> support.js -> class.js -> data.js -> query.js ->
+node.js -> css.js -> css_fix.js -> event.js -> event_fix.js -> fx.js -> ajax.js -> flow.js
+</p>
 <h3>mass Framework的优点：</h3>
 <ol>
 <li>多库共存。</li>
