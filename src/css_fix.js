@@ -130,13 +130,12 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                     return  b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
                 })
             }
+          
             m[method].apply(m, array);
-            //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php#transform-origin-ie-style
             var filter = node.filters[ident];
-            filter.M11 =  filter.M22 = 1;//取得未变形前的宽高
+            filter.M11 =  filter.M22 = 1;//重置矩形
             filter.M12 =  filter.M21 = 0;
-            var width = node.offsetWidth;
-            var height = node.offsetHeight;
+            var width  = node.offsetWidth,height = node.offsetHeight;//取得未变形前的宽高
             filter.M11 = m.a;
             filter.M12 = m.c;//★★★注意这里的顺序
             filter.M21 = m.b;
@@ -144,14 +143,13 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             filter.Dx  = m.tx;
             filter.Dy  = m.ty;
             $._data(node,"matrix",m);
-            var tw =  node.offsetWidth, th = node.offsetHeight;//取得变形后高宽
+            var tw = node.offsetWidth,th = node.offsetHeight;//取得变形后高宽
             node.style.position = "relative";
             node.style.left = (width - tw)/2  + m.tx + "px";
             node.style.top = (height - th)/2  + m.ty + "px";
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
-        //http://extremelysatisfactorytotalitarianism.com/blog/?p=1002
-        });
+          });
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
