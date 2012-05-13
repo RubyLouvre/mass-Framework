@@ -4,7 +4,7 @@
 $.define("data", "lang", function(){
     //$.log("已加载data模块");
     var remitter = /object|function/;
-    $.mix( $, {
+    $.mix( {
         "@data": {},
         // 读写数据
         data : function( target, name, data, pvt ) {
