@@ -315,17 +315,38 @@ $.define("fx", "css",function(){
     //如果clearQueue为true，是否清空列队
     //如果jumpToEnd为true，是否跳到此动画最后一帧
     $.fn.stop = function( clearQueue, jumpToEnd ){
+        clearQueue = clearQueue ? "1" : ""
+        jumpToEnd = jumpToEnd ? "1" : "0"
+        var stopCode = parseInt( clearQueue+jumpToEnd,2 );//返回0 1 2 3
         var array = heartbeat.queue;
         return this.each(function(node){
-            for(var i = 0, fx ; fx = array[i++];){
+            for(var i = 0, fx ; fx = array[i];i++){
                 if(fx.node === node){
-                    if(jumpToEnd){//跑到最后一帧再移除
-                        fx.gotoEnd = true;
-                    }else{
-                        fx.node = null;
-                    }
-                    if(!clearQueue){//
-                        break;
+                    Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
+                    fx.negative = []; // 清空负向列队
+                    switch(stopCode){//如果此时调用了stop方法
+                        case 0:
+                            var neo = fx.positive.shift();
+                            if(neo){
+                                heartbeat.queue[i] = neo;
+                                neo.positive = fx.positive;
+                                neo.negative = fx.negative
+                            }else{
+                                fx.node = null
+                            }
+                            //中断当前动画，继续下一个动画
+                            break;
+                        case 1:
+                            fx.gotoEnd = true;//立即跳到最后一帧，继续下一个动画
+                            break;
+                        case 2:
+                            fx.node = null//清空该元素的所有动画
+                            break;
+                        case 3:
+                            for(var ii=0, _fx; _fx= fx.positive[ii++]; ){
+                                _fx.gotoEnd = true;//立即完成该元素的所有动画
+                            }
+                            break;
                     }
                 }
             }
