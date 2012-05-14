@@ -2,9 +2,7 @@
 // 动画引擎v4
 //==========================================
 $.define("fx", "css",function(){
-    //setInterval
     //中央定时器，可以添加新节点到中央列队，然后通过setInterval方法不断调用nextTick处理所有节点的动画
-    var delays = {};
     $.easing = {
         linear: function( pos ) {
             return pos;
@@ -108,13 +106,8 @@ $.define("fx", "css",function(){
         }
         return nodes.fx(duration, props);
     }
-    // $.fx用于构建复合动画
-    // $.fn.fx 规整化参数与放入动画列队
-    // tween 生成动画实例，如果存在倒退指令，则多生一实例，把它放入负高列队
-    // heartbeat决定是放入子列队还是中央列队
-    // nextTick 迭代列队中的所有动画并移除符合条件的
-    // animate 执行动画，以后让子列队中的动画代替自身
     $.mix($.fx, {
+        "@debug": 1,
         type: function (attr){//  用于取得适配器的类型
             for(var i in types){
                 if(types[i].test(attr)){
@@ -302,45 +295,46 @@ $.define("fx", "css",function(){
             return false
         }
     }
+    //拦截用户动画进入中央列队或子列队
     $.fn.delay = function(ms){
-        return this.each(function(node){
-            var uuid = $.data(node, "@uuid");
-            setTimeout(function(){
-                var array = delays[uuid] || []
-                heartbeat.queue.apply(heartbeat.queue, array);
-                delete delays[uuid];
-            },ms);
+        return this.fx(Infinity,{
+            before: function(node, fx){
+                fx.update = $.noop;
+                setTimeout(function(){
+                    fx.gotoEnd = true;
+                }, ms)
+            }
         });
     }
     //如果clearQueue为true，是否清空列队
-    //如果jumpToEnd为true，是否跳到此动画最后一帧
-    $.fn.stop = function( clearQueue, jumpToEnd ){
+    //如果gotoEnd 为true，是否跳到此动画最后一帧
+    $.fn.stop = function( clearQueue, gotoEnd  ){
         clearQueue = clearQueue ? "1" : ""
-        jumpToEnd = jumpToEnd ? "1" : "0"
-        var stopCode = parseInt( clearQueue+jumpToEnd,2 );//返回0 1 2 3
+        gotoEnd  = gotoEnd  ? "1" : "0"
+        var stopCode = parseInt( clearQueue+gotoEnd ,2 );//返回0 1 2 3
         var array = heartbeat.queue;
         return this.each(function(node){
             for(var i = 0, fx ; fx = array[i];i++){
                 if(fx.node === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:
-                            fx.gotoEnd = true;
                             fx.update = fx.after = fx.frame = $.noop
-                            fx.revert && fx.negative.shift()
+                            fx.revert && fx.negative.shift();
+                            fx.gotoEnd = true;
                             //中断当前动画，继续下一个动画
                             break;
                         case 1:
                             fx.gotoEnd = true;//立即跳到最后一帧，继续下一个动画
                             break;
                         case 2:
-                            fx.node = null//清空该元素的所有动画
+                            delete fx.node//清空该元素的所有动画
                             break;
                         case 3:
                             Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
                             fx.negative = []; // 清空负向列队
-                            for(var ii=0, _fx; _fx= fx.positive[ii++]; ){
-                                _fx.before = _fx.update = fx.after = fx.frame = $.noop
-                                _fx.gotoEnd = true;//立即完成该元素的所有动画
+                            for(var j =0; fx = fx.positive[j++]; ){
+                                fx.before = fx.update = fx.after = fx.frame = $.noop
+                                fx.gotoEnd = true;//立即完成该元素的所有动画
                             }
                             break;
                     }
@@ -429,7 +423,6 @@ $.define("fx", "css",function(){
         return obj;
     }
 
-
     var effects = {
         slideDown: genFx( "show", 1 ),
         slideUp: genFx( "hide", 1 ),
@@ -482,7 +475,7 @@ $.define("fx", "css",function(){
         left = $.css(node,"left"),
         top = $.css(node,"top");
         node.style.position = "relative";
-        $.mix(fx, {
+        $.mix(fx.orig, {
             width: "*=1.5",
             height: "*=1.5",
             opacity: "hide",
