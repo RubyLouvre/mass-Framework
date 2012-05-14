@@ -263,13 +263,11 @@ $.define("fx", "css",function(){
             }else{
                 var per = (now - fx.startTime) / fx.duration
                 var end = fx.gotoEnd || per >= 1;
-                //node, 是否结束, 进度
                 fx.update(per, end ); // 处理渐变
                 if( (mix = fx.frame ) && !end ){
                     mix.call(node, node, fx ) ;
                 }
                 if ( end ) {//最后一帧
-                    //  console.log(fx.uuid)
                     if(fx.method == "hide"){
                         for(var i in fx.orig){//还原为初始状态
                             $.css( node, i, fx.orig[i] )
@@ -295,7 +293,7 @@ $.define("fx", "css",function(){
             return false
         }
     }
-    //拦截用户动画进入中央列队或子列队
+    //添加一个ms自动移除的占位空动画
     $.fn.delay = function(ms){
         return this.fx(Infinity,{
             before: function(node, fx){
@@ -317,23 +315,22 @@ $.define("fx", "css",function(){
             for(var i = 0, fx ; fx = array[i];i++){
                 if(fx.node === node){
                     switch(stopCode){//如果此时调用了stop方法
-                        case 0:
+                        case 0:  //中断当前动画，继续下一个动画
                             fx.update = fx.after = fx.frame = $.noop
                             fx.revert && fx.negative.shift();
                             fx.gotoEnd = true;
-                            //中断当前动画，继续下一个动画
                             break;
-                        case 1:
-                            fx.gotoEnd = true;//立即跳到最后一帧，继续下一个动画
+                        case 1://立即跳到最后一帧，继续下一个动画
+                            fx.gotoEnd = true;
                             break;
-                        case 2:
-                            delete fx.node//清空该元素的所有动画
+                        case 2://清空该元素的所有动画
+                            delete fx.node
                             break;
                         case 3:
                             Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
                             fx.negative = []; // 清空负向列队
                             for(var j =0; fx = fx.positive[j++]; ){
-                                fx.before = fx.update = fx.after = fx.frame = $.noop
+                                fx.before = fx.after = fx.frame = $.noop
                                 fx.gotoEnd = true;//立即完成该元素的所有动画
                             }
                             break;
@@ -497,7 +494,7 @@ $.define("fx", "css",function(){
     //扩大1.5倍并淡去
     $.fn.puff = function(duration, hash) {
         return $.fx( this, duration, hash, {
-            before:beforePuff
+            before: beforePuff
         });
     }
 
