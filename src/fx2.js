@@ -322,18 +322,11 @@ $.define("fx", "css",function(){
         return this.each(function(node){
             for(var i = 0, fx ; fx = array[i];i++){
                 if(fx.node === node){
-                    Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
-                    fx.negative = []; // 清空负向列队
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:
-                            var neo = fx.positive.shift();
-                            if(neo){
-                                heartbeat.queue[i] = neo;
-                                neo.positive = fx.positive;
-                                neo.negative = fx.negative
-                            }else{
-                                fx.node = null
-                            }
+                            fx.props = fx.orig = [];
+                            fx.duration = fx.after = fx.frame = 0;
+                            fx.revert && fx.negative.shift()
                             //中断当前动画，继续下一个动画
                             break;
                         case 1:
@@ -343,6 +336,8 @@ $.define("fx", "css",function(){
                             fx.node = null//清空该元素的所有动画
                             break;
                         case 3:
+                            Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
+                            fx.negative = []; // 清空负向列队
                             for(var ii=0, _fx; _fx= fx.positive[ii++]; ){
                                 _fx.gotoEnd = true;//立即完成该元素的所有动画
                             }
