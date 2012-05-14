@@ -9,64 +9,38 @@
         <script type="text/javascript" src="../src/mass.js"> </script>
 
         <style>
-
-            .box-parent{
-                position:relative;
-                margin:50px;
+               .box{
+                color: white;
+                background-color: #333;
+                position: absolute;
+                top: 50px;
+                left: 50px;
+                width: 100px;
+                height: 100px;
+                border:1px solid yellow;
             }
-            .transform-box{
-                width:100px;
-                height:100px;
-                background:blue;
-
-            }
-            .bounding-box{
-                position:absolute;
-                top:0px;
-                left:0px;
-                width:100px;
-                height:100px;
-                background:gray
-            }
-
 
 
         </style>
         <script>
-            $.require("ready,css",function(){
-                // translate(100px)
-              var a =  $(".transform-box").css("transform","skew( -17deg, 45deg) rotate(-125deg)").data("matrix",void 0, true)//rotate(45deg)skew(33deg,0)
-       console.log(a.decompose())// skew(33deg,0)
-               // skew(33deg,0)rotate(45deg)  scale(2)
-                // var m = new $.Matrix2D(1, 0, 0 ,1,0,0)
-                //   m.rotate("45deg").skew("33deg","0");
-                // console.log(m.get())// skew(33deg)
-    
+         
+           $.require("ready,fx2",function(){
+                $.require("ready,fx",function(){
+                    $(".box").fx(2000, { o: 0.5   }). // A
+                    fx(2000, { w: 300, record:  1 }). // B
+                    fx(2000, { h: 300 }). // C
+                    fx(2000, { fs: "*=3", revert: 1 }); // D
+                });
+
             })
-   
-            //http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
-            //$(function(){
-            //   $(".transform-box").css("transform","rotate(45deg) translate(100px)")
-            //})
-      
           
         </script>
     </head>
-    <body>
-        <div class="box-parent">
+    <body >
+          <div style="position:relative;">
 
-            <div class="bounding-box">
-            </div>
-            <div class="transform-box" >
-                司徒正美
-            </div>
+            <div class="box">box</div>
+
         </div>
-
-        -moz-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0px, 0px);
-        -webkit-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0, 0);
-        -ms-transform: matrix(0.707107, 0.707107, -0.247906, 1.16631, 0, 0);
-        zoom:1;
-        filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.707107,M12=-0.247906,M21=0.707107,M22=1.16631,SizingMethod='auto expand')
-
     </body>
 </html>
