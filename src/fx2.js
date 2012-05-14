@@ -324,8 +324,8 @@ $.define("fx", "css",function(){
                 if(fx.node === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:
-                            fx.props = fx.orig = [];
-                            fx.duration = fx.after = fx.frame = 0;
+                            fx.gotoEnd = true;
+                            fx.update = fx.after = fx.frame = $.noop
                             fx.revert && fx.negative.shift()
                             //中断当前动画，继续下一个动画
                             break;
@@ -339,6 +339,7 @@ $.define("fx", "css",function(){
                             Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
                             fx.negative = []; // 清空负向列队
                             for(var ii=0, _fx; _fx= fx.positive[ii++]; ){
+                                _fx.before = _fx.update = fx.after = fx.frame = $.noop
                                 _fx.gotoEnd = true;//立即完成该元素的所有动画
                             }
                             break;
