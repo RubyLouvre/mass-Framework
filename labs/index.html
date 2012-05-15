@@ -7,6 +7,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
         <script type="text/javascript" src="../src/mass.js"> </script>
+        <!--<script type="text/javascript" src="../libs/jquery1.7.js"> </script>-->
 
         <style>
             #sample {
@@ -20,11 +21,19 @@
         <script>
          
             var exec1 = function(){
-                $.require("ready,fx2",function(){
-                    $("div.first").hide(1000).show(1000);
-                 //   $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
-                });
+                var change = 90, start = new Date;
+                var style = document.getElementById("first").style
+                setInterval(function(){
+                    var per = (new Date - start)/60
+                    style.MozTransform = "rotate(" + (change * per).toFixed(2) + "deg)"
+                },4)
             }
+            $.require("ready,css",function(){
+
+
+                
+                console.log(a)
+            })
           
         </script>
     </head>
@@ -40,8 +49,8 @@
             </pre>
             <p><input onclick="exec1()" value="点我，执行代码" type="button"/></p>
             <div id="sample">
-                <div class="first"></div>
-              <!--  <div class="second"></div>-->
+                <div class="first" id="first"></div>
+                <!-- <div class="second"></div> -->
             </div>
 
         </fieldset>
