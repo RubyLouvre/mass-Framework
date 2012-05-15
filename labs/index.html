@@ -21,20 +21,13 @@
         <script>
          
             var exec1 = function(){
-                var change = 90, start = new Date;
-                var style = document.getElementById("first").style
-                setInterval(function(){
-                    var per = (new Date - start)/60
-                    style.MozTransform = "rotate(" + (change * per).toFixed(2) + "deg)"
-                },4)
+ 
+                $.require("ready,fx2",function(){
+                    $("#first").fx(2000,{
+                        transform:"rotate(90deg)"
+                    })
+                })
             }
-            $.require("ready,css",function(){
-
-
-                
-                console.log(a)
-            })
-          
         </script>
     </head>
     <body>
@@ -49,7 +42,7 @@
             </pre>
             <p><input onclick="exec1()" value="点我，执行代码" type="button"/></p>
             <div id="sample">
-                <div class="first" id="first"></div>
+                <div class="first" id="first">司徒正美</div>
                 <!-- <div class="second"></div> -->
             </div>
 
