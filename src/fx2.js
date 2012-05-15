@@ -47,6 +47,7 @@ $.define("fx", "css",function(){
     
     $.fn.fx = function( duration, hash, /*internal*/ p  ){
         if(typeof duration === "number" ){
+            hash = hash || {};
             for( var name in hash){
                 p = $.cssName(name) || name;
                 if( name != p ){
@@ -58,15 +59,14 @@ $.define("fx", "css",function(){
                 var easing = (hash.easing || "swing").toLowerCase() ;
                 hash.easing = $.easing[ easing ] || $.easing.swing;
             }
-            hash.method = "noop";
-            hash.duration = duration;
             for(var i = 0, node; node = this[i++];){
                 var fx = new Fx;
                 fx.orig = hash;
+                fx.method = "noop"
+                fx.duration = duration
                 fx.node = node;
                 heartbeat( fx )
             }
-
             return this;
         }else{
             throw "First argument must be number "
@@ -75,8 +75,7 @@ $.define("fx", "css",function(){
 
     var types = {
         color:/color/i,
-        scroll:/scroll/i,
-        _default:/fontSize|fontWeight|opacity|width|height|top$|bottom$|left$|right$/i
+        scroll:/scroll/i
     },
     rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
     $.fx = function ( nodes, duration, hash, effects ){
@@ -138,7 +137,7 @@ $.define("fx", "css",function(){
         $.fx.steps.opacity = function(node, per, end, obj){
             $.css(node,"opacity", (end ? obj.to :  obj.from + obj.easing(per) * obj.change) )
         }
-        types.opacity = /opacity/i
+        types.opacity = /opacity/i;
     }
     var Fx = function(){}
     Fx.prototype.update = function(per, end){
@@ -152,40 +151,34 @@ $.define("fx", "css",function(){
             }
         }
     }
-    var uuid = 1;
     //此函数的存在意义,取得初始值,结束值,变化量与单位,并输出动画实例
-    var keyworks = $.oneObject("method,orig,overflow,duration,before,frame,after,easing,revert,record");
+    var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record");
     function fxBuilder(node, fx, index ){
         var to, parts, unit, op, props = [], revertProps = [];
         var hash = fx.orig;//这个属性会被hash.orig所覆盖
-        var orig = hash.orig = {}
+        var orig = hash.orig = {}, hidden = !visible(node)
         for(var name in hash){
             if(keyworks[name]){
                 continue
             }
-
             var val = hash[name] //取得结束值
             var easing = hash.easing;//公共缓动公式
             var type = $.fx.type(name);
-            var from = ($.fx[ type ] || $.fx._default)(node, name);
+            var from = ($.fx[ type ] || $.fx._default)(node, name);//取得起始值
             //用于分解属性包中的样式或属性,变成可以计算的因子
-            if( val === "show" || (val === "toggle" && !visible(node))){
+            if( val === "show" || (val === "toggle" && hidden)){
                 val = $._data(node,"old"+name) || from;
-                hash.method = "show";
+                fx.method = "show";
                 from = 0;
+                $.css(node, name, 0 );
             }else if(val === "hide" || val === "toggle" ){//hide
-                orig[name] = $._data(node,"old"+name,from);
-                hash.method = "hide";
+                orig[name] = $._data(node,"old"+name, from );
+                fx.method = "hide";
                 val = 0;
-                if(parseInt(orig[name],10) == val ){
-                    delete hash[name];
-                    delete orig[name];
-                    continue
-                }
             }else if($.isArray( val )){// array
                 parts = val;
                 val = parts[0];//取得第一个值
-                easing = parts[1] || easing;//取得第二个值或默认值
+                easing = typeof parts[1] =="function" ? parts[1]: easing;//取得第二个值或默认值
             }
             if(type != "color" ){//如果不是颜色，则需判定其有没有单位以及起止值单位不一致的情况
                 from = from == "auto" ? 0 : parseFloat(from)//确保from为数字
@@ -205,19 +198,17 @@ $.define("fx", "css",function(){
                     }
                     var change = to - from;
                 }else{
-                    continue;
+                    continue
                 }
             }else{
                 from = color2array(from);
                 to   = color2array(val);
                 change = to.map(function(end,i){
-                    return end - from[i]
+                    return end - from[i];
                 });
             }
-            //console.log(name+"  type "+ type +" from "+ from +  " to  "+to)
             if(from +"" === to +"" ){//不处理初止值都一样的样式与属性
-                delete hash[name];
-                continue;
+                continue
             }
             var prop = {
                 name: name,
@@ -241,14 +232,12 @@ $.define("fx", "css",function(){
             fx[name] = hash[name];
         }
         fx.props = props;
-        fx.uuid = uuid++// $.data(node,"@uuid");
         if ( hash.record || hash.revert ) {
             var fx2 = new Fx;//回滚到最初状态
             for(name in fx){
-                fx2[name] = fx[name]
+                fx2[name] = fx[name];
             }
             fx2.record = fx2.revert = void 0
-            fx2.uuid = "-"+fx.uuid;
             fx2.props = revertProps;
             var el = heartbeat.queue[index];
             el.negative = el.negative || []
@@ -263,10 +252,10 @@ $.define("fx", "css",function(){
                 if(!fx.props){//from这个值必须在此个时间点才能侦察正确
                     fxBuilder(fx.node, fx, index); //添加props属性与设置负向列队
                 }
+                $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
                 fx.startTime = now;
                 mix = fx.before
                 mix && (mix.call( node, node, fx ), fx.before = 0);
-                $[ fx.method ].call(node, node, fx );//供show, hide 方法调用
             }else{
                 var per = (now - fx.startTime) / fx.duration
                 var end = fx.gotoEnd || per >= 1;
@@ -276,10 +265,9 @@ $.define("fx", "css",function(){
                 }
                 if ( end ) {//最后一帧
                     if(fx.method == "hide"){
-//                        for(var i in fx.orig){//还原为初始状态
-//                            console.log(i + " "+fx.orig[i])
-//                            $.css( node, i, fx.orig[i] )
-//                        }
+                        for(var i in fx.orig){//还原为初始状态
+                            $.css( node, i, fx.orig[i] )
+                        }
                     }
                     mix = fx.after;//执行动画完成后的回调
                     mix && mix.call( node, node, fx ) ;
@@ -346,7 +334,6 @@ $.define("fx", "css",function(){
     //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
     //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
     $.mix( {
-
         show: function(node, fx){
             if(node.nodeType == 1 && !visible(node)) {
                 var old =  $._data(node, "olddisplay"),
