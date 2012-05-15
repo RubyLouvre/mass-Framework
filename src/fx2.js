@@ -116,7 +116,7 @@ $.define("fx", "css",function(){
             }
             return "_default";
         },
-        steps: {
+        update: {
             scroll: function(node, per, end, obj){
                 node[obj.name] = (end ? obj.to :  obj.from + obj.easing(per) * obj.change) + obj.unit
             },
@@ -128,13 +128,30 @@ $.define("fx", "css",function(){
                 node.style[obj.name] = "rgb(" + rgb + ")";
             }
         },
+        parse: {
+            color:function(node, name, from, val){
+                return [ color2array(from), color2array(val) ]
+            },
+            transform: function(node, name, from, val){
+                var zero = "matrix(1,0,0,1,0,0)"
+                from = from == "none" ? zero  : from;
+                if(~val.indexOf("matrix")){
+                    return [from, val]
+                }else{
+                     var neo = node.cloneNode(true);
+                     neo.style.display = "none";
+                     neo.style[name] = val;
+                     val = neo.style[name];
+                }
+            }
+        },
         _default: $.css,
         scroll: function(el, prop){
             return el[ prop ];
         }
     });
     if(!$.support.cssOpacity){
-        $.fx.steps.opacity = function(node, per, end, obj){
+        $.fx.update.opacity = function(node, per, end, obj){
             $.css(node,"opacity", (end ? obj.to :  obj.from + obj.easing(per) * obj.change) )
         }
         types.opacity = /opacity/i;
@@ -143,7 +160,7 @@ $.define("fx", "css",function(){
     Fx.prototype.update = function(per, end){
         var node = this.node;
         for(var i = 0, obj; obj = this.props[i++];){
-            var fn = $.fx.steps[obj.type]
+            var fn = $.fx.update[obj.type]
             if(fn){
                 fn(node, per, end, obj)
             }else{
@@ -178,9 +195,12 @@ $.define("fx", "css",function(){
             }else if($.isArray( val )){// array
                 parts = val;
                 val = parts[0];//取得第一个值
-                easing = typeof parts[1] =="function" ? parts[1]: easing;//取得第二个值或默认值
+                easing = typeof parts[1] == "function" ? parts[1]: easing;//取得第二个值或默认值
             }
-            if(type != "color" ){//如果不是颜色，则需判定其有没有单位以及起止值单位不一致的情况
+          
+            if($.fx.parse[ type ]){
+                parts = $.fx.parse[ type ](node, name, from, val );
+            }else{
                 from = from == "auto" ? 0 : parseFloat(from)//确保from为数字
                 if( (parts = rfxnum.exec( val )) ){
                     to = parseFloat( parts[2] ),//确保to为数字
@@ -196,26 +216,25 @@ $.define("fx", "css",function(){
                             to = eval(from+op+to);
                         }
                     }
-                    var change = to - from;
+                    parts = [from, to]
                 }else{
-                    continue
+                    parts = [0, 0]
                 }
-            }else{
-                from = color2array(from);
-                to   = color2array(val);
-                change = to.map(function(end,i){
-                    return end - from[i];
-                });
             }
-            if(from +"" === to +"" ){//不处理初止值都一样的样式与属性
+           
+            from = parts[0];
+            to = parts[1];
+            if( from +"" === to +"" ){//不处理初止值都一样的样式与属性
                 continue
             }
             var prop = {
                 name: name,
+                from: from ,
                 to: to,
                 type: type,
-                from: from ,
-                change: change,
+                change: $.isArray(to)?  to.map(function(end,i){
+                    return end - from[i];
+                }) : to - from,
                 easing: easing,
                 unit: unit
             }
@@ -223,9 +242,9 @@ $.define("fx", "css",function(){
             revertProps.push($.mix({},prop,{
                 to: from,
                 from: to,
-                change: type == "color" ?  change.map(function(c){
-                    return c * -1
-                }) : change * -1
+                change: $.isArray(from)?  from.map(function(start,i){
+                    return start - to[i];
+                }) : from - to
             }))
         }
         for( name in hash){
@@ -398,7 +417,7 @@ $.define("fx", "css",function(){
         fxAttrs.concat.apply([], fxAttrs.slice(0,num)).forEach(function(name) {
             obj[ name ] = type;
             if(~name.indexOf("margin")){
-                $.fx.steps[name] = function(node, per, end, obj){
+                $.fx.update[name] = function(node, per, end, obj){
                     var val = (end ? obj.to :  obj.from + obj.easing(per) * obj.change) ;
                     node.style[name] = Math.max(val,0) + obj.unit;
                 }
