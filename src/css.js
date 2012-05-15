@@ -200,10 +200,12 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this.cross(a, b, c, d, toFloat(tx, 0), toFloat(ty, 0))
         },
         decompose : function() {
-            //分解原始数值,得到a,b,c,e,tx,ty属性,以及返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
-            var ret = {};
-            ret.x = this.tx;
-            ret.y = this.ty;
+            //分解原始数值,返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
+            var ret = {
+                toString: this.toString
+            };
+            ret.translateX = this.tx;
+            ret.translateY = this.ty;
             ret.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
             ret.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
 
@@ -211,7 +213,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             var skewY = Math.atan2(this.b, this.a);
 
             if (skewX == skewY) {
-                ret.rotation = skewY/ Math.PI * 180;
+                ret.rotate = skewY/ Math.PI * 180;
                 if (this.a < 0 && this.d >= 0) {
                     ret.rotation += (ret.rotation <= 0) ? 180 : -180;
                 }
@@ -227,7 +229,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     $.Matrix2D = Matrix2D
     var getter = $.cssAdapter["_default:get"], RECT = "getBoundingClientRect",
     //支持情况 ff3.5 chrome ie9 pp6 opara10.5 safari3.1
-    cssTransfrom = $.cssName("transform");
+    cssTransfrom = $.support.transform = $.cssName("transform");
     if( cssTransfrom ){
         adapter[cssTransfrom + ":set"] = function(node, name, value){
             if(value.indexOf("matrix")!== -1 && cssTransfrom === "MozTransform"){
