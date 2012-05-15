@@ -66,6 +66,7 @@ $.define("fx", "css",function(){
                 fx.node = node;
                 heartbeat( fx )
             }
+
             return this;
         }else{
             throw "First argument should be number and second argument should be object "
@@ -153,7 +154,7 @@ $.define("fx", "css",function(){
     }
     var uuid = 1;
     //此函数的存在意义,取得初始值,结束值,变化量与单位,并输出动画实例
-    var keyworks = $.oneObject("orig,overflow,duration,before,frame,after,easing,revert,record");
+    var keyworks = $.oneObject("method,orig,overflow,duration,before,frame,after,easing,revert,record");
     function fxBuilder(node, fx, index ){
         var to, parts, unit, op, props = [], revertProps = [];
         var hash = fx.orig;//这个属性会被hash.orig所覆盖
@@ -167,14 +168,28 @@ $.define("fx", "css",function(){
             var type = $.fx.type(name);
             var from = ($.fx[ type ] || $.fx._default)(node, name);
             //用于分解属性包中的样式或属性,变成可以计算的因子
+            if(/show|hide|toggel/.test(val)){
+                !visible(node)
+            }
+
             if( val === "show" || (val === "toggle" && !visible(node))){
                 val = $._data(node,"old"+name) || from;
                 hash.method = "show";
                 from = 0;
+                if(parseInt(val,10) == from ){
+                    delete hash[name];
+                    delete orig[name];
+                    continue
+                }
             }else if(val === "hide" || val === "toggle" ){//hide
                 orig[name] = $._data(node,"old"+name,from);
                 hash.method = "hide";
                 val = 0;
+                if(parseInt(orig[name],10) == val ){
+                    delete hash[name];
+                    delete orig[name];
+                    continue
+                }
             }else if($.isArray( val )){// array
                 parts = val;
                 val = parts[0];//取得第一个值
@@ -230,6 +245,7 @@ $.define("fx", "css",function(){
                 }) : change * -1
             }))
         }
+        console.log(hash)
         for( name in hash){
             fx[name] = hash[name];
         }
@@ -270,6 +286,7 @@ $.define("fx", "css",function(){
                 if ( end ) {//最后一帧
                     if(fx.method == "hide"){
                         for(var i in fx.orig){//还原为初始状态
+                            console.log(i + " "+fx.orig[i])
                             $.css( node, i, fx.orig[i] )
                         }
                     }
@@ -352,6 +369,7 @@ $.define("fx", "css",function(){
                 var old =  $._data(node, "olddisplay"),
                 _default = parseDisplay(node.nodeName),
                 display = node.style.display = (old || _default);
+                console.log(display)
                 $._data(node, "olddisplay", display);
                 if(fx && ("width" in fx || "height" in fx)){//如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
