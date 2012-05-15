@@ -46,7 +46,7 @@ $.define("fx", "css",function(){
     }
     
     $.fn.fx = function( duration, hash, /*internal*/ p  ){
-        if(typeof duration === "number" && $.isPlainObject(hash) ){
+        if(typeof duration === "number" ){
             for( var name in hash){
                 p = $.cssName(name) || name;
                 if( name != p ){
@@ -69,7 +69,7 @@ $.define("fx", "css",function(){
 
             return this;
         }else{
-            throw "First argument should be number and second argument should be object "
+            throw "First argument must be number "
         }
     }
 
@@ -163,24 +163,16 @@ $.define("fx", "css",function(){
             if(keyworks[name]){
                 continue
             }
+
             var val = hash[name] //取得结束值
             var easing = hash.easing;//公共缓动公式
             var type = $.fx.type(name);
             var from = ($.fx[ type ] || $.fx._default)(node, name);
             //用于分解属性包中的样式或属性,变成可以计算的因子
-            if(/show|hide|toggel/.test(val)){
-                !visible(node)
-            }
-
             if( val === "show" || (val === "toggle" && !visible(node))){
                 val = $._data(node,"old"+name) || from;
                 hash.method = "show";
                 from = 0;
-                if(parseInt(val,10) == from ){
-                    delete hash[name];
-                    delete orig[name];
-                    continue
-                }
             }else if(val === "hide" || val === "toggle" ){//hide
                 orig[name] = $._data(node,"old"+name,from);
                 hash.method = "hide";
@@ -245,7 +237,6 @@ $.define("fx", "css",function(){
                 }) : change * -1
             }))
         }
-        console.log(hash)
         for( name in hash){
             fx[name] = hash[name];
         }
@@ -285,10 +276,10 @@ $.define("fx", "css",function(){
                 }
                 if ( end ) {//最后一帧
                     if(fx.method == "hide"){
-                        for(var i in fx.orig){//还原为初始状态
-                            console.log(i + " "+fx.orig[i])
-                            $.css( node, i, fx.orig[i] )
-                        }
+//                        for(var i in fx.orig){//还原为初始状态
+//                            console.log(i + " "+fx.orig[i])
+//                            $.css( node, i, fx.orig[i] )
+//                        }
                     }
                     mix = fx.after;//执行动画完成后的回调
                     mix && mix.call( node, node, fx ) ;
@@ -310,16 +301,8 @@ $.define("fx", "css",function(){
             return false
         }
     }
-    //添加一个ms自动移除的占位空动画
     $.fn.delay = function(ms){
-        return this.fx(Infinity,{
-            before: function(node, fx){
-                fx.update = $.noop;
-                setTimeout(function(){
-                    fx.gotoEnd = true;
-                }, ms)
-            }
-        });
+        return this.fx(ms);
     }
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
@@ -369,7 +352,6 @@ $.define("fx", "css",function(){
                 var old =  $._data(node, "olddisplay"),
                 _default = parseDisplay(node.nodeName),
                 display = node.style.display = (old || _default);
-                console.log(display)
                 $._data(node, "olddisplay", display);
                 if(fx && ("width" in fx || "height" in fx)){//如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
