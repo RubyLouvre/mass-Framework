@@ -75,7 +75,8 @@ $.define("fx", "css",function(){
 
     var types = {
         color:/color/i,
-        scroll:/scroll/i
+        scroll:/scroll/i,
+        transform: /transform/i
     },
     rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
     $.fx = function ( nodes, duration, hash, effects ){
@@ -106,6 +107,7 @@ $.define("fx", "css",function(){
         }
         return nodes.fx(duration, props);
     }
+    var cssTransform = $.support.transform
     $.mix($.fx, {
         "@debug": 1,
         type: function (attr){//  用于取得适配器的类型
@@ -126,6 +128,44 @@ $.define("fx", "css",function(){
                     return Math.max(Math.min( (from + obj.change[i] * delta)|0, 255), 0);
                 });
                 node.style[obj.name] = "rgb(" + rgb + ")";
+            },
+            transform: function(node, per, end, obj){
+                if(!obj.parsed){
+                    var t = new $.Matrix2D
+                    t.set.apply(t, obj.from)
+                    obj.from = t.decompose();
+                    t.set.apply(t, obj.to)
+                    obj.to = t.decompose();
+                    obj.parsed = 1;
+                }
+                var delta = obj.easing(per), to = obj.to, from = obj.from, transform = "", unit;
+                for(var name in from){
+                    unit = ""
+                    if(  to[name] == from[name] ){
+                        delete from[name];
+                        continue
+                    }
+                    switch(name){
+                        case "translateX":
+                        case "translateY":
+                            unit += "px";
+                        case "scaleX":
+                        case "scaleY":
+                            transform = name+"("+ (end ? to[name] : from[name] + (to[name] - from[name]) * delta)+unit+") " +transform;
+                            break;
+                        case "skewX":
+                        case "skewY":
+                        case "rotate":
+                            transform = name+"("+(end ? to[name] : from[name] + (to[name] - from[name]) * delta).toFixed(2)+"deg) " +transform;
+                            break;
+                    }
+                }
+               $.log(transform)
+                if(cssTransform){
+                    node.style[obj.name] = transform
+                }else{
+                    $(node).css("transform",transform);
+                }
             }
         },
         parse: {
@@ -135,14 +175,19 @@ $.define("fx", "css",function(){
             transform: function(node, name, from, val){
                 var zero = "matrix(1,0,0,1,0,0)"
                 from = from == "none" ? zero  : from;
-                if(~val.indexOf("matrix")){
-                    return [from, val]
-                }else{
-                     var neo = node.cloneNode(true);
-                     neo.style.display = "none";
-                     neo.style[name] = val;
-                     val = neo.style[name];
+                if(val.indexOf("matrix") == -1 ){
+                    var neo = node.cloneNode(true);
+                    neo.style.display = "none";
+                    node.parentNode.appendChild(neo)
+                    val = $(neo).css("transform", val).css("transform")
+                    $(neo).remove();
                 }
+                $.log(from +" "+ val)
+                var to = (from +" "+ val).match(/[-+.e\d]+/g).map(function(el){
+                    return el * 1
+                });
+                from = to.splice(0,6);
+                return [from, to]
             }
         },
         _default: $.css,
