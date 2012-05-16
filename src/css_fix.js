@@ -114,7 +114,8 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         parseFloat(value);
     }
     adapter[ "transform:set" ] = function(node, name, value){
-        var m = adapter[ "transform:get" ](node, true)
+        adapter[ "transform:get" ](node)
+        var m = new $.Matrix2D( 1,0,0,1,0,0 );
         //注意：IE滤镜和其他浏览器定义的角度方向相反
         value.toLowerCase().replace(rtransform,function(_,method,array){
             array = array.replace(/px/g,"").match($.rword) || [];
@@ -130,7 +131,6 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                     return  b.toUpperCase();//处理translateX translateY scaleX scaleY skewX skewY等大小写问题
                 })
             }
-          
             m[method].apply(m, array);
             var filter = node.filters[ident];
             filter.M11 =  filter.M22 = 1;//重置矩形
@@ -142,14 +142,13 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             filter.M22 = m.d;
             filter.Dx  = m.tx;
             filter.Dy  = m.ty;
-            $._data(node,"matrix",m);
             var tw = node.offsetWidth,th = node.offsetHeight;//取得变形后高宽
             node.style.position = "relative";
             node.style.left = (width - tw)/2  + m.tx + "px";
             node.style.top = (height - th)/2  + m.ty + "px";
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
-          });
+        });
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
