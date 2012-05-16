@@ -200,10 +200,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             return this.cross(a, b, c, d, toFloat(tx, 0), toFloat(ty, 0))
         },
         decompose : function() {
-            //分解原始数值,返回一个包含x,y,scaleX,scaleY,skewX,skewY,rotation的对象
-            var ret = {
-                toString: this.toString
-            };
+            //分解原始数值,返回一个包含translateX,translateY,scaleX,scaleY,skewX,skewY,rotate的对象
+            var ret = { };
             ret.translateX = this.tx;
             ret.translateY = this.ty;
             ret.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
@@ -211,7 +209,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 
             var skewX = Math.atan2(-this.c, this.d);
             var skewY = Math.atan2(this.b, this.a);
-
+            ret.rotate = 0;
+            $.log("===================")
+            $.log(Math.atan2(this.c, this.d)/ Math.PI * 180)/// Math.PI * 180
+            // Math.atan2(p.y, p.x);
             if (skewX == skewY) {
                 ret.rotate = skewY/ Math.PI * 180;
                 if (this.a < 0 && this.d >= 0) {

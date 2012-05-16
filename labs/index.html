@@ -23,9 +23,13 @@
             var exec1 = function(){
  
                 $.require("ready,fx2",function(){
-                    $("#first").fx(2000,{
-                        transform:"rotate(90deg)"
-                    })
+                   //  $("#first").fx(2000,{
+                   //      transform:"skew(30deg) scale(1.5,1.5) rotate(40deg) translate(10px, 20px)"
+                   //  });
+                   //
+                   // $("#first").css("transform"  , "skewX(14.67deg) skewY(29.48deg) rotate(40.00deg) scaleY(1.1877806) scaleX(1.9593861) translateY(32.6231000px) translateX(11.0420000px)")
+                   $("#first").css("transform","skew(30deg) scale(1.5,1.5) rotate(40deg) translate(10px, 20px)")
+                   
                 })
             }
         </script>

@@ -149,6 +149,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         });
+        m.decompose();
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理

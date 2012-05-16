@@ -137,21 +137,23 @@ $.define("fx", "css",function(){
                     t.set.apply(t, obj.to)
                     obj.to = t.decompose();
                     obj.parsed = 1;
+                    console.log(obj.from)
+                    console.log(obj.to)
                 }
                 var delta = obj.easing(per), to = obj.to, from = obj.from, transform = "", unit;
                 for(var name in from){
                     unit = ""
-                    if(  to[name] == from[name] ){
-                        delete from[name];
-                        continue
-                    }
+                  //  if(  to[name] == from[name] ){
+                 //       delete from[name];
+                  //      continue
+                  //  }
                     switch(name){
                         case "translateX":
                         case "translateY":
                             unit += "px";
                         case "scaleX":
                         case "scaleY":
-                            transform = name+"("+ (end ? to[name] : from[name] + (to[name] - from[name]) * delta)+unit+") " +transform;
+                            transform = name+"("+ (end ? to[name] : from[name] + (to[name] - from[name]) * delta).toFixed(7)+unit+") " +transform;
                             break;
                         case "skewX":
                         case "skewY":
@@ -160,7 +162,7 @@ $.define("fx", "css",function(){
                             break;
                     }
                 }
-               $.log(transform)
+                $.log(transform)
                 if(cssTransform){
                     node.style[obj.name] = transform
                 }else{
@@ -179,8 +181,9 @@ $.define("fx", "css",function(){
                     var neo = node.cloneNode(true);
                     neo.style.display = "none";
                     node.parentNode.appendChild(neo)
-                    val = $(neo).css("transform", val).css("transform")
-                    $(neo).remove();
+                    neo =  $(neo).css("transform", val)
+                    val = neo.css("transform");
+                    neo.remove();
                 }
                 var to = (from +" "+ val).match(/[-+.e\d]+/g).map(function(el){
                     return el * 1
