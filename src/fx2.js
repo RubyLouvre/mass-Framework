@@ -125,7 +125,7 @@ $.define("fx", "css",function(){
             color: function(node, per, end, obj){
                 var delta = obj.easing(per),
                 rgb = end ? obj.to : obj.from.map(function(from, i){
-                    return Math.max(Math.min( (from + obj.change[i] * delta)|0, 255), 0);
+                    return Math.max(Math.min( parseInt( from + obj.change[i] * delta, 10), 255), 0);
                 });
                 node.style[obj.name] = "rgb(" + rgb + ")";
             },
@@ -137,28 +137,28 @@ $.define("fx", "css",function(){
                     t.set.apply(t, obj.to)
                     obj.to = t.decompose();
                     obj.parsed = 1;
-                    console.log(obj.from)
-                    console.log(obj.to)
                 }
-                var delta = obj.easing(per), to = obj.to, from = obj.from, transform = "", unit;
-                for(var name in from){
-                    unit = ""
-                  //  if(  to[name] == from[name] ){
-                 //       delete from[name];
-                  //      continue
-                  //  }
-                    switch(name){
-                        case "translateX":
-                        case "translateY":
-                            unit += "px";
-                        case "scaleX":
-                        case "scaleY":
-                            transform = name+"("+ (end ? to[name] : from[name] + (to[name] - from[name]) * delta).toFixed(7)+unit+") " +transform;
+                var pos = obj.easing(per), transform = "", unit, startVal, endVal, i = obj.from.length;
+                while ( i-- ) {
+                    startVal = obj.from[i];
+                    endVal = obj.to[i];
+                    unit = +false;
+                    switch ( startVal[0] ) {
+                        case "translate":
+                            unit = "px";
+                        case "scale":
+                            unit || ( unit = "");
+                            transform = startVal[0] + "(" +
+                            (end ? endVal[1][0]: (startVal[1][0] + (endVal[1][0] - startVal[1][0]) * pos).toFixed(7) ) + unit +","+
+                            (end ? endVal[1][1]: (startVal[1][1] + (endVal[1][1] - startVal[1][1]) * pos).toFixed(7) ) + unit + ") "+
+                            transform;
                             break;
                         case "skewX":
                         case "skewY":
                         case "rotate":
-                            transform = name+"("+(end ? to[name] : from[name] + (to[name] - from[name]) * delta).toFixed(2)+"deg) " +transform;
+                            transform = startVal[0] + "(" +
+                            (end ? endVal[1]:  (startVal[1] + (endVal[1] - startVal[1]) * pos).toFixed(7) ) +"rad) "+
+                            transform;
                             break;
                     }
                 }
@@ -189,6 +189,8 @@ $.define("fx", "css",function(){
                     return el * 1
                 });
                 from = to.splice(0,6);
+                // console.log(from)
+                // console.log(to)
                 return [from, to]
             }
         },
