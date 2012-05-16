@@ -169,10 +169,10 @@ $.define("fx", "css",function(){
             }
         },
         parse: {
-            color:function(node, name, from, val){
+            color:function(node, from, val){
                 return [ color2array(from), color2array(val) ]
             },
-            transform: function(node, name, from, val){
+            transform: function(node,from, val){
                 var zero = "matrix(1,0,0,1,0,0)"
                 from = from == "none" ? zero  : from;
                 if(val.indexOf("matrix") == -1 ){
@@ -182,7 +182,6 @@ $.define("fx", "css",function(){
                     val = $(neo).css("transform", val).css("transform")
                     $(neo).remove();
                 }
-                $.log(from +" "+ val)
                 var to = (from +" "+ val).match(/[-+.e\d]+/g).map(function(el){
                     return el * 1
                 });
@@ -244,7 +243,7 @@ $.define("fx", "css",function(){
             }
           
             if($.fx.parse[ type ]){
-                parts = $.fx.parse[ type ](node, name, from, val );
+                parts = $.fx.parse[ type ](node, from, val );
             }else{
                 from = from == "auto" ? 0 : parseFloat(from)//确保from为数字
                 if( (parts = rfxnum.exec( val )) ){
