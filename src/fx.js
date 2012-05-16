@@ -165,21 +165,26 @@ $.define("fx", "css",function(){
             }
         },
         parse: {
-            color:function(node, from, val){
-                return [ color2array(from), color2array(val) ]
+            color:function(node, from, to){
+                return [ color2array(from), color2array(to) ]
             },
-            transform: function(node,from, val){
+            transform: function(node,from, to){
                 var zero = "matrix(1,0,0,1,0,0)"
                 from = from == "none" ? zero  : from;
-                if(val.indexOf("matrix") == -1 ){
+                if(to.indexOf("matrix") == -1 ){
                     var neo = node.cloneNode(true);
-                    neo.style.display = "none";
+                    if(window.opera || navigator.vendor){//webkit与opera如果display为none,无法取得其变形属性
+                        neo.style.position = "relative";
+                        neo.style.opacity = "0";
+                    }else{
+                        neo.style.display = "none"
+                    }
                     node.parentNode.appendChild(neo)
-                    neo = $(neo).css("transform", val);
-                    val = neo.css("transform");
+                    neo = $(neo).css("transform", to);
+                    to = neo.css("transform");
                     neo.remove();
                 }
-                var to = (from +" "+ val).match(/[-+.e\d]+/g).map(function(el){
+                to = (from +" "+ to).match(/[-+.e\d]+/g).map(function(el){
                     return el * 1
                 });
                 from = to.splice(0,6);
@@ -191,6 +196,19 @@ $.define("fx", "css",function(){
             return el[ prop ];
         }
     });
+
+    if(window.WebKitCSSMatrix){
+        $.fx.parse.transform = function(node, from, to){
+            var first = new WebKitCSSMatrix(from), second = new WebKitCSSMatrix(to)
+            from = [], to = [];
+            "a,b,c,d,e,f".replace($.rword, function(p){
+                from.push( first[ p ] )
+                to.push( second[ p ] )
+            });
+            return [from, to]
+        }
+    }
+
     if(!$.support.cssOpacity){
         $.fx.update.opacity = function(node, per, end, obj){
             $.css(node,"opacity", (end ? obj.to :  obj.from + obj.easing(per) * (obj.to - obj.from) ))
