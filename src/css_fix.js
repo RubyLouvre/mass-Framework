@@ -114,7 +114,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         parseFloat(value);
     }
     adapter[ "transform:set" ] = function(node, name, value){
-        var m = adapter[ "transform:get" ](node).set( 1,0,0,1,0,0 );
+        var m = adapter[ "transform:get" ](node, true).set( 1,0,0,1,0,0 );
         //注意：IE滤镜和其他浏览器定义的角度方向相反
         value.toLowerCase().replace(rtransform,function(_,method,array){
             array = array.replace(/px/g,"").match($.rword) || [];
