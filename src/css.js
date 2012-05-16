@@ -125,7 +125,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //优化HTML5应用的体验细节，例如全屏的处理与支持，横屏的响应，图形缩放的流畅性和不失真，点触的响应与拖曳，Websocket的完善
     //关于JavaScript中计算精度丢失的问题 http://rockyee.iteye.com/blog/891538
     function toFixed(d){
-        return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) : d
+        return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) :  d;
     }
     function toFloat(d, x){
         return isFinite(d) ? d: parseFloat(d) || x
@@ -199,31 +199,40 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         matrix:function(a, b, c, d, tx, ty){
             return this.cross(a, b, c, d, toFloat(tx, 0), toFloat(ty, 0))
         },
-        decompose : function() {
-            //分解原始数值,返回一个包含translateX,translateY,scaleX,scaleY,skewX,skewY,rotate的对象
-            var ret = { };
-            ret.translateX = this.tx;
-            ret.translateY = this.ty;
-            ret.scaleX = Math.sqrt(this.a * this.a + this.b * this.b);
-            ret.scaleY = Math.sqrt(this.c * this.c + this.d * this.d);
-
-            var skewX = Math.atan2(-this.c, this.d);
-            var skewY = Math.atan2(this.b, this.a);
-            ret.rotate = 0;
-            $.log("===================")
-            $.log(Math.atan2(this.c, this.d)/ Math.PI * 180)/// Math.PI * 180
-            // Math.atan2(p.y, p.x);
-            if (skewX == skewY) {
-                ret.rotate = skewY/ Math.PI * 180;
-                if (this.a < 0 && this.d >= 0) {
-                    ret.rotation += (ret.rotation <= 0) ? 180 : -180;
+        decompose: function() {
+            //分解原始数值,返回一个包含translateX,translateY,scale,skewX,rotate的对象
+            //https://github.com/louisremi/jquery.transform.js/blob/master/jquery.transform2d.js
+            //http://http://mxr.mozilla.org/mozilla-central/source/layout/style/nsStyleAnimation.cpp
+            var scaleX, scaleY, skew, A = this.a, B = this.b,C = this.c,D = this.d ;
+            if ( A * D - B * C ) {
+                // step (3)
+                scaleX = Math.sqrt( A * A + B * B );
+                A /= scaleX;
+                B /= scaleX;
+                // step (4)
+                skew = A * C + B * D;
+                C -= A * skew;
+                D -= B * skew;
+                // step (5)
+                scaleY = Math.sqrt( C * C + D * D );
+                C /= scaleY;
+                D /= scaleY;
+                skew /= scaleY;
+                // step (6)
+                if ( A * D < B * C ) {
+                    A = -A;
+                    B = -B;
+                    skew = -skew;
+                    scaleX = -scaleX;
                 }
-                ret.skewX = ret.skewY = 0;
             } else {
-                ret.skewX = skewX/ Math.PI * 180;
-                ret.skewY = skewY/ Math.PI * 180;
+                scaleX = scaleY = skew = 0;
             }
-            return ret;
+            return [
+            ["translate", [+this.tx, +this.ty]],
+            ["rotate", Math.atan2(B, A)],
+            ["skewX", Math.atan(skew)],
+            ["scale", [scaleX, scaleY]]]
         }
     });
 
@@ -299,7 +308,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
-     */
+         */
  
     var cssPair = {
         Width:['Left', 'Right'],
@@ -584,7 +593,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     } ;
 
 });
-/**
+    /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 2011.9.20 v2
@@ -600,6 +609,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.5.10 FIX toFloat BUG
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
- */
+     */
 
 
