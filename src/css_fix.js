@@ -114,8 +114,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         parseFloat(value);
     }
     adapter[ "transform:set" ] = function(node, name, value){
-        adapter[ "transform:get" ](node)
-        var m = new $.Matrix2D( 1,0,0,1,0,0 );
+        var m = adapter[ "transform:get" ](node).set( 1,0,0,1,0,0 );
         //注意：IE滤镜和其他浏览器定义的角度方向相反
         value.toLowerCase().replace(rtransform,function(_,method,array){
             array = array.replace(/px/g,"").match($.rword) || [];
@@ -149,7 +148,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         });
-        m.decompose();
+        $._data(node,"matrix",m )
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
