@@ -120,6 +120,31 @@
                 <img src="../public/styles/css_transform2d17.jpg"/>
             </div>
             <p>Matrix = translate x rotate x scale x skew </p>
+            <p></p>
+            <pre>
+http://math.stackexchange.com/questions/13150/extracting-rotation-scale-values-from-2d-transformation-matrix
+rotation = Math.atan( -mat.c / mat.a);
+scaleX   = Math.sqrt((mat.a * mat.a) + (mat.c * mat.c));
+scaleY   = Math.sqrt((mat.b * mat.b) + (mat.d * mat.d));
+
+sign = Math.atan(-c / a);
+rad  = Math.acos(a / scaleX);
+deg  = rad * degree;
+
+if (deg > 90 && sign > 0)
+{
+    rotation = (360 - deg) * radian;
+}
+else if (deg < 90 && sign < 0)
+{
+    rotation = (360 - deg) * radian;
+}
+else
+{
+    rotation = rad;
+}
+rotationInDegree = rotation * degree;
+            </pre>
         </article>
     </body>
 </html>
