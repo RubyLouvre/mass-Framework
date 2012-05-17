@@ -39,13 +39,13 @@
             动画实例Fx。每一个动画只能对应一个元件，元件作为动画实例的属性而存在（属性名为<strong>symbol</strong>）。动画实例还拥有一个叫props的对象数组属性，里面装载着要进行操作的元素样式名，
             起始值（from），结束值(to)，单位(unit)，类别(type)与对应的缓动公式(easing)。类别是供动画引擎分解起始值与结束值，设置当前值用的。当前值是根据
             起始值（from），结束值(to)，进度，缓动公式求得（<span style="color:red">prop.from + (prop.to - prop.from) * prop.easing( pos ) </span>）。而进度值是通过
-            动画时长（duration）、开始时间（startTime）与当前时间求得（ <span style="color:#85111D">(now - fx.startTime) / fx.duration </span>）。可见，
+            动画时长（duration）、开始时间（startTime）与当前时间求得（ <span style="color:red">(now - fx.startTime) / fx.duration </span>）。可见，
             要实现动画的材料都绑到动画特效上，这里面，起始值与类别是通过引擎自动计算得到，now是在setInterval时自动莸取的，
             单位与缓动公式有默认值，用户只需要指望结整束值就行了。</p>
         <p>关键帧，就是动画的第一帧与最后一帧，换言之，就是起始值与结束值。如果想在它们里面做更多的事情，可以使用回调函数，before与after。</li>
         <p>图层， 在DOM系统中，元素的样式存在z-index的概念。canvas可根据先后添加顺序决定上下。</p>
         <p>此外，mass Framework还有什么呢？作为一个伟大的框架，必须有独创之处，而且不是那种鸡肋的微创新。列队！主列队与子列队。立即完成与立即中止的机制。</p>
-        <p>mass Framework有一个叫"@queue"的系统变量，是一个数组，用于存放<span style="color:red">现在要执行</span>的动画实例。
+        <p>mass Framework有一个叫"@queue"的系统变量，是一个数组，用于存放<span style="color:#a9ea00;">现在要执行</span>的动画实例。
             什么叫做“现在要执行”，一个元件在某个时间段只能运行一个动画，要想运行另一个动画，必须待到当前动画执行完毕。$["@queue"]作为引擎的主列队，
             允许放多个动画实例，意味着它可以同时操作多个元件进行动画，如一个水缸里面几十条鱼在游，天空有几朵云在缓缓蠕动，几个彩球在墙壁内来回碰撞跳弹，
             现实有许多这样需要模拟的场景。一个方块一会儿变成红色，一会儿放大，一会儿整体往左上角收缩乃至消失，再过一会儿渐渐淡出来，这就涉及到四个动画，
