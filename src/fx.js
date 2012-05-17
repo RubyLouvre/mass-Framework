@@ -11,7 +11,6 @@ $.define("fx", "css",function(){
     function visible(node) {
         return  $.css(node, "display") !== 'none';
     }
-    //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/spark/effects/animation/Keyframe.html
     $.mix({//缓动公式
         easing : {
             linear: function( pos ) {
@@ -21,9 +20,9 @@ $.define("fx", "css",function(){
                 return (-Math.cos(pos*Math.PI)/2) + 0.5;
             }
         },
-        "@queue": [],//时间轴
-        tick: function(fx){//向时间轴插入关键帧
-            var gotoQueue = true;//判定是加入主时间轴上，还是添加到子时间轴上
+        "@queue": [],//主列队
+        tick: function(fx){//向时间轴插入动画实例
+            var gotoQueue = true;//判定是加入主列队上，还是添加到子列队上
             for(var i = 0, el; el = $["@queue"][i++];){
                 if(el.node == fx.node){//★★★第一步
                     el.positive.push(fx);//子列队

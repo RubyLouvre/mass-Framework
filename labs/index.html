@@ -20,21 +20,18 @@
         </style>
         <script>
          
-          var exec1 = function(){
+            var exec1 = function(){
        
-            $.require("ready,fx",function(){
+                $.require("ready,fx",function(){
               
-                $("#first").fx(2000,{
-                    transform:"skewX(30deg) scale(1.5,1.5) rotate(40deg) translate(10px, 20px)"
-                });
+                    //   $("#first").fx(2000,{
+                    //       transform:"skewX(30deg) scale(1.5,1.5) rotate(40deg) translate(10px, 20px)"
+                    //  });
             
- //日志: translate(11.04104px,32.62025px) rotate(0.51444rad) skewX(0.25845rad) scale(1.9593,1.14831)
-       //translate(11.02999px,32.58761px) rotate(0.51392rad) skewX(0.2582rad) scale(1.95834,1.14816)
-                // $("#first").css("transform","skew(30deg) scale(1.5,1.5) rotate(40deg) translate(10px, 20px)")
-                //  $.log($("#first").css("transform"))
-                 //Knockout
-            })
-          }
+                    $("div.first").slideUp(300).fx(2000).fadeIn(400).hide(1000).show(1000);
+                    $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
+                })
+            }
 
         </script>
     </head>
@@ -42,7 +39,7 @@
         <fieldset ><legend>例子</legend>
             <pre class="brush:javascript;gutter:false;toolbar:false">
             $.require("ready,fx,event",function(){
-                $.require("ready,fx2",function(){
+                $.require("ready,fx",function(){
                     $("div.first").slideUp(300).fx(2000).fadeIn(400).hide(1000).show(1000);
                     $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
                 });
@@ -51,7 +48,7 @@
             <p><input onclick="exec1()" value="点我，执行代码" type="button"/></p>
             <div id="sample">
                 <div class="first" id="first">司徒正美</div>
-                <!-- <div class="second"></div> -->
+                <div class="second"></div> 
             </div>
 
         </fieldset>
