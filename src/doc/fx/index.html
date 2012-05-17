@@ -26,46 +26,73 @@
     <article>
         <h3>动画模块</h3>
         <p><span class="stress">描述：</span></p>
-        <p>动画模块。所谓动画就是一个元素的大小样子位置在一个时间内发生平滑的改变。由此可见，动画是与时间息息相关。
-            本框架与大多数框架的动画系统是构筑在setInterval定时器之上，但与其他框架最大的不同时，只用一个setInterval。
-            如jQuery就会为每个节点每个动画各分配一个定时器，因此在同一时间内会出现N*N个定时器,对于单线程的javascript来说，
-            这就可能出现掉帧的情况。因此我只使用一个定时器()，我管它为heartbeat。下面详述一下我的动画系统</p>
-        <p>heartbeat函数是整个系统的心脏，它的血液就是放进中央列队中等待执行的元素节（hearbeat.nodes），
-            它通过setInterval方法不断调用nextTick方法，然后由它执行animate函数，实现各种绚丽的特效。
-        </p>
+        <p>所谓动画就是对某个元素或实体的外观，颜色或位置等在一个时间段内发生平滑的改变。由此可见，动画与时间息息相关。</p>
+        <p>在著名的FLASH动画中，存在四大元素：时间轴，元件，关键帧，图层。</p>
+        <p>mass Framework的动事引擎在v4中借鉴它的思维进行重构。</p>
+        <p>时间轴，mass Framework是没有存在与之相关的实体的。这是一个高级抽象的东西，mass Framework把它简单理解为时间，一段时间。
+            而在JS早期编程环境中,只有setTimeout与setInterval是与时间有关的，至于后来的什么requestAnimationFrame与setImmediate
+            基本上算为时间间隔不可控的setTimeout优化版。setTimeout是将一个函数延迟到未来某个时间才调用，想形成连贯的动画，
+            要多次调用此API，性能明显一如setInterval。setInterval是每隔一段时间就调用一次，直到用户调用clearInterval。因此，我们可以将从我们设置
+            setInterval那一刻起到调用clearInterval的那一段时间，为一个“时间轴”。</p>
+        <p>元件，就是用于构建动画的最小单位，它里面有许多可以用于计算的属性，像长度、宽度、坐标、背影颜色、字体大小、透明度等等。在浏览器中，显然易见有个东西立即符合条件——
+            元素节点。HTML5中，canvas里面的图形也满足这条件。但为了简化这些元件的动画操纵，mass Framework将它们依附于一个更高级的东西，
+            动画实例Fx。每一个动画只能对应一个元件，元件作为动画实例的属性而存在（属性名为<strong>symbol</strong>）。动画实例还拥有一个叫props的对象数组属性，里面装载着要进行操作的元素样式名，
+            起始值（from），结束值(to)，单位(unit)，类别(type)与对应的缓动公式(easing)。类别是供动画引擎分解起始值与结束值，设置当前值用的。当前值是根据
+            起始值（from），结束值(to)，进度，缓动公式求得（<span style="color:red">prop.from + (prop.to - prop.from) * prop.easing( pos ) </span>）。而进度值是通过
+            动画时长（duration）、开始时间（startTime）与当前时间求得（ <span style="color:#85111D">(now - fx.startTime) / fx.duration </span>）。可见，
+            要实现动画的材料都绑到动画特效上，这里面，起始值与类别是通过引擎自动计算得到，now是在setInterval时自动莸取的，
+            单位与缓动公式有默认值，用户只需要指望结整束值就行了。</p>
+        <p>关键帧，就是动画的第一帧与最后一帧，换言之，就是起始值与结束值。如果想在它们里面做更多的事情，可以使用回调函数，before与after。</li>
+        <p>图层， 在DOM系统中，元素的样式存在z-index的概念。canvas可根据先后添加顺序决定上下。</p>
+        <p>此外，mass Framework还有什么呢？作为一个伟大的框架，必须有独创之处，而且不是那种鸡肋的微创新。列队！主列队与子列队。立即完成与立即中止的机制。</p>
+        <p>mass Framework有一个叫"@queue"的系统变量，是一个数组，用于存放<span style="color:red">现在要执行</span>的动画实例。
+            什么叫做“现在要执行”，一个元件在某个时间段只能运行一个动画，要想运行另一个动画，必须待到当前动画执行完毕。$["@queue"]作为引擎的主列队，
+            允许放多个动画实例，意味着它可以同时操作多个元件进行动画，如一个水缸里面几十条鱼在游，天空有几朵云在缓缓蠕动，几个彩球在墙壁内来回碰撞跳弹，
+            现实有许多这样需要模拟的场景。一个方块一会儿变成红色，一会儿放大，一会儿整体往左上角收缩乃至消失，再过一会儿渐渐淡出来，这就涉及到四个动画，
+            由于存在先后顺序，我们就得先把额外的三个动画存放到子列队中去，特到此元件的当前动画结束再从列队中取得下一个动画，代替它的位置。在动画实例中，
+            有个神奇之处，也只有运行中的动画实例多出两个属性，positive与negative，作为子列队。positive用于存放下次要执行的动画，
+            negative用于要回放的动画。当某个动画实例的revert属性为true，negative中的动画实例就会取出来，添加到positive的末端。想要立即完成一个动画，
+            非常简单，设置动画实例的gotoEnd属性为true就行，想立即中止一个动画，则多一步，把渲染方法update替换为空函数就行了。想清空某个元素的所有动画，
+            就把它对应的那个正在执行中的动画实例的symbol属性干掉。因此，mass Framework想模拟jQuery的stop与delay方法是轻而易举，也是优雅得多的 </p>
+        <p>mass Framework藉由$.fx方法轻易构建jQuery的show, hide, toggle, slideDown, slideUp, slideToggle, fadeIn, fadeOut, fadeToggle等一系列复合动画.</p>
+        <hr/>
+        <p>下面是动画引擎的一些核心方法介绍</p>
+        <p>$.tick，用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来。 </p>
         <pre class="brush:javascript;gutter:false;toolbar:false">
-    function heartbeat( node) {
-        heartbeat.nodes.push( node);
-        if (heartbeat.id === null) {
-            heartbeat.id = setInterval(nextTick, 13);//开始心跳
-        }
-        return true;
-    }
-    heartbeat.nodes = []; //中央列队
-    heartbeat.id = null;  //原始的setInterval id
+        tick: function(fx){
+            var gotoQueue = true;//判定是加入主列队上，还是添加到子列队上
+            for(var i = 0, el; el = $["@queue"][i++];){
+                if(el.symbol == fx.symbol){//★★★第一步
+                    el.positive.push(fx);//子列队
+                    gotoQueue = false
+                    break;
+                }
+            }
+            if(gotoQueue){//★★★第二步
+                fx.positive = fx.positive || [];
+                $["@queue"].unshift( fx );
+            }
+            if ($.tick.id === null) {
+                $.tick.id = setInterval( nextTick, 13 );//原始的setInterval id并执行动画
+            }
+        },
         </pre>
-        <p>我们再看nextTick方法，它也是最核心的方法之一。它负责驱动中央列队的元素节点执行它们的动画，
-            如果某一动画执行完毕就把相对节点从列队中剔除，如果列队为空则中止心跳。这相当血流光了，心脏也活不了。 </p>
+        <p>nextTick，内部方法，用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存。 </p>
         <pre class="brush:javascript;gutter:false;toolbar:false">
     function nextTick() {
-        var nodes = heartbeat.nodes, i = 0, n = nodes.length;
-        for (; i < n; i++) {
-            if (animate(nodes[i]) === false) {//在这里操作元素的样式或属性进行渐变
-                nodes.splice(i, 1);
-                i -= 1;
-                n -= 1;
+        var fxs = $["@queue"], i = fxs.length;
+        while(--i >= 0){
+            if ( !(fxs[i].symbol && animate(fxs[i], i)) ) {
+                fxs.splice(i, 1);
             }
         }
-        nodes.length || (clearInterval(heartbeat.id), heartbeat.id = null);
+        fxs.length || (clearInterval($.tick.id), $.tick.id = null);
     }
         </pre>
-        <p>animate则是执行渐变的函数，它只有一个参数，至少它是怎样运作等设置，都通从数据缓存系统中取得。如果缓存系统有它相应的对象，那么它
-            就会这些数据生成一个补间动画函数，然后每一次心跳就执行它一次，直到动画结果为止。
-        </p>
-        <p>上面所说的heartbeat， nextTick， animate都是内部函数，至于如何调用，是由fx API执行。同时fx方法也是其他复合动画show,
-            hide, slideDown, slideUp, fadeIn, fadeOut的基石。其参数设置详见$.fn.fx页面。
-        </p>
-        
+        <p>animate，内部方法，驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, frame, after），并在动画结束后，
+            从子列队选取下一个动画实例取替自身.</p>
+        <p>$.fn.fx，用于元素节点的动画，根据用户的参数生成相应动画实例，然后转交$.tick进一步处理。</p>
+
     </article>
 </body>
 </html>
