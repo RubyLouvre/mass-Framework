@@ -11,6 +11,7 @@ $.define("fx", "css",function(){
     function visible(node) {
         return  $.css(node, "display") !== 'none';
     }
+    //http://help.adobe.com/zh_CN/FlashPlatform/reference/actionscript/3/spark/effects/animation/Keyframe.html
     $.mix({//缓动公式
         easing : {
             linear: function( pos ) {
