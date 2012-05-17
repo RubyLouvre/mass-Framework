@@ -490,14 +490,7 @@ $.define("api", function(){
                 "hide": "function",
                 "puff": "function"
             },
-            "fxAdapter": {
-                "_default": "object",
-                "type": "function",
-                "scroll": "object",
-                "transform": "object",
-                "color": "object"
-            },
-            "easing": "object",
+            "easings": "object",
             "fx": "function",
             "show": "function",
             "hide": "function",
