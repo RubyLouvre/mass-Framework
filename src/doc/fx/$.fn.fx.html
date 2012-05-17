@@ -30,13 +30,13 @@
     <article>
         <h3>$.fn.fx(duration, props)</h3>
         <p><span class="stress">描述：</span></p>
-        <p>让匹配节点在指定时间对指定的属性进行变化。</p>
+        <p>通过用户指定的参数生成动画实例,在定时器内渐变。</p>
         <p><span class="stress">参数：</span></p>
         <dl>
             <dt>duration</dt>
             <dd>必需。Number。动画执行时间，单位为ms。</dd>
             <dt>props</dt>
-            <dd>必需。Object。各种配置。</dd>
+            <dd>可选。Object。各种配置。</dd>
         </dl>
         <p><span class="stress">返回值：</span></p>
         <p>mass实例</p>
@@ -46,6 +46,7 @@
             动画结束时的回调函数after,
             经及动画进行倒带效果revert，record（即让元素回来开始时的样子）
         </p>
+        <hr/>
         <p><span class="stress">props属性一览表：</span></p>
         <table class="table1">
             <tr><th>键名</th><th>值</th></tr>
@@ -57,14 +58,28 @@
             <tr><td>revert</td><td>是否开始倒带。</td></tr>
             <tr><td>record</td><td>将当前动画设置转录到负向列队，从而实现多个动画的倒带。</td></tr>
         </table>
+        <hr/>
         <p>before, after, frame这三个回调的参数情况:</p>
         <table class="table1">
-            <tr><th>参数名(按先后顺数排列)</th><th>说</th></tr>
+            <tr><th>参数名(按先后顺数排列)</th><th>说明</th></tr>
             <tr><td>node</td><td>当前执行动画的元素节点，当然我们也可以直接在回调函数使用this取得它</td></tr>
-            <tr><td>props</td><td>当前动画所进行渐变的属性集合。这是一个对象，键名为样式名，值为样式值。</td></tr>
-            <tr><td>fx</td><td>动画描述对象，可以通过它看到当前动画更详尽的执行情况，比如它从何时开始执行(startTime),
-                    那些属性正在改名（props，就是第二个参数的那个东西），用户配置，如何正在倒带，它还有个叫reverting，值为1。</td></tr>
+            <tr><td>fx</td><td>动画实例,它拥有startTime, symbol, duration, gotoEnd, props, revert, orig等属性。</td></tr>
         </table>
+        <hr/>
+        <p><span class="stress">before, after, frame这三个回调的参数情况:</span></p>
+        <table class="table1">
+            <tr><th>属性名</th><th>说明</th></tr>
+            <tr><td>symbol</td><td>元件,可以是元素节点或canvas中的图形</td></tr>
+            <tr><td>startTime</td><td>动画开始时间,单位毫秒</td></tr>
+            <tr><td>duration</td><td>动画时长,单位毫秒</td></tr>
+            <tr><td>gotoEnd</td><td>是否立即结束,默认false</td></tr>
+            <tr><td>revert</td><td>是否要回放动画,默认false</td></tr>
+            <tr><td>positive</td><td>正向子列队,数组,用于向主列队添加动画</td></tr>
+            <tr><td>negative</td><td>负向子列队,数组,用于向正向子列队添加动画</td></tr>
+            <tr><td>props</td><td>要渐变的属性,一个对象数组,每个对象包含属性名,起始值（from），结束值(to)，单位(unit)，
+                    类别(type)与对应的缓动公式(easing)</td></tr>
+        </table>
+
         <p><span class="stress">CSS属性名的简写一览表：</span></p>
         <table class="table1">
             <tr><th>简写</th><th>真实名字</th></tr>
