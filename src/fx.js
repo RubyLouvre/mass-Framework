@@ -21,10 +21,10 @@ $.define("fx", "css",function(){
             }
         },
         "@queue": [],//主列队
-        tick: function(fx){//向时间轴插入动画实例
-            var gotoQueue = true;//判定是加入主列队上，还是添加到子列队上
+        tick: function(fx){//用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
+            var gotoQueue = true;
             for(var i = 0, el; el = $["@queue"][i++];){
-                if(el.node == fx.node){//★★★第一步
+                if(el.symbol == fx.symbol){//★★★第一步
                     el.positive.push(fx);//子列队
                     gotoQueue = false
                     break;
@@ -128,11 +128,11 @@ $.define("fx", "css",function(){
             $[ visible(node) ? "hide" : "show" ]( node );
         }
     })
-    //用于移除已经完成或强制完成的关键帧,当时间轴不存在任何时间轴时,中止定时器
+    //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
     function nextTick() {
         var fxs = $["@queue"], i = fxs.length;
         while(--i >= 0){
-            if ( !(fxs[i].node && animate(fxs[i], i)) ) {
+            if ( !(fxs[i].symbol && animate(fxs[i], i)) ) {
                 fxs.splice(i, 1);
             }
         }
@@ -158,7 +158,7 @@ $.define("fx", "css",function(){
                 fx.orig = hash;
                 fx.method = "noop"
                 fx.duration = duration
-                fx.node = node;
+                fx.symbol = node;
                 $.tick( fx );
             }
             return this;
@@ -232,7 +232,7 @@ $.define("fx", "css",function(){
             color:function(node, from, to){
                 return [ color2array(from), color2array(to) ]
             },
-            transform: function(node,from, to){
+            transform: function(node, from, to){
                 var zero = "matrix(1,0,0,1,0,0)"
                 from = from == "none" ? zero  : from;
                 if(to.indexOf("matrix") == -1 ){
@@ -280,7 +280,7 @@ $.define("fx", "css",function(){
     }
     var Fx = function(){}
     Fx.prototype.update = function(per, end){
-        var node = this.node;
+        var node = this.symbol;
         for(var i = 0, obj; obj = this.props[i++];){
             var fn = $.fx.update[obj.type]
             if(fn){
@@ -290,12 +290,13 @@ $.define("fx", "css",function(){
             }
         }
     }
-    //此函数的存在意义,取得初始值,结束值,变化量与单位,并输出动画实例
+
     var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record");
+    //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
     function fxBuilder(node, fx, index ){
-        var to, parts, unit, op, props = [], revertProps = [];
+        var to, parts, unit, op, props = [], revertProps = [], hidden = !visible(node);
         var hash = fx.orig;//这个属性会被hash.orig所覆盖
-        var orig = hash.orig = {}, hidden = !visible(node)
+        var orig = hash.orig = {};
         for(var name in hash){
             if(keyworks[name]){
                 continue
@@ -379,12 +380,13 @@ $.define("fx", "css",function(){
             el.negative.push(fx2);//添加已存负向列队中
         }
     }
-
-    function animate( fx, index ) {//如果是元素节点，则检测其是存在于DOM树中
-        var node = fx.node, now =  +new Date, mix
+    //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, frame, after），
+    //并在动画结束后，从子列队选取下一个动画实例取替自身
+    function animate( fx, index ) {
+        var node = fx.symbol, now =  +new Date, mix
         if(!fx.startTime){//第一帧
             if(!fx.props){//from这个值必须在此个时间点才能侦察正确
-                fxBuilder( fx.node, fx, index ); //添加props属性与设置负向列队
+                fxBuilder( fx.symbol, fx, index ); //添加props属性与设置负向列队
             }
             $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
@@ -433,7 +435,7 @@ $.define("fx", "css",function(){
         var array = $["@queue"];
         return this.each(function(node){
             for(var i = 0, fx ; fx = array[i];i++){
-                if(fx.node === node){
+                if(fx.symbol === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:  //中断当前动画，继续下一个动画
                             fx.update = fx.after = fx.frame = $.noop
@@ -444,7 +446,7 @@ $.define("fx", "css",function(){
                             fx.gotoEnd = true;
                             break;
                         case 2://清空该元素的所有动画
-                            delete fx.node
+                            delete fx.symbol
                             break;
                         case 3:
                             Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
