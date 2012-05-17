@@ -145,21 +145,21 @@ $.define("flip", "fx", function(){
             }
             var middle = dirOption.middle, end = dirOption.end, self = this;
             //绑定回调
-            middle.before = function( clone, prop, fx ){
-                if(typeof props.before === "function" ){
-                    props.before.call( self, clone, prop, fx );
+            middle.before = function( clone, fx ){
+                if(typeof fx.before === "function" ){
+                    fx.before.call( self, clone, fx );
                 }
             }
-            middle.frame = end.frame = function( clone, prop, fx ){
-                if(typeof props.frame === "function" ){
-                    props.frame.call( self, clone, prop, fx );
+            middle.frame = end.frame = function( clone, fx ){
+                if(typeof fx.frame === "function" ){
+                    fx.frame.call( self, clone, fx );
                 }
             }
-            end.after = function( clone, prop, fx){
+            end.after = function( clone, fx){
                 $this.css("visibility", "visible").removeData('fliping');
                 $clone.remove();
-                if(typeof props.after === "function" ){
-                    props.after.call( self, clone, prop, fx );
+                if(typeof fx.after === "function" ){
+                    fx.after.call( self, clone, fx );
                 }
             }
             $clone.css( dirOption.begin ).fx( duration, middle).fx( duration, dirOption.end );
@@ -167,3 +167,4 @@ $.define("flip", "fx", function(){
     }
 })
 // 2012.2.19 发布
+//2012.5.18 升级
