@@ -21,22 +21,22 @@ $.define("fx", "css",function(){
                 return (-Math.cos(pos*Math.PI)/2) + 0.5;
             }
         },
-        "@timeline": [],//时间轴
+        "@queue": [],//时间轴
         tick: function(fx){//向时间轴插入关键帧
             var gotoQueue = true;//判定是加入主时间轴上，还是添加到子时间轴上
-            for(var i = 0, el; el = $["@timeline"][i++];){
+            for(var i = 0, el; el = $["@queue"][i++];){
                 if(el.node == fx.node){//★★★第一步
-                    el.timeline.push(fx);//子列队
+                    el.positive.push(fx);//子列队
                     gotoQueue = false
                     break;
                 }
             }
             if(gotoQueue){//★★★第二步
-                fx.timeline = fx.timeline || [];
-                $["@timeline"].unshift( fx );
+                fx.positive = fx.positive || [];
+                $["@queue"].unshift( fx );
             }
             if ($.tick.id === null) {
-                $.tick.id = setInterval(nextTick, 13);//原始的setInterval id并执行动画
+                $.tick.id = setInterval( nextTick, 13 );//原始的setInterval id并执行动画
             }
         },
         //由于构建更高级的基于元素节点的复合动画
@@ -131,15 +131,15 @@ $.define("fx", "css",function(){
     })
     //用于移除已经完成或强制完成的关键帧,当时间轴不存在任何时间轴时,中止定时器
     function nextTick() {
-        var fxs = $["@timeline"], i = fxs.length;
+        var fxs = $["@queue"], i = fxs.length;
         while(--i >= 0){
-            if ( animate(fxs[i], i) === false) {
+            if ( !(fxs[i].node && animate(fxs[i], i)) ) {
                 fxs.splice(i, 1);
             }
         }
         fxs.length || (clearInterval($.tick.id), $.tick.id = null);
     }
-    
+    $.tick.id = null;
     $.fn.fx = function( duration, hash, /*internal*/ p  ){
         if(typeof duration === "number" ){
             hash = hash || {};
@@ -160,7 +160,7 @@ $.define("fx", "css",function(){
                 fx.method = "noop"
                 fx.duration = duration
                 fx.node = node;
-                heartbeat( fx );
+                $.tick( fx );
             }
             return this;
         }else{
@@ -375,55 +375,52 @@ $.define("fx", "css",function(){
             }
             fx2.record = fx2.revert = void 0
             fx2.props = revertProps;
-            var el = $["@timeline"][ index ];
-            el.backward = el.backward || []
-            el.backward.push(fx2);//添加已存负向列队中
+            var el = $["@queue"][ index ];
+            el.negative = el.negative || []
+            el.negative.push(fx2);//添加已存负向列队中
         }
     }
 
-    function animate( frame, index ) {//如果是元素节点，则检测其是存在于DOM树中
-        if( frame.node && (!frame.node.nodeType || frame.node.parentNode ) ){
-            var node = frame.node, now =  +new Date, mix
-            if(!frame.startTime){//第一帧
-                if(!frame.props){//from这个值必须在此个时间点才能侦察正确
-                    fxBuilder( frame.node, frame, index ); //添加props属性与设置负向列队
+    function animate( fx, index ) {//如果是元素节点，则检测其是存在于DOM树中
+        var node = fx.node, now =  +new Date, mix
+        if(!fx.startTime){//第一帧
+            if(!fx.props){//from这个值必须在此个时间点才能侦察正确
+                fxBuilder( fx.node, fx, index ); //添加props属性与设置负向列队
+            }
+            $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
+            fx.startTime = now;
+            mix = fx.before
+            mix && (mix.call( node, node, fx ), fx.before = 0);
+        }else{
+            var per = (now - fx.startTime) / fx.duration
+            var end = fx.gotoEnd || per >= 1;
+            fx.update(per, end ); // 处理渐变
+            if( (mix = fx.frame ) && !end ){
+                mix.call(node, node, fx ) ;
+            }
+            if ( end ) {//最后一帧
+                if(fx.method == "hide"){
+                    for(var i in fx.orig){//还原为初始状态
+                        $.css( node, i, fx.orig[i] )
+                    }
                 }
-                $[ frame.method ].call(node, node, frame );//这里用于设置node.style.display
-                frame.startTime = now;
-                mix = frame.before
-                mix && (mix.call( node, node, frame ), frame.before = 0);
-            }else{
-                var per = (now - frame.startTime) / frame.duration
-                var end = frame.gotoEnd || per >= 1;
-                frame.update(per, end ); // 处理渐变
-                if( (mix = frame.frame ) && !end ){
-                    mix.call(node, node, frame ) ;
+                mix = fx.after;//执行动画完成后的回调
+                mix && mix.call( node, node, fx ) ;
+                if( fx.revert && fx.negative.length){
+                    Array.prototype.unshift.apply( fx.positive, fx.negative.reverse());
+                    fx.negative = []; // 清空负向列队
                 }
-                if ( end ) {//最后一帧
-                    if(frame.method == "hide"){
-                        for(var i in frame.orig){//还原为初始状态
-                            $.css( node, i, frame.orig[i] )
-                        }
-                    }
-                    mix = frame.after;//执行动画完成后的回调
-                    mix && mix.call( node, node, frame ) ;
-                    if( frame.revert && frame.backward.length){
-                        Array.prototype.unshift.apply( frame.timeline, frame.backward.reverse());
-                        frame.backward = []; // 清空负向列队
-                    }
-                    if (!frame.timeline.length) {
-                        return false;
-                    }else{
-                        var neo = frame.timeline.shift();
-                        $["@timeline"][index] = neo;
-                        neo.timeline = frame.timeline;
-                        neo.backward = frame.backward
-                    }
+                if (!fx.positive.length) {
+                    return false;
+                }else{
+                    var neo = fx.positive.shift();
+                    $["@queue"][ index ] = neo;
+                    neo.positive = fx.positive;
+                    neo.negative = fx.negative
                 }
             }
-        }else{
-            return false
         }
+        return true
     }
     $.fn.delay = function(ms){
         return this.fx(ms);
@@ -434,14 +431,14 @@ $.define("fx", "css",function(){
         clearQueue = clearQueue ? "1" : ""
         gotoEnd  = gotoEnd  ? "1" : "0"
         var stopCode = parseInt( clearQueue+gotoEnd ,2 );//返回0 1 2 3
-        var array = $["@timeline"];
+        var array = $["@queue"];
         return this.each(function(node){
             for(var i = 0, fx ; fx = array[i];i++){
                 if(fx.node === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:  //中断当前动画，继续下一个动画
                             fx.update = fx.after = fx.frame = $.noop
-                            fx.revert && fx.backward.shift();
+                            fx.revert && fx.negative.shift();
                             fx.gotoEnd = true;
                             break;
                         case 1://立即跳到最后一帧，继续下一个动画
@@ -451,9 +448,9 @@ $.define("fx", "css",function(){
                             delete fx.node
                             break;
                         case 3:
-                            Array.prototype.unshift.apply( fx.timeline,fx.backward.reverse());
-                            fx.backward = []; // 清空负向列队
-                            for(var j =0; fx = fx.timeline[j++]; ){
+                            Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
+                            fx.negative = []; // 清空负向列队
+                            for(var j =0; fx = fx.positive[j++]; ){
                                 fx.before = fx.after = fx.frame = $.noop
                                 fx.gotoEnd = true;//立即完成该元素的所有动画
                             }
