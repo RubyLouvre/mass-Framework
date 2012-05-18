@@ -73,7 +73,7 @@ $.define("fx", "css",function(){
         show: function(node, fx){
             if(node.nodeType == 1 && !visible(node)) {
                 var display =  $._data(node, "olddisplay");
-                if(display == "none"){
+                if(!display || display == "none"){
                     display = parseDisplay(node.nodeName)
                     $._data(node, "olddisplay", display);
                 }
