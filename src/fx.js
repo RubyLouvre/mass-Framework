@@ -7,7 +7,7 @@ $.define("fx", "css",function(){
         scroll:/scroll/i,
         transform: /transform/i
     },
-    rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
+    rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
     function visible(node) {
         return  $.css(node, "display") !== 'none';
     }
