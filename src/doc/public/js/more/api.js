@@ -220,7 +220,7 @@ $.define("api", function(){
             "query": "function"
         },
         "数据缓存模块": {
-            "_db": "object",
+            "@data": "object",
             "data": "function",
             "_data": "function",
             "parseData": "function",

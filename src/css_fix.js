@@ -115,7 +115,12 @@ $.define("css_fix", !!top.getComputedStyle, function(){
     }
     adapter[ "transform:set" ] = function(node, name, value){
         var m = adapter[ "transform:get" ](node, true).set( 1,0,0,1,0,0 );
-        //注意：IE滤镜和其他浏览器定义的角度方向相反
+        var el = $(node);//处理元素的定位问题，保存原来元素与offsetParent的距离
+        if(node._mass_top == null && el.css("position") != "static"){
+            var p = el.position()
+            node._mass_top = p.top;
+            node._mass_left = p.left;
+        }
         value.toLowerCase().replace(rtransform,function(_,method,array){
             array = array.replace(/px/g,"").match($.rword) || [];
             if(/skew|rotate/.test(method)){//角度必须带单位
@@ -136,15 +141,15 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             filter.M12 =  filter.M21 = 0;
             var width  = node.offsetWidth,height = node.offsetHeight;//取得未变形前的宽高
             filter.M11 = m.a;
-            filter.M12 = m.c;//★★★注意这里的顺序
+            filter.M12 = m.c;//★★★注意这里的顺序, IE滤镜和其他浏览器定义的角度方向相反
             filter.M21 = m.b;
             filter.M22 = m.d;
             filter.Dx  = m.tx;
             filter.Dy  = m.ty;
             var tw = node.offsetWidth,th = node.offsetHeight;//取得变形后高宽
             node.style.position = "relative";
-            node.style.left = (width - tw)/2  + m.tx + "px";
-            node.style.top = (height - th)/2  + m.ty + "px";
+            node.style.left = (node._mass_left | 0) + (width - tw)/2  + m.tx + "px";
+            node.style.top =  (node._mass_top | 0) + ( height - th)/2  + m.ty + "px";
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         });
