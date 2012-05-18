@@ -5185,45 +5185,143 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
 // 动画模块v4
 //==========================================
 $.define("fx", "css",function(){
-    //中央定时器，可以添加新节点到中央列队，然后通过setInterval方法不断调用nextTick处理所有节点的动画
-    $.easing = {
-        linear: function( pos ) {
-            return pos;
-        },
-        swing: function( pos ) {
-            return (-Math.cos(pos*Math.PI)/2) + 0.5;
-        }
+    var types = {
+        color:/color/i,
+        scroll:/scroll/i,
+        transform: /transform/i
+    },
+    rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
+    function visible(node) {
+        return  $.css(node, "display") !== 'none';
     }
-    function heartbeat( fx ) {
-        var gotoQueue = true;//如果此元素还没有任何动画加入中央列队,则跳转到第二步，否则为第一步
-        for(var i = 0, el; el = heartbeat.queue[i++];){
-            if(el.node == fx.node){//★★★第一步
-                el.positive.push(fx);//子列队
-                gotoQueue = false
-                break;
+    $.mix({//缓动公式
+        easing : {
+            linear: function( pos ) {
+                return pos;
+            },
+            swing: function( pos ) {
+                return (-Math.cos(pos*Math.PI)/2) + 0.5;
             }
+        },
+        "@queue": [],//主列队
+        tick: function(fx){//用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
+            var gotoQueue = true;
+            for(var i = 0, el; el = $["@queue"][i++];){
+                if(el.symbol == fx.symbol){//★★★第一步
+                    el.positive.push(fx);//子列队
+                    gotoQueue = false
+                    break;
+                }
+            }
+            if(gotoQueue){//★★★第二步
+                fx.positive = fx.positive || [];
+                $["@queue"].unshift( fx );
+            }
+            if ($.tick.id === null) {
+                $.tick.id = setInterval( nextTick, 13 );//原始的setInterval id并执行动画
+            }
+        },
+        //由于构建更高级的基于元素节点的复合动画
+        fx: function ( nodes, duration, hash, effects ){
+            nodes = nodes.mass ? nodes : $(nodes);
+            var props =  hash || duration ;
+            props = typeof props === "object" ? props : {}
+            if(typeof duration === "function"){// fx(obj fn)
+                hash = duration;               // fx(obj, 500, fn)
+                duration = 500;
+            }
+            if(typeof hash === "function"){   //  fx(obj, num, fn)
+                props.after = hash;           //  fx(obj, num, {after: fn})
+            }
+            if( effects ){
+                for(var i in effects){
+                    if(typeof effects[i] === "function"){
+                        var old = props[i];
+                        props[i] = function(node, fn ){
+                            effects[i].call(node, node, fn);
+                            if(typeof old === "function"){
+                                old.call(node, node, fn);
+                            }
+                        }
+                    }else{
+                        props[i] = effects[i]
+                    }
+                }
+            }
+            return nodes.fx(duration, props);
+        },
+        //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
+        //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
+        //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
+        show: function(node, fx){
+            if(node.nodeType == 1 && !visible(node)) {
+                var display =  $._data(node, "olddisplay");
+                if(!display || display == "none"){
+                    display = parseDisplay(node.nodeName)
+                    $._data(node, "olddisplay", display);
+                }
+                node.style.display = display;
+                if(fx && ("width" in fx || "height" in fx)){//如果是缩放操作
+                    //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
+                    if ( display === "inline" && $.css( node, "float" ) === "none" ) {
+                        if ( !$.support.inlineBlockNeedsLayout ) {//w3c
+                            node.style.display = "inline-block";
+                        } else {//IE
+                            if ( display === "inline" ) {
+                                node.style.display = "inline-block";
+                            }else {
+                                node.style.display = "inline";
+                                node.style.zoom = 1;
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        hide: function(node, fx){
+            if(node.nodeType == 1 && visible(node)){
+                var display = $.css( node, "display" );
+                if ( display !== "none" && !$._data( node, "olddisplay" ) ) {
+                    $._data( node, "olddisplay", display );
+                }
+                if( fx ){//缩小
+                    if("width" in fx || "height" in fx){//如果是缩放操作
+                        //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
+                        fx.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
+                        node.style.overflow = "hidden";
+                    }
+                    var after = fx.after;
+                    fx.after = function( node, fx ){
+                        node.style.display = "none";
+                        if ( fx.overflow != null && !$.support.keepSize  ) {
+                            [ "", "X", "Y" ].forEach(function (postfix,index) {
+                                node.style[ "overflow" + postfix ] = fx.overflow[index]
+                            });
+                        }
+                        if(typeof after == "function"){
+                            after.call( node, node, fx );
+                        }
+                    };
+                }else{
+                    node.style.display = "none";
+                }
+            }
+        },
+        toggle: function( node ){
+            $[ visible(node) ? "hide" : "show" ]( node );
         }
-        if(gotoQueue){//★★★第二步
-            fx.positive = fx.positive || [];
-            heartbeat.queue.unshift( fx );
-        }
-        if (heartbeat.id === null) {
-            heartbeat.id = setInterval(nextTick, 13);//开始心跳
-        }
-    }
-    heartbeat.queue = []; //中央列队
-    heartbeat.id = null;  //原始的setInterval id
-    //驱动中央列队的元素节点执行它们的动画，如果执行完毕就把它们从列队中剔除，如果列队为空则中止心跳
+    })
+    //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
     function nextTick() {
-        var fxs = heartbeat.queue, i = fxs.length;
+        var fxs = $["@queue"], i = fxs.length;
         while(--i >= 0){
-            if ( animate(fxs[i], i) === false) {//在这里操作元素的样式或属性进行渐变
+            if ( !(fxs[i].symbol && animate(fxs[i], i)) ) {
                 fxs.splice(i, 1);
             }
         }
-        fxs.length || (clearInterval(heartbeat.id), heartbeat.id = null);
+        fxs.length || (clearInterval($.tick.id), $.tick.id = null);
     }
-    
+    $.tick.id = null;
     $.fn.fx = function( duration, hash, /*internal*/ p  ){
         if(typeof duration === "number" ){
             hash = hash || {};
@@ -5243,8 +5341,8 @@ $.define("fx", "css",function(){
                 fx.orig = hash;
                 fx.method = "noop"
                 fx.duration = duration
-                fx.node = node;
-                heartbeat( fx );
+                fx.symbol = node;
+                $.tick( fx );
             }
             return this;
         }else{
@@ -5252,40 +5350,6 @@ $.define("fx", "css",function(){
         }
     }
 
-    var types = {
-        color:/color/i,
-        scroll:/scroll/i,
-        transform: /transform/i
-    },
-    rfxnum = /^([+\-/\*]=)?([\d+.\-]+)([a-z%]*)$/i;
-    $.fx = function ( nodes, duration, hash, effects ){
-        nodes = nodes.mass ? nodes : $(nodes);
-        var props =  hash || duration ;
-        props = typeof props === "object" ? props : {}
-        if(typeof duration === "function"){// fx(obj fn)
-            hash = duration;               // fx(obj, 500, fn)
-            duration = 500;
-        }
-        if(typeof hash === "function"){   //  fx(obj, num, fn)
-            props.after = hash;           //  fx(obj, num, {after: fn})
-        }
-        if( effects ){
-            for(var i in effects){
-                if(typeof effects[i] === "function"){
-                    var old = props[i];
-                    props[i] = function(node, fn ){
-                        effects[i].call(node, node, fn);
-                        if(typeof old === "function"){
-                            old.call(node, node, fn);
-                        }
-                    }
-                }else{
-                    props[i] = effects[i]
-                }
-            }
-        }
-        return nodes.fx(duration, props);
-    }
     var cssTransform = $.support.transform
     $.mix($.fx, {
         "@debug": 1,
@@ -5351,7 +5415,7 @@ $.define("fx", "css",function(){
             color:function(node, from, to){
                 return [ color2array(from), color2array(to) ]
             },
-            transform: function(node,from, to){
+            transform: function(node, from, to){
                 var zero = "matrix(1,0,0,1,0,0)"
                 from = from == "none" ? zero  : from;
                 if(to.indexOf("matrix") == -1 ){
@@ -5391,7 +5455,6 @@ $.define("fx", "css",function(){
             return [from, to]
         }
     }
-
     if(!$.support.cssOpacity){
         $.fx.update.opacity = function(node, per, end, obj){
             $.css(node,"opacity", (end ? obj.to :  obj.from + obj.easing(per) * (obj.to - obj.from) ))
@@ -5400,7 +5463,7 @@ $.define("fx", "css",function(){
     }
     var Fx = function(){}
     Fx.prototype.update = function(per, end){
-        var node = this.node;
+        var node = this.symbol;
         for(var i = 0, obj; obj = this.props[i++];){
             var fn = $.fx.update[obj.type]
             if(fn){
@@ -5410,12 +5473,13 @@ $.define("fx", "css",function(){
             }
         }
     }
-    //此函数的存在意义,取得初始值,结束值,变化量与单位,并输出动画实例
+
     var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record");
+    //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
     function fxBuilder(node, fx, index ){
-        var to, parts, unit, op, props = [], revertProps = [];
+        var to, parts, unit, op, props = [], revertProps = [], hidden = !visible(node);
         var hash = fx.orig;//这个属性会被hash.orig所覆盖
-        var orig = hash.orig = {}, hidden = !visible(node)
+        var orig = hash.orig = {};
         for(var name in hash){
             if(keyworks[name]){
                 continue
@@ -5494,55 +5558,53 @@ $.define("fx", "css",function(){
             }
             fx2.record = fx2.revert = void 0
             fx2.props = revertProps;
-            var el = heartbeat.queue[ index ];
+            var el = $["@queue"][ index ];
             el.negative = el.negative || []
             el.negative.push(fx2);//添加已存负向列队中
         }
     }
-
-    function animate( fx, index ) {//如果是元素节点，则检测其是存在于DOM树中
-        if( fx.node && (!fx.node.nodeType || fx.node.parentNode ) ){
-            var node = fx.node, now =  +new Date, mix
-            if(!fx.startTime){//第一帧
-                if(!fx.props){//from这个值必须在此个时间点才能侦察正确
-                    fxBuilder( fx.node, fx, index ); //添加props属性与设置负向列队
+    //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, frame, after），
+    //并在动画结束后，从子列队选取下一个动画实例取替自身
+    function animate( fx, index ) {
+        var node = fx.symbol, now =  +new Date, mix
+        if(!fx.startTime){//第一帧
+            if(!fx.props){//from这个值必须在此个时间点才能侦察正确
+                fxBuilder( fx.symbol, fx, index ); //添加props属性与设置负向列队
+            }
+            $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
+            fx.startTime = now;
+            mix = fx.before
+            mix && (mix.call( node, node, fx ), fx.before = 0);
+        }else{
+            var per = (now - fx.startTime) / fx.duration
+            var end = fx.gotoEnd || per >= 1;
+            fx.update(per, end ); // 处理渐变
+            if( (mix = fx.frame ) && !end ){
+                mix.call(node, node, fx ) ;
+            }
+            if ( end ) {//最后一帧
+                if(fx.method == "hide"){
+                    for(var i in fx.orig){//还原为初始状态
+                        $.css( node, i, fx.orig[i] )
+                    }
                 }
-                $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
-                fx.startTime = now;
-                mix = fx.before
-                mix && (mix.call( node, node, fx ), fx.before = 0);
-            }else{
-                var per = (now - fx.startTime) / fx.duration
-                var end = fx.gotoEnd || per >= 1;
-                fx.update(per, end ); // 处理渐变
-                if( (mix = fx.frame ) && !end ){
-                    mix.call(node, node, fx ) ;
+                mix = fx.after;//执行动画完成后的回调
+                mix && mix.call( node, node, fx ) ;
+                if( fx.revert && fx.negative.length){
+                    Array.prototype.unshift.apply( fx.positive, fx.negative.reverse());
+                    fx.negative = []; // 清空负向列队
                 }
-                if ( end ) {//最后一帧
-                    if(fx.method == "hide"){
-                        for(var i in fx.orig){//还原为初始状态
-                            $.css( node, i, fx.orig[i] )
-                        }
-                    }
-                    mix = fx.after;//执行动画完成后的回调
-                    mix && mix.call( node, node, fx ) ;
-                    if( fx.revert && fx.negative.length){
-                        Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
-                        fx.negative = []; // 清空负向列队
-                    }
-                    if (!fx.positive.length) {
-                        return false;
-                    }else{
-                        var neo = fx.positive.shift();
-                        heartbeat.queue[index] = neo;
-                        neo.positive = fx.positive;
-                        neo.negative = fx.negative
-                    }
+                if (!fx.positive.length) {
+                    return false;
+                }else{
+                    var neo = fx.positive.shift();
+                    $["@queue"][ index ] = neo;
+                    neo.positive = fx.positive;
+                    neo.negative = fx.negative
                 }
             }
-        }else{
-            return false
         }
+        return true
     }
     $.fn.delay = function(ms){
         return this.fx(ms);
@@ -5553,10 +5615,10 @@ $.define("fx", "css",function(){
         clearQueue = clearQueue ? "1" : ""
         gotoEnd  = gotoEnd  ? "1" : "0"
         var stopCode = parseInt( clearQueue+gotoEnd ,2 );//返回0 1 2 3
-        var array = heartbeat.queue;
+        var array = $["@queue"];
         return this.each(function(node){
             for(var i = 0, fx ; fx = array[i];i++){
-                if(fx.node === node){
+                if(fx.symbol === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:  //中断当前动画，继续下一个动画
                             fx.update = fx.after = fx.frame = $.noop
@@ -5567,7 +5629,7 @@ $.define("fx", "css",function(){
                             fx.gotoEnd = true;
                             break;
                         case 2://清空该元素的所有动画
-                            delete fx.node
+                            delete fx.symbol
                             break;
                         case 3:
                             Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
@@ -5582,69 +5644,8 @@ $.define("fx", "css",function(){
             }
         });
     }
-    function visible(node) {
-        return  $.css(node, "display") !== 'none';
-    }
-    //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
-    //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
-    //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
-    $.mix( {
-        show: function(node, fx){
-            if(node.nodeType == 1 && !visible(node)) {
-                var old =  $._data(node, "olddisplay"),
-                _default = parseDisplay(node.nodeName),
-                display = node.style.display = (old || _default);
-                $._data(node, "olddisplay", display);
-                if(fx && ("width" in fx || "height" in fx)){//如果是缩放操作
-                    //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
-                    if ( display === "inline" && $.css( node, "float" ) === "none" ) {
-                        if ( !$.support.inlineBlockNeedsLayout ) {//w3c
-                            node.style.display = "inline-block";
-                        } else {//IE
-                            if ( _default === "inline" ) {
-                                node.style.display = "inline-block";
-                            }else {
-                                node.style.display = "inline";
-                                node.style.zoom = 1;
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        hide: function(node, fx){
-            if(node.nodeType == 1 && visible(node)){
-                var display = $.css( node, "display" );
-                if ( display !== "none" && !$._data( node, "olddisplay" ) ) {
-                    $._data( node, "olddisplay", display );
-                }
-                if( fx ){//缩小
-                    if("width" in fx || "height" in fx){//如果是缩放操作
-                        //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
-                        fx.overflow = [ node.style.overflow, node.style.overflowX, node.style.overflowY ];
-                        node.style.overflow = "hidden";
-                    }
-                    var after = fx.after;
-                    fx.after = function( node, fx ){
-                        node.style.display = "none";
-                        if ( fx.overflow != null && !$.support.keepSize  ) {
-                            [ "", "X", "Y" ].forEach(function (postfix,index) {
-                                node.style[ "overflow" + postfix ] = fx.overflow[index]
-                            });
-                        }
-                        if(typeof after == "function"){
-                            after.call( node, node, fx );
-                        }
-                    };
-                }else{
-                    node.style.display = "none";
-                }
-            }
-        },
-        toggle: function( node ){
-            $[ visible(node) ? "hide" : "show" ]( node );
-        }
-    });
+ 
+
 
     var fxAttrs = [ [ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
     [ "width", "marginLeft", "marginRight", "paddingLeft", "paddingRight" ], ["opacity"]]

@@ -15,7 +15,18 @@
             if (self!=top)
                 window.top.location.replace(self.location);
         </script>
-
+        <style>
+            .div {
+                position: absolute;
+                left: 100px;
+                top: 20px;
+                white:100px;
+                height:100px;
+                color: white;
+                background-color: #a3d1fc;
+                border: 10px double skyblue;
+            }
+        </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
             SyntaxHighlighter.all();
@@ -23,7 +34,7 @@
                 $("#back").prop("href","/src/doc/index.html?iframe_src=fx/$.fn.fx.html")
                 var i, iz = 5;
                 for (i = 1; i < iz; ++i) {
-                    $("<div class='tgt"+i+"'>tgt"+i+"</div>").prependTo(".container")
+                    $("<div class='test tgt"+i+"' >tgt"+i+"</div>").prependTo(".container")
                 }
             });
             var exec1 = function(){
@@ -32,26 +43,26 @@
                         "#"+((1<<24)*Math.random()|0).toString(16),
                         "#"+((1<<24)*Math.random()|0).toString(16),
                         "#"+((1<<24)*Math.random()|0).toString(16)];
-                    $(".tgt1").fx(2000, { tx: [400, "linear"],
-                        ty: 400,
+                    $(".tgt1").fx(2000, { x: [400, "linear"],
+                        y: 400,
                         w: 200,
                         bgc: "skyblue",
                         o: 0.5,
                         fs: 36,revert:1 });
 
                     $(".tgt2").css({ o: 0.2 }).
-                        fx(1000, { tx: ["+=400", "swing"], ty: "+=400", o: 1.0, w: 50, h: [50, "linear"] }).
-                        fx(1000, { tx: ["-=400", "swing"], ty: "-=400", o: 0.2, w: 100, h: [100, "linear"] });
+                        fx(1000, { x: ["+=400", "swing"], y: "+=400", o: 1.0, w: 50, h: [50, "linear"] }).
+                        fx(1000, { x: ["-=400", "swing"], y: "-=400", o: 0.2, w: 100, h: [100, "linear"] });
 
                     $(".tgt3").css({ o: 1   }).
-                        fx(2000, { tx: "+=500", ty: "+=500", o: "-=0.9" ,bgc: "rgb(0,255,100)" }).
-                        delay(400).fx(2000, { tx: "-=500", ty: "-=500", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
+                        fx(2000, { x: "+=500", y: "+=500", o: "-=0.9" ,bgc: "rgb(0,255,100)" }).
+                        delay(400).fx(2000, { x: "-=500", y: "-=500", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
                     $(".tgt4").css({ o: 1.0 }).
-                        fx(1000, { tx: "+=400", ty: "+=230", o: 0.2, w:  10, h: [100, "linear"], bgc: color[0] }).
-                        fx(1000, { tx: "+=30", ty: "-=100", o: 1.0, w:  50, h: [ 10, "linear"], bgc: color[1] }).
-                        fx(1000, { tx: "-=400", ty: "-=30", o: 0.2, w:  10, h: [ 50, "linear"], bgc: color[2] }).
-                        fx(1000, { tx: "-=20", ty: "-=100", o: 1.0, w: 200, h: [200, "linear"], bgc: color[3] });
+                        fx(1000, { x: "+=400", y: "+=230", o: 0.2, w:  10, h: [100, "linear"], bgc: color[0] }).
+                        fx(1000, { x: "+=30", y: "-=100", o: 1.0, w:  50, h: [ 10, "linear"], bgc: color[1] }).
+                        fx(1000, { x: "-=400", y: "-=30", o: 0.2, w:  10, h: [ 50, "linear"], bgc: color[2] }).
+                        fx(1000, { x: "-=20", y: "-=100", o: 1.0, w: 200, h: [200, "linear"], bgc: color[3] });
                 });
             }
 
@@ -71,26 +82,26 @@
                         "#"+((1<<24)*Math.random()|0).toString(16),
                         "#"+((1<<24)*Math.random()|0).toString(16),
                         "#"+((1<<24)*Math.random()|0).toString(16)];
-                    $(".tgt1").fx(2000, { tx: [400, "linear"],
-                        ty: 400,
+                    $(".tgt1").fx(2000, { x [400, "linear"],
+                        y: 400,
                         w: 200,
                         bgc: "skyblue",
                         o: 0.5,
                         fs: 36,revert:1 });
 
                     $(".tgt2").css({ o: 0.2 }).
-                        fx(1000, { tx: ["+=400", "swing"], ty: "+=400", o: 1.0, w: 50, h: [50, "linear"] }).
-                        fx(1000, { tx: ["-=400", "swing"], ty: "-=400", o: 0.2, w: 100, h: [100, "linear"] });
+                        fx(1000, { x: ["+=400", "swing"], y: "+=400", o: 1.0, w: 50, h: [50, "linear"] }).
+                        fx(1000, { x: ["-=400", "swing"], y: "-=400", o: 0.2, w: 100, h: [100, "linear"] });
 
                     $(".tgt3").css({ o: 1   }).
-                        fx(2000, { tx: "+=500", ty: "+=500", o: "-=0.9" ,bgc: "rgb(0,255,100)" }).
-                        delay(400).fx(2000, { tx: "-=500", ty: "-=500", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
+                        fx(2000, { x: "+=500", y: "+=500", o: "-=0.9" ,bgc: "rgb(0,255,100)" }).
+                        delay(400).fx(2000, { x: "-=500", y: "-=500", o: 0.5 ,w: 300 ,bgc: "rgb(0,0,0)" });
 
                     $(".tgt4").css({ o: 1.0 }).
-                        fx(1000, { tx: "+=400", ty: "+=230", o: 0.2, w:  10, h: [100, "linear"], bgc: color[0] }).
-                        fx(1000, { tx: "+=30", ty: "-=100", o: 1.0, w:  50, h: [ 10, "linear"], bgc: color[1] }).
-                        fx(1000, { tx: "-=400", ty: "-=30", o: 0.2, w:  10, h: [ 50, "linear"], bgc: color[2] }).
-                        fx(1000, { tx: "-=20", ty: "-=100", o: 1.0, w: 200, h: [200, "linear"], bgc: color[3] });
+                        fx(1000, { x: "+=400", y: "+=230", o: 0.2, w:  10, h: [100, "linear"], bgc: color[0] }).
+                        fx(1000, { x: "+=30", y: "-=100", o: 1.0, w:  50, h: [ 10, "linear"], bgc: color[1] }).
+                        fx(1000, { x: "-=400", y: "-=30", o: 0.2, w:  10, h: [ 50, "linear"], bgc: color[2] }).
+                        fx(1000, { x: "-=20", y: "-=100", o: 1.0, w: 200, h: [200, "linear"], bgc: color[3] });
                 });
         </pre>
         <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>
