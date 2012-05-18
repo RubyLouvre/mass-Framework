@@ -113,6 +113,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         parseInt(value,10) * Math.PI/200:
         parseFloat(value);
     }
+    var f = false;
     adapter[ "transform:set" ] = function(node, name, value){
         var m = adapter[ "transform:get" ](node, true).set( 1,0,0,1,0,0 );
         var el = $(node);//处理元素的定位问题，保存原来元素与offsetParent的距离
@@ -148,6 +149,12 @@ $.define("css_fix", !!top.getComputedStyle, function(){
             filter.Dy  = m.ty;
             var tw = node.offsetWidth,th = node.offsetHeight;//取得变形后高宽
             node.style.position = "relative";
+            if(!f){
+                f = true;
+                console.log("-------------")
+                console.log((width - tw)/2  + m.tx)//(node._mass_left | 0) + 
+                   console.log("-------------")
+            }
             node.style.left = (node._mass_left | 0) + (width - tw)/2  + m.tx + "px";
             node.style.top =  (node._mass_top | 0) + ( height - th)/2  + m.ty + "px";
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
