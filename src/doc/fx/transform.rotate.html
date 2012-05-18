@@ -35,8 +35,7 @@
             })
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { r:"+=360" }); // 旋转360度
-                    //相当于 $(".box").fx(2000, { rotate:"+=360" });
+                    $(".box").fx(2000, { transform:"rotate(356deg)" }); // 旋转360度
                 });
             }
 
@@ -47,8 +46,7 @@
         <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>
         <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(2000, { r:"+=360deg" }); // 旋转360度
-                    //相当于 $(".box").fx(2000, { rotate:"+=360" });
+                     $(".box").fx(2000, { transform:"rotate(180deg)" }); // 旋转360度
                 });
         </pre>
         <div style="position:relative;">

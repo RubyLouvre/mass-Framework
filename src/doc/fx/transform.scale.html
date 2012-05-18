@@ -36,8 +36,7 @@
 
             var exec1 = function(){
                 $.require("ready,fx",function(){
-                    $(".box").fx(800, { sx:"*=2.0",sy:"*=2.0",revert:1 }); // 放大两倍后再还原
-                    //相当于 $(".box").fx(800, { scaleX":"*=2",scaleY:"*=2",reverse:1}); //注意放大是以“倍”为单位
+                    $(".box").fx(800, { transform:"scale(2,2)",revert:1 }); // 放大两倍后再还原
                 });
             }
 
@@ -48,8 +47,7 @@
         <p><input onclick="exec1()" value="点我，执行代码" type="button"/><a href="" id="back">返回</a></p>
         <pre class="brush:js;gutter:false;toolbar:false">
                 $.require("ready,fx",function(){
-                    $(".box").fx(800, { sx:"*=2",sy:"*=2",revert:1 }); // 放大两倍后再还原
-                    //相当于 $(".box").fx(800, { scaleX":"*=2",scaleY:"*=2",reverse:1}); //注意放大是以“倍”为单位
+                    $(".box").fx(800, { transform:"scale(2,2)",revert:1 }); // 放大两倍后再还原
                 });
         </pre>
         <div style="position:relative;">
