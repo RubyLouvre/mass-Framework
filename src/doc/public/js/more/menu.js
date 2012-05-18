@@ -47,7 +47,7 @@ $.define("menu","more/uibase,fx,event,attr",function(Widget){
         }
         ui.target.delegate(".menu_item", "mouseover", function(){
             ui.target.find("."+hover).removeClass(hover);
-            $(this).addClass(hover).find("> .sub_menu").show(500);
+            $(this).addClass(hover).find("> .sub_menu").show(600);
             ui.target.find(".sub_menu:visible:not(:has(."+hover+"))").hide()
         });
     }
@@ -55,6 +55,25 @@ $.define("menu","more/uibase,fx,event,attr",function(Widget){
     $.fn.menu = Widget.create("tabs", Widget.Class, init )
 })
     /*
+                .mass_menu , .sub_menu{
+                width:130px;
+                -moz-box-shadow:0 0 10px #06c;
+                -webkit-box-shadow:0 0 10px #06c;
+                box-shadow:0 0 10px #06c;
+            }
+            .menu_item{
+                width:120px;
+                padding-left:10px;
+                height:24px;
+                line-height:24px;
+                border-bottom:1px solid #fff;
+                background:#0088aa;
+                color:#fff;
+            }
+            .hover {
+                background:#f36100!important;
+                color:black;
+            }
           $.require("ready,more/menu",function( api ){
                 $("body").menu({
                     data:[
