@@ -237,12 +237,9 @@ $.define("fx", "css",function(){
                 from = from == "none" ? zero  : from;
                 if(to.indexOf("matrix") == -1 ){
                     var neo = node.cloneNode(true);
-                    if(window.opera || navigator.vendor){//webkit与opera如果display为none,无法取得其变形属性
-                        neo.style.position = "relative";
-                        neo.style.opacity = "0";
-                    }else{
-                        neo.style.display = "none"
-                    }
+                    //webkit与opera如果display为none,无法取得其变形属性
+                    neo.style.position = "relative";
+                    neo.style.opacity = "0";
                     node.parentNode.appendChild(neo)
                     neo = $(neo).css("transform", to);
                     to = neo.css("transform");
@@ -642,6 +639,7 @@ $.define("fx", "css",function(){
 //2011.10.21 改进内部的normalizer函数
 //2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
 //2012.5.17 升级到  v4
+//2012.5.19 $.fx.parse.transform FIX BUG
 //http://caniuse.com/
 //http://gitcp.com/sorenbs/jsgames-articles/resources
 //http://www.kesiev.com/akihabara/
