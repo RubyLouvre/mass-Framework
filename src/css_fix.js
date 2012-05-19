@@ -113,9 +113,14 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         parseInt(value,10) * Math.PI/200:
         parseFloat(value);
     }
-    var f = false;
+ 
     adapter[ "transform:set" ] = function(node, name, value){
         var m = adapter[ "transform:get" ](node, true).set( 1,0,0,1,0,0 );
+        var filter = node.filters[ident];
+        filter.M11 =  filter.M22 = 1;//重置矩形
+        filter.M12 =  filter.M21 = 0;
+        var width = node.offsetWidth
+        var height = node.offsetHeight
         var el = $(node);//处理元素的定位问题，保存原来元素与offsetParent的距离
         if(node._mass_top == null && el.css("position") != "static"){
             var p = el.position()
@@ -137,29 +142,19 @@ $.define("css_fix", !!top.getComputedStyle, function(){
                 })
             }
             m[method].apply(m, array);
-            var filter = node.filters[ident];
-            filter.M11 =  filter.M22 = 1;//重置矩形
-            filter.M12 =  filter.M21 = 0;
-            var width  = node.offsetWidth,height = node.offsetHeight;//取得未变形前的宽高
-            filter.M11 = m.a;
-            filter.M12 = m.c;//★★★注意这里的顺序, IE滤镜和其他浏览器定义的角度方向相反
-            filter.M21 = m.b;
-            filter.M22 = m.d;
+            filter.M11 = m.a;//0
+            filter.M12 = m.c;//2★★★注意这里的顺序, IE滤镜和其他浏览器定义的角度方向相反
+            filter.M21 = m.b;//1
+            filter.M22 = m.d;//3
             filter.Dx  = m.tx;
             filter.Dy  = m.ty;
-            var tw = node.offsetWidth,th = node.offsetHeight;//取得变形后高宽
-            node.style.position = "relative";
-            if(!f){
-                f = true;
-                console.log("-------------")
-                console.log((width - tw)/2  + m.tx)//(node._mass_left | 0) + 
-                   console.log("-------------")
-            }
-            node.style.left = (node._mass_left | 0) + (width - tw)/2  + m.tx + "px";
-            node.style.top =  (node._mass_top | 0) + ( height - th)/2  + m.ty + "px";
         //http://extremelysatisfactorytotalitarianism.com/blog/?p=922
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         });
+        node.style.position = "relative";
+        node.style.left = node._mass_left + ( width - node.offsetWidth )/2  + m.tx  + "px";
+        node.style.top = node._mass_top + ( height - node.offsetHeight) /2  + m.ty  + "px";
+        
         $._data(node,"matrix",m )
     }
 });
