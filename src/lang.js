@@ -239,20 +239,19 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 
     }, false);
 
-    "Array,Function".replace($.rword, function(name){
-        $["is"+name] = function(obj){
-            return obj && ({}).toString.call(obj) === "[object "+name+"]";
+    "Array,Function".replace($.rword, function( method ){
+        $[ "is"+method ] = function(obj){
+            return obj && ({}).toString.call(obj) === "[object "+method+"]";
         }
     });
-    "each,map".replace($.rword, function(name){
-        $[name] = function(obj, fn){
-            return $.lang(obj)[name === "each" ? "forEach" : "map"]( fn ).value();
+    "each,map".replace($.rword, function( method ){
+        $[ method ] = function(obj, fn, scope){
+           return $[ $.isArrayLike(obj,true) ? "Array" : "Object" ][ method ](obj, fn, scope);
         }
     });
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-
     //这只是一个入口
     $.lang = function(obj, type){
         return adjust(new Chain, obj, type)
@@ -430,6 +429,13 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var i = target.length, result = [];
             while (i--) result[i] = cloneOf(target[i]);
             return result;
+        },
+        each: function( target, fn, scope  ){
+            for(var i = 0, n = target.length; i < n; i++){
+                if (fn.call(scope || target[i], target[i], i, target) === false)
+                    break;
+            }
+            return target;
         },
         //取得第一个元素或对它进行操作
         first: function( target, fn, scope ){
@@ -656,10 +662,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         },
         //遍历对象的键值对
-        forEach: function(target, fn, scope){
-            Object.keys(target).forEach(function(name){
-                fn.call(scope, target[name], name, target);
-            }, target);
+        each: function(target, fn, scope){
+            var keys = target.keys();
+            for(var i = 0, n = keys.length; i < n; i++){
+                var key = keys[i], value = target[key];
+                if (fn.call(scope || value, key, key, target) === false)
+                    break;
+            }
+            return target;
         },
         map: function(target, fn, scope){
             return Object.keys(target).map(function(name){
@@ -727,5 +737,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.1.27 让$$.String等对象上的方法全部变成静态方法
 2012.1.31 去掉$.Array.ensure，添加$.Array.merge
 2012.3.17 v4 重构语言链对象
+2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
 键盘控制物体移动 http://www.wushen.biz/move/
 */
