@@ -362,25 +362,25 @@ $.define("fx", "css",function(){
             }))
         }
         for( name in hash){
-            fx[name] = hash[name];
+            fx[ name ] = hash[ name ];
         }
         fx.props = props;
         if ( hash.record || hash.revert ) {
             var fx2 = new Fx;//回滚到最初状态
-            for(name in fx){
-                fx2[name] = fx[name];
+            for( name in fx ){
+                fx2[ name ] = fx[ name ];
             }
             fx2.record = fx2.revert = void 0
             fx2.props = revertProps;
             var el = $["@queue"][ index ];
-            el.negative = el.negative || []
+            el.negative = el.negative || [];
             el.negative.push(fx2);//添加已存负向列队中
         }
     }
     //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, frame, after），
     //并在动画结束后，从子列队选取下一个动画实例取替自身
     function animate( fx, index ) {
-        var node = fx.symbol, now =  +new Date, mix
+        var node = fx.symbol, now =  +new Date, mix;
         if(!fx.startTime){//第一帧
             if(!fx.props){//from这个值必须在此个时间点才能侦察正确
                 fxBuilder( fx.symbol, fx, index ); //添加props属性与设置负向列队
@@ -388,18 +388,18 @@ $.define("fx", "css",function(){
             $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
             mix = fx.before
-            mix && (mix.call( node, node, fx ), fx.before = 0);
+            mix && ( mix.call( node, node, fx ), fx.before = 0 );
         }else{
-            var per = (now - fx.startTime) / fx.duration
+            var per = (now - fx.startTime) / fx.duration;
             var end = fx.gotoEnd || per >= 1;
-            fx.update(per, end ); // 处理渐变
+            fx.update( per, end ); // 处理渐变
             if( (mix = fx.frame ) && !end ){
                 mix.call(node, node, fx ) ;
             }
             if ( end ) {//最后一帧
                 if(fx.method == "hide"){
                     for(var i in fx.orig){//还原为初始状态
-                        $.css( node, i, fx.orig[i] )
+                        $.css( node, i, fx.orig[i] );
                     }
                 }
                 mix = fx.after;//执行动画完成后的回调
@@ -408,20 +408,19 @@ $.define("fx", "css",function(){
                     Array.prototype.unshift.apply( fx.positive, fx.negative.reverse());
                     fx.negative = []; // 清空负向列队
                 }
-                if (!fx.positive.length) {
+                var neo = fx.positive.shift();
+                if ( !neo ) {
                     return false;
-                }else{
-                    var neo = fx.positive.shift();
-                    $["@queue"][ index ] = neo;
-                    neo.positive = fx.positive;
-                    neo.negative = fx.negative
                 }
+                $["@queue"][ index ] = neo;
+                neo.positive = fx.positive;
+                neo.negative = fx.negative;
             }
         }
-        return true
+        return true;
     }
-    $.fn.delay = function(ms){
-        return this.fx(ms);
+    $.fn.delay = function( ms ){
+        return this.fx( ms );
     }
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
