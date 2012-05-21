@@ -16,11 +16,15 @@ $.define("event", "node" ,function(){
         el = null;
         return ret;
     };
+    $.log($.eventSupport("focusin"))
     //添加或增强二级属性eventAdapter
     $.Object.merge(facade,{
         eventAdapter:{
             focus: {
                 delegateType: "focusin"
+            },
+            aaa: {
+                bindType: "eee"
             },
             blur: {
                 delegateType: "focusout"
@@ -29,102 +33,98 @@ $.define("event", "node" ,function(){
     });
     var eventAdapter  = $.event.eventAdapter;
     var wrapper = function(hash){
-        //    console.log(hash)
-        var fn =  function(event){
-            var src = hash.src;
-            var ret = hash.callback.apply(src, arguments)
+        var fn = function(event){
+            var ret = hash.callback.apply(hash.scope, arguments)
             if (ret === false) event.preventDefault()
             hash.times--;
             if(hash.times === 0){
-                facade.unbind.call( src, hash)
+                facade.unbind.call( hash.scope, hash)
             }
             return ret;
         }
         fn.uuid = hash.uuid;
         return fn;
     }
-
-    
-    function parseType(event) {
+    function parseType(event, selector) {//"focusin.aaa.bbb"
         var parts = ('' + event).split('.');
-        var ns = parts.slice(1).sort().join(' ');
-        var rns = ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null;
+        var ns = parts.slice(1).sort().join(' ');//aaa bbb
+        var origType = parts[0];
+        var adapter =  eventAdapter[ origType] || {}//focusin -> focus
         return {
-            type: parts[0],
-            ns: ns,
-            rns: rns
+            type : (selector ? adapter.delegateType : adapter.bindType ) || origType,//focus
+            origType: origType,
+            selector: selector,
+            namespace: ns,
+            rns: ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
         }
     }
     //收集要移除的回调
     function findHandlers(hash, selector, fn, events) {
         return events.filter(function(item) {
-            return item && (!hash.type  || hash.type === item.origType) //通过事件类型进行过滤
+            return item && (!hash.type  || hash.type === item.type) //通过事件类型进行过滤
             && (!hash.rns  || hash.rns.test(item.namespace)) //通过命名空间进行进行过滤
-            && (!fn        || fn.uuid === item.uuid)//通过UUID进行过滤
+            && (!fn        || fn.uuid === item.uuid)//通过uuid进行过滤
             && (!selector  || selector === item.selector || selector === "**" && item.selector )//通过选择器进行过滤
         })
     }
 
     $.mix(facade,{
-        bind: function( hash ){
-            if(arguments.length > 1 ){
+        bind: function( hash ){//hash 包含type callback times selector
+            if( arguments.length > 1 ){
                 throw "$.event bind method only need one argument, and it's a hash!"
             }
             var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
             types = hash.type, selector = hash.selector
-            if(target.nodeType === 3 || target.nodeType === 8 || !events){
+            if( !events ){
                 return
             }
             if( DOM ){ //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             events = events.events || (events.events = []);
-            hash.uuid = $.getUid(hash.callback); //确保UUID，bag与callback的UUID一致
+            hash.uuid = $.getUid( hash.callback ); //确保hash.uuid与callback.uuid一致
             types.replace( $.rword, function( old ){
-                var p = parseType(old);//"focusin.aaa.bbb"
-                var adapter = DOM && eventAdapter[ p.type] || {};// focusin -> focus
-                var type = (selector ? adapter.delegateType : adapter.bindType ) || p.type//focus
+                var item = parseType(old, selector);//"focusin.aaa.bbb"
+                var type = item.type;
                 var isCustom = !DOM || !$.eventSupport(type)
-                var item = $.mix({
-                    target: target,//如果是自定义事件,使用window来代理
-                    scope: isCustom ? window : target,
+                $.mix(item, {
+                    scode: target,//如果是自定义事件,使用window来代理
+                    target: isCustom ? window : target,
                     isCustom: isCustom,
-                    type: type,
-                    index: events.length,
-                    origType: p.type,
-                    namespace: p.ns //取得命名空间 "aaa bbb"
+                    index: events.length
                 }, hash, false);
                 events.push( item );//用于事件拷贝
-                item.proxy = wrapper(item)
-                item.scope.addEventListener(type, item.proxy,!!selector )
+                events["@"+type] = ( events["@"+type] | 0 )+ 1;
+                item.proxy = wrapper( item );
+                item.target.addEventListener(type, item.proxy, !!selector )
             });
         },
         //外部的API已经确保typesr至少为空字符串
         unbind: function( hash, mappedTypes  ) {
             var target = this, events = $._data( target, "events");
             if(!events ) return;
-            var types = hash.type || "", selector = hash.selector, fn = hash.callback,
-            DOM =  $["@target"] in target, adapter, item;
+            var types = hash.type || "", expr = hash.selector,
+            DOM =  $["@target"] in target;
             if( DOM ){ //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             types.replace( $.rword, function( old ){
-                findHandlers( parseType(old), selector, fn, events).forEach(item, function(item){
+                findHandlers( parseType(old, expr), expr, hash.callback, events).forEach( function(item){
+                    $.log(item)
                     var type = item.type;
-                    item.scope.removeEventListener( type, item.proxy, false);
-                    adapter = eventAdapter[ type ] || {};
+                    item.target.removeEventListener( type, item.proxy, !!expr);
                     events[item.index] = null;
-                    type = ( selector ? adapter.delegateType: adapter.bindType ) || type;
-                    if( events[type]-- == 0){
-                        delete events[ type ];
+                    if( --events["@"+type] == 0){
+                        delete events[ "@"+type ];
                     }
                 })
             });
-            for (var i =  events.length; i >=0;i--) {
-                if (events[i] == null)
-                    this.splice(i, 1);
+            for (var i = events.length; i >=0;i--) {
+                if (events[i] == null){
+                    events.splice(i, 1);
+                }
             }
-            if( !events.lenth ){
+            if( !events.length ){
                 $.removeData( target, "events") ;
             }
             return this;
@@ -143,7 +143,7 @@ $.define("event", "node" ,function(){
             for(var i = 0 ; i < arguments.length; i++ ){
                 var el = arguments[i];
                 if(typeof el == "number"){
-                    hash.times = el
+                    hash.times = el;
                 }else if(typeof el == "function"){
                     hash.callback = el
                 }if(typeof el === "string"){
