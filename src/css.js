@@ -381,8 +381,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                 return size == null ? null : this;
             }
             if ( $.type( target, "Window" ) ) {//取得浏览器工作区的大小
-                var doc = target.document, prop = doc.documentElement[ "client" + name ], body = doc.body;
-                return doc.compatMode === "CSS1Compat" && prop || body && body[ "client" + name ] || prop;
+                // https://github.com/jquery/jquery/pull/764
+                return target.document.documentElement[  "client" + name ];
+               // var doc = target.document, prop = doc.documentElement[ "client" + name ], body = doc.body;
+               // return doc.compatMode === "CSS1Compat" && prop || body && body[ "client" + name ] || prop;
             } else if ( target.nodeType === 9 ) {//取得页面的大小（包括不可见部分）
                 return Math.max(
                     target.documentElement["client" + name],
@@ -607,6 +609,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.4.16 重构showHidden
 2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
 2012.5.10 FIX toFloat BUG
+2012.5.21 优化$(window).height / width的逻辑
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
      */
