@@ -32,7 +32,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return merge( this, [expr] );
             }
             this.selector = expr + "";
-/*            if ( expr === "body" && !context && document.body ) {//分支4:  body
+            /*            if ( expr === "body" && !context && document.body ) {//分支4:  body
                 this.ownerDocument = document;
                 merge( this, [ document.body ] );
                 return this.selector = "body";
@@ -220,17 +220,36 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             return this;
         }
     });
-
-    var HTML = $.html;
+   
+    //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
+    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', '-khtml-', 'ms-']
+    function cssMap(name){
+        return cssMap[name] ||  $.String.camelize( name );
+    }
+    function cssName( name, host, test ){
+        if( cssMap[ name ] )
+            return cssMap[ name ];
+        host = host || $.html.style;
+        for ( var i = 0, n = prefixes.length; i < n; i++ ) {
+            test = $.String.camelize( prefixes[i] + name || "")
+            if( test in host ){
+                return ( cssMap[ name ] = test );
+            }
+        }
+        return null;
+    }
+    var matchesAPI = cssName("matchesSelector",$.html)
     var commonRange = document.createRange && document.createRange();
-    var matchesAPI = HTML.matchesSelector || HTML.mozMatchesSelector || HTML.webkitMatchesSelector || HTML.msMatchesSelector;
     $.mix({
+        cssMap: cssMap,
+        //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
+        cssName: cssName,
         match: function( node, expr, i ){
             if( $.type( expr, "Function" ) ){
                 return expr.call( node, node, i );
             }
             try{
-                return matchesAPI.call( node, expr );
+                return node[matchesAPI]( node, expr );
             } catch(e) {
                 var parent = node.parentNode;
                 if( parent ){
