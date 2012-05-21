@@ -17,7 +17,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         return document;
     }
     $.mix( $.mutators ).implement({
-        init:function( expr, context ){
+        init: function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
                 return this;
@@ -32,11 +32,11 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return merge( this, [expr] );
             }
             this.selector = expr + "";
-            if ( expr === "body" && !context && document.body ) {//分支4:  body
+/*            if ( expr === "body" && !context && document.body ) {//分支4:  body
                 this.ownerDocument = document;
                 merge( this, [ document.body ] );
                 return this.selector = "body";
-            }
+            }*/
             if ( typeof expr === "string" ) {
                 doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
                 var scope = context || doc;
@@ -745,4 +745,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.4.5 使用isArrayLike精简init方法
 2012.4.29 重构$.access与$.fn.data
 2012.5.4 $.access添加第六个可选参数，用于绑定作用域，因此顺带重构了html, text, outerHTML,data原型方法
+2012.5.21 Remove $("body") case; $(document.body) is 2x faster.
  */
