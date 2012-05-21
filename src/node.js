@@ -245,9 +245,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
         match: function( node, expr, i ){
-            if( $.type( expr, "Function" ) ){
-                return expr.call( node, node, i );
-            }
             try{
                 return node[matchesAPI]( node, expr );
             } catch(e) {
