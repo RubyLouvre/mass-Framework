@@ -3,13 +3,16 @@
 //==================================================
 $.define("data", "lang", function(){
     //$.log("已加载data模块");
-    var remitter = /object|function/;
+    var remitter = /object|function/, rtype = /[^38]/
+    function validate(target){
+        return target && remitter.test(typeof target) && rtype.test(target.nodeType)
+    }
     $.mix( {
         "@data": {},
         // 读写数据
         data : function( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
-            if(target && remitter.test(typeof target) && /[^38]/.test(target.nodeType) ){
-                var id = $.getUid(target), isEl = target.nodeType === 1
+            if( validate(target) ){
+                var id = $.getUid(target), isEl = target.nodeType === 1;
                 if(name === "@uuid"){
                     return id;
                 }
@@ -70,7 +73,7 @@ $.define("data", "lang", function(){
         },
         //移除数据
         removeData : function(target, name, pvt){
-            if( target && remitter.test(typeof target) && /[^38]/.test(target.nodeType) ){
+            if( validate(target) ){
                 var id =  $.getUid(target);
                 if (  !id ) {
                     return;
@@ -132,4 +135,5 @@ $.define("data", "lang", function(){
 2012.1.31 简化$.Object.merge的调用
 2012.4.5 修正mergeData BUG, 让$.data能获取HTML5 data-*
 2012.5.2 $._db -> $["@data]
+2012.5.21 抽象出validate私有方法
 */
