@@ -7,8 +7,8 @@ $.define("data", "lang", function(){
     $.mix( {
         "@data": {},
         // 读写数据
-        data : function( target, name, data, pvt ) {
-            if(target && remitter.test(typeof target)){//只处理HTML节点与普通对象
+        data : function( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
+            if(target && remitter.test(typeof target) && /[^38]/.test(target.nodeType) ){
                 var id = $.getUid(target), isEl = target.nodeType === 1
                 if(name === "@uuid"){
                     return id;
@@ -70,7 +70,7 @@ $.define("data", "lang", function(){
         },
         //移除数据
         removeData : function(target, name, pvt){
-            if(target && remitter.test(typeof target)){
+            if( target && remitter.test(typeof target) && /[^38]/.test(target.nodeType) ){
                 var id =  $.getUid(target);
                 if (  !id ) {
                     return;
