@@ -36,25 +36,24 @@ $.define("event", "node" ,function(){
     var wrapper = function(hash){
         var fn = function(event){
             event.type = hash.origType;
-            var detail = firing["@"+event.type] || {};
-            var scope = hash.scope
-            if( hash.selector ){//处理事件代理
-                if( facade.filter(event.target, this, hash.selector)){
-                    scope = event.target;
-                }else{
-                    return
+            var detail = firing["@"+event.type] || {},
+            selector = hash.selector,
+            scope = hash.scope,
+            src = event.target;
+            if ( !src.disabled && !(event.button && event.type === "click")//fire
+                && (!selector  || facade.filter(src, this, selector))//selector
+                && (!detail.rns || detail.rns.test( hash.namespace ) ) ) {//fire
+                var ret = hash.callback.apply( selector ? src :scope, [event].concat(detail.args || []))
+                if (ret === false){
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
-            }//处理多参数与修正this
-            var ret = hash.callback.apply( scope, [event].concat(detail.args || []))
-            if (ret === false){
-                event.preventDefault();
-                event.stopPropagation();
+                hash.times--;//处理执行次数
+                if(hash.times === 0){
+                    facade.unbind.call( hash.scope, hash)
+                }
+                return ret;
             }
-            hash.times--;//处理执行次数
-            if(hash.times === 0){
-                facade.unbind.call( hash.scope, hash)
-            }
-            return ret;
         }
         fn.uuid = hash.uuid;
         return fn;
