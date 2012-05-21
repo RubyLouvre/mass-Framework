@@ -146,7 +146,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                     try {
                         for ( var i = 0; el = this[ i++ ]; ) {
                             if ( el.nodeType === 1 ) {
-                                $.slice( el[TAGS]("*") ).forEach( cleanNode );
+                                $.slice( el[TAGS]("*") ).each( cleanNode );
                                 el.innerHTML = value;
                             }
                         }
@@ -705,7 +705,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             el.contentDocument || el.contentWindow.document :
             $.slice( el.childNodes );
         }
-    }).forEach(function( method, name ){
+    }).each(function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
             for(var i = 0, el ; el = this[i++];){
