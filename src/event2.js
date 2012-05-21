@@ -16,7 +16,7 @@ $.define("event", "node" ,function(){
         el = null;
         return ret;
     };
-    $.log($.eventSupport("focusin"))
+
     //添加或增强二级属性eventAdapter
     $.Object.merge(facade,{
         eventAdapter:{
@@ -32,11 +32,25 @@ $.define("event", "node" ,function(){
         }
     });
     var eventAdapter  = $.event.eventAdapter;
+    var firing = {}
     var wrapper = function(hash){
         var fn = function(event){
-            var ret = hash.callback.apply(hash.scope, arguments)
-            if (ret === false) event.preventDefault()
-            hash.times--;
+            event.type = hash.origType;
+            var detail = firing["@"+event.type] || {};
+            var scope = hash.scope
+            if( hash.selector ){//处理事件代理
+                if( facade.filter(event.target, this, hash.selector)){
+                    scope = event.target;
+                }else{
+                    return
+                }
+            }//处理多参数与修正this
+            var ret = hash.callback.apply( scope, [event].concat(detail.args || []))
+            if (ret === false){
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            hash.times--;//处理执行次数
             if(hash.times === 0){
                 facade.unbind.call( hash.scope, hash)
             }
@@ -67,8 +81,23 @@ $.define("event", "node" ,function(){
             && (!selector  || selector === item.selector || selector === "**" && item.selector )//通过选择器进行过滤
         })
     }
-
+    function quickIs( elem, m ) {
+        var attrs = elem.attributes || {};
+        return (
+            (!m[1] || elem.nodeName.toLowerCase() === m[1]) &&
+            (!m[2] || (attrs.id || {}).value === m[2]) &&
+            (!m[3] || m[3].test( (attrs[ "class" ] || {}).value ))
+            );
+    }
     $.mix(facade,{
+        filter: function( cur, parent, expr ){
+            var matcher = expr.input ? quickIs : $.match
+            for ( ; cur != parent; cur = cur.parentNode || parent ) {
+                if(matcher(cur, expr))
+                    return true
+            }
+            return false;
+        },
         bind: function( hash ){//hash 包含type callback times selector
             if( arguments.length > 1 ){
                 throw "$.event bind method only need one argument, and it's a hash!"
@@ -86,11 +115,9 @@ $.define("event", "node" ,function(){
             types.replace( $.rword, function( old ){
                 var item = parseType(old, selector);//"focusin.aaa.bbb"
                 var type = item.type;
-                var isCustom = !DOM || !$.eventSupport(type)
                 $.mix(item, {
-                    scode: target,//如果是自定义事件,使用window来代理
-                    target: isCustom ? window : target,
-                    isCustom: isCustom,
+                    scope: target,//如果是自定义事件,使用window来代理
+                    target: !DOM ? window : target,
                     index: events.length
                 }, hash, false);
                 events.push( item );//用于事件拷贝
@@ -100,11 +127,11 @@ $.define("event", "node" ,function(){
             });
         },
         //外部的API已经确保typesr至少为空字符串
-        unbind: function( hash, mappedTypes  ) {
+        unbind: function( hash  ) {
             var target = this, events = $._data( target, "events");
             if(!events ) return;
             var types = hash.type || "", expr = hash.selector,
-            DOM =  $["@target"] in target;
+            DOM = $["@target"] in target;
             if( DOM ){ //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
@@ -128,9 +155,38 @@ $.define("event", "node" ,function(){
                 $.removeData( target, "events") ;
             }
             return this;
+        },
+        fire: function(type){
+            var detail = parseType(type, false);
+            type = detail.type;
+            detail.args = $.slice(arguments,1)
+            var DOM = $["@target"] in this;
+            var support = DOM && $.eventSupport(type, this),event
+            if(!DOM || !support){
+                event = new CustomEvent(type);
+                event.initCustomEvent(type,true,true,detail);
+            }else{
+                var doc = this.ownerDocument || this.document || this;
+                event = doc.createEvent("Events");
+                event.initEvent(type, true, true, null, null, null, null, null, null, null, null, null, null, null, null)
+            }
+            firing["@"+type] = detail;
+            var target =  DOM ? this : window;
+            target.dispatchEvent(event);
+            delete firing["@"+type]
+            return this;
         }
     });
-
+    $.fn.fire = function() {
+        var args = arguments;
+        if(this.mass && this.each){
+            return this.each(function() {
+                $.event.fire.apply(this, args );
+            });
+        }else{
+            return $.event.fire.apply(this, args );
+        }
+    }
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
         $.fn[ method ] = function(types, selector, fn ){//$.fn.on $.fn.off
             if ( typeof types === "object" ) {
@@ -173,5 +229,19 @@ $.define("event", "node" ,function(){
             return $.fn[ method ].apply(this, arguments );
         }
     });
+    var  rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/
+    function quickParse( selector ) {
+        var quick = rquickIs.exec( selector );
+        if ( quick ) {
+            //   0  1    2   3
+            // [ _, tag, id, class ]
+            quick[1] = ( quick[1] || "" ).toLowerCase();
+            quick[3] = quick[3] && new RegExp( "(?:^|\\s)" + quick[3] + "(?:\\s|$)" );
+        }
+        return quick;
+    }
+    $.fn.delegate = function( selector, types, fn, times ) {
+        return this.on( types, selector, fn, times);
+    }
 
 });
