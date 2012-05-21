@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Text Rendering Example</title>
+        <script src="../libs/fabric/dist/all.js"></script>
+        <script src="../libs/fabric/lib/fonts/Delicious_500.font.js"></script>
+    </head>
+    <body>
+    <canvas id="canvas" width="800" height="450" style="border:1px solid #000000"></canvas>
+    <script type="html">
+        var canvas = new fabric.Canvas('canvas');
+
+        var textObj = new fabric.Text('Hello Text!', {
+            fontFamily: 'Delicious_500',
+            left: 400,
+            top: 225,
+            fontSize: 80,
+            textAlign: "left",
+            fill:"#FF0000"  // Set text color to red
+        });
+
+        canvas.add(textObj);
+    </script>
+    <script>
+        window.addEventListener("cat", function(e) { alert(e.detail) })
+
+        // create and dispatch the event
+        var event = new CustomEvent("cat", {"detail":{"hazcheeseburger":true}})
+        window.dispatchEvent(event)
+    </script>
+</body>
+</html>

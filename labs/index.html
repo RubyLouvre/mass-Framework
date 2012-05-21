@@ -1,42 +1,17 @@
-
-
-<!DOCTYPE HTML>
 <html>
     <head>
-        <title>测试首页 司徒正美</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-        <script type="text/javascript" src="../src/mass.js"> </script>
-        <!--<script type="text/javascript" src="../libs/jquery1.7.js"> </script>-->
-
-        <style>
-            .box {
-                color: white;
-                background-color: #333;
-                position: relative;
-                top: 50px;
-                left: 50px;
-                width: 100px;
-                height: 100px;
-            }
-            body{
-                border:1px solid red;
-            }
-        </style>
+        <title>event html5</title>
+        <script src="../src/mass.js"></script>
         <script>
-         
-         
-            $.require("ready,fx",function(){
-                var callback = function(node){
-                    console.log($(node).css("top"))
-                    console.log($(node).css("left"))
-                }
-                $(".box").fx(2000, { transform:"rotate(90deg)" ,before:callback,after:callback}); // 旋转360度
-            });
+            window.addEventListener("cat", function(e) { alert(e.detail) })
 
+            // create and dispatch the event
+            var event = new CustomEvent("cat", {"detail":{"hazcheeseburger":true}})
+            window.dispatchEvent(event)
         </script>
     </head>
     <body>
-        <div id="tgt1" class="box">司徒正美</div>
+
+
     </body>
 </html>
