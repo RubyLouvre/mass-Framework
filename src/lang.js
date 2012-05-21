@@ -287,12 +287,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     }
     var proto = Chain.prototype;
     //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
-    "String,Array,Number,Object".replace($.rword, function(type){
-        $[type] = function(ext){
+    "String,Array,Number,Object".replace($.rword, function(Type){
+        $[ Type ] = function(ext){
             var isNative = typeof ext == "string",
             methods = isNative ? ext.match($.rword) : Object.keys(ext);
             methods.forEach(function(name){
-                $[type][name] = isNative ? function(obj){
+                $[ Type ][name] = isNative ? function(obj){
                     return obj[name].apply(obj,$.slice(arguments,1) );
                 } :  ext[name];
                 proto[name] = function(){
@@ -300,7 +300,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                     if( target == null){
                         return this;
                     }else{
-                        var method = isNative ? target[name] : retouch( $[this.type][name] ),
+                        var method = isNative ? target[name] : retouch( $[ this.type ][name] ),
                         next = this.target = method.apply( target, arguments ),
                         type = $.type( next );
                         if( type === this.type){
@@ -663,7 +663,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //遍历对象的键值对
         each: function(target, fn, scope){
-            var keys = target.keys();
+            var keys = Object.keys(target);
             for(var i = 0, n = keys.length; i < n; i++){
                 var key = keys[i], value = target[key];
                 if (fn.call(scope || value, key, key, target) === false)
