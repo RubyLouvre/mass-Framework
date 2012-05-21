@@ -2,14 +2,9 @@
 // 样式操作模块 by 司徒正美
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
-    $.log( "已加载css模块" );
-
-    var prefixes = ['', '-ms-','-moz-', '-webkit-', '-khtml-', '-o-','ms-'],
-    adapter = $.cssAdapter = $.cssAdapter || {};
-    function cssMap(name){
-        return cssMap[name] ||  $.String.camelize( name );
-    }
-    var shortcuts = {
+    //$.log( "已加载css模块" );
+    var adapter = $.cssAdapter = $.cssAdapter || {},
+    shortcuts = {
         c:   "color",
         h:   "height",
         o:   "opacity",
@@ -24,7 +19,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
     for(var name in shortcuts){
-        cssMap[ name ]  = shortcuts[ name ]
+        $.cssMap[ name ]  = shortcuts[ name ]
     }
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     $.implement({
@@ -38,20 +33,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     });
 
     $.mix({
-        cssMap: cssMap,
-        //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
-        cssName: function( name, host, test ){
-            if( cssMap[ name ] )
-                return cssMap[ name ];
-            host = host || $.html.style;
-            for ( var i = 0, n = prefixes.length; i < n; i++ ) {
-                test = $.String.camelize( prefixes[i] + name || "")
-                if( test in host ){
-                    return ( cssMap[ name ] = test );
-                }
-            }
-            return null;
-        },
         scrollbarWidth: function (){
             if( $.scrollbarWidth.ret ){
                 return $.scrollbarWidth.ret
@@ -65,7 +46,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function( node, name, value){
             if(node.style){
-                name = typeof this === "string" ? this : cssMap( name );
+                name = typeof this === "string" ? this : $.cssMap( name );
                 if( value === void 0){ //取值
                     return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
                 }else {//设值
@@ -106,7 +87,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
             }
-              
             // A tribute to the "awesome hack by Dean Edwards"
             // WebKit uses "computed value (percentage if specified)" instead of "used value" for margins
             // which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
