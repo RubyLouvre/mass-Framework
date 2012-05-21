@@ -1,6 +1,6 @@
 //$.query v5 开发代号Icarus
 $.define("query", function(){
-   // $.log("已加载选择器模块")
+    // $.log("已加载选择器模块")
     var global = this, DOC = global.document;
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
@@ -335,8 +335,9 @@ $.define("query", function(){
         //如果要从多个上下文中过滤孩子
         expr = expr.replace(trimLeft, "").replace(trimRight, "");  
         flag_xml = flag_xml !== void 0 ? flag_xml : $.isXML(doc);
-       
-        if (!flag_xml && doc.querySelectorAll2) {
+        if ( flag_xml && expr === "body" && context.body )
+            return pushResult( [context.body], result, flag_multi );
+        if (!flag_xml && doc.querySelectorAll) {
             var query = expr;
             if(contexts.length > 2 || doc.documentMode == 8  && context.nodeType == 1  ){
                 if(contexts.length > 2 )
@@ -943,5 +944,6 @@ $.define("query", function(){
 修改属性选择器$=的判定，原先attr.indexOf(val) == attr.length - val.length，会导致"PWD".indexOf("bar]")也有true
 2011.11.9 增加getText 重构 getElementById与过滤ID部分
 2011.11.10 exec一律改为match,对parseNth的结果进行缓存
+2012.5.21 对body进行优化
 */
 
