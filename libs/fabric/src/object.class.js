@@ -44,12 +44,6 @@
      * @constant
      * @type Number
      */
-    FX_DURATION:                500,
-
-    /**
-     * @constant
-     * @type Number
-     */
     MIN_SCALE_LIMIT:            0.1,
 
     /**
@@ -107,6 +101,13 @@
      * @type Boolean
      */
     hasBorders:               true,
+
+    /**
+     * When set to `false`, object's rotating point will not be visible or selectable
+     * @property
+     * @type Boolean
+     */
+    hasRotatingPoint:         false,
 
     /**
      * @method callSuper
@@ -369,13 +370,13 @@
         ctx.fillStyle = this.fill;
       }
 
-      if (this.group) {
-        // TODO: this breaks some shapes, need to look into it
+      // TODO: this breaks some shapes, need to look into it
+      // if (this.group) {
         // ctx.translate(
         //    -this.group.width / 2 + this.width / 2,
         //    -this.group.height / 2 + this.height / 2
         // );
-      }
+      // }
       this._render(ctx, noTransform);
 
       if (this.active && !noTransform) {
@@ -522,11 +523,15 @@
       var mr = {
         x: tr.x - (this.currentHeight/2 * sinTh),
         y: tr.y + (this.currentHeight/2 * cosTh)
-      }
+      };
       var mb = {
         x: bl.x + (this.currentWidth/2 * cosTh),
         y: bl.y + (this.currentWidth/2 * sinTh)
-      }
+      };
+      var mtr = {
+        x: tl.x + (this.currentWidth/2 * cosTh),
+        y: tl.y + (this.currentWidth/2 * sinTh)
+      };
 
       // debugging
 
@@ -543,7 +548,7 @@
       //       }, 50);
 
       // clockwise
-      this.oCoords = { tl: tl, tr: tr, br: br, bl: bl, ml: ml, mt: mt, mr: mr, mb: mb };
+      this.oCoords = { tl: tl, tr: tr, br: br, bl: bl, ml: ml, mt: mt, mr: mr, mb: mb, mtr: mtr };
 
       // set coordinates of the draggable boxes in the corners used to scale/rotate the image
       this._setCornerCoords();
@@ -587,6 +592,17 @@
         ~~(w + padding2),
         ~~(h + padding2)
       );
+
+      if (this.hasRotatingPoint && !this.hideCorners && !this.lockRotation) {
+        var rotateHeight = (-h/2);
+        var rotateWidth = (-w/2);
+
+        ctx.beginPath();
+        ctx.moveTo(0, rotateHeight);
+        ctx.lineTo(0, rotateHeight - 40);
+        ctx.closePath();
+        ctx.stroke();
+      }
 
       ctx.restore();
       return this;
@@ -663,6 +679,21 @@
       _left = left - scaleOffsetX;
       _top = top + height/2 - scaleOffsetY;
       ctx.fillRect(_left, _top, sizeX, sizeY);
+
+      // middle-top-rotate
+      if (this.hasRotatingPoint) {
+        // _left = left + this.width/2;
+        // _top = top - (45 / this.scaleY) + scaleOffsetY;
+
+        // ctx.save();
+        // ctx.beginPath();
+        // ctx.arc(_left, _top, sizeX / 2, 0, Math.PI * 2, false);
+        // ctx.fill();
+        // ctx.restore();
+        _left = left + this.width/2 - scaleOffsetX;
+        _top = top - (45 / this.scaleY);
+        ctx.fillRect(_left, _top, sizeX, sizeY);
+      }
 
       ctx.restore();
 
@@ -1009,7 +1040,9 @@
           theta = degreesToRadians(45 - this.getAngle()),
           cornerHypotenuse = Math.sqrt(2 * Math.pow(this.cornersize, 2)) / 2,
           cosHalfOffset = cornerHypotenuse * Math.cos(theta),
-          sinHalfOffset = cornerHypotenuse * Math.sin(theta);
+          sinHalfOffset = cornerHypotenuse * Math.sin(theta),
+          sinTh = Math.sin(this.theta),
+          cosTh = Math.cos(this.theta);
 
       coords.tl.corner = {
         tl: {
@@ -1162,6 +1195,25 @@
           y: coords.mb.y + cosHalfOffset
         }
       };
+
+      coords.mtr.corner = {
+        tl: {
+          x: coords.mtr.x - sinHalfOffset + (sinTh * 40),
+          y: coords.mtr.y - cosHalfOffset - (cosTh * 40)
+        },
+        tr: {
+          x: coords.mtr.x + cosHalfOffset + (sinTh * 40),
+          y: coords.mtr.y - sinHalfOffset - (cosTh * 40)
+        },
+        bl: {
+          x: coords.mtr.x - cosHalfOffset + (sinTh * 40),
+          y: coords.mtr.y + sinHalfOffset - (cosTh * 40)
+        },
+        br: {
+          x: coords.mtr.x + sinHalfOffset + (sinTh * 40),
+          y: coords.mtr.y + cosHalfOffset - (cosTh * 40)
+        }
+      };
     },
 
     /**
@@ -1182,106 +1234,6 @@
      * @return {Number}
      */
     complexity: function() {
-      return 0;
-    },
-
-    /**
-     * @method straighten
-     * @return {fabric.Object} thisArg
-     * @chainable
-     */
-    straighten: function() {
-      var angle = this._getAngleValueForStraighten();
-      this.setAngle(angle);
-      return this;
-    },
-
-    /**
-     * @method fxStraighten
-     * @param {Object} callbacks
-     *                  - onComplete: invoked on completion
-     *                  - onChange: invoked on every step of animation
-     *
-     * @return {fabric.Object} thisArg
-     * @chainable
-     */
-    fxStraighten: function(callbacks) {
-      callbacks = callbacks || { };
-
-      var empty = function() { },
-          onComplete = callbacks.onComplete || empty,
-          onChange = callbacks.onChange || empty,
-          _this = this;
-
-      fabric.util.animate({
-        startValue: this.get('angle'),
-        endValue: this._getAngleValueForStraighten(),
-        duration: this.FX_DURATION,
-        onChange: function(value) {
-          _this.setAngle(value);
-          onChange();
-        },
-        onComplete: function() {
-          _this.setCoords();
-          onComplete();
-        },
-        onStart: function() {
-          _this.setActive(false);
-        }
-      });
-
-      return this;
-    },
-
-    /**
-     * @method fxRemove
-     * @param {Object} callbacks
-     * @return {fabric.Object} thisArg
-     * @chainable
-     */
-    fxRemove: function(callbacks) {
-      callbacks || (callbacks = { });
-
-      var empty = function() { },
-          onComplete = callbacks.onComplete || empty,
-          onChange = callbacks.onChange || empty,
-          _this = this;
-
-      fabric.util.animate({
-        startValue: this.get('opacity'),
-        endValue: 0,
-        duration: this.FX_DURATION,
-        onChange: function(value) {
-          _this.set('opacity', value);
-          onChange();
-        },
-        onComplete: onComplete,
-        onStart: function() {
-          _this.setActive(false);
-        }
-      });
-
-      return this;
-    },
-
-    /**
-     * @method _getAngleValueForStraighten
-     * @return {Number} angle value
-     * @private
-     */
-    _getAngleValueForStraighten: function() {
-      var angle = this.get('angle');
-
-      // TODO (kangax): can this be simplified?
-
-      if      (angle > -225 && angle <= -135) { return -180;  }
-      else if (angle > -135 && angle <= -45)  { return  -90;  }
-      else if (angle > -45  && angle <= 45)   { return    0;  }
-      else if (angle > 45   && angle <= 135)  { return   90;  }
-      else if (angle > 135  && angle <= 225 ) { return  180;  }
-      else if (angle > 225  && angle <= 315)  { return  270;  }
-      else if (angle > 315)                   { return  360;  }
-
       return 0;
     },
 
@@ -1313,6 +1265,8 @@
       fabric.util.animate({
         startValue: options.from,
         endValue: to,
+        byValue: options.by,
+        easing: options.easing,
         duration: options.duration,
         onChange: function(value) {
           obj.set(property, value);
