@@ -1,17 +1,68 @@
+<!doctype html>
 <html>
     <head>
-        <title>event html5</title>
+        <title>mass Framework</title>
         <script src="../src/mass.js"></script>
         <script>
-            window.addEventListener("cat", function(e) { alert(e.detail) })
-
-            // create and dispatch the event
-            var event = new CustomEvent("cat", {"detail":{"hazcheeseburger":true}})
-            window.dispatchEvent(event)
+            $.require("ready,event2",function(){
+                var a = function(e){
+                    $.log("redred");
+                }
+                $("body").delegate("#red","click",a);
+                $("body").delegate("#blue","click",function(e){
+                    $.log("blueblue");
+                });
+                $("body").undelegate({click:a})
+            })
         </script>
+        <script>
+   
+          
+
+          
+        </script>
+        <script type="bind">
+            $.require("ready,event2",function(){
+                $("body").bind("aaa",function(e){
+                    $.log("11111111111");
+                    $.log(e.preventDefault)
+                });
+                $("#div").bind("click",function(e){
+                    $.log("22222222222");
+                });
+                $("#div").bind("click",function(e){
+                    $.log([].slice.call(arguments));
+                });
+            
+                $("#div").fire("click",1,2,3)
+            })
+        </script>
+        <style id="dd">
+            #red {
+                width: 150px;
+                height: 150px;
+                background: red;
+            }
+            #blue {
+                width: 150px;
+                height: 150px;
+                background: blue;
+            }
+        </style>
+
     </head>
     <body>
+        <div id="red" >
 
+        </div>
+        <div id="blue" >
 
+        </div>
+        $("body").on("mouseup",function(e){
+        $.log("666666666")
+        })
+        $("body").on("click",function(e){
+        $.log("dddddddddddddd")
+        })
     </body>
 </html>

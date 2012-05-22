@@ -8,12 +8,15 @@ function extend(destination, source) {
     return destination;
 }
 
-function mix( target, source ){
-    var args = [].slice.call( arguments ), key,//如果最后参数是布尔，判定是否覆写同名属性
+function mix( target, source ){//如果最后参数是布尔，判定是否覆写同名属性
+    var args = [].slice.call( arguments ),i = 1, key,
     ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-    target = target || {};//如果只传入一个参数，则是拷贝对象
-    for(var i = 1; source = args[i++];){//允许对象糅杂，用户保证都是对象
-        for ( key in source ) {
+    if(args.length === 1){//处理$.mix(hash)的情形
+        target = !this.window ? this : {} ;
+        i = 0;
+    }
+    while((source = args[i++])){
+        for ( key in source ) {//允许对象糅杂，用户保证都是对象
             if (ride || !(key in target)) {
                 target[ key ] = source[ key ];
             }
@@ -203,3 +206,19 @@ type: function ( obj, str ){
     }
     return result;
 },
+
+
+var MODULE = (function () {
+    var my = {},
+    privateVariable = 1;
+
+    function privateMethod() {
+        // ...
+    }
+    my.moduleProperty = 1;
+    my.moduleMethod = function () {
+        // ...
+    };
+
+    return my;
+}());
