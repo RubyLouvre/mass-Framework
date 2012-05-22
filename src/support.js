@@ -85,7 +85,7 @@ $.define("support", function(){
         var body = DOC.body;
         if(!body)//frameset不存在body标签
             return;
-    //    div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
         body.insertBefore( div, body.firstChild );
         var ib = '<div style="height:20px;display:inline-block"></div>';
         div.innerHTML = ib + ib;//div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
