@@ -3,7 +3,7 @@
     <head>
         <title>mass Framework</title>
         <script src="../src/mass.js"></script>
-        <script>
+        <script type="bind">
             $.require("ready,event2",function(){
                 var a = function(e){
                     $.log("redred");
@@ -11,9 +11,15 @@
                 $("body").delegate("#red","click",a);
                 $("body").delegate("#blue","click",function(e){
                     $.log("blueblue");
+                    e.stopImmediatePropagation()
                 });
-                $("body").undelegate({click:a})
-            })
+                $("body").delegate("#blue","click",function(e){
+                    $.log("blueblue22");
+                });
+
+                //$("body").undelegate({click:a})
+            });
+        
         </script>
         <script>
    
@@ -21,20 +27,19 @@
 
           
         </script>
-        <script type="bind">
+        <script >
             $.require("ready,event2",function(){
-                $("body").bind("aaa",function(e){
-                    $.log("11111111111");
-                    $.log(e.preventDefault)
+                $("body").bind("click",function(e){
+                    $.log("333333333");
                 });
-                $("#div").bind("click",function(e){
+                $("#red").bind("click",function(e){
+                    $.log("11111111111");
+                });
+                $("#red").bind("click",function(e){
                     $.log("22222222222");
                 });
-                $("#div").bind("click",function(e){
-                    $.log([].slice.call(arguments));
-                });
             
-                $("#div").fire("click",1,2,3)
+                $("#red").fire("click",1,2,3)
             })
         </script>
         <style id="dd">
