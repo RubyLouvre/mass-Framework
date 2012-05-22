@@ -69,21 +69,17 @@ $.define("support", function(){
         });
         div.cloneNode(true).fireEvent("onclick");
     }
-    //判定insertAdjacentHTML是否完美，用于append,prepend,before,after等方法
     var table = div[TAGS]("table")[0]
-    try{
-        table.insertAdjacentHTML("afterBegin","<tr><td>1</td></tr>");
+    try{//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
+        table.innerHTML = "<tr><td>1</td></tr>";
+        support.innerHTML = true;
+        table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
     }catch(e){ }
     try{
         var range =  DOC.createRange();
         support.fastFragment = !!range.createContextualFragment("<a>")
     }catch(e){ };
-    //判定innerHTML是否完美，用于html方法
-    try{
-        table.innerHTML = "<tr><td>1</td></tr>";
-        support.innerHTML = true;
-    }catch(e){};
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
