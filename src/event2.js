@@ -1,5 +1,15 @@
 $.define("event", "node" ,function(){
     $.log("已加载event2模块")
+    try{
+        new CustomEvent("mass");
+        event.initCustomEvent("mass",true,true,{});
+        $.support.customEvent = true;
+    }catch(e){
+        $.support.customEvent = false;
+    }
+    var LEVEL2 = $.support.customEvent;
+
+
     var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,  rmapper = /(\w+)_(\w+)/g,
     revent = /(^|_|:)([a-z])/g
     //如果不存在添加一个
@@ -41,8 +51,8 @@ $.define("event", "node" ,function(){
             scope = hash.scope,
             src = event.target;
             if ( !src.disabled && !(event.button && event.type === "click")//fire
-                && (!selector  || facade.filter(src, this, selector))//selector
-                && (!detail.rns || detail.rns.test( hash.namespace ) ) ) {//fire
+                && (!selector  || facade.match(src, this, selector))//selector
+                && (!detail.rns || detail.rns.test( hash.ns ) ) ) {//fire
                 var ret = hash.callback.apply( selector ? src :scope, [event].concat(detail.args || []))
                 if (ret === false){
                     event.preventDefault();
@@ -67,15 +77,16 @@ $.define("event", "node" ,function(){
             type : (selector ? adapter.delegateType : adapter.bindType ) || origType,//focus
             origType: origType,
             selector: selector,
-            namespace: ns,
+            ns: ns,
             rns: ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
         }
     }
     //收集要移除的回调
     function findHandlers(hash, selector, fn, events) {
+        $.log(hash)
         return events.filter(function(item) {
             return item && (!hash.type  || hash.type === item.type) //通过事件类型进行过滤
-            && (!hash.rns  || hash.rns.test(item.namespace)) //通过命名空间进行进行过滤
+            && (!hash.rns  || hash.rns.test(item.ns)) //通过命名空间进行进行过滤
             && (!fn        || fn.uuid === item.uuid)//通过uuid进行过滤
             && (!selector  || selector === item.selector || selector === "**" && item.selector )//通过选择器进行过滤
         })
@@ -89,7 +100,7 @@ $.define("event", "node" ,function(){
             );
     }
     $.mix(facade,{
-        filter: function( cur, parent, expr ){
+        match: function( cur, parent, expr ){
             var matcher = expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr))
@@ -122,13 +133,19 @@ $.define("event", "node" ,function(){
                 events.push( item );//用于事件拷贝
                 events["@"+type] = ( events["@"+type] | 0 )+ 1;
                 item.proxy = wrapper( item );
-                item.target.addEventListener(type, item.proxy, !!selector )
+                if(LEVEL2){//一个回调绑定一个代理
+                    item.target.addEventListener(type, item.proxy, !!selector )
+                }else if(DOM && events["@"+type] == 1 ){//所有回调绑定一个代理
+                    $.bind(item.target,type, item.proxy, !!selector )
+                }
+                
             });
         },
         //外部的API已经确保typesr至少为空字符串
         unbind: function( hash  ) {
             var target = this, events = $._data( target, "events");
             if(!events ) return;
+            $.log(hash)
             var types = hash.type || "", expr = hash.selector,
             DOM = $["@target"] in target;
             if( DOM ){ //处理DOM的hover事件
@@ -176,16 +193,45 @@ $.define("event", "node" ,function(){
             return this;
         }
     });
-    $.fn.fire = function() {
-        var args = arguments;
-        if(this.mass && this.each){
-            return this.each(function() {
-                $.event.fire.apply(this, args );
-            });
-        }else{
-            return $.event.fire.apply(this, args );
+    $.implement({
+        toggle: function(/*fn1,fn2,fn3*/){
+            var fns = [].slice.call(arguments), i = 0;
+            return this.click(function(e){
+                var fn  = fns[i++] || fns[i = 0, i++];
+                fn.call( this, e );
+            })
+        },
+        hover: function( fnIn, fnOut ) {
+            return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
+        },
+        delegate: function( selector, types, fn, times ) {
+            return this.on( types, selector, fn, times);
+        },
+        live: function( types, fn, times ) {
+            $( this.ownerDocument ).on( types, this.selector, fn, times );
+            return this;
+        },
+        one: function( types, fn ) {
+            return this.on( types, fn, 1 );
+        },
+        undelegate: function(selector, types, fn ) {/*顺序不能乱*/
+            return arguments.length == 1? this.off( selector, "**" ) : this.off( types, fn, selector );
+        },
+        die: function( types, fn ) {
+            $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
+            return this;
+        },
+        fire: function(  ) {
+            var args = arguments;
+            if(this.mass && this.each){
+                return this.each(function() {
+                    $.event.fire.apply(this, args );
+                });
+            }else{
+                return $.event.fire.apply(this, args );
+            }
         }
-    }
+    });
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
         $.fn[ method ] = function(types, selector, fn ){//$.fn.on $.fn.off
             if ( typeof types === "object" ) {
@@ -205,7 +251,10 @@ $.define("event", "node" ,function(){
                     if(hash.type != null){
                         hash.selector = el.trim()
                     }else{
-                        hash.type = el.trim()
+                        hash.type = el.trim();
+                        if(!/^[a-z0-9\.\s]+$/i.test(hash.type)){
+                            throw "hash.type should be a combination of this event type and the namespace"
+                        }
                     }
                 }
             }
@@ -228,7 +277,7 @@ $.define("event", "node" ,function(){
             return $.fn[ method ].apply(this, arguments );
         }
     });
-    var  rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/
+    var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/
     function quickParse( selector ) {
         var quick = rquickIs.exec( selector );
         if ( quick ) {
