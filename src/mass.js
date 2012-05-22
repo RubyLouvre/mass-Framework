@@ -60,7 +60,7 @@ void function( global, DOC ){
     function mix( target, source ){
         var args = [].slice.call( arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        if(args.length === 1){
+        if(args.length === 1){//处理$.mix(hash)的情形
             target = !this.window ? this : {} ;
             i = 0;
         }
