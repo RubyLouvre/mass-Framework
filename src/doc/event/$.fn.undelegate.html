@@ -63,36 +63,24 @@
         </script>
     </head>
     <body>
-        <article>
-            <h3>$.fn.undelegate(selector, types, fn, [times])</h3>
-            <p><span class="stress">描述：</span></p>
-            <p>移除通过delegate绑定的事件回调。</p>
-            <p><span class="stress">参数：</span></p>
-            <dl>
-                <dt>selector</dt>
-                <dd>
-                    必需。String。用于匹配的CSS表达式。
-                </dd>
-                <dt>types</dt>
-                <dd>
-                    可选。String。一个包含一个或多个JavaScript事件类型的字符串，比如"click"或"keydown,"或自定义事件的名称。没有则清空此元素所绑定的所有回调。
-                </dd>
-                <dt>fn</dt>
-                <dd>
-                    可选。Funcion。回调函数。
-                </dd>
-                <dt>times</dt>
-                <dd>
-                    可选。正整数。限制此回调执行多少次就自动卸载。
-                </dd>
-            </dl>
-            <fieldset><legend>例子</legend>
+    <article>
+        <h3>$.fn.undelegate(selector, types, fn, [times])</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>移除通过delegate绑定的事件回调。</p>
+        <p><span class="stress">参数：</span></p>
+        <p>如果只有一个字符串参数，则selector意为types，如果不小心写错为选择器，
+            它会抛出“hash.type should be a combination of this event type and the namespace”异常</p>
+        <p>如果只有一个对象参数，则其会分解为type与回调。</p>
+        <p>如果是一个对象参数跟一个字符串参数，则那个字符串会被认为是选择器。</p>
+        <p>否则情况同函数定义。</p>
 
-                <button id="theone">没有事件……</button>
-                <button id="bind">绑定点击事件</button>
-                <button id="unbind">移除点击事件</button>
-                <div style="display:none;color:#000;background:#FF8C00" class="hide_div">Click!</div>
-                <pre class="brush:js;gutter:false;toolbar:false">
+        <fieldset><legend>例子</legend>
+
+            <button id="theone">没有事件……</button>
+            <button id="bind">绑定点击事件</button>
+            <button id="unbind">移除点击事件</button>
+            <div style="display:none;color:#000;background:#FF8C00" class="hide_div">Click!</div>
+            <pre class="brush:js;gutter:false;toolbar:false">
             $.require("ready,event,fx",function(){
                 function callback() {
                     $(".hide_div").show(1000);
@@ -107,10 +95,10 @@
                     $(".hide_div").hide(1000);
                 });
             });
-                </pre>
-            </fieldset>
+            </pre>
+        </fieldset>
 
 
-        </article>
-    </body>
+    </article>
+</body>
 </html>
