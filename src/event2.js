@@ -211,6 +211,15 @@ $.define("event", "node" ,function(){
             }
             return event;
         },
+        _dispatch: function( src, type, e ){
+            e = facade.fix( e );
+            e.type = type;
+            for(var i in src){
+                if(src.hasOwnProperty(i)){
+                    facade.dispatch.call( src[ i ], e );
+                }
+            }
+        },
         bind: function( hash ){//hash 包含type callback times selector
             if( arguments.length > 1 ){
                 throw "$.event bind method only need one argument, and it's a hash!"
@@ -295,6 +304,17 @@ $.define("event", "node" ,function(){
             return this;
         }
     });
+    var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/
+    function quickParse( selector ) {
+        var quick = rquickIs.exec( selector );
+        if ( quick ) {
+            //   0  1    2   3
+            // [ _, tag, id, class ]
+            quick[1] = ( quick[1] || "" ).toLowerCase();
+            quick[3] = quick[3] && new RegExp( "(?:^|\\s)" + quick[3] + "(?:\\s|$)" );
+        }
+        return quick;
+    }
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
             var fns = [].slice.call(arguments), i = 0;
@@ -379,19 +399,6 @@ $.define("event", "node" ,function(){
             return $.fn[ method ].apply(this, arguments );
         }
     });
-    var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/
-    function quickParse( selector ) {
-        var quick = rquickIs.exec( selector );
-        if ( quick ) {
-            //   0  1    2   3
-            // [ _, tag, id, class ]
-            quick[1] = ( quick[1] || "" ).toLowerCase();
-            quick[3] = quick[3] && new RegExp( "(?:^|\\s)" + quick[3] + "(?:\\s|$)" );
-        }
-        return quick;
-    }
-    $.fn.delegate = function( selector, types, fn, times ) {
-        return this.on( types, selector, fn, times);
-    }
+   
 
 });
