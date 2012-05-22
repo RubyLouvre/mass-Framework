@@ -2,8 +2,8 @@
 // 特征嗅探模块 by 司徒正美
 //==========================================
 $.define("support", function(){
-   // $.log("已加载特征嗅探模块");
-    var global = this, DOC = global.document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
+    // $.log("已加载特征嗅探模块");
+    var DOC = document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
     div.setAttribute("className", "t");
     div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
     '<object><param/></object><table></table><input type="checkbox"/>';
@@ -11,7 +11,6 @@ $.define("support", function(){
     select = DOC.createElement("select"),
     input = div[TAGS]( "input" )[ 0 ],
     opt = select.appendChild( DOC.createElement("option") );
-
     //true为正常，false为不正常
     var support = $.support = {
         //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
@@ -65,9 +64,8 @@ $.define("support", function(){
     select.disabled = true;
     support.optDisabled = !opt.disabled;
     if ( !div.addEventListener && div.attachEvent && div.fireEvent ) {
-        div.attachEvent("onclick", function click() {
+        div.attachEvent("onclick", function () {
             support.cloneNode = false;//w3c的节点复制是不复制事件的
-            div.detachEvent("onclick", click);
         });
         div.cloneNode(true).fireEvent("onclick");
     }
@@ -86,37 +84,30 @@ $.define("support", function(){
         table.innerHTML = "<tr><td>1</td></tr>";
         support.innerHTML = true;
     }catch(e){};
-    a = select = table = opt = style = null;
+    a = select = table = opt = style =  null;
     $.require("ready",function(){
-        //boxModel，inlineBlock，keepSize，cssPercentedMargin这些特征必须等到domReady后才能检测
-        var body = DOC.body,
-        testElement = div.cloneNode(false);
-        testElement.style.cssText = "visibility:hidden;width:0;height:0;border:0;margin:0;background:none;padding:0;"
-        testElement.appendChild( div );
-        body.insertBefore( testElement, body.firstChild );
-        //是否遵循w3c的盒子boxModel去计算元素的大小(IE存在怪异模式,inconformity)
-        div.innerHTML = "";
-        div.style.width = div.style.paddingLeft = "1px";
-        support.boxModel = div.offsetWidth === 2;
-        if ( typeof div.style.zoom !== "undefined"  ) {
-            //IE7以下版本并不支持display: inline-block;样式，而是使用display: inline;
-            //并通过其他样式触发其hasLayout形成一种伪inline-block的状态
-            div.style.display = "inline";
-            div.style.zoom = 1;
-            support.inlineBlock = !(div.offsetWidth === 2);
-            div.style.display = "";
-            div.innerHTML = "<div style='width:4px;'></div>";
-            support.keepSize = div.offsetWidth == 2;
-            if( global.getComputedStyle ) {
-                div.style.marginTop = "1%";
-                support.cssPercentedMargin = ( global.getComputedStyle( div, null ) || {
-                    marginTop: 0
-                } ).marginTop !== "1%";
-            }
-
+        var body = DOC.body;
+        if(!body)//frameset不存在body标签
+            return;
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        body.insertBefore( div, body.firstChild );
+        var ib = 'div style="height:20px;display:inline-block"></div>';
+        div.innerHTML = ib + ib;
+        support.inlineBlock = div.offsetHeight == 20;//检测是否支持inlineBlock
+        div.style.cssText = "width:20px;"
+        div.innerHTML = "<div style='width:40px;'></div>";
+        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
+        div.innerHTML = ""
+        div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
+        support.boxModel = div.offsetWidth === 20;
+        if( window.getComputedStyle ) {
+            div.style.marginTop = "1%";//检测是否能转换百分比的margin值
+            support.cssPercentedMargin = ( window.getComputedStyle( div, null ) || {
+                marginTop: 0
+            } ).marginTop !== "1%";
         }
-        body.removeChild( testElement );
-        div = testElement = null;
+        body.removeChild( div );
+        div =  null;
     });
     return support;
 });
@@ -125,4 +116,5 @@ $.define("support", function(){
 2011.9.16所有延时判定的部分现在可以立即判定了
 2011.9.23增加fastFragment判定
 2012.1.28有些特征嗅探必须连接到DOM树上才能进行
+2012.5.22 精简插入DOM树后的五种检测
 */
