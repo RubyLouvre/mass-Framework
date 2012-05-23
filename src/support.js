@@ -75,16 +75,18 @@ $.define("support", function(){
         support.innerHTML = true;
         table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
-    }catch(e){ }
-    try{
-        var range =  DOC.createRange();
-        support.fastFragment = !!range.createContextualFragment("<a>")
-    }catch(e){ };
+    }catch(e){  }
+   
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
         if(!body)//frameset不存在body标签
             return;
+        try{
+            var range =  DOC.createRange();
+            range.selectNodeContents(body)
+            support.fastFragment = !!range.createContextualFragment("<b></b>")
+        }catch(e){ };
         div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
         body.insertBefore( div, body.firstChild );
         var ib = '<div style="height:20px;display:inline-block"></div>';
