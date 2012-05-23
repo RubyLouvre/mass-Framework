@@ -75,16 +75,18 @@ $.define("support", function(){
         support.innerHTML = true;
         table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
-    }catch(e){ }
-    try{
-        var range =  DOC.createRange();
-        support.fastFragment = !!range.createContextualFragment("<a>")
     }catch(e){ };
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
         if(!body)//frameset不存在body标签
             return;
+        try{
+            var range =  DOC.createRange();
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !!range.createContextualFragment("<a>");
+            $.commonRange = range;
+        }catch(e){ };
         div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
         body.insertBefore( div, body.firstChild );
         var ib = '<div style="height:20px;display:inline-block"></div>';
