@@ -160,9 +160,7 @@ $.define("event", "node" ,function(){
                     item.target.addEventListener(item.type, item.proxy, !!expr )
                 }
                 if(count == 1){
-                    // if( adapter ){
                     $._data( target, type+"_item", item)
-                    //  } //    adapter.item = item;//target, selector, hash.fn, item.proxy
                     if( DOM && (!hack || !hack.setup || hack.setup( item ) === false ) && !level3) {
                         $.bind(target, item.type, item.proxy, !!expr);//所有回调绑定一个代理
                     }
@@ -188,7 +186,7 @@ $.define("event", "node" ,function(){
                         if( DOM && ( !hack || !hack.teardown || hack.teardown( item ) === false ) && !level3 ) {
                             $.unbind( item.target, item.type, item.proxy, !!expr );
                         }
-                        $._data( target, type+"_item", true );
+                        $.removeData( target, type+"_item", true );
                         delete events[ type+"_count"];
                     }
                     events[ item.index ] = null;
@@ -254,7 +252,6 @@ $.define("event", "node" ,function(){
             }
             delete  firing["@" + event.type];
         }
-
     });
   
     var wrapper = function( hash ){
