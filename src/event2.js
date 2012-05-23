@@ -18,16 +18,14 @@ $.define("event", "node" ,function(){
                 delegateType: "focusout"
             },
             beforeunload: {
-                setup: function(src, _, _, fn ) {
+                setup: function( item ) {
                     // We only want to do this special case on windows
-                    if ( $.type(src, "Window") ) {
-                        src.onbeforeunload = fn;
+                    if ( $.type(item.target, "Window") ) {
+                        item.target.onbeforeunload = item.proxy;
                     }
                 },
-                teardown: function( src, _, _, fn ) {
-                    if ( src.onbeforeunload === fn ) {
-                        src.onbeforeunload = null;
-                    }
+                teardown: function( item ) {
+                    item.target.onbeforeunload = $.noop;
                 }
             }
         }
