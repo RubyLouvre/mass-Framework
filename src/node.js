@@ -238,8 +238,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         }
         return null;
     }
-    var matchesAPI = cssName("matchesSelector",$.html)
-    var commonRange = document.createRange && document.createRange();
+    var matchesAPI = cssName("matchesSelector",$.html);
     $.mix({
         cssMap: cssMap,
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
@@ -291,9 +290,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             html = html.replace( rxhtml, "<$1></$2>" ).trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            if( support.fastFragment && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html) ){
-                commonRange.selectNodeContents(doc.body);//fix opera(9.2~11.51) bug,必须对文档进行选取
-                return commonRange.createContextualFragment( html );
+            if( $.commonRange && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html) ){
+                return $.commonRange.createContextualFragment( html );
             }
             if( !support.createAll ){//fix IE
                 html = html.replace(rcreate,"<br class='fix_create_all'/>$1");//在link style script等标签之前添加一个补丁
