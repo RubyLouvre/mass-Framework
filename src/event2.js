@@ -1,7 +1,7 @@
 $.define("event", "node" ,function(){
     $.support.customEvent = false;
     try{
-        var event = new CustomEvent4("mass");
+        var event = new CustomEvent("mass");
         event.initCustomEvent("mass",true,true,{});
         $.support.customEvent = true;
     }catch(e){ };
@@ -65,7 +65,7 @@ $.define("event", "node" ,function(){
             }
             return false;
         },
-        fix: function(event){
+        fix: function(event, type){
             if( !event.originalEvent ){
                 var originalEvent = event
                 event = new jEvent(originalEvent);
@@ -124,6 +124,9 @@ $.define("event", "node" ,function(){
                     }
                 }
             }
+            if(type){
+                event.type = type
+            }
             return event;
         },
 
@@ -152,16 +155,16 @@ $.define("event", "node" ,function(){
                 events.push( item );//用于事件拷贝
                 events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
                 item.proxy = wrapper( item );
-                if( LEVEL2 ){//一个回调绑定一个代理
-                    item.target.addEventListener(type, item.proxy, !!selector )
-                }else if(DOM && events[type+"_count"] == 1 ){
-                    var adapter = eventAdapter[ type ] || {};
-                    adapter.item = item;
-                    if (!adapter.setup || adapter.setup( target, selector, hash.fn, item.proxy ) === false ) {
+                if(events[type+"_count"] == 1){
+                    var adapter = eventAdapter[ type ] || {}
+                    adapter.item = item;//target, selector, hash.fn, item.proxy
+                    if( DOM && (!adapter.setup || adapter.setup( item ) === false ) && !LEVEL2) {
                         $.bind(target, type, item.proxy, !!selector);//所有回调绑定一个代理
                     }
                 }
-                
+                if( LEVEL2 && !eventAdapter[ type ] ){//一个回调绑定一个代理
+                    item.target.addEventListener(type, item.proxy, !!selector )
+                }
             });
         },
         //外部的API已经确保typesr至少为空字符串
@@ -169,7 +172,8 @@ $.define("event", "node" ,function(){
             var target = this, events = $._data( target, "events");
             if(!events ) return;
             var types = hash.type || "", expr = hash.selector;
-            if($["@target"] in target ){ //处理DOM的hover事件
+            var DOM = $["@target"] in target
+            if( DOM ){ //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             types.replace( $.rword, function( old ){
@@ -181,12 +185,9 @@ $.define("event", "node" ,function(){
                         item.target.removeEventListener( type, item.proxy, !!expr);
                     }
                     if( --events[type+"_count"] == 0){
-                        if(!LEVEL2){
-                            if ( !adapter.teardown || adapter.teardown( target, expr, parsed.origType, hash.fn ) === false ) {
-                                item = adapter.item
-                                item && $.unbind(item.target, type, item.proxy, !!expr );
-                                delete adapter.item
-                            }
+                        if( ( item = adapter.item ) &&  (!adapter.teardown || adapter.teardown( target, expr, parsed.origType, hash.fn ) === false )) {
+                            $.unbind(item.target, type, item.proxy, !!expr );
+                            delete adapter.item
                         }
                         delete events[ type+"_count"];
                     }
@@ -204,11 +205,9 @@ $.define("event", "node" ,function(){
             return this;
         },
         _dispatch: function( src, type, event ){
-            event = facade.fix( event );
-            event.type = type;
+            event = facade.fix( event, type );
             for(var i in src){
                 if(src.hasOwnProperty(i)){
-                    $.log(i)
                     facade.dispatch( src[ i ], event );
                 }
             }
@@ -295,9 +294,9 @@ $.define("event", "node" ,function(){
     var wrapper = function(hash){
         var fn = function(event){
             var type = hash.type;
-            console.log(type)
             var detail = firing["@"+ type ] || {}, scope = hash.scope//thisObject
-            var queue = [ hash ]
+            var queue = [ hash ];
+            //$.log("eventAdapter[ type ]" +eventAdapter[ type ])
             if(  eventAdapter[ type ] || !LEVEL2 ){
                 queue = ($._data( scope, "events") || []).concat();
                 var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
@@ -511,22 +510,23 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
  */
     if( !+"\v1" || !$.eventSupport("mouseenter")){
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
+            $.log(type+"ddddddddd")
             eventAdapter[ type ]  = {
-                setup: function( src ){//使用事件冒充
-                    $._data( src, type+"_handle", $.bind( src, mapper, function( e ){ 
-                        var parent = e.relatedTarget;
+                setup: function( item ){//使用事件冒充
+                    item[type+"_handle"]= $.bind( item.target, mapper, function( event ){
+                        var parent = event.relatedTarget;
                         try {
-                            while ( parent && parent !== src ) {
+                            while ( parent && parent !== item.target ) {
                                 parent = parent.parentNode;
                             }
-                            if ( parent !== src ) {
-                                facade._dispatch( [ src ], type, e );
+                            if ( parent !== item.target ) {
+                                facade._dispatch( [ item.target ], type, event );
                             }
-                        } catch(err) { };
-                    }));
+                        } catch(e) { };
+                    })
                 },
-                teardown: function(){
-                    $.unbind( this, mapper, $._data( type+"_handle" ) );
+                teardown: function( item ){
+                    $.unbind( this, mapper, item[ type+"_handle" ] );
                 }
             };
         });
@@ -537,11 +537,9 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
             var notice = 0, focusinNotify = function (event) {
                 var src = event.target;
                 do{//模拟冒泡
-                    if($._data(src, "events")) {
+                    if( $._data(src, "events") ) {
                         facade._dispatch( [ src ], type, event );
-                    } //
-                //  $.log(type)
-                  
+                    } 
                 } while (src = src.parentNode );
             }
             eventAdapter[ type ] = {
@@ -552,7 +550,6 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
                 },
                 teardown: function() {
                     if ( --notice === 0 ) {
-                        
                         document.removeEventListener( mapper, focusinNotify, true );
                     }
                 }
