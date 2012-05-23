@@ -6,7 +6,6 @@ $.define("event", "node" ,function(){
         $.support.customEvent = true;
     }catch(e){ };
     var LEVEL2 = $.support.customEvent;
-  
     var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,  rmapper = /(\w+)_(\w+)/g;
     //如果不存在添加一个
     var facade = $.event = $.event || {};
@@ -127,16 +126,8 @@ $.define("event", "node" ,function(){
             }
             return event;
         },
-        _dispatch: function( src, type, e ){
-            e = facade.fix( e );
-            e.type = type;
-            for(var i in src){
-                if(src.hasOwnProperty(i)){
-                    facade.dispatch( src[ i ], e );
-                }
-            }
-        },
-        bind: function( hash ){//hash 包含type callback times selector
+
+        bind: function( hash ){//hash 包含type fn times selector
             if( arguments.length > 1 ){
                 throw "$.event bind method only need one argument, and it's a hash!"
             }
@@ -149,7 +140,7 @@ $.define("event", "node" ,function(){
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             events = events.events || (events.events = []);
-            hash.uuid = $.getUid( hash.callback ); //确保hash.uuid与callback.uuid一致
+            hash.uuid = $.getUid( hash.fn ); //确保hash.uuid与fn.uuid一致
             types.replace( $.rword, function( old ){
                 var item = parseType(old, selector);//"focusin.aaa.bbb"
                 var type = item.type;
@@ -159,12 +150,16 @@ $.define("event", "node" ,function(){
                     index: events.length
                 }, hash, false);
                 events.push( item );//用于事件拷贝
-                events["@"+type] = ( events["@"+type] | 0 )+ 1;
+                events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
                 item.proxy = wrapper( item );
                 if( LEVEL2 ){//一个回调绑定一个代理
                     item.target.addEventListener(type, item.proxy, !!selector )
-                }else if(DOM && events["@"+type] == 1 ){//所有回调绑定一个代理
-                    $.bind(item.target,type, item.proxy, !!selector )
+                }else if(DOM && events[type+"_count"] == 1 ){
+                    var adapter = eventAdapter[ type ] || {};
+                    adapter.item = item;
+                    if (!adapter.setup || adapter.setup( target, selector, hash.fn, item.proxy ) === false ) {
+                        $.bind(target, type, item.proxy, !!selector);//所有回调绑定一个代理
+                    }
                 }
                 
             });
@@ -178,13 +173,24 @@ $.define("event", "node" ,function(){
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             types.replace( $.rword, function( old ){
-                findHandlers( parseType(old, expr), expr, hash.callback, events).forEach( function(item){
+                var parsed = parseType(old, expr)
+                findHandlers(parsed , expr, hash.fn, events).forEach( function(item){
                     var type = item.type;
-                    item.target.removeEventListener( type, item.proxy, !!expr);
-                    events[item.index] = null;
-                    if( --events["@"+type] == 0){
-                        delete events[ "@"+type ];
+                    var adapter = eventAdapter[type] || {};
+                    if( LEVEL2 ){
+                        item.target.removeEventListener( type, item.proxy, !!expr);
                     }
+                    if( --events[type+"_count"] == 0){
+                        if(!LEVEL2){
+                            if ( !adapter.teardown || adapter.teardown( target, expr, parsed.origType, hash.fn ) === false ) {
+                                item = adapter.item
+                                item && $.unbind(item.target, type, item.proxy, !!expr );
+                                delete adapter.item
+                            }
+                        }
+                        delete events[ type+"_count"];
+                    }
+                    events[item.index] = null;
                 })
             });
             for (var i = events.length; i >=0;i--) {
@@ -197,10 +203,20 @@ $.define("event", "node" ,function(){
             }
             return this;
         },
+        _dispatch: function( src, type, event ){
+            event = facade.fix( event );
+            event.type = type;
+            for(var i in src){
+                if(src.hasOwnProperty(i)){
+                    $.log(i)
+                    facade.dispatch( src[ i ], event );
+                }
+            }
+        },
         dispatch: function(target, event){
-            var queue = $._data(target, "event");
-            if(queue && queue[0]){
-                queue[0].proxy.call(target, event)
+            var adapter = eventAdapter[ event.type ],item;
+            if(adapter && (item = adapter.item )){
+                item.proxy.call(target, event)
             }
         },
         fire: function( event ){
@@ -278,13 +294,15 @@ $.define("event", "node" ,function(){
     };
     var wrapper = function(hash){
         var fn = function(event){
-            var detail = firing["@"+hash.origType] || {}, scope = hash.scope//thisObject
+            var type = hash.type;
+            console.log(type)
+            var detail = firing["@"+ type ] || {}, scope = hash.scope//thisObject
             var queue = [ hash ]
-            if( !LEVEL2 ){
+            if(  eventAdapter[ type ] || !LEVEL2 ){
                 queue = ($._data( scope, "events") || []).concat();
                 var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
                 event = facade.fix( event || win.event )
-                event.type = hash.origType;
+                event.type = type;
                 event.currentTarget = scope;
             }
             var src = event.target;
@@ -293,7 +311,7 @@ $.define("event", "node" ,function(){
                     && ( event.type == item.type )
                     && (!item.selector  || facade.match(src, scope, item.selector))//selector
                     && (!detail.rns || detail.rns.test( item.ns ) ) ) {//fire
-                    var result = item.callback.apply( item.selector ? src : scope, [event].concat(detail.args || []))
+                    var result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []))
                     if ( result !== void 0 ) {
                         event.result = result;
                         if ( result === false ) {
@@ -446,7 +464,7 @@ $.define("event", "node" ,function(){
                 if(typeof el == "number"){
                     hash.times = el;
                 }else if(typeof el == "function"){
-                    hash.callback = el
+                    hash.fn = el
                 }if(typeof el === "string"){
                     if(hash.type != null){
                         hash.selector = el.trim()
@@ -459,7 +477,7 @@ $.define("event", "node" ,function(){
                 }
             }
             if(method === "on"){
-                if( !hash.type || !hash.callback ){//必须指定事件类型与回调
+                if( !hash.type || !hash.fn ){//必须指定事件类型与回调
                     return this;
                 }
                 hash.times = hash.times > 0  ? hash.times : Infinity;
@@ -495,7 +513,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
             eventAdapter[ type ]  = {
                 setup: function( src ){//使用事件冒充
-                    $._data( src, type+"_handle", $.bind( src, mapper, function( e ){
+                    $._data( src, type+"_handle", $.bind( src, mapper, function( e ){ 
                         var parent = e.relatedTarget;
                         try {
                             while ( parent && parent !== src ) {
@@ -514,15 +532,16 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
         });
     }
     //在标准浏览器里面模拟focusin
-    if( !$.eventSupport("focusin") ){
+    if( !$.eventSupport("focusin") ){//现在只有firefox 不支持focusin
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
-            var notice = 0, focusinNotify = function (e) {
-                var src = e.target
+            var notice = 0, focusinNotify = function (event) {
+                var src = event.target;
                 do{//模拟冒泡
-                    var events = $._data( src, "events" );
-                    if(events && events[ type ]){
-                        facade._dispatch( [ src ], type, e );
-                    }
+                    if($._data(src, "events")) {
+                        facade._dispatch( [ src ], type, event );
+                    } //
+                //  $.log(type)
+                  
                 } while (src = src.parentNode );
             }
             eventAdapter[ type ] = {
@@ -533,6 +552,7 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
                 },
                 teardown: function() {
                     if ( --notice === 0 ) {
+                        
                         document.removeEventListener( mapper, focusinNotify, true );
                     }
                 }
