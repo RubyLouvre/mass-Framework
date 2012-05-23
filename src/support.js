@@ -75,8 +75,7 @@ $.define("support", function(){
         support.innerHTML = true;
         table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
-    }catch(e){  }
-   
+    }catch(e){ };
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
@@ -84,8 +83,9 @@ $.define("support", function(){
             return;
         try{
             var range =  DOC.createRange();
-            range.selectNodeContents(body)
-            support.fastFragment = !!range.createContextualFragment("<b></b>")
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !!range.createContextualFragment("<a>");
+            $.commonRange = range;
         }catch(e){ };
         div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
         body.insertBefore( div, body.firstChild );
