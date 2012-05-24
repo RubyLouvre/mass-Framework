@@ -2,67 +2,64 @@
 <html>
     <head>
         <title>mass Framework</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
         <script src="../src/mass.js"></script>
-        <script>
-            $.require("ready,event2",function(){
-                var a = function(e){
-                    $.log("redred");
-                }
-                $("body").delegate("#red","click",a);
-                $("body").delegate("#blue","click",function(e){
-                    $.log("blueblue");
-                });
-                $("body").undelegate({click:a})
-            })
-        </script>
-        <script>
-   
-          
-
-          
-        </script>
-        <script type="bind">
-            $.require("ready,event2",function(){
-                $("body").bind("aaa",function(e){
-                    $.log("11111111111");
-                    $.log(e.preventDefault)
-                });
-                $("#div").bind("click",function(e){
-                    $.log("22222222222");
-                });
-                $("#div").bind("click",function(e){
-                    $.log([].slice.call(arguments));
-                });
-            
-                $("#div").fire("click",1,2,3)
-            })
-        </script>
-        <style id="dd">
+        <style>
             #red {
                 width: 150px;
                 height: 150px;
                 background: red;
+                padding:20px;
             }
             #blue {
-                width: 150px;
-                height: 150px;
+                width: 100px;
+                height: 100px;
                 background: blue;
             }
+            #black {
+                width: 100px;
+                height: 100px;
+                background: black
+            }
         </style>
+        <script >
+
+
+            $.require("ready,event2",function(){
+
+                $("#red").bind("mouseenter",function(e){
+                    $.log("mouseenter!!!!!!!!!!!")
+                });
+                $("#red").bind("click",function(e){
+                    $.log("click!!!!!!!!!!")
+                });
+                $("#red").bind("mouseover",function(e){
+                    $.log("mouseover!!!!!!!!!!!!!")
+                });
+                $("#red").bind("mouseleave",function(e){
+                    $.log("mouseleave")
+                });
+                $("#red").fire("mouseover")
+
+
+            })
+        </script>
 
     </head>
     <body>
         <div id="red" >
+            <div id="blue" >
+
+            </div>
+        </div>
+        <div id="black" >
 
         </div>
-        <div id="blue" >
-
-        </div>
-        $("body").on("mouseup",function(e){
-        $.log("666666666")
-        })
-        $("body").on("click",function(e){
-        $.log("dddddddddddddd")
-        })
+        $("#red").bind("mouseenter",function(e){
+        $.log("11111441111111")
+        });
+        $("#red").bind("mouseenter",function(e){
+        $.log("111111123411111")
+        });
     </body>
 </html>

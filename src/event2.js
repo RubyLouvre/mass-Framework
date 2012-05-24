@@ -5,6 +5,7 @@ $.define("event", "node" ,function(){
         $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
     }catch(e){ };
     var level3 = $.support.customEvent;//DOM Level 3 Events
+    $.log("level3 "+ level3)
     var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,  rmapper = /(\w+)_(\w+)/g;
     //如果不存在添加一个
     var facade = $.event = $.event || {};
@@ -33,6 +34,7 @@ $.define("event", "node" ,function(){
     var adapter = $.event.eventAdapter, firing = {};
     function parseType(event, selector) {//"focusin.aaa.bbb"
         var parts = ('' + event).split('.');
+      
         var ns = parts.slice(1).sort().join(' ');//aaa bbb
         var type = parts[0];
         var hack = adapter[ type ] || {}//focusin -> focus
@@ -257,18 +259,22 @@ $.define("event", "node" ,function(){
             var type = hash.origType, queue = [ hash ], detail = firing["@"+ type ] || {}, scope = hash.scope//thisObject
             if(  adapter[ type ] || !level3 ){
                 var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
-                event = facade.fix( event || win.event, type )
+                event = facade.fix( event || win.event, type );
                 event.currentTarget = scope;
                 queue = ($._data( scope, "events") || []).concat();
+                
             }
+            $.log(event)
+            $.log(hash)
             var src = event.target;
             for ( var i = 0, item; item = queue[i++]; ) {
                 if ( !src.disabled && !(event.button && event.type === "click")//fire
-                    && ( event.type == item.origType )
+                    && ( !event.origType ? event.type == item.origType : event.origType == item.origType)
                     && (!item.selector  || facade.match(src, scope, item.selector))//selector
                     && (!detail.rns || detail.rns.test( item.ns ) ) ) {//fire
                     var result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
                     if ( result !== void 0 ) {
+                  
                         event.result = result;
                         if ( result === false ) {
                             event.preventDefault();
@@ -285,12 +291,15 @@ $.define("event", "node" ,function(){
         fn.uuid = hash.uuid;
         return fn;
     }
+    var oldfire = facade.fire;
     if( level3 ){
-        facade.fire = function(type){
-            var detail = parseType(type, false);
-            type = detail.type;
-            detail.args = $.slice(arguments,1)
-            var DOM = $["@target"] in this, event;
+        facade.fire = function(event){
+            var detail = event.origType ? event : parseType(event, false), type = detail.type;
+            if(detail.origType !== type){
+                return oldfire.apply(this, arguments)
+            }
+            detail.args = $.slice(arguments,1);
+            var DOM = $["@target"] in this;
             firing["@"+type] = detail;
             if( !DOM || !$.eventSupport(type, this) ){
                 event = new CustomEvent(type);
@@ -301,7 +310,7 @@ $.define("event", "node" ,function(){
                 event.initEvent(type, true, true, null, null, null, null, null, null, null, null, null, null, null, null);
             };
             ( DOM ? this : window).dispatchEvent(event);
-            delete firing["@"+type]
+             delete firing["@"+type]
             return this;
         }
     }
@@ -501,6 +510,8 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
     if( !+"\v1" || !$.eventSupport("mouseenter")){
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
             adapter[ type ]  = {
+                bindType    : mapper,
+                delegateType: mapper,
                 setup: function( item ){//使用事件冒充
                     item[type+"_handle"]= $.bind( item.target, mapper, function( event ){
                         var parent = event.relatedTarget;
