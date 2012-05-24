@@ -6,8 +6,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     }catch(e){ };
     var level3 = $.support.customEvent;//DOM Level 3 Events
     // $.log("level3 "+ level3)
-    var rhoverHack = /(?:^|\s)hover(\.\S+)?\b/,  rmapper = /(\w+)_(\w+)/g;
-    //如果不存在添加一个
     var facade = $.event = $.event || {};
     //添加或增强二级属性eventAdapter
     $.Object.merge(facade,{
@@ -31,7 +29,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         }
     });
-    var adapter = $.event.eventAdapter, details = {}, fireType= ""
+    var adapter = $.event.eventAdapter, details = {}, rhoverHack = /(?:^|\s)hover(\.\S+)?\b/
     function parseType(event, selector) {//"focusin.aaa.bbb"
         var parts = ('' + event).split('.');
         var ns = parts.slice(1).sort().join(' ');//aaa bbb
@@ -145,24 +143,23 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 $.mix(item, {
                     scope: target,//this,用于绑定数据的
                     target: !DOM ? window : target,//如果是自定义事件,使用window来代理
-                    index: events.length
+                    index: events.length,
+                    one2more: true
                 }, hash, false);
                 events.push( item );//用于事件拷贝
                 item.proxy = wrapper( item );
                 var count =  events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
-                var hack = adapter[ type ], one2more = true;
+                var hack = adapter[ type ]//, one2more = true;
                 if( level3 && !hack ){//一对一事件绑定
-                    one2more=  false
+                    item.one2more = false
                     item.target.addEventListener(item.type, item.proxy, !!expr )
                 }
                 if(count == 1){
-                    $._data( target, type+"_item", item)
-                    if( DOM && (!hack || !hack.setup || hack.setup( item ) === false ) && one2more) {
-                        //$.log("xxxxxxxxxxxx")
+                    $._data( target, type+"_item", item);//用于$.event.dispatch
+                    if( DOM && item.one2more && (!hack || !hack.setup || hack.setup( item ) === false ) ) {
                         $.bind(target, item.type, item.proxy, !!expr);//一对多事件绑定
                     }
                 }
-               
             });
         },
         //外部的API已经确保typesr至少为空字符串
@@ -176,13 +173,11 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             types.replace( $.rword, function( t ){
                 var parsed = parseType( t, expr), type = parsed.origType, hack = adapter[ type ];
                 findHandlers(events, parsed , hash.fn, expr ).forEach( function(item){
-                    var one2more = true;
-                    if( level3 && !hack ){
-                        one2more = false
+                    if( !item.one2more ){ 
                         item.target.removeEventListener( item.type, item.proxy, !!expr );
                     }
                     if( --events[type+"_count"] == 0 ){
-                        if( DOM && ( !hack || !hack.teardown || hack.teardown( item ) === false ) && one2more ) {
+                        if( DOM && ( !hack || !hack.teardown || hack.teardown( item ) === false ) && item.one2more ) {
                             $.unbind( item.target, item.type, item.proxy, !!expr );
                         }
                         $.removeData( target, type+"_item", true );
@@ -202,16 +197,14 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return this;
         },
         _dispatch: function( src, type, event ){
-            //  if( !firing["@"+event.type ] ){//防止在fire mouseover时把用于冒充mouseenter的mouseover事件也触发了
             event = facade.fix( event, type );
             for(var i in src){
                 if(src.hasOwnProperty(i)){
                     facade.dispatch( src[ i ], event );
                 }
             }
-        // }
         },
-        dispatch: function(target, event){
+        dispatch: function( target, event ){
             var item = $._data(target, event.type + "_item");//取得此元素此类型的第一个item
             item && item.proxy.call(target, event)
         },
@@ -220,7 +213,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 event = new jEvent(event);
             }
             var type = event.origType || event.type;
-
             var detail = parseType(type, false);
             detail.args = [].slice.call(arguments,1) ;
             event.target = this;
@@ -244,9 +236,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     if ( old ) {   // 不用再触发内联事件
                         this[ ontype ] = null;
                     }
-                    fireType = type;
+                    facade.fireType = type;
                     this[ type ]();//模拟默认行为 click() submit() reset() focus() blur()
-                    fireType = ""
+                    delete facade.fireType
                     if ( old ) {
                         this[ ontype ] = old;
                     }
@@ -260,11 +252,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
   
     var wrapper = function( hash ){
         var fn = function(event){
-            var type = hash.origType, queue = [ hash ], detail = details["@"+ type ] || {}, scope = hash.scope//thisObject
-            //   $.log(fireType && fireType == type)
-            if( fireType && fireType == type )
+            var type = hash.origType, queue = [ hash ], detail = details[ "@"+ type ] || {}, scope = hash.scope//thisObject
+            if( facade.fireType === type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
                 return
-            if( adapter[ type ] || !level3  ){//用于事件冒充与一对多事件绑定
+            if( hash.one2more ){//用于事件冒充与一对多事件绑定adapter[ type ] || !level3
                 var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
                 event = facade.fix( event || win.event, type );
                 event.currentTarget = scope;
@@ -298,12 +289,11 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     if( level3 ){
         facade.fire = function(type){
             var detail = type.origType ? type : parseType(type, false)
-            var eventType = detail.origType, event;
+            var eventType = detail.origType, DOM = $["@target"] in this, event;
             if( adapter[ type ] ){
                 return oldfire.apply(this, arguments)
             }
             detail.args = [].slice.call(arguments,1) ;
-            var DOM = $["@target"] in this;
             details["@"+eventType] = detail;//details用于支持多参数与修正事件类型
             if( !DOM || !$.eventSupport(eventType, this) ){
                 event = new CustomEvent(eventType);
@@ -354,7 +344,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
     //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
-    var revent = /(^|_|:)([a-z])/g
+    var revent = /(^|_|:)([a-z])/g, rmapper = /(\w+)_(\w+)/g;
     $.EventTarget = {
         uniqueNumber : $.getUid({}),
         defineEvents : function( names ){
@@ -413,6 +403,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             (!m[3] || m[3].test( (attrs[ "class" ] || {}).value ))
             );
     }
+    //以下是用户使用的API
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
             var fns = [].slice.call(arguments), i = 0;
@@ -452,8 +443,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         }
     });
+    //这个迭代器产生四个重要的事件绑定API on off bind unbind
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
-        $.fn[ method ] = function(types, selector, fn ){//$.fn.on $.fn.off
+        $.fn[ method ] = function(types, selector, fn ){
             if ( typeof types === "object" ) {
                 for ( var type in types ) {
                     $.fn[ method ].call(this, type, selector, types[ type ], fn );
@@ -499,19 +491,16 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     });
     var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup"
-    types.replace( $.rword, function( type ){
+    types.replace( $.rword, function( type ){//这里产生以事件名命名的快捷方法
         $.fn[ type ] = function( callback ){
             return callback?  this.bind( type, callback ) : this.fire( type );
         }
     });
     /**
-用于在标准浏览器下模拟mouseenter与mouseleave
-现在除了IE系列支持mouseenter/mouseleave/focusin/focusout外
-opera11,FF10也支持这四个事件,同时它们也成为w3c DOM3 Event的规范
+mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10都支持它们
 详见http://www.filehippo.com/pl/download_opera/changelog/9476/
-http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
  */
-    if( !+"\v1" || !$.eventSupport("mouseenter")){
+    if( !+"\v1" || !$.eventSupport("mouseenter")){//用于IE6789与safari chrome
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
             adapter[ type ]  = {
                 setup: function( item ){//使用事件冒充
@@ -533,8 +522,8 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
             };
         });
     }
-    //在标准浏览器里面模拟focusin
-    if( !$.eventSupport("focusin") ){//现在只有firefox 不支持focusin
+    //现在只有firefox不支持focusin,focus事件
+    if( !$.eventSupport("focusin") ){
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, focusinNotify = function (event) {
                 var src = event.target;
@@ -593,5 +582,5 @@ http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html
 2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
 2012.4.12 修正触摸屏下的pageX pageY
 2012.5.1 让$.fn.fire支持自定义事件
-2012.5.24 升级到v5
+2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
 */
