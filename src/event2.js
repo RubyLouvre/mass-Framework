@@ -264,12 +264,10 @@ $.define("event", "node" ,function(){
                 queue = ($._data( scope, "events") || []).concat();
                 
             }
-            $.log(event)
-            $.log(hash)
             var src = event.target;
             for ( var i = 0, item; item = queue[i++]; ) {
                 if ( !src.disabled && !(event.button && event.type === "click")//fire
-                    && ( !event.origType ? event.type == item.origType : event.origType == item.origType)
+                    && ( event.type == item.origType )
                     && (!item.selector  || facade.match(src, scope, item.selector))//selector
                     && (!detail.rns || detail.rns.test( item.ns ) ) ) {//fire
                     var result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
