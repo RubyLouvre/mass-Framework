@@ -1,3 +1,6 @@
+//=========================================
+// 动画模块v5
+//==========================================
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     $.support.customEvent = false;
     try{
@@ -179,7 +182,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             var item = $._data(target, event.type + "_item");//取得此元素此类型的第一个item
             item && item.proxy.call(target, event)
         },
-        weave: function( hash ){// 用于对用户回调进行改造,
+        weave: function( hash ){// 用于对用户回调进行改造
             var fn =  function(event){
                 var type = hash.origType, queue = [ hash ], detail = facade.detail || {}, scope = hash.scope//thisObject
                 if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
