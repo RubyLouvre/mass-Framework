@@ -1,5 +1,5 @@
 //=========================================
-// 动画模块v5
+// 事件系统v5
 //==========================================
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     $.support.customEvent = false;
