@@ -5,11 +5,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
     }catch(e){ };
     var level3 = $.support.customEvent;//DOM Level 3 Events
-    // $.log("level3 "+ level3)
+   // $.log("level3 "+ level3)
     var facade = $.event = $.event || {};
-    //添加或增强二级属性eventAdapter
     $.Object.merge(facade,{
-        eventAdapter:{
+        eventAdapter:{  //添加或增强二级属性eventAdapter
             focus: {
                 delegateType: "focusin"
             },
@@ -29,7 +28,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         }
     });
-    var adapter = $.event.eventAdapter, details = {}, rhoverHack = /(?:^|\s)hover(\.\S+)?\b/
+    var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+)?\b/
     function parseType(event, selector) {//"focusin.aaa.bbb"
         var parts = ('' + event).split('.');
         var ns = parts.slice(1).sort().join(' ');//aaa bbb
@@ -147,12 +146,12 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     one2more: true
                 }, hash, false);
                 events.push( item );//用于事件拷贝
-                item.proxy = wrapper( item );
+                item.proxy = facade.weave( item );
                 var count =  events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
                 var hack = adapter[ type ]//, one2more = true;
                 if( level3 && !hack ){//一对一事件绑定
-                    item.one2more = false
-                    item.target.addEventListener(item.type, item.proxy, !!expr )
+                    item.one2more = false;
+                    item.target.addEventListener(item.type, item.proxy, !!expr );
                 }
                 if(count == 1){
                     $._data( target, type+"_item", item);//用于$.event.dispatch
@@ -196,7 +195,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
             return this;
         },
-        _dispatch: function( src, type, event ){
+        _dispatch: function( src, type, event ){//level2
             event = facade.fix( event, type );
             for(var i in src){
                 if(src.hasOwnProperty(i)){
@@ -204,7 +203,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
             }
         },
-        dispatch: function( target, event ){
+        dispatch: function( target, event ){//level2
             var item = $._data(target, event.type + "_item");//取得此元素此类型的第一个item
             item && item.proxy.call(target, event)
         },
@@ -212,12 +211,12 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             if(!event.originalEvent){
                 event = new jEvent(event);
             }
-            var type = event.origType || event.type;
-            var detail = parseType(type, false);
-            detail.args = [].slice.call(arguments,1) ;
             event.target = this;
-            details["@" + event.type] = detail;
-            if( $["@target"] in this){
+            var type = event.origType || event.type;
+            var detail = parseType( type );
+            detail.args = [].slice.call(arguments,1) ;
+            facade.detail = detail;
+            if( $["@target"] in this ){
                 var cur = this,  ontype = "on" + type;
                 do{//模拟事件冒泡与执行内联事件
                     facade.dispatch( cur, event );
@@ -228,73 +227,71 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !event.isPropagationStopped );
-                if ( !event.isDefaultPrevented && ontype && !this.eval //如果用户没有阻止普通行为，并且事件源不为window，并且是原短事件
-                    && this[ type ] && ( type !== "click" || this.nameName == "A" ) //el.click() 竟然会触发元素通过多投事件API绑定的回调
-                    &&((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
+                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，
+                    && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
+                    &&( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
                     ) {
-                    var old = this[ ontype ];
-                    if ( old ) {   // 不用再触发内联事件
-                        this[ ontype ] = null;
-                    }
-                    facade.fireType = type;
-                    this[ type ]();//模拟默认行为 click() submit() reset() focus() blur()
-                    delete facade.fireType
-                    if ( old ) {
-                        this[ ontype ] = old;
-                    }
+                    var inline = this[ ontype ];
+                    this[ ontype ] = null;
+                    var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
+                    this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
+                    this[ type ]();
+                    this.disabled = disabled
+                    this[ ontype ] = inline;
                 }
             }else{//普通对象的自定义事件
                 facade.dispatch(this, event);
             }
-            delete  details["@" + event.type];
+            delete facade.detail
+        },
+        weave: function( hash ){
+            var fn = function(event){
+                var type = hash.origType, queue = [ hash ], detail = facade.detail || {}, scope = hash.scope//thisObject
+                if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
+                    return
+                if( hash.one2more ){//用于事件冒充与一对多事件绑定
+                    var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
+                    event = facade.fix( event || win.event, type );
+                    event.currentTarget = scope;
+                    queue = ($._data( scope, "events") || []).concat();
+                }
+                var src = event.target, result
+                for ( var i = 0, item; item = queue[i++]; ) {
+                    if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
+                        && ( event.type == item.origType )//type
+                        && (!item.selector  || facade.match(src, scope, item.selector))//selector
+                        && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
+                        result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
+                        if ( result !== void 0 ) {
+                            event.result = result;
+                            if ( result === false ) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                        }
+                        if ( event.isImmediatePropagationStopped ) {
+                            break;
+                        }
+                    }
+                }
+                return result;
+            }
+            fn.uuid = hash.uuid;
+            return fn;
         }
     });
   
-    var wrapper = function( hash ){
-        var fn = function(event){
-            var type = hash.origType, queue = [ hash ], detail = details[ "@"+ type ] || {}, scope = hash.scope//thisObject
-            if( facade.fireType === type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
-                return
-            if( hash.one2more ){//用于事件冒充与一对多事件绑定adapter[ type ] || !level3
-                var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
-                event = facade.fix( event || win.event, type );
-                event.currentTarget = scope;
-                queue = ($._data( scope, "events") || []).concat();
-            }
-            var src = event.target;
-            for ( var i = 0, item; item = queue[i++]; ) {
-                if ( !src.disabled && !(event.button && event.type === "click")//fire
-                    && ( event.type == item.origType )
-                    && (!item.selector  || facade.match(src, scope, item.selector))//selector
-                    && (!detail.rns || detail.rns.test( item.ns ) ) ) {//fire
-                    var result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
-                    if ( result !== void 0 ) {
-                        event.result = result;
-                        if ( result === false ) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                    }
-                    if ( event.isImmediatePropagationStopped ) {
-                        break;
-                    }
-                }
-            }
-            return result;
-        }
-        fn.uuid = hash.uuid;
-        return fn;
-    }
+
     var oldfire = facade.fire;
     if( level3 ){
-        facade.fire = function(type){
-            var detail = type.origType ? type : parseType(type, false)
+        facade.fire = function( type ){
+            var detail = type.origType ? type : parseType( type )
             var eventType = detail.origType, DOM = $["@target"] in this, event;
-            if( adapter[ type ] ){
+            if( adapter[ type ] && adapter[ type ].bindType ){ //level3不支持事件冒充
                 return oldfire.apply(this, arguments)
             }
             detail.args = [].slice.call(arguments,1) ;
-            details["@"+eventType] = detail;//details用于支持多参数与修正事件类型
+            facade.detail = detail;
             if( !DOM || !$.eventSupport(eventType, this) ){
                 event = new CustomEvent(eventType);
                 event.initCustomEvent( eventType, true, true, detail );
@@ -303,8 +300,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 event = doc.createEvent("Events");
                 event.initEvent(eventType, true, true, null, null, null, null, null, null, null, null, null, null, null, null);
             };
-            ( DOM ? this : window).dispatchEvent(event);
-            delete details["@"+eventType]
+            var target = DOM ? this : window
+            target.dispatchEvent(event);
+            delete facade.detail
             return this;
         }
     }
