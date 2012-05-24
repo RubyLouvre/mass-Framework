@@ -16,18 +16,11 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             $.event._dispatch( $._data( this, "publisher" ), "change", event );
         }
     }
-    function changeFire( event ){
-        if( !$._data( this,"_just_changed" ) ){
-            $.event._dispatch( $._data( this ,"publisher"), "change", event );
-        }else{
-            $.removeData( this, "_just_changed", true );
-        }
-    }
     function delegate( fn ){ 
         return function( item ){
             var adapter = $.event.eventAdapter, src = item.target, type = item.type,
             fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src );
-            return (fix || item.selector ) ? fn( src, type, item, fix ) : false;
+            return (fix || item.selector ) ? fn( src, item ) : false;
         }
     }
 
@@ -44,29 +37,24 @@ $.define("event_fix", !!document.dispatchEvent, function(){
 
             change: {//change事件的冒泡情况 IE6-9全灭
                 check: function(target){
-                    return rform.test(target.tagName) && /radio|checkbox/.test(target.type)
+                    return !target.disabled && rform.test( target.tagName ) //&& /radio|checkbox|select/.test(target.type)
                 },
-                setup: delegate(function( src, type, item, fix ){
+                setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
-                    item.change_beforeactive = $.bind( src, "beforeactivate", function() {
+                    item.change_beforeactive = $.bind( ancestor, "beforeactivate", function() {
                         var target = event.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
-                            subscriber[ tid ] = target;//表明其已注册
+                            subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ $.getUid(src) ] = src;//此孩子可能同时要向N个顶层元素报告变化
+                            publisher[ $.getUid(ancestor) ] = ancestor;//此孩子可能同时要向N个顶层元素报告变化
                             item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event))
-                            //允许change事件可以通过fireEvent("onchange")触发
-                            if( type === "change"){
-                                item.change_fire = $.bind(target, "change", changeFire.bind(target, event) );
-                            }
                         }
                     })
-                    if( fix ){//如果是事件绑定
-                        src.fireEvent("onbeforeactivate")
-                    }
+                    //如果是事件绑定
+                     ancestor.fireEvent("onbeforeactivate")
                 }),
-                teardown: delegate(function( src, type, item ){
+                teardown: delegate(function( src, item ){
                     $.unbind( src, "beforeactive", item.change_beforeactive );
                     $.unbind( src, "change",  item.change_fire)  ;
                     var els = item.subscriber || {};
@@ -89,7 +77,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             setup: delegate(function( src ){
                 $.fn.on.call( src, "click._"+type+" keypress._"+type, function( e ) {
                     var el = e.target;
-                    if( el.form && (adapter[ type ].keyCode[ e.which] || adapter[ type ].kind[  el.type ] ) ){
+                    if( el.form && (adapter[ type ].keyCode[ e.which ] || adapter[ type ].kind[  el.type ] ) ){
                         facade._dispatch( [ src ], type, e );
                     }
                 });
