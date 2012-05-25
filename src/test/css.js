@@ -2,7 +2,7 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
 
     $.fixture("样式模块-css",{
         "$.css":function(id){
-            return
+
             var node = $('<div id="test-div" width="8px" height="5px"' +
                 'style="padding-left: 2px; ' +
                 'background: transparent; ' +
@@ -40,7 +40,6 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             node.css( 'float', 'right');
 
             expect( node.css( 'float'), id).eq('right',"赋值后重新获取float");
-       
 
             node.css( 'font-size', '100%');
 
@@ -88,7 +87,7 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
             test_filter.remove();
         },
         "$.width/height":function(){
-return
+
             var node = $('<div id="test-div" ' +
                 'style="padding-left: 2pt; ' +
                 'background: transparent; ' +
@@ -99,7 +98,6 @@ return
             node.remove();
         },
         "$.inner/outer width/height": function() {
-     return
             var node = $('<div ' +
                 'style="' +
                 'position:absolute;' +
@@ -126,7 +124,6 @@ return
             node.remove()
         },
         "$.ccs('float')": function() {
-return
             var tag = random.str(5,"float");
             var style = $("<style>." + tag + " {float:left}</style>").appendTo( "head" );
             var node = $("<div class='" + tag + "' style='float:right'/>").appendTo( "body" );
@@ -137,7 +134,6 @@ return
             node.remove();
         },
         "$.ccs('opacity')": function() {
-return
             var tag = random.str(5,"opacity");
             var style = $("<style>." + tag + "  {width:1px;height:1px;opacity:0.55;filter:alpha(opacity=55); }</style>").appendTo("head");
             var node = $("<div class='" + tag + "' style='" +
@@ -154,27 +150,23 @@ return
       
             var node = $('<div style="background:red;width:100px;height:100px;">test</div>').appendTo("body")
             node.css("transform","rotate(15deg) translateX(230px) scale(1.5)")
-           var str = node.css("transform")
-         //   alert(str)
-         //   var array = str.match(/[-+.e\d]+/g).map(function(d){
-          //      return toFixed(d*1)
-         //   })
-         //   $.log(array)
-//            .data("matrix",void 0, true);
-//            expect( data.a.toFixed(2) ).near( "1.45", 0.001 );
-//            expect( data.b.toFixed(2) ).near( "0.39", 0.001 );
-//            expect( data.c.toFixed(2) ).near( "-0.39", 0.001 );
-//            expect( data.d.toFixed(2) ).near( "1.45", 0.001 );
-//            expect( data.tx.toFixed(2) ).near( "222.16", 0.001 );
-//            expect( data.ty.toFixed(2) ).near( "59.53", 0.001 );
+
+            var array =  node.css("transform").match(/[-+.e\d]+/g).map(function(d){
+                return (d * 1).toFixed(2)
+            })
+            expect( array[0] ).near( "1.45", 0.001 );
+            expect( array[1] ).near( "0.39", 0.001 );
+            expect( array[2] ).near( "-0.39", 0.001 );
+            expect( array[3] ).near( "1.45", 0.001 );
+            expect( array[4] ).near( "222.16", 0.001 );
+            expect( array[5] ).near( "59.53", 0.001 );
         },
 
         "$.scrollbarWidth": function() {
-            return
             expect( $.scrollbarWidth() ).log()
         },
         "$.css(el,left)": function(){
-            return
+
             var node = $("<div style='position:absolute;'/>").appendTo("body");
             expect( node.css("left") ).eq((node[0].offsetLeft - document.documentElement.clientLeft) + "px");
             expect( node.offset() ).log();
