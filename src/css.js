@@ -3,29 +3,12 @@
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //$.log( "已加载css模块" );
-    var adapter = $.cssAdapter = $.cssAdapter || {},
-    shortcuts = {
-        c:   "color",
-        h:   "height",
-        o:   "opacity",
-        w:   "width",
-        x:   "left",
-        y:   "top",
-        fs:  "fontSize",
-        st:  "scrollTop",
-        sl:  "scrollLeft",
-        bgc: "backgroundColor",
-        opacity: "opacity",//fix IE
-        "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
-    };
-    for(var name in shortcuts){
-        $.cssMap[ name ]  = shortcuts[ name ]
-    }
+    var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
-                neo = $.cssName(name)
+                neo = $.cssName(name);
                 neo = neo != name ? neo : false
             }
             return $.access( this, name, value, $.css, neo  );
@@ -46,7 +29,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function( node, name, value){
             if(node.style){
-                name = typeof this === "string" ? this : $.cssMap( name );
+                name = typeof this === "string" ? this : $.cssName( name );
                 if( value === void 0){ //取值
                     return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
                 }else {//设值
