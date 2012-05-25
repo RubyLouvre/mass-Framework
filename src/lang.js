@@ -300,6 +300,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                     if( target == null){
                         return this;
                     }else{
+                        if( !(target[name] || $[ this.type ][name]) ){
+                            throw this.type + " has no "+ name +" method!"
+                        }
                         var method = isNative ? target[name] : retouch( $[ this.type ][name] ),
                         next = this.target = method.apply( target, arguments ),
                         type = $.type( next );
@@ -666,7 +669,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             var keys = Object.keys(target);
             for(var i = 0, n = keys.length; i < n; i++){
                 var key = keys[i], value = target[key];
-                if (fn.call(scope || value, key, key, target) === false)
+                if (fn.call(scope || value, value, key, target) === false)
                     break;
             }
             return target;
