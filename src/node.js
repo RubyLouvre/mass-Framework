@@ -218,12 +218,24 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
     var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', '-khtml-', 'ms-']
-    function cssMap(name){
-        return cssMap[name] ||  $.String.camelize( name );
-    }
+    var cssMap = {
+        c:   "color",
+        h:   "height",
+        o:   "opacity",
+        w:   "width",
+        x:   "left",
+        y:   "top",
+        fs:  "fontSize",
+        st:  "scrollTop",
+        sl:  "scrollLeft",
+        bgc: "backgroundColor",
+        opacity: "opacity",//fix IE
+        "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
+    };
     function cssName( name, host, test ){
-        if( cssMap[ name ] )
+        if( cssMap[ name ] ){
             return cssMap[ name ];
+        }
         host = host || $.html.style;
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
             test = $.String.camelize( prefixes[i] + name || "")
@@ -235,7 +247,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     var matchesAPI = cssName("matchesSelector",$.html);
     $.mix({
-        cssMap: cssMap,
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
         match: function( node, expr, i ){
