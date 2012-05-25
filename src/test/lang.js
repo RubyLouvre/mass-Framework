@@ -50,8 +50,12 @@ $.define("lang","lang,more/spec",function( $$ ){
         },
         "$.isArray": function(){
             var iframe = document.createElement('iframe');
+            iframe.style.display = "none";
             document.body.appendChild(iframe);
-            xArray = window.frames[window.frames.length-1].Array;
+            var d = iframe.contentDocument || iframe.contentWindow.document;
+            d.write("<!doctype html><body><script>top.xArray = Array<\/script>")
+            d.close();
+            var xArray = window.xArray
             var arr = new xArray(1,2,3); // [1,2,3]
             expect( $.isArray(arr) ).ok();
             expect( $.isArray([]) ).ok();
@@ -285,7 +289,7 @@ $.define("lang","lang,more/spec",function( $$ ){
                 third: 'Tuesday'
             };
             var b = [];
-            $.lang(a).forEach(function(value){
+            $.lang(a).each(function(value){
                 b.push(value);
             });
             expect( b ).same(["Sunday","Monday","Tuesday"]);
