@@ -22,40 +22,24 @@
                 background: black
             }
         </style>
+
         <script >
-
-
-            $.require("ready,event",function(){
+            $.require("ready,node,css",function(){
+                var node = $('<div id="test-div" width="8px" height="5px"' +
+                    'style="padding-left: 2px; ' +
+                    'background: transparent; ' +
+                    'float: left;' +
+                    'border: 5px solid rgb(0,0,0);">x</div>').appendTo("body");
+                var a =  node.css( 'float')
+                $.log(a)
+                //nav.remove()
+            })
 
            
-                $("#black").bind("click",function(e){
-                    $.log(arguments.length)
-                    //  $.log("click1"+i)
-                });
-                $("#black").bind("click",function(e){
-                    $.log("click2")
-                });
-                $("#black").fire("click",2,5)
-
-            })
         </script>
 
     </head>
     <body>
-        <div id="red" onfocus="$.log('inline focus!')">
-            <div id="blue" >
-
-            </div>
-        </div>
-        <div id="black" onclick="$.log('inline click!')">
-
-        </div>
-        $("#red").bind("focus",function(e){
-        $.log(arguments.length)
-        });
-        $("#red").bind("focus",function(e){
-        $.log(arguments.length)
-        });
-        $("#red").fire("focus",1,2,3)
+        <span id="wb_follow_btn"></span>
     </body>
 </html>

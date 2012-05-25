@@ -264,8 +264,11 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
         access: function( elems, key, value, getter, setter, bind ) {
             var length = elems.length;
+            var args = $.slice(arguments);
+            bind = args.pop()
             setter = typeof setter === "function" ? setter : getter;
-            bind = arguments[arguments.length - 1];
+           // bind = arguments[arguments.length - 1];
+         //   $.log(bind)
             if ( typeof key === "object" ) {
                 for(var k in key){            //为所有元素设置N个属性
                     for ( var i = 0; i < length; i++ ) {

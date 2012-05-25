@@ -8,10 +8,10 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
-                neo = $.cssName(name);
-                neo = neo != name ? neo : false
+                neo = $.cssName(name) || name;
+            // neo = neo != name ? neo : false
             }
-            return $.access( this, name, value, $.css, neo  );
+            return $.access( this, name, value, $.css,  neo  );
         }
     });
 
@@ -29,8 +29,14 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function( node, name, value){
             if(node.style){
-                name = typeof this === "string" ? this : $.cssName( name );
+                // $.log(adapter[ name+":get" ])
+                $.log(typeof this+"!!!!!!")
+                name =  $.cssName( name ) || name
+                // name = typeof this === "string" ? this : $.cssName( name );
                 if( value === void 0){ //取值
+                    $.log("0000000000000000");
+                    $.log(name)
+                    $.log(adapter[ name+":get" ])
                     return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
                 }else {//设值
                     var temp;
@@ -55,6 +61,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     },false);
     //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if ( document.defaultView && document.defaultView.getComputedStyle ) {
+        $.log("000000000000000")
         adapter[ "_default:get" ] = function( node, name ) {
             var ret, defaultView, computedStyle;
             if ( !(defaultView = node.ownerDocument.defaultView) ) {

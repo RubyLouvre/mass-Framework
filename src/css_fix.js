@@ -87,6 +87,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
 
     adapter[ "transform:get" ] = function(node, name){
         var m = $._data(node,"matrix")
+        $.log(name)
         if(!m){
             if(!node.currentStyle.hasLayout){
                 node.style.zoom = 1;
