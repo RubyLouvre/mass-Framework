@@ -84,10 +84,17 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         return ret === "" ? "auto" : border[ret] ||  ret;
     }
     var ident  = "DXImageTransform.Microsoft.Matrix"
+    //deg:degrees 角度,grad grads,百分度 rad	radians, 弧度
+    function toRadian(value) {
+        return ~value.indexOf("deg") ?
+        parseInt(value,10) *  Math.PI/180:
+        ~value.indexOf("grad") ?
+        parseInt(value,10) * Math.PI/200:
+        parseFloat(value);
+    }
 
     adapter[ "transform:get" ] = function(node, name){
         var m = $._data(node,"matrix")
-        $.log(name)
         if(!m){
             if(!node.currentStyle.hasLayout){
                 node.style.zoom = 1;
@@ -104,17 +111,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         }
         return name === true ? m : m.toString();
     }
-    //deg	degrees, 角度
-    //grad	grads, 百分度
-    //rad	radians, 弧度
-    function toRadian(value) {
-        return ~value.indexOf("deg") ?
-        parseInt(value,10) *  Math.PI/180:
-        ~value.indexOf("grad") ?
-        parseInt(value,10) * Math.PI/200:
-        parseFloat(value);
-    }
- 
+
     adapter[ "transform:set" ] = function(node, name, value){
         var m = adapter[ "transform:get" ](node, true).set( 1,0,0,1,0,0 );
         var filter = node.filters[ident];
@@ -153,9 +150,8 @@ $.define("css_fix", !!top.getComputedStyle, function(){
         //http://someguynameddylan.com/lab/transform-origin-in-internet-explorer.php
         });
         node.style.position = "relative";
-        node.style.left = node._mass_left + ( width - node.offsetWidth )/2  + m.tx  + "px";
-        node.style.top = node._mass_top + ( height - node.offsetHeight) /2  + m.ty  + "px";
-        
+        node.style.left = (node._mass_left | 0) + ( width - node.offsetWidth )/2  + m.tx  + "px";
+        node.style.top = (node._mass_top | 0) + ( height - node.offsetHeight) /2  + m.ty  + "px";  
         $._data(node,"matrix",m )
     }
 });
