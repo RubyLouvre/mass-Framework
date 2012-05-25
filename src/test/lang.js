@@ -351,3 +351,4 @@ $.define("lang","lang,more/spec",function( $$ ){
 });
 //2012.4.29
 //将原lang与lang_fix的测试全部合在一起，增加Date, isArray, map, filter等测试
+//更新isArray取得iframe中的Array的逻辑，原xArray = window.frames[window.frames.length-1].Array; 是取不到数组的

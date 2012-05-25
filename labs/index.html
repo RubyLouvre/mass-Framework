@@ -25,41 +25,37 @@
         <script >
 
 
-            $.require("ready,event2",function(){
+            $.require("ready,event",function(){
 
-                $("#red").bind("mouseenter",function(e){
-                    $.log("mouseenter!!!!!!!!!!!")
+           
+                $("#black").bind("click",function(e){
+                    $.log(arguments.length)
+                    //  $.log("click1"+i)
                 });
-                $("#red").bind("click",function(e){
-                    $.log("click!!!!!!!!!!")
+                $("#black").bind("click",function(e){
+                    $.log("click2")
                 });
-                $("#red").bind("mouseover",function(e){
-                    $.log("mouseover!!!!!!!!!!!!!")
-                });
-                $("#red").bind("mouseleave",function(e){
-                    $.log("mouseleave")
-                });
-                $("#red").fire("mouseover")
-
+                $("#black").fire("click",2,5)
 
             })
         </script>
 
     </head>
     <body>
-        <div id="red" >
+        <div id="red" onfocus="$.log('inline focus!')">
             <div id="blue" >
 
             </div>
         </div>
-        <div id="black" >
+        <div id="black" onclick="$.log('inline click!')">
 
         </div>
-        $("#red").bind("mouseenter",function(e){
-        $.log("11111441111111")
+        $("#red").bind("focus",function(e){
+        $.log(arguments.length)
         });
-        $("#red").bind("mouseenter",function(e){
-        $.log("111111123411111")
+        $("#red").bind("focus",function(e){
+        $.log(arguments.length)
         });
+        $("#red").fire("focus",1,2,3)
     </body>
 </html>
