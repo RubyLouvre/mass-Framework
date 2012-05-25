@@ -1,11 +1,20 @@
 $.define("data","more/spec,data",function(){
+    var body = document.body
     $.fixture('数据缓存模块-data', {
         data: function(){
             //使用了data方法的元素或对象都会添加一个叫uniqueNumber的数字属性
-            $.data(document.body,"test1",[1,2,3]);
-            expect(typeof document.body.uniqueNumber === "number").ok();
-            expect($.data(document.body,"test1")).same([1,2,3]);
-            var val = $.data(document.body,"test2",{
+            
+            $.data( body,"test1",[1,2,3]);
+            expect(typeof  body.uniqueNumber === "number").ok();
+            expect($.data( body,"test1")).same([1,2,3]);
+            //现在数据缓存系统是不能为文本节点，注释节点储存任何数据
+            var textNode = document.createTextNode("文本节点");
+            body.appendChild( textNode ); 
+            $.data( textNode,"text","text");
+            expect($.data( textNode,"test1")).eq( void 0 );
+            body.removeChild( textNode );
+
+            var val = $.data( body,"test2",{
                 aa:"aa",
                 bb:"bb"
             });
@@ -14,7 +23,6 @@ $.define("data","more/spec,data",function(){
                 aa:"aa",
                 bb:"bb"
             });
-           
         },
         mergeData: function(){
             var a = {};
@@ -33,34 +41,34 @@ $.define("data","more/spec,data",function(){
             $.data(b,"sex","man");
             //合并数据
             $.mergeData(b,a);
-         //   alert($.data(b))
+            //   alert($.data(b))
             expect($.data(a)).log()
             expect($.data(b)).log()
             delete $.data(b).sex;
             expect($.data(a)).same($.data(b))
         },
         removeData: function(){
-            var val = $.removeData(document.body,"test1");
+            var val = $.removeData( body,"test1");
             expect(val).same([1,2,3]);
-            $.removeData(document.body);
-            expect($.data(document.body)).same({});
+            $.removeData( body );
+            expect( $.data( body )).same({});
         },
         parseData: function(){
-            document.body.setAttribute("data-object","{a:1,b:2,c:3}")
-            var data = $.parseData(document.body, "data-object")
+            body.setAttribute("data-object","{a:1,b:2,c:3}")
+            var data = $.parseData( body, "data-object")
             expect(data).same({
                 a:1,
                 b:2,
                 c:3
             });
-            document.body.setAttribute("data-array","[1,2,3]")
-            data = $.parseData(document.body, "data-array");
+            body.setAttribute("data-array","[1,2,3]")
+            data = $.parseData( body, "data-array");
             expect(data).same([1,2,3]);
-            document.body.setAttribute("data-null","null");
-            data = $.parseData(document.body, "data-null");
+            body.setAttribute("data-null","null");
+            data = $.parseData( body, "data-null");
             expect(data).eq(null);
-            document.body.setAttribute("data-num","20120429");
-            data = $.parseData(document.body, "data-num");
+            body.setAttribute("data-num","20120429");
+            data = $.parseData( body, "data-num");
             expect(data).eq(20120429);
         }
 

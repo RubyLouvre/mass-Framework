@@ -2,7 +2,7 @@ $.define("test/node","more/spec,node",function($$){
     var iframe =  $("<iframe id='test_node' frameBorder=0 style='display:none;width:0px;height:0px;' />" ).appendTo("body");//
     var idoc  =  iframe.contents()[0];
    
-    idoc.write( "<!doctype html><html><body>" );
+    idoc.write( "<!doctype html><html><script>var a = document.createElement('nav');<\/script><body>" );
     idoc.close();
     //=====================================================================================
     var iframe2 =  $("<iframe id='test_node2' frameBorder=0 style='display:none;width:0px;height:0px;' />" ).appendTo("body");//height=0 width=0 frameBorder=0
@@ -17,7 +17,7 @@ $.define("test/node","more/spec,node",function($$){
     var li = $("#aaa li",idoc2);
     var first = $("#aaaa",idoc2);
     var html = '<ul id="test_next"> <li>list item 1</li><li>list item 2</li><li class="third-item">list item 3</li><li>list item 4</li><li>list item 5</li></ul>';
-    $(html ).appendTo(ibody2);
+    $( html ).appendTo(ibody2);
     var thirdItem = $('li.third-item',idoc2);
     //添加另一个测试层级的数据
     var html2 =  '<div id="test-children" class="test-parent">\
@@ -27,7 +27,7 @@ $.define("test/node","more/spec,node",function($$){
                               <p class="test-p" id="test-prev"><em class="test-em"><span><a id="test-parent4">4</a></span></em></p>\
                           <div>\
                    <div id="test-contains">text node</div>'
-    $(html2 ).appendTo(ibody2);
+    $( html2 ).appendTo(ibody2);
     var t = $('#test-parent4',idoc2);
     // $.addTestModule2 =$.noop;
     
