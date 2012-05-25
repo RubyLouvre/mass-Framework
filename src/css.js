@@ -5,13 +5,13 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
+    var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
                 neo = $.cssName(name) || name;
-            // neo = neo != name ? neo : false
             }
-            return $.access( this, name, value, $.css,  neo  );
+            return $.access( this, name, value, $.css,  neo || this );
         }
     });
 
@@ -28,20 +28,14 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         //这里的属性不需要自行添加px
         cssNumber: $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate"),
         css: function( node, name, value){
-            if(node.style){
-                // $.log(adapter[ name+":get" ])
-                $.log(typeof this+"!!!!!!")
-                name =  $.cssName( name ) || name
-                // name = typeof this === "string" ? this : $.cssName( name );
+            if(node.style){//注意string经过call之后，变成String伪对象，不能简单用typeof来检测
+                name = $.type(this, "String") ? this : $.cssName( name ) || name;
                 if( value === void 0){ //取值
-                    $.log("0000000000000000");
-                    $.log(name)
-                    $.log(adapter[ name+":get" ])
                     return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
                 }else {//设值
                     var temp;
                     if ( typeof value === "string" && (temp = rrelNum.exec( value )) ) {
-                        value = ( +( temp[1] + 1) * + temp[2] ) + parseFloat( $.css( node , name, void 0, 1 ) );
+                        value =  ( temp[1] + 1) * temp[2]  + parseFloat( $.css( node, name, void 0) );
                     }
                     if ( isFinite( value ) && !$.cssNumber[ name ] ) {
                         value += "px";
@@ -61,7 +55,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     },false);
     //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if ( document.defaultView && document.defaultView.getComputedStyle ) {
-        $.log("000000000000000")
         adapter[ "_default:get" ] = function( node, name ) {
             var ret, defaultView, computedStyle;
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
@@ -69,7 +62,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
             var underscored = name == "cssFloat" ? "float" :
             name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-            rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
             rmargin = /^margin/, style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle.getPropertyValue( underscored );
@@ -278,7 +270,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //           event.layerX/Y  in Gecko
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
-         */
+     */
  
     var cssPair = {
         Width:['Left', 'Right'],
@@ -294,7 +286,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             var obj = {
                 node: node
             }
-            for ( name in cssShow ) {
+            for (var name in cssShow ) {
                 obj[ name ] = node.style[ name ];
                 node.style[ name ] = cssShow[ name ];
             }
@@ -331,40 +323,73 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return val;
     };
     //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
+    //    "Height,Width".replace( $.rword, function(  name ) {
+    //        var lower = name.toLowerCase();
+    //        $.cssAdapter[ lower+":get" ] = function( node ){
+    //            return getWH( node, name ) + "px";//为适配器添加节点
+    //        }
+    //        $.fn[ "inner" + name ] = function() {
+    //            var node = this[0];
+    //            return node && node.style ? getWH( node, name, 1 ) : null;
+    //        };
+    //        // outerHeight and outerWidth
+    //        $.fn[ "outer" + name ] = function( margin ) {
+    //            var node = this[0], extra = margin === "margin" ? 3 : 2;
+    //            return node && node.style ?  getWH( node,name, extra ) : null;
+    //        };
+    //        $.fn[ lower ] = function( size ) {
+    //            var target = this[0];
+    //            if ( !target ) {
+    //                return size == null ? null : this;
+    //            }
+    //            if ( $.type( target, "Window" ) ) {//取得浏览器工作区的大小
+    //                var doc = target.document, prop = doc.documentElement[ "client" + name ], body = doc.body;
+    //                return doc.compatMode === "CSS1Compat" && prop || body && body[ "client" + name ] || prop;
+    //            } else if ( target.nodeType === 9 ) {//取得页面的大小（包括不可见部分）
+    //                return Math.max(
+    //                    target.documentElement["client" + name],
+    //                    target.body["scroll" + name], target.documentElement["scroll" + name],
+    //                    target.body["offset" + name], target.documentElement["offset" + name]
+    //                    );
+    //            } else if ( size === void 0 ) {
+    //                return getWH( target, name, 0 )
+    //            } else {
+    //                return this.css( lower, size );
+    //            }
+    //        };
+    //    });
     "Height,Width".replace( $.rword, function(  name ) {
-        var lower = name.toLowerCase();
-        $.cssAdapter[ lower+":get" ] = function( node ){
-            return getWH( node, name ) + "px";//为适配器添加节点
-        }
-        $.fn[ "inner" + name ] = function() {
-            var node = this[0];
-            return node && node.style ? getWH( node, name, 1 ) : null;
-        };
-        // outerHeight and outerWidth
-        $.fn[ "outer" + name ] = function( margin ) {
-            var node = this[0], extra = margin === "margin" ? 3 : 2;
-            return node && node.style ?  getWH( node,name, extra ) : null;
-        };
-        $.fn[ lower ] = function( size ) {
-            var target = this[0];
-            if ( !target ) {
-                return size == null ? null : this;
+        var lower = name.toLowerCase(),
+        clientProp = "client" + name,
+        scrollProp = "scroll" + name,
+        offsetProp = "offset" + name;
+        "inner_1,b_0,outer_2".replace(/(\w+)_(\d)/,function(a, b,num){
+            var method = (b == "b" ? "" : b) + name;
+            $.fn[ method ] = function( margin, value ) {
+                num =  b == "outer" && margin === "true" ? 3 : num;
+                return $.access( this, num, value, function( target, num, size ) {
+                    if ( $.isWindow( target ) ) {//取得窗口尺寸
+                        return target.document.documentElement[ clientProp ];
+                    }
+                    if ( target.nodeType === 9 ) {//取得页面尺寸
+                        var doc = target.documentElement;
+                        //IE6/IE7下，<html>的box-sizing默认值本就是border-box
+                        if ( doc[ clientProp ] >= doc[ scrollProp ] ) {
+                            return doc[ clientProp ];
+                        }
+                        return Math.max(
+                            target.body[ scrollProp ], doc[ scrollProp ],
+                            target.body[ offsetProp ], doc[ offsetProp ]
+                            );
+                    }  else if ( size === void 0 ) {
+                        return getWH( target, name, num )
+                    } else {
+                        return num > 0  ? this : $.css( target, lower, size );
+                    }
+                }, this)
             }
-            if ( $.type( target, "Window" ) ) {//取得浏览器工作区的大小
-                var doc = target.document, prop = doc.documentElement[ "client" + name ], body = doc.body;
-                return doc.compatMode === "CSS1Compat" && prop || body && body[ "client" + name ] || prop;
-            } else if ( target.nodeType === 9 ) {//取得页面的大小（包括不可见部分）
-                return Math.max(
-                    target.documentElement["client" + name],
-                    target.body["scroll" + name], target.documentElement["scroll" + name],
-                    target.body["offset" + name], target.documentElement["offset" + name]
-                    );
-            } else if ( size === void 0 ) {
-                return getWH( target, name, 0 )
-            } else {
-                return this.css( lower, size );
-            }
-        };
+        })
+
     });
 
     //=======================================================
@@ -563,7 +588,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     } ;
 
 });
-    /**
+/**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 2011.9.20 v2
@@ -579,6 +604,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.5.10 FIX toFloat BUG
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
-     */
+ */
 
 
