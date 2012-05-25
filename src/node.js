@@ -32,11 +32,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 return merge( this, [expr] );
             }
             this.selector = expr + "";
-            /*            if ( expr === "body" && !context && document.body ) {//分支4:  body
-                this.ownerDocument = document;
-                merge( this, [ document.body ] );
-                return this.selector = "body";
-            }*/
             if ( typeof expr === "string" ) {
                 doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
                 var scope = context || doc;
@@ -290,7 +285,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             html = html.replace( rxhtml, "<$1></$2>" ).trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            if( $.commonRange && doc === document && doc.body && !rcreate.test(html) && !rnest.test(html) ){
+            if( $.commonRange && doc === document && !rcreate.test(html) && !rnest.test(html) ){
                 return $.commonRange.createContextualFragment( html );
             }
             if( !support.createAll ){//fix IE
@@ -361,6 +356,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         area: [ 1, "<map>", "</map>" ],
         _default: [ 0, "", "" ]
     };
+    if(!support.createAll ){//IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
+        translations._default = [ 1, "X<div>", "</div>" ]
+    }
     translations.optgroup = translations.option;
     translations.tbody = translations.tfoot = translations.colgroup = translations.caption = translations.thead;
     translations.th = translations.td;
@@ -488,6 +486,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
         if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
             var outerHTML = document.createElement(node.nodeName).outerHTML;
+            $.log(outerHTML)
             bool = outerHTML.indexOf( unknownTag ) // !0 === true;
         }
         //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
@@ -529,6 +528,9 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             //IE6-8无法复制其内部的元素
             if ( nodeName === "object" ) {
                 clone.outerHTML = src.outerHTML;
+                if ( support.cloneHTML5 && (src.innerHTML && !clone.innerHTML.trim() ) ) {
+                    clone.innerHTML = src.innerHTML;
+                }
             } else if ( nodeName === "input" && (src.type === "checkbox" || src.type == "radio") ) {
                 //IE6-8无法复制chechbox的值，在IE6-7中也defaultChecked属性也遗漏了
                 if ( src.checked ) {
@@ -538,13 +540,14 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 if ( clone.value !== src.value ) {
                     clone.value = src.value;
                 }
-            // IE6-8 无法保持选中状态
             } else if ( nodeName === "option" ) {
-                clone.selected = src.defaultSelected;
-            // IE6-8 无法保持默认值
+                clone.selected = src.defaultSelected; // IE6-8 无法保持选中状态
             } else if ( nodeName === "input" || nodeName === "textarea" ) {
-                clone.defaultValue = src.defaultValue;
+                clone.defaultValue = src.defaultValue;            // IE6-8 无法保持默认值
+            } else if ( nodeName === "script" && clone.text !== src.text ) {
+                clone.text = src.text;//IE6-8不能复制script的text属性
             }
+
         }
     }
     function outerHTML( el ){
