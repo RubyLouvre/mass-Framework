@@ -196,8 +196,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     queue = ($._data( scope, "events") || []).concat();
                 }
                 if(detail.customTarget){
-                     event = facade.fix( event  );
-                     scope = event.target = detail.customTarget
+                    event = facade.fix( event  );
+                    scope = event.target = detail.customTarget
                 }
                 var src = event.target, result;
                 for ( var i = 0, item; item = queue[i++]; ) {
@@ -269,6 +269,18 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     if ( !event.which && isFinite(button) ) {
                         event.which  = [0,1,3,0,2,0,0,0][button];//0现在代表没有意义
                     }
+                    if( type === "mousewheel" ){ //处理滚轮事件
+                        if ("wheelDelta" in originalEvent){//统一为±120，其中正数表示为向上滚动，负数表示向下滚动
+                            // http://www.w3help.org/zh-cn/causes/SD9015
+                            var delta = originalEvent.wheelDelta
+                            //opera 9x系列的滚动方向与IE保持一致，10后修正
+                            if( window.opera && opera.version() < 10 )
+                                delta = -delta;
+                            event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
+                        }else if( "detail" in originalEvent ){
+                            event.wheelDelta = -event.detail * 40;
+                        }
+                    }
                 }
                 if ( event.which == null ) {//处理键盘事件
                     event.which = event.charCode != null ? event.charCode : event.keyCode;
@@ -277,18 +289,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     event.pageX = event.touches[0].pageX//处理触摸事件
                     event.pageY = event.touches[0].pageY
                 }
-                if( type === "mousewheel" ){ //处理滚轮事件
-                    if ("wheelDelta" in originalEvent){//统一为±120，其中正数表示为向上滚动，负数表示向下滚动
-                        // http://www.w3help.org/zh-cn/causes/SD9015
-                        var delta = originalEvent.wheelDelta
-                        //opera 9x系列的滚动方向与IE保持一致，10后修正
-                        if( window.opera && opera.version() < 10 )
-                            delta = -delta;
-                        event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
-                    }else if( "detail" in originalEvent ){
-                        event.wheelDelta = -event.detail * 40;
-                    }
-                }
+             
             }
             if( type ){
                 event.type = type
