@@ -185,7 +185,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         },
         weave: function( hash ){// 用于对用户回调进行改造
             var fn =  function(event){
-                var type = hash.origType, queue = [ hash ], detail = facade.detail || {}, scope = hash.scope//thisObject
+                var type = hash.origType, queue = [ hash ], detail = facade.detail || {},
+                scope = hash.scope//thisObject
                 if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
                     return
                 if( hash.one2more ){//level2 逻辑,以实现事件对象的标准化,多参化,
@@ -194,7 +195,11 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     event.currentTarget = scope;
                     queue = ($._data( scope, "events") || []).concat();
                 }
-                var src = event.target, result
+                if(detail.customTarget){
+                     event = facade.fix( event  );
+                     scope = event.target = detail.customTarget
+                }
+                var src = event.target, result;
                 for ( var i = 0, item; item = queue[i++]; ) {
                     if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
                         && ( event.type == item.origType )//type
@@ -305,6 +310,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             facade.detail = detail;
             if( !DOM  ){
                 event = new CustomEvent(eventType);
+                detail.customTarget = this;
                 event.initCustomEvent( eventType, true, true, detail );
             }else{
                 var doc = this.ownerDocument || this.document || this;
@@ -461,7 +467,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
                 return this;
             }
-            var hash = {}; // $.log([].slice.call(arguments) +"")
+            var hash = {};
             for(var i = 0 ; i < arguments.length; i++ ){
                 var el = arguments[i];
                 if(typeof el == "number"){
@@ -594,4 +600,5 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.4.12 修正触摸屏下的pageX pageY
 2012.5.1 让$.fn.fire支持自定义事件
 2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
+2012.5.26 修正自定义事件target与this的指向
      */
