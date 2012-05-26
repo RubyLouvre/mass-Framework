@@ -490,7 +490,7 @@ $.define("api", function(){
                 "hide": "function",
                 "puff": "function"
             },
-            "easings": "object",
+            "easing": "object",
             "fx": "function",
             "show": "function",
             "hide": "function",

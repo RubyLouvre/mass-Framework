@@ -43,6 +43,7 @@ $.define("fx", "css",function(){
             nodes = nodes.mass ? nodes : $(nodes);
             var props =  hash || duration ;
             props = typeof props === "object" ? props : {}
+           
             if(typeof duration === "function"){// fx(obj fn)
                 hash = duration;               // fx(obj, 500, fn)
                 duration = 500;
@@ -65,7 +66,7 @@ $.define("fx", "css",function(){
                     }
                 }
             }
-            return nodes.fx(duration, props);
+            return nodes.fx(duration || 500, props);
         },
         //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
         //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;

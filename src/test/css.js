@@ -95,6 +95,8 @@ $.define("css","ready,more/random,more/spec,node,css",function(_,random){
                 'border: 5px solid rgb(0,0,0);">x</div>').appendTo("body");
             expect( node.width() ).near(  7, 1.35 );
             expect( node.height() ).near( 19, 1 );
+            node.width(200);
+            expect( node.height() ).near( 200, 1 );
             node.remove();
         },
         "$.inner/outer width/height": function() {
