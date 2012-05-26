@@ -39,6 +39,8 @@ $.define("support", function(){
         cloneHTML5: DOC.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
         //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
         cloneNode: true,
+        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
+        focusin : $["@target"] === "attachEvent",//IE肯定支持
         //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
         innerHTML: false,
         //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
@@ -95,7 +97,15 @@ $.define("support", function(){
         div.style.cssText = "width:20px;"
         div.innerHTML = "<div style='width:40px;'></div>";
         support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
-        div.innerHTML = ""
+        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
+        div.innerHTML = "<a href='#'></a>"
+        if(!support.focusin){
+            var a = div.firstChild;
+            a.addEventListener('focusin', function(){
+                support.focusin = true;
+            }, false);
+            a.focus();
+        }
         div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
         support.boxModel = div.offsetWidth === 20;
         if( window.getComputedStyle ) {
