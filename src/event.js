@@ -155,7 +155,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 } while ( cur && !event.isPropagationStopped );
                 if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，
                     && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
-                    &&( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
+                    && (type !== "click"|| this.nodeName == "A")
+                    && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
                     ) {
                     var inline = this[ ontype ];
                     var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
@@ -302,7 +303,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
             detail.args = [].slice.call(arguments,1) ;
             facade.detail = detail;
-            if( !DOM || !$.eventSupport(eventType, this) ){
+            if( !DOM  ){
                 event = new CustomEvent(eventType);
                 event.initCustomEvent( eventType, true, true, detail );
             }else{
@@ -507,8 +508,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     /**
 mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10都支持它们
 详见http://www.filehippo.com/pl/download_opera/changelog/9476/
- */
-    if( !+"\v1" || !$.eventSupport("mouseenter")){//用于IE6789与safari chrome
+     */
+    if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
             adapter[ type ]  = {
                 setup: function( item ){//使用事件冒充
@@ -530,18 +531,20 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
             };
         });
     }
-    //现在只有firefox不支持focusin,focus事件
-    if( !$.eventSupport("focusin") ){
+    //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
+    if( !$.support.focusin ){
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, focusinNotify = function (event) {
                 var src = event.target;
                 do{//模拟冒泡
                     if( $._data(src, "events") ) {
                         facade._dispatch( [ src ], type, event );
-                    } 
+                    }
                 } while (src = src.parentNode );
             }
             adapter[ type ] = {
+                bindType    : rmapper,
+                delegateType: rmapper,
                 setup: function( ) {
                     if ( notice++ === 0 ) {
                         document.addEventListener( mapper, focusinNotify, true );
@@ -570,7 +573,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     }catch(e){};
 
 });
-/**
+    /**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
 2011.9.17 事件发送器增加一个uniqueID属性
 2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
@@ -591,4 +594,4 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.4.12 修正触摸屏下的pageX pageY
 2012.5.1 让$.fn.fire支持自定义事件
 2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
-*/
+     */
