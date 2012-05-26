@@ -282,7 +282,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         display: "block"
     }
     var showHidden = function(node, array){
-        if( node && node.nodeType ==1 && !node.offsetWidth ){
+        if( node && node.nodeType == 1 && !node.offsetWidth ){
             var obj = {
                 node: node
             }
@@ -296,13 +296,13 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
         }
     }
-
+    $.support.boxSizing = $.cssName( "boxSizing")
     function getWH( node, name, extra  ) {//注意 name是首字母大写
         var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
         showHidden( node, hidden );
-        var rect = node[ RECT ] && node[ RECT ]() || node.ownerDocument.getBoxObjectFor(node),
-        val = node["offset" + name] ||  rect[which[1].toLowerCase()] - rect[which[0].toLowerCase()];
-        extra = extra || 0;
+        var val = node["offset" + name]
+        //if($.support.boxSizing && $.css(node, "boxSizing" ) === "border-box" && extra == 0 ){ return val;  }
+        //innerWidth = paddingWidth outerWidth = borderWidth, width = contentWidth
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -323,52 +323,20 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         return val;
     };
     //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
-    //    "Height,Width".replace( $.rword, function(  name ) {
-    //        var lower = name.toLowerCase();
-    //        $.cssAdapter[ lower+":get" ] = function( node ){
-    //            return getWH( node, name ) + "px";//为适配器添加节点
-    //        }
-    //        $.fn[ "inner" + name ] = function() {
-    //            var node = this[0];
-    //            return node && node.style ? getWH( node, name, 1 ) : null;
-    //        };
-    //        // outerHeight and outerWidth
-    //        $.fn[ "outer" + name ] = function( margin ) {
-    //            var node = this[0], extra = margin === "margin" ? 3 : 2;
-    //            return node && node.style ?  getWH( node,name, extra ) : null;
-    //        };
-    //        $.fn[ lower ] = function( size ) {
-    //            var target = this[0];
-    //            if ( !target ) {
-    //                return size == null ? null : this;
-    //            }
-    //            if ( $.type( target, "Window" ) ) {//取得浏览器工作区的大小
-    //                var doc = target.document, prop = doc.documentElement[ "client" + name ], body = doc.body;
-    //                return doc.compatMode === "CSS1Compat" && prop || body && body[ "client" + name ] || prop;
-    //            } else if ( target.nodeType === 9 ) {//取得页面的大小（包括不可见部分）
-    //                return Math.max(
-    //                    target.documentElement["client" + name],
-    //                    target.body["scroll" + name], target.documentElement["scroll" + name],
-    //                    target.body["offset" + name], target.documentElement["offset" + name]
-    //                    );
-    //            } else if ( size === void 0 ) {
-    //                return getWH( target, name, 0 )
-    //            } else {
-    //                return this.css( lower, size );
-    //            }
-    //        };
-    //    });
     "Height,Width".replace( $.rword, function(  name ) {
         var lower = name.toLowerCase(),
         clientProp = "client" + name,
         scrollProp = "scroll" + name,
         offsetProp = "offset" + name;
-        "inner_1,b_0,outer_2".replace(/(\w+)_(\d)/,function(a, b,num){
-            var method = (b == "b" ? "" : b) + name;
+        $.cssAdapter[ lower+":get" ] = function( node ){
+            return getWH( node, name, 0 ) + "px";//添加相应适配器
+        }
+        "inner_1,b_0,outer_2".replace(/(\w+)_(\d)/g,function(a, b, num){
+            var method = b == "b" ? lower : b + name;
             $.fn[ method ] = function( margin, value ) {
-                num =  b == "outer" && margin === "true" ? 3 : num;
+                num = b == "outer" && margin === true ? 3 : num;
                 return $.access( this, num, value, function( target, num, size ) {
-                    if ( $.isWindow( target ) ) {//取得窗口尺寸
+                    if ( $.type( target,"Window" ) ) {//取得窗口尺寸
                         return target.document.documentElement[ clientProp ];
                     }
                     if ( target.nodeType === 9 ) {//取得页面尺寸
@@ -474,7 +442,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return pos;
     }
-
 
     var rroot = /^(?:body|html)$/i;
     $.implement({
@@ -602,6 +569,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.4.16 重构showHidden
 2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
 2012.5.10 FIX toFloat BUG
+2012.5.26 重构$.fn.width, $.fn.height,$.fn.innerWidth, $.fn.innerHeight, $.fn.outerWidth, $.fn.outerHeight
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
  */
