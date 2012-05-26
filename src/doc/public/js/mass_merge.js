@@ -5211,6 +5211,7 @@ $.define("fx", "css",function(){
             nodes = nodes.mass ? nodes : $(nodes);
             var props =  hash || duration ;
             props = typeof props === "object" ? props : {}
+           
             if(typeof duration === "function"){// fx(obj fn)
                 hash = duration;               // fx(obj, 500, fn)
                 duration = 500;
@@ -5222,10 +5223,10 @@ $.define("fx", "css",function(){
                 for(var i in effects){
                     if(typeof effects[i] === "function"){
                         var old = props[i];
-                        props[i] = function(node, fn ){
-                            effects[i].call(node, node, fn);
+                        props[i] = function(node, fx ){
+                            effects[i].call(node, node, fx);
                             if(typeof old === "function"){
-                                old.call(node, node, fn);
+                                old.call(node, node, fx);
                             }
                         }
                     }else{
@@ -5233,7 +5234,7 @@ $.define("fx", "css",function(){
                     }
                 }
             }
-            return nodes.fx(duration, props);
+            return nodes.fx(duration || 500, props);
         },
         //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
         //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
@@ -5323,7 +5324,7 @@ $.define("fx", "css",function(){
             }
             for(var i = 0, node; node = this[i++];){
                 var fx = new Fx;
-                fx.orig = hash;
+                $.mix(fx, hash)
                 fx.method = "noop"
                 fx.duration = duration
                 fx.symbol = node;
@@ -5459,15 +5460,13 @@ $.define("fx", "css",function(){
     var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record");
     //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
     function fxBuilder(node, fx, index ){
-        var to, parts, unit, op, props = [], revertProps = [], hidden = !visible(node);
-        var hash = fx.orig;//这个属性会被hash.orig所覆盖
-        var orig = hash.orig = {};
-        for(var name in hash){
-            if(keyworks[name]){
+        var to, parts, unit, op, props = [], revertProps = [],orig = {}, hidden = !visible(node);
+        for(var name in fx){
+            if(!fx.hasOwnProperty(name) && keyworks[name]){
                 continue
             }
-            var val = hash[name] //取得结束值
-            var easing = hash.easing;//公共缓动公式
+            var val = fx[name] //取得结束值
+            var easing = fx.easing;//公共缓动公式
             var type = $.fx.type(name);
             var from = ($.fx[ type ] || $.fx._default)(node, name);//取得起始值
             //用于分解属性包中的样式或属性,变成可以计算的因子
@@ -5529,11 +5528,9 @@ $.define("fx", "css",function(){
                 from: to
             }))
         }
-        for( name in hash){
-            fx[ name ] = hash[ name ];
-        }
         fx.props = props;
-        if ( hash.record || hash.revert ) {
+        fx.orig = orig;
+        if ( fx.record || fx.revert ) {
             var fx2 = new Fx;//回滚到最初状态
             for( name in fx ){
                 fx2[ name ] = fx[ name ];
@@ -5550,13 +5547,13 @@ $.define("fx", "css",function(){
     function animate( fx, index ) {
         var node = fx.symbol, now =  +new Date, mix;
         if(!fx.startTime){//第一帧
+            mix = fx.before;//位于动画的最前面
+            mix && ( mix.call( node, node, fx ), fx.before = 0 );
             if(!fx.props){//from这个值必须在此个时间点才能侦察正确
                 fxBuilder( fx.symbol, fx, index ); //添加props属性与设置负向列队
             }
             $[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
-            mix = fx.before
-            mix && ( mix.call( node, node, fx ), fx.before = 0 );
         }else{
             var per = (now - fx.startTime) / fx.duration;
             var end = fx.gotoEnd || per >= 1;
@@ -5626,8 +5623,6 @@ $.define("fx", "css",function(){
         });
     }
  
-
-
     var fxAttrs = [ [ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
     [ "width", "marginLeft", "marginRight", "paddingLeft", "paddingRight" ], ["opacity"]]
     function genFx( type, num ) {//生成属性包
@@ -5696,7 +5691,7 @@ $.define("fx", "css",function(){
         left = $.css(node,"left"),
         top = $.css(node,"top");
         node.style.position = "relative";
-        $.mix(fx.orig, {
+        $.mix(fx, {
             width: "*=1.5",
             height: "*=1.5",
             opacity: "hide",
