@@ -3,8 +3,40 @@ $.define("event","more/spec,event",function(){
     window.eventTestCall = function(){
         var idoc = iframe.contents()[0];
         $.fixture("事件模块-event",{
-            "mouseover, mouseenter": function(id){
-                return
+            "fire complicated event": function(id){
+                $(document).keyup(function(e){
+                    expect( e.type, id ).eq( "keyup" );
+                    $.log("fire complicated event "+ e.type);
+                    $(this).unbind(e.type)
+                }).fire("keyup");
+                $(document).mousedown(function(e){
+                    expect( e.type, id ).eq( "mousedown" );
+                    $.log("fire complicated event "+ e.type);
+                    $(this).unbind(e.type)
+                }).fire("mousedown");
+                $(document).mouseup(function(e){
+                    expect( e.type, id ).eq( "mouseup" );
+                    $.log("fire complicated event "+ e.type);
+                    $(this).unbind(e.type)
+                }).fire("mouseup");
+                $(document).contextmenu(function(e){
+                    expect( e.type, id ).eq( "contextmenu" );
+                    $.log("fire complicated event "+ e.type);
+                    $(this).unbind(e.type)
+                }).fire("contextmenu");
+                $(document).mousemove(function(e){
+                    expect( e.type, id ).eq( "mousemove" );
+                    $.log("fire complicated event "+ e.type);
+                    $(this).unbind(e.type)
+                }).fire("mousemove");
+                $("body").mousewheel(function(e){
+                    expect( e.type, id ).eq( "mousewheel" );
+                    $.log("fire complicated event "+ e.type);
+                    $(this).unbind(e.type)
+                }).fire("mousewheel")
+            },
+
+            "fire mouseover, mouseenter": function(id){
                 var node = $("#mouseenter",idoc);
                 node.mouseover(function(e){
                     expect( e.type, id ).eq( "mouseover" );
@@ -17,8 +49,7 @@ $.define("event","more/spec,event",function(){
                 node.fire("mouseover");
                 node.fire("mouseenter")
             },
-            "mouseleave": function(id){
-                return
+            "fire mouseleave": function(id){
                 var node = $("#mouseenter",idoc);
                 node.mouseleave(function(e){
                     expect( e.type, id ).eq( "mouseleave" );
@@ -27,7 +58,6 @@ $.define("event","more/spec,event",function(){
                 node.fire("mouseleave")
             },
             "click":function(id){
-                return
                 var a = $("#domtree,#domtree div",idoc).click(function(e){
                     expect( e.type, id ).eq( "click" );
                 });
@@ -49,6 +79,17 @@ $.define("event","more/spec,event",function(){
                     e.target.style.color = "red";
                 });
                 $("#focus_input",idoc).fire("focusin");//DOMFocusIn
+            },
+            "event clone": function(id){
+                var source = $("#source",idoc).click(function(e){
+                    $.log(e.type+":"+this.innerHTML)
+                    expect(e.type+":"+this.innerHTML, id ).eq( "click:clone" );
+                }).mousedown(function(e){
+                    $.log(e.type+":"+this.innerHTML);
+                    expect(e.type+":"+this.innerHTML, id ).eq( "mousedown:clone" );
+                });
+                var clone = source.clone(true).html("clone").afterTo(source)
+                clone.fire("click").fire("mousedown")
             },
             "mass_fire": function( id ){
                 var form = $("#form", idoc);
