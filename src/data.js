@@ -110,17 +110,14 @@ $.define("data", "lang", function(){
             }
         },
         //合并数据
-        mergeData:function(neo, src){
-            var srcData = $._data(src), neoData = $._data(neo), events = srcData.events;
-            if(srcData && neoData){
-                $.Object.merge( neoData, srcData );
+        mergeData: function( cur, src){
+            var oldData  = $._data(src), curData  = $._data(cur), events = oldData .events;
+            if(oldData  && curData ){
+                $.Object.merge( curData , oldData  );
                 if(events){
-                    delete neoData.callback;
-                    neoData.events = {};
-                    for ( var type in events ) {
-                        for (var i = 0, obj ; obj =  events[ type ][i++]; ) {
-                            $.event.bind.call( neo, obj );
-                        }
+                    curData .events = [];
+                    for (var i = 0, item ; item =  events[i++]; ) {
+                        $.event.bind.call( cur, item );
                     }
                 }
             }
