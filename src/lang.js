@@ -214,7 +214,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 //使用new Function生成一个JSON对象
                 return (new Function( "return " + data ))();
             }
-            $.error( "Invalid JSON: " + data );
+            throw "Invalid JSON: " + data ;
         },
 
         // Cross-browser xml parsing
@@ -232,7 +232,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 xml = undefined;
             }
             if ( !xml || !xml.documentElement || xml.getElementsByTagName( "parsererror" ).length ) {
-                $.error( "Invalid XML: " + data );
+                throw "Invalid XML: " + data ;
             }
             return xml;
         }
@@ -301,7 +301,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                         return this;
                     }else{
                         if( !(target[name] || $[ this.type ][name]) ){
-                            throw this.type + " has no "+ name +" method!"
+                            throw "$."+ this.type + "."+name+" does not exist!"
                         }
                         var method = isNative ? target[name] : retouch( $[ this.type ][name] ),
                         next = this.target = method.apply( target, arguments ),
