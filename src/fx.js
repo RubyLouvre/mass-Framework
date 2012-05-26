@@ -632,22 +632,22 @@ $.define("fx", "css",function(){
         return cacheDisplay[ nodeName ];
     }
 })
-
-//2011.10.10 改进$.fn.stop
-//2011.10.20 改进所有特效函数，让传参更加灵活
-//2011.10.21 改进内部的normalizer函数
-//2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
-//2012.5.17 升级到  v4
-//2012.5.19 $.fx.parse.transform FIX BUG
-//http://caniuse.com/
-//http://gitcp.com/sorenbs/jsgames-articles/resources
-//http://www.kesiev.com/akihabara/
-//http://www.effectgames.com/effect/
-//http://www.effectgames.com/effect/#Article/joe/My_HTML5_CSS3_Browser_Wish_List
-//http://www.effectgames.com/games/absorb-hd/
-//日本人写的框架,可以参考一下其事件部分http://www.karmagination.com/
-//http://shanabrian.com/web/library/cycle.php
-//http://slodive.com/freebies/jquery-animate/
-//http://wonderfl.net/search?page=2&q=DoTweener
-//http://www.phoboslab.org/ztype/
-//http://kangax.github.com/fabric.js/kitchensink/
+/**
+2011.10.10 改进$.fn.stop
+2011.10.20 改进所有特效函数，让传参更加灵活
+2011.10.21 改进内部的normalizer函数
+2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
+2012.5.17 升级到  v4
+2012.5.19 $.fx.parse.transform FIX BUG
+http://caniuse.com/
+http://gitcp.com/sorenbs/jsgames-articles/resources
+http://www.kesiev.com/akihabara/
+http://www.effectgames.com/effect/
+http://www.effectgames.com/effect/#Article/joe/My_HTML5_CSS3_Browser_Wish_List
+http://www.effectgames.com/games/absorb-hd/
+http://shanabrian.com/web/library/cycle.php
+http://slodive.com/freebies/jquery-animate/
+http://wonderfl.net/search?page=2&q=DoTweener
+http://www.phoboslab.org/ztype/
+http://kangax.github.com/fabric.js/kitchensink/
+*/
