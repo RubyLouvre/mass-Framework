@@ -1,9 +1,8 @@
-$.define("data","more/spec,data",function(){
+$.define("data","ready,more/spec,data",function(){
     var body = document.body
     $.fixture('数据缓存模块-data', {
         data: function(){
             //使用了data方法的元素或对象都会添加一个叫uniqueNumber的数字属性
-            
             $.data( body,"test1",[1,2,3]);
             expect(typeof  body.uniqueNumber === "number").ok();
             expect($.data( body,"test1")).same([1,2,3]);

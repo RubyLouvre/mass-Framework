@@ -1,5 +1,5 @@
 $.define("event","more/spec,event",function(){
-    var iframe =  $("<iframe id='test_event' width=90% height=300 src='/test/event.html' frameBorder=0  />" ).appendTo("body");//style='display:none;width:0px;height:0px;'
+    var iframe =  $("<iframe id='test_event' style='display:none;width:0px;height:0px;' src='/test/event.html' frameBorder=0  />" ).appendTo("body");//
     window.eventTestCall = function(){
         var idoc = iframe.contents()[0];
         $.fixture("事件模块-event",{
