@@ -1,70 +1,86 @@
 $.define("event","more/spec,event",function(){
-    var iframe =  $("<iframe id='test_event' style='display:none;width:0px;height:0px;' src='/test/event.html' frameBorder=0  />" ).appendTo("body");//
+    var iframe =  $("<iframe id='test_event' width=90% height=300 src='/test/event.html' frameBorder=0  />" ).appendTo("body");//style='display:none;width:0px;height:0px;'
     window.eventTestCall = function(){
         var idoc = iframe.contents()[0];
         $.fixture("事件模块-event",{
-            "native_fire": function( id ){
-                var form = $("#form1",idoc);
-                form.submit(function(e){
-                    $.log("fire submit successly!")
-                    expect( e.type, id ).eq( "submit" );
+            "mouseover, mouseenter": function(id){
+                return
+                var node = $("#mouseenter",idoc);
+                node.mouseover(function(e){
+                    expect( e.type, id ).eq( "mouseover" );
+                    $.log("mouseover")
                 });
-                var input = $("#input1",idoc);
-                input.change(function(e){
-                    expect( e.type, id ).eq( "change" );
+                node.mouseenter(function(e){
+                    expect( e.type, id ).eq( "mouseenter" );
+                    $.log("mouseenter")
                 });
-                var select = $("#select1",idoc);
-                select.change(function(e){
-                    expect( e.type, id ).eq( "change" );
+                node.fire("mouseover");
+                node.fire("mouseenter")
+            },
+            "mouseleave": function(id){
+                return
+                var node = $("#mouseenter",idoc);
+                node.mouseleave(function(e){
+                    expect( e.type, id ).eq( "mouseleave" );
+                    $.log("mouseleave")
                 });
-
-                function fireEvent(el, type, e){
-                    if ( document.dispatchEvent ){
-                        e = document.createEvent("HTMLEvents");
-                        e.initEvent(type, true, true );
-                        el.dispatchEvent( e );
-                    }else {
-                        el.fireEvent( 'on'+type );
+                node.fire("mouseleave")
+            },
+            "click":function(id){
+                return
+                var a = $("#domtree,#domtree div",idoc).click(function(e){
+                    expect( e.type, id ).eq( "click" );
+                });
+                var tabindex = []
+                a.eq(0).find("div").each(function(el){
+                    el.onclick = function(){
+                        var a = this.tabIndex || this.tabindex;
+                        $.log(a)
+                        tabindex.push(a);
                     }
-                }
-
-                fireEvent(form[0], "submit");
-                fireEvent(input[0], "change");
-                fireEvent(select[0], "change");
+                });
+                a.filter(".inner").fire("click");
+                expect( tabindex.join(","),id ).eq( "5,4,3,2,1" );
+                
+            },
+            "focusin": function(id){
+                $("#focusin",idoc).bind("focusin",function(e){
+                    expect( e.target.id,id ).eq( "focus_input" );
+                    e.target.style.color = "red";
+                });
+                $("#focus_input",idoc).fire("focusin");//DOMFocusIn
             },
             "mass_fire": function( id ){
-                var form = $("#form2",idoc);
+                var form = $("#form", idoc);
                 form.submit(function(e){
-                    expect( e.type, id ).eq( "submit" );
+                    $.log(e.type+":"+e.currentTarget.nodeName)
+                    expect(e.type+":"+e.currentTarget.nodeName, id).eq("submit:FORM")
                 });
                 //测试冒泡
-                $("body",idoc).submit(function(e){
-                    expect( e.type+"_body", id ).eq( "submit_body" );
+                $("body", idoc).submit(function(e){
+                    $.log(e.type+":"+e.currentTarget.nodeName);
+                    expect(e.type+":"+e.currentTarget.nodeName, id).eq("submit:BODY")
                 });
-                var input = $("#input2",idoc);
+                $("html", idoc).submit(function(e){
+                    $.log(e.type+":"+e.currentTarget.nodeName);
+                    expect(e.type+":"+e.currentTarget.nodeName, id).eq("submit:HTML")
+                });
+                var input = $("#checkbox", idoc);
                 input.change(function(e){
-                    expect( e.type, id ).eq( "change" );
+                    $.log(e.type+":"+e.currentTarget.nodeName);
+                    expect(e.type+":"+e.currentTarget.nodeName, id).eq("change:INPUT")
                 });
-                var select = $("#select2",idoc);
+                var select = $("#select", idoc);
                 select.change(function(e){
-                    expect( e.type, id ).eq( "change" );
+                    $.log(e.type+":"+e.currentTarget.nodeName);
+                    expect(e.type+":"+e.currentTarget.nodeName, id).eq("change:SELECT")
                 });
-
-                function fireEvent(el, type, e){
-                    if ( document.dispatchEvent ){
-                        e = document.createEvent("HTMLEvents");
-                        e.initEvent(type, true, true );
-                        el.dispatchEvent( e );
-                    }else {
-                        el.fireEvent( 'on'+type );
-                    }
-                }
-
-                fireEvent(form[0], "submit");
-                fireEvent(input[0], "change");
-                fireEvent(select[0], "change");
+                form.fire("submit")
+                input.fire("change")
+                select.fire("change")
             },
             defineEvents: function(id){
+
                 var a  =  {};
                 $.mix(a, $.EventTarget);
                 var repeat = function(e){
@@ -77,9 +93,12 @@ $.define("event","more/spec,event",function(){
                 a.bind("data",function(e){
                     expect(e.type, id).eq("data")
                 });
-                a.bind("data",function(e){
+                a.bind("data",function(e, b, c){
                     expect( typeof(a.uniqueNumber), id ).eq("number")
                     expect( e.target, id ).eq(a)
+                    expect(b ,id).eq(3)
+                    expect(c, id).eq(5);
+                    $.log(e.type+" "+b+" "+c)
                 });
                 a.fire("data",3,5);
 
@@ -91,6 +110,8 @@ $.define("event","more/spec,event",function(){
                 });
                 b.bind("fold",function(e){
                     expect( e.type+"2", id ).eq( "fold2" );
+                    expect( e.target, id).eq(b);
+                    expect( this, id).eq(b)
                 });
                 b.fire("fold");
             }

@@ -39,6 +39,25 @@
                 height:20px;
                 background:orange;
             }
+            .box_sizing{
+                width:180px;
+                padding:40px 20px;
+                background:#a0b3d6;
+                overflow:hidden;
+            }
+            .box_sizing .in{
+                width:100%;
+                border:5px solid #34538b;
+                background:white;
+                padding:5px;
+                margin:5px;
+                zoom:1;
+                box-sizing:border-box;
+                -o-box-sizing:border-box;
+                -ms-box-sizing:border-box;
+                -moz-box-sizing:border-box;
+                -webkit-box-sizing:border-box;
+            }
         </style>
         <script type="text/javascript">
             SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
@@ -66,6 +85,21 @@
                     var a = $("#sample3 div").width()+"px";
                     $("#sample3").append("<p>"+a+"</p>")
                 });
+                (function(){
+                    var node = $(".box_sizing .in");
+                    var el = node[0]
+                    var r = el.getBoundingClientRect();
+                    $.log( "r.right - r.left " + (r.right - r.left))
+                    $.log( "node.offsetWidth "+ el.offsetWidth)
+                    $.log( "node.clientWidth " +el.clientWidth)
+                    $.log( "node.width() " + node.width() )
+                    $.log( "node.innerWidth() " + node.innerWidth() )
+                    $.log( "node.outerWidth() " +node.outerWidth() )
+                    $.log( "node.outerWidth(true) " + node.outerWidth(true) )
+                    if(window.getComputedStyle){
+                        $.log( "window.getComputedStyle(el, null).width "+window.getComputedStyle(el, null).width)
+                    }
+                })();
             });
         </script>
     </head>
@@ -138,6 +172,28 @@
                 });
             </pre>
             <button type="button" id="show_none">点我，执行代码</button>
+        </fieldset>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
+            $.require("ready,node,css",function(){
+                var node = $(".box_sizing .in");
+                var el = node[0]
+                var r = el.getBoundingClientRect();
+                $.log( "r.right - r.left " + (r.right - r.left))
+                $.log( "node.offsetWidth "+ el.offsetWidth)
+                $.log( "node.clientWidth " +el.clientWidth)
+                $.log( "node.width() " + node.width() )
+                $.log( "node.innerWidth() " + node.innerWidth() )
+                $.log( "node.outerWidth() " +node.outerWidth() )
+                $.log( "node.outerWidth(true) " + node.outerWidth(true) )
+                if(window.getComputedStyle){
+                    $.log( "window.getComputedStyle(el, null).width "+window.getComputedStyle(el, null).width)
+                }
+            })
+            </pre>
+            <div class="box_sizing">
+                <div class="in">与盒子模型有关</div>
+            </div>
         </fieldset>
     </article>
 </body>

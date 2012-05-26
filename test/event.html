@@ -16,23 +16,60 @@
                 })()
             }
         </script>
+        <style>
+            #mouseenter{
+                float:left;
+                width:100px;
+                height:100px;
+                padding:100px;
+                background:#F0F8FF;
+                border:1px solid red;
+            }
+            #mouseenter .inner{
+                width:100px;
+                height:100px;
+                background:#8FBC8F;
+            }
+            #domtree{
+                float:left;
+                width:100px;
+                height:100px;
+                background:#a0b3d6;
+            }
+        </style>
     </head>
     <body>
-        <form id="form1" action="javascript:void(0)">
-            <input type="checkbox" id="input1">
-            <select id="select1">
+        <div id="mouseenter">
+            <div class="inner">
+                mouseenter mouseover
+            </div>
+        </div>
+        <div id="domtree">
+            <div tabindex="1">
+                <div tabindex="2">
+                    <div tabindex="3" >
+                        <div tabindex="4" >
+                            <div tabindex="5" class="inner">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="form" action="javascript:void(0)">
+            <input type="checkbox" id="checkbox">
+            <select id="select">
                 <option>11111</option>
                 <option>222222</option>
                 <option>333333</option>
             </select>
         </form>
-        <form id="form2" action="javascript:void(0)">
-            <input type="checkbox" id="input2">
-            <select id="select2">
-                <option>11111</option>
-                <option>222222</option>
-                <option>333333</option>
-            </select>
+        <form id="focusin">
+            <p id="focusin_text">显示事件类型</p>
+            User name: <input id="focus_input" type="text" value="my name"/><br />
+            E-mail: <input type="text" value="myname@mydomain.com"/>
         </form>
+
     </body>
 </html>

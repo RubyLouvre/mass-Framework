@@ -5,41 +5,36 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
         <script src="../src/mass.js"></script>
         <style>
-            #red {
-                width: 150px;
-                height: 150px;
-                background: red;
-                padding:20px;
-            }
-            #blue {
-                width: 100px;
-                height: 100px;
-                background: blue;
-            }
-            #black {
-                width: 100px;
-                height: 100px;
-                background: black
+
+            #clickfocus{
+                float:left;
+                width:100px;
+                height:100px;
+                background:#a0b3d6;
             }
         </style>
 
         <script >
-            $.require("ready,node,css",function(){
-                var node = $('<div id="test-div" width="8px" height="5px"' +
-                    'style="padding-left: 2px; ' +
-                    'background: transparent; ' +
-                    'float: left;' +
-                    'border: 5px solid rgb(0,0,0);">x</div>').appendTo("body");
-                var a =  node.css( 'float')
-                $.log(a)
-                //nav.remove()
-            })
+            $.require("ready,event",function(){
 
-           
+                var b = {};
+                $.mix(b, $.EventTarget);
+                b.defineEvents("fold,unfold");
+                b.onFold(function(e){
+                    $.log(e)
+                });
+                b.fire("fold")
+            });
+
         </script>
 
     </head>
     <body>
-        <span id="wb_follow_btn"></span>
+        <form id="focusin">
+            <p id="focusin_text">显示事件类型</p>
+            User name: <input id="focus_input" type="text" value="my name"/><br />
+            E-mail: <input type="text" value="myname@mydomain.com"/>
+        </form>
+
     </body>
 </html>
