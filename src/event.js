@@ -315,7 +315,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }else{
                 var doc = this.ownerDocument || this.document || this;
                 event = doc.createEvent("Events");
-                event.initEvent(eventType, true, true, null, null, null, null, null, null, null, null, null, null, null, null);
+                event.initEvent(eventType, true, true);
             };
             var target = DOM ? this : window
             target.dispatchEvent(event);
@@ -601,4 +601,5 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.1 让$.fn.fire支持自定义事件
 2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
 2012.5.26 修正自定义事件target与this的指向
+//http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
      */
