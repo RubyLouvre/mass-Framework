@@ -246,7 +246,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     });
     "each,map".replace($.rword, function( method ){
         $[ method ] = function(obj, fn, scope){
-           return $[ $.isArrayLike(obj,true) ? "Array" : "Object" ][ method ](obj, fn, scope);
+            return $[ $.isArrayLike(obj,true) ? "Array" : "Object" ][ method ](obj, fn, scope);
         }
     });
     if(Array.isArray){
@@ -636,6 +636,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     $.Number(NumberExt);
     $.Number("toFixed,toExponential,toPrecision,toJSON")
     function cloneOf(item){
+       
         var name = $.type(item);
         switch(name){
             case "Array":
@@ -644,10 +645,11 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             default:
                 return item;
         }
+       
     }
     //使用深拷贝方法将多个对象或数组合并成一个
     function mergeOne(source, key, current){
-        if(source[key] && typeof source[key] == "object"){
+        if( $.isPlainObject(source[key]) ){//只处理纯JS对象，不处理window与节点
             $.Object.merge(source[key], current);
         }else {
             source[key] = cloneOf(current)
@@ -696,8 +698,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             for (var i = 1, n = arguments.length; i < n; i++){
                 obj = arguments[i];
                 for ( key in obj){
-                    if(obj[key] !== void 0)
+                    if(obj[key] !== void 0){
                         mergeOne(target, key, obj[key]);
+                    }
                 }
             }
             return target;
