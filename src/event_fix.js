@@ -42,7 +42,10 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
                     item.change_beforeactive = $.bind( ancestor, "beforeactivate", function() {
-                        var target = event.srcElement, tid = $.getUid( target )
+                        //防止出现跨文档调用的情况,找错event
+                        var doc = ancestor.ownerDocument || ancestor.document || ancestor;
+                        var target = doc.parentWindow.event.srcElement, tid = $.getUid( target )
+                        $.log(target)
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
