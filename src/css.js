@@ -333,8 +333,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         "inner_1,b_0,outer_2".replace(/(\w+)_(\d)/g,function(a, b, num){
             var method = b == "b" ? lower : b + name;
-            $.fn[ method ] = function( margin, value ) {
-                num = b == "outer" && margin === true ? 3 : num;
+            $.fn[ method ] = function( value ) {
+                num = b == "outer" && value === true ? 3 : num;
                 return $.access( this, num, value, function( target, num, size ) {
                     if ( $.type( target,"Window" ) ) {//取得窗口尺寸
                         return target.document.documentElement[ clientProp ];
@@ -352,6 +352,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     }  else if ( size === void 0 ) {
                         return getWH( target, name, num )
                     } else {
+                        $.log(size)
                         return num > 0  ? this : $.css( target, lower, size );
                     }
                 }, this)
