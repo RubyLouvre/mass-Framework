@@ -20,13 +20,13 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             },
             beforeunload: {
                 setup: function( item ) {
-                    // We only want to do this special case on windows
                     if ( $.type(item.target, "Window") ) {
                         item.target.onbeforeunload = item.proxy;
                     }
                 },
                 teardown: function( item ) {
-                    item.target.onbeforeunload = $.noop;
+                    if(item.target.onbeforeunload == item.fn)
+                        item.target.onbeforeunload = $.noop;
                 }
             }
         }
@@ -55,7 +55,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         })
     }
     $.mix(facade,{
-       
         //Detect Attribute Changes with jQuery The Problem http://darcyclarke.me/development/detect-attribute-changes-with-jquery/#
         bind: function( hash ){//事件系统三大核心方法之一，绑定事件
             var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
@@ -289,7 +288,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     event.pageX = event.touches[0].pageX//处理触摸事件
                     event.pageY = event.touches[0].pageY
                 }
-             
             }
             if( type ){
                 event.type = type
