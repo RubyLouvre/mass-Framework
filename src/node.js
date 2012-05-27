@@ -217,8 +217,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
-    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', '-khtml-', 'ms-']
-    var cssMap = {
+    var prefixes = ['','-webkit-','WebKit-','-o-','-moz-', '-ms-', '-khtml-', 'ms-']
+    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix
         c:   "color",
         h:   "height",
         o:   "opacity",
@@ -232,14 +232,14 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         opacity: "opacity",//fix IE
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
-    function cssName( name, host, test ){
+    function cssName( name, host, test ){//name必须小写开头
         if( cssMap[ name ] ){
             return cssMap[ name ];
         }
         host = host || $.html.style;
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
             test = $.String.camelize( prefixes[i] + name || "")
-            if( test in host ){
+            if(host.test ||  test in host ){
                 return ( cssMap[ name ] = test );
             }
         }
