@@ -3,38 +3,38 @@
     <head>
         <title>mass Framework</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <script src="../src/mass.js"></script>
-        <style>
+        <script src="../src/doc/public/js/mass_merge.js"></script>
 
-            #clickfocus{
-                float:left;
-                width:100px;
-                height:100px;
-                background:#a0b3d6;
+        <style>
+            .box {
+                color: white;
+                background-color: #333;
+                position: relative;
+                top: 50px;
+                left: 50px;
+                width: 100px;
+                height: 100px;
             }
         </style>
 
         <script >
-            $.require("ready,event",function(){
-
-                var b = {};
-                $.mix(b, $.EventTarget);
-                b.defineEvents("fold,unfold");
-                b.onFold(function(e){
-                    $.log(e)
-                });
-                b.fire("fold")
+            $.require("ready,node",function(){
+               alert( $.cssName("MutationObserver",window))
             });
 
         </script>
 
     </head>
     <body>
-        <form id="focusin">
-            <p id="focusin_text">显示事件类型</p>
-            User name: <input id="focus_input" type="text" value="my name"/><br />
-            E-mail: <input type="text" value="myname@mydomain.com"/>
-        </form>
+         <pre class="brush:js;gutter:false;toolbar:false">
+                $.require("ready,fx",function(){
+                     $(".box").fx(2000, { transform:"rotate(180deg)" }); // 旋转360度
+                });
+        </pre>
+        <div style="position:relative;">
 
+            <div class="box">旋转</div>
+
+        </div>
     </body>
 </html>

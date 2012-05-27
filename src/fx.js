@@ -645,4 +645,5 @@ http://slodive.com/freebies/jquery-animate/
 http://wonderfl.net/search?page=2&q=DoTweener
 http://www.phoboslab.org/ztype/
 http://kangax.github.com/fabric.js/kitchensink/
+http://canvimation.github.com/
 */
