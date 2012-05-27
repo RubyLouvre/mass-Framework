@@ -217,7 +217,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
-    var prefixes = ['','-webkit-','WebKit-','-o-','-moz-', '-ms-', '-khtml-', 'ms-']
+    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
     var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix
         c:   "color",
         h:   "height",
@@ -239,7 +239,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         host = host || $.html.style;
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
             test = $.String.camelize( prefixes[i] + name || "")
-            if(host.test ||  test in host ){
+            if( test in host ){
                 return ( cssMap[ name ] = test );
             }
         }
