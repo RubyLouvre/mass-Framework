@@ -3545,7 +3545,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
-    var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
+    var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
@@ -3627,7 +3627,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //优化HTML5应用的体验细节，例如全屏的处理与支持，横屏的响应，图形缩放的流畅性和不失真，点触的响应与拖曳，Websocket的完善
     //关于JavaScript中计算精度丢失的问题 http://rockyee.iteye.com/blog/891538
     function toFixed(d){
-        return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) :  d;
+        return  d > -0.000000001 && d < 0.000000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) :  d;
     }
     function toFloat(d, x){
         return isFinite(d) ? d: parseFloat(d) || x
@@ -3654,7 +3654,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         rotate: function( radian ) {
             var cos = Math.cos(radian);
             var sin = Math.sin(radian);
-            return this.cross(cos,  sin,  -sin, cos, 0, 0)
+            return this.cross(cos,  sin, -sin, cos, 0, 0)
         },
         skew: function(sx, sy) {
             return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0);
@@ -3867,7 +3867,6 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                     }  else if ( size === void 0 ) {
                         return getWH( target, name, num )
                     } else {
-                        $.log(size)
                         return num > 0  ? this : $.css( target, lower, size );
                     }
                 }, this)
@@ -5359,7 +5358,7 @@ $.define("fx", "css",function(){
                 node.style[obj.name] = "rgb(" + rgb + ")";
             },
             transform: function(node, per, end, obj){
-                if(!obj.parsed){
+                if(!obj.parsed){//先将字符串变成矩阵,矩阵再变成函数
                     var t = new $.Matrix2D
                     t.set.apply(t, obj.from)
                     obj.from = t.decompose();
@@ -5402,17 +5401,22 @@ $.define("fx", "css",function(){
                 return [ color2array(from), color2array(to) ]
             },
             transform: function(node, from, to){
-                var zero = "matrix(1,0,0,1,0,0)"
+                var zero = "matrix(1,0,0,1,0px,0px)"
                 from = from == "none" ? zero  : from;
                 if(to.indexOf("matrix") == -1 ){
-                    var neo = node.cloneNode(true);
+                      from = $(node).css("transform");
+                        from = from == "none" ? zero  : from;
+                       to = $(node).css("transform", to).css("transform");
+                        $(node).css("transform",from);
+                  //  var neo = node.cloneNode(true);
                     //webkit与opera如果display为none,无法取得其变形属性
-                    neo.style.position = "relative";
-                    neo.style.opacity = "0";
-                    node.parentNode.appendChild(neo)
-                    neo = $(neo).css("transform", to);
-                    to = neo.css("transform");
-                    neo.remove();
+                  //  neo.style.position = "relative";
+                  //  neo.style.opacity = "0";
+                 //   node.parentNode.appendChild(neo)
+                 //   neo = $(neo).css("transform", to);
+               //     to = neo.css("transform");
+                  $.log(to)
+                   // neo.remove();
                 }
                 to = (from +" "+ to).match(/[-+.e\d]+/g).map(function(el){
                     return el * 1

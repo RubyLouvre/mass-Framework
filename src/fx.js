@@ -43,7 +43,7 @@ $.define("fx", "css",function(){
             nodes = nodes.mass ? nodes : $(nodes);
             var props =  hash || duration ;
             props = typeof props === "object" ? props : {}
-           
+
             if(typeof duration === "function"){// fx(obj fn)
                 hash = duration;               // fx(obj, 500, fn)
                 duration = 500;
@@ -316,7 +316,7 @@ $.define("fx", "css",function(){
                 val = parts[0];//取得第一个值
                 easing = typeof parts[1] == "function" ? parts[1]: easing;//取得第二个值或默认值
             }
-          
+
             if($.fx.parse[ type ]){
                 parts = $.fx.parse[ type ](node, from, val );
             }else{
@@ -340,7 +340,7 @@ $.define("fx", "css",function(){
                     parts = [0, 0]
                 }
             }
-           
+
             from = parts[0];
             to = parts[1];
             if( from +"" === to +"" ){//不处理初止值都一样的样式与属性
@@ -454,7 +454,7 @@ $.define("fx", "css",function(){
             }
         });
     }
- 
+
     var fxAttrs = [ [ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
     [ "width", "marginLeft", "marginRight", "paddingLeft", "paddingRight" ], ["opacity"]]
     function genFx( type, num ) {//生成属性包
@@ -503,7 +503,7 @@ $.define("fx", "css",function(){
             }
         }
     });
-    
+
     var _toggle = $.fn.toggle;
     $.fn.toggle = function(duration,hash){
         if(!arguments.length){
