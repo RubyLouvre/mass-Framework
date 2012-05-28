@@ -7,7 +7,7 @@ $.define("ejs", "lang",function(){
     rRight = /\s*&>\s*/,
     rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g,
     rLastSemi = /[,;]\s*$/
-    var ejs2 = $.ejs = function(id,data){
+    var ejs2 = $.ejs = function(id,data,doc){
         data = data || {};
         if( !ejs2[id] ){
             var rleft = rLeft,
@@ -16,7 +16,8 @@ $.define("ejs", "lang",function(){
             rlastSemi = rLastSemi,
             startOfHTML = _startOfHTML,
             endOfHTML = _endOfHTML, str , logic,
-            el = document.getElementById(id);
+            doc = doc || document,
+            el = $.query ? $(id, doc)[0] : doc.getElementById(id);
             if (!el) throw "can not find the target element";
             str = el.innerHTML;
             var arr = str.trim().split(rleft),
