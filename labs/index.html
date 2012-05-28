@@ -3,38 +3,95 @@
     <head>
         <title>mass Framework</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <script src="../src/doc/public/js/mass_merge.js"></script>
+        <script src="../src/mass.js"></script>
+        <link rel="stylesheet" href="todo.css">
+        <script>
+            $.require("ready,attr,event,fx,more/ejs",function(){
 
-        <style>
-            .box {
-                color: white;
-                background-color: #333;
-                position: relative;
-                top: 50px;
-                left: 50px;
-                width: 100px;
-                height: 100px;
-            }
-        </style>
-
-        <script >
-            $.require("ready,node",function(){
-               alert( $.cssName("MutationObserver",window))
-            });
+                var renderFooter = function(){
+                    var input = $("#todo-list .toggle")
+                    done = input.filter(":checked").length
+                    var v =  $.ejs("#stats-tmpl",{
+                        left: input.length - done,
+                        done: done
+                    });
+                    $("footer").html(v).show()
+                }
+                var el = $("#new-todo").keyup(function(e){
+                    if( (e.which == 108 || e.which === 13) && this.value){
+                        var v =  $.ejs("#item-tmpl",{
+                            done: false,
+                            title: this.value
+                        });
+                        $("#todo-list").prepend(v)
+                        renderFooter()
+                    }
+                });
+   
+                $("body").delegate("#toggle-all","click",function(){
+                    var els = $("#todo-list input").prop("checked",this.checked);
+                    if(!this.checked){
+                        $("#todo-list li").addClass("completed")
+                    }else{
+                        $("#todo-list li").removeClass("completed")
+                    }
+ 
+                }).delegate("#todo-list input","click",function(){
+                    renderFooter()
+                }).delegate("#clear-completed","click",function(){
+                    
+                    $("#todo-list input:checked").parent().remove();
+                    if($("#todo-list").children().length){
+                        renderFooter()
+                    }else{
+                        $("footer").empty().hide();
+                    }
+                    
+                })
+                $.log(el)
+            })
 
         </script>
-
     </head>
     <body>
-         <pre class="brush:js;gutter:false;toolbar:false">
-                $.require("ready,fx",function(){
-                     $(".box").fx(2000, { transform:"rotate(180deg)" }); // 旋转360度
-                });
-        </pre>
-        <div style="position:relative;">
+    <section id="todoapp">
+        <header id="header">
+            <h1>todos</h1>
+            <input id="new-todo" type="text"  placeholder="What needs to be done?" autofocus>
+        </header>
+        <section id="main" >
+            <input id="toggle-all" type="checkbox" >
+            <label for="toggle-all">Mark all as complete</label>
+            <ul id="todo-list" >
+            </ul>
+        </section>
+        <footer id="footer" style="display:none" >
 
-            <div class="box">旋转</div>
+        </footer>
+    </section>
+    <footer id="info">
+        <span data-bind="visible: todos().length">Double-click to edit a todo.</span>
+        <p>Original Knockout version from <a href="https://github.com/ashish01/knockoutjs-todos">Ashish Sharma</a></p>
+        <p>Rewritten to use Knockout 2.0 and standard template by <a href="http://knockmeout.net">Ryan Niemeyer</a></p>
+        <p>Patches/fixes for cross-browser compat: <a href="http://twitter.com/addyosmani">Addy Osmani</a></p>
+    </footer>
 
-        </div>
-    </body>
+    <script type="text/template" id="item-tmpl">
+            <li>
+            <div class="view">
+            <input class="toggle" type="checkbox" <&= @done ? 'checked="checked"' : '' &> />
+            <label><&= @title &></label>
+            <a class="destroy"></a>
+            </div>
+            <input class="edit" type="text" value="<&= @title &>" />
+            </li>
+    </script>
+    <script type="text/template" id="stats-tmpl">
+            <span id="todo-count">
+            <strong><&= @left &></strong>item left
+            </span>
+            <button id="clear-completed" >Clear completed (<&= @done &>)</button>
+    </script>
+
+</body>
 </html>
