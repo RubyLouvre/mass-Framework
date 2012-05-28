@@ -217,8 +217,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
-    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
-    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix
+    var prefixes = ['','-webkit-','-o-','-moz-', 'moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
+    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector 
         c:   "color",
         h:   "height",
         o:   "opacity",
@@ -251,12 +251,12 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         cssName: cssName,
         match: function( node, expr, i ){
             try{
-                return node[matchesAPI]( node, expr );
+                return node[matchesAPI]( expr );
             } catch(e) {
                 var parent = node.parentNode;
                 if( parent ){
                     var array = $.query( expr, parent );
-                    return !!( array.length && array.indexOf( node ) )
+                    return !!( array.length && array.indexOf( node ) > 0 )
                 }
                 return false;
             }
@@ -497,7 +497,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
         if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
             var outerHTML = document.createElement(node.nodeName).outerHTML;
-            $.log(outerHTML)
             bool = outerHTML.indexOf( unknownTag ) // !0 === true;
         }
         //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
@@ -681,7 +680,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 result[ ri++ ] = el;
                 if(expr === true){
                     break;
-                }else if( typeof expr === "string" && $( el ).is( expr ) ){
+                }else if( typeof expr === "string" && $.match( el, expr ) ){
                     result.pop();
                     break;
                 }
@@ -698,8 +697,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         parents: function( el ){
             return travel( el, "parentNode" ).reverse();
         },
-        parentsUntil: function( el, expr ){
-            return travel( el, "parentNode", expr ).reverse();
+        parentsUntil: function( el ,expr){
+            return travel( el, "parentNode",expr ).reverse();
         },
         next: function( el ){//nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
             return travel( el, "nextSibling", true );
@@ -707,8 +706,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         nextAll: function( el ){
             return travel( el, "nextSibling" );
         },
-        nextUntil: function( el, expr ){
-            return travel( el, "nextSibling", expr );
+        nextUntil: function( el, expr){
+            return travel( el, "nextSibling",expr );
         },
         prev: function( el ){
             return travel( el, "previousSibling", true );
@@ -717,7 +716,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             return travel( el, "previousSibling" ).reverse();
         },
         prevUntil: function( el, expr ){
-            return travel( el, "previousSibling", expr ).reverse();
+            return travel( el, "previousSibling",expr ).reverse();
         },
         children: function( el ){//支持情况chrome1+ FF3.5+,IE5+,opera10+,safari4+
             return  el.children ? $.slice( el.children ) :
@@ -736,7 +735,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }).each(function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
-            for(var i = 0, el ; el = this[i++];){
+            for(var i = 0, el ; el = this[i++];){//expr只用于Until
                 nodes = nodes.concat( method( el, expr ) );
             }
             if( /Until/.test( name ) ){
@@ -774,4 +773,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.4.29 重构$.access与$.fn.data
 2012.5.4 $.access添加第六个可选参数，用于绑定作用域，因此顺带重构了html, text, outerHTML,data原型方法
 2012.5.21 Remove $("body") case; $(document.body) is 2x faster.
+2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
  */
