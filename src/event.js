@@ -35,11 +35,18 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     function parseType(event, selector) {//"focusin.aaa.bbb"
         var parts = ('' + event).split('.');
         var ns = parts.slice(1).sort().join(' ');//aaa bbb
-        var type = parts[0];
-        var hack = adapter[ type ] || {}//focusin -> focus
+        var type = parts[0], hack, t;//input -> change -> propertychange
+        while( hack = adapter[ type ] ){
+            t = ( selector ? hack.delegateType : hack.bindType )
+            if(!t){
+                break
+            }else{
+                type = t
+            }
+        }
         return {
-            type : (selector ? hack.delegateType : hack.bindType ) || type,//focus
-            origType: type,
+            type :  type, 
+            origType: parts[0],
             selector: selector,
             ns: ns,
             rns: ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
@@ -79,7 +86,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 events.push( item );//用于事件拷贝
                 item.proxy = facade.weave( item );
                 var count =  events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
-                var hack = adapter[ type ];
+                var hack = adapter[ item.type ];
                 if( level3 && !hack ){//一对一事件绑定
                     item.one2more = false;
                     item.target.addEventListener(item.type, item.proxy, !!expr );
@@ -202,7 +209,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 for ( var i = 0, item; item = queue[i++]; ) {
                     if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
                         && ( event.type == item.origType )//type
-                        && (!item.selector  || facade.match(src, scope, item.selector))//selector
+                        && ( item.selector ? facade.match(src, scope, item.selector) : hash.target == item.target )//type
                         && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
                         result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
                         if ( result !== void 0 ) {
