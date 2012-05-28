@@ -8,7 +8,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
     }catch(e){ };
     var level3 = $.support.customEvent;//DOM Level 3 Events
-    $.log("level3 "+ level3)
+    //$.log("level3 "+ level3)
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{  //添加或增强二级属性eventAdapter
@@ -414,7 +414,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             quick[1] = ( quick[1] || "" ).toLowerCase();
             quick[3] = quick[3] && new RegExp( "(?:^|\\s)" + quick[3] + "(?:\\s|$)" );
         }
-        return quick;
+        return quick || selector;//如果为null ,或许这是个复杂的表达式,交由选择器引擎去处理
     }
     function quickIs( elem, m ) {
         var attrs = elem.attributes || {};
@@ -482,7 +482,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     hash.fn = el
                 }if(typeof el === "string"){
                     if(hash.type != null){
-                        hash.selector = el.trim()
+                        hash.selector = el.trim();
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
                         if(!/^[a-z0-9_\-\.\s]+$/i.test(hash.type)){
@@ -607,5 +607,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.1 让$.fn.fire支持自定义事件
 2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
 2012.5.26 修正自定义事件target与this的指向
+2012.5.28 Fix quickParse BUG
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
      */
