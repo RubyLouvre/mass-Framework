@@ -10,34 +10,29 @@ $.define("event_fix", !!document.dispatchEvent, function(){
         "radio": "checked",
         "checkbox": "checked"
     }
-    function changeNotify( event ){
+    function changeNotify( event,type ){
         if( event.propertyName === ( changeType[ this.type ] || "value") ){
             $._data( this, "_just_changed", true );
-            $.event._dispatch( $._data( this, "publisher" ), "change", event );
+            $.event._dispatch( $._data( this, "publisher" ), type, event );
         }
     }
     function delegate( fn ){ 
         return function( item ){
             var adapter = $.event.eventAdapter, src = item.target, type = item.type,
-            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src );
+            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
             return (fix || item.selector ) ? fn( src, item ) : false;
         }
     }
 
     var facade = $.event = {
-        eventAdapter:{
-            //input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
+        eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
             input: {
-                check: function( target ){
-                    return rform.test(target.tagName) && !/^select/.test(target.type);
-                },
                 bindType: "change",
                 delegateType: "change"
             },
-
             change: {//change事件的冒泡情况 IE6-9全灭
-                check: function(target){
-                    return !target.disabled && rform.test( target.tagName ) //&& /radio|checkbox|select/.test(target.type)
+                check: function(target, item){
+                    return !target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
                 },
                 setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
@@ -50,15 +45,14 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid(ancestor) ] = ancestor;//此孩子可能同时要向N个顶层元素报告变化
-                            item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event))
+                            item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, item.origType))
                         }
-                    })
-                    //如果是事件绑定
-                     ancestor.fireEvent("onbeforeactivate")
+                    });//如果是事件绑定
+                    ancestor.fireEvent("onbeforeactivate")
                 }),
                 teardown: delegate(function( src, item ){
                     $.unbind( src, "beforeactive", item.change_beforeactive );
-                    $.unbind( src, "change",  item.change_fire)  ;
+                    //   $.unbind( src, "change",  item.change_fire)  ;
                     var els = item.subscriber || {};
                     for(var i in els){
                         $.unbind( els[i], "propertychange",  item.change_propertychange)  ;
@@ -71,7 +65,10 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             }
         }
     }
+
+
     var adapter = facade.eventAdapter;
+    // adapter.input = adapter.change;
     //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
     //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
     "submit,reset".replace( $.rword, function( type ){
