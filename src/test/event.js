@@ -91,6 +91,18 @@ $.define("event","more/spec,event",function(){
                 var clone = source.clone(true).html("clone").afterTo(source)
                 clone.fire("click").fire("mousedown")
             },
+            "event.times": function(){
+                var a = 1;//测试事件的调用次数
+                $("body").on("mouseup",function(){
+                    a++;
+                },2)
+                $("body").fire("mouseup");
+                $("body").fire("mouseup");
+                $("body").fire("mouseup");
+                $("body").fire("mouseup");
+                $("body").fire("mouseup")
+                expect(a ).eq( 3 );
+            },
             "mass_fire": function( id ){
                 var form = $("#form", idoc);
                 form.submit(function(e){
