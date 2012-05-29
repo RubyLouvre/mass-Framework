@@ -265,7 +265,7 @@ label[for='toggle-all'] {
     text-decoration: line-through;
 }
 
-#todo-list li .destroy {
+/*#todo-list li .destroy {
     display: none;
     position: absolute;
     top: 20px;
@@ -299,8 +299,25 @@ label[for='toggle-all'] {
 
 #todo-list li:hover .destroy {
     display: block;
+}*/
+#todo-list .destroy {
+	position: absolute;
+	right: 10px;
+	top: 20px;
+	display: none;
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+	background: url(destroy.png) no-repeat;
 }
 
+#todo-list li:hover .destroy {
+  	display: block;
+}
+
+#todo-list .destroy:hover {
+  	background-position: 0 -20px;
+}
 #todo-list li .edit {
     display: none;
 }
@@ -318,6 +335,7 @@ label[for='toggle-all'] {
     left: 0;
     z-index: 1;
     text-align: center;
+    background:#fff\9;
 }
 
 #footer:before {

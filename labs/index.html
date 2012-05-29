@@ -7,8 +7,9 @@
         <link rel="stylesheet" href="todo.css">
         <script>
             $.require("ready,attr,event,fx,more/ejs",function(){
-     
+
                 $("body").delegate("#todo-new","keyup", function(e){
+                    $.log(e)
                     if( (e.which == 108 || e.which === 13) && this.value){
                         var view =  $.ejs("#item-tmpl",{
                             done: false,
@@ -18,7 +19,7 @@
                         $("#todo-list").prepend(view)
                         $("body").fire("showFooter")
                     }
-                }).delegate("#toggle-all","click",function(){
+              }).delegate("#toggle-all","click",function(){
                     var check = this.checked;
                     $("#todo-list input").prop("checked", check);
                     $("#todo-list li")[ check ? "removeClass" : "addClass"]("completed")
@@ -86,7 +87,7 @@
                 <div class="view">
                 <input class="toggle" type="checkbox" <&= @done ? 'checked="checked"' : '' &> />
                 <label><&= @title &></label>
-                <a class="destroy"></a>
+                <a class="destroy" href="javascript:void(0)" ></a>
                 </div>
                 <input class="edit" type="text" value="<&= @title &>" />
                 </li>
