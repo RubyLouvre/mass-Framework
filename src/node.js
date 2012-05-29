@@ -249,14 +249,14 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        match: function( node, expr, i ){
+        match: function f( node, expr, id ){
             try{
                 return node[matchesAPI]( expr );
             } catch(e) {
-                var parent = node.parentNode;
-                if( parent ){
-                    var array = $.query( expr, parent );
-                    return !!( array.length && array.indexOf( node ) > 0 )
+                var parent = node.parentNode, array
+                if( parent ){      
+                    array = $.query( expr, node.ownerDocument );
+                    return  array.indexOf( node ) != -1
                 }
                 return false;
             }
