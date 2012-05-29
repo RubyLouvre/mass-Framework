@@ -203,10 +203,12 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
                 var src = event.target, args = [event].concat( detail.args || [] ), result;
                 for ( var i = 0, item; item = queue[i++]; ) {
-                    if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
-                        && (  event.type == item.origType )//type
-                        && ( item.selector ? facade.match(src, scope, item) : hash.target == item.target )//type
-                        && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
+                    if ( !src.disabled && !(event.button && event.type === "click")//右键不能冒泡
+                        && (  event.type == item.origType )//确保事件类型一致
+                        && (!detail.rns || detail.rns.test( item.ns ) )//如果存在命名空间，则检测是否一致
+                        && ( item.selector ? facade.match(src, scope, item) : hash.target == item.target )
+                        //如果是事件代理，则检测元素是否匹配给定选择器，否则检测此元素是否是绑定事件的元素
+                        ) {
                         result = item.fn.apply( item._target || scope, args);
                         delete item._target;
                         item.times--;
@@ -231,7 +233,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return fn;
         },
         match: function( cur, parent, item ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
-             if(item._target)
+            if(item._target)
                 return true
             var expr  = item.selector
             var matcher = expr.input ? quickIs : $.match
@@ -317,7 +319,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             facade.detail = detail;
             if( !DOM  ){
                 event = new CustomEvent(eventType);
-                //  detail.customTarget = this;
                 event.initCustomEvent( eventType, true, true, detail );
             }else{
                 var doc = this.ownerDocument || this.document || this;
