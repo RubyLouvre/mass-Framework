@@ -209,9 +209,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 for ( var i = 0, item; item = queue[i++]; ) {
                     if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
                         && ( event.type == item.origType )//type
-                        && ( item.selector ? facade.match(src, scope, item.selector) : hash.target == item.target )//type
+                        && ( item.selector ? facade.match(src, scope, item) : hash.target == item.target )//type
                         && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
-                        result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
+                        //$.log(item)
+                        result = item.fn.apply( item.selector ? item.target : scope, [event].concat(detail.args || []));
                         if ( result !== void 0 ) {
                             event.result = result;
                             if ( result === false ) {
@@ -229,11 +230,14 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             fn.uuid = hash.uuid;
             return fn;
         },
-        match: function( cur, parent, expr ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+        match: function( cur, parent, item ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+            var expr  = item.selector
             var matcher = expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
-                if(matcher(cur, expr))
+                if(matcher(cur, expr)){
+                    item.target = cur
                     return true
+                }
             }
             return false;
         },
