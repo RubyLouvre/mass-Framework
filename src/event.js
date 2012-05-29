@@ -208,6 +208,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                         && ( item.selector ? facade.match(src, scope, item) : hash.target == item.target )//type
                         && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
                         result = item.fn.apply( item._target || scope, args);
+                        delete item._target;
                         item.times--;
                         if(item.times === 0){
                             facade.unbind.call( this, item)
@@ -230,8 +231,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return fn;
         },
         match: function( cur, parent, item ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
-            // if(item._target)
-            //     return true
+             if(item._target)
+                return true
             var expr  = item.selector
             var matcher = expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
@@ -619,5 +620,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
 2012.5.26 修正自定义事件target与this的指向
 2012.5.28 Fix quickParse BUG
+2012.5.29 利用Object.defineProperty打破事件对象的封装
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
      */
