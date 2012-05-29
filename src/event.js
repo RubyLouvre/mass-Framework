@@ -8,7 +8,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
     }catch(e){ };
     var level3 = $.support.customEvent;//DOM Level 3 Events
-    //$.log("level3 "+ level3)
+    $.log("level4 "+ level3)
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{  //添加或增强二级属性eventAdapter
@@ -45,7 +45,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
         }
         return {
-            type :  type, 
+            type :  type,
             origType: parts[0],
             selector: selector,
             ns: ns,
@@ -78,23 +78,24 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 var item = parseType(old, expr);//"focusin.aaa.bbb"
                 var type = item.origType;
                 $.mix(item, {
-                    scope: target,//this,用于绑定数据的
-                    target: !DOM ? window : target,//如果是自定义事件,使用window来代理
-                    index: events.length,
-                    one2more: true
+                    target: target,//this,用于绑定数据的
+                    index: events.length,//记录其在列表的位置，在征载事件时用
+                    one2more: true//默认使用旧式的一对多事件绑定
                 }, hash, false);
                 events.push( item );//用于事件拷贝
                 item.proxy = facade.weave( item );
                 var count =  events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
                 var hack = adapter[ item.type ];
-                if( level3 && !hack ){//一对一事件绑定
-                    item.one2more = false;
-                    item.target.addEventListener(item.type, item.proxy, !!expr );
+                if( level3 && !hack ){
+                    item.one2more = false;//新式的一对一事件绑定
+                    var scope = DOM ? target : window
+                    //  $.log(!!expr);
+                    scope.addEventListener(item.type, item.proxy, !!expr );//自定义事件使用window代理
                 }
                 if(count == 1){
-                    $._data( target, type+"_item", item);//用于$.event.dispatch
+                    $._data( target, type+"_item", item);//用于事件派发：$.event.dispatch
                     if( DOM && item.one2more && (!hack || !hack.setup || hack.setup( item ) === false ) ) {
-                        $.bind(target, item.type, item.proxy, !!expr);//一对多事件绑定
+                        $.bind(target, item.type, item.proxy, !!expr);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -116,8 +117,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             types.replace( $.rword, function( t ){
                 var parsed = parseType( t, expr), type = parsed.origType, hack = adapter[ type ];
                 findHandlers(events, parsed , hash.fn, expr ).forEach( function(item){
-                    if( !item.one2more ){ 
-                        item.target.removeEventListener( item.type, item.proxy, !!expr );
+                    if( !item.one2more ){
+                        (DOM ? item.target : window).removeEventListener( item.type, item.proxy, !!expr );
                     }
                     if( --events[type+"_count"] == 0 ){
                         if( DOM && item.one2more && ( !hack || !hack.teardown || hack.teardown( item ) === false ) ) {
@@ -159,7 +160,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !event.isPropagationStopped );
-                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，
+                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
                     && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
                     && (type !== "click"|| this.nodeName == "A")
                     && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
@@ -191,8 +192,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         },
         weave: function( hash ){// 用于对用户回调进行改造
             var fn =  function(event){
-                var type = hash.origType, queue = [ hash ], detail = facade.detail || {},
-                scope = hash.scope//thisObject
+                var type = hash.origType, queue = [ hash ], detail = facade.detail || {}, scope = hash.target//原来绑定事件的对象
                 if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
                     return
                 if( hash.one2more ){//level2 逻辑,以实现事件对象的标准化,多参化,
@@ -201,18 +201,17 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     event.currentTarget = scope;
                     queue = ($._data( scope, "events") || []).concat();
                 }
-                if(detail.customTarget){
-                    event = facade.fix( event  );
-                    scope = event.target = detail.customTarget
-                }
-                var src = event.target, result;
+                var src = event.target, args = [event].concat( detail.args || [] ), result;
                 for ( var i = 0, item; item = queue[i++]; ) {
                     if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
-                        && ( event.type == item.origType )//type
+                        && (  event.type == item.origType )//type
                         && ( item.selector ? facade.match(src, scope, item) : hash.target == item.target )//type
                         && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
-                        //$.log(item)
-                        result = item.fn.apply( item.selector ? item.target : scope, [event].concat(detail.args || []));
+                        result = item.fn.apply( item._target || scope, args);
+                        item.times--;
+                        if(item.times === 0){
+                            facade.unbind.call( this, item)
+                        }
                         if ( result !== void 0 ) {
                             event.result = result;
                             if ( result === false ) {
@@ -231,11 +230,13 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return fn;
         },
         match: function( cur, parent, item ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+            // if(item._target)
+            //     return true
             var expr  = item.selector
             var matcher = expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr)){
-                    item.target = cur
+                    item._target = cur
                     return true
                 }
             }
@@ -306,29 +307,35 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return event;
         }
     });
-  
 
-    var oldfire = facade.fire;
     if( level3 ){
         facade.fire = function( type ){
             var detail = type.origType ? type : parseType( type )
             var eventType = detail.origType, DOM = $["@target"] in this, event;
-            if( adapter[ type ] && adapter[ type ].bindType ){ //level3不支持事件冒充
-                return oldfire.apply(this, arguments)
-            }
             detail.args = [].slice.call(arguments,1) ;
             facade.detail = detail;
             if( !DOM  ){
                 event = new CustomEvent(eventType);
-                detail.customTarget = this;
+                //  detail.customTarget = this;
                 event.initCustomEvent( eventType, true, true, detail );
             }else{
                 var doc = this.ownerDocument || this.document || this;
                 event = doc.createEvent("Events");
                 event.initEvent(eventType, true, true);
             };
-            var target = DOM ? this : window
-            target.dispatchEvent(event);
+            //自定义事件的属性不可修改，必须通过 Object.defineProperty打破其封装
+            Object.defineProperties(event,{
+                target: {
+                    writable:true,
+                    value: this
+                },
+                type: {
+                    writable:true,
+                    value: event.type
+                }
+            })
+            var scope = DOM ? this : window
+            scope.dispatchEvent(event);
             delete facade.detail
             return this;
         }
@@ -368,7 +375,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
+    //http://www.w3.org/TR/DOM-Level-3-Events/#interface-Event
     var revent = /(^|_|:)([a-z])/g, rmapper = /(\w+)_(\w+)/g;
     $.EventTarget = {
         uniqueNumber : $.getUid({}),
