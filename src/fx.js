@@ -646,4 +646,7 @@ http://wonderfl.net/search?page=2&q=DoTweener
 http://www.phoboslab.org/ztype/
 http://kangax.github.com/fabric.js/kitchensink/
 http://canvimation.github.com/
+https://github.com/sole/tween.js/blob/master/src/Tween.js
+http://lab.soledadpenades.com/js/webgl_vga/
+http://tmlife.net/tag/enchant-js
 */
