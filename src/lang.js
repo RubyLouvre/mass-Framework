@@ -404,7 +404,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             .replace(/&lt;/g,'<')
             .replace(/&gt;/g,'>')
             .replace(/&quot;/g,'"');
-            return str.replace(/&#([\d]+);/g,function(_0,_1){
+            return str.replace(/&#(\d+);/g,function(_0,_1){
                 return String.formCharCode(parseInt(_1,10));
             });
         },
