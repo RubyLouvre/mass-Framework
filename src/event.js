@@ -295,11 +295,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                             event.wheelDelta = -event.detail * 40;
                         }
                     }
-                }
-                if ( event.which == null ) {//处理键盘事件
+                }else if ( event.which == null ) {//处理键盘事件
                     event.which = event.charCode != null ? event.charCode : event.keyCode;
-                }
-                if( window.Touch && event.touches && event.touches[0] ){
+                }else if( window.Touch && event.touches && event.touches[0] ){
                     event.pageX = event.touches[0].pageX//处理触摸事件
                     event.pageY = event.touches[0].pageY
                 }
