@@ -2,12 +2,11 @@
 // 事件系统v5
 //==========================================
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
-    $.support.customEvent = false;
+    var level3  = false;//DOM Level 3 Events
     try{
         var event = new CustomEvent("mass");
-        $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
+        level3 = $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
     }catch(e){ };
-    var level3 = $.support.customEvent;//DOM Level 3 Events
     $.log("level4 "+ level3)
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
@@ -88,8 +87,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 var hack = adapter[ item.type ];
                 if( level3 && !hack ){
                     item.one2more = false;//新式的一对一事件绑定
-                    var scope = DOM ? target : window
-                    //  $.log(!!expr);
+                    var scope = DOM ? target : window;
                     scope.addEventListener(item.type, item.proxy, !!expr );//自定义事件使用window代理
                 }
                 if(count == 1){
@@ -138,7 +136,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             if( !events.length ){
                 $.removeData( target, "events") ;
             }
-            return this;
         },
         fire: function( event ){//事件系统三大核心方法之一，触发事件
             if(!event.originalEvent){
@@ -438,7 +435,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     //以下是用户使用的API
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
-            var fns = [].slice.call(arguments), i = 0;
+            var fns = Array.apply([],arguments), i = 0;
             return this.click(function(e){
                 var fn  = fns[i++] || fns[i = 0, i++];
                 fn.call( this, e );
