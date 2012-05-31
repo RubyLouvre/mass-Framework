@@ -596,6 +596,7 @@ $.define("fx", "css",function(){
         }
         return colorMap.white;
     }
+    $.parseColor = color2array
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);
