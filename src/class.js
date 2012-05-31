@@ -17,6 +17,15 @@ $.define("class", "lang",function(){
         });
         return klass;
     }
+    var defineProperties = false;
+    try{
+        Object.defineProperty($, "@path",{
+            value:$.mass,//指定了get与set不能指定writable
+            enumerable: true, 
+            writable: true
+        });
+        defineProperties = true;
+    }catch(e){}
 
     $.mutators = {
         inherit : function( parent,init ) {
@@ -51,12 +60,20 @@ $.define("class", "lang",function(){
             return proto.constructor = this;
         },
         implement:function(){
-            var target = this.prototype, parent = this._super, reg = rconst;
+            var target = this.prototype, parent = this._super, reg = rconst, definition = {}
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
                 Object.keys(module).forEach(function(name){
                     if( !reg.test(name) ){
-                        var prop = target[name] = module[name];
+                        var prop =  target[name] = module[name];
+                        if(defineProperties && (prop.get || prop.set)){
+                            definition[name] = prop;
+                            if (!('enumerable' in prop))
+                                prop.enumerable = true;
+                        }else if(prop.hasOwnProperty("value")){
+                           target[name] = prop.value;
+                        }
+                        //target[name] = prop
                         if(typeof prop == "function"){
                             target[name] = (function(){
                                 var _super = function() {
@@ -88,6 +105,7 @@ $.define("class", "lang",function(){
                     }
                 }, this );
             }
+            defineProperties && Object.defineProperties(this.prototype,definition)
             return this;
         },
         extend: function(){//扩展类成员
@@ -132,5 +150,6 @@ fix 子类实例不是父类的实例的bug
 2012.1.29 修正setOptions中$.Object.merge方法的调用方式
 2012.2.25 改进setOptions，可以指定在this上扩展还是在this.XXX上扩展
 2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
+2012.5.31 添加数据描述符的应用 v9
 */
 
