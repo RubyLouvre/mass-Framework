@@ -21,7 +21,7 @@ $.define("class", "lang",function(){
     try{
         Object.defineProperty($, "@path",{
             value:$.mass,//指定了get与set不能指定writable
-            enumerable: true, 
+            enumerable: true,
             writable: true
         });
         defineProperties = true;
@@ -152,4 +152,3 @@ fix 子类实例不是父类的实例的bug
 2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
 2012.5.31 添加数据描述符的应用 v9
 */
-
