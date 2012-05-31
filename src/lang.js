@@ -761,4 +761,5 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.3.17 v4 重构语言链对象
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
 键盘控制物体移动 http://www.wushen.biz/move/
+https://github.com/tristen/tablesort
 */

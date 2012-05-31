@@ -167,7 +167,7 @@ document == window // IE678 false;
 //    isNumeric: function( obj ) {
 //        return !isNaN( parseFloat(obj) ) && isFinite( obj );
 //    }
-
+/*
 class2type = {
     "[object HTMLDocument]"   : "Document",
     "[object HTMLCollection]" : "NodeList",
@@ -206,8 +206,14 @@ type: function ( obj, str ){
     }
     return result;
 },
-
-
+*/
+//tangram
+isDate: function(o){
+    return {}.toString.call(o) === "[object Date]" && o.toString() !== 'Invalid Date' && !isNaN(o);
+}
+isNumber:function(o){
+   return '[object Number]'  == {}.toString.call(o) && isFinite(o);
+}
 var MODULE = (function () {
     var my = {},
     privateVariable = 1;

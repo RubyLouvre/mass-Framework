@@ -3,112 +3,38 @@
     <head>
         <title>mass Framework</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <script src="../src/mass.js"></script>
+        <script src="../src/enchant.js"></script>
         <link rel="stylesheet" href="todo.css">
         <script>
-            $.require("ready,attr,event,fx,more/ejs",function(){
+            // forked from phi's "enchant.js のテンプレートを用意しよう" http://jsdo.it/phi/isoa
+            // おまじない(using namespace enchant)
+            enchant();
 
-                $("body").delegate("#todo-new","keyup", function(e){
-                    $.log(e)
-                    if( (e.which == 108 || e.which === 13) && this.value){
-                        var view =  $.ejs("#item-tmpl",{
-                            done: false,
-                            title: this.value
-                        });
-                        this.value = "";
-                        $("#todo-list").prepend(view)
-                        $("body").fire("showFooter")
-                    }
-              }).delegate("#toggle-all","click",function(){
-                    var check = this.checked;
-                    $("#todo-list input").prop("checked", check);
-                    $("#todo-list li")[ check ? "removeClass" : "addClass"]("completed")
-                    $("body").fire("showFooter")
-                }).delegate("#todo-list input","click",function(){
-                    $("body").fire("showFooter")
-                }).delegate("#todo-list li","dblclick",function(){
-                    $(".editing").removeClass("editing");//每次只编辑一个
-                    $(this).addClass("editing")
-                    $(this).find(".edit").focus();
-                }).delegate("#todo-list li","keyup",function(e){
-                    if( (e.which == 108 || e.which === 13)){
-                        var v = $(this).find(".edit").val();
-                        var view =  $.ejs("#item-tmpl",{
-                            done: false,
-                            title: v
-                        });
-                        $(this).replace(view);
-                    }
-                }).delegate("#todo-list .destroy","click", function(e){
-                    $(this).parents("li").remove();
-                    $("body").fire("toggleFooter")
-                }).delegate("#clear-completed","click",function(){
-                    $("#todo-list input:checked").parents("li").remove();
-                    $("body").fire("toggleFooter")
-                }).bind("showFooter",function(){
-                    var input = $("#todo-list .toggle")
-                    done = input.filter(":checked").length
-                    var view = $.ejs("#stats-tmpl",{
-                        left: input.length - done,
-                        done: done
-                    });
-                    $("#footer").html(view).show()
-                }).bind("toggleFooter", function(){
-                    if( $("#todo-list li").length ){
-                        $("body").fire("showFooter")
-                    }else{
-                        $("#footer").hide();
-                    }
-                })
-            })
+            window.onload = function() {
+                var game = new Game();
+
+                game.onload = function() {
+                    var scene = game.rootScene;
+                    scene.backgroundColor = "black";
+
+                    // エンティティを生成, シーンに追加
+                    var entity = new Entity();	// 生成
+                    entity.width = 200;		// 幅を設定
+                    entity.height= 100;		// 高さを設定
+                    entity.backgroundColor = "red";	// 背景色を設定
+                    scene.addChild(entity);		// シーンに追加
+                };
+
+                game.start();
+            };
 
         </script>
     </head>
     <body>
-        <div id="todoapp">
-            <div id="header">
-                <h1>todos</h1>
-                <input id="todo-new" type="text"  placeholder="What needs to be done?" autofocus>
-            </div>
-            <div id="main" >
-                <input id="toggle-all" type="checkbox" >
-                <label for="toggle-all">Mark all as complete</label>
-                <ul id="todo-list" >
-                </ul>
-            </div>
-            <div id="footer" style="display:none" >
-
-            </div>
-        </div>
 
 
-        <script type="text/template" id="item-tmpl">
-                <li>
-                <div class="view">
-                <input class="toggle" type="checkbox" <&= @done ? 'checked="checked"' : '' &> />
-                <label><&= @title &></label>
-                <a class="destroy" href="javascript:void(0)" ></a>
-                </div>
-                <input class="edit" type="text" value="<&= @title &>" />
-                </li>
-        </script>
-        <script type="text/template" id="stats-tmpl">
-                <span id="todo-count">
-                <strong><&= @left &></strong>&nbsp;item left
-                </span>
-                <& if(@done){ &>
-                    <button id="clear-completed" >Clear completed (<&= @done &>)</button>
-                    <& } &>
-        </script>
-        <pre>
-当输入框回车,生成新的item,并在#footer显示数据,#footer要显示出来
-输入框前面的checkbox是全选全不选按钮
-每个item前面的item在点击时会更改#footer的数据
-只有item选中的时候,#footer的按钮才显示出来
-双击item会让它变成编辑状态,每次只能编辑一个,回车还原为文本状态
-每个item在移上去会出现单独的移除按钮,并会对#footer的显示与数据产生影响
-#footer的按钮被点击时,会移除列表中被移中的item,如果全部移除,隐藏#footer
-        </pre>
+
+
 
     </body>
 </html>
