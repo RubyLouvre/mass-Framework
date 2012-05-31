@@ -8,8 +8,8 @@ $.define("fx", "css",function(){
         transform: /transform/i
     },
     rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
-    function visible(node) {
-        return  $.css(node, "display") !== 'none';
+    function isHidden( elem ) {
+        return elem.sourceIndex === 0 || $.css( elem, "display" ) === "none" || !$.contains( elem.ownerDocument.documentElement, elem );
     }
     $.mix({//缓动公式
         easing : {
@@ -72,7 +72,7 @@ $.define("fx", "css",function(){
         //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
         //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
         show: function(node, fx){
-            if(node.nodeType == 1 && !visible(node)) {
+            if(node.nodeType == 1 && isHidden(node)) {
                 var display =  $._data(node, "olddisplay");
                 if(!display || display == "none"){
                     display = parseDisplay(node.nodeName)
@@ -97,7 +97,7 @@ $.define("fx", "css",function(){
             }
         },
         hide: function(node, fx){
-            if(node.nodeType == 1 && visible(node)){
+            if(node.nodeType == 1 && !isHidden(node)){
                 var display = $.css( node, "display" );
                 if ( display !== "none" && !$._data( node, "olddisplay" ) ) {
                     $._data( node, "olddisplay", display );
@@ -126,7 +126,7 @@ $.define("fx", "css",function(){
             }
         },
         toggle: function( node ){
-            $[ visible(node) ? "hide" : "show" ]( node );
+            $[ isHidden(node) ? "show" : "hide" ]( node );
         }
     })
     //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
@@ -292,7 +292,7 @@ $.define("fx", "css",function(){
     var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record");
     //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
     function fxBuilder(node, fx, index ){
-        var to, parts, unit, op, props = [], revertProps = [],orig = {}, hidden = !visible(node);
+        var to, parts, unit, op, props = [], revertProps = [],orig = {}, hidden = isHidden(node);
         for(var name in fx){
             if(!fx.hasOwnProperty(name) && keyworks[name]){
                 continue
@@ -492,30 +492,21 @@ $.define("fx", "css",function(){
         }
     });
 
-    "show,hide".replace( $.rword, function( method ){
-        $.fn[ method ] = function(duration, hash){
-            if(!arguments.length){
-                return this.each(function(){
-                    $[ method ]( this );
-                })
+    [ "toggle", "show", "hide" ].forEach(function(  name, i ) {
+        var toggle = $.fn[ name ];
+        $.fn[ name ] = function( duration, hash ) {
+            if(!arguments.length ){
+                return this.each(function(node) {
+                    $.toggle( node );
+                });
+            }else if(!i && typeof duration === "function" && typeof duration === "function" ){
+                return toggle.apply(this,arguments)
             }else{
-                return $.fx( this, duration, hash, genFx( method , 3) );
+                return $.fx( this, duration, hash, genFx( name , 3) );
             }
-        }
+        };
     });
-
-    var _toggle = $.fn.toggle;
-    $.fn.toggle = function(duration,hash){
-        if(!arguments.length){
-            return this.each(function(node) {
-                $.toggle( node );
-            });
-        }else if(typeof duration === "function" && typeof duration === "function" ){
-            return _toggle.apply(this,arguments)
-        }else{
-            return $.fx(this, duration, hash, genFx("toggle", 3));
-        }
-    }
+    
     function beforePuff( node, fx ) {
         var position = $.css(node,"position"),
         width = $.css(node,"width"),
@@ -634,6 +625,7 @@ $.define("fx", "css",function(){
 2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
 2012.5.17 升级到  v4
 2012.5.19 $.fx.parse.transform FIX BUG
+2012.6.1 优化show hide toggle方法
 http://caniuse.com/
 http://gitcp.com/sorenbs/jsgames-articles/resources
 http://www.kesiev.com/akihabara/
