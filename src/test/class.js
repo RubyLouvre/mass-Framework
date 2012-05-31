@@ -103,8 +103,7 @@ $.define("class","more/spec,class",function(){
             expect(v.f ).eq("yyy");
         },
         "ecma262v5":function(id){
-            if(Object.create && Object.defineProperties){
-              
+            if(Object.seal && Object.defineProperties){
                     var A = $.factory({
                         init: function(a){
                             this.value = a
