@@ -175,7 +175,7 @@ $.define("attr","support,node", function( support ){
             return $.access( this, name, value, $[method] );
         }
     });
-    $.fn["class"] = $.fn.addClass;
+    //$.fn["class"] = $.fn.addClass;
     $.mix({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
