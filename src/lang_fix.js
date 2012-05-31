@@ -14,6 +14,14 @@ $.define( "lang_fix", !!Array.isArray, function(){
     }
     //第二个参数仅在浏览器支持Object.defineProperties时可用
     $.mix(Object,{
+        create: function(o){
+            if (arguments.length > 1) {
+                $.log(" Object.create implementation only accepts the first parameter.")
+            }
+            function F() {}
+            F.prototype = o;
+            return new F();
+        },
         //取得其所有键名以数组形式返回
         keys: function(obj){//ecma262v5 15.2.3.14
             var result = [];
@@ -234,8 +242,9 @@ $.define( "lang_fix", !!Array.isArray, function(){
     };
 });
 /**
-2011.7.26移除Object.create方法,添加Object.getPrototypeOf方法
+2011.7.26 添加Object.getPrototypeOf方法
 2011.11.16重构Array.prototype.unshift (thx @abcd)
 2011.12.22 修正命名空间
 2012.3.19 添加对split的修复
+2012.5.31 添加Object.create的不完全修复
 */
