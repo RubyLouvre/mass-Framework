@@ -173,7 +173,7 @@ void function( global, DOC ){
                 uid = commonNs.uuid++;
                 node.setAttribute( "uniqueNumber", uid );
             }
-            return uid;
+            return +uid;//确保返回数字
         },
         /**
          * 生成键值统一的对象，用于高速化判定
