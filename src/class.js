@@ -70,8 +70,6 @@ $.define("class", "lang",function(){
                             definition[name] = prop;
                             if (!('enumerable' in prop))
                                 prop.enumerable = true;
-                        }else if(prop.hasOwnProperty("value")){
-                           target[name] = prop.value;
                         }
                         //target[name] = prop
                         if(typeof prop == "function"){
