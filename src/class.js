@@ -33,13 +33,11 @@ $.define("class", "lang",function(){
     }catch(e){}
     $.mutators = {
         inherit : function( parent,init ) {
-            var bridge = function() { }
             if( typeof parent == "function"){
                 for(var i in parent){//继承类成员
                     this[i] = parent[i];
                 }
-                bridge.prototype = parent.prototype;
-                this.prototype = new bridge ;//继承原型成员
+                this.prototype = Object.create(parent.prototype) ;//继承原型成员
                 this._super = parent;//指定父类
             }
             this._init = (this._init || []).concat();
@@ -47,7 +45,7 @@ $.define("class", "lang",function(){
                 this._init.push(init);
             }
             this.toString = function(){
-                return (init || bridge) + ""
+                return (init || $.noop) + "";
             }
             var proto = this.prototype;
             proto.setOptions = function(){
