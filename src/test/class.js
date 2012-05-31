@@ -101,6 +101,29 @@ $.define("class","more/spec,class",function(){
             });
             expect(v.e ).eq(999);
             expect(v.f ).eq("yyy");
+        },
+        "ecma262v5":function(){
+            if(Object.create && Object.defineProperties){
+                $.require("class",function(){
+                    var A = $.factory({
+                        init: function(a){
+                            this.value = a
+                        },
+                        html:{
+                            set:function(a){
+                                this.value = a +10
+                            },
+                            get:function(a){
+                                return this.value
+                            }
+                        }
+                    });
+                    var aa = new A(10);
+                    aa.html = 26
+                    expect(aa.value).eq(36) //36
+                    expect(aa.html).eq(36) //36
+                })
+            }
         }
 
     });
