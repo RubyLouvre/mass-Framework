@@ -9,7 +9,7 @@
         <script>
             $.require("ready,attr,event,fx,more/ejs",function(){
 
-                $("body").delegate("#new-todo","keyup", function(e){
+                $("body").on("keyup","#new-todo", function(e){
                     if( (e.which == 108 || e.which === 13) && this.value){
                         var view =  $.ejs("#item-tmpl",{
                             done: false,
@@ -17,20 +17,19 @@
                         });
                         this.value = "";
                         $("#todo-list").prepend(view);
-                        $("body").fire("showFooter")
+                        $("body").fire("show")
                     }
-                }).delegate("#toggle-all","click",function(){//全选
+                }).on("click","#toggle-all",function(){//全选
                     var check = this.checked;
-                    $("#todo-list input").prop("checked", check);
+                    $("#todo-list .toggle").prop("checked", check);
                     $("#todo-list li")[ check ? "removeClass" : "addClass"]("completed")
-                    $("body").fire("showFooter")
-                }).delegate("#todo-list .toggle","click",function(){//切换自身
-                    $("body").fire("showFooter")
-                }).delegate("#todo-list li","dblclick",function(){//变成可编辑状态
+                    $("body").fire("show")
+                }).on("click", "#todo-list .toggle", function(){//切换自身
+                    $("body").fire("show")
+                }).on("dblclick","#todo-list li", function(){//变成可编辑状态
                     $(".editing").removeClass("editing");//每次只编辑一个
-                    $(this).addClass("editing")
-                    $(this).find(".edit").focus();
-                }).delegate("#todo-list li","keyup",function(e){//回车
+                    $(this).addClass("editing").find(".edit").focus();
+                }).on("keyup","#todo-list li", function(e){//回车
                     if( (e.which == 108 || e.which === 13)){
                         var v = $(this).find(".edit").val();
                         var view =  $.ejs("#item-tmpl",{
@@ -39,14 +38,13 @@
                         });
                         $(this).replace(view);
                     }
-                }).delegate("#todo-list .destroy","click", function(e){
-                    $.log("-------------------")
-                    $(e.target).parents("li").remove();
-                    $("body").fire("toggleFooter")
-                }).delegate("#clear-completed","click",function(){
+                }).on("click", "#todo-list .destroy", function(e){
+                    $(this).parents("li").remove();
+                    $("body").fire("toggle")
+                }).on("click","#clear-completed",function(){
                     $("#todo-list input:checked").parents("li").remove();
-                    $("body").fire("toggleFooter")
-                }).bind("showFooter",function(){
+                    $("body").fire("toggle")
+                }).on("show",function(){
                     $("#main").show();
                     var input = $("#todo-list .toggle")
                     done = input.filter(":checked").length
@@ -55,11 +53,12 @@
                         done: done
                     });
                     $("#footer").html(view).show()
-                }).bind("toggleFooter", function(){
+                }).on("toggle", function(){
                     if( $("#todo-list li").length ){
-                        $("body").fire("showFooter")
+                        $("body").fire("show")
                     }else{
                         $("#footer").hide();
+                        $("#main").hide();
                     }
                 })
             })
@@ -90,13 +89,14 @@
         </div>
 
         <div id="instructions">
-            Double-click to edit a todo.
+            <div>回车添加新的工作清单</div>
+            <div>双击工作清单可编辑它</div>
         </div>
 
         <div id="credits">
             Created by
             <br />
-            <a href="http://jgn.me/">J&eacute;r&ocirc;me Gravel-Niquet</a>.
+            <a href="http://www.cnblogs.com/rubylouvre/">司徒正美</a>.
             <br />Rewritten by: <a href="http://addyosmani.github.com/todomvc">TodoMVC</a>.
         </div>
 
