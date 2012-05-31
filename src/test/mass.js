@@ -62,7 +62,7 @@ $.define("mass","more/spec",function(){
         },
         getUid: function(){
             //$.getUid在正常情况下返回数字
-            expect( typeof $.getUid(document.body)).eq("number");
+            expect( typeof $.getUid(document.body) ).eq("number");
         },
 
         slice: function(){

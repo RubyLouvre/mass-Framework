@@ -18,15 +18,19 @@ $.define("class", "lang",function(){
         return klass;
     }
     var defineProperties = false;
+    // 指定了get与set不能指定writable与value
+    var hiddenProperty = {
+        configurable: false,//防止被删除
+        enumerable: false,//防止被遍历
+        writable: false//防止被修改
+    }
     try{
-        Object.defineProperty($, "@path",{
-            value:$.mass,//指定了get与set不能指定writable
-            enumerable: true,
-            writable: true
+        Object.defineProperties($,{
+            "@target": hiddenProperty,
+            "@path": hiddenProperty
         });
-        defineProperties = true;
+        defineProperties = $.support.defineProperties = true;
     }catch(e){}
-
     $.mutators = {
         inherit : function( parent,init ) {
             var bridge = function() { }
@@ -57,9 +61,15 @@ $.define("class", "lang",function(){
                 $.Object.merge.apply(null,arguments);
                 return this;
             }
+            if(defineProperties){
+                Object.defineProperties(proto, {
+                    _init: hiddenProperty,
+                    setOptions: hiddenProperty
+                })
+            }
             return proto.constructor = this;
         },
-        implement:function(){
+        implement: function(){
             var target = this.prototype, parent = this._super, reg = rconst, definition = {}
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
@@ -71,7 +81,6 @@ $.define("class", "lang",function(){
                             if (!('enumerable' in prop))
                                 prop.enumerable = true;
                         }
-                        //target[name] = prop
                         if(typeof prop == "function"){
                             target[name] = (function(){
                                 var _super = function() {
@@ -103,7 +112,7 @@ $.define("class", "lang",function(){
                     }
                 }, this );
             }
-            defineProperties && Object.defineProperties(this.prototype,definition)
+            defineProperties && Object.defineProperties(this.prototype, definition)
             return this;
         },
         extend: function(){//扩展类成员
