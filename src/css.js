@@ -347,7 +347,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         }
                         return Math.max(
                             target.body[ scrollProp ], doc[ scrollProp ],
-                            target.body[ offsetProp ], doc[ offsetProp ]
+                            target.body[ offsetProp ], doc[ offsetProp ],
+                            doc[ clientProp ]
                             );
                     }  else if ( size === void 0 ) {
                         return getWH( target, name, num )
