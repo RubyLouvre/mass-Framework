@@ -68,16 +68,26 @@ $.define("class", "lang",function(){
             return proto.constructor = this;
         },
         implement: function(){
-            var target = this.prototype, parent = this._super, reg = rconst, definition = {}
+            var target = this.prototype, parent = this._super, reg = rconst, definition = {}, accessor
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
                 Object.keys(module).forEach(function(name){
                     if( !reg.test(name) ){
                         var prop =  target[name] = module[name];
-                        if(defineProperties && (prop.get || prop.set)){
-                            definition[name] = prop;
-                            if (!('enumerable' in prop))
-                                prop.enumerable = true;
+                        if($.isPlainObject(prop) && (  accessor = ($.isFunction( prop.get ) || $.isFunction( prop.set )) || "value" in prop  ) ){
+                            if(defineProperties){
+                                definition[name] = prop;
+                                if (!('enumerable' in prop))
+                                    prop.enumerable = true;
+                                if(accessor){
+                                    delete prop.value;//指定了访问器就不能指定这两个属性
+                                    delete prop.writable
+                                }else if (!('writable' in prop)){
+                                     prop.writable =  true;
+                                }
+                            }else if("value" in prop){//如果不支持,直接赋值
+                                target[name] = prop.value;
+                            }
                         }
                         if(typeof prop == "function"){
                             target[name] = (function(){
