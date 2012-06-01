@@ -53,25 +53,25 @@ void function( global, DOC ){
 
     /**
      * 糅杂，为一个对象添加更多成员
-     * @param {Object} target 目标对象
-     * @param {Object} source 属性包
+     * @param {Object} receiver 接受者
+     * @param {Object} supplier 提供者
      * @return  {Object} 目标对象
      */
-    function mix( target, source ){
-        var args = [].slice.call( arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
+    function mix( receiver, supplier ){
+        var args = Array.apply([], arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1){//处理$.mix(hash)的情形
-            target = !this.window ? this : {} ;
+            receiver = !this.window ? this : {} ;
             i = 0;
         }
-        while((source = args[i++])){
-            for ( key in source ) {//允许对象糅杂，用户保证都是对象
-                if (ride || !(key in target)) {
-                    target[ key ] = source[ key ];
+        while((supplier = args[i++])){
+            for ( key in supplier ) {//允许对象糅杂，用户保证都是对象
+                if (ride || !(key in receiver)) {
+                    receiver[ key ] = supplier[ key ];
                 }
             }
         }
-        return target;
+        return receiver;
     }
 
     mix( $, {//为此版本的命名空间对象添加成员
@@ -365,7 +365,7 @@ void function( global, DOC ){
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define: function( name, deps, callback ){//模块名,依赖列表,模块本身
+        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
             var args = arguments;
             if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
                 if( deps ){
