@@ -145,7 +145,7 @@ void function( global, DOC ){
                 uid = commonNs.uuid++;
                 node.setAttribute( "uniqueNumber", uid );
             }
-            return uid;
+            return +uid;//确保返回数字
         },
         
         oneObject : function( array, val ){
@@ -438,6 +438,14 @@ $.define( "lang_fix", !!Array.isArray, function(){
     }
     //第二个参数仅在浏览器支持Object.defineProperties时可用
     $.mix(Object,{
+        create: function(o){
+            if (arguments.length > 1) {
+                $.log(" Object.create implementation only accepts the first parameter.")
+            }
+            function F() {}
+            F.prototype = o;
+            return new F();
+        },
         //取得其所有键名以数组形式返回
         keys: function(obj){//ecma262v5 15.2.3.14
             var result = [];
@@ -860,10 +868,49 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 throw "Invalid XML: " + data ;
             }
             return xml;
+        },
+        //http://oldenburgs.org/playground/autocomplete/
+        //http://benalman.com/projects/jquery-throttle-debounce-plugin/
+        //http://www.cnblogs.com/ambar/archive/2011/10/08/throttle-and-debounce.html
+        throttle: function( delay, no_trailing, callback, debounce_mode ) {
+            var timeout_id, last_exec = 0;//ms 时间内只执行 fn 一次, 即使这段时间内 fn 被调用多次
+            if ( typeof no_trailing !== 'boolean' ) {
+                debounce_mode = callback;
+                callback = no_trailing;
+                no_trailing = undefined;
+            }
+            function wrapper() {
+                var that = this,
+                elapsed = +new Date() - last_exec,
+                args = arguments;
+                function exec() {
+                    last_exec = +new Date();
+                    callback.apply( that, args );
+                };
+                function clear() {
+                    timeout_id = undefined;
+                };
+                if ( debounce_mode && !timeout_id ) {
+                    exec();
+                }
+                timeout_id && clearTimeout( timeout_id );
+                if ( debounce_mode === undefined && elapsed > delay ) {
+                    exec();
+                } else if ( no_trailing !== true ) {
+                    timeout_id = setTimeout( debounce_mode ? clear : exec, debounce_mode === undefined ? delay - elapsed : delay );
+                }
+            };
+            wrapper.uniqueNumber = $.getUid(callback)
+            return wrapper;
+        },
+        debounce : function( delay, at_begin, callback ) {
+            return callback === undefined
+            ? $.throttle( delay, at_begin, false )
+            : $.throttle( delay, callback, at_begin !== false );
         }
 
     }, false);
-
+   
     "Array,Function".replace($.rword, function( method ){
         $[ "is"+method ] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+method+"]";
@@ -963,6 +1010,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         byteLen:function(target){
             return target.replace(rascii,"--").length;
         },
+
         //是否为空白节点
         empty: function (target) {
             return target.valueOf() === '';
@@ -1016,7 +1064,22 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         escapeRegExp: function( target ){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
-
+        encodeHTML : function(text) {
+            return String(text).replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;')
+            .replace(/'/g,'&#39;');
+        },
+        decodeHTML: function(text) {
+            var str = String(text).replace(/&amp;/g,'&')
+            .replace(/&lt;/g,'<')
+            .replace(/&gt;/g,'>')
+            .replace(/&quot;/g,'"');
+            return str.replace(/&#(\d+);/g,function(_0,_1){
+                return String.formCharCode(parseInt(_1,10));
+            });
+        },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
         padLeft: function( target, digits, filling, radix ){
@@ -1486,16 +1549,27 @@ $.define("class", "lang",function(){
         });
         return klass;
     }
-
+    var defineProperties = false;
+    // 指定了get与set不能指定writable与value
+    var hiddenProperty = {
+        configurable: false,//防止被删除
+        enumerable: false,//防止被遍历
+        writable: false//防止被修改
+    }
+    try{
+        Object.defineProperties($,{
+            "@target": hiddenProperty,
+            "@path": hiddenProperty
+        });
+        defineProperties = $.support.defineProperties = true;
+    }catch(e){}
     $.mutators = {
         inherit : function( parent,init ) {
-            var bridge = function() { }
             if( typeof parent == "function"){
                 for(var i in parent){//继承类成员
                     this[i] = parent[i];
                 }
-                bridge.prototype = parent.prototype;
-                this.prototype = new bridge ;//继承原型成员
+                this.prototype = Object.create(parent.prototype) ;//继承原型成员
                 this._super = parent;//指定父类
             }
             this._init = (this._init || []).concat();
@@ -1503,7 +1577,7 @@ $.define("class", "lang",function(){
                 this._init.push(init);
             }
             this.toString = function(){
-                return (init || bridge) + ""
+                return (init || $.noop) + "";
             }
             var proto = this.prototype;
             proto.setOptions = function(){
@@ -1517,15 +1591,26 @@ $.define("class", "lang",function(){
                 $.Object.merge.apply(null,arguments);
                 return this;
             }
+            if(defineProperties){
+                Object.defineProperties(proto, {
+                    _init: hiddenProperty,
+                    setOptions: hiddenProperty
+                })
+            }
             return proto.constructor = this;
         },
-        implement:function(){
-            var target = this.prototype, parent = this._super, reg = rconst;
+        implement: function(){
+            var target = this.prototype, parent = this._super, reg = rconst, definition = {}
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
                 Object.keys(module).forEach(function(name){
                     if( !reg.test(name) ){
-                        var prop = target[name] = module[name];
+                        var prop =  target[name] = module[name];
+                        if(defineProperties && (prop.get || prop.set)){
+                            definition[name] = prop;
+                            if (!('enumerable' in prop))
+                                prop.enumerable = true;
+                        }
                         if(typeof prop == "function"){
                             target[name] = (function(){
                                 var _super = function() {
@@ -1557,6 +1642,7 @@ $.define("class", "lang",function(){
                     }
                 }, this );
             }
+            defineProperties && Object.defineProperties(this.prototype, definition)
             return this;
         },
         extend: function(){//扩展类成员
@@ -1587,8 +1673,6 @@ $.define("class", "lang",function(){
         return expand( klass, obj ).implement( obj );
     }
 });
-
-
 
 //==================================================
 // 数据缓存模块
@@ -2858,8 +2942,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     });
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
-    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', '-khtml-', 'ms-']
-    var cssMap = {
+    var prefixes = ['','-webkit-','-o-','-moz-', 'moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
+    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector 
         c:   "color",
         h:   "height",
         o:   "opacity",
@@ -2873,7 +2957,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         opacity: "opacity",//fix IE
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
-    function cssName( name, host, test ){
+    function cssName( name, host, test ){//name必须小写开头
         if( cssMap[ name ] ){
             return cssMap[ name ];
         }
@@ -2890,14 +2974,14 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        match: function( node, expr, i ){
+        match: function f( node, expr, id ){
             try{
-                return node[matchesAPI]( node, expr );
+                return node[matchesAPI]( expr );
             } catch(e) {
-                var parent = node.parentNode;
-                if( parent ){
-                    var array = $.query( expr, parent );
-                    return !!( array.length && array.indexOf( node ) )
+                var parent = node.parentNode, array
+                if( parent ){      
+                    array = $.query( expr, node.ownerDocument );
+                    return  array.indexOf( node ) != -1
                 }
                 return false;
             }
@@ -3123,7 +3207,6 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
         if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
             var outerHTML = document.createElement(node.nodeName).outerHTML;
-            $.log(outerHTML)
             bool = outerHTML.indexOf( unknownTag ) // !0 === true;
         }
         //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
@@ -3307,7 +3390,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 result[ ri++ ] = el;
                 if(expr === true){
                     break;
-                }else if( typeof expr === "string" && $( el ).is( expr ) ){
+                }else if( typeof expr === "string" && $.match( el, expr ) ){
                     result.pop();
                     break;
                 }
@@ -3324,8 +3407,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         parents: function( el ){
             return travel( el, "parentNode" ).reverse();
         },
-        parentsUntil: function( el, expr ){
-            return travel( el, "parentNode", expr ).reverse();
+        parentsUntil: function( el ,expr){
+            return travel( el, "parentNode",expr ).reverse();
         },
         next: function( el ){//nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
             return travel( el, "nextSibling", true );
@@ -3333,8 +3416,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         nextAll: function( el ){
             return travel( el, "nextSibling" );
         },
-        nextUntil: function( el, expr ){
-            return travel( el, "nextSibling", expr );
+        nextUntil: function( el, expr){
+            return travel( el, "nextSibling",expr );
         },
         prev: function( el ){
             return travel( el, "previousSibling", true );
@@ -3343,7 +3426,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             return travel( el, "previousSibling" ).reverse();
         },
         prevUntil: function( el, expr ){
-            return travel( el, "previousSibling", expr ).reverse();
+            return travel( el, "previousSibling",expr ).reverse();
         },
         children: function( el ){//支持情况chrome1+ FF3.5+,IE5+,opera10+,safari4+
             return  el.children ? $.slice( el.children ) :
@@ -3362,7 +3445,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }).each(function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
-            for(var i = 0, el ; el = this[i++];){
+            for(var i = 0, el ; el = this[i++];){//expr只用于Until
                 nodes = nodes.concat( method( el, expr ) );
             }
             if( /Until/.test( name ) ){
@@ -3545,7 +3628,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
-    var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
+    var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
@@ -3627,7 +3710,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
     //优化HTML5应用的体验细节，例如全屏的处理与支持，横屏的响应，图形缩放的流畅性和不失真，点触的响应与拖曳，Websocket的完善
     //关于JavaScript中计算精度丢失的问题 http://rockyee.iteye.com/blog/891538
     function toFixed(d){
-        return  d > -0.000000001 && d < 0.000000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) :  d;
+        return  d > -0.0000001 && d < 0.0000001 ? 0 : /e/.test(d+"") ? d.toFixed(7) :  d;
     }
     function toFloat(d, x){
         return isFinite(d) ? d: parseFloat(d) || x
@@ -3654,7 +3737,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         rotate: function( radian ) {
             var cos = Math.cos(radian);
             var sin = Math.sin(radian);
-            return this.cross(cos,  sin, -sin, cos, 0, 0)
+            return this.cross(cos,  sin,  -sin, cos, 0, 0)
         },
         skew: function(sx, sy) {
             return this.cross(1, Math.tan( sy ), Math.tan( sx ), 1, 0, 0);
@@ -3862,11 +3945,13 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
                         }
                         return Math.max(
                             target.body[ scrollProp ], doc[ scrollProp ],
-                            target.body[ offsetProp ], doc[ offsetProp ]
+                            target.body[ offsetProp ], doc[ offsetProp ],
+                            doc[ clientProp ]
                             );
                     }  else if ( size === void 0 ) {
                         return getWH( target, name, num )
                     } else {
+                        $.log(size)
                         return num > 0  ? this : $.css( target, lower, size );
                     }
                 }, this)
@@ -4247,7 +4332,7 @@ $.define("attr","support,node", function( support ){
             return $.access( this, name, value, $[method] );
         }
     });
-    $.fn["class"] = $.fn.addClass;
+    //$.fn["class"] = $.fn.addClass;
     $.mix({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
@@ -4501,34 +4586,29 @@ $.define("event_fix", !!document.dispatchEvent, function(){
         "radio": "checked",
         "checkbox": "checked"
     }
-    function changeNotify( event ){
+    function changeNotify( event,type ){
         if( event.propertyName === ( changeType[ this.type ] || "value") ){
             $._data( this, "_just_changed", true );
-            $.event._dispatch( $._data( this, "publisher" ), "change", event );
+            $.event._dispatch( $._data( this, "publisher" ), type, event );
         }
     }
     function delegate( fn ){ 
         return function( item ){
             var adapter = $.event.eventAdapter, src = item.target, type = item.type,
-            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src );
+            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
             return (fix || item.selector ) ? fn( src, item ) : false;
         }
     }
 
     var facade = $.event = {
-        eventAdapter:{
-            //input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
+        eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
             input: {
-                check: function( target ){
-                    return rform.test(target.tagName) && !/^select/.test(target.type);
-                },
                 bindType: "change",
                 delegateType: "change"
             },
-
             change: {//change事件的冒泡情况 IE6-9全灭
-                check: function(target){
-                    return !target.disabled && rform.test( target.tagName ) //&& /radio|checkbox|select/.test(target.type)
+                check: function(target, item){
+                    return !target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
                 },
                 setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
@@ -4541,15 +4621,14 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid(ancestor) ] = ancestor;//此孩子可能同时要向N个顶层元素报告变化
-                            item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event))
+                            item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, item.origType))
                         }
-                    })
-                    //如果是事件绑定
-                     ancestor.fireEvent("onbeforeactivate")
+                    });//如果是事件绑定
+                    ancestor.fireEvent("onbeforeactivate")
                 }),
                 teardown: delegate(function( src, item ){
                     $.unbind( src, "beforeactive", item.change_beforeactive );
-                    $.unbind( src, "change",  item.change_fire)  ;
+                    //   $.unbind( src, "change",  item.change_fire)  ;
                     var els = item.subscriber || {};
                     for(var i in els){
                         $.unbind( els[i], "propertychange",  item.change_propertychange)  ;
@@ -4562,7 +4641,10 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             }
         }
     }
+
+
     var adapter = facade.eventAdapter;
+    // adapter.input = adapter.change;
     //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
     //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
     "submit,reset".replace( $.rword, function( type ){
@@ -4591,13 +4673,12 @@ $.define("event_fix", !!document.dispatchEvent, function(){
 // 事件系统v5
 //==========================================
 $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
-    $.support.customEvent = false;
+    var level3  = false;//DOM Level 3 Events
     try{
         var event = new CustomEvent("mass");
-        $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
+        level3 = $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
     }catch(e){ };
-    var level3 = $.support.customEvent;//DOM Level 3 Events
-    $.log("level3 "+ level3)
+    $.log("level4 "+ level3)
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{  //添加或增强二级属性eventAdapter
@@ -4624,11 +4705,18 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     function parseType(event, selector) {//"focusin.aaa.bbb"
         var parts = ('' + event).split('.');
         var ns = parts.slice(1).sort().join(' ');//aaa bbb
-        var type = parts[0];
-        var hack = adapter[ type ] || {}//focusin -> focus
+        var type = parts[0], hack, t;//input -> change -> propertychange
+        while( hack = adapter[ type ] ){
+            t = ( selector ? hack.delegateType : hack.bindType )
+            if(!t){
+                break
+            }else{
+                type = t
+            }
+        }
         return {
-            type : (selector ? hack.delegateType : hack.bindType ) || type,//focus
-            origType: type,
+            type :  type,
+            origType: parts[0],
             selector: selector,
             ns: ns,
             rns: ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
@@ -4660,23 +4748,23 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 var item = parseType(old, expr);//"focusin.aaa.bbb"
                 var type = item.origType;
                 $.mix(item, {
-                    scope: target,//this,用于绑定数据的
-                    target: !DOM ? window : target,//如果是自定义事件,使用window来代理
-                    index: events.length,
-                    one2more: true
+                    target: target,//this,用于绑定数据的
+                    index: events.length,//记录其在列表的位置，在征载事件时用
+                    one2more: true//默认使用旧式的一对多事件绑定
                 }, hash, false);
                 events.push( item );//用于事件拷贝
                 item.proxy = facade.weave( item );
                 var count =  events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
-                var hack = adapter[ type ];
-                if( level3 && !hack ){//一对一事件绑定
-                    item.one2more = false;
-                    item.target.addEventListener(item.type, item.proxy, !!expr );
+                var hack = adapter[ item.type ];
+                if( level3 && !hack ){
+                    item.one2more = false;//新式的一对一事件绑定
+                    var scope = DOM ? target : window;
+                    scope.addEventListener(item.type, item.proxy, !!expr );//自定义事件使用window代理
                 }
                 if(count == 1){
-                    $._data( target, type+"_item", item);//用于$.event.dispatch
+                    $._data( target, type+"_item", item);//用于事件派发：$.event.dispatch
                     if( DOM && item.one2more && (!hack || !hack.setup || hack.setup( item ) === false ) ) {
-                        $.bind(target, item.type, item.proxy, !!expr);//一对多事件绑定
+                        $.bind(target, item.type, item.proxy, !!expr);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -4698,8 +4786,8 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             types.replace( $.rword, function( t ){
                 var parsed = parseType( t, expr), type = parsed.origType, hack = adapter[ type ];
                 findHandlers(events, parsed , hash.fn, expr ).forEach( function(item){
-                    if( !item.one2more ){ 
-                        item.target.removeEventListener( item.type, item.proxy, !!expr );
+                    if( !item.one2more ){
+                        (DOM ? item.target : window).removeEventListener( item.type, item.proxy, !!expr );
                     }
                     if( --events[type+"_count"] == 0 ){
                         if( DOM && item.one2more && ( !hack || !hack.teardown || hack.teardown( item ) === false ) ) {
@@ -4719,7 +4807,6 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             if( !events.length ){
                 $.removeData( target, "events") ;
             }
-            return this;
         },
         fire: function( event ){//事件系统三大核心方法之一，触发事件
             if(!event.originalEvent){
@@ -4741,7 +4828,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !event.isPropagationStopped );
-                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，
+                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
                     && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
                     && (type !== "click"|| this.nodeName == "A")
                     && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
@@ -4773,8 +4860,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         },
         weave: function( hash ){// 用于对用户回调进行改造
             var fn =  function(event){
-                var type = hash.origType, queue = [ hash ], detail = facade.detail || {},
-                scope = hash.scope//thisObject
+                var type = hash.origType, queue = [ hash ], detail = facade.detail || {}, scope = hash.target//原来绑定事件的对象
                 if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
                     return
                 if( hash.one2more ){//level2 逻辑,以实现事件对象的标准化,多参化,
@@ -4783,17 +4869,20 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     event.currentTarget = scope;
                     queue = ($._data( scope, "events") || []).concat();
                 }
-                if(detail.customTarget){
-                    event = facade.fix( event  );
-                    scope = event.target = detail.customTarget
-                }
-                var src = event.target, result;
+                var src = event.target, args = [event].concat( detail.args || [] ), result;
                 for ( var i = 0, item; item = queue[i++]; ) {
-                    if ( !src.disabled && !(event.button && event.type === "click")//Avoid non-left-click bubbling in Firefox (#3861)
-                        && ( event.type == item.origType )//type
-                        && (!item.selector  || facade.match(src, scope, item.selector))//selector
-                        && (!detail.rns || detail.rns.test( item.ns ) ) ) {//namespace
-                        result = item.fn.apply( item.selector ? src : scope, [event].concat(detail.args || []));
+                    if ( !src.disabled && !(event.button && event.type === "click")//右键不能冒泡
+                        && (  event.type == item.origType )//确保事件类型一致
+                        && (!detail.rns || detail.rns.test( item.ns ) )//如果存在命名空间，则检测是否一致
+                        && ( item.selector ? facade.match(src, scope, item) : hash.target == item.target )
+                        //如果是事件代理，则检测元素是否匹配给定选择器，否则检测此元素是否是绑定事件的元素
+                        ) {
+                        result = item.fn.apply( item._target || scope, args);
+                        delete item._target;
+                        item.times--;
+                        if(item.times === 0){
+                            facade.unbind.call( this, item)
+                        }
                         if ( result !== void 0 ) {
                             event.result = result;
                             if ( result === false ) {
@@ -4811,11 +4900,16 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             fn.uuid = hash.uuid;
             return fn;
         },
-        match: function( cur, parent, expr ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+        match: function( cur, parent, item ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
+            if(item._target)
+                return true
+            var expr  = item.selector
             var matcher = expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
-                if(matcher(cur, expr))
+                if(matcher(cur, expr)){
+                    item._target = cur
                     return true
+                }
             }
             return false;
         },
@@ -4869,11 +4963,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                             event.wheelDelta = -event.detail * 40;
                         }
                     }
-                }
-                if ( event.which == null ) {//处理键盘事件
+                }else if ( event.which == null ) {//处理键盘事件
                     event.which = event.charCode != null ? event.charCode : event.keyCode;
-                }
-                if( window.Touch && event.touches && event.touches[0] ){
+                }else if( window.Touch && event.touches && event.touches[0] ){
                     event.pageX = event.touches[0].pageX//处理触摸事件
                     event.pageY = event.touches[0].pageY
                 }
@@ -4884,29 +4976,34 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             return event;
         }
     });
-  
 
-    var oldfire = facade.fire;
     if( level3 ){
         facade.fire = function( type ){
             var detail = type.origType ? type : parseType( type )
             var eventType = detail.origType, DOM = $["@target"] in this, event;
-            if( adapter[ type ] && adapter[ type ].bindType ){ //level3不支持事件冒充
-                return oldfire.apply(this, arguments)
-            }
             detail.args = [].slice.call(arguments,1) ;
             facade.detail = detail;
             if( !DOM  ){
                 event = new CustomEvent(eventType);
-                detail.customTarget = this;
                 event.initCustomEvent( eventType, true, true, detail );
             }else{
                 var doc = this.ownerDocument || this.document || this;
                 event = doc.createEvent("Events");
                 event.initEvent(eventType, true, true);
             };
-            var target = DOM ? this : window
-            target.dispatchEvent(event);
+            //自定义事件的属性不可修改，必须通过 Object.defineProperty打破其封装
+            Object.defineProperties(event,{
+                target: {
+                    writable:true,
+                    value: this
+                },
+                type: {
+                    writable:true,
+                    value: event.type
+                }
+            })
+            var scope = DOM ? this : window
+            scope.dispatchEvent(event);
             delete facade.detail
             return this;
         }
@@ -4946,7 +5043,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     };
     //事件派发器的接口
     //实现了这些接口的对象将具有注册事件和广播事件的功能
-    //http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-EventTarget
+    //http://www.w3.org/TR/DOM-Level-3-Events/#interface-Event
     var revent = /(^|_|:)([a-z])/g, rmapper = /(\w+)_(\w+)/g;
     $.EventTarget = {
         uniqueNumber : $.getUid({}),
@@ -4996,7 +5093,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             quick[1] = ( quick[1] || "" ).toLowerCase();
             quick[3] = quick[3] && new RegExp( "(?:^|\\s)" + quick[3] + "(?:\\s|$)" );
         }
-        return quick;
+        return quick || selector;//如果为null ,或许这是个复杂的表达式,交由选择器引擎去处理
     }
     function quickIs( elem, m ) {
         var attrs = elem.attributes || {};
@@ -5009,7 +5106,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     //以下是用户使用的API
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
-            var fns = [].slice.call(arguments), i = 0;
+            var fns = Array.apply([],arguments), i = 0;
             return this.click(function(e){
                 var fn  = fns[i++] || fns[i = 0, i++];
                 fn.call( this, e );
@@ -5064,7 +5161,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     hash.fn = el
                 }if(typeof el === "string"){
                     if(hash.type != null){
-                        hash.selector = el.trim()
+                        hash.selector = el.trim();
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
                         if(!/^[a-z0-9_\-\.\s]+$/i.test(hash.type)){
@@ -5175,8 +5272,8 @@ $.define("fx", "css",function(){
         transform: /transform/i
     },
     rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
-    function visible(node) {
-        return  $.css(node, "display") !== 'none';
+    function isHidden( elem ) {
+        return elem.sourceIndex === 0 || $.css( elem, "display" ) === "none" || !$.contains( elem.ownerDocument.documentElement, elem );
     }
     $.mix({//缓动公式
         easing : {
@@ -5202,7 +5299,7 @@ $.define("fx", "css",function(){
                 $["@queue"].unshift( fx );
             }
             if ($.tick.id === null) {
-                $.tick.id = setInterval( nextTick, 13 );//原始的setInterval id并执行动画
+                $.tick.id = setInterval( nextTick, 1000/ fx.fps );//原始的setInterval id并执行动画
             }
         },
         //由于构建更高级的基于元素节点的复合动画
@@ -5210,7 +5307,7 @@ $.define("fx", "css",function(){
             nodes = nodes.mass ? nodes : $(nodes);
             var props =  hash || duration ;
             props = typeof props === "object" ? props : {}
-           
+
             if(typeof duration === "function"){// fx(obj fn)
                 hash = duration;               // fx(obj, 500, fn)
                 duration = 500;
@@ -5239,7 +5336,7 @@ $.define("fx", "css",function(){
         //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
         //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
         show: function(node, fx){
-            if(node.nodeType == 1 && !visible(node)) {
+            if(node.nodeType == 1 && isHidden(node)) {
                 var display =  $._data(node, "olddisplay");
                 if(!display || display == "none"){
                     display = parseDisplay(node.nodeName)
@@ -5264,7 +5361,7 @@ $.define("fx", "css",function(){
             }
         },
         hide: function(node, fx){
-            if(node.nodeType == 1 && visible(node)){
+            if(node.nodeType == 1 && !isHidden(node)){
                 var display = $.css( node, "display" );
                 if ( display !== "none" && !$._data( node, "olddisplay" ) ) {
                     $._data( node, "olddisplay", display );
@@ -5293,7 +5390,7 @@ $.define("fx", "css",function(){
             }
         },
         toggle: function( node ){
-            $[ visible(node) ? "hide" : "show" ]( node );
+            $[ isHidden(node) ? "show" : "hide" ]( node );
         }
     })
     //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
@@ -5337,6 +5434,7 @@ $.define("fx", "css",function(){
 
     var cssTransform = $.support.transform
     $.mix($.fx, {
+        fps: 30,
         "@debug": 1,
         type: function (attr){//  用于取得适配器的类型
             for(var i in types){
@@ -5358,7 +5456,7 @@ $.define("fx", "css",function(){
                 node.style[obj.name] = "rgb(" + rgb + ")";
             },
             transform: function(node, per, end, obj){
-                if(!obj.parsed){//先将字符串变成矩阵,矩阵再变成函数
+                if(!obj.parsed){
                     var t = new $.Matrix2D
                     t.set.apply(t, obj.from)
                     obj.from = t.decompose();
@@ -5401,22 +5499,17 @@ $.define("fx", "css",function(){
                 return [ color2array(from), color2array(to) ]
             },
             transform: function(node, from, to){
-                var zero = "matrix(1,0,0,1,0px,0px)"
+                var zero = "matrix(1,0,0,1,0,0)"
                 from = from == "none" ? zero  : from;
                 if(to.indexOf("matrix") == -1 ){
-                      from = $(node).css("transform");
-                        from = from == "none" ? zero  : from;
-                       to = $(node).css("transform", to).css("transform");
-                        $(node).css("transform",from);
-                  //  var neo = node.cloneNode(true);
+                    var neo = node.cloneNode(true);
                     //webkit与opera如果display为none,无法取得其变形属性
-                  //  neo.style.position = "relative";
-                  //  neo.style.opacity = "0";
-                 //   node.parentNode.appendChild(neo)
-                 //   neo = $(neo).css("transform", to);
-               //     to = neo.css("transform");
-                  $.log(to)
-                   // neo.remove();
+                    neo.style.position = "relative";
+                    neo.style.opacity = "0";
+                    node.parentNode.appendChild(neo)
+                    neo = $(neo).css("transform", to);
+                    to = neo.css("transform");
+                    neo.remove();
                 }
                 to = (from +" "+ to).match(/[-+.e\d]+/g).map(function(el){
                     return el * 1
@@ -5464,7 +5557,7 @@ $.define("fx", "css",function(){
     var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record");
     //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
     function fxBuilder(node, fx, index ){
-        var to, parts, unit, op, props = [], revertProps = [],orig = {}, hidden = !visible(node);
+        var to, parts, unit, op, props = [], revertProps = [],orig = {}, hidden = isHidden(node);
         for(var name in fx){
             if(!fx.hasOwnProperty(name) && keyworks[name]){
                 continue
@@ -5488,7 +5581,7 @@ $.define("fx", "css",function(){
                 val = parts[0];//取得第一个值
                 easing = typeof parts[1] == "function" ? parts[1]: easing;//取得第二个值或默认值
             }
-          
+
             if($.fx.parse[ type ]){
                 parts = $.fx.parse[ type ](node, from, val );
             }else{
@@ -5512,7 +5605,7 @@ $.define("fx", "css",function(){
                     parts = [0, 0]
                 }
             }
-           
+
             from = parts[0];
             to = parts[1];
             if( from +"" === to +"" ){//不处理初止值都一样的样式与属性
@@ -5626,7 +5719,7 @@ $.define("fx", "css",function(){
             }
         });
     }
- 
+
     var fxAttrs = [ [ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
     [ "width", "marginLeft", "marginRight", "paddingLeft", "paddingRight" ], ["opacity"]]
     function genFx( type, num ) {//生成属性包
@@ -5664,30 +5757,21 @@ $.define("fx", "css",function(){
         }
     });
 
-    "show,hide".replace( $.rword, function( method ){
-        $.fn[ method ] = function(duration, hash){
-            if(!arguments.length){
-                return this.each(function(){
-                    $[ method ]( this );
-                })
+    [ "toggle", "show", "hide" ].forEach(function(  name, i ) {
+        var toggle = $.fn[ name ];
+        $.fn[ name ] = function( duration, hash ) {
+            if(!arguments.length ){
+                return this.each(function(node) {
+                    $.toggle( node );
+                });
+            }else if(!i && typeof duration === "function" && typeof duration === "function" ){
+                return toggle.apply(this,arguments)
             }else{
-                return $.fx( this, duration, hash, genFx( method , 3) );
+                return $.fx( this, duration, hash, genFx( name , 3) );
             }
-        }
+        };
     });
     
-    var _toggle = $.fn.toggle;
-    $.fn.toggle = function(duration,hash){
-        if(!arguments.length){
-            return this.each(function(node) {
-                $.toggle( node );
-            });
-        }else if(typeof duration === "function" && typeof duration === "function" ){
-            return _toggle.apply(this,arguments)
-        }else{
-            return $.fx(this, duration, hash, genFx("toggle", 3));
-        }
-    }
     function beforePuff( node, fx ) {
         var position = $.css(node,"position"),
         width = $.css(node,"width"),
@@ -5777,6 +5861,7 @@ $.define("fx", "css",function(){
         }
         return colorMap.white;
     }
+    $.parseColor = color2array
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);

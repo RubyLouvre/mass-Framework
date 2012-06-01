@@ -1,5 +1,4 @@
-$.define("waterfall","more/uibase, more/ejs, event,attr,fx",function(Widget){
-    //$.log("已加载waterfall模块")
+$.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
     var Waterfall = $.factory({
         inherit: Widget.Class,
         addTiles: function(json){
@@ -81,6 +80,12 @@ $.define("waterfall","more/uibase, more/ejs, event,attr,fx",function(Widget){
                 fn: callback || function(){},
                 ui: this
             });
+        },
+        adjustLayout: function(){
+            var cols = this.target.find("waterfall-col");
+            if(cols.length){
+                
+            }
         }
     });
     var  now = 0;
@@ -97,25 +102,18 @@ $.define("waterfall","more/uibase, more/ejs, event,attr,fx",function(Widget){
     var defaults = {
         tiles: [],
         data: [],
-        img_expr: ".waterfall_img",/*砖头中的大图的CSS表达式*/
+        img: ".waterfall-img",/*砖头中的大图的CSS表达式*/
         callback: $.noop,
         fade: false,/* 是否使用淡入效果*/
-        fade_time:500/*淡入时间*/
+        fadeTime:500/*淡入时间*/
     }
     //拥有如下参数： ejs_id，data, col_width, width, img_expr
     var init = function(ui, hash){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         ui.target = ui.parent;//所有控件都有target属性，这个也不例外
         ui.width = ui.width || ui.target.width();//求得容器宽
-        var gutter = Math.floor( ( ui.width - ui.col * ui.col_width)/ (ui.col - 1) ); //列间距离
-        for(var i = 0; i < ui.col ; i++){
-            $("<div class='waterfall_cols' />").css({
-                "float": "left",
-                "margin-left": (i == 0 ? 0 : gutter),
-                "width": ui.col_width
-            }).addClass("waterfall_cols").appendTo(ui.target)
-        }
-        ui.cols = ui.target.find(".waterfall_cols");
+        ui.columnGutter = Math.floor( ( ui.width - ui.col * ui.columnWidth)/ (ui.cols - 1) ); //列间距离
+        ui.adjustLayout();
     }
 
     $.fn.waterfall = Widget.create("waterfall", Waterfall, init )

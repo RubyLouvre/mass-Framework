@@ -235,10 +235,49 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 throw "Invalid XML: " + data ;
             }
             return xml;
+        },
+        //http://oldenburgs.org/playground/autocomplete/
+        //http://benalman.com/projects/jquery-throttle-debounce-plugin/
+        //http://www.cnblogs.com/ambar/archive/2011/10/08/throttle-and-debounce.html
+        throttle: function( delay, no_trailing, callback, debounce_mode ) {
+            var timeout_id, last_exec = 0;//ms 时间内只执行 fn 一次, 即使这段时间内 fn 被调用多次
+            if ( typeof no_trailing !== 'boolean' ) {
+                debounce_mode = callback;
+                callback = no_trailing;
+                no_trailing = undefined;
+            }
+            function wrapper() {
+                var that = this,
+                elapsed = +new Date() - last_exec,
+                args = arguments;
+                function exec() {
+                    last_exec = +new Date();
+                    callback.apply( that, args );
+                };
+                function clear() {
+                    timeout_id = undefined;
+                };
+                if ( debounce_mode && !timeout_id ) {
+                    exec();
+                }
+                timeout_id && clearTimeout( timeout_id );
+                if ( debounce_mode === undefined && elapsed > delay ) {
+                    exec();
+                } else if ( no_trailing !== true ) {
+                    timeout_id = setTimeout( debounce_mode ? clear : exec, debounce_mode === undefined ? delay - elapsed : delay );
+                }
+            };
+            wrapper.uniqueNumber = $.getUid(callback)
+            return wrapper;
+        },
+        debounce : function( delay, at_begin, callback ) {
+            return callback === undefined
+            ? $.throttle( delay, at_begin, false )
+            : $.throttle( delay, callback, at_begin !== false );
         }
 
     }, false);
-
+   
     "Array,Function".replace($.rword, function( method ){
         $[ "is"+method ] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+method+"]";
@@ -762,4 +801,4 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
-*/
+ */
