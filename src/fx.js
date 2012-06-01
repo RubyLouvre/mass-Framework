@@ -35,7 +35,7 @@ $.define("fx", "css",function(){
                 $["@queue"].unshift( fx );
             }
             if ($.tick.id === null) {
-                $.tick.id = setInterval( nextTick, 13 );//原始的setInterval id并执行动画
+                $.tick.id = setInterval( nextTick, 1000/ fx.fps );//原始的setInterval id并执行动画
             }
         },
         //由于构建更高级的基于元素节点的复合动画
@@ -170,6 +170,7 @@ $.define("fx", "css",function(){
 
     var cssTransform = $.support.transform
     $.mix($.fx, {
+        fps: 30,
         "@debug": 1,
         type: function (attr){//  用于取得适配器的类型
             for(var i in types){

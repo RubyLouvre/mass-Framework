@@ -3,12 +3,45 @@
     <head>
         <title>mass Framework</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <script src="../src/enchant.js"></script>
-        <link rel="stylesheet" href="todo.css">
+      <!--  <script src="../src/enchant.js"></script>-->
+        <script src="../src/mass.js"></script>
         <script>
+            $.require("ready,event,fx",function(){
+                $(document).click(function(){
+                    $("#ddd").toggle()
+                })
+            })
+        </script>
+        <style>
+            body { background-color: #DDDDDD; font: 30px sans-serif; margin:0px; }
+
+            /* ちょっとデコってみる */
+            .hoge {
+                border: 4px dotted #fff;
+                background-color: #0000ff;
+                border-radius: 50%;
+            }
+
+            .hoge:hover {
+                box-shadow: 0px 0px 16px 0px #fff;
+            }
+            #ddd{
+                background:red;
+                width:100px;
+                height:100px
+            }
+        </style>
+        <script type="id">
+            // forked from phi's "enchant.js - Entity と CSS を連携して円を描画してみよう" http://jsdo.it/phi/6bgb
+            // forked from phi's "enchant.js - Entity の className を使って CSS と連携してみよう" http://jsdo.it/phi/ge5e
+            // forked from phi's "enchant.js - Entity を生成してSceneに追加しよう" http://jsdo.it/phi/tlgU
             // forked from phi's "enchant.js のテンプレートを用意しよう" http://jsdo.it/phi/isoa
             // おまじない(using namespace enchant)
             enchant();
+
+            // enchant.js v0.4.0 では className がサポートされていないみたいなので追加する
+            // 最新のやつだとサポートされています
+
 
             window.onload = function() {
                 var game = new Game();
@@ -19,21 +52,22 @@
 
                     // エンティティを生成, シーンに追加
                     var entity = new Entity();	// 生成
-                    entity.width = 200;		// 幅を設定
+                    entity.className = "hoge";	// CSSクラス名を指定
+                    entity.moveTo(100, 50);		// 移動
+                    entity.width = 100;		// 幅を設定
                     entity.height= 100;		// 高さを設定
-                    entity.backgroundColor = "red";	// 背景色を設定
                     scene.addChild(entity);		// シーンに追加
                 };
 
                 game.start();
             };
-
         </script>
+
     </head>
     <body>
-
-
-
+        <div id="ddd">
+            ggg
+        </div>
 
 
     </body>
