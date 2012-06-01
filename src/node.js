@@ -249,7 +249,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        match: function f( node, expr, id ){
+        match: function ( node, expr, id ){
             try{
                 return node[matchesAPI]( expr );
             } catch(e) {
