@@ -1,22 +1,23 @@
-$.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
+$.define("waterfall","more/uibase, event,attr,fx",function(Widget){
     var Waterfall = $.factory({
         inherit: Widget.Class,
         //为原始的回调绑定参数
         curry : function( callback ){
-            var ui = this, tiles = ui.tiles;
-            var pageHeight = $(document).height(), rollHeight = $(window).scrollTop() +  $(window).height()
-            for( var i = 0; i < tiles.length; i++ ){
-                var tile = tiles[i], top = tile.offset().top;//取得元素相对于整个页面的Y位置
+            var els = this.fadeData;
+            var thresholds = this.shortest + this.top + this.diff;
+            var rollHeight = Math.max( document.body.scrollTop, $.html.scrollTop)
+            for( var i = 0; i < els.length; i++ ){
+                var dom = els[i], top = dom.offset().top;//取得元素相对于整个页面的Y位置
                 if( rollHeight >= top ) { //如果页面的滚动条拖动要处理的元素所在的位置
-                    if(ui.fade){
-                        tile.fx( ui.fade_time,{
+                    if(this.fade){
+                        dom.fx( this.fade_time,{
                             o:1
                         });
                     }
-                    callback.call( ui ,tile );//调用回调，让元素显示出来
+                    callback.call( this ,dom );//调用回调，让元素显示出来
                 }
             }
-            callback.call(ui, rollHeight, pageHeight);
+            callback.call(this, rollHeight, thresholds);
         },
         scroll: function( callback ){
             //这只是一个代理，用于添加回调的
@@ -25,33 +26,29 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
                 ui: this
             });
         },
-        //根据屏幕自动调整列宽
-        getColumnNumber: function(){
-            return 4;
-        },
         //设置列的对齐方式
         setColumnAlign: function(space){
-            var cols = this.target.find("waterfall-col"), margin;
-            this.cols = cols;
+            this.cols = this.target.find(".waterfall-col");
             this.align = this.align || "left";
+            var cols = this.cols.length, margin;
             switch(this.align){
                 case "center":
                     margin = Math.floor( space / cols + 1);
-                    cols.css({
+                    this.cols.css({
                         marginLeft: margin,
                         marginRight: margin
                     })
                     break;
                 case "left":
                     margin = Math.floor( space / cols - 1);
-                    cols.css({
+                    this.cols.css({
                         marginLeft: 0,
                         marginRight: margin
                     })
                     break;
                 case "right":
                     margin = Math.floor( space / cols -1);
-                    cols.css({
+                    this.cols.css({
                         marginLeft: margin,
                         marginRight: 0
                     })
@@ -68,32 +65,37 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
                     result = i
                 }
             }
-            return cols[ result ];
+            return cols.eq( result )
         },
+        //将JSON数据转换成HTML数据
         appendDatas: function(json){
-            var array = this.jsonData;
-            //将JSON数据转换成HTML数据
+            var array = this.htmlData;
             for(var i = 0, el; el = json[i++];){
-                array.push( $.ejs( this.ejs, el) )
+                array.push( this.makeCallback(el, this) )
             }
             this.loadCallback()
             this.appendCells();
         },
-        //添加许多格子
-        appendCells: function( num ){//把格子添加到瀑布流的列中去,如果没有指定数量,它会用尽htmlData里面的节点
-            var cells = this.target.find("waterfall-cell");
-            var total = this.htmlData.length
-            var opacity = cells > this.firestScreenCellNumber ? 0 : 1;
-            num = num ? Math.min(num, total) : total;
-            this.appendCell( cells.splice(0, num), opacity );
+        //将HTML数据转换成DOM数据
+        appendCells: function( num ){
+            var cells = this.target.find(".waterfall-cell").get();//检测瀑布流已经插入了多少格子
+            var array = this.htmlData;//等待添加到DOM树的HTML数据
+            var opacity = cells.length > this.screenCellNumber() ? 0 : 1;
+            num = num ? Math.min(num, array.length) : array.length;
+            this.appendCell( array.splice(0, num), opacity );
         },
-        //把指定的格子递归添加到DOM树上
+        //把DOM数据添加到DOM树
         appendCell: function( cells, opacity ){
             var cell = cells.shift(), ui = this;
             if( cell ){
                 var col = this.getShortestColumn();
                 col.append( cell );
-                var image = $(cell).css("opacity", opacity ).find( this.image )[0];
+                var dom = $(cell);
+                if(opacity == 0){
+                    this.fadeData.push( dom );
+                    dom.css("opacity", opacity )
+                }
+                var image = dom.find( this.image )[0];
                 if( image ){//加载下一张图片
                     var i = 0;
                     (function recursion(){
@@ -113,11 +115,10 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
         },
         setLayout: function(){
             this.adjusting = true;//调整中,此时不宜加载数据
-            var cols = this.target.find("waterfall-col");
-            var num = this.getColumnNumber();
-            var cn = cols.length, n;
-            if( n < num){//如果瀑布布里面没有列,或列数不够,补够它
-                n = num - cn;
+            var cols = this.target.find(".waterfall-col");
+            var num = this.columnNumber();
+            var cn = cols.length,  n = num - cn;
+            if( cn < num){//如果瀑布布里面没有列,或列数不够,补够它
                 for(var i = 0; i < n ; i++){
                     $("<div class='waterfall-col' />").css({
                         "float": "left",
@@ -125,15 +126,14 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
                     }).appendTo(this.target)
                 }
             }else if( cn > num ){//可能瀑布流里面的第一屏格子都用PHP渲染好了,就会出现要求四列,但却输出了五列情况
-                n = num - cn;
                 var removeColumn = cols.slice(n);//要移除的列队,从右边取起;
-                var cells = removeColumn.find("waterfall-cell");//取得里面的格式,回收到htmlData中去
+                var cells = removeColumn.find(".waterfall-cell");//取得里面的格式,回收到htmlData中去
                 Array.prototype.push.array(this.htmlData, cells);
             }
-            var space = Math.floor( ( this.width - num * this.columnWidth));//取得行间空白的总宽
+            var space = Math.floor( ( parseInt(this.width) - num * this.columnWidth));//取得行间空白的总宽
             this.setColumnAlign( space );//调整列间的空白
             this.adjusting = false;
-            this.appendCell();
+            this.appendCells();//开始添加格子
         }
     });
     var now = 0;
@@ -150,13 +150,23 @@ $.define("waterfall","more/uibase, more/ejs,event,attr,fx",function(Widget){
     var defaults = {
         jsonData: [],
         htmlData: [],
+        fadeData: [],
         image: ".waterfall-image",//格子中的大图的CSS表达式
         fade: true,// 是否使用淡入效果
         fadeTime:500,//淡入时间
         shortest: 1, //默认最短的列的高为1px
+        diff: 1,
+        makeCallback: function(json){},//此回调必须返回HTML数据或DOM数据
         loadCallback: function(){},//每次数据加载成功后执行的回调
         appendCallback: function(){},//每次指定的格子都添加到DOM树后执行的回调
+        columnNumber:function(){ //根据屏幕自动调整列宽
+            return 4
+        },
+        screenCellNumber:function(){//每屏的大致格子数
+            return 20
+        },
         columnAlign: "center",//列的显示方式，是怎么对齐
+        columnWidth: 200,//列宽
         firestScreenCellNumber: 20 
     //第一屏要显示出来的格子数。在瀑布流中，默认第一屏格式是不做淡出动画，它们直接显示在页面
     //如果超出这个阀值的格子，当我们用模板生成它们时，会立即把它们的透明度设置为0。当用户滚动到此格子附近时，才淡出显示它。
