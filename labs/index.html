@@ -22,19 +22,18 @@
                 width:198px;
                 padding:20px;
                 margin-top:10px;
-                border:1px solid #000;
+                border:1px solid #ccc;
                 -moz-box-shadow:2px 2px 10px #c96;
                 -webkit-box-shadow:2px 2px 10px #c96;
                 box-shadow:2px 2px 10px #c96;
-                background:#fff;
+                border-radius: 2px 2px 2px 2px;
+                background-color: #F7F7F7;
+            }
+            .image-parent {
+                text-align:center;
             }
             .waterfall-cell .dis{
                 width:198px;
-            }
-            .waterfall-col{
-                height: 10px;
-                background: red;
-
             }
             .footer{
                 height:24px;
@@ -42,9 +41,9 @@
                 background:gray;
             }
         </style>
-        <script src="waterfall-data.js"></script>
+
         <script>
-            $.require("ready,more/waterfall2,more/ejs",function(){
+            $.require("ready,d(http://localhost:8888/labs/waterfall-data.js),more/waterfall2,more/ejs",function(){
                 var waterfall = $("#waterfall").waterfall({
                     fade: true,
                     width: 1100,
@@ -54,15 +53,23 @@
                         return 4
                     },
                     makeCallback: function(json, ui){
-                        json.image = this.image;
+                        json.image = this.image.slice(1);
                         return  $.ejs("#cell-tmpl", json)
+                    },
+                    appendCallback: function(){
+                        $.log($(".waterfall-img").length)
                     }
 
                 }).waterfall("getUI");
+
+
+             //   $.log(data)
                 waterfall.appendDatas( data.splice(0,10) )
                 waterfall.scroll(function(rollHeight, thresholds){
                     if(typeof rollHeight == "number"){
+                       
                         if(rollHeight  > thresholds ){
+                            $.log("111111111111111111111111")
                             waterfall.appendDatas( data.splice(0,10) )
                         }
                     }
@@ -80,8 +87,11 @@
 
         </div>
         <script type="text/tmpl" id="cell-tmpl">
-                <div class="tile">
+                <div class="waterfall-cell">
+                <div class="image-parent">
                 <img src="<&= @src &>" class="<&= @image &>" />
+                </div>
+
                 <div class="dis" ><&= @title &></div>
                 </div>
         </script>

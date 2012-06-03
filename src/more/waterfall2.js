@@ -10,7 +10,7 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
                 var dom = els[i], top = dom.offset().top;//取得元素相对于整个页面的Y位置
                 if( rollHeight >= top ) { //如果页面的滚动条拖动要处理的元素所在的位置
                     if(this.fade){
-                        dom.fx( this.fade_time,{
+                        dom.fx( this.fadeTime,{
                             o:1
                         });
                     }
@@ -57,15 +57,19 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
         },
         //求当前最短的列
         getShortestColumn: function(){
-            var result = 0, cols = this.cols, shortest = this.shortest, h;
+            var result = 0, cols = this.cols, shortest , h;
             for(var i = 0; i < cols.length; i++){
                 h = cols[i].offsetHeight;
-                if( h < shortest ){
-                    this.shortest = shortest = h
+                if(i == 0){
+                    shortest = h;
+                }
+                if(h < shortest ){
+                    shortest = h;
+                    this.shortest = h
                     result = i
                 }
             }
-            return cols.eq( result )
+            return cols[ result ]
         },
         //将JSON数据转换成HTML数据
         appendDatas: function(json){
@@ -86,15 +90,16 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
         },
         //把DOM数据添加到DOM树
         appendCell: function( cells, opacity ){
+            this.adjusting = true;
             var cell = cells.shift(), ui = this;
             if( cell ){
                 var col = this.getShortestColumn();
-                col.append( cell );
-                var dom = $(cell);
+                var dom = $(cell).appendTo(col);
                 if(opacity == 0){
                     this.fadeData.push( dom );
-                    dom.css("opacity", opacity )
+                    dom.css("opacity", opacity );
                 }
+                //  $.log(this.image)
                 var image = dom.find( this.image )[0];
                 if( image ){//加载下一张图片
                     var i = 0;
@@ -110,7 +115,8 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
                     ui.appendCell( cells, opacity );
                 }
             }else {
-                this.loadCallback();//如果这轮的格子都添加成功了,执行此回调
+                this.adjusting = false;
+                this.appendCallback();//如果这轮的格子都添加成功了,执行此回调
             }
         },
         setLayout: function(){
@@ -120,7 +126,7 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
             var cn = cols.length,  n = num - cn;
             if( cn < num){//如果瀑布布里面没有列,或列数不够,补够它
                 for(var i = 0; i < n ; i++){
-                    $("<div class='waterfall-col' />").css({
+                    $("<div class='waterfall-col' tabindex="+i+" />").css({
                         "float": "left",
                         "width":  this.columnWidth
                     }).appendTo(this.target)
@@ -132,8 +138,8 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
             }
             var space = Math.floor( ( parseInt(this.width) - num * this.columnWidth));//取得行间空白的总宽
             this.setColumnAlign( space );//调整列间的空白
-            this.adjusting = false;
             this.appendCells();//开始添加格子
+            this.adjusting = false;
         }
     });
     var now = 0;
@@ -163,7 +169,7 @@ $.define("waterfall","more/uibase, event,attr,fx",function(Widget){
             return 4
         },
         screenCellNumber:function(){//每屏的大致格子数
-            return 20
+            return 5
         },
         columnAlign: "center",//列的显示方式，是怎么对齐
         columnWidth: 200,//列宽
