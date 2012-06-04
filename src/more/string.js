@@ -64,7 +64,81 @@ $.define("string", function(){
             }else{
                 return url
             }
+        },
+        manualLowercase : function(s) {
+            return isString(s)
+            ? s.replace(/[A-Z]/g, function(ch) {
+                return fromCharCode(ch.charCodeAt(0) | 32);
+            })
+            : s;
+        },
+        manualUppercase : function(s) {
+            return isString(s)
+            ? s.replace(/[a-z]/g, function(ch) {
+                return fromCharCode(ch.charCodeAt(0) & ~32);
+            })
+            : s;
+        },
+        /**
+ * We need our custom mehtod because encodeURIComponent is too agressive and doesn't follow
+ * http://www.ietf.org/rfc/rfc3986.txt with regards to the character set (pchar) allowed in path
+ * segments:
+ *    segment       = *pchar
+ *    pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+ *    pct-encoded   = "%" HEXDIG HEXDIG
+ *    unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+ *    sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+ *                     / "*" / "+" / "," / ";" / "="
+ */
+        encodeUriSegment:function (val) {
+            return encodeUriQuery(val, true).
+            replace(/%26/gi, '&').
+            replace(/%3D/gi, '=').
+            replace(/%2B/gi, '+');
+        },
+        /**
+ * This method is intended for encoding *key* or *value* parts of query component. We need a custom
+ * method becuase encodeURIComponent is too agressive and encodes stuff that doesn't have to be
+ * encoded per http://tools.ietf.org/html/rfc3986:
+ *    query       = *( pchar / "/" / "?" )
+ *    pchar         = unreserved / pct-encoded / sub-delims / ":" / "@"
+ *    unreserved    = ALPHA / DIGIT / "-" / "." / "_" / "~"
+ *    pct-encoded   = "%" HEXDIG HEXDIG
+ *    sub-delims    = "!" / "$" / "&" / "'" / "(" / ")"
+ *                     / "*" / "+" / "," / ";" / "="
+ */
+        encodeUriQuery:function (val, pctEncodeSpaces) {
+            return encodeURIComponent(val).
+            replace(/%40/gi, '@').
+            replace(/%3A/gi, ':').
+            replace(/%24/g, '$').
+            replace(/%2C/gi, ',').
+            replace((pctEncodeSpaces ? null : /%20/g), '+');
         }
-    })
 
+
+    })
+/**
+ * Parses an escaped url query string into key-value pairs.
+ * @returns Object.<(string|boolean)>
+ */
+function parseKeyValue(/**string*/keyValue) {
+  var obj = {}, key_value, key;
+  forEach((keyValue || "").split('&'), function(keyValue){
+    if (keyValue) {
+      key_value = keyValue.split('=');
+      key = decodeURIComponent(key_value[0]);
+      obj[key] = isDefined(key_value[1]) ? decodeURIComponent(key_value[1]) : true;
+    }
+  });
+  return obj;
+}
+
+function toKeyValue(obj) {
+  var parts = [];
+  forEach(obj, function(value, key) {
+    parts.push(encodeUriQuery(key, true) + (value === true ? '' : '=' + encodeUriQuery(value, true)));
+  });
+  return parts.length ? parts.join('&') : '';
+}
 });

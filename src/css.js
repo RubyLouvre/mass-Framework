@@ -60,9 +60,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-            var underscored = name == "cssFloat" ? "float" :
-            name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-            rmargin = /^margin/, style = node.style ;
+         //   var underscored = name == "cssFloat" ? "float" :
+        //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
+         var   rmargin = /^margin/, style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
