@@ -431,22 +431,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         escapeRegExp: function( target ){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
-        encodeHTML : function(text) {
-            return String(text).replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;')
-            .replace(/'/g,'&#39;');
-        },
-        decodeHTML: function(text) {
-            var str = String(text).replace(/&amp;/g,'&')
-            .replace(/&lt;/g,'<')
-            .replace(/&gt;/g,'>')
-            .replace(/&quot;/g,'"');
-            return str.replace(/&#(\d+);/g,function(_0,_1){
-                return String.formCharCode(parseInt(_1,10));
-            });
-        },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
         padLeft: function( target, digits, filling, radix ){
