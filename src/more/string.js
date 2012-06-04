@@ -26,27 +26,9 @@ $.define("string", function(){
             });
         },
         //返回search对象或指定参数的值
-        getQuery: function(url, key){
-            url = url.replace(/^[^?=]*\?/ig, '').split('#')[0];	//去除网址与hash信息
-            var json = {};
-            //考虑到key中可能有特殊符号如“[].”等，而[]却有是否被编码的可能，所以，牺牲效率以求严谨，就算传了key参数，也是全部解析url。
-            url.replace(/(^|&)([^&=]+)=([^&]*)/g, function (a, b, key , value){
-                key = decodeURIComponent(key);
-                value = decodeURIComponent(value);
-                if (!(key in json)) {
-                    json[key] = /\[\]$/.test(key) ? [value] : value; //如果参数名以[]结尾，则当作数组
-                }
-                else if (json[key] instanceof Array) {
-                    json[key].push(value);
-                }
-                else {
-                    json[key] = [json[key], value];
-                }
-            });
-            return key ? json[key] : json;
-        },
+        getQuery: $.unparam,
         //返回经过修改location
-        setQuery: function(url, hash, value){
+        setQuery: function(url, hash, value){//对象变
             var obj = $.String.getQuery(url);
             if(typeof hash === "object"){
                 $.Object.merge( obj , hash)
