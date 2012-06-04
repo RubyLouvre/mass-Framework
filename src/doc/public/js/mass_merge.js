@@ -47,21 +47,21 @@ void function( global, DOC ){
     }
 
     
-    function mix( target, source ){
-        var args = [].slice.call( arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
+    function mix( receiver, supplier ){
+        var args = Array.apply([], arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1){//处理$.mix(hash)的情形
-            target = !this.window ? this : {} ;
+            receiver = !this.window ? this : {} ;
             i = 0;
         }
-        while((source = args[i++])){
-            for ( key in source ) {//允许对象糅杂，用户保证都是对象
-                if (ride || !(key in target)) {
-                    target[ key ] = source[ key ];
+        while((supplier = args[i++])){
+            for ( key in supplier ) {//允许对象糅杂，用户保证都是对象
+                if (ride || !(key in receiver)) {
+                    receiver[ key ] = supplier[ key ];
                 }
             }
         }
-        return target;
+        return receiver;
     }
 
     mix( $, {//为此版本的命名空间对象添加成员
@@ -327,7 +327,7 @@ void function( global, DOC ){
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define: function( name, deps, callback ){//模块名,依赖列表,模块本身
+        define: function( name, deps, factory ){//模块名,依赖列表,模块本身
             var args = arguments;
             if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
                 if( deps ){
@@ -1064,22 +1064,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         escapeRegExp: function( target ){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
-        encodeHTML : function(text) {
-            return String(text).replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
-            .replace(/"/g,'&quot;')
-            .replace(/'/g,'&#39;');
-        },
-        decodeHTML: function(text) {
-            var str = String(text).replace(/&amp;/g,'&')
-            .replace(/&lt;/g,'<')
-            .replace(/&gt;/g,'>')
-            .replace(/&quot;/g,'"');
-            return str.replace(/&#(\d+);/g,function(_0,_1){
-                return String.formCharCode(parseInt(_1,10));
-            });
-        },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
         padLeft: function( target, digits, filling, radix ){
@@ -1600,16 +1584,26 @@ $.define("class", "lang",function(){
             return proto.constructor = this;
         },
         implement: function(){
-            var target = this.prototype, parent = this._super, reg = rconst, definition = {}
+            var target = this.prototype, parent = this._super, reg = rconst, definition = {}, accessor
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
                 Object.keys(module).forEach(function(name){
                     if( !reg.test(name) ){
                         var prop =  target[name] = module[name];
-                        if(defineProperties && (prop.get || prop.set)){
-                            definition[name] = prop;
-                            if (!('enumerable' in prop))
-                                prop.enumerable = true;
+                        if($.isPlainObject(prop) && (  accessor = ($.isFunction( prop.get ) || $.isFunction( prop.set )) || "value" in prop  ) ){
+                            if(defineProperties){
+                                definition[name] = prop;
+                                if (!('enumerable' in prop))
+                                    prop.enumerable = true;
+                                if(accessor){
+                                    delete prop.value;//指定了访问器就不能指定这两个属性
+                                    delete prop.writable
+                                }else if (!('writable' in prop)){
+                                     prop.writable =  true;
+                                }
+                            }else if("value" in prop){//如果不支持,直接赋值
+                                target[name] = prop.value;
+                            }
                         }
                         if(typeof prop == "function"){
                             target[name] = (function(){
@@ -2974,7 +2968,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        match: function f( node, expr, id ){
+        match: function ( node, expr, id ){
             try{
                 return node[matchesAPI]( expr );
             } catch(e) {
@@ -3683,9 +3677,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-            var underscored = name == "cssFloat" ? "float" :
-            name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-            rmargin = /^margin/, style = node.style ;
+         //   var underscored = name == "cssFloat" ? "float" :
+        //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
+         var   rmargin = /^margin/, style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
