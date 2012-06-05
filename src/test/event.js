@@ -132,6 +132,19 @@ $.define("event","more/spec,event",function(){
                 input.fire("change")
                 select.fire("change")
             },
+            "parseEvent": function(){
+                //这是一个内部函数
+                var type = "focusin.aaa.bbb"
+                var parts = ('' + type).split('.');
+                var ns = parts.slice(1).sort().join(' ');//aaa bbb
+                expect( ns ).eq("aaa bbb")
+                
+                type = "nonamespace"
+                parts = ('' + type).split('.');
+                ns = parts.slice(1).sort().join(' ');//aaa bbb
+                expect( ns ).eq("")
+
+            },
             defineEvents: function(id){
 
                 var a  =  {};
