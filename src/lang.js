@@ -57,6 +57,15 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return false;
         },
+        makeArray: function(obj){
+            if (obj == null) {
+                return [];
+            }
+            if($.isArrayLike(obj)){
+                return $.slice( obj )
+            }
+            return [ obj ]
+        },
         //将字符串中的占位符替换为对应的键值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
         format: function(str, object){
@@ -355,7 +364,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             });
         }
     });
-
+    
     $.String({
         //判断一个字符串是否包含另一个字符
         contains: function(target, str, separator){
@@ -378,14 +387,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return target.replace(rascii,"--").length;
         },
 
-        //是否为空白节点
-        empty: function (target) {
-            return target.valueOf() === '';
-        },
-        //判定字符串是否只有空白
-        blank: function (target) {
-            return /^\s*$/.test(target);
-        },
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
         truncate :function(target, length, truncation) {
             length = length || 30;
@@ -394,9 +395,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             target.slice(0, length - truncation.length) + truncation : String(target);
         },
         //转换为驼峰风格
-        camelize:function(target){
-            return target.replace(/[_-]([a-z])/g, function($0, $1){
-                return $1.toUpperCase();
+        camelize: function(target){
+            if (target.indexOf('-') < 0 && target.indexOf('_') < 0) {
+                return target;//提前判断，提高getStyle等的效率
+            }
+            return target.replace(/[-_][^-_]/g, function (match) {
+                return match.charAt(1).toUpperCase();
             });
         },
         //转换为连字符风格
@@ -407,29 +411,48 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         capitalize: function(target){
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
-        //转换为整数
-        toInt: function(target, radix) {
-            return parseInt(target, radix || 10);
+        //去掉字符串中的html标签
+        stripTags:function (str) {
+            return String(str || '').replace(/<[^>]+>/g, '');
         },
-        //转换为小数
-        toFloat: function(target) {
-            return parseFloat(target);
+        stripScripts : function(str){
+            return str.replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
+        },//移除字符串中所有的 HTML script 块。弥补stripTags方法对script标签的缺陷
+        //将字符串中的html代码转换为可以直接显示的格式,
+
+        escapeHTML:  function (str) {
+            return str.replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
         },
-        //转换为十六进制
-        toHex: function(target) {
-            for (var i = 0, ret = ""; i < target.length; i++) {
-                if (target.charCodeAt(i).toString(16).length < 2) {
-                    ret += '\\x0' + target.charCodeAt(i).toString(16).toUpperCase() ;
-                } else {
-                    ret += '\\x' + target.charCodeAt(i).toString(16).toUpperCase() ;
-                }
-            }
-            return ret;
+
+        unescapeHTML: function (str) {
+            return  str.replace(/&quot;/g,'"')
+            .replace(/&lt;/g,'<')
+            .replace(/&gt;/g,'>')
+            .replace(/&amp;/g, "&");
+            //处理转义的中文和实体字符
+            return str.replace(/&#([\d]+);/g, function(_0, _1){
+                return String.fromCharCode(parseInt(_1, 10));
+            });
         },
         //http://stevenlevithan.com/regex/xregexp/
         //将字符串安全格式化为正则表达式的源码
         escapeRegExp: function( target ){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+        },
+        /**
+ * 为目标字符串添加wbr软换行
+1.支持html标签、属性以及字符实体。<br>
+2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
+3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题
+		*/
+        wbr: function (source) {
+            return String(source)
+            .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
+            .replace(/><wbr>/g, '>');
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
@@ -450,18 +473,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 num +=  filling;
             }
             return num;
-        },
-        // http://www.cnblogs.com/rubylouvre/archive/2009/11/08/1598383.html
-        times :function(target, n){
-            var result = "";
-            while (n > 0) {
-                if (n & 1)
-                    result += target;
-                target += target;
-                n >>= 1;
-            }
-            return result;
         }
+
     });
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
@@ -783,6 +796,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.1.31 去掉$.Array.ensure，添加$.Array.merge
 2012.3.17 v4 重构语言链对象
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
+2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
  */

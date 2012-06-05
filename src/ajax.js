@@ -151,7 +151,7 @@ $.define("ajax","event", function(){
             if (!$.isPlainObject(json)) {
                 return "";
             }
-            serializeArray = typeof bracket == "boolean" ? serializeArray : !0 ;
+            serializeArray = typeof serializeArray == "boolean" ? serializeArray : !0 ;
             var buf = [], key, val;
             for (key in json) {
                 if ( json.hasOwnProperty( key )) {
@@ -180,17 +180,27 @@ $.define("ajax","event", function(){
             }
             url = url.replace(/^[^?=]*\?/ig, '').split('#')[0];	//去除网址与hash信息
             //考虑到key中可能有特殊符号如“[].”等，而[]却有是否被编码的可能，所以，牺牲效率以求严谨，就算传了key参数，也是全部解析url。
-            url.replace(/(^|&)([^&=]+)=([^&]*)/g, function (a, b, key , value){
-                key = decodeURIComponent(key);
-                value = decodeURIComponent(value);
-                if (!(key in json)) {
-                    json[key] = /\[\]$/.test(key) ? [value] : value; //如果参数名以[]结尾，则当作数组
-                }else if ($.isArray( json[key] )) {
-                    json[key].push(value);
-                } else {
-                    json[key] = [json[key], value];
+            var  pairs = url.split("&"),  pair, key, val,  i = 0, len = pairs.length;
+            for (; i < len; ++i) {
+                pair = pairs[i].split("=");
+                key = decodeURIComponent(pair[0]);
+                try {
+                    val = decodeURIComponent(pair[1] || "");
+                } catch (e) {
+                    $.log(e + "decodeURIComponent error : " + pair[1], "error");
+                    val = pair[1] || "";
                 }
-            });
+                key = key.replace(/\[\]$/,"")//如果参数名以[]结尾，则当作数组
+                if ( json.hasOwnProperty(key) ) {
+                    if (Array.isArray( json[key] )) {
+                        json[key].push(val);//直接加入数组
+                    } else {
+                        json[key] = [ json[key], val ];//第二次,将它转换为数组
+                    }
+                } else {
+                    json[key] = val;
+                }
+            }
             return query ? json[query] : json;
         },
         serialize: function( form ){//表单元素变字符串
@@ -200,7 +210,7 @@ $.define("ajax","event", function(){
                 return  elem.name && !elem.disabled && ( elem.checked === true || /radio|checkbox/.test(elem.type) )
             }).forEach( function( elem ) {
                 var val = $( elem ).val(), vs;
-                val = typeof val == "object" ? val : [val];
+                val = $.makeArray[val];
                 // 字符串换行平台归一化
                 val = val.map( function(v) {
                     return v.replace(rCRLF, "\r\n");
@@ -386,7 +396,7 @@ $.define("ajax","event", function(){
             this.transport = undefined;
         }
     });
-    XHR.prototype.fire = function( type ){//覆盖$.EventTarget的fire方法，去掉事件对象
+    $.XHR.prototype.fire = function( type ){//覆盖$.EventTarget的fire方法，去掉事件对象
         var events = $._data( this,"events") ,args = $.slice(arguments,1);
         if(!events || !events.length) return;
         for ( var i = 0, item; item = events[i++]; ) {
@@ -601,7 +611,7 @@ $.define("ajax","event", function(){
         var ret = [], d, isArray, vs, i, e;
         for (d in data) {
             isArray = $.isArray(data[d]);
-            vs = typeof data[d] == "object" ? data[d]: [data[d]] ;
+            vs = $.makeArray( data[d])
             // 数组和原生一样对待，创建多个同名输入域
             for (i = 0; i < vs.length; i++) {
                 e = DOC.createElement("input");

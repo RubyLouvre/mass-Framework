@@ -43,38 +43,15 @@
         </style>
 
         <script>
-            $.require("ready,d(http://localhost:8888/labs/waterfall-data.js),more/waterfall2,more/ejs",function(){
-                var waterfall = $("#waterfall").waterfall({
-                    fade: true,
-                    width: 1100,
-                    image:".waterfall-img",
-                    columnWidth: 246,
-                    columnsNumber:function(){
-                        return 4
-                    },
-                    makeCallback: function(json, ui){
-                        json.image = this.image.slice(1);
-                        return  $.ejs("#cell-tmpl", json)
-                    },
-                    appendCallback: function(){
-                        $.log($(".waterfall-img").length)
-                    }
-
-                }).waterfall("getUI");
-
-
-             //   $.log(data)
-                waterfall.appendDatas( data.splice(0,10) )
-                waterfall.scroll(function(rollHeight, thresholds){
-                    if(typeof rollHeight == "number"){
-                       
-                        if(rollHeight  > thresholds ){
-                            $.log("111111111111111111111111")
-                            waterfall.appendDatas( data.splice(0,10) )
-                        }
-                    }
-                });
-
+            $.require("ready",function(){
+                var text = "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript";
+                var rtype = /json|xml|script/
+                $.log(text.match(rtype))
+                text = "application/json; charset=utf-8"
+                $.log(text.match(rtype))
+                text = "application/xml, text/xml";
+                $.log(text.match(rtype));
+                alert(document.getElementById("aaa").checked)
             })
 
 
@@ -82,19 +59,11 @@
 
     </head>
     <body>
-
+        <input id="aaa" />
         <div class="waterfall clearfix" id="waterfall">
 
         </div>
-        <script type="text/tmpl" id="cell-tmpl">
-                <div class="waterfall-cell">
-                <div class="image-parent">
-                <img src="<&= @src &>" class="<&= @image &>" />
-                </div>
 
-                <div class="dis" ><&= @title &></div>
-                </div>
-        </script>
 
     </body>
 </html>

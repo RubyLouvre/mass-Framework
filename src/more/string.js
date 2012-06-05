@@ -1,6 +1,36 @@
 $.define("string", function(){
     $.String({
-        //将字符串中的html代码转换为可以直接显示的格式,
+
+        // http://www.cnblogs.com/rubylouvre/archive/2009/11/08/1598383.html
+        times :function(target, n){
+            var result = "";
+            while (n > 0) {
+                if (n & 1)
+                    result += target;
+                target += target;
+                n >>= 1;
+            }
+            return result;
+        },
+        //转换为整数
+        toInt: function(target, radix) {
+            return parseInt(target, radix || 10);
+        },
+        //转换为小数
+        toFloat: function(target) {
+            return parseFloat(target);
+        },
+        //转换为十六进制
+        toHex: function(target) {
+            for (var i = 0, ret = ""; i < target.length; i++) {
+                if (target.charCodeAt(i).toString(16).length < 2) {
+                    ret += '\\x0' + target.charCodeAt(i).toString(16).toUpperCase() ;
+                } else {
+                    ret += '\\x' + target.charCodeAt(i).toString(16).toUpperCase() ;
+                }
+            }
+            return ret;
+        },
         escapeHTML: function( target ){
             return target.replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').
             replace(/</g, '&lt;').
@@ -24,6 +54,14 @@ $.define("string", function(){
             }).replace(/<\/(td|th)\b/gi, function($0, tag){
                 return  ' ' + $0;
             });
+        },
+        //是否为空白节点
+        empty: function (target) {
+            return target.valueOf() === '';
+        },
+        //判定字符串是否只有空白
+        blank: function (target) {
+            return /^\s*$/.test(target);
         },
         //返回search对象或指定参数的值
         getQuery: $.unparam,
@@ -100,27 +138,27 @@ $.define("string", function(){
 
 
     })
-/**
+    /**
  * Parses an escaped url query string into key-value pairs.
  * @returns Object.<(string|boolean)>
  */
-function parseKeyValue(/**string*/keyValue) {
-  var obj = {}, key_value, key;
-  forEach((keyValue || "").split('&'), function(keyValue){
-    if (keyValue) {
-      key_value = keyValue.split('=');
-      key = decodeURIComponent(key_value[0]);
-      obj[key] = isDefined(key_value[1]) ? decodeURIComponent(key_value[1]) : true;
+    function parseKeyValue(/**string*/keyValue) {
+        var obj = {}, key_value, key;
+        forEach((keyValue || "").split('&'), function(keyValue){
+            if (keyValue) {
+                key_value = keyValue.split('=');
+                key = decodeURIComponent(key_value[0]);
+                obj[key] = isDefined(key_value[1]) ? decodeURIComponent(key_value[1]) : true;
+            }
+        });
+        return obj;
     }
-  });
-  return obj;
-}
 
-function toKeyValue(obj) {
-  var parts = [];
-  forEach(obj, function(value, key) {
-    parts.push(encodeUriQuery(key, true) + (value === true ? '' : '=' + encodeUriQuery(value, true)));
-  });
-  return parts.length ? parts.join('&') : '';
-}
+    function toKeyValue(obj) {
+        var parts = [];
+        forEach(obj, function(value, key) {
+            parts.push(encodeUriQuery(key, true) + (value === true ? '' : '=' + encodeUriQuery(value, true)));
+        });
+        return parts.length ? parts.join('&') : '';
+    }
 });

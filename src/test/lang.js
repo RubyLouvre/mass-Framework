@@ -14,7 +14,54 @@ $.define("lang","lang,more/spec",function( $$ ){
             };
             expect(Object.keys(testobj)).same(array);
         },
+        "$.makeArray": function(id){
+            var o;
 
+            // 普通对象(无 length 属性)转换为 [obj]
+            o = {
+                a:1
+            };
+            expect($.makeArray(o)[0]).eq(o);
+
+            // string 转换为 [str]
+            expect($.makeArray('test')[0]).eq('test');
+
+            // function 转换为 [fn]
+            o = function(){};
+            expect($.makeArray(o)[0]).eq(o);
+
+            // array-like 对象，转换为数组
+            expect($.makeArray({
+                '0':0,
+                '1':1,
+                length:2
+            }).length).eq(2);
+            expect($.makeArray({
+                '0':0,
+                '1':1,
+                length:2
+            })[1]).eq(1);
+
+            // nodeList 转换为普通数组
+            o = document.getElementsByTagName('body');
+            expect($.makeArray(o).length).eq(1);
+            expect($.makeArray(o)[0]).eq(o[0]);
+            expect('slice' in $.makeArray(o)).eq(true);
+
+            // arguments 转换为普通数组
+            o = arguments;
+            expect($.makeArray(o).length).eq(1);
+
+            // 伪 array-like 对象
+            o = $.makeArray({
+                a:1,
+                b:2,
+                length:2
+            });
+            expect(o.length).eq(2);
+            expect(o[0]).eq(undefined);
+            expect(o[1]).eq(undefined);
+        },
         "Array#map":function(){
             var ret = [1, 2, 3, 4].map(function(a, b) {
                 return a + b;
@@ -182,24 +229,30 @@ $.define("lang","lang,more/spec",function( $$ ){
             expect( $.String.endsWith('image.gif', '.GIF') ).ng();
             expect( $.String.endsWith('image.gif',".GIF",true) ).ok();
             expect( $.String.byteLen('司徒正美') ).eq(8);
-            expect( $.String.empty('') ).ok();
-            expect( $.String.empty(' ') ).ng();
-            expect( $.String.blank(' ') ).ok();
-            expect( $.String.blank('') ).ok();
-            expect( $.String.blank('\n') ).ok();
-            expect( $.String.blank(' a') ).ng();
+            //            expect( $.String.empty('') ).ok();
+            //            expect( $.String.empty(' ') ).ng();
+            //            expect( $.String.blank(' ') ).ok();
+            //            expect( $.String.blank('') ).ok();
+            //            expect( $.String.blank('\n') ).ok();
+            //            expect( $.String.blank(' a') ).ng();
             expect( $.lang("this is a test test").truncate(10) ).eq("this is...");
             expect( $.lang("foo-bar").camelize() ).eq("fooBar");
             expect( $.lang("boo boo boo").capitalize() ).eq("Boo boo boo");
             expect( $.lang("fooBar").underscored() ).eq("foo_bar");
             expect( $.lang("foo-bar").underscored() ).eq("foo_bar");
             expect( $.lang("foo-bar").capitalize().camelize()).eq("FooBar");
-            expect( $.lang("10.23").toInt()).eq( 10 );
-            expect( $.lang("1.23").toFloat()).eq( 1.23 );
+            //            expect( $.lang("10.23").toInt()).eq( 10 );
+            //            expect( $.lang("1.23").toFloat()).eq( 1.23 );
             expect( $.lang("animals.sheep[1]").escapeRegExp() ).eq("animals\\.sheep\\[1\\]");
             expect( $.lang("2").padLeft(4) ).eq("0002");
             expect( $.lang("2").padRight(4," ") ).eq("2   ");
-            expect( $.lang("ruby").times(2) ).eq("rubyruby");
+        //            expect( $.lang("ruby").times(2) ).eq("rubyruby");
+        },
+        "$.escapeHTML": function () {
+            expect($.String.escapeHTML("<")).eq("&lt;");
+            expect($.String.escapeHTML(">")).eq("&gt;");
+            expect($.String.escapeHTML("&")).eq("&amp;");
+            expect($.String.escapeHTML('"')).eq("&quot;");
         },
 
         "$.Array":function(){
