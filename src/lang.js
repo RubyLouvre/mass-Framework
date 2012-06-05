@@ -158,12 +158,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         dump: function(obj, indent) {
             indent = indent || "";
             if (obj == null)//处理null,undefined
-                return indent + "null";
+                return indent + "obj";
             if (obj.nodeType === 9)
                 return indent + "[object Document]";
             if (obj.nodeType)
                 return indent + "[object " + (obj.tagName || "Node") +"]";
-            var arr = [],type = $.type(obj),self = $.dump ,next = indent +  "\t";
+            var arr = [], type = $.type(obj),self = $.dump ,next = indent +  "\t";
             switch (type) {
                 case "Boolean":
                 case "Number":
@@ -178,21 +178,19 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                     return indent + '(new Date(' + obj.valueOf() + '))';
                 case "Window" :
                     return indent + "[object "+type +"]";
-                case "NodeList":
-                case "Arguments":
-                case "Array":
-                    for (var i = 0, n = obj.length; i < n; ++i)
-                        arr.push(self(obj[i], next).replace(/^\s* /g, next));
-                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
                 default:
+                    if($.isArrayLike(obj)){
+                        for (var i = 0, n = obj.length; i < n; ++i)
+                            arr.push(self(obj[i], next).replace(/^\s* /g, next));
+                        return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
+                    }
                     if($.isPlainObject(obj)){
                         for ( i in obj) {
                             arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
                         }
                         return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
-                    }else{
-                        return indent + "[object "+type +"]";
                     }
+                    return indent + "[object "+type +"]";
             }
         },
         //http://www.schillmania.com/content/projects/javascript-animation-1/
