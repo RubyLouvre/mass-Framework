@@ -191,14 +191,13 @@ $.define("ajax","event", function(){
                     val = pair[1] || "";
                 }
                 key = key.replace(/\[\]$/,"")//如果参数名以[]结尾，则当作数组
-                if ( json.hasOwnProperty(key) ) {
-                    if (Array.isArray( json[key] )) {
-                        json[key].push(val);//直接加入数组
-                    } else {
-                        json[key] = [ json[key], val ];//第二次,将它转换为数组
-                    }
+                var item = json[key];
+                if ('undefined' == typeof item) {
+                    json[key] = val;//第一次
+                } else if (Array.isArray(item)) {
+                    item.push(val);//第三次或三次以上
                 } else {
-                    json[key] = val;
+                    json[key] = [item, val];//第二次,将它转换为数组
                 }
             }
             return query ? json[query] : json;
