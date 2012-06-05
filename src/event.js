@@ -1,13 +1,8 @@
 //=========================================
 // 事件系统v5
 //==========================================
-$.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
-    var level3  = false;//DOM Level 3 Events
-    try{
-        var event = new CustomEvent("mass");
-        level3 = $.support.customEvent = !event.initCustomEvent("mass",true,true,{});
-    }catch(e){ };
-    $.log("level4 "+ level3)
+$.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
+    $.log("已加载event模块")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{  //添加或增强二级属性eventAdapter
@@ -20,7 +15,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             beforeunload: {
                 setup: function( quark ) {
                     if ( $.type(quark.target, "Window") ) {
-                        quark.target.onbeforeunload = quark.proxy;
+                        quark.target.onbeforeunload = quark.handle;
                     }
                 },
                 teardown: function( quark ) {
@@ -31,73 +26,90 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
     var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+)?\b/
-    function parseType(event, selector) {//"focusin.aaa.bbb"
+    var bindWindow = !adapter.input;//如果没有加载event_fix模块,也就没有input分支,也就说明其是支持dispatchEvent API
+    $.eventSupport = function( eventName,el ) {
+        el = el || document.createElement("div");
+        eventName = "on" + eventName;
+        var ret = eventName in el;
+        if ( el.setAttribute && !ret ) {
+            el.setAttribute( eventName, "" );
+            ret = typeof el[ eventName ] === "function";
+            el.removeAttribute(eventName);
+        }
+        el = null;
+        return ret;
+    };
+    /**
+     *用于生成一个Quark对象
+     * @param {String} event 事件类型
+     * @param {String|Boolean|Undefined} live 用于判定是否使用代理
+     */
+    var parseEvent = $._parseEvent = function (event, live) {
         var parts = ('' + event).split('.');
-        var ns = parts.slice(1).sort().join(' ');//aaa bbb
-        var type = parts[0], hack, t;//input -> change -> propertychange
-        while( hack = adapter[ type ] ){
-            t = ( selector ? hack.delegateType : hack.bindType )
-            if(!t){
+        var ns = parts.slice(1).sort().join(' ');
+        var type = parts[0], hack, tmp;//input -> change -> propertychange
+        while( (hack = adapter[ type ]) ){
+            tmp = hack[ live ? "delegateType" : "bindType" ];
+            if( !tmp ){
                 break
             }else{
-                type = t
+                type = tmp
             }
         }
         return {
-            type :  type,
-            origType: parts[0],
-            selector: selector,
-            ns: ns,
-            rns: ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
+            type:      type,          //事件类型
+            origType:  parts[0],      //原事件类型
+            live:      live,          //是否使用了事件代理,可以是正则,字符串,布尔或空值
+            ns:        ns,            //命名空间
+            rns:       ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null,
+            toString: function(){
+                return "[object Quark]"
+            }
         }
     }
     //events为要过滤的集合,后面个参数为过滤条件
-    function findHandlers( events, hash, fn, expr ) {
+    function findHandlers( events, hash, fn, live ) {
         return events.filter(function(quark) {
-            return quark && (!hash.rns  || hash.rns.test(quark.ns))  //通过事件类型进行过滤
+            return quark && (!hash.rns || hash.rns.test(quark.ns))  //通过事件类型进行过滤
             && (!hash.origType || hash.origType === quark.origType) //通过命名空间进行进行过滤
             && (!fn || fn.uniqueNumber === quark.uuid)//通过uuid进行过滤
-            && (!expr || expr === quark.selector || expr === "**" && quark.selector )//通过选择器进行过滤
+            && (!live || live === quark.live || live === "**" && quark.live )//通过选择器进行过滤
         })
     }
     $.mix(facade,{
+        //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
         //Detect Attribute Changes with jQuery The Problem http://darcyclarke.me/development/detect-attribute-changes-with-jquery/#
         bind: function( hash ){//事件系统三大核心方法之一，绑定事件
-            var target = this, DOM =  $[ "@target" ] in target, events = $._data( target),
-            types = hash.type, expr = hash.selector
+            var bindTarget =  $[ "@bind" ] in this,//是否能直接绑定到目标对象上
+            events = $._data( this ),              //是否能绑定事件
+            types  = hash.type,                    //原有的事件类型,可能是复数个
+            live   = hash.live ,                   //是否使用事件代理
+            target = this;
             if( !events ){
                 return
             }
-            if( DOM ){ //处理DOM的hover事件
+            if( bindTarget ){                       //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             events = events.events || (events.events = []);
-            hash.uuid = $.getUid( hash.fn ); //确保hash.uuid与fn.uuid一致
-            types.replace( $.rword, function( old ){
-                var quark = parseType(old, expr);//"focusin.aaa.bbb"
-                var type = quark.origType;
+            hash.uuid = $.getUid( hash.fn );       //确保hash.uuid与fn.uuid一致
+            types.replace( $.rword, function( t ){
+                var quark = parseEvent( t, live), type = quark.origType;
                 $.mix(quark, {
-                    target: target,//this,用于绑定数据的
-                    index: events.length,//记录其在列表的位置，在征载事件时用
-                    one2more: true//默认使用旧式的一对多事件绑定
-                    
+                    target: target,                 //this,用于绑定数据的
+                    index:  events.length           //记录其在列表的位置，在卸载事件时用
                 }, hash, false);
-                quark.toString = function(){
-                    return "[object Quark]"
-                }
-                events.push( quark );//用于事件拷贝
-                quark.proxy = facade.weave( quark );
-                var count =  events[type+"_count"] = ( events[type+"_count"] | 0 )+ 1;
-                var hack = adapter[ quark.type ];
-                if( level3 && !hack ){
-                    quark.one2more = false;//新式的一对一事件绑定
-                    var scope = DOM ? target : window;
-                    scope.addEventListener(quark.type, quark.proxy, !!expr );//自定义事件使用window代理
-                }
+                events.push( quark );                //用于事件拷贝
+                var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
+                var hack = adapter[ quark.type ] || {};
                 if(count == 1){
-                    $._data( target, type+"_quark", quark);//用于事件派发：$.event.dispatch
-                    if( DOM && quark.one2more && (!hack || !hack.setup || hack.setup( quark ) === false ) ) {
-                        $.bind(target, quark.type, quark.proxy, !!expr);
+                    quark.handle = facade.handle( quark );
+                    $._data( target, "first_" + type, quark);  //用于事件派发：$.event.dispatch
+                    if( !hack.setup || hack.setup( quark ) === false  ) {
+                        if( bindTarget === false && bindWindow ){//如果不能绑到当前对象上,尝试绑到window上
+                            target = window;
+                        }
+                        $.bind(target, quark.type, quark.handle, live);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -112,27 +124,27 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         unbind: function( hash ) {//事件系统三大核心方法之一，卸载事件
             var target = this, events = $._data( target, "events");
             if( !events ) return;
-            var types = hash.type || "", expr = hash.selector, DOM = $["@target"] in target;
-            if( DOM ){ //处理DOM的hover事件
+            var types = hash.type || "", live = hash.live, bindTarget = $["@bind"] in this;
+            if( bindTarget ){ //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             types.replace( $.rword, function( t ){
-                var parsed = parseType( t, expr), type = parsed.origType, hack = adapter[ type ];
-                findHandlers(events, parsed , hash.fn, expr ).forEach( function(quark){
-                    if( !quark.one2more ){
-                        (DOM ? quark.target : window).removeEventListener( quark.type, quark.proxy, !!expr );
-                    }
+                var quark = parseEvent( t, live ), type = quark.origType, hack = adapter[ type ] || {};
+                findHandlers( events, quark , hash.fn, live ).forEach( function(quark){
                     if( --events[type+"_count"] == 0 ){
-                        if( DOM && quark.one2more && ( !hack || !hack.teardown || hack.teardown( quark ) === false ) ) {
-                            $.unbind( quark.target, quark.type, quark.proxy, !!expr );
+                        if( !hack.teardown || hack.teardown( quark ) === false  ) {
+                            if( bindTarget === false && bindWindow ){//如果不能绑到当前对象上,尝试绑到window上
+                                target = window;
+                            }
+                            $.unbind( target, quark.type, quark.handle, live );
                         }
-                        $.removeData( target, type+"_quark", true );
+                        $.removeData( target, "first_" + type, true );
                         delete events[ type+"_count"];
                     }
                     events[ quark.index ] = null;
                 })
             });
-            for (var i = events.length; i >= 0; i-- ) {
+            for ( var i = events.length; i >= 0; i-- ) {
                 if (events[i] == null){
                     events.splice(i, 1);
                 }
@@ -141,76 +153,39 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                 $.removeData( target, "events") ;
             }
         },
-        fire: function( event ){//事件系统三大核心方法之一，触发事件
-            if(!event.originalEvent){
-                event = new jEvent(event);
-            }
-            event.target = this;
-            var type = event.origType || event.type;
-            var detail = parseType( type );
-            detail.args = [].slice.call(arguments,1) ;
-            facade.detail = detail;
-            if( $["@target"] in this ){
-                var cur = this,  ontype = "on" + type;
-                do{//模拟事件冒泡与执行内联事件
-                    facade.dispatch( cur, event );
-                    if (cur[ ontype ] && cur[ ontype ].call(cur) === false) {
-                        event.preventDefault();
-                    }
-                    cur = cur.parentNode ||
-                    cur.ownerDocument ||
-                    cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
-                } while ( cur && !event.isPropagationStopped );
-                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
-                    && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
-                    && (type !== "click"|| this.nodeName == "A")
-                    && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
-                    ) {
-                    var inline = this[ ontype ];
-                    var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
-                    this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
-                    this[ ontype ] = null;
-                    this[ type ]();
-                    this.disabled = disabled
-                    this[ ontype ] = inline;
-                }
-            }else{//普通对象的自定义事件
-                facade.dispatch(this, event);
-            }
-            delete facade.detail
-        },
-        _dispatch: function( src, type, event ){//level2 API 用于事件冒充
+        _dispatch: function( list, type, event ){//level2 API 用于事件冒充
             event = facade.fix( event, type );
-            for(var i in src){
-                if(src.hasOwnProperty(i)){
-                    facade.dispatch( src[ i ], event );
+            for(var i in list){
+                if( list.hasOwnProperty(i)){
+                    facade.dispatch( list[ i ], event );
                 }
             }
         },
         dispatch: function( target, event ){// level2 API 用于旧式的$.event.fire中
-            var quark = $._data(target, event.type + "_quark");//取得此元素此类型的第一个quark
-            quark && quark.proxy.call(target, event)
+            var quark = $._data(target, "first_" + event.type );//取得此元素此类型的第一个quark
+            quark && quark.handle.call( target, event )
         },
-        weave: function( hash ){// 用于对用户回调进行改造
-            var fn =  function(event){
-                var type = hash.origType, queue = [ hash ], detail = facade.detail || {}, scope = hash.target//原来绑定事件的对象
+        handle: function( hash ){// 用于对用户回调进行改造
+            var fn =  function( event ){
+                var type = hash.origType, detail = facade.detail || {}, target = hash.target//原来绑定事件的对象
                 if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
                     return
-                if( hash.one2more ){//level2 逻辑,以实现事件对象的标准化,多参化,
-                    var win = ( scope.ownerDocument || scope.document || scope ).parentWindow || window
+                //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
+                if(event.originalEvent || !bindWindow || hash.type !== hash.origType){
+                    var win = bindWindow || ( target.ownerDocument || target.document || target ).parentWindow || window
                     event = facade.fix( event || win.event, type );
-                    event.currentTarget = scope;
-                    queue = ($._data( scope, "events") || []).concat();
+                    event.currentTarget = target;
                 }
-                var src = event.target, args = [event].concat( detail.args || [] ), result;
+                var queue = ( $._data( target, "events") || [] ).concat();
+                var eventTarget = event.target, args = [ event ].concat( detail.args || [] ), result;
                 for ( var i = 0, quark; quark = queue[i++]; ) {
-                    if ( !src.disabled && !(event.button && event.type === "click")//右键不能冒泡
+                    if ( !eventTarget.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
                         && (  event.type == quark.origType )//确保事件类型一致
                         && (!detail.rns || detail.rns.test( quark.ns ) )//如果存在命名空间，则检测是否一致
-                        && ( quark.selector ? facade.match(src, scope, quark) : hash.target == quark.target )
+                        && ( quark.live ? facade.match( eventTarget, target, quark ) : hash.target == quark.target )
                         //如果是事件代理，则检测元素是否匹配给定选择器，否则检测此元素是否是绑定事件的元素
                         ) {
-                        result = quark.fn.apply( quark._target || scope, args);
+                        result = quark.fn.apply( quark._target || target, args);
                         delete quark._target;
                         quark.times--;
                         if(quark.times === 0){
@@ -236,7 +211,7 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
             if(quark._target)
                 return true
-            var expr  = quark.selector
+            var expr  = quark.live
             var matcher = expr.input ? quickIs : $.match
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr)){
@@ -246,10 +221,10 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
             }
             return false;
         },
-        fix: function(event, type){//level2 API 用于修复事件对象的属性与方法
+        fix: function(event, type){//level2 API 用于修复事件对象的属性与方法,主要能IE678, FF用
             if( !event.originalEvent ){
                 var originalEvent = event
-                event = new jEvent(originalEvent);
+                event = new jEvent( originalEvent );
                 for( var p in originalEvent ){
                     if( (p in event) ||  /^[A-Z_]+$/.test(p) || typeof originalEvent[p] == "function"){
                         continue;//去掉所有方法与常量
@@ -310,24 +285,26 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
 
-    if( level3 ){
+    if( bindWindow ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( type ){
-            var detail = type.origType ? type : parseType( type )
-            var eventType = detail.origType, DOM = $["@target"] in this, event;
-            detail.args = [].slice.call(arguments,1) ;
-            facade.detail = detail;
-            if( !DOM  ){
-                event = new CustomEvent(eventType);
-                event.initCustomEvent( eventType, true, true, detail );
-            }else{
+            var bindTarget = $["@bind"] in this, detail, event, eventType
+            if(typeof type === "string"){
+                detail = parseEvent( type );
+                eventType = detail.origType;
                 var doc = this.ownerDocument || this.document || this;
                 event = doc.createEvent("Events");
                 event.initEvent(eventType, true, true);
-            };
+            }else{//传入一个真正的事件对象
+                event = type
+                detail = parseEvent( event.type );
+            }
+            detail.args = [].slice.call(arguments,1) ;
+            facade.detail = detail;
             //自定义事件的属性不可修改，必须通过 Object.defineProperty打破其封装
-            Object.defineProperties(event,{
+            //支持情况:firefox 4 chrome5 ie9 opera11.6 safari5
+            Object.defineProperties && Object.defineProperties(event,{
                 target: {
-                    writable:true,
+                    writable: true,
                     value: this
                 },
                 type: {
@@ -335,10 +312,9 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     value: event.type
                 }
             })
-            var scope = DOM ? this : window
+            var scope = !bindTarget ? window : this;
             scope.dispatchEvent(event);
-            delete facade.detail
-            return this;
+            delete facade.detail;
         }
     }
     var jEvent = $.Event = function ( event ) {
@@ -401,24 +377,11 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
     };
     "bind_on,unbind_off,fire_fire".replace( rmapper,function(_, type, mapper){
         $.EventTarget[ type ] = function(){
-//            $.log(this);
-//            $.log("======" + mapper +"=========")
             $.fn[ mapper ].apply(this, arguments);
             return this;
         }
     });
-    $.eventSupport = function( eventName,el ) {
-        el = el || document.createElement("div");
-        eventName = "on" + eventName;
-        var ret = eventName in el;
-        if ( el.setAttribute && !ret ) {
-            el.setAttribute( eventName, "" );
-            ret = typeof el[ eventName ] === "function";
-            el.removeAttribute(eventName);
-        }
-        el = null;
-        return ret;
-    };
+
     var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/
     function quickParse( selector ) {
         var quick = rquickIs.exec( selector );
@@ -496,28 +459,28 @@ $.define("event",document.dispatchEvent ?  "node" : "node,event_fix",function(){
                     hash.fn = el
                 }if(typeof el === "string"){
                     if(hash.type != null){
-                        hash.selector = el.trim();
+                        hash.live = el.trim();
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
                         if(!/^[a-z0-9_\-\.\s]+$/i.test(hash.type)){
-                            throw "hash.type should be a combination of this event type and the namespace"
+                            throw "hash.type should be a combination of this event type and the namespace!"
                         }
                     }
                 }
             }
             if(method === "on"){
-                if( !hash.type || !hash.fn ){//必须指定事件类型与回调
+                if( !hash.type || !hash.fn ){
+                    $.log("$.fn."+method + " occur error: type and callback must be specified!");
                     return this;
                 }
                 hash.times = hash.times > 0  ? hash.times : Infinity;
-                hash.selector =  hash.selector ? quickParse( hash.selector ) : false
+                hash.live =  hash.live ? quickParse( hash.live ) : false
             }
             if(this.mass && this.each){
                 return this.each(function() {
                     facade[ mapper ].call( this, hash );
                 });
             }else{
-             
                 return facade[ mapper ].call( this, hash );
             }
         }
@@ -600,7 +563,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     }catch(e){};
 
 });
-    /**
+/**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
 2011.9.17 事件发送器增加一个uniqueID属性
 2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
@@ -625,4 +588,4 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.28 Fix quickParse BUG
 2012.5.29 利用Object.defineProperty打破事件对象的封装
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
-     */
+ */
