@@ -284,7 +284,7 @@ $.define("ajax","event", function(){
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
     $.mix(ajax, $.EventTarget);
-    // $.ajax = ajax;
+
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
          * XHR类,用于模拟原生XMLHttpRequest的所有行为
