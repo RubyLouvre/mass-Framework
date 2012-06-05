@@ -284,6 +284,7 @@ $.define("ajax","event", function(){
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
     $.mix(ajax, $.EventTarget);
+    // $.ajax = ajax;
     ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
     /**
          * XHR类,用于模拟原生XMLHttpRequest的所有行为
@@ -333,7 +334,9 @@ $.define("ajax","event", function(){
             }
             return this;
         },
- 
+        toString: function(){
+            return "[object Lions]"
+        },
         // 中止请求
         abort: function(statusText) {
             statusText = statusText || "abort";
@@ -388,7 +391,10 @@ $.define("ajax","event", function(){
                 delete this.timeoutID;
             }
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
+           
             this.fire( eventType, this.responseData, statusText);
+            $.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
+            $.log(this == ajax)
             ajax.fire( eventType );
             this.fire("complete", this.responseData, statusText);
             ajax.fire("complete");
@@ -514,7 +520,6 @@ $.define("ajax","event", function(){
                             } else if (status === 1223) {
                                 status = 204;
                             }
-                            $.log([ status, statusText ])
                             dummyXHR.dispatch(status, statusText);
                         }
                     }
