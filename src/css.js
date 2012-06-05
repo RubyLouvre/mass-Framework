@@ -64,7 +64,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
          var   rmargin = /^margin/, style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
-                ret = computedStyle.getPropertyValue( underscored );
+                ret = computedStyle[name]           //.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
