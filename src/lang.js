@@ -379,12 +379,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             end_str === str;
         },
         //得到字节长度
-        byteLen:function(target){
+        byteLen: function(target){
             return target.replace(rascii,"--").length;
         },
 
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
-        truncate :function(target, length, truncation) {
+        truncate: function(target, length, truncation) {
             length = length || 30;
             truncation = truncation === void(0) ? '...' : truncation;
             return target.length > length ?
@@ -408,24 +408,24 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
         //去掉字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
-        stripTags:function (str) {
-            return String(str ||"").replace(/<[^>]+>/g, '');
+        stripTags: function (target) {
+            return String(target ||"").replace(/<[^>]+>/g, '');
         },
         //移除字符串中所有的 HTML script 块。弥补stripTags方法对script标签的缺陷
-        stripScripts : function(str){
-            return String(str ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
+        stripScripts: function(target){
+            return String(target ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
         },
         //将字符串中的html代码转换为可以直接显示的格式,
-        escapeHTML:  function (str) {
-            return str.replace(/&/g,'&amp;')
+        escapeHTML:  function (target) {
+            return target.replace(/&/g,'&amp;')
             .replace(/</g,'&lt;')
             .replace(/>/g,'&gt;')
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
         },
         //还原为可被文档解析的HTML标签
-        unescapeHTML: function (str) {
-            return  str.replace(/&quot;/g,'"')
+        unescapeHTML: function (target) {
+            return  target.replace(/&quot;/g,'"')
             .replace(/&lt;/g,'<')
             .replace(/&gt;/g,'>')
             .replace(/&amp;/g, "&");
@@ -434,20 +434,20 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return String.fromCharCode(parseInt(_1, 10));
             });
         },
-        //http://stevenlevithan.com/regex/xregexp/
-        //将字符串安全格式化为正则表达式的源码
-        escapeRegExp: function( target ){
-            return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
-        },
         /**
  为目标字符串添加wbr软换行
 1.支持html标签、属性以及字符实体。<br>
 2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题*/
-        wbr: function (source) {
-            return String(source)
+        wbr: function (target) {
+            return String(target)
             .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
             .replace(/><wbr>/g, '>');
+        },
+        //http://stevenlevithan.com/regex/xregexp/
+        //将字符串安全格式化为正则表达式的源码
+        escapeRegExp: function( target ){
+            return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
@@ -456,16 +456,16 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             filling = filling || "0";
             while(num.length < digits){
                 if(!right){
-                     num = filling + num;
+                    num = filling + num;
                 }else{
-                     num += filling;
+                    num += filling;
                 }
             }
             return num;
         },
         //在右边补上一些字符,默认为0
         padRight: function(target, digits, filling, radix){
-          return $.String.padLeft(target, digits, filling, radix, true)
+            return $.String.padLeft(target, digits, filling, radix, true)
         }
     });
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
@@ -545,7 +545,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return Math.max.apply(0, target);
         },
         //取得对象数组的每个元素的特定属性
-        pluck:function( target, name ){
+        pluck: function( target, name ){
             var result = [], prop;
             target.forEach(function(item){
                 prop = item[name];
@@ -574,7 +574,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             });
         },
         //取差集(补集)
-        diff : function( target, array ) {
+        diff: function( target, array ) {
             var result = target.slice();
             for ( var i = 0; i < result.length; i++ ) {
                 for ( var j = 0; j < array.length; j++ ) {
@@ -596,12 +596,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return target;
         },
         //取并集
-        union :function( target, array ){
+        union: function( target, array ){
             $.Array.merge(target, array)
             return $.Array.unique( target );
         },
         //取交集
-        intersect:function( target, array ){
+        intersect: function( target, array ){
             return target.filter(function(n) {
                 return ~array.indexOf(n);
             });
@@ -646,12 +646,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             if(target > a[1]) target = a[1];
             return target;
         },
-        //求出距离原数最近的那个数
-        nearer: function(target, n1, n2){
-            var diff1 = Math.abs(target - n1),
-            diff2 = Math.abs(target - n2);
-            return diff1 < diff2 ? n1 : n2
-        },
         upto: function(target, number, fn, scope) {
             for (var i=target+0; i <= number; i++)
                 fn.call(scope, i);
@@ -661,6 +655,12 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             for (var i=target+0; i >= number; i--)
                 fn.call(scope, i);
             return target;
+        },
+        //求出距离原数最近的那个数
+        nearer: function(target, n1, n2){
+            var diff1 = Math.abs(target - n1),
+            diff2 = Math.abs(target - n2);
+            return diff1 < diff2 ? n1 : n2
         },
         round: function(target, base) {
             if (base) {
@@ -680,7 +680,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     $.Number(NumberExt);
     $.Number("toFixed,toExponential,toPrecision,toJSON")
     function cloneOf(item){
-       
         var name = $.type(item);
         switch(name){
             case "Array":
@@ -688,8 +687,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return $[name].clone(item);
             default:
                 return item;
-        }
-       
+        }       
     }
     //使用深拷贝方法将多个对象或数组合并成一个
     function mergeOne(source, key, current){
