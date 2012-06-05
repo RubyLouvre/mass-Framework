@@ -451,25 +451,22 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
-        padLeft: function( target, digits, filling, radix ){
+        padLeft: function( target, digits, filling, radix , right){
             var num = target.toString(radix || 10);
             filling = filling || "0";
             while(num.length < digits){
-                num= filling + num;
+                if(!right){
+                     num = filling + num;
+                }else{
+                     num += filling;
+                }
             }
             return num;
         },
-
         //在右边补上一些字符,默认为0
         padRight: function(target, digits, filling, radix){
-            var num = target.toString(radix || 10);
-            filling = filling || "0";
-            while(num.length < digits){
-                num +=  filling;
-            }
-            return num;
+          return $.String.padLeft(target, digits, filling, radix, true)
         }
-
     });
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
