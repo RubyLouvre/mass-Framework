@@ -25,6 +25,45 @@ $.define("event_fix", !!document.dispatchEvent, function(){
     }
 
     var facade = $.event = {
+        fire: function( event ){
+            //这里的代码仅用于IE678
+            if(!event.originalEvent){
+                event = new $.Event(event);
+            }
+            event.target = this;
+            var type = event.origType || event.type;
+            var detail = $._parseEvent( type );
+            detail.args = [].slice.call(arguments,1) ;
+            facade.detail = detail;
+            if( $["@bind"] in this ){
+                var cur = this,  ontype = "on" + type;
+                do{//模拟事件冒泡与执行内联事件
+                    facade.dispatch( cur, event );
+                    if (cur[ ontype ] && cur[ ontype ].call(cur) === false) {
+                        event.preventDefault();
+                    }
+                    cur = cur.parentNode ||
+                    cur.ownerDocument ||
+                    cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
+                } while ( cur && !event.isPropagationStopped );
+                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
+                    && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
+                    && (type !== "click"|| this.nodeName == "A")
+                    && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
+                    ) {
+                    var inline = this[ ontype ];
+                    var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
+                    this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
+                    this[ ontype ] = null;
+                    this[ type ]();
+                    this.disabled = disabled
+                    this[ ontype ] = inline;
+                }
+            }else{//普通对象的自定义事件
+                facade.dispatch(this, event);
+            }
+            delete facade.detail
+        },
         eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
             input: {
                 bindType: "change",
@@ -65,7 +104,6 @@ $.define("event_fix", !!document.dispatchEvent, function(){
             }
         }
     }
-
 
     var adapter = facade.eventAdapter;
     // adapter.input = adapter.change;
