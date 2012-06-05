@@ -786,7 +786,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.1.31 去掉$.Array.ensure，添加$.Array.merge
 2012.3.17 v4 重构语言链对象
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
-2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法
+2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法 v4
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
  */
