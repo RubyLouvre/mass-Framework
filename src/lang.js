@@ -157,10 +157,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         })(),
         dump: function(obj, indent) {
             indent = indent || "";
-            if (obj === null)
+            if (obj == null)//处理null,undefined
                 return indent + "null";
-            if (obj === void 0)
-                return indent + "undefined";
             if (obj.nodeType === 9)
                 return indent + "[object Document]";
             if (obj.nodeType)
@@ -178,7 +176,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                     return (indent + obj).replace(/\n/g, "\n" + indent);
                 case "Date":
                     return indent + '(new Date(' + obj.valueOf() + '))';
-                case "global" :
+                case "Window" :
                     return indent + "[object "+type +"]";
                 case "NodeList":
                 case "Arguments":
@@ -411,15 +409,15 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         capitalize: function(target){
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
-        //去掉字符串中的html标签
+        //去掉字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
         stripTags:function (str) {
-            return String(str || '').replace(/<[^>]+>/g, '');
+            return String(str ||"").replace(/<[^>]+>/g, '');
         },
+        //移除字符串中所有的 HTML script 块。弥补stripTags方法对script标签的缺陷
         stripScripts : function(str){
-            return str.replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
-        },//移除字符串中所有的 HTML script 块。弥补stripTags方法对script标签的缺陷
+            return String(str ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
+        },
         //将字符串中的html代码转换为可以直接显示的格式,
-
         escapeHTML:  function (str) {
             return str.replace(/&/g,'&amp;')
             .replace(/</g,'&lt;')
@@ -427,7 +425,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
         },
-
+        //还原为可被文档解析的HTML标签
         unescapeHTML: function (str) {
             return  str.replace(/&quot;/g,'"')
             .replace(/&lt;/g,'<')
@@ -444,11 +442,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
         },
         /**
- * 为目标字符串添加wbr软换行
+ 为目标字符串添加wbr软换行
 1.支持html标签、属性以及字符实体。<br>
 2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
-3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题
-		*/
+3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题*/
         wbr: function (source) {
             return String(source)
             .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')

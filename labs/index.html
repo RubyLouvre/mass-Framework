@@ -43,15 +43,9 @@
         </style>
 
         <script>
-            $.require("ready",function(){
-                var text = "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript";
-                var rtype = /json|xml|script/
-                $.log(text.match(rtype))
-                text = "application/json; charset=utf-8"
-                $.log(text.match(rtype))
-                text = "application/xml, text/xml";
-                $.log(text.match(rtype));
-                alert(document.getElementById("aaa").checked)
+            $.require("ready,lang",function(){
+                var str ="<div>你好<script>alert(1)<\/script></div>"
+                $.log($.String.stripTags(str))
             })
 
 

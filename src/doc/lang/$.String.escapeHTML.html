@@ -24,12 +24,6 @@
                     $.log($$(s).escapeHTML(),true);
                 });
             }
-            var escapeHTML = function(s) {
-                var el = document.createElement('pre'); //这里要用pre，用div有时会丢失换行，例如：'a\r\n\r\nb'
-                var text = document.createTextNode(s);
-                el.appendChild(text);
-                return el.innerHTML;
-            }
         </script>
     </head>
     <body>
@@ -40,18 +34,15 @@
             在输出HTML代码对其进行显示的话，应该用”&amp;lt;”来表示。要不放便某一标签内，它就会被解析成一个新的元素了。比如代码高亮时，
             我们就一定要使用此方法。
         </p>
-        <p>现在此方法的实现是非常的复杂，需要进行六次replace才将相关的HTML entity转换掉，这是因为我还要考虑到后端node.js的使用，如果单单是前端使用，还有一种更简单的实现。
-            下面就把两种实现放出来，如果还有更好的实现请多多指教。
-        </p>
         <pre class="brush:javascript;gutter:false;toolbar:false">
-//没有取纳的实现方式
+//v1
             var escapeHTML = function(s) {
                 var el = document.createElement('pre'); //这里要用pre，用div有时会丢失换行，例如：'a\r\n\r\nb'
                 var text = document.createTextNode(s);
                 el.appendChild(text);
                 return el.innerHTML;
             }
-//当前使用的实现方式
+//v2
         escapeHTML: function( target ){
             return target.replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').
             replace(/</g, '&lt;').
@@ -59,6 +50,14 @@
             replace(/"/g, '&quot;').
             replace(/'/g, '&#x27;').
             replace(/\//g,'&#x2F;');
+        },
+//v3
+        escapeHTML:  function (str) {
+            return str.replace(/&/g,'&amp;')
+            .replace(/&lt;/g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
         },
         </pre>
         <fieldset><legend>例子</legend>
