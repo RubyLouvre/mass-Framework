@@ -26,7 +26,7 @@ $.define("class", "lang",function(){
     }
     try{
         Object.defineProperties($,{
-            "@target": hiddenProperty,
+            "@bind": hiddenProperty,
             "@path": hiddenProperty
         });
         defineProperties = $.support.defineProperties = true;
