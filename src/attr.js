@@ -151,7 +151,7 @@ $.define("attr","support,node", function( support ){
 
     "attr,prop".replace($.rword, function( method ){
         $[ method ] = function( node, name, value ) {
-            if(node  && ( $["@target"] in node )){
+            if(node  && ( $["@bind"] in node )){
                 var isElement = "setAttribute" in node,
                 notxml = !isElement || !$.isXML(node),
                 //对于HTML元素节点，我们需要对一些属性名进行映射
