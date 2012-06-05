@@ -82,7 +82,7 @@ void function( global, DOC ){
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@name": "$",
         "@debug": true,
-        "@target": w3c ? "addEventListener" : "attachEvent",
+        "@bind": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
             node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
@@ -310,18 +310,19 @@ void function( global, DOC ){
             el.addEventListener( type, fn, !!phase );
             return fn;
         } : function( el, type, fn ){
-            el.attachEvent( "on"+type, fn );
+            el.attachEvent && el.attachEvent( "on"+type, fn );
             return fn;
         },
         unbind: w3c ? function( el, type, fn, phase ){
             el.removeEventListener( type, fn || $.noop, !!phase );
         } : function( el, type, fn ){
-            var name = "on" + type; //preventing memory leaks for custom events in IE6-8 –
-            // detachEvent needed property on element, by name of that event, to properly expose it to GC
-            if ( typeof el[ name ] === "undefined" ) {
-                el[ name ] = null;
+            if ( el.detachEvent ) {
+                var name = "on" + type; 
+                if ( el[ name ] == null ) {
+                    el[ name ] = null;
+                }
+                el.detachEvent( name, fn || $.noop );
             }
-            el.detachEvent( name, fn || $.noop );
         },
         //请求模块
         require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
@@ -506,7 +507,7 @@ dom.namespace改为dom["mass"]
 改进$.mix方法，允许只存在一个参数，直接将属性添加到$命名空间上。
 内部方法assemble更名为setup，并强化调试机制，每加入一个新模块， 都会遍历命名空间与原型上的方法，重写它们，添加try catch逻辑。
 //2012.5.6更新rdebug,不处理大写开头的自定义"类"
-//2012.5.26 $.unbind增强对内在泄漏的处理
+//2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
