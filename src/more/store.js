@@ -195,5 +195,4 @@ $.define("store", top.JSON && JSON.parse ? "support" :"support,json2", function(
     return store;
 })
 //这里提供了一个用cookie实现本地储存的方案 https://developer.mozilla.org/en/DOM/Storage
-//https://github.com/marcuswestin/store.js/blob/master/store.js
 //http://www.cnblogs.com/NNUF/archive/2012/06/01/2531436.html
