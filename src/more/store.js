@@ -121,8 +121,6 @@ $.define("store", top.JSON && JSON.parse ? "support" :"support,json2", function(
             storageOwner = storageContainer.w.frames[0].document
             storage = storageOwner.createElement('div')
         } catch(e) {
-            // somehow ActiveXObject instantiation failed (perhaps some special
-            // security settings or otherwse), fall back to per-path storage
             storage = document.createElement('div')
             storageOwner = document.body
         }
@@ -130,8 +128,8 @@ $.define("store", top.JSON && JSON.parse ? "support" :"support,json2", function(
             return function() {
                 var args = Array.apply([],arguments);
                 args.unshift(storage)
-                // See http://msdn.microsoft.com/en-us/library/ms531081(v=VS.85).aspx
-                // and http://msdn.microsoft.com/en-us/library/ms531424(v=VS.85).aspx
+                //  http://msdn.microsoft.com/en-us/library/ms531081(v=VS.85).aspx
+                //  http://msdn.microsoft.com/en-us/library/ms531424(v=VS.85).aspx
                 storageOwner.appendChild(storage)
                 storage.addBehavior('#default#userData')
                 storage.load(localStorageName)
@@ -141,7 +139,7 @@ $.define("store", top.JSON && JSON.parse ? "support" :"support,json2", function(
             }
         }
         function ieKeyFix(key) {
-            // In IE7, keys may not begin with numbers.
+            // 不能以数字开头
             // See https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
             return '_'+key
         }
