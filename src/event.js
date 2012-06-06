@@ -100,9 +100,10 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
                 }, hash, false);
                 events.push( quark );                //用于事件拷贝
+                $.log( quark )
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
                 var hack = adapter[ quark.type ] || {};
-                if(count == 1){
+                if( count == 1 ){
                     quark.handle = facade.handle( quark );
                     $._data( target, "first_" + type, quark);  //用于事件派发：$.event.dispatch
                     if( !hack.setup || hack.setup( quark ) === false  ) {
@@ -178,6 +179,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 }
                 var queue = ( $._data( target, "events") || [] ).concat();
                 var eventTarget = event.target, args = [ event ].concat( detail.args || [] ), result;
+
                 for ( var i = 0, quark; quark = queue[i++]; ) {
                     if ( !eventTarget.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
                         && (  event.type == quark.origType )//确保事件类型一致
@@ -295,7 +297,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 event = doc.createEvent("Events");
                 event.initEvent(eventType, true, true);
             }else{//传入一个真正的事件对象
-                event = type
+                event = type;
                 detail = parseEvent( event.type );
             }
             detail.args = [].slice.call(arguments,1) ;
@@ -321,7 +323,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
         this.originalEvent = event.type ? event: {};
         this.origType = event.type || event;
         this.type = (this.origType).replace(/\..*/g,"");
-        this.timeStamp  = Date.now();
+        this.timeStamp = Date.now();
     };
     jEvent.prototype = {
         toString: function(){
@@ -430,7 +432,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
             $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
             return this;
         },
-        fire: function(  ) {
+        fire: function() {
             var args = arguments;
             if(this.mass && this.each){
                 return this.each(function() {
@@ -533,8 +535,8 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
                 } while (src = src.parentNode );
             }
             adapter[ type ] = {
-                bindType    : rmapper,
-                delegateType: rmapper,
+//                bindType    : rmapper,
+//                delegateType: rmapper,
                 setup: function( ) {
                     if ( notice++ === 0 ) {
                         document.addEventListener( mapper, focusinNotify, true );

@@ -45,7 +45,7 @@ $.define("api", function(){
             "mass": "number",
             "@name": "string",
             "@debug": "boolean",
-            "@target": "string",
+            "@bind": "string",
             "@path": "string",
             "exports": "function",
             "slice": "function",

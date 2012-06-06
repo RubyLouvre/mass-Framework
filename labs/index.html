@@ -8,7 +8,9 @@
         <style type="text/css">
             #waterfall{
                 width:1100px;
-                background: url("../public/styles/waterfall/waterfall_bc.jpg") repeat scroll 0 0 transparent;
+                height:300px;
+                background:red;
+                /*  background: url("../public/styles/waterfall/waterfall_bc.jpg") repeat scroll 0 0 transparent;*/
             }
             .clearfix:after {
                 content: "";
@@ -43,17 +45,49 @@
         </style>
 
         <script>
-            $.require("ready,lang",function(){
-                var str ="<div>你好<script>alert(1)<\/script></div>"
-                $.log($.String.stripTags(str))
-            })
+
+        
+           
+               $.require("ready,event,fx",function(){
+        $("body").delegate("#sample1 input","blur",function(e){
+            $.log(e)
+          $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
+        });
+      });
+                //  $("body").mousewheel(function(e){
+                //      $.log(e)
+                //  })//.fire("mouseup")
 
 
+                /*               var uncia = {
+                    toString: function(){
+                        return "[object Uncia]"
+                    }
+                }
+                $.log( uncia );
+                $.mix(uncia, $.EventTarget);
+                uncia.bind("gallop", function(e){
+                    $.log(e);
+                    $.log(this);
+                    $.log(e.target)
+                }).fire("gallop");*/
+
+                //   $.ajax.bind("success",function(e){
+                //    $.log(e);
+                // $.log(this+"");
+                //   }).fire("success");
+
+
+          
         </script>
 
     </head>
     <body>
-        <input id="aaa" />
+        <div class="sample" id="sample1" >
+            <p><input type="text" /> <span>focus fire</span></p>
+
+            <p><input type="password" /> <span>focus fire</span></p>
+        </div>
         <div class="waterfall clearfix" id="waterfall">
 
         </div>

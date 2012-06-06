@@ -2,6 +2,7 @@
 //  事件补丁模块
 //==========================================
 $.define("event_fix", !!document.dispatchEvent, function(){
+    $.log("已加载event_fix模块")
     //模拟IE678的reset,submit,change的事件代理
     var rform  = /^(?:textarea|input|select)$/i ,
     changeType = {
@@ -20,7 +21,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
         return function( item ){
             var adapter = $.event.eventAdapter, src = item.target, type = item.type,
             fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
-            return (fix || item.selector ) ? fn( src, item ) : false;
+            return (fix || item.live ) ? fn( src, item ) : false;
         }
     }
 
