@@ -13,11 +13,11 @@ $.define("event_fix", !!document.dispatchEvent, function(){
     }
     function changeNotify( event,type ){
         if( event.propertyName === ( changeType[ this.type ] || "value") ){
-            $._data( this, "_just_changed", true );
+            //$._data( this, "_just_changed", true );
             $.event._dispatch( $._data( this, "publisher" ), type, event );
         }
     }
-    function delegate( fn ){ 
+    function delegate( fn ){
         return function( item ){
             var adapter = $.event.eventAdapter, src = item.target, type = item.type,
             fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
