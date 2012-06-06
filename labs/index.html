@@ -48,18 +48,18 @@
 
         
            
-               $.require("ready,event,fx",function(){
-        $("body").delegate("#sample1 input","blur",function(e){
-            $.log(e)
-          $(e.target).nextAll("span").html(e.type+" fire!").show().fadeOut(1000);
-        });
-      });
-                //  $("body").mousewheel(function(e){
-                //      $.log(e)
-                //  })//.fire("mouseup")
+            $.require("ready,node",function(){
+              $.bind($("#text")[0],"focusin",function(e){
+                  $.log(e)
+              })
+
+            });
+            //  $("body").mousewheel(function(e){
+            //      $.log(e)
+            //  })//.fire("mouseup")
 
 
-                /*               var uncia = {
+            /*               var uncia = {
                     toString: function(){
                         return "[object Uncia]"
                     }
@@ -72,10 +72,10 @@
                     $.log(e.target)
                 }).fire("gallop");*/
 
-                //   $.ajax.bind("success",function(e){
-                //    $.log(e);
-                // $.log(this+"");
-                //   }).fire("success");
+            //   $.ajax.bind("success",function(e){
+            //    $.log(e);
+            // $.log(this+"");
+            //   }).fire("success");
 
 
           
