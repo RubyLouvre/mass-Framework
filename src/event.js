@@ -6,12 +6,6 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{  //添加或增强二级属性eventAdapter
-            focus: {
-                delegateType: "focusin"
-            },
-            blur: {
-                delegateType: "focusout"
-            },
             beforeunload: {
                 setup: function( quark ) {
                     if ( $.type(quark.target, "Window") ) {
@@ -526,7 +520,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
-            var notice = 0, focusinNotify = function (event) {
+            var notice = 0, handler = function (event) {
                 var src = event.target;
                 do{//模拟冒泡
                     if( $._data(src, "events") ) {
@@ -539,12 +533,12 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 //                delegateType: rmapper,
                 setup: function( ) {
                     if ( notice++ === 0 ) {
-                        document.addEventListener( mapper, focusinNotify, true );
+                        document.addEventListener( mapper, handler, true );
                     }
                 },
                 teardown: function() {
                     if ( --notice === 0 ) {
-                        document.removeEventListener( mapper, focusinNotify, true );
+                        document.removeEventListener( mapper, handler, true );
                     }
                 }
             };
