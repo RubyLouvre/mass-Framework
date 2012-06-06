@@ -70,6 +70,12 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 bindType: "change",
                 delegateType: "change"
             },
+            focus: {
+                delegateType: "focusin"
+            },
+            blur: {
+                delegateType: "focusout"
+            },
             change: {//change事件的冒泡情况 IE6-9全灭
                 check: function(target, item){
                     return !target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
