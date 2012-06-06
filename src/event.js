@@ -55,10 +55,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
             origType:  parts[0],      //原事件类型
             live:      live,          //是否使用了事件代理,可以是正则,字符串,布尔或空值
             ns:        ns,            //命名空间
-            rns:       ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null,
-            toString: function(){
-                return "[object Quark]"
-            }
+            rns:       ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
         }
     }
     //events为要过滤的集合,后面个参数为过滤条件
@@ -529,8 +526,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
                 } while (src = src.parentNode );
             }
             adapter[ type ] = {
-//                bindType    : rmapper,
-//                delegateType: rmapper,
                 setup: function( ) {
                     if ( notice++ === 0 ) {
                         document.addEventListener( mapper, handler, true );
