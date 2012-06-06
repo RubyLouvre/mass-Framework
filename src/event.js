@@ -5,22 +5,10 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
     $.log("已加载event模块")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
-        eventAdapter:{  //添加或增强二级属性eventAdapter
-            beforeunload: {
-                setup: function( quark ) {
-                    if ( $.type(quark.target, "Window") ) {
-                        quark.target.onbeforeunload = quark.handle;
-                    }
-                },
-                teardown: function( quark ) {
-                    if(quark.target.onbeforeunload == quark.fn)
-                        quark.target.onbeforeunload = $.noop;
-                }
-            }
-        }
+        eventAdapter:{ } //添加或增强二级属性eventAdapter
     });
     var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+)?\b/
-    var bindWindow = !adapter.input;//如果没有加载event_fix模块,也就没有input分支,也就说明其是支持dispatchEvent API
+    var bindTop = !adapter.input;//如果没有加载event_fix模块,也就没有input分支,也就说明其是支持dispatchEvent API
     $.eventSupport = function( eventName,el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
@@ -98,7 +86,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                     quark.handle = facade.handle( quark );
                     $._data( target, "first_" + type, quark);  //用于事件派发：$.event.dispatch
                     if( !hack.setup || hack.setup( quark ) === false  ) {
-                        if( bindTarget === false && bindWindow ){//如果不能绑到当前对象上,尝试绑到window上
+                        if( bindTarget === false && bindTop ){//如果不能绑到当前对象上,尝试绑到window上
                             target = window;
                         }
                         $.bind(target, quark.type, quark.handle, live);
@@ -125,7 +113,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 findHandlers( events, quark , hash.fn, live ).forEach( function(quark){
                     if( --events[type+"_count"] == 0 ){
                         if( !hack.teardown || hack.teardown( quark ) === false  ) {
-                            if( bindTarget === false && bindWindow ){//如果不能绑到当前对象上,尝试绑到window上
+                            if( bindTarget === false && bindTop ){//如果不能绑到当前对象上,尝试绑到window上
                                 target = window;
                             }
                             $.unbind( target, quark.type, quark.handle, live );
@@ -163,8 +151,8 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 if(detail.origType && detail.origType !== type )//防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
                     return
                 //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
-                if(event.originalEvent || !bindWindow || hash.type !== hash.origType){
-                    var win = bindWindow || ( target.ownerDocument || target.document || target ).parentWindow || window
+                if(event.originalEvent || !bindTop || hash.type !== hash.origType){
+                    var win = bindTop || ( target.ownerDocument || target.document || target ).parentWindow || window
                     event = facade.fix( event || win.event, type );
                     event.currentTarget = target;
                 }
@@ -261,7 +249,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                                 delta = -delta;
                             event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
                         }else if( "detail" in originalEvent ){
-                            event.wheelDelta = -event.detail * 40;
+                            event.wheelDelta = -event.detail * 40;//修正FF的detail 为更大众化的wheelDelta
                         }
                     }
                 }else if ( event.which == null ) {//处理键盘事件
@@ -278,20 +266,21 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
 
-    if( bindWindow ){//事件系统三大核心方法之一，触发事件
+    if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( type ){
             var bindTarget = $["@bind"] in this, detail, event, eventType
+            var target = bindTarget ? this : window;
             if(typeof type === "string"){
                 detail = parseEvent( type );
                 eventType = detail.origType;
-                var doc = this.ownerDocument || this.document || this;
+                var doc = target.ownerDocument || target.document || target || document;
                 event = doc.createEvent("Events");
-                event.initEvent(eventType, true, true);
+                event.initEvent(eventType, true, true, doc.defaultView);
             }else{//传入一个真正的事件对象
                 event = type;
                 detail = parseEvent( event.type );
             }
-            detail.args = [].slice.call(arguments,1) ;
+            detail.args = [].slice.call( arguments,1 ) ;
             facade.detail = detail;
             //自定义事件的属性不可修改，必须通过 Object.defineProperty打破其封装
             //支持情况:firefox 4 chrome5 ie9 opera11.6 safari5
@@ -305,8 +294,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                     value: event.type
                 }
             })
-            var scope = !bindTarget ? window : this;
-            scope.dispatchEvent(event);
+            target.dispatchEvent(event);
             delete facade.detail;
         }
     }
@@ -578,5 +566,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.26 修正自定义事件target与this的指向
 2012.5.28 Fix quickParse BUG
 2012.5.29 利用Object.defineProperty打破事件对象的封装
+2012.6.6 addEventListenter也能绑定自定义事件, 一些兼容逻辑移到event_fix中去 升级到v6
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
  */
