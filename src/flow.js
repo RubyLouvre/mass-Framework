@@ -12,8 +12,8 @@ $.define("flow", function(){
         constructor:OperateFlow,
         bind:function(names,callback,reload){
             var  core = this.core, deps = {},args = [];
-            names.replace($.rword,function(name){
-                name = "####"+name
+            (names +"").replace($.rword,function(name){
+                name = "####"+name; 
                 if(!core[name]){
                     core[name] ={
                         unfire : [callback],//正在等待解发的回调
@@ -32,7 +32,7 @@ $.define("flow", function(){
             callback.reload = !!reload;//默认每次重新加载
         },
         unbind : function(array,fn){//$.multiUnind("aaa,bbb")
-            if(/string|number/.test(typeof array) ){
+            if(/string|number|object/.test(typeof array) ){
                 var tmp = []
                 (array+"").replace($.rword,function(name){
                     tmp.push( "####"+name)
@@ -61,6 +61,7 @@ $.define("flow", function(){
         },
         fire : function(name, args){
             var core = this.core, obj = core["####"+name], deps;
+           
             if(!obj )
                 return ;
             obj.ret = args;
