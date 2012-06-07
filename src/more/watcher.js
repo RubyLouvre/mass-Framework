@@ -1,5 +1,6 @@
 $.define("watcher","lang", function(){
     //监听器模块 用于监听普通对象,或元素节点的属性变化
+    $.log("已加载watcher模块")
     var watcher = []
     function check(obj){
         if(!(obj && typeof obj == "object")){
@@ -120,3 +121,4 @@ $.define("watcher","lang", function(){
 
 })
 //参考 http://stackoverflow.com/questions/1269633/watch-for-object-properties-changes-in-javascript
+//Detect Attribute Changes with jQuery The Problem http://darcyclarke.me/development/detect-attribute-changes-with-jquery/#
