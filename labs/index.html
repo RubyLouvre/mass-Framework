@@ -48,11 +48,55 @@
 
         
            
-            $.require("ready,node",function(){
-              $.bind($("#text")[0],"focusin",function(e){
-                  $.log(e)
-              })
+            $.require("flow,more/watcher",function(r,watcher){
+                function computed(a, b, fn){
+                    var bind = this;
+                    watcher.watch(bind, a, function(){
+                        fn.call(bind);
+                    })
+                    //  return fn.call(bind);
+                }
+                var Test = {
+                    attrs:{
+                        firstName:"xxx",
+                        lastName:"yyy",
+                        fullName:[function(){
+                                $.log("==============")
+                                return this.firstName+" "+this.lastName;
+                            },"firstName","lastName",]//返回一个带标识的数组
+                    }
+                }
+                var flow = new $.flow;
+                var attrs = Test.attrs, props = [];
+                for(var prop in attrs){
+                    if(attrs.hasOwnProperty(prop)){
+                        var value = attrs[prop];
+                        if(Array.isArray(value)
+                            && value.length >= 2
+                            && (typeof (value[0] ) =="function")
+                            && (typeof value[value.length - 1] === "string" ) ){
+                            //构娅一回调,当依赖属性发生变化时,修改此属性,并把它放到它们的change事件中去
+                            var callback =  value.shift()
+                            var reload = typeof value[0] == "boolean" ? value.shift() : false;
+                            flow.bind(value, function(){
+                                callback.call(attrs)
+                            },reload)
+                        }else{
+                            props.push(prop);
 
+                        }
+                    }
+
+                }
+                //  $.log(props)
+                for(var i = 0, n = props.length; i < n; i++){
+                    watcher.watch(attrs, props[i], function(p){
+                       flow.fire( p )
+                    })
+                }
+
+                Test.attrs.firstName = "zzz"
+               // Test.attrs.lastName = "oooo"
             });
             //  $("body").mousewheel(function(e){
             //      $.log(e)
@@ -84,7 +128,7 @@
     </head>
     <body>
         <div class="sample" id="sample1" >
-            <p><input type="text" /> <span>focus fire</span></p>
+            <p><input type="text" id="test"/> <span>focus fire</span></p>
 
             <p><input type="password" /> <span>focus fire</span></p>
         </div>
