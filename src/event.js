@@ -57,7 +57,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
     }
     $.mix(facade,{
         //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
-        //Detect Attribute Changes with jQuery The Problem http://darcyclarke.me/development/detect-attribute-changes-with-jquery/#
+        //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
         bind: function( hash ){//事件系统三大核心方法之一，绑定事件
             var bindTarget =  $[ "@bind" ] in this,//是否能直接绑定到目标对象上
             events = $._data( this ),              //是否能绑定事件
