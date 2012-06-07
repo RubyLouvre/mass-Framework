@@ -7,6 +7,7 @@ $.define("watcher","lang", function(){
             throw "first arguments must be a object!"
         }
     }
+
     if( Object.prototype.watch){
         watcher.watch = function(obj, prop, handler){
             check( obj );
@@ -28,7 +29,9 @@ $.define("watcher","lang", function(){
                 }
             }
         };
-    }else if( Object.defineProperty || watcher.__defineGetter__){
+    }else if( $.isNative(Object.defineProperties ||  watcher.__defineGetter__ )){
+        //IE8也有Object.defineProperty，但不能用于普通JS对象。为了防止某些es5-shim库，它们对Object.defineProperty的修复是不完全
+        //一定是原生支持才行
         watcher.watch = function(obj, prop, handler){
             check( obj );
             var oldval = obj[prop];
@@ -86,7 +89,7 @@ $.define("watcher","lang", function(){
         watcher.watch = function(obj, prop ,callback){
             check( obj );
             watcher.unwatch(obj, prop);
-            var length = watcher.push( [ obj, prop,callback, obj[prop] ] );
+            var length = watcher.push( [ obj, prop, callback, obj[prop] ] );
             if( length == 1 ){//启动定时器
                 watcher.intervalID = setInterval( loop, watcher.time);
             }else if( length > 100 ){//改变定时器的跳动频率
