@@ -27,7 +27,7 @@ $.define("spec","lang", function(){
                 case "NaN":
                     return isNaN(b);
                 case "Date":
-                    return a.valueOf() === b.valueOf();
+                    return +a === +b
                 case "NodeList":
                 case "Arguments":
                 case "Array":
