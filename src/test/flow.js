@@ -1,6 +1,6 @@
 $.define("flow","flow,more/spec",function(){
     $.fixture('操作流模块-flow', {
-        "reloadAll = false": function(id){
+        "reload = false": function(id){
             var flow = new $.flow;
             var callback = function(a,b,c){
                 expect([].slice.call(arguments),id).same([10,20,30])//测试多路监听时收集的返回值
@@ -20,8 +20,8 @@ $.define("flow","flow,more/spec",function(){
 
             // $.log(callback.args)
             expect(callback.args).same(["__aaa", "__bbb", "__ccc"]);//必须这三个事件都被fire才执行callback
-            // $.log(callback.reloadAll)
-            expect(callback.reloadAll).eq(false);
+            // $.log(callback.reload)
+            expect(callback.reload).eq(false);
             //  $.log(flow.root["__aaa"])
             expect(flow.root["__aaa"].unfire.length).eq(2);//__aaa这个事件未绑定的回调已达两个
             flow.fire("aaa",10);
@@ -32,7 +32,7 @@ $.define("flow","flow,more/spec",function(){
             flow.fire("ddd",60);
             expect(fireCount).eq(3);
         },
-        "reloadAll = true": function(){
+        "reload = true": function(){
             var flow = new $.flow;
             var fireCount = 0;//用于统计aa,bb这个组合的回调一共执行了多少次
             var callback = function(){

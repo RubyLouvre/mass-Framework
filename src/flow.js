@@ -12,7 +12,7 @@ $.define("flow", function(){
     OperateFlow.prototype = {
         constructor: OperateFlow,
         //names 可以为数组，用逗号作为分隔符的字符串
-        bind:function(names,callback,reloadAll){
+        bind:function(names,callback,reload){
             var  root = this.root, deps = {},args = [];
             (names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
@@ -32,7 +32,7 @@ $.define("flow", function(){
             });
             callback.deps = deps;
             callback.args = args;
-            callback.reloadAll = !!reloadAll;//默认每次重新加载
+            callback.reload = !!reload;//默认每次重新加载
         },
         unbind : function(array,fn){//$.multiUnind("aaa,bbb")
             if(/string|number|object/.test(typeof array) ){
@@ -82,12 +82,12 @@ $.define("flow", function(){
                     repeat = true;
                 }
             if(repeat){ //为了谨慎起见再检测一遍
-                return this.fire(name, args);
+                return this.fire.apply(this,arguments);
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
                     if(fn.deps["__"+name]){//只处理相关的
-                        fn.apply(this,this._args(fn.args));
-                        if(fn.reloadAll){//重新加载所有数据
+                        fn.apply(this, this._args( fn.args ));
+                        if(fn.reload){//重新加载所有数据
                             fired.splice(i,1);
                             unfire.push(fn);
                             for(key in fn.deps){
@@ -99,8 +99,8 @@ $.define("flow", function(){
             }
         }
     }
-    $.flow  = function(names,callback,reloadAll){//一个工厂方法
-        return new OperateFlow(names,callback,reloadAll)
+    $.flow  = function(names,callback,reload){//一个工厂方法
+        return new OperateFlow(names,callback,reload)
     }
 })
 //2012.6.8 对fire的传参进行处理
