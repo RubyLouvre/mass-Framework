@@ -9,7 +9,6 @@ $.define("flow", function(){
         if(typeof arguments[1] == "function")
             this.bind.apply(this, arguments);
     }
-    var db = $.flowDB = {};
     OperateFlow.prototype = {
         constructor: OperateFlow,
         //names 可以为数组，用逗号作为分隔符的字符串
@@ -57,9 +56,9 @@ $.define("flow", function(){
                 }
             }
         },
-        _args : function (arr){
+        _args : function (arr){//对所有结果进行平坦化处理
             for(var i = 0, result = [], el; el = arr[i++];){
-                result.push( this.root[el].ret);
+                result.push.apply( result,this.root[el].ret);
             }
             return result;
         },
@@ -67,7 +66,7 @@ $.define("flow", function(){
             var root = this.root, obj = root["__"+name], deps;
             if(!obj )
                 return ;
-            obj.ret = args;
+            obj.ret = $.slice(arguments,1);//这个供_args方法调用
             obj.state = 2;//标识此操作已完成
             var unfire = obj.unfire,fired = obj.fired;
                 loop:
@@ -75,7 +74,6 @@ $.define("flow", function(){
                     deps = fn.deps;
                     for(var key in deps){//如果其依赖的其他操作都已完成
                         if(deps.hasOwnProperty(key) && root[key].state != 2 ){
-                            $.log(key)
                             continue loop;
                         }
                     }
@@ -88,7 +86,6 @@ $.define("flow", function(){
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
                     if(fn.deps["__"+name]){//只处理相关的
-                        $.log(fn.reloadAll)
                         fn.apply(this,this._args(fn.args));
                         if(fn.reloadAll){//重新加载所有数据
                             fired.splice(i,1);
@@ -106,3 +103,4 @@ $.define("flow", function(){
         return new OperateFlow(names,callback,reloadAll)
     }
 })
+//2012.6.8 对fire的传参进行处理
