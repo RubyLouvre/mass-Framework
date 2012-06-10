@@ -48,6 +48,7 @@ $.define("class", "lang",function(){
                 return (init || $.noop) + "";
             }
             var proto = this.prototype;
+            proto.klass = this;
             proto.setOptions = function(){
                 var first = arguments[0];
                 if( typeof first === "string" ){
@@ -62,7 +63,8 @@ $.define("class", "lang",function(){
             if(defineProperties){
                 Object.defineProperties(proto, {
                     _init: hiddenProperty,
-                    setOptions: hiddenProperty
+                    setOptions: hiddenProperty,
+                    klass: hiddenProperty
                 })
             }
             return proto.constructor = this;
