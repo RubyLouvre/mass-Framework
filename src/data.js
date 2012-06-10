@@ -2,7 +2,7 @@
 // 数据缓存模块
 //==================================================
 $.define("data", "lang", function(){
-    //$.log("已加载data模块");
+    $.log("已加载data模块");
     var remitter = /object|function/, rtype = /[^38]/
     function validate(target){
         return target && remitter.test(typeof target) && rtype.test(target.nodeType)

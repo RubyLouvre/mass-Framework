@@ -1,6 +1,6 @@
-$.require("flow,more/watcher",function(r,watcher){
+$.require("flow",function(){
     var Test = {
-        attrs:{
+        model:{
             firstName:"xxx",
             lastName:"yyy",
             fullName:[function(){
@@ -12,33 +12,49 @@ $.require("flow,more/watcher",function(r,watcher){
     }
 
     var flow = new $.flow;
-    var attrs = Test.attrs, props = [];
-    for(var prop in attrs){
-        if(attrs.hasOwnProperty(prop)){
-            var value = attrs[prop];
-            // $.log(typeof value[value.length - 1] +" "+prop)
+    var model = Test.model, fields = [];
+    for(var prop in model){
+        if(model.hasOwnProperty(prop)){
+            var value = model[prop];
             if(Array.isArray(value)
                 && value.length >= 2
                 && (typeof value[0] =="function")
                 && (typeof value[value.length - 1] === "string" ) ){
                 var callback =  value.shift();
-                //$.log(value[0])
                 var reload = typeof value[0] == "boolean" ? value.shift() : false;
                 //放进操作流中
                 flow.bind(value, function(){
-                    callback.call(attrs)
-                },reload)
+                    callback.call(model)
+                },reload);
+                model[prop] = callback.call(model)
             }else{
-                props.push(prop);
+                fields.push(prop);//取得原子属性
             }
         }
     }
-    for(var i = 0, n = props.length; i < n; i++){
-        watcher.watch(attrs, props[i], function(p){
-            flow.fire( p )
-        })
+    Test.set = function(key,value){
+        var obj
+        if ($.isPlainObject(key) ) {
+            obj = key;
+        } else {
+            obj = {};
+            obj[key] = value;
+        }
+        if (!obj) return this;
+        for(var i in obj){
+            if(obj.hasOwnProperty(i) && this.fields.indexOf(i) !== -1){
+                var now = obj[i], prev = this.model[i];
+                this.model[i] = now;
+                if(now != prev){
+                    flow.fire( i );
+                }
+            }
+        }
     }
-    Test.attrs.firstName = "zzz"
-    Test.attrs.lastName = "oooo";
-    Test.attrs.lastName = "uuu"
-});
+    Test.get = function( name ){
+        return this.model[name]
+    }
+    Test.set("firstName", "aaa")
+    $.log(Test.get("fullName"))
+
+});//模型层必须提供get与set方法

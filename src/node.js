@@ -2,7 +2,7 @@
 // 节点操作模块
 //==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
-    // $.log("已加载node模块");
+    $.log("已加载node模块");
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", merge = $.Array.merge;
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
