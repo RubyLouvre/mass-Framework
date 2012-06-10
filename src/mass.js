@@ -200,7 +200,7 @@ void function( global, DOC ){
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
     rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/,
-    tokens = [],//需要处理的模块名列表
+    loadings = [],//需要处理的模块名列表
     transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
     cbi = 1e5 ;//用于生成回调函数的名字
     var mapper = $[ "@modules" ] = {
@@ -273,7 +273,7 @@ void function( global, DOC ){
             }
         }
     }
-    //收集依赖列表对应模块的返回值，传入目标模块中执行
+    //收集依赖列表中的模块的返回值，传入模块工厂中执行
     function setup( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( transfer[d] );
@@ -324,9 +324,12 @@ void function( global, DOC ){
                 el.detachEvent( name, fn || $.noop );
             }
         },
-        //请求模块
-        require: function( deps, callback, errback ){//依赖列表,正向回调,负向回调
-            var _deps = {}, args = [], dn = 0, cn = 0;
+        //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
+        require: function( deps, factory, errback ){
+            var _deps = {}, // 用于检测它的依赖是否都为2
+            args = [],      // 用于依赖列表中的模块的返回值
+            dn = 0,         // 需要加载的模块数
+            cn = 0;         // 已加载完的模块数
             ( deps +"" ).replace( $.rword, function( url, name, match ){
                 dn++;
                 match = url.match( rmodule );
@@ -342,27 +345,22 @@ void function( global, DOC ){
                     _deps[ name ] = "司徒正美";//去重，去掉@ready
                 }
             });
-            var token = callback.token;
-            if( dn === cn ){//在依赖都已执行过或没有依赖的情况下
-                if( token && !( token in transfer ) ){
-                    mapper[ token ].state = 2 //如果是使用合并方式，模块会跑进此分支（只会执行一次）
-                    return transfer[ token ] = setup( token, args, callback );
-                }else if( !token ){//普通的回调可执行无数次
-                    return  setup( token, args, callback );
-                }
+            var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
+            if( dn === cn ){//如果需要加载的等于已加载好的
+                (mapper[ token ] || {}).state = 2; 
+                return transfer[ token ] = setup( token, args, factory );//装配到框架中
             }
-            token = token || "@cb"+ ( cbi++ ).toString(32);
             if( errback ){
                 $.stack( errback );//压入错误堆栈
             }
             mapper[ token ] = {//创建或更新模块的状态
-                callback:callback,
+                callback:factory,
                 name: token,
                 deps: _deps,
                 args: args,
                 state: 1
             };//在正常情况下模块只能通过resolveCallbacks执行
-            tokens.unshift( token );
+            loadings.unshift( token );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
@@ -383,7 +381,7 @@ void function( global, DOC ){
         //执行并移除所有依赖都具备的模块或回调
         _checkDeps: function (){
             loop:
-            for ( var i = tokens.length, repeat, name; name = tokens[ --i ]; ) {
+            for ( var i = loadings.length, repeat, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -392,7 +390,7 @@ void function( global, DOC ){
                 }
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
-                    tokens.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
+                    loadings.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
                     transfer[ obj.name ] = setup( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
@@ -506,8 +504,9 @@ dom.namespace改为dom["mass"]
 简化deferred列队，统一先进先出。
 改进$.mix方法，允许只存在一个参数，直接将属性添加到$命名空间上。
 内部方法assemble更名为setup，并强化调试机制，每加入一个新模块， 都会遍历命名空间与原型上的方法，重写它们，添加try catch逻辑。
-//2012.5.6更新rdebug,不处理大写开头的自定义"类"
-//2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
+2012.5.6更新rdebug,不处理大写开头的自定义"类"
+2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
+2012.6.10 精简require方法
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
