@@ -246,13 +246,11 @@ void function( global, DOC ){
         });
     }
 
-    //收集依赖列表中的模块的返回值，传入模块工厂中执行
     function setup( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
-            argv.push( returns[ d ] );
+            argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
         }
-        var ret = fn.apply( global, argv );
-        //如果打开调试机制
+        var ret = fn.apply( global, argv );//执行模块工厂，然后把返回值放到returns对象中
         $.debug( name )
         return ret;
     }

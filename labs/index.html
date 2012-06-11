@@ -9,25 +9,14 @@
         <script type="text/javascript2" src="javascript/codex/core.js" charset="UTF-8"></script>
         <script type="text/javascript2" src="javascript/codex/codex.proxy.js" charset="UTF-8"></script>
         <script type="text/javascript2" src="javascript/codex/codex.view.js" charset="UTF-8"></script>
-        <script src="../src/mass_merge.js"></script>
+        <script src="../src/mass.js"></script>
         <script>
-            //  $.require("fx",function(){
-               
-            var script = document.createElement('script') ;
-            var head = document.getElementsByTagName("head")[0];
-            
-            script.onreadystatechange = function(){//先绑定事件再指定src发出请求
-                //  if(/loaded|complete|undefined/.test(this.readyState) && !this.once ){
-                console.log(this.readyState + "加载成功")
-                //    this.once = 1;
-                //    this.parentNode.removeChild(this);
-                // }
-            }
-            script.onerror = function(){
-                console.log("dddddddddd")
-            }
-            head.insertBefore(script, head.firstChild);//规避IE6下自闭合base标签BUG
-            script.src = 'http://files.cnblogs.com/rubylouvre/html4.js'
+            $.require("lang2",function(){
+                for(var i in document){
+                    $.log(i+"  "+document[i],true)
+                }
+
+            })
             
            
         </script>

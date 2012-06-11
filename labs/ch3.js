@@ -210,7 +210,7 @@ type: function ( obj, str ){
     }
     return result;
 },
-*/
+ */
     //tangram
     isDate: function(o){
         return {}.toString.call(o) === "[object Date]" && o.toString() !== 'Invalid Date' && !isNaN(o);
@@ -327,3 +327,90 @@ script.onload = script.onreadystatechange = function(){//先绑定事件再指�
     }
 }
 script.src = 'http://files.cnblogs.com/rubylouvre/html5.js'
+
+$.check = {
+    aaa: 1,
+    bbb: 1,
+    ccc: 1
+}
+$.bind(el1,"onload", function(){//el1是用于加载aaa模块的script节点
+    delete $.check.aaa
+});
+$.bind(el2,"onload", function(){//el2是用于加载bbb模块的script节点
+    delete $.check.bbb
+})
+$.bind(el3,"onload", function(){//el3是用于加载ccc模块的script节点
+    delete $.check.ccc
+});
+window.onload = function(){
+    for(var module in $.check){
+        if($.check[ module ] === 1){
+            reportError( module );//通报module模块没有加载成功
+        }
+    }
+}
+
+function loadJS( name, url ){
+    url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ?
+        "?timestamp="+(new Date-0) : "" );
+    var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯
+    codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
+    '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
+    (DOC.uniqueID ? "onreadystatechange" : "onload"),
+    '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
+    'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
+    '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
+    iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
+    //http://www.tech126.com/https-iframe/
+    if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
+        iframe.src = "javascript:false"
+    }
+    HEAD.insertBefore( iframe, HEAD.firstChild );
+    var doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.write( codes.join('') );
+    doc.close();
+    $.bind( iframe, "load", function(){
+        if( global.opera && doc.ok == void 0 ){
+            $._checkFail(doc, name, true );//模拟opera的script onerror
+        }
+        doc.write( "<body/>" );//清空内容
+        HEAD.removeChild( iframe );//移除iframe
+    });
+}
+
+//执行所有依赖都已加载成功的模块
+$._checkDeps = function (){
+    loop:
+    for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
+        var obj = mapper[ name ], deps = obj.deps;
+        for( var key in deps ){
+            if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
+                continue loop;
+            }
+        }
+        if( obj.state != 2){
+            loadings.splice( i, 1 );//从加载列队中移除
+            returns[ obj.name ] = setup( obj.name, obj.args, obj.callback );
+            obj.state = 2;//置为2，表示已执行过
+            $._checkDeps();//再执行一次，以防有其他模块依赖于它
+        }
+    }
+}
+
+//用于检测这模块有没有加载成功
+$._checkFail = function(  doc, name, error ){
+    doc && (doc.ok = 1);//添加标识，如果ok不为1说明没有加载成功
+    if( error || !mapper[ name ].state ){
+        this.log("Failed to load [[ "+name+" ]]");
+        this.stack.fire();//打印错误堆栈
+    }
+}
+
+function setup( name, deps, fn ){
+    for ( var i = 0,argv = [], d; d = deps[i++]; ) {
+        argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
+    }//global为window
+    var ret = fn.apply( global, argv );//执行模块工厂，然后把返回值放到returns对象中
+    $.debug( name )
+    return ret;
+}
