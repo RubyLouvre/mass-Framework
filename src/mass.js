@@ -225,23 +225,23 @@ void function( global, DOC ){
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
         '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
-        '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
-        'Ns._checkDeps();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
-        '} " onerror="Ns._checkFail(nick, true);" ><\/script>' ];
-        iframe.style.display = "none";
+        '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
+        'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
+        '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
+        iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
             iframe.src = "javascript:false"
         }
         HEAD.insertBefore( iframe, HEAD.firstChild );
-        var d = iframe.contentDocument || iframe.contentWindow.document;
-        d.write( codes.join('') );
-        d.close();
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.write( codes.join('') );
+        doc.close();
         $.bind( iframe, "load", function(){
-            if( global.opera && d.ok == void 0 ){
-                $._checkFail( name, true );//模拟opera的script onerror
+            if( global.opera && doc.ok == void 0 ){
+                $._checkFail(doc, name, true );//模拟opera的script onerror
             }
-            d.write( "<body/>" );//清空内容
+            doc.write( "<body/>" );//清空内容
             HEAD.removeChild( iframe );//移除iframe
         });
     }
@@ -345,6 +345,14 @@ void function( global, DOC ){
             args[2].token = "@"+name; //模块名
             this.require( args[1], args[2] );
         },
+        //用于检测这模块有没有加载成功
+        _checkFail : function(  doc, name, error ){
+            doc && (doc.ok = 1);
+            if( error || !mapper[ name ].state ){
+                this.log("Failed to load [[ "+name+" ]]");
+                this.stack.fire();//打印错误堆栈
+            }
+        },
         //执行并移除所有依赖都具备的模块或回调
         _checkDeps: function (){
             loop:
@@ -364,14 +372,8 @@ void function( global, DOC ){
                 }
             }
         repeat && $._checkDeps();
-        },
-        //用于检测这模块有没有加载成功
-        _checkFail : function( name, error ){
-            if( error || !mapper[ name ].state ){
-                this.log("Failed to load [[ "+name+" ]]")
-                this.stack.fire();//打印错误堆栈
-            }
         }
+
     });
     //domReady机制
     var readylist = deferred();
@@ -473,7 +475,7 @@ dom.namespace改为dom["mass"]
 内部方法assemble更名为setup，并强化调试机制，每加入一个新模块， 都会遍历命名空间与原型上的方法，重写它们，添加try catch逻辑。
 2012.5.6更新rdebug,不处理大写开头的自定义"类"
 2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
-2012.6.10 精简require方法
+2012.6.10 精简require方法 处理opera11.64的情况
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
