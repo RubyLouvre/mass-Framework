@@ -33,20 +33,20 @@ mix( $, {//为此版本的命名空间对象添加成员
     "@name": "$",
     "@debug": true,
     "@target": w3c ? "addEventListener" : "attachEvent",
-    //……其他想要添加的属性或方法
+//……其他想要添加的属性或方法
 })
 
 
-slice: function ( nodes, start, end ) {
-    for(var i = 0, n = nodes.length, result = []; i < n; i++){
-        result[i] = nodes[i];
+    slice: function ( nodes, start, end ) {
+        for(var i = 0, n = nodes.length, result = []; i < n; i++){
+            result[i] = nodes[i];
+        }
+        if ( arguments.length > 1 ) {
+            return result.slice( start , ( end || result.length ) );
+        } else {
+            return result;
+        }
     }
-    if ( arguments.length > 1 ) {
-        return result.slice( start , ( end || result.length ) );
-    } else {
-        return result;
-    }
-}
 
 
 typeof null// "object"
@@ -109,14 +109,18 @@ function isArray( arr ) {
 }
 function isArray(arr) {//Prototype.js1.6.0.3
     return arr != null && typeof arr === "object" &&
-        'splice' in arr && 'join' in arr;
+    'splice' in arr && 'join' in arr;
 }
 function isArray(arr){//Douglas Crockford
     return typeof arr.sort == 'function'
 }
 function isArray(array){//kriszyp
     var result = false;
-    try{new array.constructor(Math.pow(2, 32))}catch(e){result=/Array/.test(e.message)};
+    try{
+        new array.constructor(Math.pow(2, 32))
+    }catch(e){
+        result=/Array/.test(e.message)
+    };
     return result;
 };
 function isArray(o) {// kangax
@@ -139,35 +143,35 @@ function isArray(o) {//kangax
 window == document // IE678 true;
 document == window // IE678 false;
 
-//var isArrayLike = selector.length && selector[selector.length - 1] !== undefined && !selector.nodeType;
-//
-//isFunction: function( fn ) {
-//    return !!fn && typeof fn != "string" && !fn.nodeName &&
-//        fn.constructor != Array && /^[\s[]?function/.test( fn + "" );
-//    }
-//class2type = {}
-//jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" "), function(i, name) {
-//    class2type[ "[object " + name + "]" ] = name.toLowerCase();
-//});
-//type: function( obj ) {
-//    return obj == null ?
-//        String( obj ) :
-//        class2type[ toString.call(obj) ] || "object";
-//},
-//jquery1.43~1.64
+    //var isArrayLike = selector.length && selector[selector.length - 1] !== undefined && !selector.nodeType;
+    //
+    //isFunction: function( fn ) {
+    //    return !!fn && typeof fn != "string" && !fn.nodeName &&
+    //        fn.constructor != Array && /^[\s[]?function/.test( fn + "" );
+    //    }
+    //class2type = {}
+    //jQuery.each("Boolean Number String Function Array Date RegExp Object".split(" "), function(i, name) {
+    //    class2type[ "[object " + name + "]" ] = name.toLowerCase();
+    //});
+    //type: function( obj ) {
+    //    return obj == null ?
+    //        String( obj ) :
+    //        class2type[ toString.call(obj) ] || "object";
+    //},
+    //jquery1.43~1.64
 
-//    isNaN: function( obj ) {
-//        return obj == null || !rdigit.test( obj ) || isNaN( obj );
-//    },
-//    //jquery1.7 就是isNaN的取反版
-//    isNumeric: function( obj ) {
-//        return obj != null && rdigit.test( obj ) && !isNaN( obj );
-//    },
-//    //jquery1.71~1.72
-//    isNumeric: function( obj ) {
-//        return !isNaN( parseFloat(obj) ) && isFinite( obj );
-//    }
-/*
+    //    isNaN: function( obj ) {
+    //        return obj == null || !rdigit.test( obj ) || isNaN( obj );
+    //    },
+    //    //jquery1.7 就是isNaN的取反版
+    //    isNumeric: function( obj ) {
+    //        return obj != null && rdigit.test( obj ) && !isNaN( obj );
+    //    },
+    //    //jquery1.71~1.72
+    //    isNumeric: function( obj ) {
+    //        return !isNaN( parseFloat(obj) ) && isFinite( obj );
+    //    }
+    /*
 class2type = {
     "[object HTMLDocument]"   : "Document",
     "[object HTMLCollection]" : "NodeList",
@@ -207,24 +211,119 @@ type: function ( obj, str ){
     return result;
 },
 */
-//tangram
-isDate: function(o){
-    return {}.toString.call(o) === "[object Date]" && o.toString() !== 'Invalid Date' && !isNaN(o);
-}
-isNumber:function(o){
-   return '[object Number]'  == {}.toString.call(o) && isFinite(o);
-}
+    //tangram
+    isDate: function(o){
+        return {}.toString.call(o) === "[object Date]" && o.toString() !== 'Invalid Date' && !isNaN(o);
+    }
+    isNumber:function(o){
+        return '[object Number]'  == {}.toString.call(o) && isFinite(o);
+    }
 var MODULE = (function () {
     var my = {},
     privateVariable = 1;
 
     function privateMethod() {
-        // ...
+    // ...
     }
     my.moduleProperty = 1;
     my.moduleMethod = function () {
-        // ...
+    // ...
     };
 
     return my;
 }());
+
+var scripts = document.getElementsByTagName( "script" );
+node = scripts[ scripts.length - 1 ];
+console.log(node.src)//http://localhost:8888/src/test.js
+
+//"@path": (function( url, scripts, node ){
+//    scripts = DOC.getElementsByTagName( "script" );
+//    node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
+//    url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
+//    return url.substr( 0, url.lastIndexOf('/') );
+//})()
+
+
+define(function(require, exports, module) {
+    var $ = require('jquery');
+    var m2 = require('module2');
+    var m3 = require('module3');
+
+    exports.run = function() {
+        return $.merge(['module1'], $.merge(m2.run(), m3.run()));
+    }
+});
+
+require(['jquery', 'event', 'selector'], function($, E, S) {
+    alert($);
+});
+
+define("foo/title", ["my/cart", "my/inventory"], function(cart, inventory) {
+    //Define foo/title object in here.
+    } );
+
+$.define("foo/title", "my/cart,my/inventory", function(cart, inventory) {
+    //Define foo/title object in here.
+    } );
+
+$.define = function(name, deps, factory){//定义一个模块
+    factory.token = "@"+ name;
+    this.require( deps, factory)
+}
+var mapper = {},    //用于储存模块的信息
+returns = {},       //用于储存模块的返回值
+loadings = [],      //正在加载的模块
+rmodule = /([^(\s]+)\(?([^)]*)\)?/,//分解出模块名与可能存在的URL地址
+cbi = 1e5           //用于为普通回调起名
+//请求模块（依赖列表,模块工厂,加载失败时触发的回调）
+$.require =  function( deps, factory, errback ){
+    var _deps = {}, // 用于检测它的依赖是否都为2
+    args = [],      // 用于依赖列表中的模块的返回值
+    dn = 0,         // 需要加载的模块数
+    cn = 0;         // 已加载完的模块数
+    ( deps +"" ).replace( $.rword, function( url, name, match ){
+        dn++;
+        match = url.match( rmodule );
+        name  = "@"+ match[1];//取得模块名
+        if( !mapper[ name ] ){ //防止重复生成节点与请求
+            mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
+            loadJS( name, match[2] );//加载JS文件
+        }else if( mapper[ name ].state === 2 ){
+            cn++;
+        }
+        if( !_deps[ name ] ){
+            args.push( name );
+            _deps[ name ] = "司徒正美";//去重，去掉@ready
+        }
+    });
+    var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
+    if( dn === cn ){//如果需要加载的等于已加载好的
+        (mapper[ token ] || {}).state = 2;
+        return returns[ token ] = setup( token, args, factory );//装配到框架中
+    }
+    if( errback ){
+        $.stack( errback );//压入错误堆栈
+    }
+    mapper[ token ] = {//储存模块的信息
+        callback:factory,
+        name: token,
+        deps: _deps,
+        args: args,
+        state: 1
+    };//在正常情况下模块只能通过resolveCallbacks执行
+    loadings.unshift( token );
+    $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
+}
+
+var script = document.createElement('script') ;
+var head = document.getElementsByTagName("head")[0];
+head.insertBefore(script, head.firstChild);//规避IE6下自闭合base标签BUG
+script.onload = script.onreadystatechange = function(){//先绑定事件再指定src发出请求
+    if(/loaded|complete|undefined/.test(this.readyState) && !this.once ){
+        console.log(this.readyState + "加载成功")
+        this.once = 1;
+        this.parentNode.removeChild(this);
+    }
+}
+script.src = 'http://files.cnblogs.com/rubylouvre/html5.js'

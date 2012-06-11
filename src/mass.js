@@ -200,8 +200,8 @@ void function( global, DOC ){
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
     rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/,
-    loadings = [],//需要处理的模块名列表
-    transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
+    loadings = [],//正在加载中的模块列表
+    returns = {}, //模块的返回值
     cbi = 1e5 ;//用于生成回调函数的名字
     var mapper = $[ "@modules" ] = {
         "@ready" : { }
@@ -220,7 +220,7 @@ void function( global, DOC ){
      * @param {String} url  模块的路径
      * @param {String} mass  当前框架的版本号
      */
-    function load( name, url ){
+    function loadJS( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
@@ -276,7 +276,7 @@ void function( global, DOC ){
     //收集依赖列表中的模块的返回值，传入模块工厂中执行
     function setup( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
-            argv.push( transfer[d] );
+            argv.push( returns[ d ] );
         }
         var ret = fn.apply( global, argv );
         if($["@debug"]){//如果打开调试机制
@@ -336,7 +336,7 @@ void function( global, DOC ){
                 name  = "@"+ match[1];//取得模块名
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
                     mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    load( name, match[2] );//加载JS文件
+                    loadJS( name, match[2] );//加载JS文件
                 }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
@@ -348,7 +348,7 @@ void function( global, DOC ){
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要加载的等于已加载好的
                 (mapper[ token ] || {}).state = 2; 
-                return transfer[ token ] = setup( token, args, factory );//装配到框架中
+                return returns[ token ] = setup( token, args, factory );//装配到框架中
             }
             if( errback ){
                 $.stack( errback );//压入错误堆栈
@@ -391,7 +391,7 @@ void function( global, DOC ){
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     loadings.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    transfer[ obj.name ] = setup( obj.name, obj.args, obj.callback );
+                    returns[ obj.name ] = setup( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     repeat = true;
                 }

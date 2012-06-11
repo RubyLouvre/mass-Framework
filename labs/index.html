@@ -1,171 +1,106 @@
-<!doctype html>
-<html>
+
+
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <title>mass Framework</title>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-        <!--  <script src="../src/enchant.js"></script>-->
-        <script src="../src/mass.js"></script>
-        <style type="text/css">
-            #waterfall{
-                width:1100px;
-                height:300px;
-                background:red;
-                /*  background: url("../public/styles/waterfall/waterfall_bc.jpg") repeat scroll 0 0 transparent;*/
-            }
-            .clearfix:after {
-                content: "";
-                display: block;
-                height: 0;
-                clear: both;
-                visibility: hidden;
-            }
-            .clearfix {zoom:1;}
-            .waterfall-cell{
-                width:198px;
-                padding:20px;
-                margin-top:10px;
-                border:1px solid #ccc;
-                -moz-box-shadow:2px 2px 10px #c96;
-                -webkit-box-shadow:2px 2px 10px #c96;
-                box-shadow:2px 2px 10px #c96;
-                border-radius: 2px 2px 2px 2px;
-                background-color: #F7F7F7;
-            }
-            .image-parent {
-                text-align:center;
-            }
-            .waterfall-cell .dis{
-                width:198px;
-            }
-            .footer{
-                height:24px;
-                line-height:24px;
-                background:gray;
-            }
-        </style>
-
+        <meta charset="utf-8"/>
+        <title>Testing</title>
+        <script type="text/javascript2" src="javascript/jquery-1.7.js" charset="UTF-8"></script>
+        <script type="text/javascript2" src="javascript/codex/core.js" charset="UTF-8"></script>
+        <script type="text/javascript2" src="javascript/codex/codex.proxy.js" charset="UTF-8"></script>
+        <script type="text/javascript2" src="javascript/codex/codex.view.js" charset="UTF-8"></script>
+        <script src="../src/mass_merge.js"></script>
         <script>
+            //  $.require("fx",function(){
+               
+            var script = document.createElement('script') ;
+            var head = document.getElementsByTagName("head")[0];
+            
+            script.onreadystatechange = function(){//先绑定事件再指定src发出请求
+                //  if(/loaded|complete|undefined/.test(this.readyState) && !this.once ){
+                console.log(this.readyState + "加载成功")
+                //    this.once = 1;
+                //    this.parentNode.removeChild(this);
+                // }
+            }
+            script.onerror = function(){
+                console.log("dddddddddd")
+            }
+            head.insertBefore(script, head.firstChild);//规避IE6下自闭合base标签BUG
+            script.src = 'http://files.cnblogs.com/rubylouvre/html4.js'
+            
+           
+        </script>
 
-        
-            (function(watch, unwatch){
-                createWatcher = watch && unwatch ?
-                    // Andrea Giammarchi - Mit Style License
-                function(Object){
-                    var handlers = [];
-                    return {
-                        destroy:function(){
-                            handlers.forEach(function(prop){
-                                unwatch.call(this, prop);
-                            }, this);
-                            delete handlers;
-                        },
-                        watch:function(prop, handler){
-                            if(-1 === handlers.indexOf(prop))
-                                handlers.push(prop);
-                            watch.call(this, prop, function(prop, prevValue, newValue){
-                                return Object[prop] = handler.call(Object, prop, prevValue, newValue);
-                            });
-                        },
-                        unwatch:function(prop){
-                            var i = handlers.indexOf(prop);
-                            if(-1 !== i){
-                                unwatch.call(this, prop);
-                                handlers.splice(i, 1);
-                            };
+
+
+        <script type="text/javascript2">
+
+            $(function() {
+                var data = {
+                    person: {
+                        full_name: "Some Person Name",
+                        email: "example@domain.com",
+
+                        address: {
+                            street_name: "Some Address here",
+                            house_number: "5/2a",
+                            city: "Belgrade"
                         }
                     }
-                }:(Object.prototype.__defineSetter__?
-                    function(Object){
-                    var handlers = [];
-                    return {
-                        destroy:function(){
-                            handlers.forEach(function(prop){
-                                delete this[prop];
-                            }, this);
-                            delete handlers;
-                        },
-                        watch:function(prop, handler){
-                            if(-1 === handlers.indexOf(prop))
-                                handlers.push(prop);
-                            if(!this.__lookupGetter__(prop))
-                                this.__defineGetter__(prop, function(){return Object[prop]});
-                            this.__defineSetter__(prop, function(newValue){
-                                Object[prop] = handler.call(Object, prop, Object[prop], newValue);
-                            });
-                        },
-                        unwatch:function(prop){
-                            var i = handlers.indexOf(prop);
-                            if(-1 !== i){
-                                delete this[prop];
-                                handlers.splice(i, 1);
-                            };
-                        }
-                    };
-                }:
-                    function(Object){
-                    function onpropertychange(){
-                        var prop = event.propertyName,
-                        newValue = empty[prop]
-                        prevValue = Object[prop],
-                        handler = handlers[prop];
-                        if(handler)
-                            attachEvent(detachEvent()[prop] = Object[prop] = handler.call(Object, prop, prevValue, newValue));
-                    };
-                    function attachEvent(){empty.attachEvent("onpropertychange", onpropertychange)};
-                    function detachEvent(){empty.detachEvent("onpropertychange", onpropertychange);return empty};
-                    var empty = document.createElement("empty"), handlers = {};
-                    empty.destroy = function(){
-                        detachEvent();
-                        empty.parentNode.removeChild(empty);
-                        empty = handlers = null;
-                    };
-                    empty.watch = function(prop, handler){handlers[prop] = handler};
-                    empty.unwatch = function(prop){delete handlers[prop]};
-                    attachEvent();
-                    return (document.getElementsByTagName("head")[0] || document.documentElement).appendChild(empty);
-                }
-            )
-                ;
-            })(Object.prototype.watch, Object.prototype.unwatch);
+                };
 
-            var // original object
-            man = {},
-            // create its watcher
-            manWatcher = createWatcher(man);
+                var p = new codex.Proxy(data);
+                console.log(p.person.email);
 
-            manWatcher.watch("name", function(propertyName, oldValue, newValue){
-                return "Mr " + newValue;
+                var view = new codex.View("personEditView");
+                var view = new codex.View("personView");
+                setTimeout(function() {
+                    codex.dataSources.add("personDataSource", p);
+                }, 1000);
+
+
             });
-
-            // assign name property
-            manWatcher.name = "Andrea";
-
-            // retrieve original object property
-            alert(man.name); // Mr Andrea
-            var obj = {},
-            watcher = createWatcher(obj);
-
-            watcher.watch("test", function(prop, oldValue, newValue){
-                return oldValue === undefined ? newValue : oldValue;
-            });
-
-            watcher.test = "one assignment";
-            watcher.test = "never again";
-
-            alert(obj.test); // one assignment
         </script>
 
     </head>
     <body>
-        <div class="sample" id="sample1" >
-            <p><input type="text" id="test"/> <span>focus fire</span></p>
 
-            <p><input type="password" /> <span>focus fire</span></p>
+        <div id="personEditView" data-source="personDataSource">
+            <div class="field">
+                <label for="person_full_name">Full Name</label>
+                <input id="person_full_name" name="person[full_name]" type="text"/>
+            </div>
+            <div class="field">
+                <label for="person_email">Email Address</label>
+                <input id="person_email" name="person[email]" type="text"/>
+            </div>
+            <div class="field">
+
+                <label for="person_address_street_name">Street Name</label>
+                <input id="person_address_street_name" name="person[address][street_name]" type="text"/>
+            </div>
+            <div class="field">
+                <label for="person_address_house_number">Hose Number</label>
+                <input id="person_address_house_number" name="person[address][house_number]" type="text"/>
+            </div>
+            <div class="field">
+                <label for="person_address_city">City</label>
+                <select id="person_address_city" name="person[address][city]">
+                    <option value="">--Select--</option>
+                    <option value="Belgrade">Belgrade</option>
+                    <option value="Pancevo">Pancevo</option>
+                </select>
+            </div>
+
         </div>
-        <div class="waterfall clearfix" id="waterfall">
-
+        <div id="personView" data-source="personDataSource">
+            <fieldset>
+                <legend><span name="person[full_name]"></span>'s Address</legend>
+                <span name="person[address][street_name]"></span>
+                <span name="person[address][house_number]"></span>,
+                <span name="person[address][city]"></span>
+            </fieldset>
         </div>
-
-
     </body>
 </html>
