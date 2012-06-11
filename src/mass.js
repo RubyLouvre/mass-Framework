@@ -193,13 +193,12 @@ void function( global, DOC ){
         }
     });
 
-    $.noop = $.error = function(){};
+    $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
-    rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/,
     loadings = [],//正在加载中的模块列表
     returns = {}, //模块的返回值
     cbi = 1e5 ;//用于生成回调函数的名字
@@ -246,47 +245,15 @@ void function( global, DOC ){
             HEAD.removeChild( iframe );//移除iframe
         });
     }
-    function debug(obj, name, module, p){
-        var fn = obj[name];
-        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
-            if( rdebug.test( name )){
-                fn["@debug"] = name;
-            }else{
-                var method = obj[name] = function(){
-                    try{
-                        return  method["@debug"].apply(this,arguments)
-                    }catch(e){
-                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
-                        throw e;
-                    }
-                }
-                for(var i in fn){
-                    method[i] = fn[i];
-                }
-                method["@debug"] = fn;
-                method.toString = function(){
-                    return fn.toString()
-                }
-                method.valueOf = function(){
-                    return fn.valueOf();
-                }
-            }
-        }
-    }
+
     //收集依赖列表中的模块的返回值，传入模块工厂中执行
     function setup( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );
         }
         var ret = fn.apply( global, argv );
-        if($["@debug"]){//如果打开调试机制
-            for( i in $){
-                debug($, i, name);
-            }
-            for( i in $.prototype){
-                debug($.prototype, i, name,1);
-            }
-        }
+        //如果打开调试机制
+        $.debug( name )
         return ret;
     }
     function deferred(){//一个简单的异步列队
