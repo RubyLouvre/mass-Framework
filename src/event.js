@@ -220,9 +220,9 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 if ( event.target.nodeType === 3 ) {
                     event.target = event.target.parentNode;
                 }
-                if ( event.metaKey === undefined ) {
-                    event.metaKey = event.ctrlKey; //  处理组合键
-                }
+   
+                event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
+
                 if( /^(?:mouse|contextmenu)|click/.test( type ) ){
                     if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
                         var doc = event.target.ownerDocument || document,
