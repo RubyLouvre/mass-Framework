@@ -30,7 +30,7 @@ void function( global, DOC ){
      */
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
-            $.require( "ready,lang,attr,event,fx,flow", expr );
+            $.require( "lang,flow,attr,event,fx,ready", expr );
         }else{
             if( !$.fn )
                 throw "@node module is required!"
@@ -190,6 +190,21 @@ void function( global, DOC ){
                 result[ array[i] ] = value;
             }
             return result;
+        },
+        deferred: function(){//一个简单的异步列队
+            var list = [], self = function(fn){
+                fn && fn.call && list.push( fn );
+                return self;
+            }
+            self.fire = function( fn ){
+                list = self.reuse ? list.concat() : list
+                while( fn = list.shift() ){
+                    fn();
+                }
+                return list.length ? self : self.complete();
+            }
+            self.complete = $.noop;
+            return self;
         }
     });
 
@@ -201,6 +216,7 @@ void function( global, DOC ){
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
     loadings = [],//正在加载中的模块列表
     returns = {}, //模块的返回值
+    errorStack = $.deferred(),
     cbi = 1e5 ;//用于生成回调函数的名字
     var mapper = $[ "@modules" ] = {
         "@ready" : { }
@@ -254,22 +270,7 @@ void function( global, DOC ){
         $.debug( name )
         return ret;
     }
-    function deferred(){//一个简单的异步列队
-        var list = [],self = function(fn){
-            fn && fn.call && list.push( fn );
-            return self;
-        }
-        self.fire = function( fn ){
-            while( fn = list.shift() ){
-                fn();
-            }
-            return list.length ? self : self.complete();
-        }
-        self.complete = $.noop;
-        return self;
-    }
     $.mix({
-        stack : deferred(),
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
             el.addEventListener( type, fn, !!phase );
@@ -316,7 +317,7 @@ void function( global, DOC ){
                 return returns[ token ] = setup( token, args, factory );//装配到框架中
             }
             if( errback ){
-                $.stack( errback );//压入错误堆栈
+                errorStack( errback );//压入错误堆栈
             }
             mapper[ token ] = {//创建或更新模块的状态
                 callback:factory,
@@ -348,7 +349,7 @@ void function( global, DOC ){
             doc && (doc.ok = 1);
             if( error || !mapper[ name ].state ){
                 this.log("Failed to load [[ "+name+" ]]");
-                this.stack.fire();//打印错误堆栈
+                errorStack.fire();//打印错误堆栈
             }
         },
         //执行并移除所有依赖都具备的模块或回调
@@ -373,41 +374,34 @@ void function( global, DOC ){
 
     });
     //domReady机制
-    var readylist = deferred();
     function fireReady(){
         mapper[ "@ready" ].state = 2;
         $._checkDeps();
-        readylist.complete = function( fn ){
-            $.type( fn, "Function") &&  fn();
-        }
-        readylist.fire();
-        fireReady = $.noop;
+        fireReady = $.noop;//隋性函数，防止IE9二次调用_checkDeps
     };
     function doScrollCheck() {
         try {
-            $.html.doScroll( "left" );
+            $.html.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
             setTimeout( doScrollCheck, 1 );
         }
     };
-    //开始判定页面的加载情况
     if ( DOC.readyState === "complete" ) {
-        fireReady();
+        fireReady();//如果在domReady之外加载
     }else {
         $.bind( DOC, ( w3c ? "DOMContentLoaded" : "readystatechange" ), function(){
             if ( w3c || DOC.readyState === "complete" ){
                 fireReady();
             }
         });
-        if( $.html.doScroll && self.eval === top.eval ){ //支持HTML5
-            ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-                "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
-                document.createElement(tag);
-            });
+        if( $.html.doScroll && self.eval === top.eval)
             doScrollCheck();
-        }
     }
+    top.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
+        DOC.createElement(tag);
+    });
     for(var i in $){
         if( !$[i].mass && typeof $[i] == "function"){
             $[i]["@debug"] = i;
@@ -473,6 +467,7 @@ dom.namespace改为dom["mass"]
 2012.5.6更新rdebug,不处理大写开头的自定义"类"
 2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
 2012.6.10 精简require方法 处理opera11.64的情况
+2012.6.13 添加异步列队到命名空间,精简domReady
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
