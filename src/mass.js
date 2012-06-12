@@ -354,7 +354,7 @@ void function( global, DOC ){
         //执行并移除所有依赖都具备的模块或回调
         _checkDeps: function (){
             loop:
-            for ( var i = loadings.length, repeat, name; name = loadings[ --i ]; ) {
+            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -366,10 +366,9 @@ void function( global, DOC ){
                     loadings.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
                     returns[ obj.name ] = setup( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
-                    repeat = true;
+                    $._checkDeps();
                 }
             }
-        repeat && $._checkDeps();
         }
 
     });
