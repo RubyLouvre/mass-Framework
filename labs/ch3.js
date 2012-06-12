@@ -1,4 +1,24 @@
 
+if (typeof(Ten) == 'undefined')
+
+    Ten = {};
+Ten.Function = {/*略*/}
+Ten.Array = {/*略*/}
+Ten.Class = function(){/*略*/}
+Ten.JSONP = new Ten.Class(/*略*/)
+Ten.XHR = new Ten.Class(/*略*/);
+
+//jQuery1.2
+var _jQuery = window.jQuery,_$ = window.$;//先把可能存在的同名变量保存起来
+
+jQuery.extend({
+    noConflict: function( deep ) {
+        window.$ = _$;//这时再放回去
+        if ( deep )
+            window.jQuery = _jQuery;
+        return jQuery;
+    }
+})
 
 namespace = DOC.URL.replace( /(#.+|\W)/g,'');
 
@@ -6,6 +26,12 @@ function extend(destination, source) {
     for (var property in source)
         destination[property] = source[property];
     return destination;
+}
+
+Object.keys = Object.keys || function(obj){
+    var a = [];
+    for(a[a.length] in obj);
+    return a ;
 }
 
 function mix( target, source ){//如果最后参数是布尔，判定是否覆写同名属性
@@ -210,7 +236,7 @@ type: function ( obj, str ){
     }
     return result;
 },
- */
+*/
     //tangram
     isDate: function(o){
         return {}.toString.call(o) === "[object Date]" && o.toString() !== 'Invalid Date' && !isNaN(o);

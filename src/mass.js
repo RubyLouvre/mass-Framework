@@ -207,9 +207,9 @@ void function( global, DOC ){
     };
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
     var innerDefine = function( _, deps, callback ){
-        var args = arguments;
+        var args = arguments, last = args.length - 1
         args[0] = nick.slice(1);
-        args[ args.length - 1 ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
+        args[ last ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ last ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
