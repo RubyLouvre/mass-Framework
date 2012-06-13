@@ -25,7 +25,7 @@ void function( global, DOC ){
     
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
-            $.require( "ready,lang,attr,event,fx,flow", expr );
+            $.require( "lang,flow,attr,event,fx,ready", expr );
         }else{
             if( !$.fn )
                 throw "@node module is required!"
@@ -157,116 +157,82 @@ void function( global, DOC ){
                 result[ array[i] ] = value;
             }
             return result;
+        },
+        deferred: function(){//一个简单的异步列队
+            var list = [], self = function(fn){
+                fn && fn.call && list.push( fn );
+                return self;
+            }
+            self.fire = function( fn ){
+                list = self.reuse ? list.concat() : list
+                while( fn = list.shift() ){
+                    fn();
+                }
+                return list.length ? self : self.complete();
+            }
+            self.complete = $.noop;
+            return self;
         }
     });
 
-    $.noop = $.error = function(){};
+    $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
     var
     rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
-    rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/,
-    loadings = [],//需要处理的模块名列表
-    transfer = {},//中转器，用于收集各个模块的返回值并转送到那些指定了依赖列表的模块去
+    loadings = [],//正在加载中的模块列表
+    returns = {}, //模块的返回值
+    errorStack = $.deferred(),
     cbi = 1e5 ;//用于生成回调函数的名字
     var mapper = $[ "@modules" ] = {
         "@ready" : { }
     };
     //用于处理iframe请求中的$.define，将第一个参数修正为正确的模块名后，交由其父级窗口的命名空间对象的define
     var innerDefine = function( _, deps, callback ){
-        var args = arguments;
+        var args = arguments, last = args.length - 1
         args[0] = nick.slice(1);
-        args[ args.length - 1 ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ args.length - 1 ] )();
+        args[ last ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ last ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
     
-    function load( name, url ){
+    function loadJS( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
         '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
         (DOC.uniqueID ? "onreadystatechange" : "onload"),
-        '="if(/loaded|complete|undefined/i.test(this.readyState)){ ',
-        'Ns._checkDeps();this.ownerDocument.ok = 1;if(!window.opera){ Ns._checkFail(nick); }',
-        '} " onerror="Ns._checkFail(nick, true);" ><\/script>' ];
-        iframe.style.display = "none";
+        '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
+        'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
+        '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
+        iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
             iframe.src = "javascript:false"
         }
         HEAD.insertBefore( iframe, HEAD.firstChild );
-        var d = iframe.contentDocument || iframe.contentWindow.document;
-        d.write( codes.join('') );
-        d.close();
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        doc.write( codes.join('') );
+        doc.close();
         $.bind( iframe, "load", function(){
-            if( global.opera && d.ok == void 0 ){
-                $._checkFail( name, true );//模拟opera的script onerror
+            if( global.opera && doc.ok == void 0 ){
+                $._checkFail(doc, name, true );//模拟opera的script onerror
             }
-            d.write( "<body/>" );//清空内容
+            doc.write( "<body/>" );//清空内容
             HEAD.removeChild( iframe );//移除iframe
         });
     }
-    function debug(obj, name, module, p){
-        var fn = obj[name];
-        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
-            if( rdebug.test( name )){
-                fn["@debug"] = name;
-            }else{
-                var method = obj[name] = function(){
-                    try{
-                        return  method["@debug"].apply(this,arguments)
-                    }catch(e){
-                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
-                        throw e;
-                    }
-                }
-                for(var i in fn){
-                    method[i] = fn[i];
-                }
-                method["@debug"] = fn;
-                method.toString = function(){
-                    return fn.toString()
-                }
-                method.valueOf = function(){
-                    return fn.valueOf();
-                }
-            }
-        }
-    }
-    //收集依赖列表中的模块的返回值，传入模块工厂中执行
+
     function setup( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
-            argv.push( transfer[d] );
+            argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
         }
-        var ret = fn.apply( global, argv );
-        if($["@debug"]){//如果打开调试机制
-            for( i in $){
-                debug($, i, name);
-            }
-            for( i in $.prototype){
-                debug($.prototype, i, name,1);
-            }
-        }
+        var ret = fn.apply( global, argv );//执行模块工厂，然后把返回值放到returns对象中
+        $.debug( name )
         return ret;
     }
-    function deferred(){//一个简单的异步列队
-        var list = [],self = function(fn){
-            fn && fn.call && list.push( fn );
-            return self;
-        }
-        self.fire = function( fn ){
-            while( fn = list.shift() ){
-                fn();
-            }
-            return list.length ? self : self.complete();
-        }
-        self.complete = $.noop;
-        return self;
-    }
     $.mix({
-        stack : deferred(),
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
             el.addEventListener( type, fn, !!phase );
@@ -298,7 +264,7 @@ void function( global, DOC ){
                 name  = "@"+ match[1];//取得模块名
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
                     mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    load( name, match[2] );//加载JS文件
+                    loadJS( name, match[2] );//加载JS文件
                 }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
@@ -310,10 +276,10 @@ void function( global, DOC ){
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要加载的等于已加载好的
                 (mapper[ token ] || {}).state = 2; 
-                return transfer[ token ] = setup( token, args, factory );//装配到框架中
+                return returns[ token ] = setup( token, args, factory );//装配到框架中
             }
             if( errback ){
-                $.stack( errback );//压入错误堆栈
+                errorStack( errback );//压入错误堆栈
             }
             mapper[ token ] = {//创建或更新模块的状态
                 callback:factory,
@@ -340,10 +306,18 @@ void function( global, DOC ){
             args[2].token = "@"+name; //模块名
             this.require( args[1], args[2] );
         },
+        //用于检测这模块有没有加载成功
+        _checkFail : function(  doc, name, error ){
+            doc && (doc.ok = 1);
+            if( error || !mapper[ name ].state ){
+                this.log("Failed to load [[ "+name+" ]]");
+                errorStack.fire();//打印错误堆栈
+            }
+        },
         //执行并移除所有依赖都具备的模块或回调
         _checkDeps: function (){
             loop:
-            for ( var i = loadings.length, repeat, name; name = loadings[ --i ]; ) {
+            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -353,57 +327,43 @@ void function( global, DOC ){
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     loadings.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    transfer[ obj.name ] = setup( obj.name, obj.args, obj.callback );
+                    returns[ obj.name ] = setup( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
-                    repeat = true;
+                    $._checkDeps();
                 }
             }
-        repeat && $._checkDeps();
-        },
-        //用于检测这模块有没有加载成功
-        _checkFail : function( name, error ){
-            if( error || !mapper[ name ].state ){
-                this.log("Failed to load [[ "+name+" ]]")
-                this.stack.fire();//打印错误堆栈
-            }
         }
+
     });
     //domReady机制
-    var readylist = deferred();
     function fireReady(){
         mapper[ "@ready" ].state = 2;
         $._checkDeps();
-        readylist.complete = function( fn ){
-            $.type( fn, "Function") &&  fn();
-        }
-        readylist.fire();
-        fireReady = $.noop;
+        fireReady = $.noop;//隋性函数，防止IE9二次调用_checkDeps
     };
     function doScrollCheck() {
         try {
-            $.html.doScroll( "left" );
+            $.html.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
             setTimeout( doScrollCheck, 1 );
         }
     };
-    //开始判定页面的加载情况
     if ( DOC.readyState === "complete" ) {
-        fireReady();
+        fireReady();//如果在domReady之外加载
     }else {
         $.bind( DOC, ( w3c ? "DOMContentLoaded" : "readystatechange" ), function(){
             if ( w3c || DOC.readyState === "complete" ){
                 fireReady();
             }
         });
-        if( $.html.doScroll && self.eval === top.eval ){ //支持HTML5
-            ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-                "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
-                document.createElement(tag);
-            });
+        if( $.html.doScroll && self.eval === top.eval)
             doScrollCheck();
-        }
     }
+    top.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
+        DOC.createElement(tag);
+    });
     for(var i in $){
         if( !$[i].mass && typeof $[i] == "function"){
             $[i]["@debug"] = i;
@@ -3619,7 +3579,7 @@ $.define("css_fix", !!top.getComputedStyle, function(){
 // 样式操作模块 by 司徒正美
 //=========================================
 $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
-    $.log( "已加载css模块" );
+    //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
@@ -4712,7 +4672,7 @@ $.define("event_fix", !!document.dispatchEvent, function(){
 // 事件系统v5
 //==========================================
 $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
-    $.log("已加载event模块")
+    $.log("已加载event模块v5")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{ } //添加或增强二级属性eventAdapter
@@ -4785,7 +4745,6 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
                 }, hash, false);
                 events.push( quark );                //用于事件拷贝
-                $.log( quark )
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
                 var hack = adapter[ quark.type ] || {};
                 if( count == 1 ){
@@ -4926,9 +4885,9 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 if ( event.target.nodeType === 3 ) {
                     event.target = event.target.parentNode;
                 }
-                if ( event.metaKey === undefined ) {
-                    event.metaKey = event.ctrlKey; //  处理组合键
-                }
+   
+                event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
+
                 if( /^(?:mouse|contextmenu)|click/.test( type ) ){
                     if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
                         var doc = event.target.ownerDocument || document,

@@ -5,91 +5,20 @@
     <head>
         <meta charset="utf-8"/>
         <title>Testing</title>
-        <script type="text/javascript2" src="javascript/jquery-1.7.js" charset="UTF-8"></script>
-        <script type="text/javascript2" src="javascript/codex/core.js" charset="UTF-8"></script>
-        <script type="text/javascript2" src="javascript/codex/codex.proxy.js" charset="UTF-8"></script>
-        <script type="text/javascript2" src="javascript/codex/codex.view.js" charset="UTF-8"></script>
         <script src="../src/mass.js"></script>
         <script>
-            $.require("lang2",function(){
-                for(var i in document){
-                    $.log(i+"  "+document[i],true)
-                }
+            $.require("ready,event,css",function(){
 
+                $('#box').delegate( 'input', 'change', function(){
+                    console.log( 'changed' );
+                });
             })
-            
-           
-        </script>
 
-
-
-        <script type="text/javascript2">
-
-            $(function() {
-                var data = {
-                    person: {
-                        full_name: "Some Person Name",
-                        email: "example@domain.com",
-
-                        address: {
-                            street_name: "Some Address here",
-                            house_number: "5/2a",
-                            city: "Belgrade"
-                        }
-                    }
-                };
-
-                var p = new codex.Proxy(data);
-                console.log(p.person.email);
-
-                var view = new codex.View("personEditView");
-                var view = new codex.View("personView");
-                setTimeout(function() {
-                    codex.dataSources.add("personDataSource", p);
-                }, 1000);
-
-
-            });
         </script>
 
     </head>
     <body>
+        <div id="checkboxparent"><input id="checkbox" type="checkbox"/></div>
 
-        <div id="personEditView" data-source="personDataSource">
-            <div class="field">
-                <label for="person_full_name">Full Name</label>
-                <input id="person_full_name" name="person[full_name]" type="text"/>
-            </div>
-            <div class="field">
-                <label for="person_email">Email Address</label>
-                <input id="person_email" name="person[email]" type="text"/>
-            </div>
-            <div class="field">
-
-                <label for="person_address_street_name">Street Name</label>
-                <input id="person_address_street_name" name="person[address][street_name]" type="text"/>
-            </div>
-            <div class="field">
-                <label for="person_address_house_number">Hose Number</label>
-                <input id="person_address_house_number" name="person[address][house_number]" type="text"/>
-            </div>
-            <div class="field">
-                <label for="person_address_city">City</label>
-                <select id="person_address_city" name="person[address][city]">
-                    <option value="">--Select--</option>
-                    <option value="Belgrade">Belgrade</option>
-                    <option value="Pancevo">Pancevo</option>
-                </select>
-            </div>
-
-        </div>
-        <div id="personView" data-source="personDataSource">
-            <fieldset>
-                <legend><span name="person[full_name]"></span>'s Address</legend>
-                <span name="person[address][street_name]"></span>
-                <span name="person[address][house_number]"></span>,
-                <span name="person[address][city]"></span>
-            </fieldset>
-        </div>
     </body>
 </html>

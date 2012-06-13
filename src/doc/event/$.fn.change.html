@@ -27,7 +27,7 @@
                 })
                 .change();
                 
-                $('body').delegate('.listOfOptions', 'change', function() {
+                $('#first_example').delegate('.listOfOptions', 'change', function() {
                     var selected = $(this).find(':selected')
                     if (selected.prop('class') == 'customOption') {
                         $("#show_result2").text(selected.text()+" ！！！");
@@ -37,6 +37,10 @@
                 });
                 $("#checkbox").change(function(){
                     $("#show_result3").text(this.checked)
+                });
+                var second = 0;
+                $('#checkboxparent').delegate( 'input', 'change', function(){
+                    $("<div>"+(++second)+"  !</div>").appendTo("#second_example")
                 });
             });
         </script>
@@ -56,7 +60,7 @@
             </dd>
         </dl>
 
-        <fieldset><legend>例子</legend>
+        <fieldset id="first_example"><legend>例子</legend>
             <pre class="brush:js;gutter:false;toolbar:false;">
             $.require("ready,event,fx",function(){
                 $("#sweets").change(function () {
@@ -68,7 +72,7 @@
                 })
                 .change();
                 
-                $('body').delegate('.listOfOptions', 'change', function() {
+                $('#first_example').delegate('.listOfOptions', 'change', function() {
                     var selected = $(this).find(':selected')
                     if (selected.prop('class') == 'customOption') {
                         $("#show_result2").text(selected.text()+" ！！！");
@@ -101,6 +105,18 @@
             <div id="show_result2"></div>
             <input id="checkbox" type="checkbox"/>
             <div id="show_result3"></div>
+        </fieldset>
+        <fieldset id="second_example"><legend>第二例子</legend>
+            <div id="checkboxparent"><input type="checkbox"/></div>
+            <pre class="brush:xml;gutter:false;toolbar:false;">
+               &lt;div id="checkboxparent"&gt;&lt;input type="checkbox"/&gt;&lt;/div&gt;
+            </pre>
+            <pre class="brush:js;gutter:false;toolbar:false;">
+                var second = 0;
+                $('#checkboxparent').delegate( 'input', 'change', function(){
+                    $("&lt;div&gt;"+(++second)+"&lt;/div&gt;").appendTo("#second_example")
+                });
+            </pre>
         </fieldset>
     </article>
 </body>

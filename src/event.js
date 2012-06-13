@@ -2,7 +2,7 @@
 // 事件系统v5
 //==========================================
 $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
-    $.log("已加载event模块")
+    $.log("已加载event模块v5")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{ } //添加或增强二级属性eventAdapter
@@ -79,7 +79,6 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
                 }, hash, false);
                 events.push( quark );                //用于事件拷贝
-                $.log( quark )
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
                 var hack = adapter[ quark.type ] || {};
                 if( count == 1 ){
