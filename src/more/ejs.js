@@ -20,6 +20,10 @@ $.define("ejs", "lang",function(){
             el = $.query ? $(id, doc)[0] : doc.getElementById(id);
             if (!el) throw "can not find the target element";
             str = el.innerHTML;
+            if(!(/script|textarea/.test(el.tagName))){
+                str = $.String.unescapeHTML(str);
+            }
+            
             var arr = str.trim().split(rleft),
             buff = ["var __views = [];\n"],temp = [],i = 0,n = arr.length,els,segment;
 
