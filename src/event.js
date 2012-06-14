@@ -273,7 +273,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 detail = parseEvent( type );
                 eventType = detail.origType;
                 var doc = target.ownerDocument || target.document || target || document;
-                event = doc.createEvent("Events");
+                event = doc.createEvent(eventMap[eventType] || "CustomEvent");
                 event.initEvent(eventType, true, true, doc.defaultView);
             }else{//传入一个真正的事件对象
                 event = type;
@@ -468,9 +468,12 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
             return $.fn[ method ].apply(this, arguments );
         }
     });
-    var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup"
+    var mouseEvents =  "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,"
+    var eventMap = $.oneObject(mouseEvents, "MouseEvents");
+    var types = mouseEvents +",keypress,keydown,keyup," + "blur,focus,focusin,focusout,"+
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input"
     types.replace( $.rword, function( type ){//这里产生以事件名命名的快捷方法
+         eventMap[type] = eventMap[type] || (/key/.test(type) ? "UIEvents" : "HTMLEvents")
         $.fn[ type ] = function( callback ){
             return callback?  this.bind( type, callback ) : this.fire( type );
         }
