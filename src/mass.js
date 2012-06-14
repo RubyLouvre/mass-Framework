@@ -225,8 +225,8 @@ void function( global, DOC ){
     var innerDefine = function( _, deps, callback ){
         var args = arguments, last = args.length - 1
         args[0] = nick.slice(1);
-        // args[ last ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ last ] )();
-        args[ last ] =  parent.Function( "return "+ args[ last ] )();
+        //锁死$
+        args[ last ] =  parent.Function( "$","return "+ args[ last ] )(Ns);
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
