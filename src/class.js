@@ -21,7 +21,7 @@ $.define("class", "lang",function(){
     // 指定了get与set不能指定writable与value
     var hiddenProperty = {
         configurable: false,//防止被删除
-        enumerable: false,//防止被遍历
+        enumerable: true,//防止被遍历
         writable: false//防止被修改
     }
     try{
