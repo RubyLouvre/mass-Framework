@@ -77,6 +77,33 @@ $.require("ready,lang",function(){//对字符串进行链式操作
 });
 </pre>
 <p>语言链对象为字符串，数字，对象，数组以及类数组对象的链式操作提供了丰富无比的API接口。</p>
+<h3>多库共存</h3>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+    &lt;head&gt;
+        &lt;meta charset="utf-8"/&gt;
+        &lt;title&gt;多库共存&lt;/title&gt;
+        &lt;script&gt;
+            var $ = {
+                toString:function(){
+                    return "[object jQuery]"
+                }
+            };//假设这是已存在的库
+        &lt;/script&gt;
+        &lt;script type="text/javascript" src="../src/mass.js" charset="UTF-8"&gt;&lt;/script&gt;
+        &lt;script&gt;
+            //mass的命名空间将自动改为$+它当前的版本号
+            $1.require("lang",function(){
+                $1.log($+"")//[object jQuery]
+            })
+
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</pre>
 <h3>文档的使用：</h3>
 <p>还是刚才解压出来的文件夹，里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。
 </p>
