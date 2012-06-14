@@ -225,12 +225,13 @@ void function( global, DOC ){
     var innerDefine = function( _, deps, callback ){
         var args = arguments, last = args.length - 1
         args[0] = nick.slice(1);
-        args[ last ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ last ] )();
+        // args[ last ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ last ] )();
+        args[ last ] =  parent.Function( "return "+ args[ last ] )();
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
     /**
-     * 加载模块。它会临时构建一个iframe沙箱环境，在里面创建script标签加载指定模块
+     * 将要安装的模块通过iframe中的script加载下来
      * @param {String} name 模块名
      * @param {String} url  模块的路径
      * @param {String} mass  当前框架的版本号
@@ -262,7 +263,7 @@ void function( global, DOC ){
         });
     }
 
-    function setup( name, deps, fn ){
+    function install( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
         }
@@ -294,15 +295,15 @@ void function( global, DOC ){
         require: function( deps, factory, errback ){
             var _deps = {}, // 用于检测它的依赖是否都为2
             args = [],      // 用于依赖列表中的模块的返回值
-            dn = 0,         // 需要加载的模块数
-            cn = 0;         // 已加载完的模块数
+            dn = 0,         // 需要安装的模块数
+            cn = 0;         // 已安装完的模块数
             ( deps +"" ).replace( $.rword, function( url, name, match ){
                 dn++;
                 match = url.match( rmodule );
                 name  = "@"+ match[1];//取得模块名
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
-                    mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    loadJS( name, match[2] );//加载JS文件
+                    mapper[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
+                    loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
                 }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
@@ -312,9 +313,9 @@ void function( global, DOC ){
                 }
             });
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
-            if( dn === cn ){//如果需要加载的等于已加载好的
+            if( dn === cn ){//如果需要安装的等于已安装好的
                 (mapper[ token ] || {}).state = 2; 
-                return returns[ token ] = setup( token, args, factory );//装配到框架中
+                return returns[ token ] = install( token, args, factory );//装配到框架中
             }
             if( errback ){
                 errorStack( errback );//压入错误堆栈
@@ -325,7 +326,7 @@ void function( global, DOC ){
                 deps: _deps,
                 args: args,
                 state: 1
-            };//在正常情况下模块只能通过resolveCallbacks执行
+            };//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( token );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
@@ -344,7 +345,7 @@ void function( global, DOC ){
             args[2].token = "@"+name; //模块名
             this.require( args[1], args[2] );
         },
-        //用于检测这模块有没有加载成功
+        //检测此JS文件有没有加载下来
         _checkFail : function(  doc, name, error ){
             doc && (doc.ok = 1);
             if( error || !mapper[ name ].state ){
@@ -352,7 +353,7 @@ void function( global, DOC ){
                 errorStack.fire();//打印错误堆栈
             }
         },
-        //执行并移除所有依赖都具备的模块或回调
+        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
             for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
@@ -364,8 +365,8 @@ void function( global, DOC ){
                 }
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
-                    loadings.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    returns[ obj.name ] = setup( obj.name, obj.args, obj.callback );
+                    loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
+                    returns[ obj.name ] = install( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     $._checkDeps();
                 }
@@ -468,6 +469,7 @@ dom.namespace改为dom["mass"]
 2012.6.5 对IE的事件API做更严格的判定,更改"@target"为"@bind"
 2012.6.10 精简require方法 处理opera11.64的情况
 2012.6.13 添加异步列队到命名空间,精简domReady
+2012.6.14 精简innerDefine,更改一些术语
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
