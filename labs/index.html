@@ -5,75 +5,25 @@
     <head>
         <meta charset="utf-8"/>
         <title>Testing</title>
-        <script type="text/javascript" src="javascript/jquery-1.7.js" charset="UTF-8"></script>
-        <script type="text/javascript" src="javascript/codex/core.js" charset="UTF-8"></script>
-        <script type="text/javascript" src="javascript/codex/codex.proxy.js" charset="UTF-8"></script>
-        <script type="text/javascript" src="javascript/codex/codex.view.js" charset="UTF-8"></script>
+
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
-
         <script>
-            $.require("ready,node,attr", function(){
-                var personDataSource  = {//这是数据源
-                    firstName:"xxxx",
-                    lastName:"yyyy",
-                    fullName:"rrrr"
-                }
-                $("#personDataSource [data-bind]").each(function(){
-                    var val = this.getAttribute("data-bind");
-                    var arr =  val.split(":");
-                    var method = arr[0];
-                    var v = personDataSource[arr[1].trim()];
-                    $(this)[method](v)
-                });
+            $.require("ready,event",function(){
+                $("input").click(function(){
+                    $.log("1111111111111")
+                }).fire("click")
             })
-
         </script>
 
 
 
     </head>
     <body>
-        <div id="personDataSource" >
-            <p>First name: <span data-bind="text: firstName"></span></p>
-            <p>Last name: <span data-bind="text: lastName"></span></p>
-            <h2>Hello, <input data-bind="val: fullName"/>!</h2>
-        </div>
-
-        <div id="personEditView" data-source="personDataSource">
-            <div class="field">
-                <label for="person_full_name">Full Name</label>
-                <input id="person_full_name" name="person[full_name]" type="text"/>
-            </div>
-            <div class="field">
-                <label for="person_email">Email Address</label>
-                <input id="person_email" name="person[email]" type="text"/>
-            </div>
-            <div class="field">
-
-                <label for="person_address_street_name">Street Name</label>
-                <input id="person_address_street_name" name="person[address][street_name]" type="text"/>
-            </div>
-            <div class="field">
-                <label for="person_address_house_number">Hose Number</label>
-                <input id="person_address_house_number" name="person[address][house_number]" type="text"/>
-            </div>
-            <div class="field">
-                <label for="person_address_city">City</label>
-                <select id="person_address_city" name="person[address][city]">
-                    <option value="">--Select--</option>
-                    <option value="Belgrade">Belgrade</option>
-                    <option value="Pancevo">Pancevo</option>
-                </select>
-            </div>
-
-        </div>
-        <div id="personView" data-source="personDataSource">
-            <fieldset>
-                <legend><span name="person[full_name]"></span>'s Address</legend>
-                <span name="person[address][street_name]"></span>
-                <span name="person[address][house_number]"></span>,
-                <span name="person[address][city]"></span>
-            </fieldset>
-        </div>
+        get:返回value值
+        set:根据依赖修正自身的value
+        deps:[]依赖属性
+        scope:设置this
+        value:
+        <input type="checkbox" checked/>
     </body>
 </html>
