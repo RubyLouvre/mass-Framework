@@ -6,24 +6,28 @@
         <meta charset="utf-8"/>
         <title>Testing</title>
 
-        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="ko.js" charset="UTF-8"></script>
         <script>
-            $.require("ready,event",function(){
-                $("input").click(function(){
-                    $.log("1111111111111")
-                }).fire("click")
-            })
+            var viewModel = {
+                numberOfClicks : ko.observable(0),
+                incrementClickCounter : function() {
+                    var previousCount = this.numberOfClicks();
+                    this.numberOfClicks(previousCount + 1);
+                }
+            };
+            window.onload = function(){
+                 ko.applyBindings(viewModel);
+            }
+
         </script>
 
 
 
     </head>
     <body>
-        get:返回value值
-        set:根据依赖修正自身的value
-        deps:[]依赖属性
-        scope:设置this
-        value:
-        <input type="checkbox" checked/>
+        <div>
+            You've clicked <span data-bind="text: numberOfClicks"></span> times
+            <button data-bind="click: incrementClickCounter">Click me</button>
+        </div>
     </body>
 </html>

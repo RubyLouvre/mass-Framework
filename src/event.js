@@ -570,4 +570,21 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.29 利用Object.defineProperty打破事件对象的封装
 2012.6.6 addEventListenter也能绑定自定义事件, 一些兼容逻辑移到event_fix中去 升级到v6
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
+ECMAScript Edition3, 5 execution context and scope chain http://user.qzone.qq.com/153720615/blog/1339563690#!app=2&pos=1323177459
+DOM Level3 Event对象新增API 浏览器实现 一览表:
+
+IE9+(全部实现)(但是,IE9,IE10的e.isTrusted有bug .link.click();后出发的也是true...)
+
+chrome5 - chrome17 部分实现.(e.isTrusted未支持),
+
+Safari5 才部分实现.(e.isTrusted未支持).
+
+Opera10 - Opera11部分实现(stopImmediatePropagation以及e.isTrusted未实现，而仅仅实现了defaultPrevented).
+Opera12 部分实现 (stopImmediatePropagation,仍然为实现, 但实现了e.isTrusted)
+
+Firefox1.0 - Firefox5 (stopImmediatePropagation和defaultPrevented 未实现,仅仅实现了e.isTrusted,isTrusted,在成为标准前，是MOZ的私有实现啊)
+Firefox6 - Firefox10 (仅未实现stopImmediatePropagation)
+Firefox11(终于实现了stopImmediatePropagation)
+isTrusted 表明当前事件是否是由用户行为触发(比如说真实的鼠标点击触发一个click事件),
+还是由一个脚本生成的(使用事件构造方法,比如event.initEvent)
  */

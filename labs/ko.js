@@ -319,7 +319,7 @@ ko.utils = new (function () {
         unwrapObservable: function (value) {
             return ko.isObservable(value) ? value() : value;
         },
-
+//就是其他库的toggleClass
         toggleDomNodeCssClass: function (node, className, shouldHaveClass) {
             var currentClassNames = (node.className || "").split(/\s+/);
             var hasClass = ko.utils.arrayIndexOf(currentClassNames, className) >= 0;
@@ -334,7 +334,7 @@ ko.utils = new (function () {
                 node.className = ko.utils.stringTrim(newClassName);
             }
         },
-
+//text
         setTextContent: function(element, textContent) {
             var value = ko.utils.unwrapObservable(textContent);
             if ((value === null) || (value === undefined))
@@ -484,7 +484,7 @@ if (!Function.prototype['bind']) {
         };
     };
 }
-
+//储存系统
 ko.utils.domData = new (function () {
     var uniqueId = 0;
     var dataStoreKeyExpandoPropertyName = "__ko__" + (new Date).getTime();
@@ -592,7 +592,7 @@ ko.utils.domNodeDisposal = new (function () {
                     destroyCallbacksCollection(node);
             }
         },
-
+//清除元素上绑定的数据
         cleanNode : function(node) {
             // First clean this node, where applicable
             if (cleanableNodeTypes[node.nodeType]) {
@@ -608,7 +608,7 @@ ko.utils.domNodeDisposal = new (function () {
                 }
             }
         },
-
+//移除节点
         removeNode : function(node) {
             ko.cleanNode(node);
             if (node.parentNode)
@@ -718,7 +718,7 @@ ko.memoization = (function () {
     function generateRandomId() {
         return randomMax8HexChars() + randomMax8HexChars();
     }
-    function findMemoNodes(rootNode, appendToArray) {
+    function findMemoNodes(rootNode, appendToArray) {//这是一个空数组
         if (!rootNode)
             return;
         if (rootNode.nodeType == 8) {
@@ -740,7 +740,7 @@ ko.memoization = (function () {
             return "<!--[ko_memo:" + memoId + "]-->";
         },
 
-        unmemoize: function (memoId, callbackParams) {
+        unmemoize: function (memoId, callbackParams) {//从缓存机制中取出并执行它
             var callback = memos[memoId];
             if (callback === undefined)
                 throw new Error("Couldn't find any memo with ID " + memoId + ". Perhaps it's already been unmemoized.");
@@ -1627,7 +1627,7 @@ ko.exportSymbol('jsonExpressionRewriting.insertPropertyAccessorsIntoJson', ko.js
     var startCommentRegex = commentNodesHaveTextProperty ? /^<!--\s*ko\s+(.*\:.*)\s*-->$/ : /^\s*ko\s+(.*\:.*)\s*$/;
     var endCommentRegex =   commentNodesHaveTextProperty ? /^<!--\s*\/ko\s*-->$/ : /^\s*\/ko\s*$/;
     var htmlTagsWithOptionallyClosingChildren = { 'ul': true, 'ol': true };
-
+//若返回一个数组，里面是其内容
     function isStartComment(node) {
         return (node.nodeType == 8) && (commentNodesHaveTextProperty ? node.text : node.nodeValue).match(startCommentRegex);
     }
@@ -1757,7 +1757,7 @@ ko.exportSymbol('jsonExpressionRewriting.insertPropertyAccessorsIntoJson', ko.js
                 return null;
             return node.nextSibling;
         },
-
+//
         virtualNodeBindingValue: function(node) {
             var regexMatch = isStartComment(node);
             return regexMatch ? regexMatch[1] : null;

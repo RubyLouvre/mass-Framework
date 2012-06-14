@@ -1495,7 +1495,7 @@ $.define("class", "lang",function(){
     // 指定了get与set不能指定writable与value
     var hiddenProperty = {
         configurable: false,//防止被删除
-        enumerable: false,//防止被遍历
+        enumerable: true,//防止被遍历
         writable: false//防止被修改
     }
     try{
@@ -4577,15 +4577,19 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !event.isPropagationStopped );
+            
                 if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
                     && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
-                    && (type !== "click"|| this.nodeName == "A")
+                    && (type == "click"|| this.nodeName != "A")//如果是点击事件则元素不能为A因为会跳转
                     && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
                     ) {
                     var inline = this[ ontype ];
                     var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
                     this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
                     this[ ontype ] = null;
+                    if(type == "click" && /checkbox|radio/.test(this.type)){
+                        this.checked = !this.checked
+                    }
                     this[ type ]();
                     this.disabled = disabled
                     this[ ontype ] = inline;
@@ -4939,7 +4943,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                 detail = parseEvent( type );
                 eventType = detail.origType;
                 var doc = target.ownerDocument || target.document || target || document;
-                event = doc.createEvent("Events");
+                event = doc.createEvent(eventMap[eventType] || "CustomEvent");
                 event.initEvent(eventType, true, true, doc.defaultView);
             }else{//传入一个真正的事件对象
                 event = type;
@@ -5134,9 +5138,12 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
             return $.fn[ method ].apply(this, arguments );
         }
     });
-    var types = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel," +
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input,"+"blur,focus,focusin,focusout,"+"keypress,keydown,keyup"
+    var mouseEvents =  "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,"
+    var eventMap = $.oneObject(mouseEvents, "MouseEvents");
+    var types = mouseEvents +",keypress,keydown,keyup," + "blur,focus,focusin,focusout,"+
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input"
     types.replace( $.rword, function( type ){//这里产生以事件名命名的快捷方法
+         eventMap[type] = eventMap[type] || (/key/.test(type) ? "UIEvents" : "HTMLEvents")
         $.fn[ type ] = function( callback ){
             return callback?  this.bind( type, callback ) : this.fire( type );
         }
