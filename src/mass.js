@@ -66,7 +66,7 @@ void function( global, DOC ){
         }
         while((supplier = args[i++])){
             for ( key in supplier ) {//允许对象糅杂，用户保证都是对象
-                if (ride || !(key in receiver)) {
+                if (supplier.hasOwnProperty(key) && (ride || !(key in receiver))) {
                     receiver[ key ] = supplier[ key ];
                 }
             }
