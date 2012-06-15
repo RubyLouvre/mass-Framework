@@ -3,15 +3,14 @@
     <head>
         <meta charset="utf-8"/>
         <title>Testing</title>
-      
+
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
 
         <script>
 
-            $.require("ready,event",function(){
-                $( '#inputBox' ).on( 'change', function(e){
-                    console.log( 'changed1' );
-                });
+            $.require("ready,more/mvvm",function(){
+                $.applyBindings({},document.body);
+               // alert(document.getElementsByTagName("!").length)
             })
         </script>
 
@@ -19,14 +18,8 @@
 
     </head>
     <body>
-        <div id="inputBox">
-            <label for="radio" id="label">label</label>
-            <input type="radio" id="radio1" name="testRadio" />
-            <input type="radio" id="radio2" name="testRadio" />
-            <input type="checkbox" id="check1" name="testCheck1" />
-            <input type="checkbox" id="check2" name="testCheck2" checked="checked" />
-            <input type="text" id="nameInput" />
-            <input type="file" id="upFile" />
-        </div>
+        The name is <span data-bind="text: personName"></span>
+       <!-- ko foreach: products //-->
+         The name is <span data-bind="text: personName"></span>
     </body>
 </html>

@@ -918,13 +918,13 @@ ko.dependencyDetection = (function () {
     };
 })();
 var primitiveTypes = { 'undefined':true, 'boolean':true, 'number':true, 'string':true };
-
+//核心方法,用于监听指定的属性
 ko.observable = function (initialValue) {
     var _latestValue = initialValue;
 
     function observable() {
         if (arguments.length > 0) {
-            // Write
+            // setter
 
             // Ignore writes if the value hasn't changed
             if ((!observable['equalityComparer']) || !observable['equalityComparer'](_latestValue, arguments[0])) {
@@ -934,9 +934,8 @@ ko.observable = function (initialValue) {
                 observable.valueHasMutated();
             }
             return this; // Permits chained assignments
-        }
-        else {
-            // Read
+        }else {
+            //getter
             ko.dependencyDetection.registerDependency(observable); // The caller only needs to be notified of changes if they did a "read" operation
             return _latestValue;
         }
@@ -950,7 +949,7 @@ ko.observable = function (initialValue) {
     ko.exportProperty(observable, "valueHasMutated", observable.valueHasMutated);
     ko.exportProperty(observable, "valueWillMutate", observable.valueWillMutate);
 
-    return observable;
+    return observable;//植树
 }
 
 ko.observable['fn'] = {
@@ -2041,7 +2040,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
 //开始在其自身与后代中绑定
         applyBindingsToNodeAndDescendantsInternal(viewModel, rootNode, true);
     };
-
+//applyBindings --> applyBindingsToNodeAndDescendantsInternal
     // Retrieving binding context from arbitrary nodes
     ko.contextFor = function(node) {
         // We can only do something meaningful for elements and comment nodes (in particular, not text nodes, as IE can't store domdata for them)
