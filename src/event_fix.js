@@ -81,8 +81,8 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 delegateType: "focusout"
             },
             change: {//change事件的冒泡情况 IE6-9全灭
-                check: function(target, item){
-                    return !target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
+                check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
+                    return true //!target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
                 },
                 setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
