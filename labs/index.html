@@ -3,40 +3,30 @@
     <head>
         <meta charset="utf-8"/>
         <title>Testing</title>
-        <script type="text/javascript" src="../libs/jquery1.7.js" charset="UTF-8"></script>
-        <script type="text/javascript" src="ko.js" charset="UTF-8"></script>
+      
+        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
 
         <script>
 
-
-            window.onload = function(){
-                /*                var folderTreeViewVm = {
-                    isSelected: ko.observable(false)
-                };
-                ko.applyBindings(folderTreeViewVm, $('#folderTreeView')[0]);*/
-                alert(document.body.firstChild.nodeType)
-                alert(document.body.firstChild.text)
-                alert(document.body.firstChild.nodeValue)
-            }
-
+            $.require("ready,event",function(){
+                $( '#inputBox' ).on( 'change', function(e){
+                    console.log( 'changed1' );
+                });
+            })
         </script>
 
 
 
     </head>
-    <body><!--[if !(lt IE 9)]><!-->444<!--<![endif]-->
-        <ul>
-            <li><strong>Here is a static header item</strong></li>
-            <!-- ko foreach: products -->
-            <li>
-                <em data-bind="text: name"></em>
-                <!-- ko if: manufacturer -->
-                &mdash; made by <span data-bind="text: manufacturer.company"></span>
-                <!-- /ko -->
-            </li>
-            <!-- /ko -->
-        </ul>
-        <div id="aaa">4444<br/>ddd </div>
-        <div> <span id="ccc"> </span></div>
+    <body>
+        <div id="inputBox">
+            <label for="radio" id="label">label</label>
+            <input type="radio" id="radio1" name="testRadio" />
+            <input type="radio" id="radio2" name="testRadio" />
+            <input type="checkbox" id="check1" name="testCheck1" />
+            <input type="checkbox" id="check2" name="testCheck2" checked="checked" />
+            <input type="text" id="nameInput" />
+            <input type="file" id="upFile" />
+        </div>
     </body>
 </html>

@@ -65,3 +65,4 @@ $.define("ejs", "lang",function(){
     }
 })
 // ejs v9!
+//https://github.com/leizongmin/tinyliquid http://cdc.tencent.com/?p=5723

@@ -1115,14 +1115,14 @@ ko.dependentObservable = function (evaluatorFunctionOrOptions, evaluatorFunction
         options = options || {};
         if (!readFunction)
             readFunction = options["read"];
-    }
+    }//必须指定getter
     // By here, "options" is always non-null
     if (typeof readFunction != "function")
         throw new Error("Pass a function that returns the value of the ko.computed");
 
     var writeFunction = options["write"];
     if (!evaluatorFunctionTarget)
-        evaluatorFunctionTarget = options["owner"];
+        evaluatorFunctionTarget = options["owner"];//取得作用域
 
     var _subscriptionsToDependencies = [];
     function disposeAllSubscriptionsToDependencies() {
@@ -1904,7 +1904,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
             applyBindingsToNodeAndDescendantsInternal(viewModel, currentChild, bindingContextsMayDifferFromDomParentElement);
         }
     }
-
+//最后一个参数是用于判定scope是父节点还是用户自己定义的
     function applyBindingsToNodeAndDescendantsInternal (viewModel, nodeVerified, bindingContextMayDifferFromDomParentElement) {
         var shouldBindDescendants = true;
 

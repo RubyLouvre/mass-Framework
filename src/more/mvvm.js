@@ -100,9 +100,6 @@ $.define("mvvm",function(){
 */
             if (!OptionallyClosingChildren[node.nodeName])
                 return;
-
-            // Scan immediate children to see if they contain unbalanced comment tags. If they do, those comment tags
-            // must be intended to appear *after* that child, so move them there.
             var childNode = node.firstChild;
             if (childNode) {
                 do {
