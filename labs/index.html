@@ -1,22 +1,22 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
         <title>Testing</title>
-
+        <script type="text/javascript" src="../libs/jquery1.7.js" charset="UTF-8"></script>
         <script type="text/javascript" src="ko.js" charset="UTF-8"></script>
+
         <script>
-            var viewModel = {
-                numberOfClicks : ko.observable(0),
-                incrementClickCounter : function() {
-                    var previousCount = this.numberOfClicks();
-                    this.numberOfClicks(previousCount + 1);
-                }
-            };
+
+
             window.onload = function(){
-                 ko.applyBindings(viewModel);
+                /*                var folderTreeViewVm = {
+                    isSelected: ko.observable(false)
+                };
+                ko.applyBindings(folderTreeViewVm, $('#folderTreeView')[0]);*/
+                alert(document.body.firstChild.nodeType)
+                alert(document.body.firstChild.text)
+                alert(document.body.firstChild.nodeValue)
             }
 
         </script>
@@ -24,10 +24,19 @@
 
 
     </head>
-    <body>
-        <div>
-            You've clicked <span data-bind="text: numberOfClicks"></span> times
-            <button data-bind="click: incrementClickCounter">Click me</button>
-        </div>
+    <body><!--[if !(lt IE 9)]><!-->444<!--<![endif]-->
+        <ul>
+            <li><strong>Here is a static header item</strong></li>
+            <!-- ko foreach: products -->
+            <li>
+                <em data-bind="text: name"></em>
+                <!-- ko if: manufacturer -->
+                &mdash; made by <span data-bind="text: manufacturer.company"></span>
+                <!-- /ko -->
+            </li>
+            <!-- /ko -->
+        </ul>
+        <div id="aaa">4444<br/>ddd </div>
+        <div> <span id="ccc"> </span></div>
     </body>
 </html>

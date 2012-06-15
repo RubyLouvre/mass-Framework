@@ -223,7 +223,7 @@ ko.utils = new (function () {
                 return false;
             return string.substring(0, startsWith.length) === startsWith;
         },
-//这是绑定节点的事件?
+//这是将data-bind添加上访问器后再转换为函数?
         buildEvalWithinScopeFunction: function (expression, scopeLevels) {
             // Build the source for a function that evaluates "expression"
             // For each scope variable, add an extra level of "with" nesting
@@ -1419,7 +1419,7 @@ ko.exportSymbol('toJSON', ko.toJSON);
 ko.exportSymbol('selectExtensions', ko.selectExtensions);
 ko.exportSymbol('selectExtensions.readValue', ko.selectExtensions.readValue);
 ko.exportSymbol('selectExtensions.writeValue', ko.selectExtensions.writeValue);
-
+//重写JSON表达式
 ko.jsonExpressionRewriting = (function () {
     var restoreCapturedTokensRegex = /\@ko_token_(\d+)\@/g;
     var javaScriptAssignmentTarget = /^[\_$a-z][\_$a-z0-9]*(\[.*?\])*(\.[\_$a-z][\_$a-z0-9]*(\[.*?\])*)*$/i;
@@ -1437,8 +1437,10 @@ ko.jsonExpressionRewriting = (function () {
     }
 
     function isWriteableValue(expression) {
+        //判定expression是否等于true,false其中一个
         if (ko.utils.arrayIndexOf(javaScriptReservedWords, ko.utils.stringTrim(expression).toLowerCase()) >= 0)
             return false;
+       //是否为变量名
         return expression.match(javaScriptAssignmentTarget) !== null;
     }
 
@@ -1509,7 +1511,6 @@ ko.jsonExpressionRewriting = (function () {
                                   break;
                     }
                 }
-
                 if (c === tokenStartChar)
                     tokenDepth++;
                 else if (c === tokenEndChar) {
@@ -1558,8 +1559,8 @@ ko.jsonExpressionRewriting = (function () {
                     resultStrings.push(quotedKey);
                     resultStrings.push(":");
                     resultStrings.push(val);
-
                     if (isWriteableValue(ko.utils.stringTrim(val))) {
+                        //这里是设置访问器
                         if (propertyAccessorResultStrings.length > 0)
                             propertyAccessorResultStrings.push(", ");
                         propertyAccessorResultStrings.push(quotedKey + " : function(__ko_value) { " + val + " = __ko_value; }");
@@ -1803,7 +1804,7 @@ ko.exportSymbol('virtualElements.prepend', ko.virtualElements.prepend);
 ko.exportSymbol('virtualElements.setDomNodeChildren', ko.virtualElements.setDomNodeChildren);
 (function() {
     var defaultBindingAttributeName = "data-bind";
-
+//框架的核心之一,将数据变成监听函数
     ko.bindingProvider = function() {
         this.bindingCache = {};
     };
@@ -1818,6 +1819,7 @@ ko.exportSymbol('virtualElements.setDomNodeChildren', ko.virtualElements.setDomN
         },
 
         'getBindings': function(node, bindingContext) {
+            //取得data-bind中的值
             var bindingsString = this['getBindingsString'](node, bindingContext);
             return bindingsString ? this['parseBindingsString'](bindingsString, bindingContext) : null;
         },
@@ -1837,8 +1839,9 @@ ko.exportSymbol('virtualElements.setDomNodeChildren', ko.virtualElements.setDomN
         'parseBindingsString': function(bindingsString, bindingContext) {
             try {
                 var viewModel = bindingContext['$data'],
-                    scopes = (typeof viewModel == 'object' && viewModel != null) ? [viewModel, bindingContext] : [bindingContext],
-                    bindingFunction = createBindingsStringEvaluatorViaCache(bindingsString, scopes.length, this.bindingCache);
+                    scopes = (typeof viewModel == 'object' && viewModel != null) ? [viewModel, bindingContext] : [bindingContext];
+                   var bindingFunction = createBindingsStringEvaluatorViaCache(bindingsString, scopes.length, this.bindingCache);
+                   console.log(bindingFunction+"")
                 return bindingFunction(scopes);
             } catch (ex) {
                 throw new Error("Unable to parse bindings.\nMessage: " + ex + ";\nBindings value: " + bindingsString);
@@ -1849,13 +1852,15 @@ ko.exportSymbol('virtualElements.setDomNodeChildren', ko.virtualElements.setDomN
     ko.bindingProvider['instance'] = new ko.bindingProvider();
 
     function createBindingsStringEvaluatorViaCache(bindingsString, scopesCount, cache) {
-        var cacheKey = scopesCount + '_' + bindingsString;
+        var cacheKey = scopesCount + '_' + bindingsString;//缓存
         return cache[cacheKey]
             || (cache[cacheKey] = createBindingsStringEvaluator(bindingsString, scopesCount));
     }
 
     function createBindingsStringEvaluator(bindingsString, scopesCount) {
+        //将属性访问器插入到JSON
         var rewrittenBindings = " { " + ko.jsonExpressionRewriting.insertPropertyAccessorsIntoJson(bindingsString) + " } ";
+        console.log(rewrittenBindings)
         return ko.utils.buildEvalWithinScopeFunction(rewrittenBindings, scopesCount);
     }
 })();
@@ -1913,6 +1918,7 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
 //默认为true
         var shouldApplyBindings = (isElement && bindingContextMayDifferFromDomParentElement)             // Case (1)
                                || ko.bindingProvider['instance']['nodeHasBindings'](nodeVerified);       // Case (2)
+                           //通常会执行这一步
         if (shouldApplyBindings)
             shouldBindDescendants = applyBindingsToNodeInternal(nodeVerified, null, viewModel, bindingContextMayDifferFromDomParentElement).shouldBindDescendants;
 
@@ -2027,12 +2033,12 @@ ko.exportSymbol('bindingProvider', ko.bindingProvider);
         if (rootNode.nodeType === 1 || rootNode.nodeType === 8)
             applyBindingsToDescendantsInternal(viewModel, rootNode, true);
     };
-//核心方法
+//框架的入口函数,从指定节点绑定viewModel对象
     ko.applyBindings = function (viewModel, rootNode) {
         if (rootNode && (rootNode.nodeType !== 1) && (rootNode.nodeType !== 8))
             throw new Error("ko.applyBindings: first parameter should be your view model; second parameter should be a DOM node");
         rootNode = rootNode || window.document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
-//开始在其生身与后代中绑定
+//开始在其自身与后代中绑定
         applyBindingsToNodeAndDescendantsInternal(viewModel, rootNode, true);
     };
 
