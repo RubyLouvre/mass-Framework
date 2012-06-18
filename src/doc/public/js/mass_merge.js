@@ -56,7 +56,7 @@ void function( global, DOC ){
         }
         while((supplier = args[i++])){
             for ( key in supplier ) {//允许对象糅杂，用户保证都是对象
-                if (ride || !(key in receiver)) {
+                if (supplier.hasOwnProperty(key) && (ride || !(key in receiver))) {
                     receiver[ key ] = supplier[ key ];
                 }
             }
@@ -192,7 +192,8 @@ void function( global, DOC ){
     var innerDefine = function( _, deps, callback ){
         var args = arguments, last = args.length - 1
         args[0] = nick.slice(1);
-        args[ last ] =  parent.Function( "var $ = window."+Ns[ "@name" ]+";return "+ args[ last ] )();
+        //锁死$
+        args[ last ] =  parent.Function( "$","return "+ args[ last ] )(Ns);
         //将iframe中的函数转换为父窗口的函数
         Ns.define.apply(Ns, args)
     }
@@ -224,7 +225,7 @@ void function( global, DOC ){
         });
     }
 
-    function setup( name, deps, fn ){
+    function install( name, deps, fn ){
         for ( var i = 0,argv = [], d; d = deps[i++]; ) {
             argv.push( returns[ d ] );//从returns对象取得依赖列表中的各模块的返回值
         }
@@ -256,15 +257,15 @@ void function( global, DOC ){
         require: function( deps, factory, errback ){
             var _deps = {}, // 用于检测它的依赖是否都为2
             args = [],      // 用于依赖列表中的模块的返回值
-            dn = 0,         // 需要加载的模块数
-            cn = 0;         // 已加载完的模块数
+            dn = 0,         // 需要安装的模块数
+            cn = 0;         // 已安装完的模块数
             ( deps +"" ).replace( $.rword, function( url, name, match ){
                 dn++;
                 match = url.match( rmodule );
                 name  = "@"+ match[1];//取得模块名
                 if( !mapper[ name ] ){ //防止重复生成节点与请求
-                    mapper[ name ] = { };//state: undefined, 未加载; 1 已加载; 2 : 已执行
-                    loadJS( name, match[2] );//加载JS文件
+                    mapper[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
+                    loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
                 }else if( mapper[ name ].state === 2 ){
                     cn++;
                 }
@@ -274,9 +275,9 @@ void function( global, DOC ){
                 }
             });
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
-            if( dn === cn ){//如果需要加载的等于已加载好的
+            if( dn === cn ){//如果需要安装的等于已安装好的
                 (mapper[ token ] || {}).state = 2; 
-                return returns[ token ] = setup( token, args, factory );//装配到框架中
+                return returns[ token ] = install( token, args, factory );//装配到框架中
             }
             if( errback ){
                 errorStack( errback );//压入错误堆栈
@@ -287,7 +288,7 @@ void function( global, DOC ){
                 deps: _deps,
                 args: args,
                 state: 1
-            };//在正常情况下模块只能通过resolveCallbacks执行
+            };//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( token );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
@@ -306,7 +307,7 @@ void function( global, DOC ){
             args[2].token = "@"+name; //模块名
             this.require( args[1], args[2] );
         },
-        //用于检测这模块有没有加载成功
+        //检测此JS文件有没有加载下来
         _checkFail : function(  doc, name, error ){
             doc && (doc.ok = 1);
             if( error || !mapper[ name ].state ){
@@ -314,7 +315,7 @@ void function( global, DOC ){
                 errorStack.fire();//打印错误堆栈
             }
         },
-        //执行并移除所有依赖都具备的模块或回调
+        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
             for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
@@ -326,8 +327,8 @@ void function( global, DOC ){
                 }
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
-                    loadings.splice( i, 1 );//必须先移除再执行，防止在IE下DOM树建完后手动刷新页面，会多次执行最后的回调函数
-                    returns[ obj.name ] = setup( obj.name, obj.args, obj.callback );
+                    loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
+                    returns[ obj.name ] = install( obj.name, obj.args, obj.callback );
                     obj.state = 2;//只收集模块的返回值
                     $._checkDeps();
                 }
@@ -970,6 +971,16 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return ignorecase ? end_str.toLowerCase() === str.toLowerCase() :
             end_str === str;
         },
+        repeat: function(target, n){
+            var result = "";
+            while (n > 0) {
+                if (n & 1)
+                    result += target;
+                target += target;
+                n >>= 1;
+            }
+            return result;
+        },
         //得到字节长度
         byteLen: function(target){
             return target.replace(rascii,"--").length;
@@ -1039,7 +1050,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
-        padLeft: function( target, digits, filling, radix , right){
+        pad: function( target, digits, filling, radix , right){
             var num = target.toString(radix || 10);
             filling = filling || "0";
             while(num.length < digits){
@@ -1050,10 +1061,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 }
             }
             return num;
-        },
-        //在右边补上一些字符,默认为0
-        padRight: function(target, digits, filling, radix){
-            return $.String.padLeft(target, digits, filling, radix, true)
         }
     });
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
@@ -1259,9 +1266,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
         }
     }
-    "padLeft,padRight".replace($.rword, function(name){
-        NumberExt[name] = $.String[name];
-    });
     "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".replace($.rword,function(name){
         NumberExt[name] = Math[name];
     });
@@ -1633,7 +1637,7 @@ $.define("class", "lang",function(){
 //==================================================
 $.define("data", "lang", function(){
     $.log("已加载data模块");
-    var remitter = /object|function/, rtype = /[^38]/
+    var remitter = /object|function/, rtype = /[^3]/
     function validate(target){
         return target && remitter.test(typeof target) && rtype.test(target.nodeType)
     }
@@ -3637,9 +3641,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-         //   var underscored = name == "cssFloat" ? "float" :
-        //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-         var   rmargin = /^margin/, style = node.style ;
+            //   var underscored = name == "cssFloat" ? "float" :
+            //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
+            var   rmargin = /^margin/, style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle[name]           //.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
@@ -3996,7 +4000,15 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return pos;
     }
-
+    "show,hide".replace($.rword, function(method){
+        $.fn[ method ] = function(){
+            return this.each(function(){
+                if(this.style){
+                    this.style.display = method == "show" ? "" : "hide"
+                }
+            })
+        }
+    })
     var rroot = /^(?:body|html)$/i;
     $.implement({
         position: function() {//取得元素相对于其offsetParent的坐标
@@ -4611,8 +4623,8 @@ $.define("event_fix", !!document.dispatchEvent, function(){
                 delegateType: "focusout"
             },
             change: {//change事件的冒泡情况 IE6-9全灭
-                check: function(target, item){
-                    return !target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
+                check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
+                    return true //!target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
                 },
                 setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
