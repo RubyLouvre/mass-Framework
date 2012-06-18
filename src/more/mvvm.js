@@ -1,152 +1,103 @@
 
 $.define("mvvm","data,attr,event,fx", function(){
-    //    $.applyBindings = function(viewModel, root){
-    //        if(!$.type(viewModel,"Object") ){
-    //            throw "first argument must be object"
-    //        }
-    //        if(root){
-    //            root = root.mass ? root[0] : root.nodeType === 1 ? root : 0
-    //        }
-    //        root = root || document.body;
-    //        $.parseBindings(root,viewModel)
-    //    }
-    $.Observable = function(a){
-        this.value = a
-    }
-    $.applyBindings = function(viewModel,node){
-        var obj = new $.Observable;
-        var str = node.getAttribute("data-bind");
-        var arr = str.split(":");
-        var handle = arr[0].trim();
-        var type =   arr[1].trim();
-        $(node).bind(type, function(e){
-            $.binds[handle].apply(this,arguments)
-        })
-
-        for(var key in viewModel){
-            if(viewModel.hasOwnProperty(key)){
-                var val = viewModel[key];
-                if(typeof val == "function" && val.__observable__ == true){ 
-                    val.call(obj, key, node, viewModel)
+//1看这里，许多BUG没有修https://github.com/SteveSanderson/knockout/issues?page=1&state=open
+//2里面大量使用闭包，有时多达七八层，性能感觉不会很好
+//3with的使用会与ecma262的严格模式冲突
+//4代码隐藏（指data-bind）大量入侵页面，与JS前几年提倡的无侵入运动相悖
+//5好像不能为同一元素同种事件绑定多个回调
+    var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
+    $.dependencyDetection = (function () {
+        var _frames = [];
+        return {
+            begin: function (ret) {
+                _frames.push(ret);
+            },
+            end: function () {
+                _frames.pop();
+            },
+            collect: function (self) {
+                if (_frames.length > 0) {
+                    if(!self.list)
+                        self.list = [];
+                    var fn = _frames[_frames.length - 1];
+                    if ( self.list.indexOf( fn ) >= 0)
+                        return;
+                    self.list.push(fn);
                 }
             }
-        }
-      
-    //        for(var i = 0, el; el = this[i++];){
-    //            if(el.nodeType == 1 || el.nodeType == 8){
-    //                $.parseBindings(viewModel,el)
-    //            }
-    //        }
-    //        return this;
-    }
-    $.binds = {};
-    $.binds.visible = function(e, bool){
-        $.log("进入visible回调")
-        this.style.display =  bool ? "" : "none"
-    }
-    $.binds.css = function(e,bool){
-
-    }
-    $.binds.text = function(e, text){
-        //                var viewModel = {
-        //                    myMessage: $.observable(4) // Initially blank
-        //                };
-        //                viewModel.myMessage("Hello, world!"); // Text appears
-        //                viewModel.myMessage("XXXXX"); // Text appears
-        //                $.applyBindings(viewModel,$("#aaa")[0]);
-        $.log("进入text回调")
-        $(this).text(text)
-    }
-    $.bindNodeData = function(node,viewModel){
-        var data = node.getAttribute("data-bind");
-        if(data && data.length > 3){
-            var d =  $.data(node, "@data-bind");
-        
-            if(!d){
-                var a = Function( "return {"+  data.trim()+"}");
-     
-                $.data(node, "@data-bind",data);
+        };
+    })();
+    $.valueWillMutate = function(observable){
+        var list = observable.list
+        if($.type(list,"Array")){
+            for(var i = 0, el; el = list[i++];){
+                el();
             }
         }
     }
-    $.bindDescendantData = function(node,viewModel){
-        for (node = node.firstChild; node; node = node.nextSibling){
-            if(node.nodeType == 1){
-                $.bindNodeData(node, viewModel);
-                $.bindDescendantData(node, viewModel)
-            }else if(node.nodeType == 8){
-
+    $.observable = function(value){
+        var v = value;//将上一次的传参保存到v中,ret与它构成闭包
+        function ret(neo){
+            if(arguments.length){ //setter
+                if(!validValueType[$.type(neo)]){
+                    $.error("arguments must be primitive type!")
+                    return ret
+                }
+                if(v !== neo ){
+                    v = neo;
+                    $.valueWillMutate(ret);//向依赖者发送通知
+                }
+                return ret;
+            }else{                //getter
+                $.dependencyDetection.collect(ret);//收集被依赖者
+                return v;
+            }
         }
-        }
+        value = validValueType[$.type(value)] ? value : void 0;
+        ret(arguments[0]);//必须先执行一次
+        return ret
     }
-    $.parseBindings = function(root,viewModel){
-        //  $.data(root,"data-bind");
-        $.bindNodeData(root,viewModel)
-        $.bindDescendantData(root,viewModel)
-    }
-    $.bindingHandlers = {}
 
-    $.unwrapObservable = function (value) {
-        return $.isObservable(value) ? value() : value;
-    }
-    $.isObservable = function (instance) {
-        return instance instanceof Observable
-    }
-    function isChange(fn, val){
-        $.log("isChange "+val)
-        if( fn.__value__ != val){
-            fn.__change__ = true;
-            fn.__value__ = val;
+    $.computed = function(obj, scope){//为一个惰性函数，会重写自身
+        //computed是由多个$.observable组成
+        var getter, setter
+        if(typeof obj == "function"){
+            getter = obj
+        }else if(obj && typeof obj == "object"){
+            getter = obj.getter;
+            setter = obj.setter;
+            scope  = obj.scope;
         }
-    }
-    //    $.observable =  function (initialValue) {
-    //        var _latestValue = initialValue;
-    //        function observable() {
-    //            if (arguments.length > 0) {
-    //                // 通过equalityComparer方法比较它闭包内的_latestValue值与刚传递进行的参数是否相等
-    //                // 不相等就触发valueWillMutate,valueHasMutated方法,把依赖链激活,并刷新_latestValue的值
-    //                if ((!observable['equalityComparer']) || !observable['equalityComparer'](_latestValue, arguments[0])) {
-    //                    observable.valueWillMutate();
-    //                    _latestValue = arguments[0];
-    //                    if ($["@debug"]) observable._latestValue = _latestValue;
-    //                    observable.valueHasMutated();
-    //                }
-    //                return this; // Permits chained assignments
-    //            }
-    //            else {//没有则返回现在的_latestValue
-    //                ko.dependencyDetection.registerDependency(observable); // The caller only needs to be notified of changes if they did a "read" operation
-    //                return _latestValue;
-    //            }
-    //        }
-    //    }
-
-    //人家花了那么多心思与时间做出来的东西,你以为是小学生写记叙文啊,一目了然....
-    $.observable = function(init){
-      
-        function fn( value, node, viewModel){
-            if( (this instanceof $.Observable) && (!fn.__init__) ){
-                fn.__name__ = value
-                fn.__init__ = true;
-                fn.__node__ = node;
+        var v
+        var ret = function(neo){
+            if(arguments.length ){
+                if(typeof setter == "function"){//setter不一定存在的
+                    if(!validValueType[$.type(neo)]){
+                        $.error("arguments must be primitive type!")
+                        return ret
+                    }
+                    if(v !== neo ){
+                        setter.call(scope, neo);
+                        v = neo;
+                    }
+                }
+                return ret;
             }else{
-                isChange(fn, value);
-            }
-            if(fn.__init__ && fn.__change__){
-                $(fn.__node__).fire( fn.__name__, fn.__value__);
-                fn.__change__ = false;
+                $.dependencyDetection.begin(ret);//让其依赖知道自己的存在
+                $.log("$.dependencyDetection.begin(ret) "+ret)
+                v = getter.call(scope);
+                $.dependencyDetection.end();
+                return v;
             }
         }
-
-        fn.__value__ = init;
-        fn.__observable__ = true;
-        return fn;
+        ret(); //必须先执行一次
+        return ret;
     }
-
     function MyViewModel() {
-        this.firstName = ko.observable('Planet');
-        this.lastName = ko.observable('Earth');
+        this.firstName = $.observable('Planet');
+        this.lastName = $.observable('Earth');
 
-        this.fullName = ko.computed({
+        this.fullName = $.computed({
             getter: function () {
                 return this.firstName() + " " + this.lastName();
             },
@@ -159,44 +110,14 @@ $.define("mvvm","data,attr,event,fx", function(){
             },
             scope: this
         });
+        this.card = $.computed(function(){
+            return this.fullName() +"屌丝"
+        },this)
     }
+//人家花了那么多心思与时间做出来的东西,你以为是小学生写记叙文啊,一目了然....
 
-    $.computed = function(obj, scope){
-        var getter, setter
-        if(typeof obj == "function"){
-            getter = obj
-        }else if(obj && typeof obj == "object"){
-            getter = obj.getter;
-            setter = obj.setter;
-            scope = obj.scope;
-        }
-        var ret = function(){
-            if(arguments.length){
-                if(typeof setter == "function"){
-                    setter.call(scope, arguments[0])
-                }
-                return ret;
-            }else{
-                return getter.call(scope)
-            }
-        }
-        return ret;
-    }
-    $.observable = function(value){
-        var v = value
-        function ret(){
-            if(arguments.length){
-                v = arguments[0];
-                return ret;
-            }else{
-                return v;
-            }
-        }
-        return v;
-    }
-    $.applyBindings = function(viewModel){
 
-    }
+
 
 });
 
