@@ -8,8 +8,9 @@
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
         <!-- <script type="text/javascript" src="ko.js" charset="UTF-8"></script>-->
         <script>
+
             var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
-            $.dependencyDetection = (function () {
+            $.dependencyChain = (function () {
                 var _frames = [];
                 return {
                     begin: function (ret) {
@@ -29,75 +30,69 @@
                     }
                 };
             })();
-            $.valueWillMutate = function(observable){
-                var list = observable.list
+            $.notifyUpdate = function(observable){
+                var list = observable.list;
                 if($.type(list,"Array")){
                     for(var i = 0, el; el = list[i++];){
-                        el();
+           
+                        el();//通知顶层的computed更新自身
                     }
                 }
             }
-            $.observable = function(value){
-                var v = value;//将上一次的传参保存到v中,ret与它构成闭包
-                function ret(neo){
-                    if(arguments.length){ //setter
-                        if(!validValueType[$.type(neo)]){
-                            $.error("arguments must be primitive type!")
-                            return ret
-                        }
-                        if(v !== neo ){
-                            v = neo;
-                            $.valueWillMutate(ret);//向依赖者发送通知
-                        }
-                        return ret;
-                    }else{                //getter
-                        $.dependencyDetection.collect(ret);//收集被依赖者
-                        return v;
+
+            $.computed = function(obj, scope){
+                var args//构建一个至少拥有getter,scope属性的对象
+                if(typeof obj == "function"){
+                    args = {
+                        getter: obj,
+                        scope: scope
                     }
+                }else if( typeof obj == "object" && obj && obj.getter){
+                    args = obj
                 }
-                value = validValueType[$.type(value)] ? value : void 0;
-                ret(arguments[0]);//必须先执行一次
+                return $.observable(args, true)
+            }
+
+            $.observable = function(old, isComputed){
+                var cur, getter, setter, scope
+                function ret(neo){
+                    var set;//判定是读方法还是写方法
+                    if(arguments.length){ //setter
+                        neo =  typeof setter === "function" ? setter.call( scope, neo ) : neo
+                        set = true;
+                    }else{  //getter
+                        if(typeof getter === "function"){
+ 
+                            $.dependencyChain.begin(ret);//只有computed才在依赖链中暴露自身
+                            neo = getter.call( scope )
+                            console.log(neo+"!!!!!!!!!!")
+                            $.dependencyChain.end()
+                        }else{
+                            neo = cur
+                        }
+                        $.dependencyChain.collect(ret)//将暴露到依赖链的computed放到自己的通知列表中
+                    }
+                    if(cur !== neo ){
+                        cur = neo;
+                        $.notifyUpdate(ret);
+                    }
+                    return set ? ret : cur
+                }
+                if( isComputed == true){
+                    getter = old.getter;  setter = old.setter; scope  = old.scope;
+                    ret();//必须先执行一次
+                }else{
+                    old = validValueType[$.type(old)] ? old : void 0;
+                    cur = old;//将上一次的传参保存到cur中,ret与它构成闭包
+                    ret(old);//必须先执行一次
+                }
                 return ret
             }
 
-            $.computed = function(obj, scope){//为一个惰性函数，会重写自身
-                //computed是由多个$.observable组成
-                var getter, setter
-                if(typeof obj == "function"){
-                    getter = obj
-                }else if(obj && typeof obj == "object"){
-                    getter = obj.getter;
-                    setter = obj.setter;
-                    scope  = obj.scope;
-                }
-                var v
-                var ret = function(neo){
-                    if(arguments.length ){
-                        if(typeof setter == "function"){//setter不一定存在的
-                            if(!validValueType[$.type(neo)]){
-                                $.error("arguments must be primitive type!")
-                                return ret
-                            }
-                            if(v !== neo ){
-                                setter.call(scope, neo);
-                                v = neo;
-                                $.valueWillMutate(ret);//向依赖者发送通知
-                            }
-                        }
-                        return ret;
-                    }else{
-                        $.dependencyDetection.begin(ret);//让其依赖知道自己的存在
-                        v = getter.call(scope);
-                        $.dependencyDetection.end();
-                        return v;
-                    }
-                }
-                ret(); //必须先执行一次
-                return ret;
-            }
             function MyViewModel() {
                 this.firstName = $.observable('Planet');
                 this.lastName = $.observable('Earth');
+
                 this.fullName = $.computed({
                     getter: function () {
                         return this.firstName() + " " + this.lastName();
@@ -111,70 +106,26 @@
                     },
                     scope: this
                 });
-                /*     this.card = $.computed(function(){
-                    return this.fullName() +"屌丝"
-                },this)*/
+                this.fullName.name = "XXX"
+                this.card = $.computed(function(){
+                    return this.fullName() +" 屌丝"
+                },this);
+                this.wordcard = $.computed(function(){
+                    return this.card() +"工作卡 "
+                },this)
+                this.wordcardA = $.computed(function(){
+                    return this.wordcard() +"A "
+                },this)
             }
-            $.buildEvalWithinScopeFunction =  function (expression, scopeLevels) {
-                var functionBody = "return (" + expression + ")";
-                for (var i = 0; i < scopeLevels; i++) {
-                    functionBody = "with(sc[" + i + "]) { " + functionBody + " } ";
-                }
-                return new Function("sc", functionBody);
-            }
-            $.applyBindings = function(model, node){       
-              
-                var nodeBind = $.computed(function (){
-                    var str = "{" + node.getAttribute("data-bind")+"}"
-                    var fn = $.buildEvalWithinScopeFunction(str,2);
-                    var bindings = fn([node,model]);
-                    $.log("=====================")
-                    for(var key in bindings){
-                        if(bindings.hasOwnProperty(key)){
-                            var fn = $.bindingHandlers["text"]["update"];
-                            var observable = bindings[key]
-                            $.dependencyDetection.collect(observable);
-                            fn(node, observable)
-                        }
-                    }
-                },node);
-                return nodeBind
-                
-            }
-            $.bindingHandlers = {}
-            $.bindingHandlers["text"] = {
-                'update': function (node, observable) {
-                    var val = observable()
-                    val = val == null ? "" : val+"";
-                    if("textContent" in node){//优先考虑标准属性textContent
-                        node.textContent = val;
-                    }else{
-                        node.innerText = val;
-                    }
-                    //处理IE9的渲染BUG
-                    if (document.documentMode == 9) {
-                        node.style.display = node.style.display;
-                    }
 
-                }
-            }
+
             window.onload = function(){
                 var model = new MyViewModel();
-                var node = document.getElementById("node");
-                var nodeBind = $.applyBindings(model, node);
-                $.log("+++++++++++++++++++++++++++")
-                $.log(model.fullName.list[0] == nodeBind);
-                $.log(model.lastName.list[0] == model.fullName);
-                $.log(model.firstName.list[0] == model.fullName);
-                //  $.log(model.lastName.list[0] == model.fullName)
-                setTimeout(function(){
-                    model.fullName("xxx yyy")
-                },1500)
-                setTimeout(function(){
-                    model.fullName("111 222")
-                },3000)
-            }
+                $.log("==================")
+                model.lastName("last");
+                $.log("==================")
 
+            }
 
         </script>
 
