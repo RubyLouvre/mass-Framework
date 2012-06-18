@@ -60,9 +60,9 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-         //   var underscored = name == "cssFloat" ? "float" :
-        //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-         var   rmargin = /^margin/, style = node.style ;
+            //   var underscored = name == "cssFloat" ? "float" :
+            //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
+            var   rmargin = /^margin/, style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
                 ret = computedStyle[name]           //.getPropertyValue( underscored );
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
@@ -444,7 +444,15 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
         }
         return pos;
     }
-
+    "show,hide".replace($.rword, function(method){
+        $.fn[ method ] = function(){
+            return this.each(function(){
+                if(this.style){
+                    this.style.display = method == "show" ? "" : "hide"
+                }
+            })
+        }
+    })
     var rroot = /^(?:body|html)$/i;
     $.implement({
         position: function() {//取得元素相对于其offsetParent的坐标

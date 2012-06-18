@@ -2,24 +2,133 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
-        <title>Testing</title>
+        <title>mass Framework</title>
+        <link href="style.css" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
-
+        <script type="text/javascript" src="ko.js" charset="UTF-8"></script>
         <script>
 
-            $.require("ready,more/mvvm",function(){
-                $.applyBindings({},document.body);
-               // alert(document.getElementsByTagName("!").length)
-            })
         </script>
 
 
 
     </head>
     <body>
-        The name is <span data-bind="text: personName"></span>
-       <!-- ko foreach: products //-->
-         The name is <span data-bind="text: personName"></span>
+        <div class="main">
+
+            <div class="header">
+                <div class="header_resize">
+                    <div class="menu_nav">
+                        <ul>
+                            <li><a href="index.html"><span><span>Home</span></span></a></li>
+                            <li class="active"><a href="support.html"><span><span>Support</span></span></a></li>
+                            <li><a href="about.html"><span><span>About Us</span></span></a></li>
+                            <li><a href="blog.html"><span><span>Blog</span></span></a></li>
+                            <li><a href="contact.html"><span><span>Contact Us</span></span></a></li>
+                        </ul>
+                    </div>
+                    <div class="clr"></div>
+                    <div class="site-logo">
+                        <h1 class="site-name"><a href="index.html">mass Framework<br /><small>put your slogan here</small></a></h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="content_resize">
+                    <div class="mainbar">
+                        <div class="article">
+                            <h2>Support to Company Name</h2>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. <strong>Suspendisse nulla ligula, blandit ultricies aliquet ac, lobortis in massa. Nunc dolor sem, tincidunt vitae viverra in, egestas sed lacus.</strong> Etiam in ullamcorper felis. Nulla cursus feugiat leo, ut dictum metus semper a. Vivamus euismod, arcu gravida sollicitudin vestibulum, quam sem tempus quam, quis ullamcorper erat nunc in massa. Donec aliquet ante non diam sollicitudin quis auctor velit sodales. Morbi neque est, posuere at fringilla non, mollis nec nibh. Sed commodo tortor nec sem tincidunt mattis. Nam convallis aliquam nibh eu luctus. Nunc vel tincidunt lacus. Suspendisse sit amet pulvinar ante.</p>
+                            <p>Phasellus diam justo, laoreet vel vulputate eu, congue vel est. Maecenas eros libero, sollicitudin a vulputate fermentum, ultrices vel lacus. Nam in metus non augue fermentum consequat ultrices ac enim. Integer aliquam urna non diam aliquam eget hendrerit sem molestie.</p>
+                            <p><strong>Lorem ipsum dolor sit amet</strong></p>
+                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget bibendum tellus. Nunc vel imperdiet tellus. Mauris ornare aliquam urna, accumsan bibendum eros auctor ac.</p>
+                            <ul class="sb_menu">
+                                <li><a href="#"><strong>Lorem ipsum</strong></a></li>
+                                <li><a href="#"><strong>Lorem ipsum</strong></a></li>
+                                <li><a href="#"><strong>Lorem ipsum</strong></a></li>
+                                <li><a href="#"><strong>Lorem ipsum</strong></a></li>
+                                <li><a href="#"><strong>Lorem ipsum</strong></a></li>
+                                <li><a href="#"><strong>Lorem ipsum</strong></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="sidebar">
+                        <div class="searchform">
+                            <form id="formsearch" name="formsearch" method="post" action="">
+                                <input name="button_search" src="images/search_btn.gif" class="button_search" type="image" />
+                                <span><input name="editbox_search" class="editbox_search" id="editbox_search" maxlength="80" value="Search" type="text" /></span>
+                                <div class="clr"></div>
+                            </form>
+                        </div>
+                        <div class="gadget">
+                            <h2 class="star"><span>Sidebar</span> Menu</h2>
+                            <ul class="sb_menu">
+                                <li><a href="#">Home</a></li>
+                                <li><a href="#">TemplateInfo</a></li>
+                                <li><a href="#">Style Demo</a></li>
+                                <li><a href="#">Blog</a></li>
+                                <li><a href="#">Archives</a></li>
+                                <li><a href="http://www.cssmoban.com">网站模板</a></li>
+                            </ul>
+                        </div>
+                        <div class="gadget">
+                            <h2 class="star"><span>Sponsors</span></h2>
+                            <ul class="ex_menu">
+                                <li><a href="http://www.cssmoban.com" title="网站模板">网站模板</a><br />Over 6,000+ Premium Web Templates</li>
+                                <li><a href="#" title="WordPress Themes">TemplateSOLD</a><br />Premium WordPress &amp; Joomla Themes</li>
+                                <li><a href="http://www.imhosted.com" title="Affordable Hosting">ImHosted.com</a><br />Affordable Web Hosting Provider</li>
+                                <li><a href="http://www.dreamstock.com" title="Stock Photos">DreamStock</a><br />Download Amazing Stock Photos</li>
+                                <li><a href="http://www.evrsoft.com" title="Website Builder">Evrsoft</a><br />Website Builder Software &amp; Tools</li>
+                                <li><a href="http://www.myvectorstore.com" title="Stock Icons">MyVectorStore</a><br />Royalty Free Stock Icons</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="clr"></div>
+                </div>
+            </div>
+
+            <div class="fbg">
+                <div class="fbg_resize">
+                    <div class="col c1">
+                        <h2><span>About</span></h2>
+                        <img src="images/white.jpg" width="56" height="56" alt="pix" />
+                        <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec libero. Suspendisse bibendum. Cras id urna. Morbi tincidunt, orci ac convallis aliquam, lectus turpis varius lorem, eu posuere nunc justo tempus leo.  llorem, eu posuere nunc justo tempus leo. Donec mattis, purus nec placerat bibendum. <a href="#">Learn more...</a></p>
+                    </div>
+                    <div class="col c2">
+                        <h2><span>Lorem Ipsum</span></h2>
+                        <ul class="sb_menu">
+                            <li><a href="#">consequat molestie</a></li>
+                            <li><a href="#">sem justo</a></li>
+                            <li><a href="#">semper</a></li>
+                            <li><a href="#">magna sed purus</a></li>
+                            <li><a href="#">tincidunt</a></li>
+                        </ul>
+                    </div>
+                    <div class="col c3">
+                        <h2>Contact</h2>
+                        <p>Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat.</p>
+                        <p><strong>Phone:</strong> +1234567<br />
+                            <strong>Address:</strong> 123 TemplateAccess Rd<br />
+                            <strong>E-mail:</strong> <a href="mailto:info@example.com">info@example.com</a></p>
+                    </div>
+                    <div class="clr"></div>
+                </div>
+            </div>
+            <div class="footer">
+                <div class="footer_resize">
+                    <p class="lf">&copy; Copyright MyWebSite. Designed from <a href="http://www.cssmoban.com">网站模板</a></p>
+                    <ul class="fmenu">
+                        <li><a href="index.html">Home</a></li>
+                        <li class="active"><a href="support.html">Support</a></li>
+                        <li><a href="blog.html">Blog</a></li>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="contact.html">Contacts</a></li>
+                    </ul>
+                    <div class="clr"></div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
