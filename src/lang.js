@@ -378,6 +378,16 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return ignorecase ? end_str.toLowerCase() === str.toLowerCase() :
             end_str === str;
         },
+        repeat: function(target, n){
+            var result = "";
+            while (n > 0) {
+                if (n & 1)
+                    result += target;
+                target += target;
+                n >>= 1;
+            }
+            return result;
+        },
         //得到字节长度
         byteLen: function(target){
             return target.replace(rascii,"--").length;
@@ -451,7 +461,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
-        padLeft: function( target, digits, filling, radix , right){
+        pad: function( target, digits, filling, radix , right){
             var num = target.toString(radix || 10);
             filling = filling || "0";
             while(num.length < digits){
@@ -462,10 +472,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 }
             }
             return num;
-        },
-        //在右边补上一些字符,默认为0
-        padRight: function(target, digits, filling, radix){
-            return $.String.padLeft(target, digits, filling, radix, true)
         }
     });
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
@@ -671,9 +677,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
         }
     }
-    "padLeft,padRight".replace($.rword, function(name){
-        NumberExt[name] = $.String[name];
-    });
     "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".replace($.rword,function(name){
         NumberExt[name] = Math[name];
     });
@@ -789,4 +792,5 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法 v4
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
+https://gist.github.com/395070
  */
