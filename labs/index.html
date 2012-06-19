@@ -88,7 +88,6 @@
                 }else{
                     old = validValueType[$.type(old)] ? old : void 0;
                     cur = old;//将上一次的传参保存到cur中,ret与它构成闭包
-                    $.log(old)
                     ret(old);//必须先执行一次
                 }
                 return ret
