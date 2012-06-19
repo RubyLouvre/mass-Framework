@@ -34,7 +34,7 @@
                 var list = observable.list;
                 if($.type(list,"Array")){
                     for(var i = 0, el; el = list[i++];){
-           
+                        delete el.cache;//清除缓存
                         el();//通知顶层的computed更新自身
                     }
                 }
@@ -58,14 +58,18 @@
                 function ret(neo){
                     var set;//判定是读方法还是写方法
                     if(arguments.length){ //setter
-                        neo =  typeof setter === "function" ? setter.call( scope, neo ) : neo
+                        neo =  typeof setter === "function" ? setter.apply( scope, arguments ) : neo
                         set = true;
                     }else{  //getter
                         if(typeof getter === "function"){
- 
                             $.dependencyChain.begin(ret);//只有computed才在依赖链中暴露自身
-                            neo = getter.call( scope )
-                            console.log(neo+"!!!!!!!!!!")
+                            if("cache" in ret){
+                                neo = ret.cache;//从缓存中读取,防止递归
+                            }else{
+                                neo = getter.apply( scope ,arguments );
+                                ret.cache = neo;//保存到缓存
+                                console.log(neo+"!!!!!!!!!!");//
+                            }
                             $.dependencyChain.end()
                         }else{
                             neo = cur
@@ -84,6 +88,7 @@
                 }else{
                     old = validValueType[$.type(old)] ? old : void 0;
                     cur = old;//将上一次的传参保存到cur中,ret与它构成闭包
+                    $.log(old)
                     ret(old);//必须先执行一次
                 }
                 return ret
@@ -106,7 +111,7 @@
                     },
                     scope: this
                 });
-                this.fullName.name = "XXX"
+ 
                 this.card = $.computed(function(){
                     return this.fullName() +" 屌丝"
                 },this);
@@ -118,13 +123,11 @@
                 },this)
             }
 
-
             window.onload = function(){
                 var model = new MyViewModel();
                 $.log("==================")
                 model.lastName("last");
                 $.log("==================")
-
             }
 
         </script>
