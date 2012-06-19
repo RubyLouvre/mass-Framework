@@ -21,55 +21,64 @@ $.define("data", "lang", function(){
                 table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
                     data:{}
                 });
-                var inner = table
+                var inner = table;
+                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                //我们可能通过$("#test").data("full-name")或$("#test").data("fullName")访问到
                 if(isEl && !table.parsedAttrs){
                     var attrs = target.attributes;
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
                         var key = attr.name;
-                        if ( key.indexOf( "data-" ) === 0 ) {
-                            $.parseData(target, key, id, table.data);
-                        }
+                        if ( key.indexOf( "data-" ) === 0 && key.length > 5 ) {
+                            $.parseData(target, key.slice(5), inner, attr.value);
+                        }//camelize
                     }
                     table.parsedAttrs = true;
                 }
+                //私有数据都是直接放到table中，普通数据放到table.data中
                 if ( !pvt ) {
                     table = table.data;
                 }
                 if ( name && typeof name == "object" ) {
-                    $.mix(table, name);
+                    $.mix( table, name );//写入一组方法
                 }else if(getByName && data !== void 0){
-                    table[ name ] = data;
+                    table[ name ] = data;//写入单个方法
                 }
                 if(getByName){
-                    return isEl && !pvt && name.indexOf("data-") === 0 ? $.parseData( target, name, id, inner ) : table[ name ];
+                    if(name in table){
+                        return table[name]
+                    }else if(isEl && !pvt){
+                        return $.parseData( target, name, inner );
+                    }
                 }else{
                     return table
                 }
             }
+            return  void 0
         },//仅内部调用
         _data:function(target,name,data){
             return $.data(target, name, data, true)
         },
-        parseData: function(target, name, id, table){
-            if( table && (name + id) in table){//如果已经转换过
-                return table[ name + id ];
-            }else{
-                var data = target.getAttribute( name );
-                if ( typeof data === "string") {//转换
-                    try {
-                        data = eval("0,"+ data );
-                    } catch( e ) {
-                        $.log("$.parseData error : "+ e)
-                    }
-                    if(table){
-                        table[ name + id ] = data
-                    }
-                }else{
-                    data = void 0;
-                }
-                return data;
+        parseData: function(target, name, table, value){
+            var data, key = $.String.camelize(name);
+            if(table && (key in table))
+                return table[key];
+            if(arguments.length != 4){
+                var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
+                value = target.getAttribute( attr )
             }
+            if ( typeof value === "string") {//转换
+                try {
+                    data = eval("0,"+ value );
+                } catch( e ) {
+                    data = value
+                }
+                if(table){
+                    table[ key ] = data
+                }
+            }
+            return data;
+
         },
         //移除数据
         removeData : function(target, name, pvt){
