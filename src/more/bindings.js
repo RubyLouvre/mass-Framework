@@ -226,7 +226,7 @@ $.define("bindings","data,attr,event,fx", function(){
                 throw new Error("只能帮定元素节点与注释节点上");
             node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
             //开始在其自身与后代中绑定
-            setBindingsToSelfAndDescendants(data, node, true);
+            return setBindingsToSelfAndDescendants(data, node, true);
         },
         //取得节点的数据隐藏
         get: function(node){
@@ -245,25 +245,24 @@ $.define("bindings","data,attr,event,fx", function(){
     $.applyBindings = $.setBindings = $.bindings.set;
     $.parseBindings = function(node, model){
         var jsonstr = $.normalizeJSON( node.getAttribute("data-bind") );
-       
         var fn = $.bindings.parse(jsonstr,2);
-         $.log(fn+"")
         return fn([node,model]);//返回一个对象
     }
     function applyBindingsToDescendants(){}
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToSelf(node, bindings, viewModel, force){
         var initPhase = 0;
-        $.computed(function(){
+        var nodeBind = $.computed(function(){
             //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
             bindings = bindings || $.parseBindings(node,viewModel)//保存到闭包中
           
             if (initPhase === 0) {
                 initPhase = 1;
+                $.log("绑定到node")
                 initPhase = 2;
             }
             if (initPhase === 2) {
-                  $.log(bindings+"!")
+                  $.log(bindings)
                 for(var key in bindings){
                     var adapter = $.bindingAdapter[key];
                     if (adapter && typeof adapter["update"] == "function") {
@@ -277,8 +276,10 @@ $.define("bindings","data,attr,event,fx", function(){
                 //var r =
                // function
             }
-            return {}
-        },node)
+        },node);
+        return nodeBind
+      //  $.log(nodeBind)
+
         return {}
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
@@ -290,11 +291,14 @@ $.define("bindings","data,attr,event,fx", function(){
         }
         var shouldApplyBindings = isElement && force  || $.bindings.get(node);
         if (shouldApplyBindings){
-            canBindToDescendants = setBindingsToSelf(node, null, viewModel, force).shouldBindDescendants;
+          var c = setBindingsToSelf(node, null, viewModel, force) //.shouldBindDescendants;
+
+          //canBindToDescendants
         }
         if (canBindToDescendants) {
-            applyBindingsToDescendants(viewModel, node, !isElement);
+           // applyBindingsToDescendants(viewModel, node, !isElement);
         }
+        return c
     }
     $.bindingAdapter = {}
     $.bindingAdapter["text"] = {
