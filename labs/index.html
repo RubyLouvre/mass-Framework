@@ -5,14 +5,44 @@
         <title>mass Framework</title>
 
 
-      <!--  <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>-->
+        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
         <!-- <script type="text/javascript" src="ko.js" charset="UTF-8"></script>-->
-        <script type="text/javascript" src="../libs/jquery-1.7.2.js" charset="UTF-8"></script>
+
         <script>
 
-   $(function(){
-       console.log($("#node").data("cityUuu"))
-   })
+            $.require("more/bindings", function(){
+                function MyViewModel() {
+                    this.firstName = $.observable('Planet');
+                    this.lastName = $.observable('Earth');
+                    this.fullName = $.computed({
+
+                        getter: function () {
+                              $.log("HHHHHHHHH")
+                            return this.firstName() + " " + this.lastName();
+                        },
+                        setter: function (value) {
+                            var lastSpacePos = value.lastIndexOf(" ");
+                            if (lastSpacePos > 0) { // Ignore values with no space character
+                                this.firstName(value.substring(0, lastSpacePos)); // Update "firstName"
+                                this.lastName(value.substring(lastSpacePos + 1)); // Update "lastName"
+                            }
+                        },
+                        scope: this
+                    });
+                }
+                var model = new MyViewModel();
+                var node = document.getElementById("node");
+                var nodeBind = $.applyBindings(model, node);
+                setTimeout(function(){
+                    model.firstName("BBB")
+                },1500)
+                setTimeout(function(){
+                    model.lastName("CCC")
+                },3000)
+                setTimeout(function(){
+                    model.fullName("DDD AAA")
+                },4500)
+            })
 
         </script>
 
@@ -20,7 +50,6 @@
 
     </head>
     <body>
-        The name is <span data-name="John Resig" data-city-uuu="Boston" data-num="1" data-bool="false"
-     data-lang="js" data-food="Bacon" data-bind="text: fullName" id="node"></span>
+        The name is <span data-bind="text: fullName" id="node"></span>
     </body>
 </html>
