@@ -10,38 +10,54 @@
 
         <script>
 
-            $.require("more/bindings", function(){
-                function MyViewModel() {
-                    this.firstName = $.observable('Planet');
-                    this.lastName = $.observable('Earth');
-                    this.fullName = $.computed({
-
-                        getter: function () {
-                              $.log("HHHHHHHHH")
-                            return this.firstName() + " " + this.lastName();
-                        },
-                        setter: function (value) {
-                            var lastSpacePos = value.lastIndexOf(" ");
-                            if (lastSpacePos > 0) { // Ignore values with no space character
-                                this.firstName(value.substring(0, lastSpacePos)); // Update "firstName"
-                                this.lastName(value.substring(lastSpacePos + 1)); // Update "lastName"
-                            }
-                        },
-                        scope: this
-                    });
+            $.require("ready", function(){
+                var a = function(v){
+                    if(a.v !== v){
+                        a.v = v;
+                        fire(a)
+                    }
+                    if(arguments.length == 0){
+                        return a.v
+                    }
                 }
-                var model = new MyViewModel();
-                var node = document.getElementById("node");
-                var nodeBind = $.applyBindings(model, node);
-                setTimeout(function(){
-                    model.firstName("BBB")
-                },1500)
-                setTimeout(function(){
-                    model.lastName("CCC")
-                },3000)
-                setTimeout(function(){
-                    model.fullName("DDD AAA")
-                },4500)
+
+                var b = function(v){
+                    if(b.v !== v){
+                        b.v = v;
+                        fire(b)
+                    }
+                    if(arguments.length == 0){
+                        return b.v
+                    }
+                }
+                function fire(fn){
+                    var list = fn.list || [];
+                    for(var i =0, el; el = list[i++];){
+                        el()
+                    }
+                }
+                var c = function(){
+                    if(arguments.length == 0){
+                        var r = a.v + b.v
+                        console.log("c  "+r);
+                        c.r = r;
+                        return r
+                    }
+                }
+                a.list = b.list = [c]
+                var d = function(){
+                    if(arguments.length == 0){
+                        var r = c.v
+                        console.log("d  "+r)
+                        return r;
+                    }
+                }
+                d.list = [c]
+                a(1);
+                b(2)
+                a(3);
+
+
             })
 
         </script>
