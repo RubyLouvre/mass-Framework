@@ -30,15 +30,14 @@
                 }
                 var model = new MyViewModel();
 
-                var c = $.applyBindings(model,$("#node")[0]);
+               $.applyBindings(model,$("#node")[0]);
                 setTimeout(function(){
                     model.firstName("neo")
                 },1000)
                 setTimeout(function(){
                     model.firstName("xxx")
                 },2000)
-             
-
+            
             })
         </script>
 

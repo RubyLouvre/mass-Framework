@@ -27,15 +27,7 @@ $.define("bindings","data,attr,event,fx", function(){
             }
         };
     })();
-    $.notifyUpdate = function(observable){
-        var list = observable.list;
-        if($.type(list,"Array")){
-            for(var i = 0, el; el = list[i++];){
-                delete el.cache;//清除缓存
-                el();//通知顶层的computed更新自身
-            }
-        }
-    }
+
     $.computed = function(obj, scope){
         var args//构建一个至少拥有getter,scope属性的对象
         if(typeof obj == "function"){
@@ -74,7 +66,7 @@ $.define("bindings","data,attr,event,fx", function(){
             }
             if(cur !== neo ){
                 cur = neo;
-                $.notifyUpdate(ret);
+                $.bindings.update(ret);
             }
             return set ? ret : cur
         }
@@ -88,8 +80,6 @@ $.define("bindings","data,attr,event,fx", function(){
         }
         return ret
     }
-
-
 
     //normalizeJSON及其辅助方法与变量
     void function(){
@@ -158,7 +148,7 @@ $.define("bindings","data,attr,event,fx", function(){
                     if (tokenDepth === 0) {
                         var token = str.substring(tokenStart, position + 1);
                         tokens.push(token);
-                        var replacement = "@mass_token_" + (tokens.length - 1) + "@";
+                        replacement = "@mass_token_" + (tokens.length - 1) + "@";
                         str = str.substring(0, tokenStart) + replacement + str.substring(position + 1);
                         position -= (token.length - replacement.length);
                         tokenStart = null;
@@ -236,6 +226,25 @@ $.define("bindings","data,attr,event,fx", function(){
                 body = "with(sc[" + i + "]) { " + body + " } ";
             }
             return  Function("sc", body);
+        },
+        update: function(observable){
+            var list = observable.list;
+            if($.type(list,"Array") && list.length){
+                var safelist = list.concat(), dispose = false
+                for(var i = 0, el; el = safelist[i++];){
+                    delete el.cache;//清除缓存
+                    if(el.dispose === true || el() == true ){//通知顶层的computed更新自身
+                        el.dispose = dispose = true
+                    }
+                }
+                if( dispose == true ){//移除无意义的绑定
+                    for (  i = list.length; el = list[ --i ]; ) {
+                        if(el.dispose == true){
+                            el.splice( i, 1 );
+                        }
+                    }
+                }
+            }
         }
     }
     //MVVM三大入口函数之一
@@ -246,28 +255,28 @@ $.define("bindings","data,attr,event,fx", function(){
         return fn([node,model]);//返回一个对象
     }
     function applyBindingsToDescendants(){}
-    function associationUIandData(node, observable, viewModel, updater){
+    function associateDataAndUI(node, observable, viewModel, process){
         var fn = function(){
-            updater(node, observable, viewModel);
+            if(!node){
+                return true;//解除绑定
+            }
+            process(node, observable, viewModel);
         }
         var list = observable.list ||  (observable.list = [])
         if ( list.indexOf( fn ) == -1 ){
             list.push(fn)
         }
-        fn()
+        fn();
     }
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToSelf(node, bindings, viewModel, force){
-        //   var nodeBind = $.computed(function(){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         bindings = bindings || $.parseBindings(node,viewModel)//保存到闭包中
-        $.log(bindings)
         for(var key in bindings){
-            var adapter = $.bindingAdapter[key];
-            if (adapter && typeof adapter["update"] == "function") {
-                var updater = adapter["update"];//更新UI
-                var observable = bindings[key];
-                associationUIandData(node, observable, viewModel, updater)
+            var process = $.bindingAdapter[key];
+            if (typeof process  == "function") {
+                $.log("associateDataAndUI : "+key)
+                associateDataAndUI(node, bindings[key], viewModel, process)
             }
         }
         return {}
@@ -291,19 +300,17 @@ $.define("bindings","data,attr,event,fx", function(){
         return c
     }
     $.bindingAdapter = {}
-    $.bindingAdapter["text"] = {
-        'update': function (node, observable) {
-            var val = observable()
-            val = val == null ? "" : val+"";
-            if("textContent" in node){//优先考虑标准属性textContent
-                node.textContent = val;
-            }else{
-                node.innerText = val;
-            }
-            //处理IE9的渲染BUG
-            if (document.documentMode == 9) {
-                node.style.display = node.style.display;
-            }
+    $.bindingAdapter["text"] =  function (node, observable) {
+        var val = observable()
+        val = val == null ? "" : val+"";
+        if("textContent" in node){//优先考虑标准属性textContent
+            node.textContent = val;
+        }else{
+            node.innerText = val;
+        }
+        //处理IE9的渲染BUG
+        if (document.documentMode == 9) {
+            node.style.display = node.style.display;
         }
     }
 
