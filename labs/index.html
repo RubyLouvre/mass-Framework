@@ -5,13 +5,16 @@
         <title>mass Framework</title>
 
 
-        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>-->
+        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
         <!--  <script type="text/javascript" src="ko.js" charset="UTF-8"></script> -->
 
         <script>
 
             $.require("ready,more/bindings", function(){
                 function MyViewModel() {
+
+                    this.currentProfit = $.observable(1000) // Positive value, so initially we don't apply the "profitWarning" class
+
                     this.firstName = $.observable('Planet');
                     this.lastName = $.observable('Earth');
                     this.fullName = $.computed({
@@ -30,23 +33,31 @@
                 }
                 var model = new MyViewModel();
 
-               $.applyBindings(model,$("#node")[0]);
+                $.applyBindings(model,$("#node")[0]);
                 setTimeout(function(){
-                    model.firstName("neo")
-                },1000)
+                   model.currentProfit(-50);
+                       model.firstName("neo")
+                },1500)
                 setTimeout(function(){
-                    model.firstName("xxx")
-                },2000)
+                       model.firstName("xxx")
+                },3000)
             
             })
         </script>
 
-
+        <style>
+            .red{
+                color:red;
+            }
+        </style>
 
 
     </head>
     <body>
-        The name is <span data-bind="text: fullName" id="node"></span>
+        <div  id="node" data-bind="css: 'red'">
+            Profit Information
+        </div>
+        The name is <span data-bind="text: fullName" ></span>
         <table>
             <thead>
                 <tr><th>First name</th><th>Last name</th></tr>

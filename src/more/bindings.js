@@ -38,47 +38,47 @@ $.define("bindings","data,attr,event,fx", function(){
         }else if( typeof obj == "object" && obj && obj.getter){
             args = obj
         }
-        return $.observable(args, true)
+        return $.observable( args, true )
     }
 
     $.observable = function(old, isComputed){
         var cur, getter, setter, scope, init = true
-        function ret(neo){
+        function field( neo ){
             var set;//判定是读方法还是写方法
             if(arguments.length){ //setter
                 neo =  typeof setter === "function" ? setter.apply( scope, arguments ) : neo
                 set = true;
             }else{  //getter
                 if(typeof getter === "function"){
-                    init && $.dependencyChain.begin(ret);//只有computed才在依赖链中暴露自身
-                    if("cache" in ret){
-                        neo = ret.cache;//从缓存中读取,防止递归读取
+                    init && $.dependencyChain.begin( field );//只有computed才在依赖链中暴露自身
+                    if("cache" in field){
+                        neo = field.cache;//从缓存中读取,防止递归读取
                     }else{
-                        neo = getter.call( scope  );
-                        ret.cache = neo;//保存到缓存
+                        neo = getter.call( scope );
+                        field.cache = neo;//保存到缓存
                     }
                     init &&  $.dependencyChain.end()
                 }else{
                     neo = cur
                 }
-                init && $.dependencyChain.collect(ret)//将暴露到依赖链的computed放到自己的通知列表中
+                init && $.dependencyChain.collect( field )//将暴露到依赖链的computed放到自己的通知列表中
                 init = false
             }
             if(cur !== neo ){
                 cur = neo;
-                $.bindings.update(ret);
+                $.bindings.notify( field );
             }
-            return set ? ret : cur
+            return set ? field : cur
         }
         if( isComputed == true){
             getter = old.getter;  setter = old.setter; scope  = old.scope;
-            ret();//必须先执行一次
+            field();//必须先执行一次
         }else{
-            old = validValueType[$.type(old)] ? old : void 0;
+            old = validValueType[ $.type(old) ] ? old : void 0;
             cur = old;//将上一次的传参保存到cur中,ret与它构成闭包
-            ret(old);//必须先执行一次
+            field(old);//必须先执行一次
         }
-        return ret
+        return field
     }
 
     //normalizeJSON及其辅助方法与变量
@@ -227,8 +227,8 @@ $.define("bindings","data,attr,event,fx", function(){
             }
             return  Function("sc", body);
         },
-        update: function(observable){
-            var list = observable.list;
+        notify: function( field ){
+            var list = field.list;
             if($.type(list,"Array") && list.length){
                 var safelist = list.concat(), dispose = false
                 for(var i = 0, el; el = safelist[i++];){
@@ -251,32 +251,35 @@ $.define("bindings","data,attr,event,fx", function(){
     $.applyBindings = $.setBindings = $.bindings.set;
     $.parseBindings = function(node, model){
         var jsonstr = $.normalizeJSON( node.getAttribute("data-bind") );
-        var fn = $.bindings.parse(jsonstr,2);
-        return fn([node,model]);//返回一个对象
+        var fn = $.bindings.parse( jsonstr, 2 );
+        return fn;//返回一个对象
     }
     function applyBindingsToDescendants(){}
-    function associateDataAndUI(node, observable, viewModel, process){
-        var fn = function(){
+    function associateDataAndUI(node, field, viewModel, process, fn){
+        function anonymous(){
             if(!node){
                 return true;//解除绑定
             }
-            process(node, observable, viewModel);
+            process(node, field, viewModel);
         }
-        var list = observable.list ||  (observable.list = [])
-        if ( list.indexOf( fn ) == -1 ){
-            list.push(fn)
+        var list = field.list ||  (field.list = [])
+        if ( list.indexOf( anonymous ) == -1 ){
+            list.push( anonymous )
         }
-        fn();
+        anonymous();
     }
     //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToSelf(node, bindings, viewModel, force){
+    function setBindingsToSelf(node, viewModel, force){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        bindings = bindings || $.parseBindings(node,viewModel)//保存到闭包中
+        var fn =  $.parseBindings( )//保存到闭包中
+        var bindings = fn( node,viewModel)
         for(var key in bindings){
             var process = $.bindingAdapter[key];
             if (typeof process  == "function") {
                 $.log("associateDataAndUI : "+key)
-                associateDataAndUI(node, bindings[key], viewModel, process)
+                //     console.log(process);
+                //    console.log(bindings[key])
+                associateDataAndUI(node, bindings[key], process, viewModel, fn)
             }
         }
         return {}
@@ -290,7 +293,7 @@ $.define("bindings","data,attr,event,fx", function(){
         }
         var shouldApplyBindings = isElement && force  || $.bindings.get(node);
         if (shouldApplyBindings){
-            var c = setBindingsToSelf(node, null, viewModel, force) //.shouldBindDescendants;
+            var c = setBindingsToSelf(node, viewModel, force) //.shouldBindDescendants;
 
         //canBindToDescendants
         }
@@ -301,8 +304,8 @@ $.define("bindings","data,attr,event,fx", function(){
     }
   
     $.bindingAdapter = {
-        text:  function (node, observable) {
-            var val = observable()
+        text: function ( node, field ) {
+            var val = field();
             val = val == null ? "" : val+"";
             if("textContent" in node){//优先考虑标准属性textContent
                 node.textContent = val;
@@ -314,12 +317,43 @@ $.define("bindings","data,attr,event,fx", function(){
                 node.style.display = node.style.display;
             }
         },
-        visible: function(){
-
+        visible: function( node, field ){
+            var val = !!field();
+            node.style.display = val ? "" : "none"
+        },
+        html:  function( node, field ){
+            var val = field();
+            $(node).html(val)
+        },
+        "css": function( node, value ){
+         
+            //  var value = field();
+            if (typeof value == "object") {
+                for (var className in value) {
+                    var shouldHaveClass = value[className];
+                    console.log(shouldHaveClass+"!")
+                    toggleClass(node, className, shouldHaveClass);
+                }
+            } else {
+                value = String(value || ''); // Make sure we don't try to store or set a non-string value
+                toggleClass(node, value, true);
+            }
         }
     }
+    var toggleClass = function (node, className, shouldHaveClass) {
+        var classes = (node.className || "").split(/\s+/);
+        var hasClass = classes.indexOf( className) >= 0;//原className是否有这东西
 
-
+        if (shouldHaveClass && !hasClass) {
+            node.className += (classes[0] ? " " : "") + className;
+        } else if (hasClass && !shouldHaveClass) {
+            var newClassName = "";
+            for (var i = 0; i < classes.length; i++)
+                if (classes[i] != className)
+                    newClassName += classes[i] + " ";
+            node.className = newClassName.trim();
+        }
+    }
 
 
 
