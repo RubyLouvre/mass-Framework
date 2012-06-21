@@ -58,19 +58,19 @@ $.define("bindings","data,attr,event,fx", function(){
                 set = true;
             }else{  //getter
                 if(typeof getter === "function"){
-                   init && $.dependencyChain.begin(ret);//只有computed才在依赖链中暴露自身
+                    init && $.dependencyChain.begin(ret);//只有computed才在依赖链中暴露自身
                     if("cache" in ret){
                         neo = ret.cache;//从缓存中读取,防止递归
                     }else{
                         neo = getter.call( scope  );
                         ret.cache = neo;//保存到缓存
                     }
-                  init &&  $.dependencyChain.end()
+                    init &&  $.dependencyChain.end()
                 }else{
                     neo = cur
                 }
-               init && $.dependencyChain.collect(ret)//将暴露到依赖链的computed放到自己的通知列表中
-               init = false
+                init && $.dependencyChain.collect(ret)//将暴露到依赖链的computed放到自己的通知列表中
+                init = false
             }
             if(cur !== neo ){
                 cur = neo;
@@ -110,7 +110,6 @@ $.define("bindings","data,attr,event,fx", function(){
                 return [];
             if (str.charAt(0) === "{")// 去掉最开始{与最后的}
                 str = str.substring(1, str.length - 1);
-
             // 首先用占位符把字段中的字符串与正则处理掉
             var tokens = [];
             var tokenStart = null, tokenEndChar;
@@ -134,12 +133,10 @@ $.define("bindings","data,attr,event,fx", function(){
                     tokenStart = null;
                 }
             }
-
             // 将{},[],()等括起来的部分全部用占位符代替
-            tokenStart = null;
-            tokenEndChar = null;
+            tokenEndChar = tokenStart = null;
             var tokenDepth = 0, tokenStartChar = null;
-            for (var position = 0; position < str.length; position++) {
+            for (position = 0; position < str.length; position++) {
                 var c = str.charAt(position);
                 if (tokenStart === null) {
                     switch (c) {
@@ -249,37 +246,30 @@ $.define("bindings","data,attr,event,fx", function(){
         return fn([node,model]);//返回一个对象
     }
     function applyBindingsToDescendants(){}
+    function associationUIandData(node, observable, viewModel, updater){
+        var fn = function(){
+            updater(node, observable, viewModel);
+        }
+        var list = observable.list ||  (observable.list = [])
+        if ( list.indexOf( fn ) == -1 ){
+            list.push(fn)
+        }
+        fn()
+    }
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToSelf(node, bindings, viewModel, force){
-        var initPhase = 0;
-        var nodeBind = $.computed(function(){
-            //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-            bindings = bindings || $.parseBindings(node,viewModel)//保存到闭包中
-          
-            if (initPhase === 0) {
-                initPhase = 1;
-                $.log("绑定到node")
-                initPhase = 2;
+        //   var nodeBind = $.computed(function(){
+        //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
+        bindings = bindings || $.parseBindings(node,viewModel)//保存到闭包中
+        $.log(bindings)
+        for(var key in bindings){
+            var adapter = $.bindingAdapter[key];
+            if (adapter && typeof adapter["update"] == "function") {
+                var updater = adapter["update"];//更新UI
+                var observable = bindings[key];
+                associationUIandData(node, observable, viewModel, updater)
             }
-            if (initPhase === 2) {
-                  $.log(bindings)
-                for(var key in bindings){
-                    var adapter = $.bindingAdapter[key];
-                    if (adapter && typeof adapter["update"] == "function") {
-                        var updater = adapter["update"];//更新UI
-                        var observable = bindings[key];
-                        $.log(observable)
-                       // $.dependencyChain.collect(observable);//绑定viewModel与UI
-                        updater(node, observable, viewModel);
-                    }
-                }
-                //var r =
-               // function
-            }
-        },node);
-        return nodeBind
-      //  $.log(nodeBind)
-
+        }
         return {}
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
@@ -291,12 +281,12 @@ $.define("bindings","data,attr,event,fx", function(){
         }
         var shouldApplyBindings = isElement && force  || $.bindings.get(node);
         if (shouldApplyBindings){
-          var c = setBindingsToSelf(node, null, viewModel, force) //.shouldBindDescendants;
+            var c = setBindingsToSelf(node, null, viewModel, force) //.shouldBindDescendants;
 
-          //canBindToDescendants
+        //canBindToDescendants
         }
         if (canBindToDescendants) {
-           // applyBindingsToDescendants(viewModel, node, !isElement);
+        // applyBindingsToDescendants(viewModel, node, !isElement);
         }
         return c
     }

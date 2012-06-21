@@ -1906,7 +1906,6 @@
                         var viewModel = bindingContext['$data'],
                         scopes = (typeof viewModel == 'object' && viewModel != null) ? [viewModel, bindingContext] : [bindingContext];
                         var bindingFunction = createBindingsStringEvaluatorViaCache(bindingsString, scopes.length, this.bindingCache);
-                        console.log(bindingFunction+"")
                         return bindingFunction(scopes);
                     } catch (ex) {
                         throw new Error("Unable to parse bindings.\nMessage: " + ex + ";\nBindings value: " + bindingsString);
@@ -2041,7 +2040,6 @@
                         var evaluatedBindings = (typeof bindings == "function") ? bindings() : bindings;
                         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
                         parsedBindings = evaluatedBindings || ko.bindingProvider['instance']['getBindings'](node, bindingContextInstance);
-                        //  console.log(parsedBindings)
                         if (parsedBindings) {
                             // First run all the inits, so bindings can register for notification on changes
                             if (initPhase === 0) {
@@ -2278,8 +2276,6 @@
                 }
                 var valueUpdateHandler = function() {
                     var modelValue = valueAccessor();
-                    console.log(element)
-                    console.log("elementValue "+modelValue)
                     var elementValue = ko.selectExtensions.readValue(element);//相当于jQuery的$(element).val()
                   
                     ko.jsonExpressionRewriting.writeValueToProperty(modelValue, allBindingsAccessor, 'value', elementValue, /* checkIfDifferent: */ true);
@@ -3164,9 +3160,9 @@
                     var bindingValue = ko.utils.unwrapObservable(valueAccessor());
                     if ((typeof bindingValue != "string") && (!bindingValue['name']) && (element.nodeType == 1 || element.nodeType == 8)) {
                         // It's an anonymous template - store the element contents, then clear the element
-                        var templateNodes = element.nodeType == 1 ? element.childNodes : ko.virtualElements.childNodes(element),
-                        container = ko.utils.moveCleanedNodesToContainerElement(templateNodes); // This also removes the nodes from their current parent
-                        new ko.templateSources.anonymousTemplate(element)['nodes'](container);
+                        var templateNodes = element.nodeType == 1 ? element.childNodes : ko.virtualElements.childNodes(element);
+                        var container = ko.utils.moveCleanedNodesToContainerElement(templateNodes); // This also removes the nodes from their current parent
+                       new ko.templateSources.anonymousTemplate(element)['nodes'](container);
                     }
                     return {
                         'controlsDescendantBindings': true
@@ -3195,6 +3191,7 @@
                         // Render once for each data point (treating data set as empty if shouldDisplay==false)
                         var dataArray = (shouldDisplay && bindingValue['foreach']) || [];
                         templateSubscription = ko.renderTemplateForEach(templateName || element, dataArray, /* options: */ bindingValue, element, bindingContext);
+                        //templateSubscription为一个computed
                     } else {
                         if (shouldDisplay) {
                             // Render once for this single data point (or use the viewModel if no data was provided)
