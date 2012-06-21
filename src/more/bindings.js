@@ -52,7 +52,7 @@ $.define("bindings","data,attr,event,fx", function(){
                 if(typeof getter === "function"){
                     init && $.dependencyChain.begin(ret);//只有computed才在依赖链中暴露自身
                     if("cache" in ret){
-                        neo = ret.cache;//从缓存中读取,防止递归
+                        neo = ret.cache;//从缓存中读取,防止递归读取
                     }else{
                         neo = getter.call( scope  );
                         ret.cache = neo;//保存到缓存
@@ -299,20 +299,26 @@ $.define("bindings","data,attr,event,fx", function(){
         }
         return c
     }
-    $.bindingAdapter = {}
-    $.bindingAdapter["text"] =  function (node, observable) {
-        var val = observable()
-        val = val == null ? "" : val+"";
-        if("textContent" in node){//优先考虑标准属性textContent
-            node.textContent = val;
-        }else{
-            node.innerText = val;
-        }
-        //处理IE9的渲染BUG
-        if (document.documentMode == 9) {
-            node.style.display = node.style.display;
+  
+    $.bindingAdapter = {
+        text:  function (node, observable) {
+            var val = observable()
+            val = val == null ? "" : val+"";
+            if("textContent" in node){//优先考虑标准属性textContent
+                node.textContent = val;
+            }else{
+                node.innerText = val;
+            }
+            //处理IE9的渲染BUG
+            if (document.documentMode == 9) {
+                node.style.display = node.style.display;
+            }
+        },
+        visible: function(){
+
         }
     }
+
 
 
 
