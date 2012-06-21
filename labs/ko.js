@@ -1655,11 +1655,11 @@
                 writeValueToProperty: function(property, allBindingsAccessor, key, value, checkIfDifferent) {
                     if (!property || !ko.isWriteableObservable(property)) {
                         var propWriters = allBindingsAccessor()['_ko_property_writers'];
-//                        propWriters = {
-//                            visible: function (__ko_value) {
-//                                shouldShowMessage = __ko_value;
-//                            }
-//                        }
+                        //                        propWriters = {
+                        //                            visible: function (__ko_value) {
+                        //                                shouldShowMessage = __ko_value;
+                        //                            }
+                        //                        }
                         if (propWriters && propWriters[key])
                             propWriters[key](value);
                     } else if (!checkIfDifferent || property() !== value) {
@@ -2831,7 +2831,7 @@
         ko.templateRewriting = (function () {
             var memoizeDataBindingAttributeSyntaxRegex = /(<[a-z]+\d*(\s+(?!data-bind=)[a-z0-9\-]+(=(\"[^\"]*\"|\'[^\']*\'))?)*\s+)data-bind=(["'])([\s\S]*?)\5/gi;
             var memoizeVirtualContainerBindingSyntaxRegex = /<!--\s*ko\b\s*([\s\S]*?)\s*-->/g;
-
+            //将数据隐藏亦成一个对象数组，检测对象中的key的值
             function validateDataBindValuesForRewriting(keyValueArray) {
                 var allValidators = ko.jsonExpressionRewriting.bindingRewriteValidators;
                 for (var i = 0; i < keyValueArray.length; i++) {
