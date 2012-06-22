@@ -65,11 +65,13 @@ $.define("support", function(){
     //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
     select.disabled = true;
     support.optDisabled = !opt.disabled;
+    var clickFn
     if ( !div.addEventListener && div.attachEvent && div.fireEvent ) {
-        div.attachEvent("onclick", function () {
+        div.attachEvent("onclick", clickFn = function () {
             support.cloneNode = false;//w3c的节点复制是不复制事件的
         });
         div.cloneNode(true).fireEvent("onclick");
+        div.detachEvent( "onclick", clickFn );
     }
     var table = div[TAGS]("table")[0]
     try{//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
