@@ -416,4 +416,5 @@ $.define("attr","support,node", function( support ){
 2011.10.21 FIX valAdapter["select:set"] BUG
 2011.10.22 FIX boolaAdapter.set方法
 2011.10.27 对prop attr val大重构
+2012.6.23 attr在value为false, null, undefined时进行删除特性操作
 */
