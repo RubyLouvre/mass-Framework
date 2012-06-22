@@ -6,19 +6,15 @@
 
 
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
-        <!--<script type="text/javascript" src="ko.js" charset="UTF-8"></script>-->
+        <script type="text/javascript" src="ko.js" charset="UTF-8"></script>
 
         <script>
 
 
             $.require("ready,more/avalon", function(){
-                $.applyBindings({
-                    people: [
-                        { firstName: 'Bert', lastName: 'Bertington' },
-                        { firstName: 'Charles', lastName: 'Charlesforth',$index:7 },
-                        { firstName: 'Denise', lastName: 'Dentiste' }
-                    ],
-                    sex : "先生"
+                $.applyBindings( {
+                    canEdit : $.observable(true),
+                    cellphoneNumber: ""
                 });
             })
         </script>
@@ -35,19 +31,13 @@
 
     </head>
     <body>
-        <table border="1">
-            <thead>
-                <tr><th>编号</th><th>First name</th><th>Last name</th><th>姓别</th></tr>
-            </thead>
-            <tbody data-bind="foreach: people as item">
-                <tr>
-                    <td data-bind="text: $index"></td>
-                    <td data-bind="text: item.firstName"></td>
-                    <td data-bind="text: lastName"></td>
-                    <td data-bind="text: $parent.sex"></td>
-                </tr>
-            </tbody>
-        </table>
+        <p>
+            <input type='checkbox' data-bind="checked: canEdit" />
+            通过复选框控制下面文本域的编辑状态
+        </p>
+        <p>
+           <input type='text' data-bind="value: cellphoneNumber, enable: canEdit" />
+        </p>
 
     </body>
 </html>

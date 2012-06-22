@@ -282,16 +282,22 @@ $.define("avalon","data,attr,event,fx", function(){
         return fn;//返回一个对象
     }
 
-    function associateDataAndUI(scopes, field, process, getBindings, key){
+    function associateDataAndUI(node, viewModel, extra, field, key, getBindings){
         function symptom(){//这是依赖链的末梢,通过process操作节点
-            if(!scopes[0]){
+            if(!node){
                 return true;//解除绑定
             }
             if(typeof field !== "function"){
-                var bindings = getBindings( scopes );
+                var bindings = getBindings( arguments );
                 field = bindings["@mass_fields"][key]
             }
-            process(scopes[0], field, scopes[1], scopes[2] );
+            var adapter = $.bindingAdapter[key];
+            var args = [ node, field, viewModel, extra];
+            if(adapter.init && !symptom.init){
+                adapter.init.apply(adapter, args);
+                symptom.init = 1;
+            }
+            adapter.update.apply(adapter, args);
         }
         symptom();
         var pubblico = $.dependencyChain.pubblico = []
@@ -310,9 +316,8 @@ $.define("avalon","data,attr,event,fx", function(){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         console.log("setBindingsToElement")
         extra = extra || {}
-        var scopes = [node,viewModel, extra]
         var getBindings =  $.parseBindings( node, extra )//保存到闭包中
-        var bindings = getBindings( scopes );
+        var bindings = getBindings( arguments );
         var continueBindings = true;
         for(var key in bindings){
             var adapter = $.bindingAdapter[key];
@@ -321,7 +326,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     continueBindings = false;
                 }
                 $.log("associateDataAndUI : "+key)
-                associateDataAndUI(scopes, bindings[key], adapter.init, getBindings, key)
+                associateDataAndUI( node, viewModel, extra, bindings[key], key, getBindings)
             }
         }
         return continueBindings;
@@ -350,31 +355,36 @@ $.define("avalon","data,attr,event,fx", function(){
   
     $.bindingAdapter = {
         text: {
-            init:function ( node, field ) {
+            update:function ( node, field ) {
                 var val = field();
                 val = val == null ? "" : val+"";
                 $(node).text(val)
             }
         },
         visible: {
-            init:function( node, field ){
+            update:function( node, field ){
                 var val = !!field();
                 node.style.display = val ? "" : "none"
             }
         },
-        visible: function( node, field ){
-            var val = !!field();
-            node.style.display = val ? "" : "none"
+        enable: {
+            'update': function (node, field) {
+                var value = field()
+                if (value && node.disabled)
+                    node.removeAttribute("disabled");
+                else if ((!value) && (!node.disabled))
+                    node.disabled = true;
+            }
         },
         html: {
-            init: function( node, field ){
+            update: function( node, field ){
                 var val = field();
                 $(node).html( val )
             },
             stopBindings: true
         },
         "class":{
-            init:function( node, field ){
+            update:function( node, field ){
                 var val = field();
                 if (typeof value == "object") {
                     for (var className in val) {
@@ -390,7 +400,7 @@ $.define("avalon","data,attr,event,fx", function(){
         // { text-decoration: someValue }
         // { color: currentProfit() < 0 ? 'red' : 'black' }
         style: {
-            init:function(node, field){
+            update:function(node, field){
                 var val = field(), style = node.style, styleName
                 for (var name in val) {
                     if (typeof style == "string") {
@@ -401,7 +411,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
         attr: {
-            init:function(node, field){
+            update:function(node, field){
                 var val = field();
                 for (var name in val) {
                     $.attr(node, name, val[ name ] )
@@ -409,15 +419,27 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
         prop: {
-            init:function(node, field){
+            update:function(node, field){
                 var val = field();
                 for (var name in val) {
                     $.prop(node, name, val[ name ] )
                 }
             }
         },
+        checked: {
+            init: function(node, field){
+                $(node).bind("change",function(){
+                    field(node.checked);
+                    console.log(field());
+                    console.log("================")
+                });
+            },
+            update:function(node, field){
+                node.checked = !!field()
+            }
+        },
         foreach: {
-            init:function(node, field, viewModel, more ){
+            update:function(node, field, viewModel, more ){
                 var val = field()
                 var frag = node.ownerDocument.createDocumentFragment(),
                 el;
@@ -448,6 +470,13 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             },
             stopBindings: true
+        }
+    }
+    $.bindingAdapter.disable = {
+        update: function( node, field){
+            $.bindingAdapter.enable(node, function(){
+                return !field
+            })
         }
     }
     var getChildren = function(node){
