@@ -229,8 +229,8 @@ $.define("avalon","data,attr,event,fx", function(){
         //为一个Binding Target(节点)绑定Binding Source(viewModel)
         setBindings: function(source, node){
             node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
-            //开始在其自身与后代中绑定
-            return setBindingsToElementAndDescendants(node, source);
+            //开始在其自身与孩子中绑定
+            return setBindingsToElementAndChildren(node, source);
         },
         //取得节点的数据隐藏
         hasBindings: function(node){
@@ -272,7 +272,7 @@ $.define("avalon","data,attr,event,fx", function(){
         var fn = $.avalon.parse( jsonstr, 2 );
         return fn;//返回一个对象
     }
-  //  function applyBindingsToDescendants(){}
+    //  function applyBindingsToDescendants(){}
     function associateDataAndUI(node, field, process, viewModel, getBindings, key){
         function symptom(){
             if(!node){
@@ -318,23 +318,24 @@ $.define("avalon","data,attr,event,fx", function(){
         return continueBindings;
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToElementAndDescendants( node, source ){
-        if ( node.nodeType === 1    ){
+    function setBindingsToElementAndChildren( node, source ){
+        if ( node.nodeType === 1  ){
             var continueBindings = true;
-            $.log("setBindingsToElementAndDescendants");
+          //  $.log("setBindingsToElementAndChildren");
             if( $.avalon.hasBindings( node ) ){
-                 continueBindings = setBindingsToElement(node, source ) //.shouldBindDescendants;
+                continueBindings = setBindingsToElement(node, source ) //.shouldBindDescendants;
             }
             if( continueBindings ){
-                setBindingsToDescendants( node.childNodes, source )
+                var elems = getChildren(node)
+                elems.length && setBindingsToChildren( elems, source )
             }
         }
        
     }
-    function setBindingsToDescendants(nodes, source){
-        $.log("setBindingsToDescendants")
-        for(var i = 0, n = nodes.length; i < n ; i++){
-            setBindingsToElementAndDescendants( nodes[i], source )
+    function setBindingsToChildren(elems, source){
+        $.log("setBindingsToChildren")
+        for(var i = 0, n = elems.length; i < n ; i++){
+            setBindingsToElementAndChildren( elems[i], source )
         }
     }
   
@@ -420,12 +421,24 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
                 for(i = 0; frag = frags[i];i++){
                     val[i].$index = i
-                   setBindingsToDescendants(frag.childNodes, val[i])
-                    node.appendChild(frag)
+                    var elems = getChildren(frag)
+                    node.appendChild(frag);
+                    if(elems.length){
+                        setBindingsToChildren(elems, val[i])
+                    }
                 }
             },
             stopBindings: true
         }
+    }
+    var getChildren = function(node){
+        var elems = [] ,ri = 0
+        for (node = node.firstChild; node; node = node.nextSibling){
+            if (node.nodeType === 1){
+                elems[ri++] = node;
+            }
+        }
+        return elems;
     }
     // var b
     $.bindingAdapter["css"] = $.bindingAdapter["css"]
