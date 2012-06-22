@@ -48,19 +48,19 @@ $.define("avalon","data,attr,event,fx", function(){
     }
 
     $.observable = function(old, isComputed){
-        var cur, getter, setter, scope, init = true
+        var cur, init = true
         function field( neo ){
-            var set;//判定是读方法还是写方法
+            var set, scope = field.scope//判定是读方法还是写方法
             if(arguments.length){ //setter
-                neo =  typeof setter === "function" ? setter.apply( scope, arguments ) : neo
+                neo =  typeof field.setter === "function" ? field.setter.apply( scope, arguments ) : neo
                 set = true;
             }else{  //getter
-                if(typeof getter === "function"){
+                if(typeof field.getter === "function"){
                     init && $.dependencyChain.begin( field );//只有computed才在依赖链中暴露自身
                     if("cache" in field){
                         neo = field.cache;//从缓存中读取,防止递归读取
                     }else{
-                        neo = getter.call( scope );
+                        neo = field.getter.call( scope );
                         field.cache = neo;//保存到缓存
                     }
                     init &&  $.dependencyChain.end()
@@ -78,7 +78,9 @@ $.define("avalon","data,attr,event,fx", function(){
             return set ? field : cur
         }
         if( isComputed == true){
-            getter = old.getter;  setter = old.setter; scope  = old.scope;
+            for(var name  in old){
+                field[ name ] = old[ name ]
+            }
             field();//必须先执行一次
         }else{
             old = validValueType[ $.type(old) ] ? old : void 0;
@@ -288,8 +290,9 @@ $.define("avalon","data,attr,event,fx", function(){
                 return true;//解除绑定
             }
             if(typeof field !== "function"){
+                $.log("每次都生成")
                 var bindings = getBindings( arguments );
-                field = bindings["@mass_fields"][key]
+                field = bindings["@mass_fields"][key];
             }
             var adapter = $.bindingAdapter[key];
             var args = [ node, field, viewModel, extra];
@@ -297,11 +300,11 @@ $.define("avalon","data,attr,event,fx", function(){
                 adapter.init.apply(adapter, args);
                 symptom.init = 1;
             }
-            adapter.update.apply(adapter, args);
+            adapter.update && adapter.update.apply(adapter, args);
         }
         symptom();
-        var pubblico = $.dependencyChain.pubblico = []
-        field();//取得其依赖,方便one way绑定
+        var pubblico = $.dependencyChain.pubblico = [];//现在取得依赖的方法不太赖,总得执行一次
+        field.call(viewModel);//取得其依赖,方便one way绑定
         $.dependencyChain.pubblico = [];
         for(var i = 0, el; el = pubblico[i++];){
             var list = el.list ||  (el.list = [])
@@ -335,7 +338,6 @@ $.define("avalon","data,attr,event,fx", function(){
     function setBindingsToElementAndChildren( node, source, extra ){
         if ( node.nodeType === 1  ){
             var continueBindings = true;
-            //  $.log("setBindingsToElementAndChildren");
             if( $.avalon.hasBindings( node ) ){
                 continueBindings = setBindingsToElement(node, source, extra ) //.shouldBindDescendants;
             }
@@ -426,12 +428,17 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }
         },
+        click: {
+            init: function(node, field, viewModel){
+                $(node).bind("click",function(e){
+                   field.call( viewModel, e )
+                });
+            }
+        },
         checked: {
             init: function(node, field){
                 $(node).bind("change",function(){
                     field(node.checked);
-                    console.log(field());
-                    console.log("================")
                 });
             },
             update:function(node, field){

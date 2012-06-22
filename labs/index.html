@@ -12,9 +12,13 @@
 
 
             $.require("ready,more/avalon", function(){
-                $.applyBindings( {
-                    canEdit : $.observable(true),
-                    cellphoneNumber: ""
+                $.applyBindings(  {
+                    numberOfClicks : $.observable(0),
+                    incrementClickCounter : function(e) {
+                        $.log(e)
+                        var previousCount = this.numberOfClicks();//注意这里的this指向viewModel
+                        this.numberOfClicks(previousCount + 1);
+                    }
                 });
             })
         </script>
@@ -31,13 +35,9 @@
 
     </head>
     <body>
-        <p>
-            <input type='checkbox' data-bind="checked: canEdit" />
-            通过复选框控制下面文本域的编辑状态
-        </p>
-        <p>
-           <input type='text' data-bind="value: cellphoneNumber, enable: canEdit" />
-        </p>
-
+        <div>
+            You've clicked <span data-bind="text: numberOfClicks"></span> times
+            <button data-bind="click: incrementClickCounter">Click me</button>
+        </div>
     </body>
 </html>
