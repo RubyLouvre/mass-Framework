@@ -1,5 +1,5 @@
 
-$.define("bindings","data,attr,event,fx", function(){
+$.define("avalon","data,attr,event,fx", function(){
     //1看这里，许多BUG没有修https://github.com/SteveSanderson/knockout/issues?page=1&state=open
     //2里面大量使用闭包，有时多达七八层，性能感觉不会很好
     //3with的使用会与ecma262的严格模式冲突
@@ -72,7 +72,7 @@ $.define("bindings","data,attr,event,fx", function(){
             }
             if(cur !== neo ){
                 cur = neo;
-                $.bindings.notify( field );
+                $.avalon.notify( field );
             }
             return set ? field : cur
         }
@@ -225,20 +225,17 @@ $.define("bindings","data,attr,event,fx", function(){
         }
     }();
     
-    var specialElements = $.oneObject("OL,UL");
-    $.bindings = {
-        //为一个节点绑定viewModel
-        set: function(model, node){
-            if (node && (node.nodeType !== 1) && (node.nodeType !== 8))
-                throw new Error("只能帮定元素节点与注释节点上");
+    $.avalon = {
+        //为一个Binding Target(节点)绑定Binding Source(viewModel)
+        setBindings: function(source, node){
             node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
             //开始在其自身与后代中绑定
-            console.log(node);
-            return setBindingsToSelfAndDescendants(node, model, true);
+            return setBindingsToElementAndDescendants(node, source);
         },
         //取得节点的数据隐藏
-        get: function(node){
-            return node.getAttribute("data-bind")
+        hasBindings: function(node){
+            var str = node.getAttribute("data-bind");
+            return typeof str === "string" && str.indexOf(":") > 1
         },
         //转换数据隐藏为一个函数;;;相当于ko的buildEvalWithinScopeFunction
         parse: function(expression, level){
@@ -269,13 +266,13 @@ $.define("bindings","data,attr,event,fx", function(){
         }
     }
     //MVVM三大入口函数之一
-    $.applyBindings = $.setBindings = $.bindings.set;
+    $.applyBindings = $.setBindings = $.avalon.setBindings;
     $.parseBindings = function(node){
         var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true );
-        var fn = $.bindings.parse( jsonstr, 2 );
+        var fn = $.avalon.parse( jsonstr, 2 );
         return fn;//返回一个对象
     }
-    function applyBindingsToDescendants(){}
+  //  function applyBindingsToDescendants(){}
     function associateDataAndUI(node, field, process, viewModel, getBindings, key){
         function symptom(){
             if(!node){
@@ -300,104 +297,137 @@ $.define("bindings","data,attr,event,fx", function(){
       
 
     }
+
     //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToSelf(node, viewModel, force){
+    function setBindingsToElement(node, viewModel, force){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        console.log("setBindingsToSelf")
+        console.log("setBindingsToElement")
         var getBindings =  $.parseBindings( node)//保存到闭包中
-        var bindings = getBindings( [node,viewModel] )
+        var bindings = getBindings( [node,viewModel] );
+        var continueBindings = true;
         for(var key in bindings){
-            var process = $.bindingAdapter[key];
-            if (typeof process  == "function") {
+            var adapter = $.bindingAdapter[key];
+            if( adapter ){
+                if(adapter.stopBindings){
+                    continueBindings = false;
+                }
                 $.log("associateDataAndUI : "+key)
-                associateDataAndUI(node, bindings[key], process, viewModel, getBindings, key)
+                associateDataAndUI(node, bindings[key], adapter.init, viewModel, getBindings, key)
             }
         }
-        return {}
+        return continueBindings;
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToSelfAndDescendants( node,viewModel, force){
-        var canBindToDescendants = true;
-        var isElement = (node.nodeType === 1);
-        if (isElement && specialElements[node.nodeName]) {
-        //  virtualElements.normaliseStructure(node);//修正元素节点的内容结构
+    function setBindingsToElementAndDescendants( node, source ){
+        if ( node.nodeType === 1    ){
+            var continueBindings = true;
+            $.log("setBindingsToElementAndDescendants");
+            if( $.avalon.hasBindings( node ) ){
+                 continueBindings = setBindingsToElement(node, source ) //.shouldBindDescendants;
+            }
+            if( continueBindings ){
+                setBindingsToDescendants( node.childNodes, source )
+            }
         }
-        console.log(node)
-        var shouldApplyBindings = isElement && force  || $.bindings.get(node);
-        if (shouldApplyBindings){
-            console.log("setBindingsToSelfAndDescendants")
-            setBindingsToSelf(node, viewModel, force) //.shouldBindDescendants;
-        //canBindToDescendants
-        }
-        if (canBindToDescendants) {
-    // applyBindingsToDescendants(viewModel, node, !isElement);
+       
     }
+    function setBindingsToDescendants(nodes, source){
+        $.log("setBindingsToDescendants")
+        for(var i = 0, n = nodes.length; i < n ; i++){
+            setBindingsToElementAndDescendants( nodes[i], source )
+        }
     }
   
     $.bindingAdapter = {
-        text: function ( node, field ) {
-            var val = field();
-            val = val == null ? "" : val+"";
-            $(node).text(val)
+        text: {
+            init:function ( node, field ) {
+                var val = field();
+                val = val == null ? "" : val+"";
+                $(node).text(val)
+            }
+        },
+        visible: {
+            init:function( node, field ){
+                var val = !!field();
+                node.style.display = val ? "" : "none"
+            }
         },
         visible: function( node, field ){
             var val = !!field();
             node.style.display = val ? "" : "none"
         },
-        html:  function( node, field ){
-            var val = field();
-            $(node).html( val )
+        html: {
+            init: function( node, field ){
+                var val = field();
+                $(node).html( val )
+            },
+            stopBindings: true
         },
-        "class": function( node, field ){
-            var val = field();
-            if (typeof value == "object") {
-                for (var className in val) {
-                    var shouldHaveClass = val[className];
-                    toggleClass(node, className, shouldHaveClass);
+        "class":{
+            init:function( node, field ){
+                var val = field();
+                if (typeof value == "object") {
+                    for (var className in val) {
+                        var shouldHaveClass = val[className];
+                        toggleClass(node, className, shouldHaveClass);
+                    }
+                } else {
+                    val = String(val || ''); // Make sure we don't try to store or set a non-string value
+                    toggleClass(node, val, true);
                 }
-            } else {
-                val = String(val || ''); // Make sure we don't try to store or set a non-string value
-                toggleClass(node, val, true);
             }
-        },
+        } ,
         // { text-decoration: someValue }
         // { color: currentProfit() < 0 ? 'red' : 'black' }
-        style: function(node, field){
-            var val = field(), style = node.style, styleName
-            for (var name in val) {
-                if (typeof style == "string") {
-                    styleName = $.cssName(name, style) || name
-                    node.style[styleName] = val[ name ] || ""; 
+        style: {
+            init:function(node, field){
+                var val = field(), style = node.style, styleName
+                for (var name in val) {
+                    if (typeof style == "string") {
+                        styleName = $.cssName(name, style) || name
+                        node.style[styleName] = val[ name ] || "";
+                    }
                 }
             }
         },
-        attr: function(node, field){
-            var val = field();
-            for (var name in val) {
-                $.attr(node, name, val[ name ] )
+        attr: {
+            init:function(node, field){
+                var val = field();
+                for (var name in val) {
+                    $.attr(node, name, val[ name ] )
+                }
             }
         },
-        prop: function(node, field){
-            var val = field();
-            for (var name in val) {
-                $.prop(node, name, val[ name ] )
+        prop: {
+            init:function(node, field){
+                var val = field();
+                for (var name in val) {
+                    $.prop(node, name, val[ name ] )
+                }
             }
         },
-        foreach: function(node,field){
-            var val = field()
-            var frag = document.createDocumentFragment(), first
-            while(first = node.firstChild){
-                frag.appendChild(first)
-            }
-            console.log(frag)
-            for(var i = 0, n = val.length ; i < n ; i++){
-                node.appendChild( frag.cloneNode(true))
-             
-            }
-
-
+        foreach: {
+            init:function(node, field){
+                var val = field()
+                var frag = node.ownerDocument.createDocumentFragment(),
+                el;
+                while(el = node.firstChild){
+                    frag.appendChild(el)
+                }
+                var frags = [frag];//防止对fragment二次复制,引发safari的BUG
+                for(var i = 0, n = val.length - 1 ; i < n ; i++){
+                    frags[frags.length] = frag.cloneNode(true)
+                }
+                for(i = 0; frag = frags[i];i++){
+                    val[i].$index = i
+                   setBindingsToDescendants(frag.childNodes, val[i])
+                    node.appendChild(frag)
+                }
+            },
+            stopBindings: true
         }
     }
+    // var b
     $.bindingAdapter["css"] = $.bindingAdapter["css"]
     var toggleClass = function (node, className, shouldHaveClass) {
         var classes = (node.className || "").split(/\s+/);
@@ -415,147 +445,6 @@ $.define("bindings","data,attr,event,fx", function(){
 
 });
 
-    //http://tunein.yap.tv/javascript/2012/06/11/javascript-frameworks-and-data-binding/
+//http://tunein.yap.tv/javascript/2012/06/11/javascript-frameworks-and-data-binding/
 
-    //$.define("mvvm",function(){
-    //    var data_name = "data-bind";
-    //    var OptionallyClosingChildren = $.oneObject("UL,OL");
-    //
-    //    //IE9的注释节点的nodeValue若是条件注释就不正确了
-    //    var commentNodesHaveTextProperty = document.createComment("test").text === "<!--test-->";
-    //
-    //    var startCommentRegex = commentNodesHaveTextProperty ? /^<!--\s*ko\s+(.*\:.*)\s*-->$/ : /^\s*ko\s+(.*\:.*)\s*$/;
-    //    var endCommentRegex =   commentNodesHaveTextProperty ? /^<!--\s*\/ko\s*-->$/ : /^\s*\/ko\s*$/;
-    //    //若返回一个数组，里面是其内容
-    //    function isStartComment(node) {
-    //        return (node.nodeType == 8) && (commentNodesHaveTextProperty ? node.text : node.nodeValue).match(startCommentRegex);
-    //    }
-    //
-    //    function isEndComment(node) {
-    //        return (node.nodeType == 8) && (commentNodesHaveTextProperty ? node.text : node.nodeValue).match(endCommentRegex);
-    //    }
-    //    function getVirtualChildren(startComment, allowUnbalanced) {
-    //        var currentNode = startComment;
-    //        var depth = 1;
-    //        var children = [];
-    //        while (currentNode = currentNode.nextSibling) {
-    //            if (isEndComment(currentNode)) {
-    //                depth--;
-    //                if (depth === 0)
-    //                    return children;
-    //            }
-    //
-    //            children.push(currentNode);
-    //
-    //            if (isStartComment(currentNode))
-    //                depth++;
-    //        }
-    //        if (!allowUnbalanced)
-    //            throw new Error("Cannot find closing comment tag to match: " + startComment.nodeValue);
-    //        return null;
-    //    }
-    //    function getMatchingEndComment(startComment, allowUnbalanced) {
-    //        var allVirtualChildren = getVirtualChildren(startComment, allowUnbalanced);
-    //        if (allVirtualChildren) {
-    //            if (allVirtualChildren.length > 0)
-    //                return allVirtualChildren[allVirtualChildren.length - 1].nextSibling;
-    //            return startComment.nextSibling;
-    //        } else
-    //            return null; // Must have no matching end comment, and allowUnbalanced is true
-    //    }
-    //    //对得不对称的标签
-    //    function getUnbalancedChildTags(node) {
-    //        // e.g., from <div>OK</div><!-- ko blah --><span>Another</span>, returns: <!-- ko blah --><span>Another</span>
-    //        //       from <div>OK</div><!-- /ko --><!-- /ko -->,             returns: <!-- /ko --><!-- /ko -->
-    //        var childNode = node.firstChild, captureRemaining = null;
-    //        if (childNode) {
-    //            do {
-    //                if (captureRemaining)                   // We already hit an unbalanced node and are now just scooping up all subsequent nodes
-    //                    captureRemaining.push(childNode);
-    //                else if (isStartComment(childNode)) {
-    //                    var matchingEndComment = getMatchingEndComment(childNode, /* allowUnbalanced: */ true);
-    //                    if (matchingEndComment)             // It's a balanced tag, so skip immediately to the end of this virtual set
-    //                        childNode = matchingEndComment;
-    //                    else
-    //                        captureRemaining = [childNode]; // It's unbalanced, so start capturing from this point
-    //                } else if (isEndComment(childNode)) {
-    //                    captureRemaining = [childNode];     // It's unbalanced (if it wasn't, we'd have skipped over it already), so start capturing
-    //                }
-    //            } while (childNode = childNode.nextSibling);
-    //        }
-    //        return captureRemaining;
-    //    }
-    //    var virtualElements = {
-    //        getBindings: function(node){
-    //            var regexMatch = isStartComment(node);
-    //            return regexMatch ? regexMatch[1] : null;
-    //        },
-    //        normaliseStructure: function(node) {
-    //            // Workaround for https://github.com/SteveSanderson/knockout/issues/155
-    //            /*
-    //<ul>
-    //    <li><strong>Here is a static header item</strong></li>
-    //    <!-- ko foreach: products -->
-    //    <li>
-    //        <em data-bind="text: name"></em>
-    //        <!-- ko if: manufacturer -->
-    //            &mdash; made by <span data-bind="text: manufacturer.company"></span>
-    //        <!-- /ko -->
-    //    </li>
-    //    <!-- /ko -->
-    //</ul>
-    //有序列表与无序列表会在IE678与IE9的怪异模式下变成这样
-    //<UL>
-    //     <LI><STRONG>Here is a static header item</STRONG>
-    //     <!-- ko foreach: products -->
-    //     <LI>
-    //          <EM data-bind="text: name"></EM>
-    //          <!-- ko if: manufacturer -->
-    //                &mdash;  made by <SPAN data-bind="text: manufacturer.company"></SPAN>
-    //          <!-- /ko -->
-    //      <!-- /ko -->
-    //     </LI>
-    //</UL>
-    //*/
-    //            if (!OptionallyClosingChildren[node.nodeName])
-    //                return;
-    //            var childNode = node.firstChild;
-    //            if (childNode) {
-    //                do {
-    //                    if (childNode.nodeType === 1) {//逐个li元素进行处理
-    //                        var unbalancedTags = getUnbalancedChildTags(childNode);
-    //                        if (unbalancedTags) {
-    //                            // Fix up the DOM by moving the unbalanced tags to where they most likely were intended to be placed - *after* the child
-    //                            var nodeToInsertBefore = childNode.nextSibling;
-    //                            for (var i = 0; i < unbalancedTags.length; i++) {
-    //                                if (nodeToInsertBefore)
-    //                                    node.insertBefore(unbalancedTags[i], nodeToInsertBefore);
-    //                                else
-    //                                    node.appendChild(unbalancedTags[i]);
-    //                            }
-    //                        }
-    //                    }
-    //                } while (childNode = childNode.nextSibling);
-    //            }
-    //        }
-    //    }
-    //
-
-
-    //    });
-    //    //创建一个出来,方便使用其原型方法
-    //    bindingProvider['instance'] = new bindingProvider();
-    //
-    //    var bindingContext = function(dataItem, context) {
-    //        if (context) {
-    //            $.mix(this, context); // Inherit $root and any custom properties
-    //            this['$parentContext'] = context;
-    //            this['$parent'] = context['$data'];
-    //            this['$parents'] = (context['$parents'] || []).slice(0);
-    //            this['$parents'].unshift(this['$parent']);
-    //        } else {
-    //            this['$parents'] = [];
-    //            this['$root'] = dataItem;
-    //        }
-    //        this['$data'] = dataItem;
- 
+   
