@@ -24,7 +24,12 @@ $.define("bindings","data,attr,event,fx", function(){
                         return;
                     self.list.push(fn);
                 }
+            },
+            pubblico : [],
+            put: function(fn){
+                this.pubblico.push(fn)
             }
+
         };
     })();
 
@@ -62,6 +67,7 @@ $.define("bindings","data,attr,event,fx", function(){
                     neo = cur
                 }
                 init && $.dependencyChain.collect( field )//将暴露到依赖链的computed放到自己的通知列表中
+                $.dependencyChain.put( field )
                 init = false
             }
             if(cur !== neo ){
@@ -186,34 +192,49 @@ $.define("bindings","data,attr,event,fx", function(){
                     return "'" + trimmedKey + "'";
             }
         }
-
-        $.normalizeJSON = function (json) {//对键名添加引号，以便安全通过编译
-            var keyValueArray = parseObjectLiteral(json),resultStrings = [] ,keyValueEntry;
+        // var e =  $.normalizeJSON("{aaa:111,bbb:{ccc:333, class:'xxx', eee:{ddd:444}}}");
+        // console.log(e)
+        $.normalizeJSON = function (json, insertFields) {//对键名添加引号，以便安全通过编译
+            var keyValueArray = parseObjectLiteral(json),resultStrings = [] ,keyValueEntry, propertyToHook = [];
             for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
                 if (resultStrings.length > 0)
                     resultStrings.push(",");
                 if (keyValueEntry['key']) {
-                    var quotedKey = ensureQuoted(keyValueEntry['key']), val = keyValueEntry['value'];
+                    var key = keyValueEntry['key'].trim();
+                    var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
                     resultStrings.push(quotedKey);
                     resultStrings.push(":");
+                    if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
+                        val = $.normalizeJSON( val );//逐层加引号
+                    }
                     resultStrings.push(val);
+                    if(insertFields == true){
+                        if (propertyToHook.length > 0)
+                            propertyToHook.push(", ");
+                        propertyToHook.push(quotedKey + " : function() { return " + val + " }")
+                    }
                 } else if (keyValueEntry['unknown']) {
                     resultStrings.push(keyValueEntry['unknown']);
                 }
             }
-            return "{" +resultStrings.join("") +"}";
+            resultStrings = resultStrings.join("");
+            if(insertFields == true){
+                resultStrings += ' , "@mass_fields": {'+ propertyToHook.join("") + '}'
+            }
+            return "{" +resultStrings +"}";
         }
     }();
     
     var specialElements = $.oneObject("OL,UL");
     $.bindings = {
         //为一个节点绑定viewModel
-        set: function(data, node){
+        set: function(model, node){
             if (node && (node.nodeType !== 1) && (node.nodeType !== 8))
                 throw new Error("只能帮定元素节点与注释节点上");
             node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
             //开始在其自身与后代中绑定
-            return setBindingsToSelfAndDescendants(data, node, true);
+            console.log(node);
+            return setBindingsToSelfAndDescendants(node, model, true);
         },
         //取得节点的数据隐藏
         get: function(node){
@@ -249,73 +270,75 @@ $.define("bindings","data,attr,event,fx", function(){
     }
     //MVVM三大入口函数之一
     $.applyBindings = $.setBindings = $.bindings.set;
-    $.parseBindings = function(node, model){
-        var jsonstr = $.normalizeJSON( node.getAttribute("data-bind") );
+    $.parseBindings = function(node){
+        var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true );
         var fn = $.bindings.parse( jsonstr, 2 );
         return fn;//返回一个对象
     }
     function applyBindingsToDescendants(){}
-    function associateDataAndUI(node, field, viewModel, process, fn){
-        function anonymous(){
+    function associateDataAndUI(node, field, process, viewModel, getBindings, key){
+        function symptom(){
             if(!node){
                 return true;//解除绑定
             }
+            if(typeof value !== "function"){
+                var bindings = getBindings([ node, viewModel ]);
+                field = bindings["@mass_fields"][key]
+            }
             process(node, field, viewModel);
         }
-        var list = field.list ||  (field.list = [])
-        if ( list.indexOf( anonymous ) == -1 ){
-            list.push( anonymous )
+        symptom();
+        var pubblico = $.dependencyChain.pubblico = []
+        field();
+        $.dependencyChain.pubblico = [];
+        for(var i = 0, el; el = pubblico[i++];){
+            var list = el.list ||  (el.list = [])
+            if ( list.indexOf( symptom ) == -1 ){
+                list.push( symptom )
+            }
         }
-        anonymous();
+      
+
     }
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToSelf(node, viewModel, force){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        var fn =  $.parseBindings( )//保存到闭包中
-        var bindings = fn( node,viewModel)
+        console.log("setBindingsToSelf")
+        var getBindings =  $.parseBindings( node)//保存到闭包中
+        var bindings = getBindings( [node,viewModel] )
         for(var key in bindings){
             var process = $.bindingAdapter[key];
             if (typeof process  == "function") {
                 $.log("associateDataAndUI : "+key)
-                //     console.log(process);
-                //    console.log(bindings[key])
-                associateDataAndUI(node, bindings[key], process, viewModel, fn)
+                associateDataAndUI(node, bindings[key], process, viewModel, getBindings, key)
             }
         }
         return {}
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToSelfAndDescendants(viewModel, node, force){
+    function setBindingsToSelfAndDescendants( node,viewModel, force){
         var canBindToDescendants = true;
         var isElement = (node.nodeType === 1);
         if (isElement && specialElements[node.nodeName]) {
         //  virtualElements.normaliseStructure(node);//修正元素节点的内容结构
         }
+        console.log(node)
         var shouldApplyBindings = isElement && force  || $.bindings.get(node);
         if (shouldApplyBindings){
-            var c = setBindingsToSelf(node, viewModel, force) //.shouldBindDescendants;
-
+            console.log("setBindingsToSelfAndDescendants")
+            setBindingsToSelf(node, viewModel, force) //.shouldBindDescendants;
         //canBindToDescendants
         }
         if (canBindToDescendants) {
-        // applyBindingsToDescendants(viewModel, node, !isElement);
-        }
-        return c
+    // applyBindingsToDescendants(viewModel, node, !isElement);
+    }
     }
   
     $.bindingAdapter = {
         text: function ( node, field ) {
             var val = field();
             val = val == null ? "" : val+"";
-            if("textContent" in node){//优先考虑标准属性textContent
-                node.textContent = val;
-            }else{
-                node.innerText = val;
-            }
-            //处理IE9的渲染BUG
-            if (document.documentMode == 9) {
-                node.style.display = node.style.display;
-            }
+            $(node).text(val)
         },
         visible: function( node, field ){
             var val = !!field();
@@ -323,27 +346,62 @@ $.define("bindings","data,attr,event,fx", function(){
         },
         html:  function( node, field ){
             var val = field();
-            $(node).html(val)
+            $(node).html( val )
         },
-        "css": function( node, value ){
-         
-            //  var value = field();
+        "class": function( node, field ){
+            var val = field();
             if (typeof value == "object") {
-                for (var className in value) {
-                    var shouldHaveClass = value[className];
-                    console.log(shouldHaveClass+"!")
+                for (var className in val) {
+                    var shouldHaveClass = val[className];
                     toggleClass(node, className, shouldHaveClass);
                 }
             } else {
-                value = String(value || ''); // Make sure we don't try to store or set a non-string value
-                toggleClass(node, value, true);
+                val = String(val || ''); // Make sure we don't try to store or set a non-string value
+                toggleClass(node, val, true);
             }
+        },
+        // { text-decoration: someValue }
+        // { color: currentProfit() < 0 ? 'red' : 'black' }
+        style: function(node, field){
+            var val = field(), style = node.style, styleName
+            for (var name in val) {
+                if (typeof style == "string") {
+                    styleName = $.cssName(name, style) || name
+                    node.style[styleName] = val[ name ] || ""; 
+                }
+            }
+        },
+        attr: function(node, field){
+            var val = field();
+            for (var name in val) {
+                $.attr(node, name, val[ name ] )
+            }
+        },
+        prop: function(node, field){
+            var val = field();
+            for (var name in val) {
+                $.prop(node, name, val[ name ] )
+            }
+        },
+        foreach: function(node,field){
+            var val = field()
+            var frag = document.createDocumentFragment(), first
+            while(first = node.firstChild){
+                frag.appendChild(first)
+            }
+            console.log(frag)
+            for(var i = 0, n = val.length ; i < n ; i++){
+                node.appendChild( frag.cloneNode(true))
+             
+            }
+
+
         }
     }
+    $.bindingAdapter["css"] = $.bindingAdapter["css"]
     var toggleClass = function (node, className, shouldHaveClass) {
         var classes = (node.className || "").split(/\s+/);
         var hasClass = classes.indexOf( className) >= 0;//原className是否有这东西
-
         if (shouldHaveClass && !hasClass) {
             node.className += (classes[0] ? " " : "") + className;
         } else if (hasClass && !shouldHaveClass) {
@@ -354,8 +412,6 @@ $.define("bindings","data,attr,event,fx", function(){
             node.className = newClassName.trim();
         }
     }
-
-
 
 });
 
@@ -484,47 +540,8 @@ $.define("bindings","data,attr,event,fx", function(){
     //        }
     //    }
     //
-    //    var bindingProvider = $.factory({
-    //        init: function(){
-    //            this.bindingCache = {};
-    //        },
-    //        //取得data-bind中的值
-    //        getBindings: function(node) {
-    //            switch (node.nodeType) {
-    //                case 1: return node.getAttribute(data_name);   // Element
-    //                case 8: return virtualElements.getBindings(node);          // Comment node
-    //            }
-    //            return null;
-    //        },
-    //        hasBindings: function(node){
-    //            return !(this.getBindings(node) == null)
-    //        },
-    //        //转换为函数
-    //        parseBindings: function(bindingsString, bindingContext){
-    //            try {
-    //                var viewModel = bindingContext['$data'];
-    //                var scopes = (typeof viewModel == 'object' && viewModel != null) ? [viewModel, bindingContext] : [bindingContext];
-    //                var cacheKey = scopes.length + '_' + bindingsString;//缓存
-    //                var bindingFunction = this.bindingCache[cacheKey];
-    //                if(typeof bindingFunction != "function" ){
-    //                    bindingFunction = this._createBindingsStringEvaluator(bindingsString, scopes.length)
-    //                }
-    //                return bindingFunction(scopes);
-    //            } catch (ex) {
-    //                throw new Error("Unable to parse bindings.\nMessage: " + ex + ";\nBindings value: " + bindingsString);
-    //            }
-    //        },
-    //        _createBindingsStringEvaluator : function(bindingsString, scopesCount) {
-    //            var rewrittenBindings = " { " + ko.jsonExpressionRewriting.insertPropertyAccessorsIntoJson(bindingsString) + " } ";
-    //            return this._createScopedFunction(rewrittenBindings, scopesCount);
-    //        },
-    //        _createScopedFunction: function(expression,scopeLevels){
-    //            var functionBody = "return (" + expression + ")";
-    //            for (var i = 0; i < scopeLevels; i++) {
-    //                functionBody = "with(sc[" + i + "]) { " + functionBody + " } ";
-    //            }
-    //            return new Function("sc", functionBody);
-    //        }
+
+
     //    });
     //    //创建一个出来,方便使用其原型方法
     //    bindingProvider['instance'] = new bindingProvider();

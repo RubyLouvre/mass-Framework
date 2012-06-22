@@ -6,69 +6,50 @@
 
 
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
-        <!--  <script type="text/javascript" src="ko.js" charset="UTF-8"></script> -->
+        <!--<script type="text/javascript" src="ko.js" charset="UTF-8"></script>-->
 
         <script>
 
+
             $.require("ready,more/bindings", function(){
-                function MyViewModel() {
 
-                    this.currentProfit = $.observable(1000) // Positive value, so initially we don't apply the "profitWarning" class
-
-                    this.firstName = $.observable('Planet');
-                    this.lastName = $.observable('Earth');
-                    this.fullName = $.computed({
-                        getter: function () {
-                            return  this.firstName() + " " + this.lastName();
-                        },
-                        setter: function (value) {
-                            var lastSpacePos = value.lastIndexOf(" ");
-                            if (lastSpacePos > 0) { // Ignore values with no space character
-                                this.firstName(value.substring(0, lastSpacePos)); // Update "firstName"
-                                this.lastName(value.substring(lastSpacePos + 1)); // Update "lastName"
-                            }
-                        },
-                        scope: this
-                    });
-                }
-                var model = new MyViewModel();
-
-                $.applyBindings(model,$("#node")[0]);
-                setTimeout(function(){
-                   model.currentProfit(-50);
-                       model.firstName("neo")
-                },1500)
-                setTimeout(function(){
-                       model.firstName("xxx")
-                },3000)
+                $.applyBindings({
+                    people: [
+                        { firstName: 'Bert', lastName: 'Bertington' },
+                        { firstName: 'Charles', lastName: 'Charlesforth' },
+                        { firstName: 'Denise', lastName: 'Dentiste' }
+                    ]
+                },$("#ddd")[0]);
+            
             
             })
+
+    
         </script>
 
         <style>
-            .red{
+            #node.red{
                 color:red;
+            }
+            #node {
+                color:blue
             }
         </style>
 
 
     </head>
     <body>
-        <div  id="node" data-bind="css: 'red'">
-            Profit Information
-        </div>
-        The name is <span data-bind="text: fullName" ></span>
         <table>
             <thead>
                 <tr><th>First name</th><th>Last name</th></tr>
             </thead>
-            <tbody data-bind="foreach: people">
-                <!--22-->
+            <tbody data-bind="foreach: people" id="ddd">
                 <tr>
-                    <td data-bind="text: firstName"></td>
-                    <td data-bind="text: lastName"></td>
+                    <td data-bind="text: firstName">XXX</td>
+                    <td data-bind="text: lastName">YYY</td>
                 </tr>
             </tbody>
         </table>
+
     </body>
 </html>

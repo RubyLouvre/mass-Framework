@@ -2040,6 +2040,7 @@
                         var evaluatedBindings = (typeof bindings == "function") ? bindings() : bindings;
                         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
                         parsedBindings = evaluatedBindings || ko.bindingProvider['instance']['getBindings'](node, bindingContextInstance);
+  
                         if (parsedBindings) {
                             // First run all the inits, so bindings can register for notification on changes
                             if (initPhase === 0) {
@@ -2702,16 +2703,22 @@
         // "foreach: someExpression" is equivalent to "template: { foreach: someExpression }"
         // "foreach: { data: someExpression, afterAdd: myfn }" is equivalent to "template: { foreach: someExpression, afterAdd: myfn }"
         ko.bindingHandlers['foreach'] = {
-            makeTemplateValueAccessor: function(valueAccessor) {
-                return function() {
-                    var bindingValue = ko.utils.unwrapObservable(valueAccessor());
 
+            makeTemplateValueAccessor: function(valueAccessor) {
+              
+                return function() {
+
+                    var bindingValue = ko.utils.unwrapObservable(valueAccessor());
+                    console.log("进入foreach分支");
+                    console.log(bindingValue)
                     // If bindingValue is the array, just pass it on its own
-                    if ((!bindingValue) || typeof bindingValue.length == "number")
+                    if ((!bindingValue) || typeof bindingValue.length == "number"){
                         return {
                             'foreach': bindingValue,
                             'templateEngine': ko.nativeTemplateEngine.instance
                         };
+                    }
+                      
 
                     // If bindingValue.data is the array, preserve all relevant options
                     return {
@@ -3156,13 +3163,14 @@
 
             ko.bindingHandlers['template'] = {
                 'init': function(element, valueAccessor) {
+                  
                     // Support anonymous templates
                     var bindingValue = ko.utils.unwrapObservable(valueAccessor());
                     if ((typeof bindingValue != "string") && (!bindingValue['name']) && (element.nodeType == 1 || element.nodeType == 8)) {
                         // It's an anonymous template - store the element contents, then clear the element
                         var templateNodes = element.nodeType == 1 ? element.childNodes : ko.virtualElements.childNodes(element);
                         var container = ko.utils.moveCleanedNodesToContainerElement(templateNodes); // This also removes the nodes from their current parent
-                       new ko.templateSources.anonymousTemplate(element)['nodes'](container);
+                        new ko.templateSources.anonymousTemplate(element)['nodes'](container);
                     }
                     return {
                         'controlsDescendantBindings': true
@@ -3190,8 +3198,11 @@
                     if ((typeof bindingValue === 'object') && ('foreach' in bindingValue)) { // Note: can't use 'in' operator on strings
                         // Render once for each data point (treating data set as empty if shouldDisplay==false)
                         var dataArray = (shouldDisplay && bindingValue['foreach']) || [];
+                        console.log(element);
+                        console.log(bindingValue)
+                        console.log(dataArray)
                         templateSubscription = ko.renderTemplateForEach(templateName || element, dataArray, /* options: */ bindingValue, element, bindingContext);
-                        //templateSubscription为一个computed
+                    //templateSubscription为一个computed
                     } else {
                         if (shouldDisplay) {
                             // Render once for this single data point (or use the viewModel if no data was provided)
