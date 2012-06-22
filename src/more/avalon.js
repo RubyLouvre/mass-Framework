@@ -1,5 +1,6 @@
 
 $.define("avalon","data,attr,event,fx", function(){
+    //knockout的缺陷
     //1看这里，许多BUG没有修https://github.com/SteveSanderson/knockout/issues?page=1&state=open
     //2里面大量使用闭包，有时多达七八层，性能感觉不会很好
     //3with的使用会与ecma262的严格模式冲突
@@ -194,7 +195,7 @@ $.define("avalon","data,attr,event,fx", function(){
         }
         // var e =  $.normalizeJSON("{aaa:111,bbb:{ccc:333, class:'xxx', eee:{ddd:444}}}");
         // console.log(e)
-        $.normalizeJSON = function (json, insertFields) {//对键名添加引号，以便安全通过编译
+        $.normalizeJSON = function (json, insertFields, extra) {//对键名添加引号，以便安全通过编译
             var keyValueArray = parseObjectLiteral(json),resultStrings = [] ,keyValueEntry, propertyToHook = [];
             for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
                 if (resultStrings.length > 0)
@@ -204,17 +205,25 @@ $.define("avalon","data,attr,event,fx", function(){
                     var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
                     resultStrings.push(quotedKey);
                     resultStrings.push(":");
+                    if(insertFields === true && key === "foreach"){//特殊处理foreach
+                        var array = val.match($.rword);
+                        val = array.shift();
+                        if(array[0] === "as"){//如果用户定义了多余参数
+                            extra.$itemName = array[1]
+                            extra.$indexName = array[2]
+                        }
+                    }
                     if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
                         val = $.normalizeJSON( val );//逐层加引号
                     }
                     resultStrings.push(val);
-                    if(insertFields == true){
+                    if(insertFields == true){//用函数延迟值部分的执行
                         if (propertyToHook.length > 0)
                             propertyToHook.push(", ");
                         propertyToHook.push(quotedKey + " : function() { return " + val + " }")
                     }
                 } else if (keyValueEntry['unknown']) {
-                    resultStrings.push(keyValueEntry['unknown']);
+                    resultStrings.push(keyValueEntry['unknown']);//基于跑到这里就是出错了
                 }
             }
             resultStrings = resultStrings.join("");
@@ -267,14 +276,14 @@ $.define("avalon","data,attr,event,fx", function(){
     }
     //MVVM三大入口函数之一
     $.applyBindings = $.setBindings = $.avalon.setBindings;
-    $.parseBindings = function(node){
-        var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true );
+    $.parseBindings = function(node, extra){
+        var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra );
         var fn = $.avalon.parse( jsonstr, 3 );
         return fn;//返回一个对象
     }
-    //  function applyBindingsToDescendants(){}
+
     function associateDataAndUI(scopes, field, process, getBindings, key){
-        function symptom(){
+        function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!scopes[0]){
                 return true;//解除绑定
             }
@@ -282,11 +291,11 @@ $.define("avalon","data,attr,event,fx", function(){
                 var bindings = getBindings( scopes );
                 field = bindings["@mass_fields"][key]
             }
-            process(scopes[0], field, scopes[1] );
+            process(scopes[0], field, scopes[1], scopes[2] );
         }
         symptom();
         var pubblico = $.dependencyChain.pubblico = []
-        field();
+        field();//取得其依赖,方便one way绑定
         $.dependencyChain.pubblico = [];
         for(var i = 0, el; el = pubblico[i++];){
             var list = el.list ||  (el.list = [])
@@ -297,12 +306,12 @@ $.define("avalon","data,attr,event,fx", function(){
     }
 
     //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToElement(node, viewModel, extra ){
+    function setBindingsToElement( node, viewModel, extra ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         console.log("setBindingsToElement")
         extra = extra || {}
         var scopes = [node,viewModel, extra]
-        var getBindings =  $.parseBindings( node)//保存到闭包中
+        var getBindings =  $.parseBindings( node, extra )//保存到闭包中
         var bindings = getBindings( scopes );
         var continueBindings = true;
         for(var key in bindings){
@@ -408,7 +417,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
         foreach: {
-            init:function(node, field, viewModel){
+            init:function(node, field, viewModel, more ){
                 var val = field()
                 var frag = node.ownerDocument.createDocumentFragment(),
                 el;
@@ -424,6 +433,12 @@ $.define("avalon","data,attr,event,fx", function(){
                         $parent: viewModel,
                         $index: i,
                         $item: val[i]
+                    }
+                    if(more.$itemName){
+                        extra[ more.$itemName ] = val[i]
+                    }
+                    if(more.$indexName){
+                        extra[ more.$indexName ] = i
                     }
                     var elems = getChildren(frag)
                     node.appendChild(frag);

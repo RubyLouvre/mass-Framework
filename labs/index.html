@@ -11,20 +11,16 @@
         <script>
 
 
-            $.require("ready,more/bindings", function(){
-
+            $.require("ready,more/avalon", function(){
                 $.applyBindings({
                     people: [
                         { firstName: 'Bert', lastName: 'Bertington' },
-                        { firstName: 'Charles', lastName: 'Charlesforth' },
+                        { firstName: 'Charles', lastName: 'Charlesforth',$index:7 },
                         { firstName: 'Denise', lastName: 'Dentiste' }
-                    ]
-                },$("#ddd")[0]);
-            
-            
+                    ],
+                    sex : "先生"
+                });
             })
-
-    
         </script>
 
         <style>
@@ -39,14 +35,16 @@
 
     </head>
     <body>
-        <table>
+        <table border="1">
             <thead>
-                <tr><th>First name</th><th>Last name</th></tr>
+                <tr><th>编号</th><th>First name</th><th>Last name</th><th>姓别</th></tr>
             </thead>
-            <tbody data-bind="foreach: people" id="ddd">
+            <tbody data-bind="foreach: people as item">
                 <tr>
-                    <td data-bind="text: firstName">XXX</td>
-                    <td data-bind="text: lastName">YYY</td>
+                    <td data-bind="text: $index"></td>
+                    <td data-bind="text: item.firstName"></td>
+                    <td data-bind="text: lastName"></td>
+                    <td data-bind="text: $parent.sex"></td>
                 </tr>
             </tbody>
         </table>
