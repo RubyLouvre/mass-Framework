@@ -21,7 +21,7 @@ $.define("avalon","data,attr,event,fx", function(){
             var str = node.getAttribute( "data-bind" );
             return typeof str === "string" && str.indexOf(":") > 1
         },
-        //转换数据隐藏为一个函数;;;相当于ko的buildEvalWithinScopeFunction
+        //将字符串变成一个函数
         evalBindings: function(expression, level){
             var body = "return (" + expression + ")";
             for (var i = 0; i < level; i++) {
@@ -29,10 +29,11 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             return  Function( "sc", body );
         },
+        //转换数据隐藏为一个函数
         parseBindings : function( node, extra ){
             var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra || {} );
             var fn = $.avalon.evalBindings( jsonstr, 3 );
-            return fn;//返回一个对象
+            return fn;
         },
         begin : function(){//开始依赖收集
             this.list = [];
@@ -77,8 +78,10 @@ $.define("avalon","data,attr,event,fx", function(){
                 var safelist = list.concat(), dispose = false
                 for(var i = 0, el; el = safelist[i++];){
                     delete el.cache;//清除缓存
-                    if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
-                        el.dispose = dispose = true
+                    if(!el.stopReflow){
+                        if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
+                            el.dispose = dispose = true
+                        }
                     }
                 }
                 if( dispose == true ){//移除无意义的绑定
@@ -127,7 +130,11 @@ $.define("avalon","data,attr,event,fx", function(){
             $.avalon.add( field );
             if( arguments.length ){
                 if(typeof setter === "function"){
+                    field.stopReflow = true;
+                    //setter会唤起其依赖的$.observable与$.computed重新计算自身，但它们也会触发其上级更新自身
+                    //由于自身已经先行更新了，没有再计算一次
                     neo = setter.apply( scope, arguments );
+                    field.stopReflow = false
                 }
             }else{
                 if( "cache" in field ){//getter
@@ -181,7 +188,7 @@ $.define("avalon","data,attr,event,fx", function(){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         extra = extra || {}
         var callback = parseBindings( node, extra )//保存到闭包中
-        var getBindings = function(){
+        var getBindings = function(){//用于取得数据隐藏
             return callback( [node, viewModel, extra] )
         }
         var bindings = getBindings();
@@ -221,50 +228,50 @@ $.define("avalon","data,attr,event,fx", function(){
                 adapter.init && adapter.init.apply(adapter, args);
                 initPhase = 1
             }
-            $.log("+++++++++++++++++++")
-            // update 为一个getter,拥有返回值
-            return adapter.update && adapter.update.apply(adapter, args);
+            adapter.update && adapter.update.apply(adapter, args);
         }
-        window.TEST = $.computed(symptom);
+        window.TEST = $.computed(symptom, viewModel);
+    }
+    var checkDiff = function( update ){
+        return function anonymity (node, field){
+            var val = field();
+            if(!("cache" in anonymity)){
+                update(node, val);
+            }else {
+                if( anonymity.cache !== val ){
+                    update(node, val);
+                }
+            }
+            anonymity.cache = val
+        }
     }
     $.bindingAdapter = {
         text: {
-            update:function ( node, field ) {
-                var val = field();
-             
+            update:checkDiff(function ( node, val ) {
                 $(node).text(val == null ? "" : val+"");
-                   console.log(node.firstChild.data)
-                return val
-            }
+            })
         },
         visible: {
-            update:function( node, field ){
-                var val  = field()
+            update:checkDiff(function ( node, val ) {
                 node.style.display = val ? "" : "none"
-                return val;
-            }
+            })
         },
         enable: {
-            'update': function (node, field) {
-                var val = field()
+            update:checkDiff(function ( node, val ) {
                 if (val && node.disabled)
                     node.removeAttribute("disabled");
                 else if ((!val) && (!node.disabled))
                     node.disabled = true;
-                return val;
-            }
+            })
         },
         html: {
-            update: function( node, field ){
-                var val = field()
+            update:checkDiff(function ( node, val ) {
                 $(node).html( val )
-                return val;
-            },
+            }),
             stopBindings: true
         },
         "class":{
-            update:function( node, field ){
-                var val = field()
+            update:checkDiff(function ( node, val ) {
                 if (typeof value == "object") {
                     for (var className in val) {
                         var shouldHaveClass = val[className];
@@ -274,7 +281,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     val = String(val || ''); // Make sure we don't try to store or set a non-string value
                     toggleClass(node, val, true);
                 }
-            }
+            })
         } ,
         // { text-decoration: someValue }
         // { color: currentProfit() < 0 ? 'red' : 'black' }
@@ -322,6 +329,30 @@ $.define("avalon","data,attr,event,fx", function(){
                 node.checked = !!field()
             }
         },
+        "if":{
+            update:checkDiff(function fn(node, val){
+                if(!fn.frag){
+                    fn.frag = node.ownerDocument.createDocumentFragment()
+                }
+                var length = fn.frag.childNodes.length, first;
+                console.log(val)
+                if( val  ){
+                    if(length)
+                        node.appendChild( fn.frag )
+                }else {
+                    while( first = node.firstChild){
+                        fn.frag.appendChild(first)
+                    }
+                }
+            })
+        },
+        unless:{
+            update: function(node,field){
+                $.bindingAdapter["if"]["update"](node, function(){
+                    return !field()
+                })
+            }
+        },
         foreach: {
             update:function(node, field, viewModel, more ){
                 var val = field()
@@ -356,10 +387,47 @@ $.define("avalon","data,attr,event,fx", function(){
             stopBindings: true
         }
     }
+    //if unless with foreach四个适配器都是使用template适配器
+    "if,unless".replace($.rword, function( type ){
+        $.bindingAdapter[ type ] = {
+            update : function(node, field){
+                $.bindingAdapter['template']['update'](node, function(){
+                    return {
+                        showChildNodes: type == "if" ?  field() : !field()
+                    }
+                })
+            }
+        }
+    })
+    $.bindingAdapter["with"] = {
+        update : function(node, field){
+            $.bindingAdapter['template']['update'](node, function(){
+                var value = field()
+                return {
+                    showChildNodes: value, 
+                    data: value
+                }
+            })
+        }
+    }
+    $.bindingAdapter[ "foreach" ] = {
+        update : function(node, field){
+            $.bindingAdapter['template']['update'](node, function(){
+                return {
+                    foreach: field()
+                }
+            })
+        }
+    }
+     $.bindingAdapter[ "template" ] = {
+         update: function(node, obj ){
+
+         }
+     }
     $.bindingAdapter.disable = {
         update: function( node, field){
-            $.bindingAdapter.enable(node, function(){
-                return !field
+            $.bindingAdapter.enable.update(node, function(){
+                return !field()
             })
         }
     }
@@ -387,8 +455,6 @@ $.define("avalon","data,attr,event,fx", function(){
             node.className = newClassName.trim();
         }
     }
-
-
     //normalizeJSON及其辅助方法与变量
     void function(){
         var restoreCapturedTokensRegex = /\@mass_token_(\d+)\@/g;
