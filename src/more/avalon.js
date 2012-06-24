@@ -25,11 +25,11 @@ $.define("avalon","data,attr,event,fx", function(){
                         return;
                     self.list.push(fn);
                 }
-            },
-            pubblico : [],
-            put: function(fn){
-                this.pubblico.push(fn)
             }
+//            pubblico : [],
+//            put: function(fn){
+//                this.pubblico.push(fn)
+//            }
 
         };
     })();
@@ -68,7 +68,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     neo = cur
                 }
                 init && $.dependencyChain.collect( field )//将暴露到依赖链的computed放到自己的通知列表中
-                $.dependencyChain.put( field )
+               // $.dependencyChain.put( field )
                 init = false
             }
             if(cur !== neo ){
@@ -77,7 +77,12 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             return set ? field : cur
         }
+        field.isObservable = true;
+        field.toString = field.valueOf = function(){
+            return field.cache;
+        }
         if( isComputed == true){
+            console.log(old.getter)
             for(var name  in old){
                 field[ name ] = old[ name ]
             }
@@ -280,56 +285,52 @@ $.define("avalon","data,attr,event,fx", function(){
     $.applyBindings = $.setBindings = $.avalon.setBindings;
     $.parseBindings = function(node, extra){
         var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra );
+        $.log(jsonstr)
         var fn = $.avalon.parse( jsonstr, 3 );
         return fn;//返回一个对象
     }
 
-    function associateDataAndUI(node, viewModel, extra, field, key, getBindings){
+    function associateDataAndUI(node, field,  viewModel, extra, key, getBindings){
+        var adapter = $.bindingAdapter[key], args = arguments;
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
                 return true;//解除绑定
             }
             if(typeof field !== "function"){
                 $.log("每次都生成")
-                var bindings = getBindings( arguments );
+                var bindings = getBindings( );
                 field = bindings["@mass_fields"][key];
+                $.log(field+"")
             }
-            var adapter = $.bindingAdapter[key];
-            var args = [ node, field, viewModel, extra];
-            if(adapter.init && !symptom.init){
-                adapter.init.apply(adapter, args);
+       //     var args = [ node, field, viewModel, extra ];
+            if(!symptom.init){
+                $.dependencyChain.collect( field );
+                adapter.init && adapter.init.apply(adapter, args);
                 symptom.init = 1;
             }
             adapter.update && adapter.update.apply(adapter, args);
         }
-        symptom();
-        var pubblico = $.dependencyChain.pubblico = [];//现在取得依赖的方法不太赖,总得执行一次
-        field.call(viewModel);//取得其依赖,方便one way绑定
-        $.dependencyChain.pubblico = [];
-        for(var i = 0, el; el = pubblico[i++];){
-            var list = el.list ||  (el.list = [])
-            if ( list.indexOf( symptom ) == -1 ){
-                list.push( symptom )
-            }
-        }
+        window.symptom = $.computed(symptom);
     }
 
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, viewModel, extra ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        console.log("setBindingsToElement")
         extra = extra || {}
-        var getBindings =  $.parseBindings( node, extra )//保存到闭包中
-        var bindings = getBindings( arguments );
+        var getBindingsFn = $.parseBindings( node, extra )//保存到闭包中
+        var getBindings = function(){
+            return getBindingsFn( [node, viewModel, extra] )
+        }
+        var bindings = getBindings();
         var continueBindings = true;
         for(var key in bindings){
             var adapter = $.bindingAdapter[key];
             if( adapter ){
-                if(adapter.stopBindings){
+                if( adapter.stopBindings ){
                     continueBindings = false;
                 }
                 $.log("associateDataAndUI : "+key)
-                associateDataAndUI( node, viewModel, extra, bindings[key], key, getBindings)
+                associateDataAndUI( node, bindings[key], viewModel, extra, key, getBindings)
             }
         }
         return continueBindings;
@@ -431,7 +432,7 @@ $.define("avalon","data,attr,event,fx", function(){
         click: {
             init: function(node, field, viewModel){
                 $(node).bind("click",function(e){
-                   field.call( viewModel, e )
+                    field.call( viewModel, e )
                 });
             }
         },

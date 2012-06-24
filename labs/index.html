@@ -10,17 +10,36 @@
 
         <script>
 
-
             $.require("ready,more/avalon", function(){
-                $.applyBindings(  {
-                    numberOfClicks : $.observable(0),
-                    incrementClickCounter : function(e) {
-                        $.log(e)
-                        var previousCount = this.numberOfClicks();//注意这里的this指向viewModel
-                        this.numberOfClicks(previousCount + 1);
-                    }
-                });
-            })
+                function MyViewModel() {
+                    this.firstName = $.observable('Bob');
+                    this.lastName = $.observable('Smith');
+                    this.fullName = $.computed({
+                        getter: function () {
+                            return this.firstName() + " " + this.lastName();
+                        },
+                        setter: function (value) {
+                            var lastSpacePos = value.lastIndexOf(" ");
+                            if (lastSpacePos > 0) { 
+                                this.firstName( value.substring(0, lastSpacePos) );
+                                this.lastName( value.substring(lastSpacePos + 1) );
+                            }
+                        },
+                        scope: this
+                    })
+                }
+                var viewModel = new MyViewModel
+                $.applyBindings(viewModel);
+                setTimeout(function(){
+                    viewModel.firstName("first"); // change
+                },1000);
+                setTimeout(function(){
+                    viewModel.lastName("last"); // change
+                },2000)
+                setTimeout(function(){
+                    viewModel.fullName("XX YY"); // change
+                },3000)
+            });
         </script>
 
         <style>
@@ -35,9 +54,6 @@
 
     </head>
     <body>
-        <div>
-            You've clicked <span data-bind="text: numberOfClicks"></span> times
-            <button data-bind="click: incrementClickCounter">Click me</button>
-        </div>
+        The name is <span data-bind="text:'xxx'+ fullName "></span>
     </body>
 </html>
