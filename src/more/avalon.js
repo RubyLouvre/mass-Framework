@@ -8,92 +8,386 @@ $.define("avalon","data,attr,event,fx", function(){
     //5好像不能为同一元素同种事件绑定多个回调
     //人家花了那么多心思与时间做出来的东西,你以为是小学生写记叙文啊,一目了然....
     var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
-    $.dependencyChain = (function () {
-        var _frames = [];
-        return {
-            begin: function (ret) {
-                _frames.push(ret);
-            },
-            end: function () {
-                _frames.pop();
-            },
-            collect: function (self) {
-                if (_frames.length > 0) {
-                    self.list = self.list || [];
-                    var fn = _frames[_frames.length - 1];
-                    if ( self.list.indexOf( fn ) >= 0)
-                        return;
-                    self.list.push(fn);
-                }
+    var count = 0, disposeObject = {}
+    $.avalon = {
+        //为一个Binding Target(节点)绑定Binding Source(viewModel)
+        setBindings: function( source, node ){
+            node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
+            //开始在其自身与孩子中绑定
+            return setBindingsToElementAndChildren( node, source );
+        },
+        //取得节点的数据隐藏
+        hasBindings: function( node ){
+            var str = node.getAttribute( "data-bind" );
+            return typeof str === "string" && str.indexOf(":") > 1
+        },
+        //转换数据隐藏为一个函数;;;相当于ko的buildEvalWithinScopeFunction
+        evalBindings: function(expression, level){
+            var body = "return (" + expression + ")";
+            for (var i = 0; i < level; i++) {
+                body = "with(sc[" + i + "]) { " + body + " } ";
             }
-        //            pubblico : [],
-        //            put: function(fn){
-        //                this.pubblico.push(fn)
-        //            }
-
-        };
-    })();
-
-    $.computed = function(obj, scope){
-        var args//构建一个至少拥有getter,scope属性的对象
-        if(typeof obj == "function"){
-            args = {
-                getter: obj,
-                scope: scope
-            }
-        }else if( typeof obj == "object" && obj && obj.getter){
-            args = obj
-        }
-        return $.observable( args, true )
-    }
-
-    $.observable = function(old, isComputed){
-        var cur, init = true
-        function field( neo ){
-            var set, scope = field.scope//判定是读方法还是写方法
-            if(arguments.length){ //setter
-                neo =  typeof field.setter === "function" ? field.setter.apply( scope, arguments ) : neo
-                set = true;
-            }else{  //getter
-                if(typeof field.getter === "function"){
-                    init && $.dependencyChain.begin( field );//只有computed才在依赖链中暴露自身
-                    if("cache" in field){
-                        neo = field.cache;//从缓存中读取,防止递归读取
-                    }else{
-                        neo = field.getter.call( scope );
-                        field.cache = neo;//保存到缓存
+            return  Function( "sc", body );
+        },
+        parseBindings : function( node, extra ){
+            var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra || {} );
+            var fn = $.avalon.evalBindings( jsonstr, 3 );
+            return fn;//返回一个对象
+        },
+        begin : function(){//开始依赖收集
+            this.list = [];
+            this.labels = {};
+        },
+        end : function(){//结束依赖收集
+            var list = this.list;
+            this.begin();
+            return list;
+        },
+        add : function(field){
+            //当一个$.observable或$.computed在第一次执行自己时(初始化)是没有labels属性
+            //会立即返回,避免不必要的逻辑运作
+            if( !field.labels )
+                return
+            //如果一个$.computed A依赖于另一个$.computed B与一个$.observable C,
+            //而B与C又存在依赖关系,那么C将被T出依赖列表中
+            //因为我们没有必要叫它们重复通知A进行更新
+            var add = false, empty = true, labels = field.labels;
+            for(var i in labels ){
+                if( labels.hasOwnProperty(i) ){
+                    empty = false;
+                    if(this.labels[ i ] !== 1){ //如果不为空,那么随个key取出来,看在this.labels存不存在,不存在就加
+                        add = true;
+                        this.labels[ i ] = 1;
                     }
-                    init &&  $.dependencyChain.end()
-                }else{
-                    neo = cur
                 }
-                init && $.dependencyChain.collect( field )//将暴露到依赖链的computed放到自己的通知列表中
-                // $.dependencyChain.put( field )
-                init = false
             }
-            if(cur !== neo ){
-                cur = neo;
+            if( empty ){//如果是空白,说明是原子属性
+                if(this.labels[ field.label ] !== 1){
+                    this.list.push( field );
+                    this.labels[ field.label ] = 1;
+                }
+            }
+            if( add ){
+                this.list.push( field )
+            }
+        },
+        notify : function( field ){//通知依赖于field的上层$.computed更新
+            var list = field.list || [] ;
+            if( list.length ){
+                var safelist = list.concat(), dispose = false
+                for(var i = 0, el; el = safelist[i++];){
+                    delete el.cache;//清除缓存
+                    if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
+                        el.dispose = dispose = true
+                    }
+                }
+                if( dispose == true ){//移除无意义的绑定
+                    for (  i = list.length; el = list[ --i ]; ) {
+                        if( el.dispose == true ){
+                            el.splice( i, 1 );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    $.observable = function( val ){
+        var cur = val;
+        function field( neo ){
+            $.avalon.add( field );
+            if( arguments.length ){//setter
+                if(cur !== neo){
+                    cur = neo;
+                    $.avalon.notify( field );
+                }
+            }else{//getter
+                return cur;
+            }
+        }
+        field.list = [];//订阅者列表
+        field.toString = field.valueOf = function(){
+            return cur;
+        }
+        field();
+        field.label = ++count;//原子属性拥有label属性,与永远为空的labels属性
+        field.labels = {};
+        return field;
+    }
+   
+    $.computed = function( obj, scope ){
+        var getter, setter, cur//构建一个至少拥有getter,scope属性的对象
+        if(typeof obj == "function"){//getter必然存在
+            getter = obj
+        }else if( typeof obj == "object" && obj ){
+            getter = obj.getter
+            setter = obj.setter;
+            scope =  obj.scope;
+        }
+        function field( neo ){
+            $.avalon.add( field );
+            if( arguments.length ){
+                if(typeof setter === "function"){
+                    neo = setter.apply( scope, arguments );
+                }
+            }else{
+                if( "cache" in field ){//getter
+                    neo = field.cache;//从缓存中读取,防止递归读取
+                }else{
+                    neo = getter.call( scope );
+                    field.cache = neo;//保存到缓存
+                }
+            }
+            if(cur !== neo){
+                cur = neo
                 $.avalon.notify( field );
             }
-            return set ? field : cur
+            return cur;
         }
-        field.isObservable = true;
+        field.list = [];//订阅者列表
         field.toString = field.valueOf = function(){
-            return field.cache;
+            return cur;
         }
-        if( isComputed == true){
-            console.log(old.getter)
-            for(var name  in old){
-                field[ name ] = old[ name ]
+        $.avalon.begin();
+        field();
+        field.labels = $.avalon.labels;
+        //取得其依赖的原子与分子们
+        var deps = $.avalon.end(), list;
+        for(var i = 0, d; d = deps[i++];){
+            list = d.list || (d.list = []);
+            if (  list.indexOf( field ) == -1 ){//防止重复添加
+                list.push( field );//低层向高层发送通知
             }
-            field();//必须先执行一次
-        }else{
-            old = validValueType[ $.type(old) ] ? old : void 0;
-            cur = old;//将上一次的传参保存到cur中,ret与它构成闭包
-            field(old);//必须先执行一次
         }
-        return field
+        return field;
     }
+    //MVVM三大入口函数之一
+    $.applyBindings = $.setBindings = $.avalon.setBindings;
+    var parseBindings =  $.avalon.parseBindings;
+    //在元素及其后代中将数据隐藏与viewModel关联在一起
+    function setBindingsToElementAndChildren( node, source, extra ){
+        if ( node.nodeType === 1  ){
+            var continueBindings = true;
+            if( $.avalon.hasBindings( node ) ){
+                continueBindings = setBindingsToElement(node, source, extra ) //.shouldBindDescendants;
+            }
+            if( continueBindings ){
+                var elems = getChildren(node)
+                elems.length && setBindingsToChildren( elems, source, extra )
+            }
+        }
+    }
+    //为当前元素把数据隐藏与视图模块绑定在一块
+    function setBindingsToElement( node, viewModel, extra ){
+        //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
+        extra = extra || {}
+        var callback = parseBindings( node, extra )//保存到闭包中
+        var getBindings = function(){
+            return callback( [node, viewModel, extra] )
+        }
+        var bindings = getBindings();
+        var continueBindings = true;
+        for(var key in bindings){
+            var adapter = $.bindingAdapter[key];
+            if( adapter ){
+                if( adapter.stopBindings ){
+                    continueBindings = false;
+                }
+                $.log("associateDataAndUI : "+key)
+                associateDataAndUI( node, bindings[key], viewModel, extra, key, getBindings)
+            }
+        }
+        return continueBindings;
+    }
+    function setBindingsToChildren(elems, source, extra){
+        $.log("setBindingsToChildren")
+        for(var i = 0, n = elems.length; i < n ; i++){
+            setBindingsToElementAndChildren( elems[i], source, extra );
+        }
+    }
+    //有一些域的依赖在定义vireModel时已经确认了
+    //而对元素的操作的$.computed则要在bindings中执行它们才知
+    function associateDataAndUI(node, field,  viewModel, extra, key, getBindings){
+        var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0
+        function symptom(){//这是依赖链的末梢,通过process操作节点
+            if(!node){
+                $.log("node 不存在或已删除?")
+                return disposeObject;//解除绑定
+            }
+            if(typeof field !== "function"){
+                var bindings = getBindings();
+                field = bindings["@mass_fields"][key];
+            }
+            if(initPhase == 0){
+                adapter.init && adapter.init.apply(adapter, args);
+                initPhase = 1
+            }
+            $.log("+++++++++++++++++++")
+            // update 为一个getter,拥有返回值
+            return adapter.update && adapter.update.apply(adapter, args);
+        }
+        window.TEST = $.computed(symptom);
+    }
+    $.bindingAdapter = {
+        text: {
+            update:function ( node, field ) {
+                var val = field();
+             
+                $(node).text(val == null ? "" : val+"");
+                   console.log(node.firstChild.data)
+                return val
+            }
+        },
+        visible: {
+            update:function( node, field ){
+                var val  = field()
+                node.style.display = val ? "" : "none"
+                return val;
+            }
+        },
+        enable: {
+            'update': function (node, field) {
+                var val = field()
+                if (val && node.disabled)
+                    node.removeAttribute("disabled");
+                else if ((!val) && (!node.disabled))
+                    node.disabled = true;
+                return val;
+            }
+        },
+        html: {
+            update: function( node, field ){
+                var val = field()
+                $(node).html( val )
+                return val;
+            },
+            stopBindings: true
+        },
+        "class":{
+            update:function( node, field ){
+                var val = field()
+                if (typeof value == "object") {
+                    for (var className in val) {
+                        var shouldHaveClass = val[className];
+                        toggleClass(node, className, shouldHaveClass);
+                    }
+                } else {
+                    val = String(val || ''); // Make sure we don't try to store or set a non-string value
+                    toggleClass(node, val, true);
+                }
+            }
+        } ,
+        // { text-decoration: someValue }
+        // { color: currentProfit() < 0 ? 'red' : 'black' }
+        style: {
+            update:function(node, field){
+                var val = field(), style = node.style, styleName
+                for (var name in val) {
+                    if (typeof style == "string") {
+                        styleName = $.cssName(name, style) || name
+                        node.style[styleName] = val[ name ] || "";
+                    }
+                }
+            }
+        },
+        attr: {
+            update:function(node, field){
+                var val = field();
+                for (var name in val) {
+                    $.attr(node, name, val[ name ] )
+                }
+            }
+        },
+        prop: {
+            update:function(node, field){
+                var val = field();
+                for (var name in val) {
+                    $.prop(node, name, val[ name ] )
+                }
+            }
+        },
+        click: {
+            init: function(node, field, viewModel){
+                $(node).bind("click",function(e){
+                    field.call( viewModel, e )
+                });
+            }
+        },
+        checked: {
+            init: function(node, field){
+                $(node).bind("change",function(){
+                    field(node.checked);
+                });
+            },
+            update:function(node, field){
+                node.checked = !!field()
+            }
+        },
+        foreach: {
+            update:function(node, field, viewModel, more ){
+                var val = field()
+                var frag = node.ownerDocument.createDocumentFragment(),
+                el;
+                while(el = node.firstChild){
+                    frag.appendChild(el)
+                }
+                var frags = [frag];//防止对fragment二次复制,引发safari的BUG
+                for(var i = 0, n = val.length - 1 ; i < n ; i++){
+                    frags[frags.length] = frag.cloneNode(true)
+                }
+                for(i = 0; frag = frags[i];i++){
+                    var extra = {
+                        $parent: viewModel,
+                        $index: i,
+                        $item: val[i]
+                    }
+                    if(more.$itemName){
+                        extra[ more.$itemName ] = val[i]
+                    }
+                    if(more.$indexName){
+                        extra[ more.$indexName ] = i
+                    }
+                    var elems = getChildren(frag)
+                    node.appendChild(frag);
+                    if(elems.length){
+                        setBindingsToChildren(elems, val[i], extra)
+                    }
+                }
+            },
+            stopBindings: true
+        }
+    }
+    $.bindingAdapter.disable = {
+        update: function( node, field){
+            $.bindingAdapter.enable(node, function(){
+                return !field
+            })
+        }
+    }
+    var getChildren = function(node){
+        var elems = [] ,ri = 0
+        for (node = node.firstChild; node; node = node.nextSibling){
+            if (node.nodeType === 1){
+                elems[ri++] = node;
+            }
+        }
+        return elems;
+    }
+    // var b
+    $.bindingAdapter["css"] = $.bindingAdapter["css"]
+    var toggleClass = function (node, className, shouldHaveClass) {
+        var classes = (node.className || "").split(/\s+/);
+        var hasClass = classes.indexOf( className) >= 0;//原className是否有这东西
+        if (shouldHaveClass && !hasClass) {
+            node.className += (classes[0] ? " " : "") + className;
+        } else if (hasClass && !shouldHaveClass) {
+            var newClassName = "";
+            for (var i = 0; i < classes.length; i++)
+                if (classes[i] != className)
+                    newClassName += classes[i] + " ";
+            node.className = newClassName.trim();
+        }
+    }
+
 
     //normalizeJSON及其辅助方法与变量
     void function(){
@@ -240,278 +534,6 @@ $.define("avalon","data,attr,event,fx", function(){
             return "{" +resultStrings +"}";
         }
     }();
-    
-    $.avalon = {
-        //为一个Binding Target(节点)绑定Binding Source(viewModel)
-        setBindings: function(source, node){
-            node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
-            //开始在其自身与孩子中绑定
-            return setBindingsToElementAndChildren(node, source);
-        },
-        //取得节点的数据隐藏
-        hasBindings: function(node){
-            var str = node.getAttribute("data-bind");
-            return typeof str === "string" && str.indexOf(":") > 1
-        },
-        //转换数据隐藏为一个函数;;;相当于ko的buildEvalWithinScopeFunction
-        parse: function(expression, level){
-            var body = "return (" + expression + ")";
-            for (var i = 0; i < level; i++) {
-                body = "with(sc[" + i + "]) { " + body + " } ";
-            }
-            return  Function("sc", body);
-        },
-        notify: function( field ){
-            var list = field.list;
-            if($.type(list,"Array") && list.length){
-                var safelist = list.concat(), dispose = false
-                for(var i = 0, el; el = safelist[i++];){
-                    delete el.cache;//清除缓存
-                    if(el.dispose === true || el() == true ){//通知顶层的computed更新自身
-                        el.dispose = dispose = true
-                    }
-                }
-                if( dispose == true ){//移除无意义的绑定
-                    for (  i = list.length; el = list[ --i ]; ) {
-                        if(el.dispose == true){
-                            el.splice( i, 1 );
-                        }
-                    }
-                }
-            }
-        }
-    }
-    //MVVM三大入口函数之一
-    $.applyBindings = $.setBindings = $.avalon.setBindings;
-    $.parseBindings = function(node, extra){
-        var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra );
-        $.log(jsonstr)
-        var fn = $.avalon.parse( jsonstr, 3 );
-        return fn;//返回一个对象
-    }
-    //有一些域的依赖在定义vireModel时已经确认了
-    //而对元素的操作的$.computed则要在bindings中执行它们才知
-    function associateDataAndUI(node, field,  viewModel, extra, key, getBindings){
-        var adapter = $.bindingAdapter[key], args = arguments;
-        function symptom(){//这是依赖链的末梢,通过process操作节点
-            if(!node){
-                return true;//解除绑定
-            }
-            if(typeof field !== "function"){
-                $.log("每次都生成")
-                var bindings = getBindings( );
-                field = bindings["@mass_fields"][key];
-                $.log(field+"")
-            }
-            //     var args = [ node, field, viewModel, extra ];
-            if(!symptom.init){
-                $.dependencyChain.collect( field );
-                adapter.init && adapter.init.apply(adapter, args);
-                symptom.init = 1;
-            }
-            adapter.update && adapter.update.apply(adapter, args);
-        }
-        window.symptom = $.computed(symptom);
-    }
-
-    //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToElement( node, viewModel, extra ){
-        //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        extra = extra || {}
-        var getBindingsFn = $.parseBindings( node, extra )//保存到闭包中
-        var getBindings = function(){
-            return getBindingsFn( [node, viewModel, extra] )
-        }
-        var bindings = getBindings();
-        var continueBindings = true;
-        for(var key in bindings){
-            var adapter = $.bindingAdapter[key];
-            if( adapter ){
-                if( adapter.stopBindings ){
-                    continueBindings = false;
-                }
-                $.log("associateDataAndUI : "+key)
-                associateDataAndUI( node, bindings[key], viewModel, extra, key, getBindings)
-            }
-        }
-        return continueBindings;
-    }
-    //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToElementAndChildren( node, source, extra ){
-        if ( node.nodeType === 1  ){
-            var continueBindings = true;
-            if( $.avalon.hasBindings( node ) ){
-                continueBindings = setBindingsToElement(node, source, extra ) //.shouldBindDescendants;
-            }
-            if( continueBindings ){
-                var elems = getChildren(node)
-                elems.length && setBindingsToChildren( elems, source, extra )
-            }
-        }
-       
-    }
-    function setBindingsToChildren(elems, source, extra){
-        $.log("setBindingsToChildren")
-        for(var i = 0, n = elems.length; i < n ; i++){
-            setBindingsToElementAndChildren( elems[i], source, extra )
-        }
-    }
-  
-    $.bindingAdapter = {
-        text: {
-            update:function ( node, field ) {
-                var val = field();
-                val = val == null ? "" : val+"";
-                $(node).text(val)
-            }
-        },
-        visible: {
-            update:function( node, field ){
-                var val = !!field();
-                node.style.display = val ? "" : "none"
-            }
-        },
-        enable: {
-            'update': function (node, field) {
-                var value = field()
-                if (value && node.disabled)
-                    node.removeAttribute("disabled");
-                else if ((!value) && (!node.disabled))
-                    node.disabled = true;
-            }
-        },
-        html: {
-            update: function( node, field ){
-                var val = field();
-                $(node).html( val )
-            },
-            stopBindings: true
-        },
-        "class":{
-            update:function( node, field ){
-                var val = field();
-                if (typeof value == "object") {
-                    for (var className in val) {
-                        var shouldHaveClass = val[className];
-                        toggleClass(node, className, shouldHaveClass);
-                    }
-                } else {
-                    val = String(val || ''); // Make sure we don't try to store or set a non-string value
-                    toggleClass(node, val, true);
-                }
-            }
-        } ,
-        // { text-decoration: someValue }
-        // { color: currentProfit() < 0 ? 'red' : 'black' }
-        style: {
-            update:function(node, field){
-                var val = field(), style = node.style, styleName
-                for (var name in val) {
-                    if (typeof style == "string") {
-                        styleName = $.cssName(name, style) || name
-                        node.style[styleName] = val[ name ] || "";
-                    }
-                }
-            }
-        },
-        attr: {
-            update:function(node, field){
-                var val = field();
-                for (var name in val) {
-                    $.attr(node, name, val[ name ] )
-                }
-            }
-        },
-        prop: {
-            update:function(node, field){
-                var val = field();
-                for (var name in val) {
-                    $.prop(node, name, val[ name ] )
-                }
-            }
-        },
-        click: {
-            init: function(node, field, viewModel){
-                $(node).bind("click",function(e){
-                    field.call( viewModel, e )
-                });
-            }
-        },
-        checked: {
-            init: function(node, field){
-                $(node).bind("change",function(){
-                    field(node.checked);
-                });
-            },
-            update:function(node, field){
-                node.checked = !!field()
-            }
-        },
-        foreach: {
-            update:function(node, field, viewModel, more ){
-                var val = field()
-                var frag = node.ownerDocument.createDocumentFragment(),
-                el;
-                while(el = node.firstChild){
-                    frag.appendChild(el)
-                }
-                var frags = [frag];//防止对fragment二次复制,引发safari的BUG
-                for(var i = 0, n = val.length - 1 ; i < n ; i++){
-                    frags[frags.length] = frag.cloneNode(true)
-                }
-                for(i = 0; frag = frags[i];i++){
-                    var extra = {
-                        $parent: viewModel,
-                        $index: i,
-                        $item: val[i]
-                    }
-                    if(more.$itemName){
-                        extra[ more.$itemName ] = val[i]
-                    }
-                    if(more.$indexName){
-                        extra[ more.$indexName ] = i
-                    }
-                    var elems = getChildren(frag)
-                    node.appendChild(frag);
-                    if(elems.length){
-                        setBindingsToChildren(elems, val[i], extra)
-                    }
-                }
-            },
-            stopBindings: true
-        }
-    }
-    $.bindingAdapter.disable = {
-        update: function( node, field){
-            $.bindingAdapter.enable(node, function(){
-                return !field
-            })
-        }
-    }
-    var getChildren = function(node){
-        var elems = [] ,ri = 0
-        for (node = node.firstChild; node; node = node.nextSibling){
-            if (node.nodeType === 1){
-                elems[ri++] = node;
-            }
-        }
-        return elems;
-    }
-    // var b
-    $.bindingAdapter["css"] = $.bindingAdapter["css"]
-    var toggleClass = function (node, className, shouldHaveClass) {
-        var classes = (node.className || "").split(/\s+/);
-        var hasClass = classes.indexOf( className) >= 0;//原className是否有这东西
-        if (shouldHaveClass && !hasClass) {
-            node.className += (classes[0] ? " " : "") + className;
-        } else if (hasClass && !shouldHaveClass) {
-            var newClassName = "";
-            for (var i = 0; i < classes.length; i++)
-                if (classes[i] != className)
-                    newClassName += classes[i] + " ";
-            node.className = newClassName.trim();
-        }
-    }
 
 });
 

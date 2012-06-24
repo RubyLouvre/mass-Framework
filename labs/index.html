@@ -11,7 +11,37 @@
         <script>
 
             $.require("ready,more/avalon", function(){
-      
+                function MyViewModel() {
+                    this.firstName = $.observable('Bob');
+                    this.lastName = $.observable('Smith');
+                    this.fullName = $.computed({
+                        getter: function () {
+                            return this.firstName() + " " + this.lastName();
+                        },
+                        setter: function (value) {
+                            var lastSpacePos = value.lastIndexOf(" ");
+                            if (lastSpacePos > 0) { // Ignore values with no space character
+                                this.firstName(value.substring(0, lastSpacePos));
+                                // Update "firstName"
+                                this.lastName(value.substring(lastSpacePos + 1));
+                                // Update "lastName"
+                            }
+                        },
+                        scope: this
+                    })
+                }
+                var viewModel = new MyViewModel
+                $.applyBindings(viewModel);
+
+                setTimeout(function(){
+                    viewModel.firstName("first"); // change
+                },1000);
+                setTimeout(function(){
+                    viewModel.lastName("last"); // change
+                },3000)
+                setTimeout(function(){
+                    viewModel.fullName("XX YY"); // change
+                },5000)
             });
         </script>
 
@@ -27,6 +57,6 @@
 
     </head>
     <body>
-        The name is <span data-bind="text:'xxx'+ fullName " id="xxx"></span>
+        The name is <span data-bind="text: fullName"></span>
     </body>
 </html>
