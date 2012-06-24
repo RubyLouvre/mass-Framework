@@ -26,10 +26,10 @@ $.define("avalon","data,attr,event,fx", function(){
                     self.list.push(fn);
                 }
             }
-//            pubblico : [],
-//            put: function(fn){
-//                this.pubblico.push(fn)
-//            }
+        //            pubblico : [],
+        //            put: function(fn){
+        //                this.pubblico.push(fn)
+        //            }
 
         };
     })();
@@ -68,7 +68,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     neo = cur
                 }
                 init && $.dependencyChain.collect( field )//将暴露到依赖链的computed放到自己的通知列表中
-               // $.dependencyChain.put( field )
+                // $.dependencyChain.put( field )
                 init = false
             }
             if(cur !== neo ){
@@ -289,7 +289,8 @@ $.define("avalon","data,attr,event,fx", function(){
         var fn = $.avalon.parse( jsonstr, 3 );
         return fn;//返回一个对象
     }
-
+    //有一些域的依赖在定义vireModel时已经确认了
+    //而对元素的操作的$.computed则要在bindings中执行它们才知
     function associateDataAndUI(node, field,  viewModel, extra, key, getBindings){
         var adapter = $.bindingAdapter[key], args = arguments;
         function symptom(){//这是依赖链的末梢,通过process操作节点
@@ -302,7 +303,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 field = bindings["@mass_fields"][key];
                 $.log(field+"")
             }
-       //     var args = [ node, field, viewModel, extra ];
+            //     var args = [ node, field, viewModel, extra ];
             if(!symptom.init){
                 $.dependencyChain.collect( field );
                 adapter.init && adapter.init.apply(adapter, args);
