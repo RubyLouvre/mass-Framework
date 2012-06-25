@@ -15,31 +15,20 @@
 
     </head>
     <body>
-<style>
-    .my-class{
-        color: yellow;
-        background:orange;
-    }
-    .your-class {
-        line-height:3;
-        width:200px;
-    }
-    .his-class{
-        text-indent:2em;
-        font-size:14px;
-    }
-</style>
-<div data-bind="class: { my-class: someValue,your-class: otherValue, his-class: moreValue }">同时加上三个类名</div>
+        <a data-bind="attr: { href: url, title: details }">
+            青蛙公主
+        </a>
 
-<script type="text/javascript">
-    $.require("ready,more/avalon", function(){
-        var viewModel = {
-            someValue:true,
-            otherValue:true,
-            moreValue:true
-        };
-        $.applyBindings(viewModel);
-    });
-</script>
-</body>
+        <script type="text/javascript">
+            $.require("ready,more/avalon", function(){
+                var viewModel = {
+                    url: $.observable("http://yyets.com/showresource-juji-1300.html"),
+                    details: $.observable("全11回/2012春季日剧/YYeTs人人影视字幕组/"+
+                        "中日双语字幕[HR-HDTV,RMVB,720P]")
+                };
+                $.applyBindings(viewModel);
+            });
+        </script>
+    </body>
 </html>
+

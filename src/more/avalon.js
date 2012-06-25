@@ -101,7 +101,6 @@ $.define("avalon","data,attr,event,fx", function(){
         function field( neo ){
             $.avalon.add( field );
             if( arguments.length ){//setter
-                console.log(cur+" "+neo)
                 if(cur !== neo){
                     cur = neo;
                     $.avalon.notify( field );
@@ -211,20 +210,17 @@ $.define("avalon","data,attr,event,fx", function(){
             return $.mix( this,source )
         },
         alias: function( neo, old){
-            if(this[neo]){
+            if(this[ neo ]){
                 this[ this[neo] ] = this[old]
             }
             return this;
         }
     }
-
-
-
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, context ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         var callback = parseBindings( node, context )//保存到闭包中
-        context = context instanceof $.viewModel ? context : new $.viewModel(context)
+        context = context instanceof $.viewModel ? context : new $.viewModel( context );
         var getBindings = function(){//用于取得数据隐藏
             try{
                 return callback( [ node, context ] )
@@ -248,132 +244,114 @@ $.define("avalon","data,attr,event,fx", function(){
         return continueBindings;
     }
     function setBindingsToChildren(elems, source){
-        //   $.log("setBindingsToChildren")
         for(var i = 0, n = elems.length; i < n ; i++){
             setBindingsToElementAndChildren( elems[i], source );
         }
     }
     //有一些域的依赖在定义vireModel时已经确认了
     //而对元素的操作的$.computed则要在bindings中执行它们才知
-    function associateDataAndUI(node, field,  context, key, getBindings){
-        var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0;
+    function associateDataAndUI(node, field, context, key, getBindings){
+        var adapter = $.bindingAdapter[key], initPhase = 0, cur
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
                 return disposeObject;//解除绑定
             }
             if(typeof field !== "function"){
-                var bindings = getBindings();
+                var bindings = getBindings();//每次都取一次,因为viewModel的数据已经发生改变
                 field = bindings["@mass_fields"][key];
             }
-            if(initPhase == 0){
-                adapter.init && adapter.init.apply(adapter, args);
-                initPhase = 1
+            if(initPhase === 0){
+                cur = field();
+                adapter.init && adapter.init(node, cur, field, context);
             }
-            adapter.update && adapter.update.apply(adapter, args);
-        }
-        $.computed(symptom, context.$data);
-    }
-    var checkDiff = function( update ){
-        return function anonymity (node, field){
-            var val = field();
-            if(!("cache" in anonymity)){
-                update(node, val);
-            }else {
-                if( anonymity.cache !== val ){
-                    update(node, val);
-                }
+            var neo = field();
+            if(initPhase === 0 || cur != neo){//只要是处理bool假值的比较 
+                cur = neo;
+                adapter.update && adapter.update(node, cur, field, context);
             }
-            anonymity.cache = val
+            initPhase = 1;
         }
+        $.computed( symptom, context.$data );
     }
+
     //一个数据绑定，负责界面的展示，另一个是事件绑定，负责更高层次的交互，比如动画，数据请求，
     //从现影响viewModel，导致界面的再渲染
     $.bindingAdapter = {
         text: {
-            update:checkDiff(function ( node, val ) {
+            update:  function( node, val ){
                 val = val == null ? "" : val+""
                 if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
                     node.firstChild.data = val;
                 }else{
-                    $(node).text( val );
+                    $( node ).text( val );
                 }
-            })
+            }
+        },
+        html: {
+            update:  function( node, val ){
+                $( node ).html( val )
+            },
+            stopBindings: true
         },
         visible: {
-            update:checkDiff(function ( node, val ) {
+            update:  function( node, val ){
                 node.style.display = val ? "" : "none";
-            })
+            }
         },
         enable: {
-            update:checkDiff(function ( node, val ) {
+            update:  function( node, val ){
                 if (val && node.disabled)
                     node.removeAttribute("disabled");
                 else if ((!val) && (!node.disabled))
                     node.disabled = true;
-            })
+            }
         },
-        html: {
-            update:checkDiff(function ( node, val ) {
-                $(node).html( val )
-            }),
-            stopBindings: true
-        },
+
         "class":{
-            update:checkDiff(function ( node, val ) {
+            update:  function( node, val ){
                 if (typeof val == "object") {
                     for (var className in val) {
                         var shouldHaveClass = val[className];
                         toggleClass(node, className, shouldHaveClass);
                     }
                 } else {
-                    val = String(val || ''); // Make sure we don't try to store or set a non-string value
+                    val = String(val || ''); 
                     toggleClass(node, val, true);
                 }
-            })
+            }
         } ,
         // { text-decoration: someValue }
         // { color: currentProfit() < 0 ? 'red' : 'black' }
         style: {
-            update:function(node, field){
-                var val = field(), style = node.style, styleName
+            update:  function( node, val ){
+                var style = node.style, styleName
                 for (var name in val) {
-                    if (typeof style == "string") {
-                        styleName = $.cssName(name, style) || name
-                        node.style[styleName] = val[ name ] || "";
-                    }
+                    styleName = $.cssName(name, style) || name
+                    style[styleName] = val[ name ] || "";
                 }
             }
         },
         attr: {
-            update:function(node, field){
-                var val = field();
+            update:  function( node, val ){
                 for (var name in val) {
                     $.attr(node, name, val[ name ] )
                 }
             }
         },
-        prop: {
-            update:function(node, field){
-                var val = field();
-                for (var name in val) {
-                    $.prop(node, name, val[ name ] )
-                }
-            }
-        },
         click: {
-            init: function(node, field, viewModel){
+            init: function( node, val, field, viewModel ){
                 $(node).bind("click",function(e){
                     field.call( viewModel, e )
                 });
             }
         },
         checked: {
-            init: function(node, field){
+            update:  function( node, val ){
                 $(node).bind("change",function(){
                     field(node.checked);
                 });
             },
-            update:function(node, field){
+            update:function(node, val,  field){
                 node.checked = !!field()
             }
         }
