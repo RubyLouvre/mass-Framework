@@ -203,7 +203,7 @@ $.define("avalon","data,attr,event,fx", function(){
         this['$data'] = viewModel;
     }
     $.bindingContext.prototype.extend = function(object){
-        $.mix(this,object)
+        return $.mix(this,object)
     }
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, viewModel, extra ){
@@ -241,7 +241,6 @@ $.define("avalon","data,attr,event,fx", function(){
         var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
-                $.log("node 不存在或已删除?")
                 return disposeObject;//解除绑定
             }
             if(typeof field !== "function"){
@@ -254,7 +253,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             adapter.update && adapter.update.apply(adapter, args);
         }
-        window.TEST = $.computed(symptom, bindingContext.$data);
+        $.computed(symptom, bindingContext.$data);
     }
     var checkDiff = function( update ){
         return function anonymity (node, field){
@@ -354,63 +353,6 @@ $.define("avalon","data,attr,event,fx", function(){
             update:function(node, field){
                 node.checked = !!field()
             }
-        },
-        "if":{
-            update:checkDiff(function fn(node, val){
-                if(!fn.frag){
-                    fn.frag = node.ownerDocument.createDocumentFragment()
-                }
-                var length = fn.frag.childNodes.length, first;
-                //  console.log(val)
-                if( val  ){
-                    if(length)
-                        node.appendChild( fn.frag )
-                }else {
-                    while( first = node.firstChild){
-                        fn.frag.appendChild(first)
-                    }
-                }
-            })
-        },
-        unless:{
-            update: function(node,field){
-                $.bindingAdapter["if"]["update"](node, function(){
-                    return !field()
-                })
-            }
-        },
-        foreach: {
-            update:function(node, field, viewModel, more ){
-                var val = field()
-                var frag = node.ownerDocument.createDocumentFragment(),
-                el;
-                while(el = node.firstChild){
-                    frag.appendChild(el)
-                }
-                var frags = [frag];//防止对fragment二次复制,引发safari的BUG
-                for(var i = 0, n = val.length - 1 ; i < n ; i++){
-                    frags[frags.length] = frag.cloneNode(true)
-                }
-                for(i = 0; frag = frags[i];i++){
-                    var extra = {
-                        $parent: viewModel,
-                        $index: i,
-                        $item: val[i]
-                    }
-                    if(more.$itemName){
-                        extra[ more.$itemName ] = val[i]
-                    }
-                    if(more.$indexName){
-                        extra[ more.$indexName ] = i
-                    }
-                    var elems = getChildren(frag)
-                    node.appendChild(frag);
-                    if(elems.length){
-                        setBindingsToChildren(elems, val[i], extra)
-                    }
-                }
-            },
-            stopBindings: true
         }
     }
     //if unless with foreach四个适配器都是使用template适配器
@@ -430,6 +372,7 @@ $.define("avalon","data,attr,event,fx", function(){
             $.bindingAdapter['template']['update'](node, function(){
                 var value = field()
                 return {
+                    "if":true,
                     data: value
                 }
             })
@@ -446,30 +389,54 @@ $.define("avalon","data,attr,event,fx", function(){
     }
     $.bindingAdapter[ "template" ] = {
         update: function(node, field,  bindingContext){
-            var obj = field();
-            var frag = node.ownerDocument.createDocumentFragment(), el;
-            while(el = node.firstChild){
+            var obj = field(), frag = node.ownerDocument.createDocumentFragment(), el;
+            while((el = node.firstChild)){
                 frag.appendChild(el)
             }
-            var show = typeof obj["if"] === "boolean" ? obj["if"] : true;
-            if(show){
+            if( !!obj["if"] ){//处理with if unless
                 var elems = getChildren(frag)
                 node.appendChild(frag);
                 if(elems.length){
                     if(obj.data){
-                       bindingContext = new $.bindingContext(obj.data, bindingContext)
+                        bindingContext = new $.bindingContext(obj.data, bindingContext)
                     }
                     setBindingsToChildren(elems, bindingContext)
                 }
             }
-
+            var array = obj.foreach
+            if(array && array.length ){
+                var frags = [frag];//防止对fragment二次复制,引发safari的BUG
+                for(var i = 0, n = array.length - 1 ; i < n ; i++){
+                    frags[frags.length] = frag.cloneNode(true)
+                }
+                for(i = 0; frag = frags[i];i++){
+                    bindingContext = new $.bindingContext({
+                        $index: i,
+                        $item: array[i]
+                    }, bindingContext);
+                    bindingContext.extend(array[i]);
+                    bindingContext.$index = i
+                    $.log(bindingContext)
+                    //                    if(more.$itemName){
+                    //                        extra[ more.$itemName ] = val[i]
+                    //                    }
+                    //                    if(more.$indexName){
+                    //                        extra[ more.$indexName ] = i
+                    //                    }
+                    elems = getChildren(frag)
+                    node.appendChild(frag);
+                    if(elems.length){
+                        setBindingsToChildren(elems, bindingContext)
+                    }
+                }
+            }
         }
     }
     $.bindingAdapter.disable = {
         update: function( node, field){
             $.bindingAdapter.enable.update(node, function(){
                 return !field()
-            })
+            });
         }
     }
     var getChildren = function(node){
@@ -481,7 +448,6 @@ $.define("avalon","data,attr,event,fx", function(){
         }
         return elems;
     }
-    // var b
     $.bindingAdapter["css"] = $.bindingAdapter["css"]
     var toggleClass = function (node, className, shouldHaveClass) {
         var classes = (node.className || "").split(/\s+/);
