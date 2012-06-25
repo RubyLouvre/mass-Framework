@@ -11,14 +11,11 @@
         <script>
 
             $.require("ready,more/avalon", function(){
-
-                $.applyBindings({
-                    people: [
-                        { firstName: 'Bert', lastName: 'Bertington' },
-                        { firstName: 'Charles', lastName: 'Charlesforth' },
-                        { firstName: 'Denise', lastName: 'Dentiste' }
-                    ]
-                });
+                var viewModel = {
+                    myMessage: $.observable() // Initially blank
+                };
+                viewModel.myMessage("Hello, world!"); // Text appears
+                $.applyBindings(viewModel);
 
             })
         </script>
@@ -35,10 +32,6 @@
 
     </head>
     <body>
-        <ul data-bind="foreach: people" id="ddd">
-            <li data-bind="text: $index+firstName">
-                XXXX
-            </li>
-        </ul>
+        Today's message is: <span data-bind="text: myMessage"></span>
     </body>
 </html>

@@ -30,8 +30,8 @@ $.define("avalon","data,attr,event,fx", function(){
             return  Function( "sc", body );
         },
         //转换数据隐藏为一个函数
-        parseBindings : function( node, extra ){
-            var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra || {} );
+        parseBindings : function( node ){
+            var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true );
             var fn = $.avalon.evalBindings( jsonstr, 2 );
             return fn;
         },
@@ -47,8 +47,9 @@ $.define("avalon","data,attr,event,fx", function(){
         add : function(field){
             //当一个$.observable或$.computed在第一次执行自己时(初始化)是没有labels属性
             //会立即返回,避免不必要的逻辑运作
-            if( !field.labels )
-                return
+            if( !this.labels ||!field.labels ){
+                 return //如果viewModel中没有$.computed，也就没有依赖，也不会执行begin函数，返回
+            }
             //如果一个$.computed A依赖于另一个$.computed B与一个$.observable C,
             //而B与C又存在依赖关系,那么C将被T出依赖列表中
             //因为我们没有必要叫它们重复通知A进行更新
@@ -98,8 +99,10 @@ $.define("avalon","data,attr,event,fx", function(){
     $.observable = function( val ){
         var cur = val;
         function field( neo ){
+            $.log("XXXX")
             $.avalon.add( field );
             if( arguments.length ){//setter
+                console.log(cur+" "+neo)
                 if(cur !== neo){
                     cur = neo;
                     $.avalon.notify( field );
@@ -177,15 +180,15 @@ $.define("avalon","data,attr,event,fx", function(){
     $.applyBindings = $.setBindings = $.avalon.setBindings;
     var parseBindings =  $.avalon.parseBindings;
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToElementAndChildren( node, source, extra ){
+    function setBindingsToElementAndChildren( node, source ){
         if ( node.nodeType === 1  ){
             var continueBindings = true;
             if( $.avalon.hasBindings( node ) ){
-                continueBindings = setBindingsToElement(node, source, extra ) //.shouldBindDescendants;
+                continueBindings = setBindingsToElement(node, source ) //.shouldBindDescendants;
             }
             if( continueBindings ){
                 var elems = getChildren(node)
-                elems.length && setBindingsToChildren( elems, source, extra )
+                elems.length && setBindingsToChildren( elems, source )
             }
         }
     }
@@ -206,14 +209,14 @@ $.define("avalon","data,attr,event,fx", function(){
         return $.mix(this,object)
     }
     //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToElement( node, viewModel, extra ){
+    function setBindingsToElement( node, context ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        extra = extra || {}
-        var callback = parseBindings( node, extra )//保存到闭包中
-        var bindingContext = viewModel instanceof $.bindingContext ? viewModel : new $.bindingContext(viewModel)
-        $.log(bindingContext)
+      //  extra = extra || {}
+        var callback = parseBindings( node )//保存到闭包中
+        context = context instanceof $.bindingContext ? context : new $.bindingContext(context)
+       // $.log(context)
         var getBindings = function(){//用于取得数据隐藏
-            return callback( [node, bindingContext] )
+            return callback( [node, context] )
         }
         var bindings = getBindings();
         var continueBindings = true;
@@ -224,20 +227,20 @@ $.define("avalon","data,attr,event,fx", function(){
                     continueBindings = false;
                 }
                 $.log("associateDataAndUI : "+key)
-                associateDataAndUI( node, bindings[key], bindingContext, key, getBindings)
+                associateDataAndUI( node, bindings[key], context, key, getBindings)
             }
         }
         return continueBindings;
     }
-    function setBindingsToChildren(elems, source, extra){
-        $.log("setBindingsToChildren")
+    function setBindingsToChildren(elems, source){
+     //   $.log("setBindingsToChildren")
         for(var i = 0, n = elems.length; i < n ; i++){
-            setBindingsToElementAndChildren( elems[i], source, extra );
+            setBindingsToElementAndChildren( elems[i], source );
         }
     }
     //有一些域的依赖在定义vireModel时已经确认了
     //而对元素的操作的$.computed则要在bindings中执行它们才知
-    function associateDataAndUI(node, field,  bindingContext, key, getBindings){
+    function associateDataAndUI(node, field,  context, key, getBindings){
         var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
@@ -245,7 +248,14 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             if(typeof field !== "function"){
                 var bindings = getBindings();
-                field = bindings["@mass_fields"][key];
+                console.log("--------------")
+                console.log(bindings)
+                field = function(){
+                  return  bindings[key]
+                }
+
+               //     bindings["@mass_fields"][key];
+               //  console.log(field+"")
             }
             if(initPhase == 0){
                 adapter.init && adapter.init.apply(adapter, args);
@@ -253,7 +263,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             adapter.update && adapter.update.apply(adapter, args);
         }
-        $.computed(symptom, bindingContext.$data);
+        $.computed(symptom, context.$data);
     }
     var checkDiff = function( update ){
         return function anonymity (node, field){
@@ -388,7 +398,7 @@ $.define("avalon","data,attr,event,fx", function(){
         }
     }
     $.bindingAdapter[ "template" ] = {
-        update: function(node, field,  bindingContext){
+        update: function(node, field,  context){
             var obj = field(), frag = node.ownerDocument.createDocumentFragment(), el;
             while((el = node.firstChild)){
                 frag.appendChild(el)
@@ -398,9 +408,9 @@ $.define("avalon","data,attr,event,fx", function(){
                 node.appendChild(frag);
                 if(elems.length){
                     if(obj.data){
-                        bindingContext = new $.bindingContext(obj.data, bindingContext)
+                        context = new $.bindingContext(obj.data, context)
                     }
-                    setBindingsToChildren(elems, bindingContext)
+                    setBindingsToChildren(elems, context)
                 }
             }
             var array = obj.foreach
@@ -410,24 +420,26 @@ $.define("avalon","data,attr,event,fx", function(){
                     frags[frags.length] = frag.cloneNode(true)
                 }
                 for(i = 0; frag = frags[i];i++){
-                    bindingContext = new $.bindingContext({
-                        $index: i,
-                        $item: array[i]
-                    }, bindingContext);
-                    bindingContext.extend(array[i]);
-                    bindingContext.$index = i
-                    $.log(bindingContext)
-                    //                    if(more.$itemName){
-                    //                        extra[ more.$itemName ] = val[i]
-                    //                    }
-                    //                    if(more.$indexName){
-                    //                        extra[ more.$indexName ] = i
-                    //                    }
-                    elems = getChildren(frag)
-                    node.appendChild(frag);
-                    if(elems.length){
-                        setBindingsToChildren(elems, bindingContext)
-                    }
+                    (function(k){
+                    //    console.log(k)
+                        var context2 = new $.bindingContext({
+                            $index: k,
+                            $item: array[ k ]
+                        }, context);
+                        context2.extend( array[ k ]);
+                     //   $.log( bindingContext2 )
+                        elems = getChildren(frag)
+                        node.appendChild(frag);
+                        if(elems.length){
+                            setBindingsToChildren(elems, context2 )
+                        }
+                    })(i);   
+                //                    if(more.$itemName){
+                //                        extra[ more.$itemName ] = val[i]
+                //                    }
+                //                    if(more.$indexName){
+                //                        extra[ more.$indexName ] = i
+                //                    }
                 }
             }
         }
