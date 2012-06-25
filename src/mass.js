@@ -284,11 +284,7 @@ void function( global, DOC ){
             el.removeEventListener( type, fn || $.noop, !!phase );
         } : function( el, type, fn ){
             if ( el.detachEvent ) {
-                var name = "on" + type; 
-                if ( el[ name ] == null ) {
-                    el[ name ] = null;
-                }
-                el.detachEvent( name, fn || $.noop );
+                el.detachEvent( "on" + type, fn || $.noop );
             }
         },
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
@@ -375,9 +371,13 @@ void function( global, DOC ){
 
     });
     //domReady机制
+    var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
         mapper[ "@ready" ].state = 2;
         $._checkDeps();
+        if( readyFn ){
+            $.unbind( DOC, ready, readyFn );
+        }
         fireReady = $.noop;//隋性函数，防止IE9二次调用_checkDeps
     };
     function doScrollCheck() {
@@ -391,15 +391,15 @@ void function( global, DOC ){
     if ( DOC.readyState === "complete" ) {
         fireReady();//如果在domReady之外加载
     }else {
-        $.bind( DOC, ( w3c ? "DOMContentLoaded" : "readystatechange" ), function(){
+        $.bind( DOC, ready, readyFn = function(){
             if ( w3c || DOC.readyState === "complete" ){
                 fireReady();
             }
         });
-        if( $.html.doScroll && self.eval === top.eval)
+        if( $.html.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
-    top.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
+    global.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
         "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
         DOC.createElement(tag);
     });
@@ -470,6 +470,7 @@ dom.namespace改为dom["mass"]
 2012.6.10 精简require方法 处理opera11.64的情况
 2012.6.13 添加异步列队到命名空间,精简domReady
 2012.6.14 精简innerDefine,更改一些术语
+2012.6.25 domReady后移除绑定事件
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。

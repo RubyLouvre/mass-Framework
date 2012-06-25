@@ -30,9 +30,9 @@ $.define("avalon","data,attr,event,fx", function(){
             return  Function( "sc", body );
         },
         //转换数据隐藏为一个函数
-        parseBindings : function( node ){
-            var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true );
-            var fn = $.avalon.evalBindings( jsonstr, 2 );
+        parseBindings : function( node, context ){
+            var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, context );
+            var fn = $.avalon.evalBindings( jsonstr, 2 );//限制为两层，减少作用链的长度
             return fn;
         },
         begin : function(){//开始依赖收集
@@ -48,7 +48,7 @@ $.define("avalon","data,attr,event,fx", function(){
             //当一个$.observable或$.computed在第一次执行自己时(初始化)是没有labels属性
             //会立即返回,避免不必要的逻辑运作
             if( !this.labels ||!field.labels ){
-                 return //如果viewModel中没有$.computed，也就没有依赖，也不会执行begin函数，返回
+                return //如果viewModel中没有$.computed，也就没有依赖，也不会执行begin函数，返回
             }
             //如果一个$.computed A依赖于另一个$.computed B与一个$.observable C,
             //而B与C又存在依赖关系,那么C将被T出依赖列表中
@@ -99,7 +99,6 @@ $.define("avalon","data,attr,event,fx", function(){
     $.observable = function( val ){
         var cur = val;
         function field( neo ){
-            $.log("XXXX")
             $.avalon.add( field );
             if( arguments.length ){//setter
                 console.log(cur+" "+neo)
@@ -178,7 +177,7 @@ $.define("avalon","data,attr,event,fx", function(){
     //event - handler
     //MVVM三大入口函数之一
     $.applyBindings = $.setBindings = $.avalon.setBindings;
-    var parseBindings =  $.avalon.parseBindings;
+    var parseBindings = $.avalon.parseBindings;
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     function setBindingsToElementAndChildren( node, source ){
         if ( node.nodeType === 1  ){
@@ -192,31 +191,42 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         }
     }
-    $.bindingContext = function(viewModel, parentModel){
-        $.mix(this,viewModel)
-        if (parentModel) {
-            $.mix(this,parentModel)
-            this['$parentContext'] = parentModel;
-            this['$parent'] = parentModel['$data'];
-            this['$parents'] = (parentModel['$parents'] || []).slice(0);
-            this['$parents'].unshift(this['$parent']);
+    //viewModel类
+    $.viewModel = function(current, parent){
+        $.mix( this,current );
+        if ( parent) {
+            $.mix( this, parent );
+            this['$parentContext'] = parent;
+            this['$parent'] = parent['$data'];
+            this['$parents'] = (parent['$parents'] || []).slice(0);
+            this['$parents'].unshift( this['$parent'] );
         } else {
             this['$parents'] = [];
+            this['$root'] = current;
         }
-        this['$data'] = viewModel;
+        this['$data'] = current;
     }
-    $.bindingContext.prototype.extend = function(object){
-        return $.mix(this,object)
+    $.viewModel.prototype = {
+        extend : function(source){
+            return $.mix( this,source )
+        },
+        alias: function( neo, old){
+            if(this[neo]){
+                this[ this[neo] ] = this[old]
+            }
+            return this;
+        }
     }
+
+
+
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, context ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-      //  extra = extra || {}
-        var callback = parseBindings( node )//保存到闭包中
-        context = context instanceof $.bindingContext ? context : new $.bindingContext(context)
-       // $.log(context)
+        var callback = parseBindings( node, context )//保存到闭包中
+        context = context instanceof $.viewModel ? context : new $.viewModel(context)
         var getBindings = function(){//用于取得数据隐藏
-            return callback( [node, context] )
+            return callback( [ node, context ] )
         }
         var bindings = getBindings();
         var continueBindings = true;
@@ -233,7 +243,7 @@ $.define("avalon","data,attr,event,fx", function(){
         return continueBindings;
     }
     function setBindingsToChildren(elems, source){
-     //   $.log("setBindingsToChildren")
+        //   $.log("setBindingsToChildren")
         for(var i = 0, n = elems.length; i < n ; i++){
             setBindingsToElementAndChildren( elems[i], source );
         }
@@ -241,21 +251,17 @@ $.define("avalon","data,attr,event,fx", function(){
     //有一些域的依赖在定义vireModel时已经确认了
     //而对元素的操作的$.computed则要在bindings中执行它们才知
     function associateDataAndUI(node, field,  context, key, getBindings){
-        var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0
+        var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0;
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
                 return disposeObject;//解除绑定
             }
             if(typeof field !== "function"){
                 var bindings = getBindings();
-                console.log("--------------")
-                console.log(bindings)
                 field = function(){
-                  return  bindings[key]
+                    return  bindings[key]
                 }
-
-               //     bindings["@mass_fields"][key];
-               //  console.log(field+"")
+            //  bindings["@mass_fields"][key];
             }
             if(initPhase == 0){
                 adapter.init && adapter.init.apply(adapter, args);
@@ -283,7 +289,12 @@ $.define("avalon","data,attr,event,fx", function(){
     $.bindingAdapter = {
         text: {
             update:checkDiff(function ( node, val ) {
-                $(node).text(val == null ? "" : val+"");
+                val = val == null ? "" : val+""
+                if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
+                    node.firstChild.data = val;
+                }else{
+                    $(node).text( val );
+                }
             })
         },
         visible: {
@@ -389,61 +400,63 @@ $.define("avalon","data,attr,event,fx", function(){
         }
     }
     $.bindingAdapter[ "foreach" ] = {
-        update : function(node, field){
+        update : function(node, field, context){
             $.bindingAdapter['template']['update'](node, function(){
                 return {
                     foreach: field()
                 }
-            })
+            }, context)
         }
     }
+
+
     $.bindingAdapter[ "template" ] = {
-        update: function(node, field,  context){
+        update: function(node, field, context){
             var obj = field(), frag = node.ownerDocument.createDocumentFragment(), el;
             while((el = node.firstChild)){
                 frag.appendChild(el)
             }
-            if( !!obj["if"] ){//处理with if unless
+            if( !!obj["if"] ){ //处理with if unless适配器
                 var elems = getChildren(frag)
                 node.appendChild(frag);
                 if(elems.length){
                     if(obj.data){
-                        context = new $.bindingContext(obj.data, context)
+                        context = new $.viewModel(obj.data, context)
                     }
-                    setBindingsToChildren(elems, context)
+                    return  setBindingsToChildren(elems, context)
                 }
             }
-            var array = obj.foreach
-            if(array && array.length ){
+            var collection = obj.foreach
+            if(collection && collection.length ){//处理foreach适配器
                 var frags = [frag];//防止对fragment二次复制,引发safari的BUG
-                for(var i = 0, n = array.length - 1 ; i < n ; i++){
+                for(var i = 0, n = collection.length - 1 ; i < n ; i++){
                     frags[frags.length] = frag.cloneNode(true)
                 }
                 for(i = 0; frag = frags[i];i++){
-                    (function(k){
-                    //    console.log(k)
-                        var context2 = new $.bindingContext({
+                    (function( k ){
+                        var subclass = new $.viewModel({
                             $index: k,
-                            $item: array[ k ]
+                            $item: collection[ k ]
                         }, context);
-                        context2.extend( array[ k ]);
-                     //   $.log( bindingContext2 )
+                        subclass.extend( collection[ k ] )
+                        .alias("$itemName", "$item")
+                        .alias("$indexName", "$index");
                         elems = getChildren(frag)
                         node.appendChild(frag);
                         if(elems.length){
-                            setBindingsToChildren(elems, context2 )
+                            setBindingsToChildren(elems, subclass )
                         }
                     })(i);   
-                //                    if(more.$itemName){
-                //                        extra[ more.$itemName ] = val[i]
-                //                    }
-                //                    if(more.$indexName){
-                //                        extra[ more.$indexName ] = i
-                //                    }
                 }
             }
+            return void 0
         }
     }
+
+    "if,with,unless,foreach,template".replace($.rword, function( type ){
+        $.bindingAdapter[ type ]["stopBindings"] = true;
+    })
+
     $.bindingAdapter.disable = {
         update: function( node, field){
             $.bindingAdapter.enable.update(node, function(){
@@ -585,7 +598,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         }
         // var e =  $.normalizeJSON("{aaa:111,bbb:{ccc:333, class:'xxx', eee:{ddd:444}}}");
-        // console.log(e)
+
         $.normalizeJSON = function (json, insertFields, extra) {//对键名添加引号，以便安全通过编译
             var keyValueArray = parseObjectLiteral(json),resultStrings = [] ,keyValueEntry, propertyToHook = [];
             for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
@@ -600,8 +613,8 @@ $.define("avalon","data,attr,event,fx", function(){
                         var array = val.match($.rword);
                         val = array.shift();
                         if(array[0] === "as"){//如果用户定义了多余参数
-                            extra.$itemName = array[1]
-                            extra.$indexName = array[2]
+                            extra.$itemName = array[1];
+                            extra.$indexName = array[2];
                         }
                     }
                     if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
