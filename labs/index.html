@@ -11,9 +11,15 @@
         <script>
 
             $.require("ready,more/avalon", function(){
+
                 $.applyBindings({
-                    displayMessage: $.observable(false)
+                    people: [
+                        { firstName: 'Bert', lastName: 'Bertington' },
+                        { firstName: 'Charles', lastName: 'Charlesforth' },
+                        { firstName: 'Denise', lastName: 'Dentiste' }
+                    ]
                 });
+
             })
         </script>
 
@@ -29,8 +35,10 @@
 
     </head>
     <body>
-        <label><input type="checkbox" data-bind="checked: displayMessage" /> Display message</label>
-
-        <div data-bind="unless: displayMessage">Here is a message. Astonishing.</div>
+        <ul data-bind="foreach: people" id="ddd">
+            <li data-bind="text: $index+firstName">
+                XXXX
+            </li>
+        </ul>
     </body>
 </html>

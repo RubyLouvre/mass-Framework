@@ -32,7 +32,7 @@ $.define("avalon","data,attr,event,fx", function(){
         //转换数据隐藏为一个函数
         parseBindings : function( node, extra ){
             var jsonstr = $.normalizeJSON( node.getAttribute("data-bind"), true, extra || {} );
-            var fn = $.avalon.evalBindings( jsonstr, 3 );
+            var fn = $.avalon.evalBindings( jsonstr, 2 );
             return fn;
         },
         begin : function(){//开始依赖收集
@@ -94,6 +94,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         }
     }
+
     $.observable = function( val ){
         var cur = val;
         function field( neo ){
@@ -167,6 +168,11 @@ $.define("avalon","data,attr,event,fx", function(){
         }
         return field;
     }
+    //    template - name
+    //foreach - data
+    //value - data
+    //options - data
+    //event - handler
     //MVVM三大入口函数之一
     $.applyBindings = $.setBindings = $.avalon.setBindings;
     var parseBindings =  $.avalon.parseBindings;
@@ -183,13 +189,31 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         }
     }
+    $.bindingContext = function(viewModel, parentModel){
+        $.mix(this,viewModel)
+        if (parentModel) {
+            $.mix(this,parentModel)
+            this['$parentContext'] = parentModel;
+            this['$parent'] = parentModel['$data'];
+            this['$parents'] = (parentModel['$parents'] || []).slice(0);
+            this['$parents'].unshift(this['$parent']);
+        } else {
+            this['$parents'] = [];
+        }
+        this['$data'] = viewModel;
+    }
+    $.bindingContext.prototype.extend = function(object){
+        $.mix(this,object)
+    }
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, viewModel, extra ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         extra = extra || {}
         var callback = parseBindings( node, extra )//保存到闭包中
+        var bindingContext = viewModel instanceof $.bindingContext ? viewModel : new $.bindingContext(viewModel)
+        $.log(bindingContext)
         var getBindings = function(){//用于取得数据隐藏
-            return callback( [node, viewModel, extra] )
+            return callback( [node, bindingContext] )
         }
         var bindings = getBindings();
         var continueBindings = true;
@@ -200,7 +224,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     continueBindings = false;
                 }
                 $.log("associateDataAndUI : "+key)
-                associateDataAndUI( node, bindings[key], viewModel, extra, key, getBindings)
+                associateDataAndUI( node, bindings[key], bindingContext, key, getBindings)
             }
         }
         return continueBindings;
@@ -213,7 +237,7 @@ $.define("avalon","data,attr,event,fx", function(){
     }
     //有一些域的依赖在定义vireModel时已经确认了
     //而对元素的操作的$.computed则要在bindings中执行它们才知
-    function associateDataAndUI(node, field,  viewModel, extra, key, getBindings){
+    function associateDataAndUI(node, field,  bindingContext, key, getBindings){
         var adapter = $.bindingAdapter[key], args = arguments, initPhase = 0
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
@@ -230,7 +254,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             adapter.update && adapter.update.apply(adapter, args);
         }
-        window.TEST = $.computed(symptom, viewModel);
+        window.TEST = $.computed(symptom, bindingContext.$data);
     }
     var checkDiff = function( update ){
         return function anonymity (node, field){
@@ -245,6 +269,8 @@ $.define("avalon","data,attr,event,fx", function(){
             anonymity.cache = val
         }
     }
+    //一个数据绑定，负责界面的展示，另一个是事件绑定，负责更高层次的交互，比如动画，数据请求，
+    //从现影响viewModel，导致界面的再渲染
     $.bindingAdapter = {
         text: {
             update:checkDiff(function ( node, val ) {
@@ -335,7 +361,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     fn.frag = node.ownerDocument.createDocumentFragment()
                 }
                 var length = fn.frag.childNodes.length, first;
-                console.log(val)
+                //  console.log(val)
                 if( val  ){
                     if(length)
                         node.appendChild( fn.frag )
@@ -390,12 +416,12 @@ $.define("avalon","data,attr,event,fx", function(){
     //if unless with foreach四个适配器都是使用template适配器
     "if,unless".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
-            update : function(node, field){
+            update : function(node, field, bindingContext){
                 $.bindingAdapter['template']['update'](node, function(){
                     return {
-                        showChildNodes: type == "if" ?  field() : !field()
+                        "if": type == "if" ?  field() : !field()
                     }
-                })
+                }, bindingContext)
             }
         }
     })
@@ -404,7 +430,6 @@ $.define("avalon","data,attr,event,fx", function(){
             $.bindingAdapter['template']['update'](node, function(){
                 var value = field()
                 return {
-                    showChildNodes: value, 
                     data: value
                 }
             })
@@ -419,11 +444,27 @@ $.define("avalon","data,attr,event,fx", function(){
             })
         }
     }
-     $.bindingAdapter[ "template" ] = {
-         update: function(node, obj ){
+    $.bindingAdapter[ "template" ] = {
+        update: function(node, field,  bindingContext){
+            var obj = field();
+            var frag = node.ownerDocument.createDocumentFragment(), el;
+            while(el = node.firstChild){
+                frag.appendChild(el)
+            }
+            var show = typeof obj["if"] === "boolean" ? obj["if"] : true;
+            if(show){
+                var elems = getChildren(frag)
+                node.appendChild(frag);
+                if(elems.length){
+                    if(obj.data){
+                       bindingContext = new $.bindingContext(obj.data, bindingContext)
+                    }
+                    setBindingsToChildren(elems, bindingContext)
+                }
+            }
 
-         }
-     }
+        }
+    }
     $.bindingAdapter.disable = {
         update: function( node, field){
             $.bindingAdapter.enable.update(node, function(){
@@ -468,6 +509,11 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             return string;
         }
+        //https://github.com/SteveSanderson/knockout/wiki/Asynchronous-Dependent-Observables 伟大的东西
+        //https://github.com/rniemeyer/knockout-kendo 一个UI库
+        //switch分支
+        //https://github.com/mbest/knockout-switch-case/blob/master/knockout-switch-case.js
+        //https://github.com/mbest/js-object-literal-parse/blob/master/js-object-literal-parse.js
         function parseObjectLiteral(objectLiteralString) {
             var str = objectLiteralString.trim();
             if (str.length < 3)
