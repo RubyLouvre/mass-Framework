@@ -226,8 +226,13 @@ $.define("avalon","data,attr,event,fx", function(){
         var callback = parseBindings( node, context )//保存到闭包中
         context = context instanceof $.viewModel ? context : new $.viewModel(context)
         var getBindings = function(){//用于取得数据隐藏
-            return callback( [ node, context ] )
+            try{
+                return callback( [ node, context ] )
+            }catch(e){
+                $.log(e)
+            }
         }
+
         var bindings = getBindings();
         var continueBindings = true;
         for(var key in bindings){
@@ -258,10 +263,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             if(typeof field !== "function"){
                 var bindings = getBindings();
-                field = function(){
-                    return  bindings[key]
-                }
-            //  bindings["@mass_fields"][key];
+                field = bindings["@mass_fields"][key];
             }
             if(initPhase == 0){
                 adapter.init && adapter.init.apply(adapter, args);
@@ -299,7 +301,7 @@ $.define("avalon","data,attr,event,fx", function(){
         },
         visible: {
             update:checkDiff(function ( node, val ) {
-                node.style.display = val ? "" : "none"
+                node.style.display = val ? "" : "none";
             })
         },
         enable: {
@@ -318,7 +320,7 @@ $.define("avalon","data,attr,event,fx", function(){
         },
         "class":{
             update:checkDiff(function ( node, val ) {
-                if (typeof value == "object") {
+                if (typeof val == "object") {
                     for (var className in val) {
                         var shouldHaveClass = val[className];
                         toggleClass(node, className, shouldHaveClass);
@@ -408,7 +410,6 @@ $.define("avalon","data,attr,event,fx", function(){
             }, context)
         }
     }
-
 
     $.bindingAdapter[ "template" ] = {
         update: function(node, field, context){
