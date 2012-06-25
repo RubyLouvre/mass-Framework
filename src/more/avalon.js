@@ -267,7 +267,7 @@ $.define("avalon","data,attr,event,fx", function(){
             var neo = field();
             if(initPhase === 0 || cur != neo){//只要是处理bool假值的比较 
                 cur = neo;
-                adapter.update && adapter.update(node, cur, field, context);
+                adapter.update && adapter.update(node, cur, field, context, symptom);
             }
             initPhase = 1;
         }
@@ -307,7 +307,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
 
-        "class":{
+        "class": {
             update:  function( node, val ){
                 if (typeof val == "object") {
                     for (var className in val) {
@@ -339,89 +339,79 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
         click: {
-            init: function( node, val, field, viewModel ){
+            init: function( node, val, field, context ){
                 $(node).bind("click",function(e){
-                    field.call( viewModel, e )
+                    field.call( context, e )
                 });
             }
         },
         checked: {
-            update:  function( node, val ){
+            init:  function( node, val, field ){
                 $(node).bind("change",function(){
                     field(node.checked);
                 });
             },
-            update:function(node, val,  field){
-                node.checked = !!field()
+            update:function(node, val ){
+                node.checked = !!val
             }
         }
     }
     //if unless with foreach四个适配器都是使用template适配器
-    "if,unless".replace($.rword, function( type ){
+    "if,unless,with,foreach".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
-            update : function(node, field, bindingContext){
+            update : function(node, val, field, context, symptom){
                 $.bindingAdapter['template']['update'](node, function(){
-                    return {
-                        "if": type == "if" ?  field() : !field()
+                    switch(type){
+                        case "if":
+                            return Number(!!val)
+                        case "unless":
+                            return Number(!val)
+                        case "with":
+                            return 1
+                        default:
+                            return 2
                     }
-                }, bindingContext)
-            }
+                }, context, symptom);
+            },
+            stopBindings: true
         }
     })
-    $.bindingAdapter["with"] = {
-        update : function(node, field){
-            $.bindingAdapter['template']['update'](node, function(){
-                var value = field()
-                return {
-                    "if":true,
-                    data: value
-                }
-            })
-        }
-    }
-    $.bindingAdapter[ "foreach" ] = {
-        update : function(node, field, context){
-            $.bindingAdapter['template']['update'](node, function(){
-                return {
-                    foreach: field()
-                }
-            }, context)
-        }
-    }
 
     $.bindingAdapter[ "template" ] = {
-        update: function(node, field, context){
-            var obj = field(), frag = node.ownerDocument.createDocumentFragment(), el;
+        update: function(node, data, field, context, symptom){
+            if(!symptom){//缓存,省得每次都创建
+                symptom.frag = node.ownerDocument.createDocumentFragment();
+            }
+            var number = field(), frag = symptom.frag, el;
             while((el = node.firstChild)){
                 frag.appendChild(el)
             }
-            if( !!obj["if"] ){ //处理with if unless适配器
+            if( number == 1 ){ //处理with if unless适配器
                 var elems = getChildren(frag)
-                node.appendChild(frag);
+                node.appendChild( frag );
                 if(elems.length){
-                    if(obj.data){
-                        context = new $.viewModel(obj.data, context)
+                    if( data ){
+                        context = new $.viewModel( data, context)
                     }
-                    return  setBindingsToChildren(elems, context)
+                    return setBindingsToChildren(elems, context)
                 }
             }
-            var collection = obj.foreach
-            if(collection && collection.length ){//处理foreach适配器
+            if( number == 2  && data && data.length ){//处理foreach适配器
                 var frags = [frag];//防止对fragment二次复制,引发safari的BUG
-                for(var i = 0, n = collection.length - 1 ; i < n ; i++){
-                    frags[frags.length] = frag.cloneNode(true)
+                for(var i = 0, n = data.length - 1 ; i < n ; i++){
+                    frags[ frags.length ] = frag.cloneNode(true)
                 }
-                for(i = 0; frag = frags[i];i++){
+                for( i = 0; frag = frags[i];i++ ){
                     (function( k ){
                         var subclass = new $.viewModel({
                             $index: k,
-                            $item: collection[ k ]
+                            $item: data[ k ]
                         }, context);
-                        subclass.extend( collection[ k ] )
+                        subclass.extend( data[ k ] )
                         .alias("$itemName", "$item")
                         .alias("$indexName", "$index");
-                        elems = getChildren(frag)
-                        node.appendChild(frag);
+                        elems = getChildren( frag )
+                        node.appendChild( frag );
                         if(elems.length){
                             setBindingsToChildren(elems, subclass )
                         }
@@ -429,18 +419,14 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }
             return void 0
-        }
+        },
+        stopBindings: true
     }
 
-    "if,with,unless,foreach,template".replace($.rword, function( type ){
-        $.bindingAdapter[ type ]["stopBindings"] = true;
-    })
 
     $.bindingAdapter.disable = {
-        update: function( node, field){
-            $.bindingAdapter.enable.update(node, function(){
-                return !field()
-            });
+        update: function( node, val ){
+            $.bindingAdapter.enable.update(node, !val);
         }
     }
     var getChildren = function(node){
@@ -452,7 +438,7 @@ $.define("avalon","data,attr,event,fx", function(){
         }
         return elems;
     }
-    $.bindingAdapter["css"] = $.bindingAdapter["css"]
+    $.bindingAdapter["css"] = $.bindingAdapter["class"]
     var toggleClass = function (node, className, shouldHaveClass) {
         var classes = (node.className || "").split(/\s+/);
         var hasClass = classes.indexOf( className) >= 0;//原className是否有这东西
