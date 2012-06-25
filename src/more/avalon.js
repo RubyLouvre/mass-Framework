@@ -361,15 +361,15 @@ $.define("avalon","data,attr,event,fx", function(){
         $.bindingAdapter[ type ] = {
             update : function(node, val, field, context, symptom){
                 $.bindingAdapter['template']['update'](node, function(){
-                    switch(type){
+                    switch(type){//返回结果可能为 -1 0 1 2 
                         case "if":
                             return !!val - 0;
                         case "unless":
                             return !val - 0;
                         case "with":
-                            return 1
-                        default:
                             return 2
+                        default:
+                            return -1
                     }
                 }, context, symptom);
             },
@@ -386,17 +386,17 @@ $.define("avalon","data,attr,event,fx", function(){
             while((el = node.firstChild)){
                 frag.appendChild(el)
             }
-            if( number == 1 ){ //处理with if unless适配器
+            if( number > 0 ){ //处理with if unless适配器
                 var elems = getChildren(frag)
                 node.appendChild( frag );
                 if(elems.length){
-                    if( data ){
+                    if( number == 2 ){
                         context = new $.viewModel( data, context)
                     }
                     return setBindingsToChildren(elems, context)
                 }
             }
-            if( number == 2  && data && data.length ){//处理foreach适配器
+            if( number < 0  && data && data.length ){//处理foreach适配器
                 var frags = [frag];//防止对fragment二次复制,引发safari的BUG
                 for(var i = 0, n = data.length - 1 ; i < n ; i++){
                     frags[ frags.length ] = frag.cloneNode(true)
