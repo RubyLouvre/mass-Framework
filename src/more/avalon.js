@@ -363,9 +363,9 @@ $.define("avalon","data,attr,event,fx", function(){
                 $.bindingAdapter['template']['update'](node, function(){
                     switch(type){
                         case "if":
-                            return Number(!!val)
+                            return !!val - 0;
                         case "unless":
-                            return Number(!val)
+                            return !val - 0;
                         case "with":
                             return 1
                         default:
