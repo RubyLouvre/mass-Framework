@@ -1924,7 +1924,6 @@
             function createBindingsStringEvaluator(bindingsString, scopesCount) {
                 //将属性访问器插入到JSON
                 var rewrittenBindings = " { " + ko.jsonExpressionRewriting.insertPropertyAccessorsIntoJson(bindingsString) + " } ";
-                // console.log(rewrittenBindings)
                 return ko.utils.buildEvalWithinScopeFunction(rewrittenBindings, scopesCount);
             }
         })();
@@ -2710,7 +2709,6 @@
 
                     var bindingValue = ko.utils.unwrapObservable(valueAccessor());
                     console.log("进入foreach分支");
-                    console.log(bindingValue)
                     // If bindingValue is the array, just pass it on its own
                     if ((!bindingValue) || typeof bindingValue.length == "number"){
                         return {
@@ -3126,6 +3124,7 @@
                     var templateName = typeof(template) == 'function' ? template(arrayValue) : template;
                     arrayItemContext = parentBindingContext['createChildContext'](ko.utils.unwrapObservable(arrayValue));
                     arrayItemContext['$index'] = index;
+                  
                     return executeTemplate(null, "ignoreTargetNode", templateName, arrayItemContext, options);
                 }
 
@@ -3145,7 +3144,7 @@
                     var filteredArray = ko.utils.arrayFilter(unwrappedArray, function(item) {
                         return options['includeDestroyed'] || item === undefined || item === null || !ko.utils.unwrapObservable(item['_destroy']);
                     });
-
+                    //这里是真正处理集合的地方~！
                     ko.utils.setDomNodeChildrenFromArrayMapping(targetNode, filteredArray, executeTemplateForArrayItem, options, activateBindingsCallback);
 
                 }, null, {
@@ -3198,9 +3197,7 @@
                     if ((typeof bindingValue === 'object') && ('foreach' in bindingValue)) { // Note: can't use 'in' operator on strings
                         // Render once for each data point (treating data set as empty if shouldDisplay==false)
                         var dataArray = (shouldDisplay && bindingValue['foreach']) || [];
-                        console.log(element);
-                        console.log(bindingValue)
-                        console.log(dataArray)
+                        console.log("template foreach分支")
                         templateSubscription = ko.renderTemplateForEach(templateName || element, dataArray, /* options: */ bindingValue, element, bindingContext);
                     //templateSubscription为一个computed
                     } else {
@@ -3322,6 +3319,7 @@
                     oldArray = oldArray || [];
                     newArray = newArray || [];
                     var editDistanceMatrix = calculateEditDistanceMatrix(oldArray, newArray, maxEditsToConsider);
+                    console.log(editDistanceMatrix)
                     return findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray);
                 }
             };
@@ -3400,11 +3398,12 @@
                 options = options || {};
                 var isFirstExecution = ko.utils.domData.get(domNode, lastMappingResultDomDataKey) === undefined;
                 var lastMappingResult = ko.utils.domData.get(domNode, lastMappingResultDomDataKey) || [];
+              
                 var lastArray = ko.utils.arrayMap(lastMappingResult, function (x) {
                     return x.arrayEntry;
                 });
                 var editScript = ko.utils.compareArrays(lastArray, array);
-
+                console.log(editScript)
                 // Build the new mapping result
                 var newMappingResult = [];
                 var lastMappingResultIndex = 0;

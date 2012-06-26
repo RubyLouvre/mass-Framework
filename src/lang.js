@@ -637,7 +637,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         }
     });
-    $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift"+
+    $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift,"+
         "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
     var NumberExt = {
         times: function(target, fn, bind) {

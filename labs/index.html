@@ -12,24 +12,71 @@
 
         </script>
 
-
     </head>
     <body>
-        <p>Send me spam: <input type="checkbox" data-bind="checked: wantsSpam" /></p>
-
-
+        <h4>People</h4>
+        <ul data-bind="foreach: people">
+            <li>
+                Name at position <span data-bind="text: $index"> </span>:
+                <span data-bind="text: name"> </span>
+                <a href="#" data-bind="click: $parent.removePerson">Remove</a>
+            </li>
+        </ul>
+        <button data-bind="click: addPerson">Add</button>
 
         <script type="text/javascript">
             $.require("ready,more/avalon", function(){
-                var viewModel = {
-                    wantsSpam: $.observable(true) // Initially checked
-                };
-                $.applyBindings(viewModel);
+
+                function AppViewModel() {
+                    var self = this;
+
+                    self.people = ko.observableArray([
+                        { name: 'Bert' },
+                        { name: 'Charles' },
+                        { name: 'Denise' }
+                    ]);
+
+                    self.addPerson = function() {
+                        self.people.push({ name: "New at " + new Date() });
+                    };
+
+                    self.removePerson = function() {
+                        self.people.remove(this);
+                    }
+                }
+                var model = new AppViewModel()
+                ko.applyBindings(model);
+
                 setTimeout(function(){
-                     viewModel.wantsSpam(false);
+                    model.people.push({ name: 'XXXX' },{ name: 'YYY' })
                 },1000)
+                var editScript  = [
+                    { status:"retained", value:{ name: 'Bert' }},
+                    { status:"retained", value:{ name: 'Charles' }},
+                    { status:"retained", value:{ name: 'Denise' }},
+                    { status:"added", value:{ name: 'New at Tue Jun 26 2012 16:16:05 GMT+0800' }}
+                ]
             });
         </script>
+        <table>
+            <tr>
+                <td>1</td>
+                <td>
+                    取得s的长度n，取得t的长度m
+                    如果n为0,返回m并退出
+                    如果m为0,返回n并退出
+                    构建一个n(行)*m（列）的二维矩阵
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>初始化第一行各个值为0..n<br/>初始化第一列各个值为0..m</td>
+            </tr>
+              <tr>
+                <td>3</td>
+                <td>初始化第一行各个值为0..n<br/>初始化第一列各个值为0..m</td>
+            </tr>
+        </table>
     </body>
 </html>
 
