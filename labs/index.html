@@ -15,18 +15,19 @@
 
     </head>
     <body>
-        <a data-bind="attr: { href: url, title: details }">
-            青蛙公主
-        </a>
+        <p>Send me spam: <input type="checkbox" data-bind="checked: wantsSpam" /></p>
+
+
 
         <script type="text/javascript">
             $.require("ready,more/avalon", function(){
                 var viewModel = {
-                    url: $.observable("http://yyets.com/showresource-juji-1300.html"),
-                    details: $.observable("全11回/2012春季日剧/YYeTs人人影视字幕组/"+
-                        "中日双语字幕[HR-HDTV,RMVB,720P]")
+                    wantsSpam: $.observable(true) // Initially checked
                 };
                 $.applyBindings(viewModel);
+                setTimeout(function(){
+                     viewModel.wantsSpam(false);
+                },1000)
             });
         </script>
     </body>

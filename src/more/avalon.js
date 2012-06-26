@@ -41,7 +41,7 @@ $.define("avalon","data,attr,event,fx", function(){
         },
         end : function(){//结束依赖收集
             var list = this.list;
-            this.begin();
+            this.list = this.labels = NaN;
             return list;
         },
         add : function(field){
@@ -228,7 +228,6 @@ $.define("avalon","data,attr,event,fx", function(){
                 $.log(e)
             }
         }
-
         var bindings = getBindings();
         var continueBindings = true;
         for(var key in bindings){
@@ -262,7 +261,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             if(initPhase === 0){
                 cur = field();
-                adapter.init && adapter.init(node, cur, field, context);
+                adapter.init && adapter.init(node, cur, field, context, symptom);
             }
             var neo = field();
             if(initPhase === 0 || cur != neo){//只要是处理bool假值的比较 
@@ -346,13 +345,28 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
         checked: {
-            init:  function( node, val, field ){
-                $(node).bind("change",function(){
-                    field(node.checked);
-                });
+            init:  function( node, val, field, context ){
+                if(context.$hoist && context.$hoist.nodeType == 1 ){
+                    var expr =  node.tagName +"['data-bind'="+node.getAttribute("data-bind") +"]";
+                    context.$hoisting && $(context.$hoist).delegate( expr,"change", function(){
+                        field(node.checked);
+                    });
+                }else{
+                    $(node).bind("change",function(){
+                        field(node.checked);
+                    });
+                }
             },
             update:function(node, val ){
-                node.checked = !!val
+                if ( node.type == "checkbox" ) {
+                    if (Array.isArray( val )) {
+                        node.checked = val.indexOf(node.value) >= 0;
+                    } else {
+                        node.checked = val;
+                    }
+                } else if (node.type == "radio") {
+                    node.checked = ( node.value == val );
+                }
             }
         }
     }
@@ -360,16 +374,16 @@ $.define("avalon","data,attr,event,fx", function(){
     "if,unless,with,foreach".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
             update : function(node, val, field, context, symptom){
-                $.bindingAdapter['template']['update'](node, function(){
+                $.bindingAdapter['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2 
                         case "if":
                             return !!val - 0;
                         case "unless":
                             return !val - 0;
                         case "with":
-                            return 2
+                            return 2;
                         default:
-                            return -1
+                            return -1;
                     }
                 }, context, symptom);
             },
@@ -379,7 +393,8 @@ $.define("avalon","data,attr,event,fx", function(){
 
     $.bindingAdapter[ "template" ] = {
         update: function(node, data, field, context, symptom){
-            if(!symptom){//缓存,省得每次都创建
+            console.log(symptom)
+            if( !symptom.frag ){//缓存,省得每次都创建
                 symptom.frag = node.ownerDocument.createDocumentFragment();
             }
             var number = field(), frag = symptom.frag, el;
@@ -396,20 +411,25 @@ $.define("avalon","data,attr,event,fx", function(){
                     return setBindingsToChildren(elems, context)
                 }
             }
-            if( number < 0  && data && data.length ){//处理foreach适配器
+            if( number < 0  && data && isFinite(data.length) ){//处理foreach适配器
+                console.log(data)
                 var frags = [frag];//防止对fragment二次复制,引发safari的BUG
                 for(var i = 0, n = data.length - 1 ; i < n ; i++){
                     frags[ frags.length ] = frag.cloneNode(true)
                 }
                 for( i = 0; frag = frags[i];i++ ){
                     (function( k ){
-                        var subclass = new $.viewModel({
+                        var subclass = new $.viewModel(data[ k ], context);
+                        subclass.extend( {
                             $index: k,
-                            $item: data[ k ]
-                        }, context);
-                        subclass.extend( data[ k ] )
-                        .alias("$itemName", "$item")
+                            $item: data[ k ],
+                            $hoist: node,
+                            $hoisting: !k
+                        } )
+                        .alias("$itemName", "$data")
                         .alias("$indexName", "$index");
+
+                       
                         elems = getChildren( frag )
                         node.appendChild( frag );
                         if(elems.length){
