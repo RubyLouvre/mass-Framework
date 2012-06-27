@@ -563,6 +563,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 oldArray = oldArray || [];
                 newArray = newArray || [];
                 var editDistanceMatrix = calculateEditDistanceMatrix(oldArray, newArray, maxEditsToConsider);
+                cnosole.log(editDistanceMatrix)
                 return findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray);
             }
         };

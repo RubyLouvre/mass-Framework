@@ -45,18 +45,162 @@
                     }
                 }
                 var model = new AppViewModel()
-                ko.applyBindings(model);
-
-                setTimeout(function(){
-                    model.people.push({ name: 'XXXX' },{ name: 'YYY' })
-                },1000)
-                var editScript  = [
-                    { status:"retained", value:{ name: 'Bert' }},
-                    { status:"retained", value:{ name: 'Charles' }},
-                    { status:"retained", value:{ name: 'Denise' }},
-                    { status:"added", value:{ name: 'New at Tue Jun 26 2012 16:16:05 GMT+0800' }}
-                ]
+                //      ko.applyBindings(model);
             });
+            var changeArray = function(a){
+                var ret = []
+                for(var i=0, n = a.length; i<n;i++){
+                    ret[ret.length] = {
+                        index:i,
+                        value:a[i]
+                    }
+                }
+                return ret;
+            }
+            var actionScript = function( a, b ){
+                var prev = changeArray(a);
+                if(b.length){
+                    prev.forEach(function(obj){
+                        obj.action = "add"
+                    })
+                }else{
+                    prev.forEach(function(obj, i){
+                        obj.action = "add"
+                    })
+                }
+                return prev;
+            }
+
+           
+            // 一个简单的Levenshtein distance算法
+            //编辑距离就是用来计算从原串（s）转换到目标串(t)所需要的最少的插入，删除和替换的数目，
+            //在NLP中应用比较广泛，如一些评测方法中就用到了（wer,mWer等），同时也常用来计算你对原文本所作的改动数。
+            function calculateEditDistanceMatrix(oldArray, newArray, maxAllowedDistance) {
+                var distances = [];
+                for (var i = 0; i <= newArray.length; i++)
+                    distances[i] = [];
+
+                // Top row - transform old array into empty array via deletions
+                for (var i = 0, j = Math.min(oldArray.length, maxAllowedDistance); i <= j; i++)
+                    distances[0][i] = i;
+
+                // Left row - transform empty array into new array via additions
+                for (var i = 1, j = Math.min(newArray.length, maxAllowedDistance); i <= j; i++) {
+                    distances[i][0] = i;
+                }
+
+                // Fill out the body of the array
+                var oldIndex, oldIndexMax = oldArray.length, newIndex, newIndexMax = newArray.length;
+                for (oldIndex = 1; oldIndex <= oldIndexMax; oldIndex++) {
+                    var newIndexMinForRow = Math.max(1, oldIndex - maxAllowedDistance);
+                    var newIndexMaxForRow = Math.min(newIndexMax, oldIndex + maxAllowedDistance);
+                    for (newIndex = newIndexMinForRow; newIndex <= newIndexMaxForRow; newIndex++) {
+                        if (oldArray[oldIndex - 1] === newArray[newIndex - 1])
+                            distances[newIndex][oldIndex] = distances[newIndex - 1][oldIndex - 1];
+                        else {
+                            var northDistance = distances[newIndex - 1][oldIndex] === undefined ? Number.MAX_VALUE : distances[newIndex - 1][oldIndex] + 1;
+                            var westDistance = distances[newIndex][oldIndex - 1] === undefined ? Number.MAX_VALUE : distances[newIndex][oldIndex - 1] + 1;
+                            distances[newIndex][oldIndex] = Math.min(northDistance, westDistance);
+                        }
+                    }
+                }
+                console.log(distances.join("\n"))
+                return distances;
+            }
+
+            function findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray) {
+                var oldIndex = oldArray.length;
+                var newIndex = newArray.length;
+                var editScript = [];
+                var maxDistance = editDistanceMatrix[newIndex][oldIndex];
+                if (maxDistance === undefined)
+                    return null; // maxAllowedDistance must be too small
+                while ((oldIndex > 0) || (newIndex > 0)) {
+                    var me = editDistanceMatrix[newIndex][oldIndex];
+                    var distanceViaAdd = (newIndex > 0) ? editDistanceMatrix[newIndex - 1][oldIndex] : maxDistance + 1;
+                    var distanceViaDelete = (oldIndex > 0) ? editDistanceMatrix[newIndex][oldIndex - 1] : maxDistance + 1;
+                    var distanceViaRetain = (newIndex > 0) && (oldIndex > 0) ? editDistanceMatrix[newIndex - 1][oldIndex - 1] : maxDistance + 1;
+                    if ((distanceViaAdd === undefined) || (distanceViaAdd < me - 1)) distanceViaAdd = maxDistance + 1;
+                    if ((distanceViaDelete === undefined) || (distanceViaDelete < me - 1)) distanceViaDelete = maxDistance + 1;
+                    if (distanceViaRetain < me - 1) distanceViaRetain = maxDistance + 1;
+
+                    if ((distanceViaAdd <= distanceViaDelete) && (distanceViaAdd < distanceViaRetain)) {
+                        editScript.push({
+                            status: "added",
+                            value: newArray[newIndex - 1]
+                        });
+                        newIndex--;
+                    } else if ((distanceViaDelete < distanceViaAdd) && (distanceViaDelete < distanceViaRetain)) {
+                        editScript.push({
+                            status: "deleted",
+                            value: oldArray[oldIndex - 1]
+                        });
+                        oldIndex--;
+                    } else {
+                        editScript.push({
+                            status: "retained",
+                            value: oldArray[oldIndex - 1]
+                        });
+                        newIndex--;
+                        oldIndex--;
+                    }
+                }
+                return editScript.reverse();
+            }
+            //用于比较一个对象数组
+            var compareArrays = function (oldArray, newArray, maxEditsToConsider) {
+                if (maxEditsToConsider === undefined) {
+                    return compareArrays(oldArray, newArray, 1)             // First consider likely case where there is at most one edit (very fast)
+                        || compareArrays(oldArray, newArray, 10)                // If that fails, account for a fair number of changes while still being fast
+                        || compareArrays(oldArray, newArray, Number.MAX_VALUE); // Ultimately give the right answer, even though it may take a long time
+                } else {
+                    oldArray = oldArray || [];
+                    newArray = newArray || [];
+                    var editDistanceMatrix = calculateEditDistanceMatrix(oldArray, newArray, maxEditsToConsider);
+                    console.log(editDistanceMatrix.join("\n"))
+                    //   cnosole.log(editDistanceMatrix)
+                    return findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray);
+                }
+            };
+            console.log("==========")
+            //  var a = compareArrays("GUMBO","AAMBOLD");
+            //http://www.cnblogs.com/pandora/archive/2009/12/20/levenshtein_distance.html
+            //https://gist.github.com/982927
+            var getEditDistance = function(a, b){
+                //   if(a.length == 0) return b.length;
+                //   if(b.length == 0) return a.length;
+                var matrix = [];
+                // 初始化一个矩阵,行数为b,列数为a
+                var i,j//行数为b
+                for(i = 0; i <= b.length; i++){
+                    matrix[i] = [i];
+                }
+                for(j = 0; j <= a.length; j++){
+                    matrix[0][j] = j;
+                }
+                // 填空矩阵
+                for(i = 1; i <= b.length; i++){
+                    for(j = 1; j <= a.length; j++){
+                        if(b.charAt(i-1) == a.charAt(j-1)){
+                            matrix[i][j] = matrix[i-1][j-1];
+                        } else {
+                            matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
+                            Math.min(matrix[i][j-1] + 1, // 插入insertion
+                            matrix[i-1][j] + 1)); //删除 deletion
+                        }
+                    }
+                }
+                console.log(matrix.join("\n"))
+                return matrix[b.length][a.length];
+            };
+            getEditDistance( "AA","AA")
+            console.log("===================")
+            getEditDistance( "AA","AB")
+            console.log("===================")
+            getEditDistance( "AA","BA")
+            // levenshteinDistance( "GUMBO","AAMBOLD",10)
+            //  console.log(a)
+
         </script>
         <table>
             <tr>
@@ -72,11 +216,24 @@
                 <td>2</td>
                 <td>初始化第一行各个值为0..n<br/>初始化第一列各个值为0..m</td>
             </tr>
-              <tr>
+            <tr>
                 <td>3</td>
                 <td>初始化第一行各个值为0..n<br/>初始化第一列各个值为0..m</td>
             </tr>
         </table>
+        算法证明
+
+        <p>这个算法计算的是将source[1…i]转换为target[1…j]（例如将kitten转换为sitting）所需最少的操作数（也就是所谓的编辑距离），这个操作数被保存在d[i,j]（d代表的就是上图所示的二维数组）中。
+            在第一行与第一列肯定是正确的，这也很好理解，例如我们将kitten转换为空字符串，我们需要进行的操作数为kitten的长度（所进行的操作为将kitten所有的字符丢弃）。</p>
+        <p>我们对字符可能进行的操作有三种：<p>
+        <ul>
+            <li>如果target的前半部分等于source, 那么我们直接把t后面的字符直接加在s中就行了,所需步骤为target.length - source.length + 1步!</li>
+            <li>如果target只为source的一部分,并集中在,那么直接把多出部分的前半部分等于source, 那么我们直接把t后面的字符直接加在s中就行了,所需步骤为target.length - source.length + 1步!</li>
+        </ul>
+        如果我们可以使用k个操作数把s[1…i-1]转换为t[1…j]，我们只需要把s[i]从最后删除就可以完成转换，操作数为k+1
+        如果我们可以使用k个操作数把s[1…i-1]转换为t[1…j-1]，我们只需要在需要的情况下（s[i] != t[j]）把s[i]替换为t[j]，所需的操作数为k+cost（cost代表是否需要转换，如果s[i]==t[j]，则cost为0，否则为1）。
+        将s[1…n]转换为t[1…m]当然需要将所有的s转换为所有的t，所以，d[n,m]（表格的右下角）就是我们所需的结果。
+        这个证明过程只能证明我们可以得到结果，但并没有证明结果是最小的（即我们得到的是最少的转换步骤）。所以我们引进了另外一个算法，即d[i,j]保存的是上述三种操作中操作数最小的一种。这就保证了我们获得的结果是最小的操作数（可使用argument by contradiction进行证明，离题太远，忽略。。）
     </body>
 </html>
 
