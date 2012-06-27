@@ -182,11 +182,11 @@
                 for(i = 1; i <= b.length; i++){
                     for(j = 1; j <= a.length; j++){
                         if(b.charAt(i-1) == a.charAt(j-1)){
-                            matrix[i][j] = matrix[i-1][j-1];
+                            matrix[i][j] = matrix[i-1][j-1];//没有改变
                         } else {
                             matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
-                            Math.min(matrix[i][j-1] + 1, // 插入insertion
-                            matrix[i-1][j] + 1)); //删除 deletion
+                            matrix[i][j-1] + 1, // 插入insertion
+                            matrix[i-1][j] + 1); //删除 deletion
                         }
                     }
                 }
@@ -198,8 +198,8 @@
             getEditDistance( "AA","AB")
             console.log("===================")
             getEditDistance( "AA","BA")
-            // levenshteinDistance( "GUMBO","AAMBOLD",10)
-            //  console.log(a)
+            console.log("===================")
+            getEditDistance( "AA","CC")
 
         </script>
         <table>
