@@ -202,9 +202,10 @@
                 var i =  Math.max(x,y);
                 var scripts = [], action
                 while(scripts.length != i ){
-                    var cur = matrix[y][x];
+                    var cur = matrix[y][x];//如果matrix[y]为undefined
                     var top = matrix[y-1][x]
                     var left = matrix[y][x-1]
+                    console.log("top["+(y-1)+"]["+x+"] : " + top+"    left["+y+"]["+(x-1)+"] : "+left+"   cur["+y+"]["+x+"]: "+cur)
                     if(top == left){
                         scripts[scripts.length] = {
                             action: top == cur ?  "update" : "retain"
@@ -215,7 +216,7 @@
                             cost--;
                         }
                     }else{
-                        //console.log( (top +1) +" VS " + cur )
+                      
                         if( top + 1 == cur ){
                             action = "add";
                             y--;
@@ -243,9 +244,9 @@
             // console.log("===================")
             //   getEditDistance( "ABCDE","ABCD");
             console.log("===================")
-            var old = "ABCDE", neo = "BCDEK"
+            var old = "ABCDE", neo = "OBCDEK"
             var m = getEditDistance( old, neo);
-             getEditScripts( old, neo,m)
+            getEditScripts( old, neo,m)
             //  console.log("===================")
             // getEditDistance( "AAA","CCC");
             //    var matrix = [[],[]];
