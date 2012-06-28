@@ -263,21 +263,21 @@ $.define("lang","lang,more/spec",function( $$ ){
             var b = $.lang(a).clone().value();
             expect( a ).same( b );
             expect( a ).not( b );
-            expect( $.lang(a).first().value() ).eq('aaa');
-            expect( $.lang(a).first(function(el){
-                return el >1
-            }).value() ).eq(2);
-            expect( $.lang(a).last().value() ).same({
-                2:2
-            });
-            expect( $.lang(a).last(function(el){
-                return el >1
-            }).value() ).eq(4);
+//            expect( $.lang(a).first().value() ).eq('aaa');
+//            expect( $.lang(a).first(function(el){
+//                return el >1
+//            }).value() ).eq(2);
+//            expect( $.lang(a).last().value() ).same({
+//                2:2
+//            });
+//            expect( $.lang(a).last(function(el){
+//                return el >1
+//            }).value() ).eq(4);
             expect( $.lang(a).contains(2).value() ).ok();
             expect( $.lang(a).diff([1,2,3]).value() ).same(["aaa",undefined,4,null,{
                 2:2
             }]);
-
+            expect( $.lang([1,2,3,4,5]).inGroupsOf( 3, false)  ).eq(2)
             expect( $.lang(b).remove(1).value() ).same([1]);
             expect( $.lang(b).removeAt(1).value() ).same([2]);
             expect( $.lang(a).shuffle().value() ).log();

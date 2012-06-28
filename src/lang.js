@@ -490,32 +490,29 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return target;
         },
-        //取得第一个元素或对它进行操作
-        first: function( target, fn, scope ){
-            if($.type(fn,"Function")){
-                for(var i=0, n = target.length; i < n; i++){
-                    if(fn.call( scope,target[i], i, target )){
-                        return target[i];
+        //inGroupsOf([1,2,3,4], 3, false);
+        //http://alternateidea.com/blog/articles/2006/9/26/more-ruby-in-prototype
+        inGroupsOf : function(array, number, fillWith) {
+            var number_of_groups = Math.ceil(array.length / number),
+            groups = [],
+            value,i,j;
+            for (i=0; i < number_of_groups; i++) {
+                groups[i] = [];
+                for (j=0; j < number; j++) {
+                    value = array[i * number + j];
+                    if (value === undefined) {
+                        if (fillWith !== false) {
+                            groups[i][j] = fillWith;
+                        }
+                    } else {
+                        groups[i][j] = value;
                     }
                 }
-                return null;
-            }else{
-                return target[0];
             }
+            return groups;
         },
-        //取得最后一个元素或对它进行操作
-        last: function( target, fn, scope ) {
-            if($.type(fn,"Function")){
-                for (var i=target.length-1; i > -1; i--) {
-                    if (fn.call(scope, target[i], i, target)) {
-                        return target[i];
-                    }
-                }
-                return null;
-            }else{
-                return target[target.length-1];
-            }
-        },
+
+
         //判断数组是否包含此元素
         contains: function ( target, item ) {
             return !!~target.indexOf(item) ;
@@ -790,6 +787,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
 2012.3.17 v4 重构语言链对象
 2012.5.21 添加$.Array.each方法,重构$.Object.each与$.each方法;
 2012.6.5 更新camelize，escapeHTML, unescapeHTML,stripTags,stripScripts,wbr方法 v4
+2012.6.29 添加inGroupsOf，去掉last first
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070

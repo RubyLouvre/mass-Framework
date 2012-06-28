@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        <title>array.inGroupsOf</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                 $.require("lang",function(){
+                    var a = $.lang([1,2,3,4,5,6,7]);
+                    $.log(a.inGroupsOf(3,"XXX"), true);//[[1,2,3],[4,5,6],[7,XXX,XXX]]
+
+                });
+            }
+        </script>
+    </head>
+    <body>
+    <article>
+        <h3>$.Array.inGroupsOf(array, number, fillWith)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>将数组按number分成一组，返回一个二维数组，如果最后一组不足number个，将用fillWith填充</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>array</dt>
+            <dd>目标数组。</dd>
+            <dt>number</dt>
+            <dd>划分为多少个组。</dd>
+            <dt>fillWith</dt>
+            <dd>最后一个组个数不足时用它来填空。</dd>
+        </dl>
+        <fieldset><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+                $.require("lang",function(){
+                    var a = $.lang([1,2,3,4,5,6,7]);
+                    $.log(a.inGroupsOf(3,"XXX"), true);//[[1,2,3],[4,5,6],[7,XXX,XXX]]
+                 
+                });
+            </pre>
+
+            <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
+        </fieldset>
+        <p>两种不同的实现：</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+ inGroupsOf = function(array, number, fillWith) {
+    var number_of_groups = Math.ceil(array.length / number),
+        groups = [],
+        value,i,j;
+
+    for (i=0; i < number_of_groups; i++) {
+      groups[i] = [];
+      for (j=0; j < number; j++) {
+        value = array[i * number + j];
+        if (value === undefined) {
+          if (fillWith !== false) {
+            groups[i][j] = fillWith;
+          }
+        } else {
+          groups[i][j] = value;
+        }
+      }
+    }
+
+    return groups;
+  };
+
+inGroupsOf = function(array, number, fillWith) {
+       fillWith = fillWith || null;
+       var index = -number, slices = [];
+
+       if (number < 1) return array;
+
+       while ((index += number) < array.length) {
+           var s = array.slice(index, index + number);
+           while(s.length < number)
+               s.push(fillWith);
+           slices.push(s);
+       }
+       return slices;
+   };
+        </pre>
+
+
+        <p>相关链接：https://github.com/andrewplummer/Sugar/blob/master/lib/core.js</p>
+    </article>
+</body>
+</html>
+

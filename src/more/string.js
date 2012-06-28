@@ -145,4 +145,33 @@ $.define("string", function(){
         });
         return parts.length ? parts.join('&') : '';
     }
+
+    $.mix($.Array,{
+        //取得第一个元素或对它进行操作
+        first: function( target, fn, scope ){
+            if($.type(fn,"Function")){
+                for(var i=0, n = target.length; i < n; i++){
+                    if(fn.call( scope,target[i], i, target )){
+                        return target[i];
+                    }
+                }
+                return null;
+            }else{
+                return target[0];
+            }
+        },
+        //取得最后一个元素或对它进行操作
+        last: function( target, fn, scope ) {
+            if($.type(fn,"Function")){
+                for (var i=target.length-1; i > -1; i--) {
+                    if (fn.call(scope, target[i], i, target)) {
+                        return target[i];
+                    }
+                }
+                return null;
+            }else{
+                return target[target.length-1];
+            }
+        }
+    });
 });
