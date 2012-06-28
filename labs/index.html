@@ -166,22 +166,22 @@
             //  var a = compareArrays("GUMBO","AAMBOLD");
             //http://www.cnblogs.com/pandora/archive/2009/12/20/levenshtein_distance.html
             //https://gist.github.com/982927
-            var getEditDistance = function(a, b){
+            var getEditDistance = function(from, to){
                 //   if(a.length == 0) return b.length;
                 //   if(b.length == 0) return a.length;
-                var matrix = [];
+                var matrix = [], fn = from.length, tn = to.length;
                 // 初始化一个矩阵,行数为b,列数为a
-                var i,j//行数为b
-                for(i = 0; i <= b.length; i++){
-                    matrix[i] = [i];
+                var i,j
+                for(i = 0; i <= tn; i++){
+                    matrix[i] = [i];//设置第一列的值
                 }
-                for(j = 0; j <= a.length; j++){
-                    matrix[0][j] = j;
+                for(j = 0; j <= fn; j++){
+                    matrix[0][j] = j;//设置第一行的值
                 }
                 // 填空矩阵
-                for(i = 1; i <= b.length; i++){
-                    for(j = 1; j <= a.length; j++){
-                        if(b.charAt(i-1) == a.charAt(j-1)){
+                for(i = 1; i <= tn; i++){
+                    for(j = 1; j <= fn; j++){
+                        if(to.charAt(i-1) == from.charAt(j-1)){
                             matrix[i][j] = matrix[i-1][j-1];//没有改变
                         } else {
                             matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
@@ -191,49 +191,69 @@
                     }
                 }
                 console.log(matrix.join("\n"))
-                return matrix[b.length][a.length];
+                return matrix
             };
-            getEditDistance( "AA","AA")
+            var getEditScripts = function(from, to, matrix){
+                var x = from.length;
+                var y = to.length;
+               
+                var cost = matrix[y][x];
+                console.log(cost)
+                var i =  Math.max(x,y);
+                var scripts = [], action
+                while(scripts.length != i ){
+                    var cur = matrix[y][x];
+                    var top = matrix[y-1][x]
+                    var left = matrix[y][x-1]
+                    if(top == left){
+                        scripts[scripts.length] = {
+                            action: top == cur ?  "update" : "retain"
+                        }
+                        x--;
+                        y--
+                        if(top == cur){
+                            cost--;
+                        }
+                    }else{
+                        //console.log( (top +1) +" VS " + cur )
+                        if( top + 1 == cur ){
+                            action = "add";
+                            y--;
+                            cost--;
+                        }
+                        if( left + 1 == cur){
+                            action = "delete";
+                            x--;
+                            cost--;
+                        }
+                        //console.log(matrix[y][x])
+                        scripts[scripts.length] = {
+                            action:  action
+                        }
+                    }
+                }
+                console.log(scripts.reverse())
+
+            }
+
+            //  var m = getEditDistance( "AA","AA");
+            //  getEditScripts("AA","AA",m)
+            //   console.log("===================")
+            //   getEditDistance( "ABCD","ADCD")
+            // console.log("===================")
+            //   getEditDistance( "ABCDE","ABCD");
             console.log("===================")
-            getEditDistance( "AA","AB")
-            console.log("===================")
-            getEditDistance( "AA","BA")
-            console.log("===================")
-            getEditDistance( "AA","CC")
+            var old = "ABCDE", neo = "BCDEK"
+            var m = getEditDistance( old, neo);
+             getEditScripts( old, neo,m)
+            //  console.log("===================")
+            // getEditDistance( "AAA","CCC");
+            //    var matrix = [[],[]];
+            //倒序
+            //如果它等于上边的与左边的说明发现改变
 
         </script>
-        <table>
-            <tr>
-                <td>1</td>
-                <td>
-                    取得s的长度n，取得t的长度m
-                    如果n为0,返回m并退出
-                    如果m为0,返回n并退出
-                    构建一个n(行)*m（列）的二维矩阵
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>初始化第一行各个值为0..n<br/>初始化第一列各个值为0..m</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>初始化第一行各个值为0..n<br/>初始化第一列各个值为0..m</td>
-            </tr>
-        </table>
-        算法证明
 
-        <p>这个算法计算的是将source[1…i]转换为target[1…j]（例如将kitten转换为sitting）所需最少的操作数（也就是所谓的编辑距离），这个操作数被保存在d[i,j]（d代表的就是上图所示的二维数组）中。
-            在第一行与第一列肯定是正确的，这也很好理解，例如我们将kitten转换为空字符串，我们需要进行的操作数为kitten的长度（所进行的操作为将kitten所有的字符丢弃）。</p>
-        <p>我们对字符可能进行的操作有三种：<p>
-        <ul>
-            <li>如果target的前半部分等于source, 那么我们直接把t后面的字符直接加在s中就行了,所需步骤为target.length - source.length + 1步!</li>
-            <li>如果target只为source的一部分,并集中在,那么直接把多出部分的前半部分等于source, 那么我们直接把t后面的字符直接加在s中就行了,所需步骤为target.length - source.length + 1步!</li>
-        </ul>
-        如果我们可以使用k个操作数把s[1…i-1]转换为t[1…j]，我们只需要把s[i]从最后删除就可以完成转换，操作数为k+1
-        如果我们可以使用k个操作数把s[1…i-1]转换为t[1…j-1]，我们只需要在需要的情况下（s[i] != t[j]）把s[i]替换为t[j]，所需的操作数为k+cost（cost代表是否需要转换，如果s[i]==t[j]，则cost为0，否则为1）。
-        将s[1…n]转换为t[1…m]当然需要将所有的s转换为所有的t，所以，d[n,m]（表格的右下角）就是我们所需的结果。
-        这个证明过程只能证明我们可以得到结果，但并没有证明结果是最小的（即我们得到的是最少的转换步骤）。所以我们引进了另外一个算法，即d[i,j]保存的是上述三种操作中操作数最小的一种。这就保证了我们获得的结果是最小的操作数（可使用argument by contradiction进行证明，离题太远，忽略。。）
     </body>
 </html>
 
