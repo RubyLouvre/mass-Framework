@@ -395,9 +395,10 @@ $.define("avalon","data,attr,event,fx", function(){
         update: function(node, data, field, context, symptom){
             console.log(symptom)
             if( !symptom.frag ){//缓存,省得每次都创建
-                symptom.frag = node.ownerDocument.createDocumentFragment();
+                symptom.fragment = node.ownerDocument.createDocumentFragment();
                 symptom.childNodes = node.childNodes;
-                console.log(symptom.childNodes)
+                symptom.prevData = [];
+            // console.log(symptom.childNodes)
             }
             var number = field(), frag = symptom.frag, el;
             node.normalize();
@@ -415,6 +416,20 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach适配器
+                var actions =  $.bindingAdapter[ "template" ].getEditScripts(symptom.prevData, data);
+                for (var i = 0, j = actions.length; i < j; i++) {
+                    switch(actions.action){
+                        case "add":
+                            actions.fragment = symptom.fragment;
+                            symptom.childNodes = node.childNodes;
+
+
+
+                         
+                    }
+                }
+
+
                 console.log(data)
                 var frags = [frag];//防止对fragment二次复制,引发safari的BUG
                 for(var i = 0, n = data.length - 1 ; i < n ; i++){
@@ -480,93 +495,108 @@ $.define("avalon","data,attr,event,fx", function(){
         // 一个简单的Levenshtein distance算法
         //编辑距离就是用来计算从原串（s）转换到目标串(t)所需要的最少的插入，删除和替换的数目，
         //在NLP中应用比较广泛，如一些评测方法中就用到了（wer,mWer等），同时也常用来计算你对原文本所作的改动数。
-        function calculateEditDistanceMatrix(oldArray, newArray, maxAllowedDistance) {
-            var distances = [];
-            for (var i = 0; i <= newArray.length; i++)
-                distances[i] = [];
+        //http://www.cnblogs.com/pandora/archive/2009/12/20/levenshtein_distance.html
+        //https://gist.github.com/982927
+        //http://www.blogjava.net/phyeas/archive/2009/01/10/250807.html
 
-            // Top row - transform old array into empty array via deletions
-            for (var i = 0, j = Math.min(oldArray.length, maxAllowedDistance); i <= j; i++)
-                distances[0][i] = i;
-
-            // Left row - transform empty array into new array via additions
-            for (var i = 1, j = Math.min(newArray.length, maxAllowedDistance); i <= j; i++) {
-                distances[i][0] = i;
+        //通过levenshtein distance算法返回一个矩阵，matrix[y][x]为最短的编辑长度
+        var getEditDistance = function(from, to){
+            var matrix = [], fn = from.length, tn = to.length;
+            // 初始化一个矩阵,行数为b,列数为a
+            var i,j
+            for(i = 0; i <= tn; i++){
+                matrix[i] = [i];//设置第一列的值
             }
-
-            // Fill out the body of the array
-            var oldIndex, oldIndexMax = oldArray.length, newIndex, newIndexMax = newArray.length;
-            var distanceViaAddition, distanceViaDeletion;
-            for (oldIndex = 1; oldIndex <= oldIndexMax; oldIndex++) {
-                var newIndexMinForRow = Math.max(1, oldIndex - maxAllowedDistance);
-                var newIndexMaxForRow = Math.min(newIndexMax, oldIndex + maxAllowedDistance);
-                for (newIndex = newIndexMinForRow; newIndex <= newIndexMaxForRow; newIndex++) {
-                    if (oldArray[oldIndex - 1] === newArray[newIndex - 1])
-                        distances[newIndex][oldIndex] = distances[newIndex - 1][oldIndex - 1];
-                    else {
-                        var northDistance = distances[newIndex - 1][oldIndex] === undefined ? Number.MAX_VALUE : distances[newIndex - 1][oldIndex] + 1;
-                        var westDistance = distances[newIndex][oldIndex - 1] === undefined ? Number.MAX_VALUE : distances[newIndex][oldIndex - 1] + 1;
-                        distances[newIndex][oldIndex] = Math.min(northDistance, westDistance);
+            for(j = 0; j <= fn; j++){
+                matrix[0][j] = j;//设置第一行的值
+            }
+            // 填空矩阵
+            for(i = 1; i <= tn; i++){
+                for(j = 1; j <= fn; j++){
+                    if(to.charAt(i-1) == from.charAt(j-1)){
+                        matrix[i][j] = matrix[i-1][j-1];//没有改变
+                    } else {
+                        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
+                            matrix[i][j-1] + 1, // 插入insertion
+                            matrix[i-1][j] + 1); //删除 deletion
                     }
                 }
             }
 
-            return distances;
-        }
-
-        function findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray) {
-            var oldIndex = oldArray.length;
-            var newIndex = newArray.length;
-            var editScript = [];
-            var maxDistance = editDistanceMatrix[newIndex][oldIndex];
-            if (maxDistance === undefined)
-                return null; // maxAllowedDistance must be too small
-            while ((oldIndex > 0) || (newIndex > 0)) {
-                var me = editDistanceMatrix[newIndex][oldIndex];
-                var distanceViaAdd = (newIndex > 0) ? editDistanceMatrix[newIndex - 1][oldIndex] : maxDistance + 1;
-                var distanceViaDelete = (oldIndex > 0) ? editDistanceMatrix[newIndex][oldIndex - 1] : maxDistance + 1;
-                var distanceViaRetain = (newIndex > 0) && (oldIndex > 0) ? editDistanceMatrix[newIndex - 1][oldIndex - 1] : maxDistance + 1;
-                if ((distanceViaAdd === undefined) || (distanceViaAdd < me - 1)) distanceViaAdd = maxDistance + 1;
-                if ((distanceViaDelete === undefined) || (distanceViaDelete < me - 1)) distanceViaDelete = maxDistance + 1;
-                if (distanceViaRetain < me - 1) distanceViaRetain = maxDistance + 1;
-
-                if ((distanceViaAdd <= distanceViaDelete) && (distanceViaAdd < distanceViaRetain)) {
-                    editScript.push({
-                        status: "added",
-                        value: newArray[newIndex - 1]
-                    });
-                    newIndex--;
-                } else if ((distanceViaDelete < distanceViaAdd) && (distanceViaDelete < distanceViaRetain)) {
-                    editScript.push({
-                        status: "deleted",
-                        value: oldArray[oldIndex - 1]
-                    });
-                    oldIndex--;
-                } else {
-                    editScript.push({
-                        status: "retained",
-                        value: oldArray[oldIndex - 1]
-                    });
-                    newIndex--;
-                    oldIndex--;
+            return matrix
+        };
+        //返回具体的编辑步骤
+        $.bindingAdapter[ "template" ].getEditScripts = function(from, to, matrix){
+            var x = from.length;
+            var y = to.length;
+            var cost = matrix[y][x];
+            var scripts = [], i = 0;
+            if(x == 0){//如果原数组为0,那么新数组的都是新增的
+                for( ; i < y; i++){
+                    scripts[scripts.length] = {
+                        action: "add",
+                        value: to[i]
+                    }
+                }
+                return scripts;
+            }
+            if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
+                for( ; i < x; i++){
+                    scripts[scripts.length] = {
+                        action: "delete",
+                        value: from[i]
+                    }
+                }
+                return scripts;
+            }
+            //把两个JSON合并在一起
+            console.log("原字符串： "+from)
+            console.log("目标字符串： "+to)
+            console.log("最短的编辑长度： "+cost)
+            console.log("比较矩阵： ")
+            console.log(matrix.join("\n"))
+            i =  Math.max(x,y);
+            var flag = true, action;
+            while(scripts.length != i ){
+                var cur = matrix[y][x];
+                var next = matrix[y-1][x-1];
+                var top = matrix[y-1][x];
+                var left = matrix[y][x-1]
+                action = "retain"//top == left && cur == next
+                x--;
+                y--;
+                if( top > left ){
+                    action = "delete";
+                    y++
+                } else if( top < left ){
+                    action = "add";
+                    x++
+                }else if( top == left && (cur != next) ){
+                    action = "update"
+                }
+                if( /delete|add/.test(action)){
+                    if(flag == true ){//第一次用
+                        flag = action;// 留着下次用
+                    }else{
+                        action = "retain";//第一次之后
+                    }
+                }else if(action == "update" && /delete|add/.test(flag) ){
+                    action = flag;
+                    flag = false;
+                }
+                scripts[scripts.length] = {
+                    action:  action
                 }
             }
-            return editScript.reverse();
+            console.log("具体步骤：")
+            console.log(scripts.reverse());
+
         }
-        //用于比较一个对象数组
-        var compareArrays =  $.avalon.compareArrays = function (oldArray, newArray, maxEditsToConsider) {
-            if (maxEditsToConsider === undefined) {
-                return compareArrays(oldArray, newArray, 1)             // First consider likely case where there is at most one edit (very fast)
-                || compareArrays(oldArray, newArray, 10)                // If that fails, account for a fair number of changes while still being fast
-                || compareArrays(oldArray, newArray, Number.MAX_VALUE); // Ultimately give the right answer, even though it may take a long time
-            } else {
-                oldArray = oldArray || [];
-                newArray = newArray || [];
-                var editDistanceMatrix = calculateEditDistanceMatrix(oldArray, newArray, maxEditsToConsider);
-                cnosole.log(editDistanceMatrix)
-                return findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray);
-            }
-        };
+        console.log("===================")
+        var old = "ABDEFG", neo = "ACEF"
+        var m = getEditDistance( old, neo);
+        getEditScripts( old, neo,m)
+    
     }();
 
 
