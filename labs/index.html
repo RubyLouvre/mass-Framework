@@ -202,40 +202,60 @@
                 var i =  Math.max(x,y);
                 var scripts = [], action
                 while(scripts.length != i ){
+                    action =  "retain"
                     var cur = matrix[y][x];//如果matrix[y]为undefined
                     var top = matrix[y-1][x]
                     var left = matrix[y][x-1]
-                    console.log("top["+(y-1)+"]["+x+"] : " + top+"    left["+y+"]["+(x-1)+"] : "+left+"   cur["+y+"]["+x+"]: "+cur)
+                    //   console.log("top["+(y-1)+"]["+x+"] : " + top+"    left["+y+"]["+(x-1)+"] : "+left+"   cur["+y+"]["+x+"]: "+cur)
                     if(top == left){
-                        scripts[scripts.length] = {
-                            action: top == cur ?  "update" : "retain"
-                        }
                         x--;
                         y--
-                        if(top == cur){
+                        if(top == cur && cost){
                             cost--;
+                            action = "update"
+                            console.log("update")
                         }
                     }else{
-                      
-                        if( top + 1 == cur ){
+                       
+                        if(top + 1 === cur){
+                            console.log(top +" VS "+cur)
                             action = "add";
+                            console.log("add")
                             y--;
-                            cost--;
                         }
                         if( left + 1 == cur){
                             action = "delete";
+                            console.log("delete")
                             x--;
-                            cost--;
+                        }else if(top - 1 == left){
+                            console.log(top + "VS " + left)
+                            action = "delete";
+                            console.log("delete2")
+                            scripts[scripts.length] = {
+                                action:  "retain"
+                            }
+                            y++;
+                            //    y++
                         }
                         //console.log(matrix[y][x])
-                        scripts[scripts.length] = {
-                            action:  action
-                        }
+                        cost--;
+       
                     }
+                    scripts[scripts.length] = {
+                        action:  action
+                    }
+
+
                 }
                 console.log(scripts.reverse())
 
             }
+
+            /*if(top === cur){
+   if(cur === cost){
+      cost--
+   }
+}*/
 
             //  var m = getEditDistance( "AA","AA");
             //  getEditScripts("AA","AA",m)
@@ -244,7 +264,7 @@
             // console.log("===================")
             //   getEditDistance( "ABCDE","ABCD");
             console.log("===================")
-            var old = "ABCDE", neo = "OBCDEK"
+            var old = "ABCDE", neo = "ABCF"
             var m = getEditDistance( old, neo);
             getEditScripts( old, neo,m)
             //  console.log("===================")
