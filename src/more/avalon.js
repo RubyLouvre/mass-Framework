@@ -169,7 +169,31 @@ $.define("avalon","data,attr,event,fx", function(){
         }
         return field;
     }
-    //    template - name
+    $.observableArray = function(array){
+        if(arguments.length){
+            array = []
+        }else if(!Array.isArray){
+            throw "$.observableArray arguments must be a array"
+        }
+        var result = $.observable(array);
+        makeObservableArray(result);
+        return result;
+    }
+    function makeObservableArray( val ){
+        ("pop,push,shift,slice,sort,reverse,unshift,map,filter,unique,flatten,merge,"+
+            "union,intersect,diff,sortBy,pluck,shuffle,remove,inGroupsOf").replace( $.rword, function( method ){
+            val[method] = function(){
+                var array = this();
+                Array.prototype.unshift(arguments, array)
+                var result =  $.Array[method].apply( $.Array, arguments )
+            }
+        //  $.Array[method]
+
+        })
+    }
+  
+
+    //template - name
     //foreach - data
     //value - data
     //options - data
@@ -370,7 +394,7 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         }
     }
-    //if unless with foreach四个适配器都是使用template适配器
+    //if unless with foreach四种bindings都是使用template bindings
     "if,unless,with,foreach".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
             update : function(node, val, field, context, symptom){
@@ -410,22 +434,21 @@ $.define("avalon","data,attr,event,fx", function(){
                 }];
             }
             var number = field(), template = symptom.template, el;
-            if( number > 0 ){ //处理with if适配器
+            if( number > 0 ){ //处理with if bindings
                 var elems = getChildren( symptom.nodes )
                 if( elems.length ){
-                    if( number == 2 ){//with
+                    if( number == 2 ){//处理with bindings
                         context = new $.viewModel( data, context )
                     }
                     return setBindingsToChildren( elems, context )
                 }
-            }else if(number == 0){//处理unless适配器
+            }else if(number == 0){//处理unless bindings
                 while((el = node.firstChild)){
                     template.appendChild(el)
                 }
             }
-            if( number < 0  && data && isFinite(data.length) ){//处理foreach适配器
-                //先回收原有的
-                retrieve( symptom.prevData  );
+            if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
+                retrieve( symptom.prevData  ); //先回收原有的
                 var curData = getEditScripts( symptom.prevData, data );
                 for(var i = 0, n = curData.length; i < n ; i++){
                     var obj = curData[i];
