@@ -395,8 +395,8 @@ $.define("avalon","data,attr,event,fx", function(){
         update: function(node, data, field, context, symptom){
             console.log(symptom)
             if( !symptom.frag ){//缓存,省得每次都创建
-                symptom.fragment = node.ownerDocument.createDocumentFragment();
-                symptom.childNodes = node.childNodes;
+                symptom.template = node.ownerDocument.createDocumentFragment();
+                symptom.nodes = $.slice(node.childNodes);
                 symptom.prevData = [];
             // console.log(symptom.childNodes)
             }
@@ -416,7 +416,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach适配器
-                var actions =  $.bindingAdapter[ "template" ].getEditScripts(symptom.prevData, data);
+                var actions =  getEditScripts( symptom.prevData, data );
                 for (var i = 0, j = actions.length; i < j; i++) {
                     switch(actions.action){
                         case "add":
@@ -429,7 +429,6 @@ $.define("avalon","data,attr,event,fx", function(){
                     }
                 }
 
-
                 console.log(data)
                 var frags = [frag];//防止对fragment二次复制,引发safari的BUG
                 for(var i = 0, n = data.length - 1 ; i < n ; i++){
@@ -440,9 +439,9 @@ $.define("avalon","data,attr,event,fx", function(){
                         var subclass = new $.viewModel(data[ k ], context);
                         subclass.extend( {
                             $index: k,
-                            $item: data[ k ],
-                            $hoist: node,
-                            $hoisting: !k
+                            $item: data[ k ]
+//                            $hoist: node,
+//                            $hoisting: !k
                         } )
                         .alias("$itemName", "$data")
                         .alias("$indexName", "$index");
@@ -491,16 +490,15 @@ $.define("avalon","data,attr,event,fx", function(){
         }
     }
 
-    void function () {
+    var getEditScripts = (function () {
         // 一个简单的Levenshtein distance算法
         //编辑距离就是用来计算从原串（s）转换到目标串(t)所需要的最少的插入，删除和替换的数目，
         //在NLP中应用比较广泛，如一些评测方法中就用到了（wer,mWer等），同时也常用来计算你对原文本所作的改动数。
         //http://www.cnblogs.com/pandora/archive/2009/12/20/levenshtein_distance.html
         //https://gist.github.com/982927
         //http://www.blogjava.net/phyeas/archive/2009/01/10/250807.html
-
         //通过levenshtein distance算法返回一个矩阵，matrix[y][x]为最短的编辑长度
-        var getEditDistance = function(from, to){
+        var getEditDistance = function( from, to){
             var matrix = [], fn = from.length, tn = to.length;
             // 初始化一个矩阵,行数为b,列数为a
             var i,j
@@ -526,7 +524,7 @@ $.define("avalon","data,attr,event,fx", function(){
             return matrix
         };
         //返回具体的编辑步骤
-        $.bindingAdapter[ "template" ].getEditScripts = function(from, to, matrix){
+        var _getEditScripts = function(from, to, matrix){
             var x = from.length;
             var y = to.length;
             var cost = matrix[y][x];
@@ -590,14 +588,14 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             console.log("具体步骤：")
             console.log(scripts.reverse());
-
+            return scripts
         }
-        console.log("===================")
-        var old = "ABDEFG", neo = "ACEF"
-        var m = getEditDistance( old, neo);
-        getEditScripts( old, neo,m)
-    
-    }();
+
+        return function( old, neo ){
+            var matrix = getEditDistance(old, neo);
+            return _getEditScripts( old, neo, matrix)
+        }
+    })();
 
 
 

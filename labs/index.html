@@ -14,25 +14,184 @@
 
     </head>
     <body>
+          <style>
+        .compare{
+            border:1px solid #000;
+            border-collapse:collapse;
+        }
+        .compare td{
+            border:1px solid #000;
+            width:30px;
+            height:30px;
+            text-align:center;
+            background:olive;
+        }
+        td.zero{
+            background:teal;
+        }
+        td.retain{
+            background:orange;
+        }
+        td.update{
+            background:fuchsia;
+        }
+        td.delete{
+            background:red;
+        }
+        td.add{
+            background:lime;
+        }
+    </style>
         <script type="text/javascript">
 
-            window.onload = function(){
-                var fragment = document.createDocumentFragment();
-                var tbody = document.getElementById("tmpl");
-                var obj = {};
-                obj.fragment = fragment;
-                obj.childNodes = tbody.childNodes;
-                console.log(obj.childNodes);
-                console.log(fragment)
-                for(var i = 0, n = obj.childNodes.length; i < n; i++){
-                    fragment.appendChild( obj.childNodes[i] )
+            //http://www.cnblogs.com/pandora/archive/2009/12/20/levenshtein_distance.html
+            //https://gist.github.com/982927
+            //http://www.blogjava.net/phyeas/archive/2009/01/10/250807.html
+           
+            //通过levenshtein distance算法返回一个矩阵，matrix[y][x]为最短的编辑长度
+            var getEditDistance = function(from, to, table){
+                var matrix = [], fn = from.length, tn = to.length;
+                // 初始化一个矩阵,行数为b,列数为a
+                var i,j, td, td_style = "border:1px solid #000;width:30px;height:30px;text-align:center;background:olive;"
+                for(i = 0; i <= tn; i++){
+                    matrix[i] = [i];//设置第一列的值
+                    table && table.insertRow(i)
                 }
-                i = 4;
-                var table = tbody.parentNode
-                while(--i >= 0){
-                    table.appendChild( obj.fragment.cloneNode(true) )
+                for(j = 0; j <= fn; j++){
+                    matrix[0][j] = j;//设置第一行的值
+                    if(table){
+                        for(i = 0; i <= tn; i++){
+                            td = table.rows[i].insertCell(j);
+                          //  td.style.cssText = td_style
+                            td.innerHTML = j;
+                        }
+                    }
                 }
+                table.rows[0].cells[0].className ="zero"
+                // 填空矩阵
+                for(i = 1; i <= tn; i++){
+                    for(j = 1; j <= fn; j++){
+                        if(to.charAt(i-1) == from.charAt(j-1)){
+                            matrix[i][j] = matrix[i-1][j-1];//没有改变
+                        } else {
+                            matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
+                            matrix[i][j-1] + 1, // 插入insertion
+                            matrix[i-1][j] + 1); //删除 deletion
+                        }
+                        if(table){
+                            td = table.rows[i].cells[j]
+                            td.innerHTML = matrix[i][j]
+                        }
+                    }
+                }
+                return matrix
+            };
+            //返回具体的编辑步骤
+            var getEditScripts = function(from, to, matrix, table){
+                var x = from.length;
+                var y = to.length;
+                var cost = matrix[y][x];
+                var scripts = [], i = 0;
+                if(x == 0){//如果原数组为0,那么新数组的都是新增的
+                    for( ; i < y; i++){
+                        scripts[scripts.length] = {
+                            action: "add",
+                            value: to[i]
+                        }
+                    }
+                    return scripts;
+                }
+                if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
+                    for( ; i < x; i++){
+                        scripts[scripts.length] = {
+                            action: "delete",
+                            value: from[i]
+                        }
+                    }
+                    return scripts;
+                }
+                //把两个JSON合并在一起
+                console.log("原字符串： "+from)
+                console.log("目标字符串： "+to)
+                console.log("最短的编辑长度： "+cost)
+                console.log("比较矩阵： ")
+                console.log(matrix.join("\n"))
+                i =  Math.max(x,y);
+                var flag = true, action;
+                while(scripts.length != i ){
+                    var cur = matrix[y][x];
+                    var next = matrix[y-1][x-1];
+                    var top = matrix[y-1][x];
+                    var left = matrix[y][x-1]
+                    action = "retain"//top == left && cur == next
+                    x--;
+                    y--;
+                    if( top > left ){
+                        action = "delete";
+                        y++
+                    } else if( top < left ){
+                        action = "add";
+                        x++
+                    }else if( top == left && (cur != next) ){
+                        action = "update"
+                    }
+                    if( /delete|add/.test(action)){
+                        if(flag == true ){//第一次用
+                            flag = action;// 留着下次用
+                        }else{
+                            action = "retain";//第一次之后
+                        }
+                    }else if(action == "update" && /delete|add/.test(flag) ){
+                        action = flag;
+                        flag = false;
+                    }
+                    scripts[scripts.length] = {
+                        action:  action,
+                        value: cur
+                    }
+                }
+                console.log("具体步骤：")
+                //   scripts.reverse();
+                console.log(scripts)
+                /*       var result = []
+                    for(var i = 0; i< scripts.length ; i++){
+                        switch(scripts[i].action){
+                            case "retain":
+                                result[result.length] = {
+                                    value: old[i],
+                                    action: scripts[i].action
+                                }
+                                break;
+                            case "add":
+                            case "update":
+                                result[result.length] = {
+                                    value: neo[i],
+                                    action: scripts[i].action
+                                }
+                        }
+                    }
+                    console.log(result)*/
+
             }
+            console.log("===================")
+            var old = "ABDEFG", neo = "ACEFGGH"
+
+            var compare = function(old, neo){
+                var table = document.createElement("table");
+                table.className = "compare"
+                table.style.cssText = "border:1px solid #000; border-collapse:collapse;";
+                var matrix = getEditDistance( old, neo, table);
+                window.onload = function(){
+                    document.body.appendChild(table);
+                }
+              //  document.body.appendChild(table);
+                getEditScripts( old, neo, matrix, table);
+            }
+           compare( old, neo )
+
+               
+           
+            //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
          
 
         </script>
