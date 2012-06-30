@@ -377,11 +377,11 @@ $.define("avalon","data,attr,event,fx", function(){
                 $.bindingAdapter['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2 
                         case "if":
-                            return !!val - 0;
+                            return !!val - 0;//1
                         case "unless":
-                            return !val - 0;
+                            return !val - 0;//0
                         case "with":
-                            return 2;
+                            return 2;//2
                         default:
                             return -1;
                     }
@@ -390,76 +390,71 @@ $.define("avalon","data,attr,event,fx", function(){
             stopBindings: true
         }
     })
+    function retrieve( array ){
+        array.forEach(function( obj ){
+            obj.nodes.forEach(function( el ){
+                obj.template.appendChild(el)
+            });
+        })
 
+    }
     $.bindingAdapter[ "template" ] = {
-        update: function(node, data, field, context, symptom){
-            console.log(symptom)
+        update: function(node, data, field, context, symptom){   
             if( !symptom.frag ){//缓存,省得每次都创建
+                node.normalize();
                 symptom.template = node.ownerDocument.createDocumentFragment();
                 symptom.nodes = $.slice(node.childNodes);
-                symptom.prevData = [];
-            // console.log(symptom.childNodes)
+                symptom.prevData = [{
+                    template: symptom.template ,
+                    nodes: symptom.nodes
+                }];
             }
-            var number = field(), frag = symptom.frag, el;
-            node.normalize();
-            while((el = node.firstChild)){
-                frag.appendChild(el)
-            }
-            if( number > 0 ){ //处理with if unless适配器
-                var elems = getChildren(frag)
-                node.appendChild( frag );
-                if(elems.length){
-                    if( number == 2 ){
-                        context = new $.viewModel( data, context)
+            var number = field(), template = symptom.template, el;
+            if( number > 0 ){ //处理with if适配器
+                var elems = getChildren( symptom.nodes )
+                if( elems.length ){
+                    if( number == 2 ){//with
+                        context = new $.viewModel( data, context )
                     }
-                    return setBindingsToChildren(elems, context)
+                    return setBindingsToChildren( elems, context )
+                }
+            }else if(number == 0){//处理unless适配器
+                while((el = node.firstChild)){
+                    template.appendChild(el)
                 }
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach适配器
-                var actions =  getEditScripts( symptom.prevData, data );
-                for (var i = 0, j = actions.length; i < j; i++) {
-                    switch(actions.action){
-                        case "add":
-                            actions.fragment = symptom.fragment;
-                            symptom.childNodes = node.childNodes;
-
-
-
-                         
-                    }
-                }
-
-                console.log(data)
-                var frags = [frag];//防止对fragment二次复制,引发safari的BUG
-                for(var i = 0, n = data.length - 1 ; i < n ; i++){
-                    frags[ frags.length ] = frag.cloneNode(true)
-                }
-                for( i = 0; frag = frags[i];i++ ){
-                    (function( k ){
+                //先回收原有的
+                retrieve( symptom.prevData  );
+                var curData = getEditScripts( symptom.prevData, data );
+                for(var i = 0, n = curData.length; i < n ; i++){
+                    var obj = curData[i];
+                    if(!obj.template){
+                        obj.template = template.cloneNode(true);
+                        obj.nodes =  $.slice(obj.template.childNodes);
+                    };
+                    (function( k, frag ){
                         var subclass = new $.viewModel(data[ k ], context);
                         subclass.extend( {
                             $index: k,
                             $item: data[ k ]
-//                            $hoist: node,
-//                            $hoisting: !k
                         } )
                         .alias("$itemName", "$data")
                         .alias("$indexName", "$index");
-
-                       
                         elems = getChildren( frag )
                         node.appendChild( frag );
                         if(elems.length){
                             setBindingsToChildren(elems, subclass )
                         }
-                    })(i);   
+                    })(i, obj.template);
                 }
+                symptom.prevData = curData
+
             }
             return void 0
         },
         stopBindings: true
     }
-
 
     $.bindingAdapter.disable = {
         update: function( node, val ){
@@ -498,116 +493,130 @@ $.define("avalon","data,attr,event,fx", function(){
         //https://gist.github.com/982927
         //http://www.blogjava.net/phyeas/archive/2009/01/10/250807.html
         //通过levenshtein distance算法返回一个矩阵，matrix[y][x]为最短的编辑长度
-        var getEditDistance = function( from, to){
+        var getEditDistance = function(from, to, table){
             var matrix = [], fn = from.length, tn = to.length;
             // 初始化一个矩阵,行数为b,列数为a
-            var i,j
+            var i,j, td;
             for(i = 0; i <= tn; i++){
                 matrix[i] = [i];//设置第一列的值
+                table && table.insertRow(i)
             }
             for(j = 0; j <= fn; j++){
                 matrix[0][j] = j;//设置第一行的值
+                if(table){
+                    for(i = 0; i <= tn; i++){
+                        td = table.rows[i].insertCell(j);
+                        td.innerHTML = j;
+                    }
+                }
+            }
+            if(table){
+                table.rows[0].cells[0].className ="zero"
             }
             // 填空矩阵
             for(i = 1; i <= tn; i++){
                 for(j = 1; j <= fn; j++){
-                    if(to.charAt(i-1) == from.charAt(j-1)){
+                    if( to[i-1] == from[j-1] ){
                         matrix[i][j] = matrix[i-1][j-1];//没有改变
                     } else {
                         matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
                             matrix[i][j-1] + 1, // 插入insertion
                             matrix[i-1][j] + 1); //删除 deletion
                     }
+                    if(table){
+                        td = table.rows[i].cells[j]
+                        td.innerHTML = matrix[i][j]
+                    }
                 }
             }
-
             return matrix
         };
         //返回具体的编辑步骤
-        var _getEditScripts = function(from, to, matrix){
+        var _getEditScripts = function(from, to, matrix, table){
             var x = from.length;
             var y = to.length;
-            var cost = matrix[y][x];
-            var scripts = [], i = 0;
+            var scripts = []
             if(x == 0){//如果原数组为0,那么新数组的都是新增的
                 for( ; i < y; i++){
                     scripts[scripts.length] = {
                         action: "add",
-                        value: to[i]
+                        x: i
                     }
                 }
-                return scripts;
-            }
-            if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
-                for( ; i < x; i++){
+            }else if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
+                scripts = []
+            }else{
+                //把两个JSON合并在一起
+                $.log(matrix.join("\n"))
+                var i =  Math.max(x,y),action;
+                while( 1 ){
+                    var cur = matrix[y][x];
+                    if( y == 0 && x == 0){
+                        break
+                    }
+                    var top = matrix[y-1][x];
+                    var left = matrix[y][x-1]
+                    var diagon = matrix[y-1][x-1];
+                    action = "retain"//top == left && cur == diagon
+                    var min = Math.min(top, diagon, left);
+                    var td =  table && (table.rows[y].cells[x])
+                    if( min < cur ){
+                        switch(min){
+                            case top:
+                                action = "add";
+                                y--
+                                break;
+                            case left:
+                                action = "delete";
+                                x--
+                                break;
+                            case diagon:
+                                action = "update";
+                                x--;
+                                y--
+                                break;
+                        }
+                    } else{
+                        x--;
+                        y--
+                    }
+                    if(table){
+                        td.className = action;
+                    }
                     scripts[scripts.length] = {
-                        action: "delete",
-                        value: from[i]
-                    }
-                }
-                return scripts;
-            }
-            //把两个JSON合并在一起
-            console.log("原字符串： "+from)
-            console.log("目标字符串： "+to)
-            console.log("最短的编辑长度： "+cost)
-            console.log("比较矩阵： ")
-            console.log(matrix.join("\n"))
-            i =  Math.max(x,y);
-            var flag = true, action;
-            while(scripts.length != i ){
-                var cur = matrix[y][x];
-                var next = matrix[y-1][x-1];
-                var top = matrix[y-1][x];
-                var left = matrix[y][x-1]
-                action = "retain"//top == left && cur == next
-                x--;
-                y--;
-                if( top > left ){
-                    action = "delete";
-                    y++
-                } else if( top < left ){
-                    action = "add";
-                    x++
-                }else if( top == left && (cur != next) ){
-                    action = "update"
-                }
-                if( /delete|add/.test(action)){
-                    if(flag == true ){//第一次用
-                        flag = action;// 留着下次用
-                    }else{
-                        action = "retain";//第一次之后
-                    }
-                }else if(action == "update" && /delete|add/.test(flag) ){
-                    action = flag;
-                    flag = false;
-                }
-                scripts[scripts.length] = {
-                    action:  action
+                        action:action,
+                        x:x,
+                        y:y
+                    }//action
                 }
             }
-            console.log("具体步骤：")
-            console.log(scripts.reverse());
-            return scripts
+            scripts.reverse();
+            var result = [];
+            //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
+            for( i = 0; i < scripts.length ; i++){
+                var el = scripts[i]
+                switch(el.action){
+                    case "retain":
+                        result[result.length] = {
+                            value: from[el.x]
+                        }
+                        break;
+                    case "add":
+                    case "update":
+                        result[result.length] = {
+                            value: to[el.y]
+                        }
+                        break;
+                }
+            }
+            return result;
         }
 
         return function( old, neo ){
-            var matrix = getEditDistance(old, neo);
+            var matrix = getEditDistance( old, neo);
             return _getEditScripts( old, neo, matrix)
         }
     })();
-
-
-
-
-
-
-
-
-
-
-
-
 
     //normalizeJSON及其辅助方法与变量
     void function(){
@@ -720,7 +729,6 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         }
         // var e =  $.normalizeJSON("{aaa:111,bbb:{ccc:333, class:'xxx', eee:{ddd:444}}}");
-
         $.normalizeJSON = function (json, insertFields, extra) {//对键名添加引号，以便安全通过编译
             var keyValueArray = parseObjectLiteral(json),resultStrings = [] ,keyValueEntry, propertyToHook = [];
             for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {

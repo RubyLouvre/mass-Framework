@@ -44,174 +44,40 @@
     </style>
     <script type="text/javascript">
 
-        //http://www.cnblogs.com/pandora/archive/2009/12/20/levenshtein_distance.html
-        //https://gist.github.com/982927
-        //http://www.blogjava.net/phyeas/archive/2009/01/10/250807.html
-           
-        //通过levenshtein distance算法返回一个矩阵，matrix[y][x]为最短的编辑长度
-        var getEditDistance = function(from, to, table){
-            var matrix = [], fn = from.length, tn = to.length;
-            // 初始化一个矩阵,行数为b,列数为a
-            var i,j, td, td_style = "border:1px solid #000;width:30px;height:30px;text-align:center;background:olive;"
-            for(i = 0; i <= tn; i++){
-                matrix[i] = [i];//设置第一列的值
-                table && table.insertRow(i)
-            }
-            for(j = 0; j <= fn; j++){
-                matrix[0][j] = j;//设置第一行的值
-                if(table){
-                    for(i = 0; i <= tn; i++){
-                        td = table.rows[i].insertCell(j);
-                        //  td.style.cssText = td_style
-                        td.innerHTML = j;
-                    }
-                }
-            }
-            table.rows[0].cells[0].className ="zero"
-            // 填空矩阵
-            for(i = 1; i <= tn; i++){
-                for(j = 1; j <= fn; j++){
-                    if(to.charAt(i-1) == from.charAt(j-1)){
-                        matrix[i][j] = matrix[i-1][j-1];//没有改变
-                    } else {
-                        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
-                        matrix[i][j-1] + 1, // 插入insertion
-                        matrix[i-1][j] + 1); //删除 deletion
-                    }
-                    if(table){
-                        td = table.rows[i].cells[j]
-                        td.innerHTML = matrix[i][j]
-                    }
-                }
-            }
-            return matrix
-        };
-        //返回具体的编辑步骤
-        var getEditScripts = function(from, to, matrix, table){
-            var x = from.length;
-            var y = to.length;
-            var cost = matrix[y][x];
-            var scripts = []
-            if(x == 0){//如果原数组为0,那么新数组的都是新增的
-                for( ; i < y; i++){
-                    scripts[scripts.length] = {
-                        action: "add",
-                        x: i
-                    }
-                }
-            }else if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
-                scripts = []
-            }else{
-                //把两个JSON合并在一起
-                console.log("原字符串： "+from)
-                console.log("目标字符串： "+to)
-                console.log("最短的编辑长度： "+cost)
-                console.log("比较矩阵： ")
-                console.log(matrix.join("\n"))
-                var i =  Math.max(x,y),action;
-                while(true ){
-                    var cur = matrix[y][x];
-                    if(y == 0 && x == 0){
-                        break
-                    }
-                    var next = matrix[y-1][x-1];
-                    var top = matrix[y-1][x];
-                    var left = matrix[y][x-1]
-                    action = "retain"//top == left && cur == next
-                    var min = Math.min(top, next, left)
-                    if( min < cur ){
-                        switch(min){
-                            case top:
-                                action = "add";
-                                table.rows[y].cells[x].className = action
-                                y--
-                                break;
-                            case left:
-                                action = "delete";
-                                table.rows[y].cells[x].className = action
-                                x--
-                                break;
-                            case next:
-                                action = "update";
-                                table.rows[y].cells[x].className = action
-                                x--;
-                                y--
-                                break;
 
-                        }
-                    } else{
-                        table.rows[y].cells[x].className = action
-                        x--;
-                        y--
-                    }
-                    scripts[scripts.length] = {
-                        action:action,
-                        x:x,
-                        y:y
-                    }//action
-                }
-            }
-            console.log("具体步骤：")
-            scripts.reverse();
-            console.log(scripts)
-            var result = [];
-            console.log(to)
-            for(var i = 0; i < scripts.length ; i++){
-                var el = scripts[i]
-                switch(el.action){
-                    case "retain":
-                        // console.log(from[i] +"  "+i)
-                        result[result.length] = {
-                            value: from[el.x]
-                        }
-                        break;
-                    case "add":
-                    case "update":
-                        // console.log(to[i] +"  "+i)
-                        result[result.length] = {
-                            value: to[el.y]
-                        }
-                        break;
-                }
-            }
-            console.log(result)
-        }
+        $.require("ready,more/avalon",function(){
+            $.applyBindings({
+                people: [
+                    { firstName: 'Bert', lastName: 'Bertington' },
+                    { firstName: 'Charles', lastName: 'Charlesforth' },
+                    { firstName: 'Denise', lastName: 'Dentiste' }
+                ]
+            });
+        })
+        
 
-        console.log("===================")
-          var old = "ABDEFG", neo = "ACEFGGH"
-      //  var old = "ABDEFG" , neo = "ACEFF"
-        var compare = function(old, neo){
-            var table = document.createElement("table");
-            table.className = "compare"
-            table.style.cssText = "border:1px solid #000; border-collapse:collapse;";
-            var matrix = getEditDistance( old, neo, table);
-            window.onload = function(){
-                document.body.appendChild(table);
-            }
-            //  document.body.appendChild(table);
-            getEditScripts( old, neo, matrix, table);
-        }
-        compare( old, neo )
 
-               
            
         //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
          
 
     </script>
     <div>
-        <table >
-            <tbody id="tmpl">
+        <table>
+            <thead>
+                <tr><th>First name</th><th>Last name</th></tr>
+            </thead>
+            <tbody data-bind="foreach: people">
                 <tr>
-                    <td>XXXX</td><td>XXXX</td><td>XXXX</td>
-                </tr>
-                <tr>
-                    <td>YYYY</td><td>YYYY</td><td>YYYY</td>
+                    <td data-bind="text: firstName">XXX</td>
+                    <td data-bind="text: lastName">YYY</td>
                 </tr>
             </tbody>
-
         </table>
-    </div>
+
+
+    </table>
+</div>
 
 
 </body>
