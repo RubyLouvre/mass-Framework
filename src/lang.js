@@ -511,8 +511,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return groups;
         },
-
-
         //判断数组是否包含此元素
         contains: function ( target, item ) {
             return !!~target.indexOf(item) ;
