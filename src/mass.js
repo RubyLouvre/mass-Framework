@@ -50,7 +50,6 @@ void function( global, DOC ){
     }else{
         return;
     }
-
     /**
      * 糅杂，为一个对象添加更多成员
      * @param {Object} receiver 接受者
@@ -385,7 +384,7 @@ void function( global, DOC ){
             $.html.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
-            setTimeout( doScrollCheck, 1 );
+            setTimeout( doScrollCheck, 31 );
         }
     };
     if ( DOC.readyState === "complete" ) {
