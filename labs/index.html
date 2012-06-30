@@ -46,13 +46,21 @@
 
 
         $.require("ready,more/avalon",function(){
-            $.applyBindings({
-                people: [
+            var mode = {
+                people: $.observableArray([
                     { firstName: 'Bert', lastName: 'Bertington' },
                     { firstName: 'Charles', lastName: 'Charlesforth' },
                     { firstName: 'Denise', lastName: 'Dentiste' }
-                ]
-            });
+                ])
+            }
+            $.applyBindings(mode);
+            setTimeout(function(){
+                console.log("+++++++++++++++++++++++")
+                mode.people.push({
+                    firstName: 'XXX', lastName: 'CCC'
+                })
+            },1000)
+          
         });
         //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
          

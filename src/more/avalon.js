@@ -170,26 +170,34 @@ $.define("avalon","data,attr,event,fx", function(){
         return field;
     }
     $.observableArray = function(array){
-        if(arguments.length){
+        if(!arguments.length){
             array = []
         }else if(!Array.isArray){
             throw "$.observableArray arguments must be a array"
         }
-        var result = $.observable(array);
-        makeObservableArray(result);
-        return result;
+        var field = $.observable(array);
+        makeObservableArray(field);
+        console.log(field())
+        return field;
     }
-    function makeObservableArray( val ){
-        ("pop,push,shift,slice,sort,reverse,unshift,map,filter,unique,flatten,merge,"+
-            "union,intersect,diff,sortBy,pluck,shuffle,remove,inGroupsOf").replace( $.rword, function( method ){
-            val[method] = function(){
-                var array = this();
-                Array.prototype.unshift(arguments, array)
-                var result =  $.Array[method].apply( $.Array, arguments )
+    function makeObservableArray( field ){
+        ("pop,push,shift,unshift,slice,splice,sort,reverse,map,filter,unique,flatten,merge,"+
+            "union,intersect,diff,sortBy,pluck,shuffle,remove,removeAt,inGroupsOf").replace( $.rword, function( method ){
+            field[method] = function(){
+                var array = this(), n = array.length, change
+                Array.prototype.unshift.call(arguments, array);
+                var result = $.Array[method].apply( $.Array, arguments );
+                $.log(array)
+                if(method !== "splice" && Array.isArray(result)){
+                    field(result);
+                    change = true
+                }
+                if(method == "sort" || method == "reverse" || array.length != n || change && result.length != n  ){
+                    $.log(field.list)
+                    $.avalon.notify( field );
+                }
             }
-        //  $.Array[method]
-
-        })
+        });
     }
   
 
