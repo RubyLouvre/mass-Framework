@@ -8,7 +8,10 @@ $.define("avalon","data,attr,event,fx", function(){
     //5好像不能为同一元素同种事件绑定多个回调
     //人家花了那么多心思与时间做出来的东西,你以为是小学生写记叙文啊,一目了然....
     var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
-    var count = 0, disposeObject = {}
+    var disposeObject = {}
+    var cur, ID = 1;
+    var registry = {}
+    var dependent = {}
     $.avalon = {
         //为一个Binding Target(节点)绑定Binding Source(viewModel)
         setBindings: function( source, node ){
@@ -35,88 +38,91 @@ $.define("avalon","data,attr,event,fx", function(){
             var fn = $.avalon.evalBindings( jsonstr, 2 );//限制为两层，减少作用链的长度
             return fn;
         },
-        begin : function(){//开始依赖收集
-            this.list = [];
-            this.labels = {};
-        },
-        end : function(){//结束依赖收集
-            var list = this.list;
-            this.list = this.labels = NaN;
-            return list;
-        },
-        add : function(field){
-            //当一个$.observable或$.computed在第一次执行自己时(初始化)是没有labels属性
-            //会立即返回,避免不必要的逻辑运作
-            if( !this.labels ||!field.labels ){
-                return //如果viewModel中没有$.computed，也就没有依赖，也不会执行begin函数，返回
+        //开始收集依赖
+        detectBegin: function( field ){
+            var uuid = $.avalon.register( field )
+            if( cur ){
+                cur[uuid] = field
             }
-            //如果一个$.computed A依赖于另一个$.computed B与一个$.observable C,
-            //而B与C又存在依赖关系,那么C将被T出依赖列表中
-            //因为我们没有必要叫它们重复通知A进行更新
-            var add = false, empty = true, labels = field.labels;
-            for(var i in labels ){
-                if( labels.hasOwnProperty(i) ){
-                    empty = false;
-                    if(this.labels[ i ] !== 1){ //如果不为空,那么随个key取出来,看在this.labels存不存在,不存在就加
-                        add = true;
-                        this.labels[ i ] = 1;
+            //用于收集依赖
+            var prev = cur;
+            cur = dependent[uuid];
+            cur.prev = prev
+        },
+        //添加依赖到链中
+        detectAdd: function( field ){
+            if(cur){
+                var uuid = $.avalon.register( field )
+                cur[ uuid ] = field;
+            }
+        },
+        //结束依赖收集
+        detectEnd: function( field ){
+            var deps = dependent[ field.observableID ] || {};
+            cur = deps.prev;
+            for(var key in deps){
+                if(deps.hasOwnProperty(key) && (key != "prev")){
+                    var low = registry[ key ];
+                    low.ensure(field)
+                }
+            }
+        },
+        //注册依赖
+        register: function( field ){
+            var uuid = field.observableID
+            if(!uuid || !registry[uuid] ){
+                field.observableID  = uuid = "observable" +(++ID);
+                registry[uuid] = field;//供发布者使用
+                dependent[uuid] = {};//收集依赖
+                field.list = []
+                field.ensure = function(d){
+                    if(field.list.indexOf(d) == -1){
+                        field.list.push(d);
                     }
                 }
-            }
-            if( empty ){//如果是空白,说明是原子属性
-                if(this.labels[ field.label ] !== 1){
-                    this.list.push( field );
-                    this.labels[ field.label ] = 1;
-                }
-            }
-            if( add ){
-                this.list.push( field )
-            }
-        },
-        notify : function( field ){//通知依赖于field的上层$.computed更新
-            var list = field.list || [] ;
-            if( list.length ){
-                var safelist = list.concat(), dispose = false
-                for(var i = 0, el; el = safelist[i++];){
-                    delete el.cache;//清除缓存
-                    if(!el.stopReflow){
-                        if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
-                            el.dispose = dispose = true
+                field.notify = function(){//通知依赖于field的上层$.computed更新
+                    var list = this.list || [] ;
+                    if( list.length ){
+                        var safelist = list.concat(), dispose = false
+                        for(var i = 0, el; el = safelist[i++];){
+                            delete el.cache;//清除缓存
+                            if(!el.stopReflow){
+                                if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
+                                    el.dispose = dispose = true
+                                }
+                            }
+                        }
+                        if( dispose == true ){//移除无意义的绑定
+                            for (  i = list.length; el = list[ --i ]; ) {
+                                if( el.dispose == true ){
+                                    el.splice( i, 1 );
+                                }
+                            }
                         }
                     }
                 }
-                if( dispose == true ){//移除无意义的绑定
-                    for (  i = list.length; el = list[ --i ]; ) {
-                        if( el.dispose == true ){
-                            el.splice( i, 1 );
-                        }
-                    }
-                }
             }
+            return uuid;
         }
     }
 
     $.observable = function( val ){
         var cur = val;
         function field( neo ){
-            $.avalon.add( field );
-            //  $.log(field)
+            $.avalon.detectAdd(field)
             if( arguments.length ){//setter
-                if(cur !== neo ||  Array.isArray(cur) && (JSON.stringify(cur) != JSON.stringify(neo)) ){
+                if(cur !== neo ||  Array.isArray(cur)  ){
                     cur = neo;
-                    $.avalon.notify( field );
+                    field.notify()
                 }
             }else{//getter
                 return cur;
             }
         }
-        field.list = [];//订阅者列表
         field.toString = field.valueOf = function(){
             return cur;
         }
         field();
-        field.label = ++count;//原子属性拥有label属性,与永远为空的labels属性
-        field.labels = {};
         return field;
     }
    
@@ -130,7 +136,6 @@ $.define("avalon","data,attr,event,fx", function(){
             scope =  obj.scope;
         }
         function field( neo ){
-            $.avalon.add( field );
             if( arguments.length ){
                 if(typeof setter === "function"){
                     field.stopReflow = true;
@@ -149,27 +154,16 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             if(cur !== neo || Array.isArray(cur) && (JSON.stringify(cur) != JSON.stringify(neo)) ){
                 cur = neo
-                $.avalon.notify( field );
+                field.notify()
             }
             return cur;
         }
-        field.list = [];//订阅者列表
         field.toString = field.valueOf = function(){
             return cur;
         }
-        $.avalon.begin();
+        $.avalon.detectBegin( field )
         field();
-        field.labels = $.avalon.labels;
-        //取得其依赖的原子与分子们
-        var deps = $.avalon.end(), list;
-        $.log("XXXXXXXXXXXXX")
-        console.log(deps)
-        for(var i = 0, d; d = deps[i++];){
-            list = d.list || (d.list = []);
-            if (  list.indexOf( field ) == -1 ){//防止重复添加
-                list.push( field );//低层向高层发送通知
-            }
-        }
+        $.avalon.detectEnd( field )
         return field;
     }
     $.observableArray = function(array){
@@ -196,14 +190,12 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
                 if(method == "sort" || method == "reverse" || array.length != n || change && result.length != n  ){
                     $.log("field.list");
-                    $.log(field.list[0]())
-                    $.avalon.notify( field );
+                    $.log(field.list[0]());
+                    field.notify()
                 }
             }
         });
     }
-  
-
     //template - name
     //foreach - data
     //value - data
@@ -301,14 +293,10 @@ $.define("avalon","data,attr,event,fx", function(){
                 adapter.init && adapter.init(node, cur, field, context, symptom);
             }
             var neo = field();
-            console.log( JSON.stringify(cur)  )
             if(initPhase === 0 || cur != neo || Array.isArray(cur)   ){//只要是处理bool假值的比较
                 cur = neo;
-                setTimeout(function(){
-                    $.log("CCCCCCCCCCCCCC")
-                    adapter.update && adapter.update(node, cur, field, context, symptom);
-                },0)
-                
+                $.log("CCCCCCCCCCCCCC")
+                adapter.update && adapter.update(node, cur, field, context, symptom);
             }
             initPhase = 1;
         }
@@ -455,8 +443,6 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             $.log("template bindings")
             var number = field(), template = symptom.template, el;
-            //alert(field)
-            // field.list.push(arguments.callee)
 
             if( number > 0 ){ //处理with if bindings
                 var elems = getChildren( symptom.nodes )
