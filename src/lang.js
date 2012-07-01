@@ -3,7 +3,7 @@
 //=========================================
 $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     // $.log("已加载语言扩展模块");
-    var global = this, rascii = /[^\x00-\xff]/g,
+    var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
     // JSON RegExp
@@ -364,7 +364,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     $.String({
         //判断一个字符串是否包含另一个字符
         contains: function(target, str, separator){
-            return (separator) ? !!~(separator + target + separator).indexOf(separator + str + separator) : !!~target.indexOf(str);
+            return separator ?
+            (separator + target + separator).indexOf(separator + str + separator) > -1 :
+            target.indexOf(str) > -1;
         },
         //判定是否以给定字符串开头
         startsWith: function(target, str, ignorecase) {
@@ -388,9 +390,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return result;
         },
-        //得到字节长度
+        /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
+         *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
+         *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
+         *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
+         *随着浏览器普及对二进制的操作，这方法也越来越常用。
+         */
         byteLen: function(target){
-            return target.replace(rascii,"--").length;
+            return target.replace(/[^\x00-\xff]/g,"--").length;
         },
 
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
@@ -409,7 +416,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 return match.charAt(1).toUpperCase();
             });
         },
-        //转换为连字符风格
+        //转换为下划线风格
         underscored: function(target) {
             return target.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-/g, '_').toLowerCase();
         },
