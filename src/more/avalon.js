@@ -100,8 +100,9 @@ $.define("avalon","data,attr,event,fx", function(){
         var cur = val;
         function field( neo ){
             $.avalon.add( field );
+            //  $.log(field)
             if( arguments.length ){//setter
-                if(cur !== neo){
+                if(cur !== neo ||  Array.isArray(cur) && (JSON.stringify(cur) != JSON.stringify(neo)) ){
                     cur = neo;
                     $.avalon.notify( field );
                 }
@@ -146,7 +147,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     field.cache = neo;//保存到缓存
                 }
             }
-            if(cur !== neo){
+            if(cur !== neo || Array.isArray(cur) && (JSON.stringify(cur) != JSON.stringify(neo)) ){
                 cur = neo
                 $.avalon.notify( field );
             }
@@ -161,6 +162,8 @@ $.define("avalon","data,attr,event,fx", function(){
         field.labels = $.avalon.labels;
         //取得其依赖的原子与分子们
         var deps = $.avalon.end(), list;
+        $.log("XXXXXXXXXXXXX")
+        console.log(deps)
         for(var i = 0, d; d = deps[i++];){
             list = d.list || (d.list = []);
             if (  list.indexOf( field ) == -1 ){//防止重复添加
@@ -175,9 +178,9 @@ $.define("avalon","data,attr,event,fx", function(){
         }else if(!Array.isArray){
             throw "$.observableArray arguments must be a array"
         }
+        console.log("$.observableArray")
         var field = $.observable(array);
         makeObservableArray(field);
-        console.log(field())
         return field;
     }
     function makeObservableArray( field ){
@@ -187,13 +190,13 @@ $.define("avalon","data,attr,event,fx", function(){
                 var array = this(), n = array.length, change
                 Array.prototype.unshift.call(arguments, array);
                 var result = $.Array[method].apply( $.Array, arguments );
-                $.log(array)
                 if(method !== "splice" && Array.isArray(result)){
                     field(result);
                     change = true
                 }
                 if(method == "sort" || method == "reverse" || array.length != n || change && result.length != n  ){
-                    $.log(field.list)
+                    $.log("field.list");
+                    $.log(field.list[0]())
                     $.avalon.notify( field );
                 }
             }
@@ -268,7 +271,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 if( adapter.stopBindings ){
                     continueBindings = false;
                 }
-                $.log("associateDataAndUI : "+key)
+                // $.log("associateDataAndUI : "+key)
                 associateDataAndUI( node, bindings[key], context, key, getBindings)
             }
         }
@@ -287,21 +290,29 @@ $.define("avalon","data,attr,event,fx", function(){
             if(!node){
                 return disposeObject;//解除绑定
             }
+          
             if(typeof field !== "function"){
                 var bindings = getBindings();//每次都取一次,因为viewModel的数据已经发生改变
                 field = bindings["@mass_fields"][key];
             }
             if(initPhase === 0){
                 cur = field();
+                $.log("initPhase === 0")
                 adapter.init && adapter.init(node, cur, field, context, symptom);
             }
             var neo = field();
-            if(initPhase === 0 || cur != neo){//只要是处理bool假值的比较 
+            console.log( JSON.stringify(cur)  )
+            if(initPhase === 0 || cur != neo || Array.isArray(cur)   ){//只要是处理bool假值的比较
                 cur = neo;
-                adapter.update && adapter.update(node, cur, field, context, symptom);
+                setTimeout(function(){
+                    $.log("CCCCCCCCCCCCCC")
+                    adapter.update && adapter.update(node, cur, field, context, symptom);
+                },0)
+                
             }
             initPhase = 1;
         }
+      
         $.computed( symptom, context.$data );
     }
 
@@ -406,6 +417,7 @@ $.define("avalon","data,attr,event,fx", function(){
     "if,unless,with,foreach".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
             update : function(node, val, field, context, symptom){
+                $.log("type : "+type)
                 $.bindingAdapter['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2 
                         case "if":
@@ -441,7 +453,11 @@ $.define("avalon","data,attr,event,fx", function(){
                     nodes: symptom.nodes
                 }];
             }
+            $.log("template bindings")
             var number = field(), template = symptom.template, el;
+            //alert(field)
+            // field.list.push(arguments.callee)
+
             if( number > 0 ){ //处理with if bindings
                 var elems = getChildren( symptom.nodes )
                 if( elems.length ){
@@ -578,7 +594,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 scripts = []
             }else{
                 //把两个JSON合并在一起
-                $.log(matrix.join("\n"))
+                // $.log(matrix.join("\n"))
                 var i =  Math.max(x,y),action;
                 while( 1 ){
                     var cur = matrix[y][x];

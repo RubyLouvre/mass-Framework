@@ -45,7 +45,7 @@
     <script type="text/javascript">
 
 
-        $.require("ready,more/avalon",function(){
+        /*    $.require("ready,more/avalon",function(){
             var mode = {
                 people: $.observableArray([
                     { firstName: 'Bert', lastName: 'Bertington' },
@@ -58,12 +58,79 @@
                 console.log("+++++++++++++++++++++++")
                 mode.people.push({
                     firstName: 'XXX', lastName: 'CCC'
-                })
+                });
+                console.log(typeof mode.people.list[0])
             },1000)
-          
-        });
+
+        });*/
         //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
-         
+        var cur, ID = 1;
+        var registry = {}
+        var dependent = {}
+        var detect = {
+            begin: function( field ){
+                var uuid = detect.register( field )
+                if( cur ){
+                    cur[uuid] = field
+                }
+                //用于收集依赖
+                var prev = cur;
+                cur = dependent[uuid];
+                cur.prev = prev
+            },
+            register: function( field ){
+                var uuid = field.observableID
+                if(!uuid || !registry[uuid] ){
+                    field.observableID  = uuid = "observable" +(++ID);
+                    registry[uuid] = field;//供发布者使用
+                    dependent[uuid] = {};//收集依赖
+                    field.list = []
+                    field.ensure = function(d){
+                        if(field.list.indexOf(d) == -1){
+                            field.list.push(d);
+                        }
+                    }
+                }
+                return uuid;
+            },
+            add: function( field ){
+                if(cur){
+                    var uuid = detect.register( field )
+                    cur[ uuid ] = field;
+                }
+            },
+            end: function( field ){
+                var deps = dependent[ field.observableID ] || {};
+                cur = deps.prev;
+                for(var key in deps){
+                    if(deps.hasOwnProperty(key) && (key != "prev")){
+                        var low = registry[key];
+                        low.ensure(field)
+                    }
+                }
+                console.log(deps)
+            }
+        }
+        var a = function(){
+            detect.add(a)
+        }
+        var b = function(){
+            detect.add(b)
+        }
+        var c = function(){
+            detect.begin(c)
+            a();
+            b();
+            detect.end(c)
+        }
+        var d = function(){
+            detect.begin(d)
+            c();
+            detect.end(d)
+        }
+        d()
+        //  console.log(dependent)
+     
 
     </script>
     <div>
@@ -82,8 +149,18 @@
 
     </table>
 </div>
+if(Array.isArray(root)){
+root = []
+root = e;
+flag = 0;
+}
+root.push(d)
+flag = 1
+
+
+
+
 
 
 </body>
 </html>
-

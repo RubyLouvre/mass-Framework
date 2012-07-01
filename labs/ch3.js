@@ -440,3 +440,41 @@ function setup( name, deps, fn ){
     $.debug( name )
     return ret;
 }
+
+
+//http://webreflection.blogspot.com/search?q=onContent
+//by Andrea Giammarchi 2006.9.24
+document.write("<script id=__ie_onload defer src=//0><\/scr"+"ipt>");
+script = document.getElementById("__ie_onload");
+script.onreadystatechange = function() {//IE即使是死链也能触发事件
+    if (this.readyState == "complete")
+        init(); // 指定了defer的script会在DOM树建完才触发
+};
+
+//http://javascript.nwbox.com/IEContentLoaded/
+//by Diego Perini 2007.10.5
+function IEContentLoaded (w, fn) {
+    var d = w.document, done = false,
+    init = function () {
+        if (!done) {//只执行一次
+            done = true;
+            fn();
+        }
+    };
+    (function () {
+        try {//在DOM未建完之前调用元素的doScroll发抛错
+            d.documentElement.doScroll('left');
+        } catch (e) {//延迟再试
+            setTimeout(arguments.callee, 50);
+            return;
+        }
+        init();//没有错误则执行用户回调
+    })();
+    // 如果用户是在domReady之后绑定这个函数呢？立即执行它
+    d.onreadystatechange = function() {
+        if (d.readyState == 'complete') {
+            d.onreadystatechange = null;
+            init();
+        }
+    };
+}
