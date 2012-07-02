@@ -76,9 +76,15 @@ $.define("avalon","data,attr,event,fx", function(){
                 dependent[uuid] = {};//收集依赖
                 field.list = []
                 field.ensure = function(d){
-                    if(field.list.indexOf(d) == -1){
-                        field.list.push(d);
+                    if(this.list.indexOf(d) == -1){
+                        this.list.push(d);
                     }
+                }
+                field.lock = function(){
+                    this.locked = true;
+                }
+                field.unlock = function(){
+                    delete this.locked;
                 }
                 field.notify = function(){//通知依赖于field的上层$.computed更新
                     var list = this.list || [] ;
@@ -86,10 +92,10 @@ $.define("avalon","data,attr,event,fx", function(){
                         var safelist = list.concat(), dispose = false
                         for(var i = 0, el; el = safelist[i++];){
                             delete el.cache;//清除缓存
-                            if(!el.stopReflow){
-                                if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
-                                    el.dispose = dispose = true
-                                }
+                            if(el.locked === true)
+                                break
+                            if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
+                                el.dispose = dispose = true
                             }
                         }
                         if( dispose == true ){//移除无意义的绑定
@@ -138,11 +144,11 @@ $.define("avalon","data,attr,event,fx", function(){
         function field( neo ){
             if( arguments.length ){
                 if(typeof setter === "function"){
-                    field.stopReflow = true;
+                    field.lock()
                     //setter会唤起其依赖的$.observable与$.computed重新计算自身，但它们也会触发其上级更新自身
                     //由于自身已经先行更新了，没有再计算一次
                     neo = setter.apply( scope, arguments );
-                    field.stopReflow = false
+                    field.unlock()
                 }
             }else{
                 if( "cache" in field ){//getter
@@ -172,7 +178,6 @@ $.define("avalon","data,attr,event,fx", function(){
         }else if(!Array.isArray){
             throw "$.observableArray arguments must be a array"
         }
-        console.log("$.observableArray")
         var field = $.observable(array);
         makeObservableArray(field);
         return field;
@@ -189,8 +194,6 @@ $.define("avalon","data,attr,event,fx", function(){
                     change = true
                 }
                 if(method == "sort" || method == "reverse" || array.length != n || change && result.length != n  ){
-                    $.log("field.list");
-                    $.log(field.list[0]());
                     field.notify()
                 }
             }
@@ -263,7 +266,6 @@ $.define("avalon","data,attr,event,fx", function(){
                 if( adapter.stopBindings ){
                     continueBindings = false;
                 }
-                // $.log("associateDataAndUI : "+key)
                 associateDataAndUI( node, bindings[key], context, key, getBindings)
             }
         }
@@ -277,7 +279,7 @@ $.define("avalon","data,attr,event,fx", function(){
     //有一些域的依赖在定义vireModel时已经确认了
     //而对元素的操作的$.computed则要在bindings中执行它们才知
     function associateDataAndUI(node, field, context, key, getBindings){
-        var adapter = $.bindingAdapter[key], initPhase = 0, cur
+        var adapter = $.bindingAdapter[key], initPhase = 0, cur;
         function symptom(){//这是依赖链的末梢,通过process操作节点
             if(!node){
                 return disposeObject;//解除绑定
@@ -289,13 +291,12 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             if(initPhase === 0){
                 cur = field();
-                $.log("initPhase === 0")
                 adapter.init && adapter.init(node, cur, field, context, symptom);
             }
             var neo = field();
+          
             if(initPhase === 0 || cur != neo || Array.isArray(cur)   ){//只要是处理bool假值的比较
                 cur = neo;
-                $.log("CCCCCCCCCCCCCC")
                 adapter.update && adapter.update(node, cur, field, context, symptom);
             }
             initPhase = 1;
@@ -345,7 +346,7 @@ $.define("avalon","data,attr,event,fx", function(){
                         toggleClass(node, className, shouldHaveClass);
                     }
                 } else {
-                    val = String(val || ''); 
+                    val = String(val || '');
                     toggleClass(node, val, true);
                 }
             }
@@ -405,9 +406,8 @@ $.define("avalon","data,attr,event,fx", function(){
     "if,unless,with,foreach".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
             update : function(node, val, field, context, symptom){
-                $.log("type : "+type)
                 $.bindingAdapter['template']['update'](node, val, function(){
-                    switch(type){//返回结果可能为 -1 0 1 2 
+                    switch(type){//返回结果可能为 -1 0 1 2
                         case "if":
                             return !!val - 0;//1
                         case "unless":
@@ -431,8 +431,8 @@ $.define("avalon","data,attr,event,fx", function(){
 
     }
     $.bindingAdapter[ "template" ] = {
-        update: function(node, data, field, context, symptom){   
-            if( !symptom.frag ){//缓存,省得每次都创建
+        update: function(node, data, field, context, symptom){
+            if( !symptom.template ){//缓存,省得每次都创建
                 node.normalize();
                 symptom.template = node.ownerDocument.createDocumentFragment();
                 symptom.nodes = $.slice(node.childNodes);
@@ -441,9 +441,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     nodes: symptom.nodes
                 }];
             }
-            $.log("template bindings")
             var number = field(), template = symptom.template, el;
-
             if( number > 0 ){ //处理with if bindings
                 var elems = getChildren( symptom.nodes )
                 if( elems.length ){
@@ -464,7 +462,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     var obj = curData[i];
                     if(!obj.template){
                         obj.template = template.cloneNode(true);
-                        obj.nodes =  $.slice(obj.template.childNodes);
+                        obj.nodes =  $.slice(obj.template.childNodes);  
                     };
                     (function( k, frag ){
                         var subclass = new $.viewModel(data[ k ], context);
@@ -482,7 +480,6 @@ $.define("avalon","data,attr,event,fx", function(){
                     })(i, obj.template);
                 }
                 symptom.prevData = curData
-
             }
             return void 0
         },
@@ -620,7 +617,7 @@ $.define("avalon","data,attr,event,fx", function(){
                         action:action,
                         x:x,
                         y:y
-                    }//action
+                    }
                 }
             }
             scripts.reverse();
