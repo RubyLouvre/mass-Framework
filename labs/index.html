@@ -15,48 +15,29 @@
     </head>
     <body>
 
-        <script type="text/javascript">
+         <table border="1" width="80%">
+            <thead>
+                <tr><th>First name</th><th>Last name</th></tr>
+            </thead>
+            <tbody data-bind="foreach: people">
+                <tr>
+                    <td data-bind="text: firstName"></td>
+                    <td data-bind="text: lastName"></td>
+                </tr>
+            </tbody>
+        </table>
 
-            $.require("ready,more/avalon",function(){
-                var mode = {
-                    people: $.observableArray([
+        <script type="text/javascript">
+            $.require("ready,more/avalon", function(){
+                $.applyBindings({
+                    people: [
                         { firstName: 'Bert', lastName: 'Bertington' },
                         { firstName: 'Charles', lastName: 'Charlesforth' },
                         { firstName: 'Denise', lastName: 'Dentiste' }
-                    ])
-                }
-                $.applyBindings(mode);
-                setTimeout(function(){
-                    mode.people.push({
-                        firstName: 'XXX', lastName: 'CCC'
-                    });
-                
-                },1000);
-
-                setTimeout(function(){
-                    mode.people.slice(2,4)
-                },2000);
+                    ]
+                });
             });
-
-
         </script>
-        <div>
-            <table>
-                <thead>
-                    <tr><th>First name</th><th>Last name</th></tr>
-                </thead>
-                <tbody data-bind="foreach: people">
-                    <tr>
-                        <td data-bind="text: firstName">XXX</td>
-                        <td data-bind="text: lastName">YYY</td>
-                    </tr>
-                </tbody>
-            </table>
-
-
-        </table>
-    </div>
-
 
 </body>
 </html>
