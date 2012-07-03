@@ -26,7 +26,7 @@
         <button>Add</button>
 
         <script type="text/javascript">
-            $.require("ready,more/avalon", function(){
+            $.require("ready,event", function(){
                 function AppViewModel() {
                     var self = this;
 
@@ -50,8 +50,8 @@
                 $(".remove").live("click", function() {
                     console.log(ko.dataFor(this))
                     console.log(ko.contextFor(this))
-                    ko.contextFor(this).$parent.removePerson()
-                 //   model.people.remove(ko.dataFor(this));
+                    //ko.contextFor(this).$parent.removePerson()
+                   model.people.remove(ko.dataFor(this));
                 });
         
 
