@@ -3319,7 +3319,7 @@
                     oldArray = oldArray || [];
                     newArray = newArray || [];
                     var editDistanceMatrix = calculateEditDistanceMatrix(oldArray, newArray, maxEditsToConsider);
-                    console.log(editDistanceMatrix)
+
                     return findEditScriptFromEditDistanceMatrix(editDistanceMatrix, oldArray, newArray);
                 }
             };
@@ -3403,7 +3403,7 @@
                     return x.arrayEntry;
                 });
                 var editScript = ko.utils.compareArrays(lastArray, array);
-                console.log(editScript)
+
                 // Build the new mapping result
                 var newMappingResult = [];
                 var lastMappingResultIndex = 0;

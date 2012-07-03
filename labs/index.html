@@ -15,29 +15,48 @@
     </head>
     <body>
 
-         <table border="1" width="80%">
-            <thead>
-                <tr><th>First name</th><th>Last name</th></tr>
-            </thead>
-            <tbody data-bind="foreach: people">
-                <tr>
-                    <td data-bind="text: firstName"></td>
-                    <td data-bind="text: lastName"></td>
-                </tr>
-            </tbody>
-        </table>
+        <h4>People</h4>
+        <ul data-bind="foreach: people">
+            <li>
+                Name at position <span data-bind="text: $index"> </span>:
+                <span data-bind="text: name"> </span>
+                <a href="#" class="remove">Remove</a>
+            </li>
+        </ul>
+        <button>Add</button>
 
         <script type="text/javascript">
             $.require("ready,more/avalon", function(){
-                $.applyBindings({
-                    people: [
-                        { firstName: 'Bert', lastName: 'Bertington' },
-                        { firstName: 'Charles', lastName: 'Charlesforth' },
-                        { firstName: 'Denise', lastName: 'Dentiste' }
-                    ]
+                function AppViewModel() {
+                    var self = this;
+
+                    self.people = ko.observableArray([
+                        { name: 'Bert' },
+                        { name: 'Charles' },
+                        { name: 'Denise' }
+                    ]);
+
+                    self.addPerson = function() {
+                        self.people.push({ name: "New at " + new Date() });
+                    };
+
+                    self.removePerson = function() {
+                        self.people.remove(this);
+                    }
+                }
+                var model = new AppViewModel()
+                ko.applyBindings(model);
+              
+                $(".remove").live("click", function() {
+                    console.log(ko.dataFor(this))
+                    console.log(ko.contextFor(this))
+                    ko.contextFor(this).$parent.removePerson()
+                 //   model.people.remove(ko.dataFor(this));
                 });
+        
+
             });
         </script>
 
-</body>
+    </body>
 </html>

@@ -207,6 +207,21 @@ $.define("avalon","data,attr,event,fx", function(){
     //MVVM三大入口函数之一
     $.applyBindings = $.setBindings = $.avalon.setBindings;
     var parseBindings = $.avalon.parseBindings;
+    $.contextFor = function(node) {
+        switch (node.nodeType) {
+            case 1:
+            case 3:
+                var context = $._data(node,"bindings-context")
+                if (context) return context;
+                if (node.parentNode) return $.contextFor(node.parentNode);
+                break;
+        }
+        return undefined;
+    };
+    $.dataFor = function(node) {
+        var context = $.contextFor(node);
+        return context ? context['$data'] : undefined;
+    };
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     function setBindingsToElementAndChildren( node, source ){
         if ( node.nodeType === 1  ){
@@ -251,6 +266,7 @@ $.define("avalon","data,attr,event,fx", function(){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         var callback = parseBindings( node, context )//保存到闭包中
         context = context instanceof $.viewModel ? context : new $.viewModel( context );
+        $._data(node,"bindings-context",context)
         var getBindings = function(){//用于取得数据隐藏
             try{
                 return callback( [ node, context ] )
