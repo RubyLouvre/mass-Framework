@@ -26,11 +26,11 @@
         <button>Add</button>
 
         <script type="text/javascript">
-            $.require("ready,event", function(){
+            $.require("ready,more/avalon", function(){
                 function AppViewModel() {
                     var self = this;
 
-                    self.people = ko.observableArray([
+                    self.people = $.observableArray([
                         { name: 'Bert' },
                         { name: 'Charles' },
                         { name: 'Denise' }
@@ -40,21 +40,22 @@
                         self.people.push({ name: "New at " + new Date() });
                     };
 
-                    self.removePerson = function() {
-                        self.people.remove(this);
+                    self.removePerson = function(el) {
+                        var model = $.dataFor(el);
+                        console.log(model)
+                        self.people.remove(model);
                     }
                 }
-                var model = new AppViewModel()
-                ko.applyBindings(model);
+                var model = new AppViewModel(this)
+                $.applyBindings(model);
               
                 $(".remove").live("click", function() {
-                    console.log(ko.dataFor(this))
-                    console.log(ko.contextFor(this))
-                    //ko.contextFor(this).$parent.removePerson()
-                   model.people.remove(ko.dataFor(this));
+                    model.removePerson(this)
                 });
         
-
+                $("button").live("click", function() {
+                    model.addPerson();
+                });
             });
         </script>
 

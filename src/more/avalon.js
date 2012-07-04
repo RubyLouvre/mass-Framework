@@ -17,7 +17,7 @@ $.define("avalon","data,attr,event,fx", function(){
         setBindings: function( source, node ){
             node = node || document.body; //确保是绑定在元素节点上，没有指定默认是绑在body上
             //开始在其自身与孩子中绑定
-            return setBindingsToElementAndChildren( node, source );
+            return setBindingsToElementAndChildren( node, source, true );
         },
         //取得节点的数据隐藏
         hasBindings: function( node ){
@@ -210,28 +210,29 @@ $.define("avalon","data,attr,event,fx", function(){
     $.contextFor = function(node) {
         switch (node.nodeType) {
             case 1:
-            case 3:
-                var context = $._data(node,"bindings-context")
+                var context = $._data(node,"bindings-context");
                 if (context) return context;
                 if (node.parentNode) return $.contextFor(node.parentNode);
                 break;
+            case 9:
+                return void 0
         }
-        return undefined;
+        return void 0;
     };
     $.dataFor = function(node) {
         var context = $.contextFor(node);
         return context ? context['$data'] : undefined;
     };
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    function setBindingsToElementAndChildren( node, source ){
+    function setBindingsToElementAndChildren( node, source, setData ){
         if ( node.nodeType === 1  ){
             var continueBindings = true;
             if( $.avalon.hasBindings( node ) ){
-                continueBindings = setBindingsToElement(node, source ) //.shouldBindDescendants;
+                continueBindings = setBindingsToElement(node, source, setData ) //.shouldBindDescendants;
             }
             if( continueBindings ){
                 var elems = getChildren(node)
-                elems.length && setBindingsToChildren( elems, source )
+                elems.length && setBindingsToChildren( elems, source, setData )
             }
         }
     }
@@ -262,11 +263,13 @@ $.define("avalon","data,attr,event,fx", function(){
         }
     }
     //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToElement( node, context ){
+    function setBindingsToElement( node, context, setData ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
         var callback = parseBindings( node, context )//保存到闭包中
         context = context instanceof $.viewModel ? context : new $.viewModel( context );
-        $._data(node,"bindings-context",context)
+        if( setData ){
+            $._data(node,"bindings-context",context)
+        }
         var getBindings = function(){//用于取得数据隐藏
             try{
                 return callback( [ node, context ] )
@@ -287,9 +290,14 @@ $.define("avalon","data,attr,event,fx", function(){
         }
         return continueBindings;
     }
-    function setBindingsToChildren(elems, source){
+    //setBindingsToChildren的第三第四参数是为了实现事件的无侵入绑定
+    function setBindingsToChildren(elems, context, setData, force){
         for(var i = 0, n = elems.length; i < n ; i++){
-            setBindingsToElementAndChildren( elems[i], source );
+            var node = elems[i]
+            setBindingsToElementAndChildren( node, context, setData && !force );
+            if( setData && force ){//这是由foreach绑定触发
+                $._data(node,"bindings-context", context)
+            }
         }
     }
     //有一些域的依赖在定义vireModel时已经确认了
@@ -300,7 +308,6 @@ $.define("avalon","data,attr,event,fx", function(){
             if(!node){
                 return disposeObject;//解除绑定
             }
-          
             if(typeof field !== "function"){
                 var bindings = getBindings();//每次都取一次,因为viewModel的数据已经发生改变
                 field = bindings["@mass_fields"][key];
@@ -464,7 +471,7 @@ $.define("avalon","data,attr,event,fx", function(){
                     if( number == 2 ){//处理with bindings
                         context = new $.viewModel( data, context )
                     }
-                    return setBindingsToChildren( elems, context )
+                    return setBindingsToChildren( elems, context, true )
                 }
             }else if(number == 0){//处理unless bindings
                 while((el = node.firstChild)){
@@ -474,6 +481,7 @@ $.define("avalon","data,attr,event,fx", function(){
             if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
                 retrieve( symptom.prevData  ); //先回收原有的
                 var curData = getEditScripts( symptom.prevData, data );
+                console.log(curData)
                 for(var i = 0, n = curData.length; i < n ; i++){
                     var obj = curData[i];
                     if(!obj.template){
@@ -488,10 +496,11 @@ $.define("avalon","data,attr,event,fx", function(){
                         } )
                         .alias("$itemName", "$data")
                         .alias("$indexName", "$index");
-                        elems = getChildren( frag )
+                        elems = getChildren( frag );
+                        //  console.log(subclass)
                         node.appendChild( frag );
                         if(elems.length){
-                            setBindingsToChildren(elems, subclass )
+                            setBindingsToChildren(elems, subclass, true, true )
                         }
                     })(i, obj.template);
                 }
