@@ -207,6 +207,7 @@ $.define("avalon","data,attr,event,fx", function(){
     //MVVM三大入口函数之一
     $.applyBindings = $.setBindings = $.avalon.setBindings;
     var parseBindings = $.avalon.parseBindings;
+    //dataFor与contextFor是为事件的无侵入绑定服务的
     $.contextFor = function(node) {
         switch (node.nodeType) {
             case 1:
@@ -221,14 +222,14 @@ $.define("avalon","data,attr,event,fx", function(){
     };
     $.dataFor = function(node) {
         var context = $.contextFor(node);
-        return context ? context['$data'] : undefined;
+        return context ? context['$data'] : void 0;
     };
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     function setBindingsToElementAndChildren( node, source, setData ){
         if ( node.nodeType === 1  ){
             var continueBindings = true;
             if( $.avalon.hasBindings( node ) ){
-                continueBindings = setBindingsToElement(node, source, setData ) //.shouldBindDescendants;
+                continueBindings = setBindingsToElement(node, source, setData ) 
             }
             if( continueBindings ){
                 var elems = getChildren(node)
