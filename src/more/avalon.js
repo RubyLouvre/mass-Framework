@@ -186,9 +186,12 @@ $.define("avalon","data,attr,event,fx", function(){
         ("pop,push,shift,unshift,slice,splice,sort,reverse,map,filter,unique,flatten,merge,"+
             "union,intersect,diff,sortBy,pluck,shuffle,remove,removeAt,inGroupsOf").replace( $.rword, function( method ){
             field[method] = function(){
+             
                 var array = this(), n = array.length, change
                 Array.prototype.unshift.call(arguments, array);
+                
                 var result = $.Array[method].apply( $.Array, arguments );
+ 
                 if(method !== "splice" && Array.isArray(result)){
                     field(result);
                     change = true
