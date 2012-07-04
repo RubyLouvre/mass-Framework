@@ -526,12 +526,13 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         //移除 Array 对象中某个元素的第一个匹配项。
         remove: function ( target, item ) {
             var index = target.indexOf(item);
-            if (~index ) return $.Array.removeAt(target, index);
-            return null;
+            if (~index )
+                return $.Array.removeAt(target, index);
+            return false;
         },
-        //移除 Array 对象中指定位置的元素。
+        //移除 Array 对象中指定位置的元素,返回布尔表示是否成功
         removeAt: function ( target, index ) {
-            return target.splice(index, 1);
+            return !!target.splice(index, 1).length
         },
         //对数组进行洗牌,但不影响原对象
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
