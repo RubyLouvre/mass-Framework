@@ -131,6 +131,100 @@ function capitalize(target){
     return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
 }
 
+function stripTags(target) {
+    return String(target ||"").replace(/<[^>]+>/g, '');
+}
+
+function stripScripts(target){
+    return String(target ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
+}
+
+function escapeHTML(target) {
+    return target.replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function unescapeHTML(target) {
+    return  target.replace(/&quot;/g,'"')
+    .replace(/&lt;/g,'<')
+    .replace(/&gt;/g,'>')
+    .replace(/&amp;/g, "&"); //处理转义的中文和实体字符
+    return target.replace(/&#([\d]+);/g, function($0, $1){
+        return String.fromCharCode(parseInt($1, 10));
+    });
+}
+/**
+ 为目标字符串添加wbr软换行
+1.支持html标签、属性以及字符实体。<br>
+2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
+3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题*/
+function wbr(target) {
+    return String(target)
+    .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
+    .replace(/><wbr>/g, '>');
+}
+
+function escapeRegExp( target ){
+    return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+}
+
+//http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
+//在左边补上一些字符,默认为0
+
+function pad(target, n){
+    var zero = new Array(n).join('0');
+    var str = zero + target;
+    var result = str.substr(-n);
+    return result;
+}
+
+function pad(target, n){
+    return Array((n+1) - target.toString().split('').length).join('0') + target;
+}
+
+function pad(target, n){
+    return ( Math.pow(10,n) + "" + target ).slice(-n);
+}
+
+function pad(target, n){
+    return ((1 << n).toString(2) + target).slice(-n);
+}
+
+function pad(target, n){
+    return (0..toFixed(n) + target).slice(-n);
+}
+
+function pad(target, n){
+    return (1e20 + ""+ target).slice(-n);
+}
+
+function pad(target, n){
+    var len = target.toString().length;
+    while(len < n) {
+        target = "0" + target;
+        len++;
+    }
+    return target;
+}
+
+function ( target, n, filling, right, radix){
+    var num = target.toString(radix || 10);
+    filling = filling || "0";
+    while(num.length < n){
+        if(!right){
+            num = filling + num;
+        }else{
+            num += filling;
+        }
+    }
+    return num;
+}
+
+
+
 
 
 

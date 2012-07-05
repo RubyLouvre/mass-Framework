@@ -424,15 +424,15 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         capitalize: function(target){
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
-        //去掉字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
+        //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
         stripTags: function (target) {
             return String(target ||"").replace(/<[^>]+>/g, '');
         },
-        //移除字符串中所有的 HTML script 块。弥补stripTags方法对script标签的缺陷
+        //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
         stripScripts: function(target){
             return String(target ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
         },
-        //将字符串中的html代码转换为可以直接显示的格式,
+        //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
         escapeHTML:  function (target) {
             return target.replace(/&/g,'&amp;')
             .replace(/</g,'&lt;')
@@ -445,11 +445,30 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return  target.replace(/&quot;/g,'"')
             .replace(/&lt;/g,'<')
             .replace(/&gt;/g,'>')
-            .replace(/&amp;/g, "&");
-            //处理转义的中文和实体字符
-            return target.replace(/&#([\d]+);/g, function(_0, _1){
-                return String.fromCharCode(parseInt(_1, 10));
+            .replace(/&amp;/g, "&"); //处理转义的中文和实体字符
+            return target.replace(/&#([\d]+);/g, function($0, $1){
+                return String.fromCharCode(parseInt($1, 10));
             });
+        },
+
+        //http://stevenlevithan.com/regex/xregexp/
+        //将字符串安全格式化为正则表达式的源码
+        escapeRegExp: function( target ){
+            return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+        },
+        //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
+        //在左边补上一些字符,默认为0
+        pad: function( target, n, filling, right, radix){
+            var num = target.toString(radix || 10);
+            filling = filling || "0";
+            while(num.length < n){
+                if(!right){
+                    num = filling + num;
+                }else{
+                    num += filling;
+                }
+            }
+            return num;
         },
         /**
  为目标字符串添加wbr软换行
@@ -460,25 +479,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return String(target)
             .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
             .replace(/><wbr>/g, '>');
-        },
-        //http://stevenlevithan.com/regex/xregexp/
-        //将字符串安全格式化为正则表达式的源码
-        escapeRegExp: function( target ){
-            return target.replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
-        },
-        //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
-        //在左边补上一些字符,默认为0
-        pad: function( target, digits, filling, radix , right){
-            var num = target.toString(radix || 10);
-            filling = filling || "0";
-            while(num.length < digits){
-                if(!right){
-                    num = filling + num;
-                }else{
-                    num += filling;
-                }
-            }
-            return num;
         }
     });
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
