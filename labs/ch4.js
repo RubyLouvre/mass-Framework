@@ -224,8 +224,57 @@ function ( target, n, filling, right, radix){
 }
 
 
+function wbr(target) {
+    return String(target)
+    .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
+    .replace(/><wbr>/g, '>');
+}
 
+function format(str, object){
+    var array = Array.prototype.slice.call(arguments,1);
+    return str.replace(/\\?\#{([^{}]+)\}/gm, function(match, name){
+        if (match.charAt(0) == '\\')
+            return match.slice(1);
+        var index = Number(name)
+        if(index >=0 )
+            return array[index];
+        if(object && object[name] !== void 0)
+            return  object[name];
+        return  '' ;
+    });
+}
 
+var a = format("Result is #{0},#{1}", 22,33);
+alert(a);//"Result is 22,33"
+var b = format("#{name} is a #{sex}",{
+    name:"Jhon",
+    sex:"man"
+});
+alert(b);//"Jhon is a man"
+
+//http://code.google.com/p/jquery-json/
+var escapeable = /["\\\x00-\x1f\x7f-\x9f]/g,
+meta = {
+    '\b': '\\b',
+    '\t': '\\t',
+    '\n': '\\n',
+    '\f': '\\f',
+    '\r': '\\r',
+    '"' : '\\"',
+    '\\': '\\\\'
+};
+function quote(target) {
+    if ( target.match( escapeable ) ) {
+        return '"' + target.replace( escapeable, function( a ) {
+            var c = meta[a];
+            if ( typeof c === 'string' ) {
+                return c;
+            }
+            return '\\u' + ('0000' + c.charCodeAt(0).toString(16)).slice(-4)
+        }) + '"';
+    }
+    return '"' + target + '"';
+}
 
 
 

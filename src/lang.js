@@ -130,14 +130,13 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
         quote: global.JSON && JSON.stringify || String.quote ||  (function(){
             var meta = {
-                '\t':'t',
-                '\n':'n',
-                '\v':'v',
-                '\f':'f',
-                '\r':'r',
-                '\'':'\'',
-                '\"':'\"',
-                '\\':'\\'
+                '\b': '\\b',
+                '\t': '\\t',
+                '\n': '\\n',
+                '\f': '\\f',
+                '\r': '\\r',
+                '"' : '\\"',
+                '\\': '\\\\'
             },
             reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
             regFn = function(c){
