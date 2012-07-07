@@ -183,20 +183,14 @@ $.define("avalon","data,attr,event,fx", function(){
         return field;
     }
     function makeObservableArray( field ){
-        ("pop,push,shift,unshift,slice,splice,sort,reverse,map,filter,unique,flatten,merge,"+
-            "union,intersect,diff,sortBy,pluck,shuffle,remove,removeAt,inGroupsOf").replace( $.rword, function( method ){
+        ("pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt").replace( $.rword, function( method ){
             field[method] = function(){
-             
-                var array = this(), n = array.length, change
+                var array = this(), n = array.length
                 Array.prototype.unshift.call(arguments, array);
-                
-                var result = $.Array[method].apply( $.Array, arguments );
- 
-                if(method !== "splice" && Array.isArray(result)){
-                    field(result);
-                    change = true
-                }
-                if(method == "sort" || method == "reverse" || array.length != n || change && result.length != n  ){
+                $.Array[method].apply( $.Array, arguments );
+                if( /sort|reverse|splice/.test(method) ){
+                    field.notify()
+                }else if( array.length != n  ){
                     field.notify()
                 }
             }
@@ -484,8 +478,11 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
                 retrieve( symptom.prevData  ); //先回收原有的
+               
+                console.log("prevData.length" + symptom.prevData.length);
+                 console.log("data.length" + data.length);
                 var curData = getEditScripts( symptom.prevData, data );
-                console.log(curData)
+              //  console.log(curData)
                 for(var i = 0, n = curData.length; i < n ; i++){
                     var obj = curData[i];
                     if(!obj.template){

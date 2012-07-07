@@ -196,3 +196,5 @@ $.define("store", top.JSON && JSON.parse ? "support" :"support,json2", function(
 //其他有用的资料
 //http://www.cnblogs.com/NNUF/archive/2012/06/01/2531436.html
 //http://www.cnblogs.com/zjcn/archive/2012/07/03/2575026.html
+//http://dev-test.nemikor.com/web-storage/support-test/
+//http://arty.name/localstorage.html
