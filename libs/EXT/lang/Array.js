@@ -181,6 +181,7 @@
         splice = supportsSplice ? spliceNative : spliceSim;
 
     // NOTE: from here on, use erase, replace or splice (not native methods)...
+
     ExtArray = Ext.Array = {
         /**
          * Iterates an array or an iterable value and invoke the given callback function for each item.
@@ -264,7 +265,7 @@
          * @param {Object} scope (Optional) The execution scope (`this`) in which the specified function is executed.
          */
         forEach: supportsForEach ? function(array, fn, scope) {
-                return array.forEach(fn, scope);
+            return array.forEach(fn, scope);
         } : function(array, fn, scope) {
             var i = 0,
                 ln = array.length;
@@ -283,9 +284,9 @@
          * @param {Number} from (Optional) The index at which to begin the search
          * @return {Number} The index of item in the array (or -1 if it is not found)
          */
-        indexOf: (supportsIndexOf) ? function(array, item, from) {
+        indexOf: supportsIndexOf ? function(array, item, from) {
             return array.indexOf(item, from);
-        } : function(array, item, from) {
+         } : function(array, item, from) {
             var i, length = array.length;
 
             for (i = (from < 0) ? Math.max(0, length + from) : from || 0; i < length; i++) {
@@ -401,8 +402,18 @@
          * @return {Array} results
          */
         map: supportsMap ? function(array, fn, scope) {
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('Ext.Array.map must have a callback function passed as second argument.');
+            }
+            //</debug>
             return array.map(fn, scope);
         } : function(array, fn, scope) {
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('Ext.Array.map must have a callback function passed as second argument.');
+            }
+            //</debug>
             var results = [],
                 i = 0,
                 len = array.length;
@@ -424,16 +435,19 @@
          * @param {Object} scope Callback function scope
          * @return {Boolean} True if no false value is returned by the callback function.
          */
-        every: function(array, fn, scope) {
+        every: supportsEvery ? function(array, fn, scope) {
             //<debug>
             if (!fn) {
                 Ext.Error.raise('Ext.Array.every must have a callback function passed as second argument.');
             }
             //</debug>
-            if (supportsEvery) {
-                return array.every(fn, scope);
+            return array.every(fn, scope);
+        } : function(array, fn, scope) {
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('Ext.Array.every must have a callback function passed as second argument.');
             }
-
+            //</debug>
             var i = 0,
                 ln = array.length;
 
@@ -455,16 +469,19 @@
          * @param {Object} scope Callback function scope
          * @return {Boolean} True if the callback function returns a truthy value.
          */
-        some: function(array, fn, scope) {
+        some: supportsSome ? function(array, fn, scope) {
             //<debug>
             if (!fn) {
                 Ext.Error.raise('Ext.Array.some must have a callback function passed as second argument.');
             }
             //</debug>
-            if (supportsSome) {
-                return array.some(fn, scope);
+            return array.some(fn, scope);
+        } : function(array, fn, scope) {
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('Ext.Array.some must have a callback function passed as second argument.');
             }
-
+            //</debug>
             var i = 0,
                 ln = array.length;
 
@@ -534,11 +551,19 @@
          * @param {Object} scope Callback function scope
          * @return {Array} results
          */
-        filter: function(array, fn, scope) {
-            if (supportsFilter) {
-                return array.filter(fn, scope);
+        filter: supportsFilter ? function(array, fn, scope) {
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('Ext.Array.filter must have a callback function passed as second argument.');
             }
-
+            //</debug>
+            return array.filter(fn, scope);
+        } : function(array, fn, scope) {
+            //<debug>
+            if (!fn) {
+                Ext.Error.raise('Ext.Array.filter must have a callback function passed as second argument.');
+            }
+            //</debug>
             var results = [],
                 i = 0,
                 ln = array.length;
@@ -733,10 +758,26 @@
          * end. Negative values are offsets from the end of the array. If end is omitted,
          * all items up to the end of the array are copied.
          * @return {Array} The copied piece of the array.
+         * @method
          */
-        slice: function(array, begin, end) {
-            return slice.call(array, begin, end);
-        },
+        // Note: IE6 will return [] on slice.call(x, undefined).
+        slice: ([1,2].slice(1, undefined).length ?
+            function (array, begin, end) {
+                return slice.call(array, begin, end);
+            } :
+            // at least IE6 uses arguments.length for variadic signature
+            function (array, begin, end) {
+                // After tested for IE 6, the one below is of the best performance
+                // see http://jsperf.com/slice-fix
+                if (typeof begin === 'undefined') {
+                    return slice.call(array);
+                }
+                if (typeof end === 'undefined') {
+                    return slice.call(array, begin);
+                }
+                return slice.call(array, begin, end);
+            }
+        ),
 
         /**
          * Sorts the elements of an Array.
@@ -746,15 +787,13 @@
          * @param {Function} sortFn (optional) The comparison function.
          * @return {Array} The sorted array.
          */
-        sort: function(array, sortFn) {
-            if (supportsSort) {
-                if (sortFn) {
-                    return array.sort(sortFn);
-                } else {
-                    return array.sort();
-                }
+        sort: supportsSort ? function(array, sortFn) {
+            if (sortFn) {
+                return array.sort(sortFn);
+            } else {
+                return array.sort();
             }
-
+         } : function(array, sortFn) {
             var length = array.length,
                 i = 0,
                 comparison,
@@ -899,6 +938,55 @@
             return sum;
         },
 
+        /**
+         * Creates a map (object) keyed by the elements of the given array. The values in
+         * the map are the index+1 of the array element. For example:
+         * 
+         *      var map = Ext.Array.toMap(['a','b','c']);
+         *
+         *      // map = { a: 1, b: 2, c: 3 };
+         * 
+         * Or a key property can be specified:
+         * 
+         *      var map = Ext.Array.toMap([
+         *              { name: 'a' },
+         *              { name: 'b' },
+         *              { name: 'c' }
+         *          ], 'name');
+         *
+         *      // map = { a: 1, b: 2, c: 3 };
+         * 
+         * Lastly, a key extractor can be provided:
+         * 
+         *      var map = Ext.Array.toMap([
+         *              { name: 'a' },
+         *              { name: 'b' },
+         *              { name: 'c' }
+         *          ], function (obj) { return obj.name.toUpperCase(); });
+         *
+         *      // map = { A: 1, B: 2, C: 3 };
+         */
+        toMap: function(array, getKey, scope) {
+            var map = {},
+                i = array.length;
+
+            if (!getKey) {
+                while (i--) {
+                    map[array[i]] = i+1;
+                }
+            } else if (typeof getKey == 'string') {
+                while (i--) {
+                    map[array[i][getKey]] = i+1;
+                }
+            } else {
+                while (i--) {
+                    map[getKey.call(scope, array[i])] = i+1;
+                }
+            }
+
+            return map;
+        },
+
         //<debug>
         _replaceSim: replaceSim, // for unit testing
         _spliceSim: spliceSim,
@@ -920,7 +1008,7 @@
         /**
          * Inserts items in to an array.
          *
-         * @param {Array} array The Array on which to replace.
+         * @param {Array} array The Array in which to insert.
          * @param {Number} index The index in the array at which to operate.
          * @param {Array} items The array of items to insert at index.
          * @return {Array} The array passed.
@@ -953,102 +1041,134 @@
          * @param {Array} array The Array on which to replace.
          * @param {Number} index The index in the array at which to operate.
          * @param {Number} removeCount The number of items to remove at index (can be 0).
+         * @param {Object...} elements The elements to add to the array. If you don't specify
+         * any elements, splice simply removes elements from the array.
          * @return {Array} An array containing the removed items.
          * @method
          */
-        splice: splice
+        splice: splice,
+
+        /**
+         * Pushes new items onto the end of an Array.
+         *
+         * Passed parameters may be single items, or arrays of items. If an Array is found in the argument list, all its
+         * elements are pushed into the end of the target Array.
+         *
+         * @param {Array} target The Array onto which to push new items
+         * @param {Object...} elements The elements to add to the array. Each parameter may
+         * be an Array, in which case all the elements of that Array will be pushed into the end of the
+         * destination Array.
+         * @return {Array} An array containing all the new items push onto the end.
+         *
+         */
+        push: function(array) {
+            var len = arguments.length,
+                i = 1,
+                newItem;
+
+            if (array === undefined) {
+                array = [];
+            } else if (!Ext.isArray(array)) {
+                array = [array];
+            }
+            for (; i < len; i++) {
+                newItem = arguments[i];
+                Array.prototype.push[Ext.isArray(newItem) ? 'apply' : 'call'](array, newItem);
+            }
+            return array;
+        }
     };
 
     /**
      * @method
      * @member Ext
-     * @alias Ext.Array#each
+     * @inheritdoc Ext.Array#each
      */
     Ext.each = ExtArray.each;
 
     /**
      * @method
      * @member Ext.Array
-     * @alias Ext.Array#merge
+     * @inheritdoc Ext.Array#merge
      */
     ExtArray.union = ExtArray.merge;
 
     /**
      * Old alias to {@link Ext.Array#min}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#min} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#min} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#min
+     * @inheritdoc Ext.Array#min
      */
     Ext.min = ExtArray.min;
 
     /**
      * Old alias to {@link Ext.Array#max}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#max} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#max} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#max
+     * @inheritdoc Ext.Array#max
      */
     Ext.max = ExtArray.max;
 
     /**
      * Old alias to {@link Ext.Array#sum}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#sum} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#sum} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#sum
+     * @inheritdoc Ext.Array#sum
      */
     Ext.sum = ExtArray.sum;
 
     /**
      * Old alias to {@link Ext.Array#mean}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#mean} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#mean} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#mean
+     * @inheritdoc Ext.Array#mean
      */
     Ext.mean = ExtArray.mean;
 
     /**
      * Old alias to {@link Ext.Array#flatten}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#flatten} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#flatten} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#flatten
+     * @inheritdoc Ext.Array#flatten
      */
     Ext.flatten = ExtArray.flatten;
 
     /**
      * Old alias to {@link Ext.Array#clean}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#clean} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#clean} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#clean
+     * @inheritdoc Ext.Array#clean
      */
     Ext.clean = ExtArray.clean;
 
     /**
      * Old alias to {@link Ext.Array#unique}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#unique} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#unique} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#unique
+     * @inheritdoc Ext.Array#unique
      */
     Ext.unique = ExtArray.unique;
 
     /**
      * Old alias to {@link Ext.Array#pluck Ext.Array.pluck}
-     * @deprecated 4.0.0 Please use {@link Ext.Array#pluck Ext.Array.pluck} instead
+     * @deprecated 4.0.0 Use {@link Ext.Array#pluck Ext.Array.pluck} instead
      * @method
      * @member Ext
-     * @alias Ext.Array#pluck
+     * @inheritdoc Ext.Array#pluck
      */
     Ext.pluck = ExtArray.pluck;
 
     /**
      * @method
      * @member Ext
-     * @alias Ext.Array#toArray
+     * @inheritdoc Ext.Array#toArray
      */
     Ext.toArray = function() {
         return ExtArray.toArray.apply(ExtArray, arguments);

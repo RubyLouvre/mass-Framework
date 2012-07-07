@@ -53,7 +53,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
         return new Function("fn,scope",fun);
     }
     $.mix(Array[P],{
-        //定位类 返回指定项首次出现的索引。
+        //定位操作，返回数组中第一个等于给定参数的元素的索引值。
         indexOf: function (item, index) {
             var n = this.length, i = ~~index;
             if (i < 0) i += n;
@@ -61,7 +61,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
                 if ( this[i] === item) return i;
             return -1;
         },
-        //定位类 返回指定项最后一次出现的索引。
+        //定位引操作，同上，不过是从后遍历。
         lastIndexOf: function (item, index) {
             var n = this.length,
             i = index == null ? n - 1 : index;
@@ -70,17 +70,17 @@ $.define( "lang_fix", !!Array.isArray, function(){
                 if (this[i] === item) return i;
             return -1;
         },
-        //迭代类 在数组中的每个项上运行一个函数。
+        //迭代操作，将数组的元素挨个儿传入一个函数中执行。Ptototype.js的对应名字为each。
         forEach : iterator('', '_', ''),
         //迭代类 在数组中的每个项上运行一个函数，如果此函数的值为真，则此元素作为新数组的元素收集起来，并返回新数组
         filter : iterator('r=[],j=0,', 'if(_)r[j++]=this[i]', 'return r'),
-        //迭代类  在数组中的每个项上运行一个函数，并将全部结果作为数组返回。
+        //收集操作，将数组的元素挨个儿传入一个函数中执行，然后把它们的返回值组成一个新数组返回。Ptototype.js的对应名字为collect。
         map :  iterator('r=[],', 'r[i]=_', 'return r'),
-        //迭代类  在数组中的每个项上运行一个函数，若存在任意的结果返回真，则返回真值。
+        //只要数组中有一个元素满足条件（放进给定函数返回true），那么它就返回true。Ptototype.js的对应名字为any。
         some : iterator('', 'if(_)return true', 'return false'),
-        //迭代类  在数组中的每个项上运行一个函数，若所有结果都返回真值，此方法亦返回真值。
+        //只有数组中的元素都满足条件（放进给定函数返回true），它才返回true。Ptototype.js的对应名字为all。
         every : iterator('', 'if(!_)return false', 'return true'),
-        //归化类 javascript1.8  对该数组的每项和前一次调用的结果运行一个函数，收集最后的结果。
+        //归化类 javascript1.8  将该数组的每个元素和前一次调用的结果运行一个函数，返回最后的结果。
         reduce: function (fn, lastResult, scope) {
             if (this.length == 0) return lastResult;
             var i = lastResult !== undefined ? 0 : 1;

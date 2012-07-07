@@ -276,21 +276,206 @@ function quote(target) {
     return '"' + target + '"';
 }
 
+var trim = String.prototype.trim;
+if(typeof trim !== "function"){
+    trim = function() {
+        return  this.replace(/^\s+|\s+$/g, '');
+    }
+}
 
+// ES5 15.5.4.20
+// http://es5.github.com/#x15.5.4.20
+var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
+"\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
+"\u2029\uFEFF";
+if (!String.prototype.trim || ws.trim()) {
+    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
+    // http://perfectionkills.com/whitespace-deviations/
+    ws = "[" + ws + "]";
+    var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
+    trimEndRegexp = new RegExp(ws + ws + "*$");
+    String.prototype.trim = function trim() {
+        if (this === undefined || this === null) {
+            throw new TypeError("can't convert "+this+" to object");
+        }
+        return String(this).replace(trimBeginRegexp, "").replace(trimEndRegexp, "");
+    };
+}
 
+Array.prototype.indexOf = function (item, index) {
+    var n = this.length, i = ~~index;
+    if (i < 0) i += n;
+    for (; i < n; i++)
+        if ( this[i] === item) return i;
+    return -1;
+}
 
+Array.prototype.lastIndexOf = function (item, index) {
+    var n = this.length,
+    i = index == null ? n - 1 : index;
+    if (i < 0) i = Math.max(0, n + i);
+    for (; i >= 0; i--)
+        if (this[i] === item) return i;
+    return -1;
+}
 
+function iterator(vars, body, ret) {
+    var fun = 'for(var '+vars+'i=0,n = this.length;i < n;i++){'+
+    body.replace('_', '((i in this) && fn.call(scope,this[i],i,this))')
+    +'}'+ret
+    return Function("fn,scope",fun);
+}
 
+Array.prototype.forEach = iterator('', '_', '');
 
+Array.prototype.filter = iterator('r=[],j=0,', 'if(_)r[j++]=this[i]', 'return r');
 
+Array.prototype.map =  iterator('r=[],', 'r[i]=_', 'return r');
 
+Array.prototype.some = iterator('', 'if(_)return true', 'return false');
 
+Array.prototype.every = iterator('', 'if(!_)return false', 'return true');
 
+[1,2,,4].forEach(function(e){
+    console.log(e)
+});
+//依次打印出1，2，4，忽略第二第三个逗号间的空元素
 
+Array.prototype.reduce = function (fn, lastResult, scope) {
+    if (this.length == 0) return lastResult;
+    var i = lastResult !== undefined ? 0 : 1;
+    var result = lastResult !== undefined ? lastResult : this[0];
+    for (var n = this.length; i < n; i++)
+        result = fn.call(scope, result, this[i], i, this);
+    return result;
+}
 
+Array.prototype.reduceRight = function (fn, lastResult, scope) {
+    var array = this.concat().reverse();
+    return array.reduce(fn, lastResult, scope);
+}
 
+function contains( target, item ) {
+    return target.indexOf(item) > -1
+}
 
+function removeAt( target, index ) {
+    return !!target.splice(index, 1).length
+}
 
+function remove( target, item ) {
+    var index = target.indexOf(item);
+    if (~index )
+        return removeAt(target, index);
+    return false;
+}
 
+function shuffle( target ) {
+    var j, x, i = target.length;
+    for (; i > 0; j = parseInt(Math.random() * i),
+        x = target[--i], target[i] = target[j], target[j] = x) {};
+    return target;
+}
 
+function random( target ) {
+    return shuffle( target.concat() )[0];
+}
+
+function flatten(target) {
+    var result = [];
+    target.forEach(function(item) {
+        if ( Array.isArray(item)) {
+            result = result.concat( flatten(item) );
+        } else {
+            result.push(item);
+        }
+    });
+    return result;
+}
+
+function unique( target ) {
+    var result = [];
+        loop:
+        for(var i = 0, n = target.length; i < n; i++) {
+            for(var x = i + 1 ; x < n; x++) {
+                if(target[x] === target[i])
+                    continue loop;
+            }
+            result.push(target[i]);
+        }
+    return result;
+}
+
+function compact( target ) {
+    return target.filter(function (el) {
+        return el != null;
+    });
+}
+
+function pluck( target, name ){
+    var result = [], prop;
+    target.forEach(function(item){
+        prop = item[name];
+        if(prop != null)
+            result.push(prop);
+    });
+    return result;
+}
+
+function groupBy(target, val) {
+    var result = {};
+    var iterator = $.isFunction(val) ? val : function(obj) {
+        return obj[val];
+    };
+    target.forEach( function(value, index) {
+        var key = iterator(value, index);
+        (result[key] || (result[key] = [])).push(value);
+    });
+    return result;
+}
+
+function sortBy( target, fn, scope ) {
+    var array =  target.map(function(item, index) {
+        return {
+            el: item,
+            re: fn.call(scope, item, index)
+        };
+    }).sort(function(left, right) {
+        var a = left.re, b = right.re;
+        return a < b ? -1 : a > b ? 1 : 0;
+    });
+    return pluck(array,'el');
+}
+
+function union( target, array ){
+    return unique( target.concat(array) );
+}
+
+function intersect( target, array ){
+    return target.filter(function(n) {
+        return ~array.indexOf(n);
+    });
+}
+
+function diff( target, array ) {
+    var result = target.slice();
+    for ( var i = 0; i < result.length; i++ ) {
+        for ( var j = 0; j < array.length; j++ ) {
+            if ( result[i] === array[j] ) {
+                result.splice(i, 1);
+                i--;
+                break;
+            }
+        }
+    }
+    return result;
+}
+
+function min( target ) {
+    return Math.min.apply(0, target);
+}
+
+function max( target ) {
+    return Math.max.apply(0, target);
+}
 

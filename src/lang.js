@@ -483,86 +483,64 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
-        //深拷贝当前数组
-        clone: function( target ){
-            var i = target.length, result = [];
-            while (i--) result[i] = cloneOf(target[i]);
-            return result;
-        },
-        each: function( target, fn, scope  ){
-            for(var i = 0, n = target.length; i < n; i++){
-                if (fn.call(scope || target[i], target[i], i, target) === false)
-                    break;
-            }
-            return target;
-        },
-        //inGroupsOf([1,2,3,4], 3, false);
-        //http://alternateidea.com/blog/articles/2006/9/26/more-ruby-in-prototype
-        inGroupsOf : function(array, number, fillWith) {
-            var number_of_groups = Math.ceil(array.length / number),
-            groups = [],
-            value,i,j;
-            for (i=0; i < number_of_groups; i++) {
-                groups[i] = [];
-                for (j=0; j < number; j++) {
-                    value = array[i * number + j];
-                    if (value === undefined) {
-                        if (fillWith !== false) {
-                            groups[i][j] = fillWith;
-                        }
-                    } else {
-                        groups[i][j] = value;
-                    }
-                }
-            }
-            return groups;
-        },
-        //判断数组是否包含此元素
+        //判定数组是否包含指定目标。
         contains: function ( target, item ) {
             return !!~target.indexOf(item) ;
         },
-        //http://msdn.microsoft.com/zh-cn/library/bb383786.aspx
-        //移除 Array 对象中某个元素的第一个匹配项。
+        //移除数组中指定位置的元素，返回布尔表示成功与否。
+        removeAt: function ( target, index ) {
+            return !!target.splice(index, 1).length
+        },
+        //移除数组中第一个匹配传参的那个元素，返回布尔表示成功与否。
         remove: function ( target, item ) {
             var index = target.indexOf(item);
             if (~index )
                 return $.Array.removeAt(target, index);
             return false;
         },
-        //移除 Array 对象中指定位置的元素,返回布尔表示是否成功
-        removeAt: function ( target, index ) {
-            return !!target.splice(index, 1).length
-        },
-        //对数组进行洗牌,但不影响原对象
+        //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
         shuffle: function ( target ) {
-            var shuff = target.concat(), j, x, i = shuff.length;
-            for (; i > 0; j = parseInt(Math.random() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
-            return shuff;
+            var j, x, i = target.length;
+            for (; i > 0; j = parseInt(Math.random() * i),
+                x = target[--i], target[i] = target[j], target[j] = x) {};
+            return target;
         },
-        //从数组中随机抽选一个元素出来
+        //从数组中随机抽选一个元素出来。
         random: function ( target ) {
-            return $.Array.shuffle( target )[0];
+            return $.Array.shuffle( target.concat() )[0];
         },
-        //取得数字数组中值最小的元素
-        min: function( target ) {
-            return Math.min.apply(0, target);
-        },
-        //取得数字数组中值最大的元素
-        max: function( target ) {
-            return Math.max.apply(0, target);
-        },
-        //取得对象数组的每个元素的特定属性
-        pluck: function( target, name ){
-            var result = [], prop;
-            target.forEach(function(item){
-                prop = item[name];
-                if(prop != null)
-                    result.push(prop);
+        //对数组进行平坦化处理，返回一个一维的新数组。
+        flatten: function(target) {
+            var result = [],self = $.Array.flatten;
+            target.forEach(function(item) {
+                if ( Array.isArray(item)) {
+                    result = result.concat(self(item));
+                } else {
+                    result.push(item);
+                }
             });
             return result;
         },
-        //根据对象的某个属性进行排序
+        // 对数组进行去重操作，返回一个没有重复元素的新数组。
+        unique: function ( target ) {
+            var result = [];
+                o:for(var i = 0, n = target.length; i < n; i++) {
+                    for(var x = i + 1 ; x < n; x++) {
+                        if(target[x] === target[i])
+                            continue o;
+                    }
+                    result.push(target[i]);
+                }
+            return result;
+        },
+        // 过滤数组中的null与undefined，但不影响原数组。
+        compact: function ( target ) {
+            return target.filter(function (el) {
+                return el != null;
+            });
+        },
+        //根据指定条件进行排序，通常用于对象数组。
         sortBy: function( target, fn, scope ) {
             var array =  target.map(function(item, index) {
                 return {
@@ -575,13 +553,39 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             });
             return $.Array.pluck(array,'el');
         },
-        // 以数组形式返回原数组中不为null与undefined的元素
-        compact: function ( target ) {
-            return target.filter(function (el) {
-                return el != null;
+        //根据指定条件（如回调或对象的某个属性）进行分组，构成对象返回。
+        groupBy: function (target, val) {
+            var result = {};
+            var iterator = $.isFunction(val) ? val : function(obj) {
+                return obj[val];
+            };
+            target.forEach( function(value, index) {
+                var key = iterator(value, index);
+                (result[key] || (result[key] = [])).push(value);
+            });
+            return result;
+        },
+        //取得对象数组的每个元素的指定属性，组成数组返回。
+        pluck: function( target, name ){
+            var result = [], prop;
+            target.forEach(function(item){
+                prop = item[name];
+                if(prop != null)
+                    result.push(prop);
+            });
+            return result;
+        },
+        //对两个数组取并集。
+        union: function( target, array ){
+            return $.Array.unique( target.concat(array) );
+        },
+        //对两个数组取交集
+        intersect: function( target, array ){
+            return target.filter(function(n) {
+                return ~array.indexOf(n);
             });
         },
-        //取差集(补集)
+        //对两个数组取差集(补集)
         diff: function( target, array ) {
             var result = target.slice();
             for ( var i = 0; i < result.length; i++ ) {
@@ -595,48 +599,27 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }
             return result;
         },
-        merge: function( target, array ){
-            var i = target.length, j = 0;
-            for ( var n = array.length; j < n; j++ ) {
-                target[ i++ ] = array[ j ];
+        //返回数组中的最小值，用于数字数组。
+        min: function( target ) {
+            return Math.min.apply(0, target);
+        },
+        //返回数组中的最大值，用于数字数组。
+        max: function( target ) {
+            return Math.max.apply(0, target);
+        },
+        //深拷贝当前数组
+        clone: function( target ){
+            var i = target.length, result = [];
+            while (i--) result[i] = cloneOf(target[i]);
+            return result;
+        },
+        //可中断的forEach迭代器
+        each: function( target, fn, scope  ){
+            for(var i = 0, n = target.length; i < n; i++){
+                if (fn.call(scope || target[i], target[i], i, target) === false)
+                    break;
             }
-            target.length = i;
             return target;
-        },
-        //取并集
-        union: function( target, array ){
-            $.Array.merge(target, array)
-            return $.Array.unique( target );
-        },
-        //取交集
-        intersect: function( target, array ){
-            return target.filter(function(n) {
-                return ~array.indexOf(n);
-            });
-        },
-        // 返回没有重复值的新数组
-        unique: function ( target ) {
-            var result = [];
-                o:for(var i = 0, n = target.length; i < n; i++) {
-                    for(var x = i + 1 ; x < n; x++) {
-                        if(target[x] === target[i])
-                            continue o;
-                    }
-                    result.push(target[i]);
-                }
-            return result;
-        },
-        //对数组进行平坦化处理，返回一个一维数组
-        flatten: function(target) {
-            var result = [],self = $.Array.flatten;
-            target.forEach(function(item) {
-                if ($.isArray(item)) {
-                    result = result.concat(self(item));
-                } else {
-                    result.push(item);
-                }
-            });
-            return result;
         }
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift,"+

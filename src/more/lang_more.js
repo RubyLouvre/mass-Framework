@@ -147,6 +147,27 @@ $.define("string", function(){
     }
 
     $.mix($.Array,{
+                //inGroupsOf([1,2,3,4], 3, false);
+        //http://alternateidea.com/blog/articles/2006/9/26/more-ruby-in-prototype
+        inGroupsOf : function(array, number, fillWith) {
+            var number_of_groups = Math.ceil(array.length / number),
+            groups = [],
+            value,i,j;
+            for (i=0; i < number_of_groups; i++) {
+                groups[i] = [];
+                for (j=0; j < number; j++) {
+                    value = array[i * number + j];
+                    if (value === undefined) {
+                        if (fillWith !== false) {
+                            groups[i][j] = fillWith;
+                        }
+                    } else {
+                        groups[i][j] = value;
+                    }
+                }
+            }
+            return groups;
+        },
         //取得第一个元素或对它进行操作
         first: function( target, fn, scope ){
             if($.type(fn,"Function")){

@@ -74,7 +74,7 @@ Ext.Function = {
      *
      * @param {Function} fn The function to delegate.
      * @param {Object} scope (optional) The scope (`this` reference) in which the function is executed.
-     * **If omitted, defaults to the browser window.**
+     * **If omitted, defaults to the default global environment object (usually the browser window).**
      * @param {Array} args (optional) Overrides arguments for the call. (Defaults to the arguments passed by the caller)
      * @param {Boolean/Number} appendArgs (optional) if True args are appended to call args instead of overriding,
      * if a number the args are inserted at the specified position
@@ -84,7 +84,7 @@ Ext.Function = {
         if (arguments.length === 2) {
             return function() {
                 return fn.apply(scope, arguments);
-            }
+            };
         }
 
         var method = fn,
@@ -102,7 +102,7 @@ Ext.Function = {
                 Ext.Array.insert(callArgs, appendArgs, args);
             }
 
-            return method.apply(scope || window, callArgs);
+            return method.apply(scope || Ext.global, callArgs);
         };
     },
 
@@ -131,12 +131,17 @@ Ext.Function = {
      */
     pass: function(fn, args, scope) {
         if (!Ext.isArray(args)) {
-            args = Ext.Array.clone(args);
-        }
+            if (Ext.isIterable(args)) {
+                args = Ext.Array.clone(args);
+            } else {
+                args = args !== undefined ? [args] : [];
+            }
+        };
 
         return function() {
-            args.push.apply(args, arguments);
-            return fn.apply(scope || this, args);
+            var fnArgs = [].concat(args);
+            fnArgs.push.apply(fnArgs, arguments);
+            return fn.apply(scope || this, fnArgs);
         };
     },
 
@@ -205,7 +210,7 @@ Ext.Function = {
                     args = arguments;
                 newFn.target = me;
                 newFn.method = origFn;
-                return (newFn.apply(scope || me || window, args) !== false) ? origFn.apply(me || window, args) : returnValue || null;
+                return (newFn.apply(scope || me || Ext.global, args) !== false) ? origFn.apply(me || Ext.global, args) : returnValue || null;
             };
         }
     },
@@ -234,7 +239,7 @@ Ext.Function = {
             setTimeout(function() {
                 fn.apply(me, args);
             }, delay);
-        }
+        };
     },
 
     /**
@@ -297,7 +302,7 @@ Ext.Function = {
      * @param {Function} originalFn The original function.
      * @param {Function} newFn The function to sequence
      * @param {Object} scope (optional) The scope (`this` reference) in which the passed function is executed.
-     * If omitted, defaults to the scope in which the original function is called or the browser window.
+     * If omitted, defaults to the scope in which the original function is called or the default global environment object (usually the browser window).
      * @return {Function} The new function
      */
     createSequence: function(originalFn, newFn, scope) {
@@ -332,21 +337,15 @@ Ext.Function = {
         var timerId;
 
         return function() {
-            if (!scope) {
-                scope = this;
-            }
-
-            if (!args) {
-                args = Array.prototype.slice.call(arguments);
-            }
+            var callArgs = args || Array.prototype.slice.call(arguments, 0),
+                me = scope || this;
 
             if (timerId) {
                 clearTimeout(timerId);
-                timerId = null;
             }
 
             timerId = setTimeout(function(){
-                fn.apply(scope, args);
+                fn.apply(me, callArgs);
             }, buffer);
         };
     },
@@ -384,44 +383,100 @@ Ext.Function = {
         };
     },
 
-    interceptBefore: function(object, methodName, fn) {
+    /**
+     * Adds behavior to an existing method that is executed before the
+     * original behavior of the function.  For example:
+     * 
+     *     var soup = {
+     *         contents: [],
+     *         add: function(ingredient) {
+     *             this.contents.push(ingredient);
+     *         }
+     *     };
+     *     Ext.Function.interceptBefore(soup, "add", function(ingredient){
+     *         if (!this.contents.length && ingredient !== "water") {
+     *             // Always add water to start with
+     *             this.contents.push("water");
+     *         }
+     *     });
+     *     soup.add("onions");
+     *     soup.add("salt");
+     *     soup.contents; // will contain: water, onions, salt
+     * 
+     * @param {Object} object The target object
+     * @param {String} methodName Name of the method to override
+     * @param {Function} fn Function with the new behavior.  It will
+     * be called with the same arguments as the original method.  The
+     * return value of this function will be the return value of the
+     * new method.
+     * @param {Object} [scope] The scope to execute the interceptor function. Defaults to the object.
+     * @return {Function} The new function just created.
+     */
+    interceptBefore: function(object, methodName, fn, scope) {
         var method = object[methodName] || Ext.emptyFn;
 
-        return object[methodName] = function() {
-            var ret = fn.apply(this, arguments);
+        return (object[methodName] = function() {
+            var ret = fn.apply(scope || this, arguments);
             method.apply(this, arguments);
 
             return ret;
-        };
+        });
     },
 
-    interceptAfter: function(object, methodName, fn) {
+    /**
+     * Adds behavior to an existing method that is executed after the
+     * original behavior of the function.  For example:
+     * 
+     *     var soup = {
+     *         contents: [],
+     *         add: function(ingredient) {
+     *             this.contents.push(ingredient);
+     *         }
+     *     };
+     *     Ext.Function.interceptAfter(soup, "add", function(ingredient){
+     *         // Always add a bit of extra salt
+     *         this.contents.push("salt");
+     *     });
+     *     soup.add("water");
+     *     soup.add("onions");
+     *     soup.contents; // will contain: water, salt, onions, salt
+     * 
+     * @param {Object} object The target object
+     * @param {String} methodName Name of the method to override
+     * @param {Function} fn Function with the new behavior.  It will
+     * be called with the same arguments as the original method.  The
+     * return value of this function will be the return value of the
+     * new method.
+     * @param {Object} [scope] The scope to execute the interceptor function. Defaults to the object.
+     * @return {Function} The new function just created.
+     */
+    interceptAfter: function(object, methodName, fn, scope) {
         var method = object[methodName] || Ext.emptyFn;
 
-        return object[methodName] = function() {
+        return (object[methodName] = function() {
             method.apply(this, arguments);
-            return fn.apply(this, arguments);
-        };
+            return fn.apply(scope || this, arguments);
+        });
     }
 };
 
 /**
  * @method
  * @member Ext
- * @alias Ext.Function#defer
+ * @inheritdoc Ext.Function#defer
  */
 Ext.defer = Ext.Function.alias(Ext.Function, 'defer');
 
 /**
  * @method
  * @member Ext
- * @alias Ext.Function#pass
+ * @inheritdoc Ext.Function#pass
  */
 Ext.pass = Ext.Function.alias(Ext.Function, 'pass');
 
 /**
  * @method
  * @member Ext
- * @alias Ext.Function#bind
+ * @inheritdoc Ext.Function#bind
  */
 Ext.bind = Ext.Function.alias(Ext.Function, 'bind');

@@ -5,103 +5,169 @@
  * @singleton
  */
 
-(function() {
+Ext.Number = new function() {
 
-var isToFixedBroken = (0.9).toFixed() !== '1';
+    var me = this,
+        isToFixedBroken = (0.9).toFixed() !== '1',
+        math = Math;
 
-Ext.Number = {
-    /**
-     * Checks whether or not the passed number is within a desired range.  If the number is already within the
-     * range it is returned, otherwise the min or max value is returned depending on which side of the range is
-     * exceeded. Note that this method returns the constrained value but does not change the current number.
-     * @param {Number} number The number to check
-     * @param {Number} min The minimum number in the range
-     * @param {Number} max The maximum number in the range
-     * @return {Number} The constrained value if outside the range, otherwise the current value
-     */
-    constrain: function(number, min, max) {
-        number = parseFloat(number);
+    Ext.apply(this, {
+        /**
+         * Checks whether or not the passed number is within a desired range.  If the number is already within the
+         * range it is returned, otherwise the min or max value is returned depending on which side of the range is
+         * exceeded. Note that this method returns the constrained value but does not change the current number.
+         * @param {Number} number The number to check
+         * @param {Number} min The minimum number in the range
+         * @param {Number} max The maximum number in the range
+         * @return {Number} The constrained value if outside the range, otherwise the current value
+         */
+        constrain: function(number, min, max) {
+            number = parseFloat(number);
 
-        if (!isNaN(min)) {
-            number = Math.max(number, min);
-        }
-        if (!isNaN(max)) {
-            number = Math.min(number, max);
-        }
-        return number;
-    },
-
-    /**
-     * Snaps the passed number between stopping points based upon a passed increment value.
-     * @param {Number} value The unsnapped value.
-     * @param {Number} increment The increment by which the value must move.
-     * @param {Number} minValue The minimum value to which the returned value must be constrained. Overrides the increment..
-     * @param {Number} maxValue The maximum value to which the returned value must be constrained. Overrides the increment..
-     * @return {Number} The value of the nearest snap target.
-     */
-    snap : function(value, increment, minValue, maxValue) {
-        var newValue = value,
-            m;
-
-        if (!(increment && value)) {
-            return value;
-        }
-        m = value % increment;
-        if (m !== 0) {
-            newValue -= m;
-            if (m * 2 >= increment) {
-                newValue += increment;
-            } else if (m * 2 < -increment) {
-                newValue -= increment;
+            if (!isNaN(min)) {
+                number = math.max(number, min);
             }
-        }
-        return Ext.Number.constrain(newValue, minValue,  maxValue);
-    },
+            if (!isNaN(max)) {
+                number = math.min(number, max);
+            }
+            return number;
+        },
 
-    /**
-     * Formats a number using fixed-point notation
-     * @param {Number} value The number to format
-     * @param {Number} precision The number of digits to show after the decimal point
-     */
-    toFixed: function(value, precision) {
-        if (isToFixedBroken) {
+        /**
+         * Snaps the passed number between stopping points based upon a passed increment value.
+         *
+         * The difference between this and {@link #snapInRange} is that {@link #snapInRange} uses the minValue
+         * when calculating snap points:
+         *
+         *     r = Ext.Number.snap(56, 2, 55, 65);        // Returns 56 - snap points are zero based
+         *
+         *     r = Ext.Number.snapInRange(56, 2, 55, 65); // Returns 57 - snap points are based from minValue
+         *
+         * @param {Number} value The unsnapped value.
+         * @param {Number} increment The increment by which the value must move.
+         * @param {Number} minValue The minimum value to which the returned value must be constrained. Overrides the increment.
+         * @param {Number} maxValue The maximum value to which the returned value must be constrained. Overrides the increment.
+         * @return {Number} The value of the nearest snap target.
+         */
+        snap : function(value, increment, minValue, maxValue) {
+            var m;
+
+            // If no value passed, or minValue was passed and value is less than minValue (anything < undefined is false)
+            // Then use the minValue (or zero if the value was undefined)
+            if (value === undefined || value < minValue) {
+                return minValue || 0;
+            }
+
+            if (increment) {
+                m = value % increment;
+                if (m !== 0) {
+                    value -= m;
+                    if (m * 2 >= increment) {
+                        value += increment;
+                    } else if (m * 2 < -increment) {
+                        value -= increment;
+                    }
+                }
+            }
+            return me.constrain(value, minValue,  maxValue);
+        },
+
+        /**
+         * Snaps the passed number between stopping points based upon a passed increment value.
+         *
+         * The difference between this and {@link #snap} is that {@link #snap} does not use the minValue
+         * when calculating snap points:
+         *
+         *     r = Ext.Number.snap(56, 2, 55, 65);        // Returns 56 - snap points are zero based
+         *
+         *     r = Ext.Number.snapInRange(56, 2, 55, 65); // Returns 57 - snap points are based from minValue
+         *
+         * @param {Number} value The unsnapped value.
+         * @param {Number} increment The increment by which the value must move.
+         * @param {Number} [minValue=0] The minimum value to which the returned value must be constrained.
+         * @param {Number} [maxValue=Infinity] The maximum value to which the returned value must be constrained.
+         * @return {Number} The value of the nearest snap target.
+         */
+        snapInRange : function(value, increment, minValue, maxValue) {
+            var tween;
+
+            // default minValue to zero
+            minValue = (minValue || 0);
+
+            // If value is undefined, or less than minValue, use minValue
+            if (value === undefined || value < minValue) {
+                return minValue;
+            }
+
+            // Calculate how many snap points from the minValue the passed value is.
+            if (increment && (tween = ((value - minValue) % increment))) {
+                value -= tween;
+                tween *= 2;
+                if (tween >= increment) {
+                    value += increment;
+                }
+            }
+
+            // If constraining within a maximum, ensure the maximum is on a snap point
+            if (maxValue !== undefined) {
+                if (value > (maxValue = me.snapInRange(maxValue, increment, minValue))) {
+                    value = maxValue;
+                }
+            }
+
+            return value;
+        },
+
+        /**
+         * Formats a number using fixed-point notation
+         * @param {Number} value The number to format
+         * @param {Number} precision The number of digits to show after the decimal point
+         */
+        toFixed: isToFixedBroken ? function(value, precision) {
             precision = precision || 0;
-            var pow = Math.pow(10, precision);
-            return (Math.round(value * pow) / pow).toFixed(precision);
-        }
+            var pow = math.pow(10, precision);
+            return (math.round(value * pow) / pow).toFixed(precision);
+        } : function(value, precision) {
+            return value.toFixed(precision);
+        },
 
-        return value.toFixed(precision);
-    },
+        /**
+         * Validate that a value is numeric and convert it to a number if necessary. Returns the specified default value if
+         * it is not.
+
+    Ext.Number.from('1.23', 1); // returns 1.23
+    Ext.Number.from('abc', 1); // returns 1
+
+         * @param {Object} value
+         * @param {Number} defaultValue The value to return if the original value is non-numeric
+         * @return {Number} value, if numeric, defaultValue otherwise
+         */
+        from: function(value, defaultValue) {
+            if (isFinite(value)) {
+                value = parseFloat(value);
+            }
+
+            return !isNaN(value) ? value : defaultValue;
+        },
+
+        /**
+         * Returns a random integer between the specified range (inclusive)
+         * @param {Number} from Lowest value to return.
+         * @param {Number} to Highst value to return.
+         * @return {Number} A random integer within the specified range.
+         */
+        randomInt: function (from, to) {
+           return math.floor(math.random() * (to - from + 1) + from);
+        }
+    });
 
     /**
-     * Validate that a value is numeric and convert it to a number if necessary. Returns the specified default value if
-     * it is not.
-
-Ext.Number.from('1.23', 1); // returns 1.23
-Ext.Number.from('abc', 1); // returns 1
-
-     * @param {Object} value
-     * @param {Number} defaultValue The value to return if the original value is non-numeric
-     * @return {Number} value, if numeric, defaultValue otherwise
+     * @deprecated 4.0.0 Please use {@link Ext.Number#from} instead.
+     * @member Ext
+     * @method num
+     * @inheritdoc Ext.Number#from
      */
-    from: function(value, defaultValue) {
-        if (isFinite(value)) {
-            value = parseFloat(value);
-        }
-
-        return !isNaN(value) ? value : defaultValue;
-    }
-};
-
-})();
-
-/**
- * This method is deprecated, please use {@link Ext.Number#from Ext.Number.from} instead
- *
- * @deprecated 4.0.0 Replaced by Ext.Number.from
- * @member Ext
- * @method num
- */
-Ext.num = function() {
-    return Ext.Number.from.apply(this, arguments);
+    Ext.num = function() {
+        return me.from.apply(this, arguments);
+    };
 };
