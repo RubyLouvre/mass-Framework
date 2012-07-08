@@ -529,9 +529,7 @@ $.define("avalon","data,attr,event,fx", function(){
                                 tmpl = null
                             }
                             break;
-
                         case "delete":
-                          
                             tmpl = symptom.references[ obj.y ]
                             $(tmpl.nodes).remove();
                             tmpl.destroy = true;

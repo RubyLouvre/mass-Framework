@@ -112,15 +112,18 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
         // Generate an integer Array containing an arithmetic progression. A port of
         // the native Python `range()` function. See
         // [the Python documentation](http://docs.python.org/library/functions.html#range).
-        range: function(start, stop, step) {
+        range: function(start, end, step) {
             step || (step = 1);
-            if (arguments.length < 2) {
-                stop = start || 0;
+            if (end == null) {
+                end = start || 0;
                 start = 0;
             }
+            // use `Array(length)` so V8 will avoid the slower "dictionary" mode
+            // http://www.youtube.com/watch?v=XAqIpGU8ZZk#t=16m27s
             var index = -1,
-            length = Math.max(Math.ceil((stop - start) / step), 0),
+            length = Math.max(0, Math.ceil((end - start) / step)),
             result = Array(length);
+
             while (++index < length) {
                 result[index] = start;
                 start += step;
@@ -359,7 +362,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             });
         }
     });
-    
+
     $.String({
         //判断一个字符串是否包含另一个字符
         contains: function(target, str, separator){
