@@ -475,7 +475,13 @@ $.define("avalon","data,attr,event,fx", function(){
         },this);
         return this.template
     }
-
+//http://net.tutsplus.com/tutorials/javascript-ajax/5-awesome-angularjs-features/
+/*
+ * Data-binding is probably the coolest and most useful feature in AngularJS. It will save you from writing a considerable amount of boilerplate code. A typical web application may contain up to 80% of its code base, dedicated to traversing, manipulating, and listening to the DOM. Data-binding makes this code disappear, so you can focus on your application.
+Think of your model as the single-source-of-truth for your application. Your model is where you go to to read or update anything in your application. The data-binding directives provide a projection of your model to the application view. This projection is seamless, and occurs without any effort from you.
+Traditionally, when the model changes, the developer is responsible for manually manipulating the DOM elements and attributes to reflect these changes. This is a two-way street. In one direction, the model changes drive change in DOM elements. In the other, DOM element changes necessitate changes in the model. This is further complicated by user interaction, since the developer is then responsible for interpreting the interactions, merging them into a model, and updating the view. This is a very manual and cumbersome process, which becomes difficult to control, as an application grows in size and complexity.
+There must be a better way! AngularJS’ two-way data-binding handles the synchronization between the DOM and the model, and vice versa.
+ */
     $.bindingAdapter[ "template" ] = {
         update: function(node, data, field, context, symptom){
             var ganso = symptom.ganso//取得最初的那个节点的内部作为模块
