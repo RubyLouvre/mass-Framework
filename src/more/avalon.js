@@ -492,75 +492,55 @@ $.define("avalon","data,attr,event,fx", function(){
                     return setBindingsToChildren( elems, context, true )
                 }
             }else if(number == 0){//处理unless bindings
-                while((el = node.firstChild)){
-                    ganso.appendChild(el)
-                }
+                symptom.html[0].recovery();
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
-                var scripts = getEditScripts( symptom.prevData, data ),tmp;
+                var scripts = getEditScripts( symptom.prevData, data ),tmpl, go
+                //   console.log( symptom.prevData)
+                //    console.log(data)
                 for(var i = 0, n = scripts.length; i < n ; i++){
-                    var obj = scripts[i];
+                    var obj = scripts[i], go = false;
                     switch(obj.action){
                         case "update":
                             tmpl = symptom.html[ obj.x ];
-                            //   console.log(tmpl.nodes.length)
+                            //   console.log(tmpl)
+                            go = true
                             break;
                         case "add":
                             tmpl =  new Tmpl( ganso.cloneNode(true) );
                             symptom.html[ obj.y ] = tmpl;
-                            //   console.log("XXXXXXXXXXX")
+                            go = true
                             break;
                         case "delete":
-                            tmpl = symptom.html[ obj.x ];
-                            console.log(tmpl)
+                            tmpl = symptom.html[ obj.y ];
+                            $.log("delete")
+                            console.log(tmpl.nodes)
+                            $(tmpl.nodes).remove();
                             break;
-
                     };
-
-                    (function( k, tmpl ){
-                        // setTimeout(function()}{})
-                        var frag = tmpl.template
-                        //   var frag = tmpl.recovery();//应该是在update add中发生吧
-                        var subclass = new $.viewModel(data[ k ], context);
-                        subclass.extend( {
-                            $index: k,
-                            $item: data[ k ]
-                        } )
-                        .alias("$itemName", "$data")
-                        .alias("$indexName", "$index");
-                        elems = getChildren( frag );
-                        //  console.log(subclass)
-                        node.appendChild( frag );
-                        if(elems.length){
-                            setBindingsToChildren(elems, subclass, true, true )
-                        }
-                    })(i, tmpl);
-
+                    if(go){
+                        (function( k, tmpl ){
+                            var frag = tmpl.template
+                            if(!frag.childNodes.length){
+                                tmpl.recovery();//update
+                            }
+                            var subclass = new $.viewModel(data[ k ], context);
+                            subclass.extend( {
+                                $index: k,
+                                $item: data[ k ]
+                            } )
+                            .alias("$itemName", "$data")
+                            .alias("$indexName", "$index");
+                               
+                            elems = getChildren( frag );
+                            node.appendChild( frag );
+                            if(elems.length){
+                                setBindingsToChildren(elems, subclass, true, true )
+                            }
+                        })(i, tmpl);
+                    }
                 }
-
-            //                for(var i = 0, n = curData.length; i < n ; i++){
-            //                    var obj = curData[i];
-            //                    if(!obj.template){
-            //                        obj.template = template.cloneNode(true);
-            //                        obj.nodes = $.slice(obj.template.childNodes);
-            //                    };
-            //                    (function( k, frag ){
-            //                        var subclass = new $.viewModel(data[ k ], context);
-            //                        subclass.extend( {
-            //                            $index: k,
-            //                            $item: data[ k ]
-            //                        } )
-            //                        .alias("$itemName", "$data")
-            //                        .alias("$indexName", "$index");
-            //                        elems = getChildren( frag );
-            //                        //  console.log(subclass)
-            //                        node.appendChild( frag );
-            //                        if(elems.length){
-            //                            setBindingsToChildren(elems, subclass, true, true )
-            //                        }
-            //                    })(i, obj.template);
-            //                }
-            //                symptom.prevData = curData
+                symptom.prevData = data.concat()
             }
             return void 0
         },
@@ -628,11 +608,11 @@ $.define("avalon","data,attr,event,fx", function(){
             for(i = 1; i <= tn; i++){
                 for(j = 1; j <= fn; j++){
                     if( to[i-1] == from[j-1] ){
-                        matrix[i][j] = matrix[i-1][j-1];//没有改变
+                        matrix[i][j] = matrix[i-1][j-1];//保留
                     } else {
-                        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //代替 substitution
-                            matrix[i][j-1] + 1, // 插入insertion
-                            matrix[i-1][j] + 1); //删除 deletion
+                        matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, //更新
+                            matrix[i][j-1] + 1, // 插入
+                            matrix[i-1][j] + 1); //删除
                     }
                     if(table){
                         td = table.rows[i].cells[j]
@@ -643,12 +623,8 @@ $.define("avalon","data,attr,event,fx", function(){
             return matrix
         };
         //返回具体的编辑步骤
-
         var _getEditScripts = function(from, to, matrix, table){
-            var x = from.length;
-            var y = to.length;
-            var scripts = []
-            // console.log(x+"  "+y)
+            var x = from.length, y = to.length, i = 0, scripts = [], action
             if(x == 0){//如果原数组为0,那么新数组的都是新增的
                 for( i = 0; i < y; i++){
                     scripts[scripts.length] = {
@@ -657,16 +633,14 @@ $.define("avalon","data,attr,event,fx", function(){
                     }
                 }
             }else if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
-                for( ; i < x; i++){
+                for( i = 0 ; i < x; i++){
                     scripts[scripts.length] = {
                         action: "delete",
                         y: i
                     }
                 }
             }else{
-                //把两个JSON合并在一起
-                // $.log(matrix.join("\n"))
-                var i =  Math.max(x,y),action;
+                i =  Math.max(x,y);
                 while( 1 ){
                     var cur = matrix[y][x];
                     if( y == 0 && x == 0){
@@ -710,30 +684,12 @@ $.define("avalon","data,attr,event,fx", function(){
             }
             scripts.reverse();
             console.log(scripts);
+            console.log("scriptsscriptsscriptsscripts")
             return scripts
-        //            var result = [];
-        //            //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
-        //            for( i = 0; i < scripts.length ; i++){
-        //                var el = scripts[i]
-        //                switch(el.action){
-        //                    case "retain":
-        //                        result[result.length] = {
-        //                            value: from[el.x]
-        //                        }
-        //                        break;
-        //                    case "add":
-        //                    case "update":
-        //                        result[result.length] = {
-        //                            value: to[el.y]
-        //                        }
-        //                        break;
-        //                }
-        //            }
-        //            return result;
         }
 
         return function( old, neo ){
-            var  table = document.createElement("table");
+            var table = document.createElement("table");
             document.body.appendChild(table);
             table.className = "compare";
             var matrix = getEditDistance( old, neo,table);

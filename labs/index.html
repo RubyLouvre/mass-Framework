@@ -24,7 +24,7 @@
             </li>
         </ul>
         <button>Add</button>
- <style>
+    <style>
         .compare{
             border:1px solid #000;
             border-collapse:collapse;
@@ -52,38 +52,40 @@
             background:lime;
         }
     </style>
-        <script type="text/javascript">
-            $.require("ready,more/avalon", function(){
-                function AppViewModel() {
-                    var self = this;
+    <script type="text/javascript">
+        $.require("ready,more/avalon", function(){
+            function AppViewModel() {
+                var self = this;
 
-                    self.people = $.observableArray([
-                        { name: 'Bert' },
-                        { name: 'Charles' },
-                        { name: 'Denise' }
-                    ]);
+                self.people = $.observableArray([
+                    { name: 'Bert' },
+                    { name: 'Charles' },
+                    { name: 'Denise' }
+                ]);
 
-                    self.addPerson = function() {
-                        self.people.push({ name: "New at " + Math.random() });
-                    };
+                self.addPerson = function() {
+                    self.people.push({ name: "New at " + Math.random() });
 
-                    self.removePerson = function(el) {
-                        var model = $.dataFor(el);
-                        self.people.remove(model);
-                    }
+                };
+
+                self.removePerson = function(el) {
+                    var model = $.dataFor(el);
+                    self.people.remove(model);
                 }
-                var model = new AppViewModel(this)
-                $.applyBindings(model);
+            }
+            var model = new AppViewModel(this)
+            $.applyBindings(model);
               
-                $(".remove").live("click", function() {
-                    model.removePerson(this)
-                });
-        
-                $("button").live("click", function() {
-                    model.addPerson();
-                });
+            $(".remove").live("click", function() {
+                   
+                model.removePerson(this)
             });
-        </script>
+        
+            $("button").live("click", function() {
+                model.addPerson();
+            });
+        });
+    </script>
 
-    </body>
+</body>
 </html>
