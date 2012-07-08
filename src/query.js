@@ -945,5 +945,6 @@ $.define("query", function(){
 2011.11.9 增加getText 重构 getElementById与过滤ID部分
 2011.11.10 exec一律改为match,对parseNth的结果进行缓存
 2012.5.21 对body进行优化
+https://github.com/CNEYE/JReally
 */
 

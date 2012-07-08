@@ -451,18 +451,38 @@ $.define("avalon","data,attr,event,fx", function(){
         })
 
     }
+
+
+    var Tmpl = function(t){
+        this.template = t
+        this.nodes = $.slice(t.childNodes)
+    }
+    Tmpl.prototype.recovery = function(){
+        this.nodes.forEach(function( el ){
+            this.template.appendChild(el)
+        },this);
+        return this.template
+    }
+
     $.bindingAdapter[ "template" ] = {
         update: function(node, data, field, context, symptom){
-            if( !symptom.template ){//缓存,省得每次都创建
+            var ganso = symptom.ganso//取得最初的那个节点的内部作为模块
+            if( !symptom.ganso ){//缓存,省得每次都创建
+                //合并文本节点数
                 node.normalize();
-                symptom.template = node.ownerDocument.createDocumentFragment();
-                symptom.nodes = $.slice(node.childNodes);
-                symptom.prevData = [{
-                    template: symptom.template ,
-                    nodes: symptom.nodes
-                }];
+                //保存模板
+                ganso = node.ownerDocument.createDocumentFragment();
+                while((el = node.firstChild)){
+                    ganso.appendChild(el)
+                }
+                symptom.ganso = ganso;
+                //复制一份出来放回原位
+                var first = ganso.cloneNode(true);
+                symptom.html = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
+                node.appendChild( first )
+                symptom.prevData = [{}];//这是伪数据，目的让其update
             }
-            var number = field(), template = symptom.template, el;
+            var number = field(),  el;
             if( number > 0 ){ //处理with if bindings
                 var elems = getChildren( symptom.nodes )
                 if( elems.length ){
@@ -473,23 +493,34 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }else if(number == 0){//处理unless bindings
                 while((el = node.firstChild)){
-                    template.appendChild(el)
+                    ganso.appendChild(el)
                 }
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
-                retrieve( symptom.prevData  ); //先回收原有的
-               
-                console.log("prevData.length" + symptom.prevData.length);
-                 console.log("data.length" + data.length);
-                var curData = getEditScripts( symptom.prevData, data );
-              //  console.log(curData)
-                for(var i = 0, n = curData.length; i < n ; i++){
-                    var obj = curData[i];
-                    if(!obj.template){
-                        obj.template = template.cloneNode(true);
-                        obj.nodes =  $.slice(obj.template.childNodes);  
+                var scripts = getEditScripts( symptom.prevData, data ),tmp;
+                for(var i = 0, n = scripts.length; i < n ; i++){
+                    var obj = scripts[i];
+                    switch(obj.action){
+                        case "update":
+                            tmpl = symptom.html[ obj.x ];
+                            //   console.log(tmpl.nodes.length)
+                            break;
+                        case "add":
+                            tmpl =  new Tmpl( ganso.cloneNode(true) );
+                            symptom.html[ obj.y ] = tmpl;
+                            //   console.log("XXXXXXXXXXX")
+                            break;
+                        case "delete":
+                            tmpl = symptom.html[ obj.x ];
+                            console.log(tmpl)
+                            break;
+
                     };
-                    (function( k, frag ){
+
+                    (function( k, tmpl ){
+                        // setTimeout(function()}{})
+                        var frag = tmpl.template
+                        //   var frag = tmpl.recovery();//应该是在update add中发生吧
                         var subclass = new $.viewModel(data[ k ], context);
                         subclass.extend( {
                             $index: k,
@@ -503,9 +534,33 @@ $.define("avalon","data,attr,event,fx", function(){
                         if(elems.length){
                             setBindingsToChildren(elems, subclass, true, true )
                         }
-                    })(i, obj.template);
+                    })(i, tmpl);
+
                 }
-                symptom.prevData = curData
+
+            //                for(var i = 0, n = curData.length; i < n ; i++){
+            //                    var obj = curData[i];
+            //                    if(!obj.template){
+            //                        obj.template = template.cloneNode(true);
+            //                        obj.nodes = $.slice(obj.template.childNodes);
+            //                    };
+            //                    (function( k, frag ){
+            //                        var subclass = new $.viewModel(data[ k ], context);
+            //                        subclass.extend( {
+            //                            $index: k,
+            //                            $item: data[ k ]
+            //                        } )
+            //                        .alias("$itemName", "$data")
+            //                        .alias("$indexName", "$index");
+            //                        elems = getChildren( frag );
+            //                        //  console.log(subclass)
+            //                        node.appendChild( frag );
+            //                        if(elems.length){
+            //                            setBindingsToChildren(elems, subclass, true, true )
+            //                        }
+            //                    })(i, obj.template);
+            //                }
+            //                symptom.prevData = curData
             }
             return void 0
         },
@@ -552,7 +607,7 @@ $.define("avalon","data,attr,event,fx", function(){
         var getEditDistance = function(from, to, table){
             var matrix = [], fn = from.length, tn = to.length;
             // 初始化一个矩阵,行数为b,列数为a
-            var i,j, td;
+            var i, j, td;
             for(i = 0; i <= tn; i++){
                 matrix[i] = [i];//设置第一列的值
                 table && table.insertRow(i)
@@ -562,12 +617,12 @@ $.define("avalon","data,attr,event,fx", function(){
                 if(table){
                     for(i = 0; i <= tn; i++){
                         td = table.rows[i].insertCell(j);
-                        td.innerHTML = j;
+                        if(isFinite(matrix[i][j])){
+                            td.innerHTML = matrix[i][j];
+                            td.className = "zero"
+                        }
                     }
                 }
-            }
-            if(table){
-                table.rows[0].cells[0].className ="zero"
             }
             // 填空矩阵
             for(i = 1; i <= tn; i++){
@@ -588,19 +643,26 @@ $.define("avalon","data,attr,event,fx", function(){
             return matrix
         };
         //返回具体的编辑步骤
+
         var _getEditScripts = function(from, to, matrix, table){
             var x = from.length;
             var y = to.length;
             var scripts = []
+            // console.log(x+"  "+y)
             if(x == 0){//如果原数组为0,那么新数组的都是新增的
-                for( ; i < y; i++){
+                for( i = 0; i < y; i++){
                     scripts[scripts.length] = {
                         action: "add",
                         x: i
                     }
                 }
             }else if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
-                scripts = []
+                for( ; i < x; i++){
+                    scripts[scripts.length] = {
+                        action: "delete",
+                        y: i
+                    }
+                }
             }else{
                 //把两个JSON合并在一起
                 // $.log(matrix.join("\n"))
@@ -647,30 +709,35 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }
             scripts.reverse();
-            var result = [];
-            //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
-            for( i = 0; i < scripts.length ; i++){
-                var el = scripts[i]
-                switch(el.action){
-                    case "retain":
-                        result[result.length] = {
-                            value: from[el.x]
-                        }
-                        break;
-                    case "add":
-                    case "update":
-                        result[result.length] = {
-                            value: to[el.y]
-                        }
-                        break;
-                }
-            }
-            return result;
+            console.log(scripts);
+            return scripts
+        //            var result = [];
+        //            //我们只需要三种操作,从旧组数取得retain类型的元素,从新数组取得update与add类型的元素
+        //            for( i = 0; i < scripts.length ; i++){
+        //                var el = scripts[i]
+        //                switch(el.action){
+        //                    case "retain":
+        //                        result[result.length] = {
+        //                            value: from[el.x]
+        //                        }
+        //                        break;
+        //                    case "add":
+        //                    case "update":
+        //                        result[result.length] = {
+        //                            value: to[el.y]
+        //                        }
+        //                        break;
+        //                }
+        //            }
+        //            return result;
         }
 
         return function( old, neo ){
-            var matrix = getEditDistance( old, neo);
-            return _getEditScripts( old, neo, matrix)
+            var  table = document.createElement("table");
+            document.body.appendChild(table);
+            table.className = "compare";
+            var matrix = getEditDistance( old, neo,table);
+            return _getEditScripts( old, neo, matrix,table)
         }
     })();
 

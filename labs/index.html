@@ -24,7 +24,34 @@
             </li>
         </ul>
         <button>Add</button>
-
+ <style>
+        .compare{
+            border:1px solid #000;
+            border-collapse:collapse;
+        }
+        .compare td{
+            border:1px solid #000;
+            width:30px;
+            height:30px;
+            text-align:center;
+            background:olive;
+        }
+        td.zero{
+            background:teal;
+        }
+        td.retain{
+            background:orange;
+        }
+        td.update{
+            background:fuchsia;
+        }
+        td.delete{
+            background:red;
+        }
+        td.add{
+            background:lime;
+        }
+    </style>
         <script type="text/javascript">
             $.require("ready,more/avalon", function(){
                 function AppViewModel() {
