@@ -77,11 +77,12 @@
             $.applyBindings(model);
               
             $(".remove").live("click", function() {
-                   
+                window.console && console.clear();
                 model.removePerson(this)
             });
         
             $("button").live("click", function() {
+                window.console && console.clear();
                 model.addPerson();
             });
         });

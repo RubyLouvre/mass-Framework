@@ -7,11 +7,54 @@ $.define("avalon","data,attr,event,fx", function(){
     //4代码隐藏（指data-bind）大量入侵页面，与JS前几年提倡的无侵入运动相悖
     //5好像不能为同一元素同种事件绑定多个回调
     //人家花了那么多心思与时间做出来的东西,你以为是小学生写记叙文啊,一目了然....
-    var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
+    /* JS UI Component 最终还是通过 HTML 来描述界面，当 js object 的数据发生变化或者执行某个动作时，
+    需要通知到对应的html，使其发生相应变化。于是js object 需要得到他在页面上对应的html的句柄，
+    通常做法，是在创建html的时候将createElement返回的句柄保存在js object 内部的某个变量中，
+    或者赋值给html eLement一个唯一的ID，js object 根据这个ID来找到对应的HTML Element。同样，
+    当htm elementl的事件（例如onclick）要通知到相对应的 js object 或者回调js object的某个
+    方法或属性时，也需要得到该js object的一个引用。我的意思是建立一种统一的规则，js object
+    和他相对应的 html 能通过这种规则互相访问到对方。 建立这个关联以后，实现js object和
+    对应 html 的数据邦定和数据同步等问题就简单多了
+    */
+    // var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
     var disposeObject = {}
     var cur, ID = 1;
     var registry = {}
     var dependent = {}
+    var fieldFns = {
+        ensure : function(d){
+            if(this.list.indexOf(d) == -1){
+                this.list.push(d);
+            }
+        },
+        lock : function(){
+            this.locked = true;
+        },
+        unlock : function(){
+            delete this.locked;
+        },
+        notify : function(){//通知依赖于field的上层$.computed更新
+            var list = this.list || [] ;
+            if( list.length ){
+                var safelist = list.concat(), dispose = false
+                for(var i = 0, el; el = safelist[i++];){
+                    delete el.cache;//清除缓存
+                    if(el.locked === true)
+                        break
+                    if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
+                        el.dispose = dispose = true
+                    }
+                }
+                if( dispose == true ){//移除无意义的绑定
+                    for (  i = list.length; el = list[ --i ]; ) {
+                        if( el.dispose == true ){
+                            el.splice( i, 1 );
+                        }
+                    }
+                }
+            }
+        }
+    }
     $.avalon = {
         //为一个Binding Target(节点)绑定Binding Source(viewModel)
         setBindings: function( source, node ){
@@ -75,38 +118,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 registry[uuid] = field;//供发布者使用
                 dependent[uuid] = {};//收集依赖
                 field.list = []
-                field.ensure = function(d){
-                    if(this.list.indexOf(d) == -1){
-                        this.list.push(d);
-                    }
-                }
-                field.lock = function(){
-                    this.locked = true;
-                }
-                field.unlock = function(){
-                    delete this.locked;
-                }
-                field.notify = function(){//通知依赖于field的上层$.computed更新
-                    var list = this.list || [] ;
-                    if( list.length ){
-                        var safelist = list.concat(), dispose = false
-                        for(var i = 0, el; el = safelist[i++];){
-                            delete el.cache;//清除缓存
-                            if(el.locked === true)
-                                break
-                            if(el.dispose === true || el() == disposeObject ){//通知顶层的computed更新自身
-                                el.dispose = dispose = true
-                            }
-                        }
-                        if( dispose == true ){//移除无意义的绑定
-                            for (  i = list.length; el = list[ --i ]; ) {
-                                if( el.dispose == true ){
-                                    el.splice( i, 1 );
-                                }
-                            }
-                        }
-                    }
-                }
+                $.mix(field, fieldFns);
             }
             return uuid;
         }
@@ -478,7 +490,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 symptom.ganso = ganso;
                 //复制一份出来放回原位
                 var first = ganso.cloneNode(true);
-                symptom.html = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
+                symptom.references = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
                 node.appendChild( first )
                 symptom.prevData = [{}];//这是伪数据，目的让其update
             }
@@ -495,38 +507,49 @@ $.define("avalon","data,attr,event,fx", function(){
                 symptom.html[0].recovery();
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
-                var scripts = getEditScripts( symptom.prevData, data ),tmpl, go
-                //   console.log( symptom.prevData)
-                //    console.log(data)
+                var scripts = getEditScripts( symptom.prevData, data );
+                //obj必须有x,y
                 for(var i = 0, n = scripts.length; i < n ; i++){
-                    var obj = scripts[i], go = false;
+                    var obj = scripts[i], tmpl = false;
                     switch(obj.action){
                         case "update":
-                            tmpl = symptom.html[ obj.x ];
-                            //   console.log(tmpl)
-                            go = true
+                            tmpl = symptom.references[ obj.x ];
                             break;
                         case "add":
                             tmpl =  new Tmpl( ganso.cloneNode(true) );
-                            symptom.html[ obj.y ] = tmpl;
-                            go = true
+                            symptom.references.push( tmpl );
+
                             break;
+                        case "retain":
+                            //如果发生删除操作，那么位于删除元素之后的元素的索引值会发生改变
+                            //如果重置它们
+                            if(obj.x !== obj.y){
+                                tmpl = symptom.references[ obj.x ];
+                                tmpl.index(obj.y);
+                                tmpl = null
+                            }
+                            break;
+
                         case "delete":
-                            tmpl = symptom.html[ obj.y ];
-                            $.log("delete")
-                            console.log(tmpl.nodes)
+                          
+                            tmpl = symptom.references[ obj.y ]
                             $(tmpl.nodes).remove();
+                            tmpl.destroy = true;
+                            tmpl = null;
+         
                             break;
                     };
-                    if(go){
+                    if(tmpl){
+                      
                         (function( k, tmpl ){
                             var frag = tmpl.template
                             if(!frag.childNodes.length){
                                 tmpl.recovery();//update
                             }
-                            var subclass = new $.viewModel(data[ k ], context);
+                            tmpl.index = $.observable(k)
+                            var subclass = new $.viewModel( data[ k ], context);
                             subclass.extend( {
-                                $index: k,
+                                $index:  tmpl.index,
                                 $item: data[ k ]
                             } )
                             .alias("$itemName", "$data")
@@ -537,10 +560,13 @@ $.define("avalon","data,attr,event,fx", function(){
                             if(elems.length){
                                 setBindingsToChildren(elems, subclass, true, true )
                             }
-                        })(i, tmpl);
+                        })(obj.y || 0, tmpl);
                     }
                 }
-                symptom.prevData = data.concat()
+                symptom.prevData = data.concat();
+                symptom.references = symptom.references.filter(function(el){
+                    return !el.destroy
+                })
             }
             return void 0
         },
@@ -624,23 +650,17 @@ $.define("avalon","data,attr,event,fx", function(){
         };
         //返回具体的编辑步骤
         var _getEditScripts = function(from, to, matrix, table){
-            var x = from.length, y = to.length, i = 0, scripts = [], action
-            if(x == 0){//如果原数组为0,那么新数组的都是新增的
-                for( i = 0; i < y; i++){
+            var x = from.length, y = to.length, scripts = [];
+            if(x == 0 || y == 0){//如果原数组为0,那么新数组的都是新增的,如果新数组为0,那么我们要删除所有旧数组的元素
+                var n =  Math.max(x,y), action = x == 0 ? "add" : "delete"
+                for( var i = 0; i < n; i++ ){
                     scripts[scripts.length] = {
-                        action: "add",
-                        x: i
-                    }
-                }
-            }else if(y == 0){//如果新数组为0,那么我们要删除所有旧数组的元素
-                for( i = 0 ; i < x; i++){
-                    scripts[scripts.length] = {
-                        action: "delete",
+                        action: action,
+                        x: i,
                         y: i
                     }
                 }
             }else{
-                i =  Math.max(x,y);
                 while( 1 ){
                     var cur = matrix[y][x];
                     if( y == 0 && x == 0){
@@ -683,17 +703,18 @@ $.define("avalon","data,attr,event,fx", function(){
                 }
             }
             scripts.reverse();
-            console.log(scripts);
-            console.log("scriptsscriptsscriptsscripts")
+            // console.log(scripts);
             return scripts
         }
 
-        return function( old, neo ){
-            var table = document.createElement("table");
-            document.body.appendChild(table);
-            table.className = "compare";
-            var matrix = getEditDistance( old, neo,table);
-            return _getEditScripts( old, neo, matrix,table)
+        return function( old, neo, debug ){
+            if(debug){
+                debug = document.createElement("table");
+                document.body.appendChild(debug);
+                debug.className = "compare";
+            }
+            var matrix = getEditDistance( old, neo,debug);
+            return _getEditScripts( old, neo, matrix,debug)
         }
     })();
 
