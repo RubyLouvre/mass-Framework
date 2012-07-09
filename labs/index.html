@@ -16,78 +16,34 @@
     <body>
 
         <h4>People</h4>
-        <ul data-bind="foreach: people">
-            <li>
-                Name at position <span data-bind="text: $index"> </span>:
-                <span data-bind="text: name"> </span>
-                <a href="#" class="remove">Remove</a>
-            </li>
-        </ul>
+        <div data-bind="switch: orderStatus">
+            <div data-bind="case: 'shipped'">
+                Your order has been shipped. Your tracking number is <span data-bind="text: trackingNumber"></span>.
+            </div>
+            <div data-bind="case: 'pending'">
+                Your order is being processed. Please be patient.
+            </div>
+            <div data-bind="case: 'incomplete'">
+                Your order could not be processed. Please go back and complete the missing data.
+            </div>
+
+        </div>
         <button>Add</button>
-    <style>
-        .compare{
-            border:1px solid #000;
-            border-collapse:collapse;
-        }
-        .compare td{
-            border:1px solid #000;
-            width:30px;
-            height:30px;
-            text-align:center;
-            background:olive;
-        }
-        td.zero{
-            background:teal;
-        }
-        td.retain{
-            background:orange;
-        }
-        td.update{
-            background:fuchsia;
-        }
-        td.delete{
-            background:red;
-        }
-        td.add{
-            background:lime;
-        }
-    </style>
-    <script type="text/javascript">
-        $.require("ready,more/avalon", function(){
-            function AppViewModel() {
-                var self = this;
 
-                self.people = $.observableArray([
-                    { name: 'Bert' },
-                    { name: 'Charles' },
-                    { name: 'Denise' }
-                ]);
-
-                self.addPerson = function() {
-                    self.people.push({ name: "New at " + Math.random() });
-
-                };
-
-                self.removePerson = function(el) {
-                    var model = $.dataFor(el);
-                   
-                    self.people.remove(model);
+        <script type="text/javascript">
+            $.require("ready,more/avalon", function(){
+                var model = {
+                    orderStatus: $.observable("shipped"),
+                    trackingNumber:44
                 }
-            }
-            var model = new AppViewModel(this)
-            $.applyBindings(model);
-              
-            $(".remove").live("click", function() {
-                window.console && console.clear();
-                model.removePerson(this)
-            });
-        
-            $("button").live("click", function() {
-                window.console && console.clear();
-                model.addPerson();
-            });
-        });
-    </script>
 
-</body>
+                $.applyBindings(model);
+                setTimeout(function(){
+                    model.orderStatus("pending")
+                },1000)
+
+            });
+        </script>
+
+    </body>
 </html>

@@ -241,7 +241,7 @@ $.define("avalon","data,attr,event,fx", function(){
                 continueBindings = setBindingsToElement(node, source, setData ) 
             }
             if( continueBindings ){
-                var elems = getChildren(node)
+                var elems = getChildren( node )
                 elems.length && setBindingsToChildren( elems, source, setData )
             }
         }
@@ -409,6 +409,25 @@ $.define("avalon","data,attr,event,fx", function(){
                 });
             }
         },
+        "switch":{
+            update:function( node, val, field, context){
+                context.$switch = field
+                setBindingsToChildren( node.childNodes, context )
+            },
+            stopBindings: true
+        },
+        "case":{
+            update:function( node, val, field, context, symptom){
+                if(typeof context.$switch != "function" ){
+                    throw "Must define switch statement above all"
+                }
+                $.bindingAdapter['template']['update'](node, val, function(){
+                    var code = field() == context.$switch();                 //伪装成if binding
+                    return !!code - 0
+                }, context, symptom);
+            },
+            stopBindings: true
+        },
         checked: {
             init:  function( node, val, field, context ){
                 if(context.$hoist && context.$hoist.nodeType == 1 ){
@@ -454,7 +473,8 @@ $.define("avalon","data,attr,event,fx", function(){
             },
             stopBindings: true
         }
-    })
+    });
+
 
 
     var Tmpl = function(t){
@@ -489,31 +509,31 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 //复制一份出来放回原位
                 var first = ganso.cloneNode(true);
                 symptom.references = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
-                node.appendChild( first )
+                node.appendChild( first );
                 symptom.prevData = [{}];//这是伪数据，目的让其update
             }
-            var number = field(),  el;
-            if( number > 0 ){ //处理with if bindings
-                var elems = getChildren( symptom.nodes )
+            var code = field(),  el;
+            first = symptom.references[0];
+            if( code > 0 ){ //处理with if bindings
+                var elems = getChildren( first.nodes );
+                node.appendChild( first.template );  //显示出来
                 if( elems.length ){
-                    if( number == 2 ){//处理with bindings
+                    if( code == 2 ){//处理with bindings
                         context = new $.viewModel( data, context )
                     }
                     return setBindingsToChildren( elems, context, true )
                 }
-            }else if(number == 0){//处理unless bindings
-                symptom.html[0].recovery();
+            }else if( code == 0){//处理unless bindings
+                first.recovery();
             }
-            if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
-                console.log( symptom.prevData);
-                console.log( data)
+            if( code < 0  && data && isFinite(data.length) ){//处理foreach bindings
                 var scripts = getEditScripts( symptom.prevData, data, true ), hasDelete
                 //obj必须有x,y
                 for(var i = 0, n = scripts.length; i < n ; i++){
                     var obj = scripts[i], tmpl = false;
                     switch(obj.action){
                         case "update":
-                            tmpl = symptom.references[ obj.x ];
+                            tmpl = symptom.references[ obj.x ];//这里要增强
                             break;
                         case "add":
                             tmpl =  new Tmpl( ganso.cloneNode(true) );
@@ -521,7 +541,7 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             break;
                         case "retain":
                             //如果发生删除操作，那么位于删除元素之后的元素的索引值会发生改变
-                            //如果重置它们
+                            //则重置它们
                             if(obj.x !== obj.y){
                                 tmpl = symptom.references[ obj.x ];
                                 tmpl.index(obj.y);
@@ -530,8 +550,6 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             break;
                         case "delete":
                             tmpl = symptom.references[ obj.y ];
-                            console.log("delete" + obj.y);
-                            console.log("delete" + obj.y)
                             $(tmpl.nodes).remove();
                             hasDelete = tmpl.destroy = true;
                             tmpl = null;
@@ -540,8 +558,8 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                     if(tmpl){
                       
                         (function( k, tmpl ){
-                            var frag = tmpl.template
-                            if(!frag.childNodes.length){
+                            var template = tmpl.template
+                            if(!template.childNodes.length){
                                 tmpl.recovery();//update
                             }
                             tmpl.index = $.observable(k)
@@ -553,8 +571,8 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             .alias("$itemName", "$data")
                             .alias("$indexName", "$index");
                                
-                            elems = getChildren( frag );
-                            node.appendChild( frag );
+                            elems = getChildren( template );
+                            node.appendChild( template );
                             if(elems.length){
                                 setBindingsToChildren(elems, subclass, true, true );
                             }
