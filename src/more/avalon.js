@@ -411,7 +411,8 @@ $.define("avalon","data,attr,event,fx", function(){
         },
         "switch":{
             update:function( node, val, field, context){
-                context.$switch = field
+                context.$switch = field;
+                console.log("===============")
                 setBindingsToChildren( node.childNodes, context )
             },
             stopBindings: true
@@ -511,12 +512,17 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 symptom.references = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
                 node.appendChild( first );
                 symptom.prevData = [{}];//这是伪数据，目的让其update
+                console.log("OOOOOOOOOOOOOOOOOOO")
             }
             var code = field(),  el;
             first = symptom.references[0];
+           // console.log(code)
             if( code > 0 ){ //处理with if bindings
-                var elems = getChildren( first.nodes );
-                node.appendChild( first.template );  //显示出来
+               template = first.recovery();
+                var elems = getChildren( template );
+              //  console.log(first.nodes);
+              //  console.log(template.childNodes.length)
+                node.appendChild( template );  //显示出来
                 if( elems.length ){
                     if( code == 2 ){//处理with bindings
                         context = new $.viewModel( data, context )
@@ -524,7 +530,11 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                     return setBindingsToChildren( elems, context, true )
                 }
             }else if( code == 0){//处理unless bindings
+               console.log(first.nodes)
                 first.recovery();
+                  console.log(first.nodes);
+                  console.log("----------")
+              //  console.log(first.template)
             }
             if( code < 0  && data && isFinite(data.length) ){//处理foreach bindings
                 var scripts = getEditScripts( symptom.prevData, data, true ), hasDelete
