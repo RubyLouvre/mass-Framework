@@ -455,14 +455,6 @@ $.define("avalon","data,attr,event,fx", function(){
             stopBindings: true
         }
     })
-    function retrieve( array ){
-        array.forEach(function( obj ){
-            obj.nodes.forEach(function( el ){
-                obj.template.appendChild(el)
-            });
-        })
-
-    }
 
 
     var Tmpl = function(t){
@@ -475,8 +467,8 @@ $.define("avalon","data,attr,event,fx", function(){
         },this);
         return this.template
     }
-//http://net.tutsplus.com/tutorials/javascript-ajax/5-awesome-angularjs-features/
-/*
+    //http://net.tutsplus.com/tutorials/javascript-ajax/5-awesome-angularjs-features/
+    /*
  * Data-binding is probably the coolest and most useful feature in AngularJS. It will save you from writing a considerable amount of boilerplate code. A typical web application may contain up to 80% of its code base, dedicated to traversing, manipulating, and listening to the DOM. Data-binding makes this code disappear, so you can focus on your application.
 Think of your model as the single-source-of-truth for your application. Your model is where you go to to read or update anything in your application. The data-binding directives provide a projection of your model to the application view. This projection is seamless, and occurs without any effort from you.
 Traditionally, when the model changes, the developer is responsible for manually manipulating the DOM elements and attributes to reflect these changes. This is a two-way street. In one direction, the model changes drive change in DOM elements. In the other, DOM element changes necessitate changes in the model. This is further complicated by user interaction, since the developer is then responsible for interpreting the interactions, merging them into a model, and updating the view. This is a very manual and cumbersome process, which becomes difficult to control, as an application grows in size and complexity.
@@ -513,7 +505,9 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 symptom.html[0].recovery();
             }
             if( number < 0  && data && isFinite(data.length) ){//处理foreach bindings
-                var scripts = getEditScripts( symptom.prevData, data );
+                console.log( symptom.prevData);
+                console.log( data)
+                var scripts = getEditScripts( symptom.prevData, data, true ), hasDelete
                 //obj必须有x,y
                 for(var i = 0, n = scripts.length; i < n ; i++){
                     var obj = scripts[i], tmpl = false;
@@ -524,7 +518,6 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                         case "add":
                             tmpl =  new Tmpl( ganso.cloneNode(true) );
                             symptom.references.push( tmpl );
-
                             break;
                         case "retain":
                             //如果发生删除操作，那么位于删除元素之后的元素的索引值会发生改变
@@ -532,15 +525,16 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             if(obj.x !== obj.y){
                                 tmpl = symptom.references[ obj.x ];
                                 tmpl.index(obj.y);
-                                tmpl = null
+                                tmpl = null;
                             }
                             break;
                         case "delete":
-                            tmpl = symptom.references[ obj.y ]
+                            tmpl = symptom.references[ obj.y ];
+                            console.log("delete" + obj.y);
+                            console.log("delete" + obj.y)
                             $(tmpl.nodes).remove();
-                            tmpl.destroy = true;
+                            hasDelete = tmpl.destroy = true;
                             tmpl = null;
-         
                             break;
                     };
                     if(tmpl){
@@ -562,15 +556,18 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             elems = getChildren( frag );
                             node.appendChild( frag );
                             if(elems.length){
-                                setBindingsToChildren(elems, subclass, true, true )
+                                setBindingsToChildren(elems, subclass, true, true );
                             }
                         })(obj.y || 0, tmpl);
                     }
                 }
                 symptom.prevData = data.concat();
-                symptom.references = symptom.references.filter(function(el){
-                    return !el.destroy
-                })
+                if(hasDelete){
+                    symptom.references = symptom.references.filter(function(el){
+                        return !el.destroy
+                    })
+                };
+               
             }
             return void 0
         },
@@ -583,7 +580,7 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
         }
     }
     var getChildren = function(node){
-        var elems = [] ,ri = 0
+        var elems = [] ,ri = 0;
         for (node = node.firstChild; node; node = node.nextSibling){
             if (node.nodeType === 1){
                 elems[ri++] = node;
@@ -629,7 +626,7 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                         td = table.rows[i].insertCell(j);
                         if(isFinite(matrix[i][j])){
                             td.innerHTML = matrix[i][j];
-                            td.className = "zero"
+                            td.className = "zero";
                         }
                     }
                 }
@@ -645,18 +642,19 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             matrix[i-1][j] + 1); //删除
                     }
                     if(table){
-                        td = table.rows[i].cells[j]
-                        td.innerHTML = matrix[i][j]
+                        td = table.rows[i].cells[j];
+                        td.innerHTML = matrix[i][j];
                     }
                 }
             }
-            return matrix
+            $.log(matrix.join("\n"));
+            return matrix;
         };
         //返回具体的编辑步骤
         var _getEditScripts = function(from, to, matrix, table){
-            var x = from.length, y = to.length, scripts = [];
+            var x = from.length, y = to.length, scripts = [], _action;
             if(x == 0 || y == 0){//如果原数组为0,那么新数组的都是新增的,如果新数组为0,那么我们要删除所有旧数组的元素
-                var n =  Math.max(x,y), action = x == 0 ? "add" : "delete"
+                var n =  Math.max(x,y), action = x == 0 ? "add" : "delete";
                 for( var i = 0; i < n; i++ ){
                     scripts[scripts.length] = {
                         action: action,
@@ -668,33 +666,45 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 while( 1 ){
                     var cur = matrix[y][x];
                     if( y == 0 && x == 0){
-                        break
+                        break;
                     }
-                    var top = matrix[y-1][x];
                     var left = matrix[y][x-1]
                     var diagon = matrix[y-1][x-1];
+                    var top = matrix[y-1][x];
                     action = "retain"//top == left && cur == diagon
                     var min = Math.min(top, diagon, left);
-                    var td =  table && (table.rows[y].cells[x])
+                    var td =  table && (table.rows[y].cells[x]);
+                    x--;
+                    y--;
                     if( min < cur ){
                         switch(min){
                             case top:
                                 action = "add";
-                                y--
+                                x++;
                                 break;
                             case left:
                                 action = "delete";
-                                x--
+                                y++;
                                 break;
                             case diagon:
                                 action = "update";
-                                x--;
-                                y--
+                                if(_action){
+                                    action = _action;
+                                    _action = false;
+                                }
                                 break;
                         }
                     } else{
-                        x--;
-                        y--
+                        switch(min){
+                            case top:
+                                _action = "add";
+                                x++;
+                                break;
+                            case left:
+                                _action = "delete";
+                                y++;
+                                break;
+                        }
                     }
                     if(table){
                         td.className = action;
@@ -717,8 +727,8 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 document.body.appendChild(debug);
                 debug.className = "compare";
             }
-            var matrix = getEditDistance( old, neo,debug);
-            return _getEditScripts( old, neo, matrix,debug)
+            var matrix = getEditDistance( old, neo, debug );
+            return _getEditScripts( old, neo, matrix, debug );
         }
     })();
 

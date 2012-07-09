@@ -387,9 +387,6 @@ void function( global, DOC ){
             setTimeout( doScrollCheck, 31 );
         }
     };
-    if ( typeof d.readyState !== 'string' && top.netscape ) {
-
-    }
 
     if ( DOC.readyState === "complete" ) {
         fireReady();//如果在domReady之外加载
