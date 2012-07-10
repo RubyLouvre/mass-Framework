@@ -15,33 +15,26 @@
     </head>
     <body>
 
-        <h4>People</h4>
-        <div data-bind="switch: orderStatus">
-            <div data-bind="case: 'shipped'">
-                Your order has been shipped. Your tracking number is <span data-bind="text: trackingNumber"></span>!
-            </div>
-            <div data-bind="case: 'pending'">
-                Your order is being processed. Please be patient.
-            </div>
-            <div data-bind="case: 'incomplete'">
-                Your order could not be processed. Please go back and complete the missing data.
-            </div>
 
-        </div>
-        <button>Add</button>
+        <h1 data-bind="text: city"> </h1>
+        <p data-bind="with: coords">
+            Latitude: <span data-bind="text: latitude"> </span>,
+            Longitude: <span data-bind="text: longitude"> </span>
+        </p>
+
+        <script type="text/javascript">
+
+        </script>
 
         <script type="text/javascript">
             $.require("ready,more/avalon", function(){
-                var model = {
-                    orderStatus: $.observable("shipped"),
-                    trackingNumber:44
-                }
-
-                $.applyBindings(model);
-                setTimeout(function(){
-                    model.orderStatus("pending")
-                },1000)
-
+                $.applyBindings({
+                    city: "London",
+                    coords: {
+                        latitude:  51.5001524,
+                        longitude: -0.1262362
+                    }
+                });
             });
         </script>
 

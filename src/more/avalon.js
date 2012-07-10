@@ -15,7 +15,7 @@ $.define("avalon","data,attr,event,fx", function(){
     方法或属性时，也需要得到该js object的一个引用。我的意思是建立一种统一的规则，js object
     和他相对应的 html 能通过这种规则互相访问到对方。 建立这个关联以后，实现js object和
     对应 html 的数据邦定和数据同步等问题就简单多了
-    */
+     */
     // var validValueType = $.oneObject("Null,NaN,Undefined,Boolean,Number,String")
     var disposeObject = {}
     var cur, ID = 1;
@@ -327,8 +327,18 @@ $.define("avalon","data,attr,event,fx", function(){
                 adapter.init && adapter.init(node, cur, field, context, symptom);
             }
             var neo = field();
-          
-            if(initPhase === 0 || cur != neo || Array.isArray(cur)   ){//只要是处理bool假值的比较
+            if( key == "case"){//这个应该如何处理更好呢?
+                if(field  === context.$switch){//$default;
+                    neo = !context.$switch.not;
+                }else{
+                    //如果前面有一个通过,那么它将不会进入$default分支;
+                    neo = context.$switch() == neo;
+                    if( neo ){
+                        context.$switch.not = true;
+                    }
+                }
+            }
+            if(initPhase === 0 ||  cur != neo || Array.isArray(cur)   ){//只要是处理bool假值的比较
                 cur = neo;
                 adapter.update && adapter.update(node, cur, field, context, symptom);
             }
@@ -410,22 +420,13 @@ $.define("avalon","data,attr,event,fx", function(){
             }
         },
         "switch":{
-            update:function( node, val, field, context){
+            init:function( node, val, field, context){
                 context.$switch = field;
-                console.log("===============")
+                context.$default = field
                 setBindingsToChildren( node.childNodes, context )
             },
-            stopBindings: true
-        },
-        "case":{
-            update:function( node, val, field, context, symptom){
-                if(typeof context.$switch != "function" ){
-                    throw "Must define switch statement above all"
-                }
-                $.bindingAdapter['template']['update'](node, val, function(){
-                    var code = field() == context.$switch();                 //伪装成if binding
-                    return !!code - 0
-                }, context, symptom);
+            update:function(node, val, field, context){
+                delete context.$switch.not;//每次都清空它
             },
             stopBindings: true
         },
@@ -456,11 +457,15 @@ $.define("avalon","data,attr,event,fx", function(){
         }
     }
     //if unless with foreach四种bindings都是使用template bindings
-    "if,unless,with,foreach".replace($.rword, function( type ){
+    "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.bindingAdapter[ type ] = {
             update : function(node, val, field, context, symptom){
+                if(type == "case" && (typeof context.$switch != "function" )){
+                    throw "Must define switch statement above all";
+                }
                 $.bindingAdapter['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2
+                        case "case":
                         case "if":
                             return !!val - 0;//1
                         case "unless":
@@ -490,11 +495,11 @@ $.define("avalon","data,attr,event,fx", function(){
     }
     //http://net.tutsplus.com/tutorials/javascript-ajax/5-awesome-angularjs-features/
     /*
- * Data-binding is probably the coolest and most useful feature in AngularJS. It will save you from writing a considerable amount of boilerplate code. A typical web application may contain up to 80% of its code base, dedicated to traversing, manipulating, and listening to the DOM. Data-binding makes this code disappear, so you can focus on your application.
+         * Data-binding is probably the coolest and most useful feature in AngularJS. It will save you from writing a considerable amount of boilerplate code. A typical web application may contain up to 80% of its code base, dedicated to traversing, manipulating, and listening to the DOM. Data-binding makes this code disappear, so you can focus on your application.
 Think of your model as the single-source-of-truth for your application. Your model is where you go to to read or update anything in your application. The data-binding directives provide a projection of your model to the application view. This projection is seamless, and occurs without any effort from you.
 Traditionally, when the model changes, the developer is responsible for manually manipulating the DOM elements and attributes to reflect these changes. This is a two-way street. In one direction, the model changes drive change in DOM elements. In the other, DOM element changes necessitate changes in the model. This is further complicated by user interaction, since the developer is then responsible for interpreting the interactions, merging them into a model, and updating the view. This is a very manual and cumbersome process, which becomes difficult to control, as an application grows in size and complexity.
 There must be a better way! AngularJS’ two-way data-binding handles the synchronization between the DOM and the model, and vice versa.
- */
+         */
     $.bindingAdapter[ "template" ] = {
         update: function(node, data, field, context, symptom){
             var ganso = symptom.ganso//取得最初的那个节点的内部作为模块
@@ -512,16 +517,15 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 symptom.references = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
                 node.appendChild( first );
                 symptom.prevData = [{}];//这是伪数据，目的让其update
-                console.log("OOOOOOOOOOOOOOOOOOO")
+                
             }
+            //  console.log("===============")
             var code = field(),  el;
             first = symptom.references[0];
-           // console.log(code)
+            // console.log(code)
             if( code > 0 ){ //处理with if bindings
-               template = first.recovery();
+                template = first.recovery();
                 var elems = getChildren( template );
-              //  console.log(first.nodes);
-              //  console.log(template.childNodes.length)
                 node.appendChild( template );  //显示出来
                 if( elems.length ){
                     if( code == 2 ){//处理with bindings
@@ -530,11 +534,7 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                     return setBindingsToChildren( elems, context, true )
                 }
             }else if( code == 0){//处理unless bindings
-               console.log(first.nodes)
                 first.recovery();
-                  console.log(first.nodes);
-                  console.log("----------")
-              //  console.log(first.template)
             }
             if( code < 0  && data && isFinite(data.length) ){//处理foreach bindings
                 var scripts = getEditScripts( symptom.prevData, data, true ), hasDelete
@@ -575,11 +575,11 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             tmpl.index = $.observable(k)
                             var subclass = new $.viewModel( data[ k ], context);
                             subclass.extend( {
-                                $index:  tmpl.index,
-                                $item: data[ k ]
+                                $index:  tmpl.index
+                               // $item: data[ k ]
                             } )
-                            .alias("$itemName", "$data")
-                            .alias("$indexName", "$index");
+//                            .alias("$itemName", "$data")
+//                            .alias("$indexName", "$index");
                                
                             elems = getChildren( template );
                             node.appendChild( template );
@@ -745,7 +745,6 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                 }
             }
             scripts.reverse();
-            // console.log(scripts);
             return scripts
         }
 
@@ -775,8 +774,6 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
         }
         //https://github.com/SteveSanderson/knockout/wiki/Asynchronous-Dependent-Observables 伟大的东西
         //https://github.com/rniemeyer/knockout-kendo 一个UI库
-        //switch分支
-        //https://github.com/mbest/knockout-switch-case/blob/master/knockout-switch-case.js
         //https://github.com/mbest/js-object-literal-parse/blob/master/js-object-literal-parse.js
         function parseObjectLiteral(objectLiteralString) {
             var str = objectLiteralString.trim();
@@ -881,14 +878,14 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                     var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
                     resultStrings.push(quotedKey);
                     resultStrings.push(":");
-                    if(insertFields === true && key === "foreach"){//特殊处理foreach
-                        var array = val.match($.rword);
-                        val = array.shift();
-                        if(array[0] === "as"){//如果用户定义了多余参数
-                            extra.$itemName = array[1];
-                            extra.$indexName = array[2];
-                        }
-                    }
+//                    if(insertFields === true && key === "foreach"){//特殊处理foreach
+//                        var array = val.match($.rword);
+//                        val = array.shift();
+//                        if(array[0] === "as"){//如果用户定义了多余参数
+//                            extra.$itemName = array[1];
+//                            extra.$indexName = array[2];
+//                        }
+//                    }
                     if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
                         val = $.normalizeJSON( val );//逐层加引号
                     }
@@ -912,6 +909,6 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
 
 });
 
-//http://tunein.yap.tv/javascript/2012/06/11/javascript-frameworks-and-data-binding/
+    //http://tunein.yap.tv/javascript/2012/06/11/javascript-frameworks-and-data-binding/
 
    
