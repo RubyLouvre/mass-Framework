@@ -347,7 +347,7 @@ $.define("avalon","data,attr,event,fx", function(){
       
         $.computed( symptom, context.$data );
     }
-
+    var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
     //一个数据绑定，负责界面的展示，另一个是事件绑定，负责更高层次的交互，比如动画，数据请求，
     //从现影响viewModel，导致界面的再渲染
     $.bindingAdapter = {
@@ -359,6 +359,17 @@ $.define("avalon","data,attr,event,fx", function(){
                 }else{
                     $( node ).text( val );
                 }
+            }
+        },
+        value:{
+            init: function(node, val, field){
+                node.value = val;
+                if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
+                    $(node).on("input",function(){
+                        field(node.value)
+                    });
+                }
+               
             }
         },
         html: {
@@ -576,10 +587,10 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                             var subclass = new $.viewModel( data[ k ], context);
                             subclass.extend( {
                                 $index:  tmpl.index
-                               // $item: data[ k ]
+                            // $item: data[ k ]
                             } )
-//                            .alias("$itemName", "$data")
-//                            .alias("$indexName", "$index");
+                            //                            .alias("$itemName", "$data")
+                            //                            .alias("$indexName", "$index");
                                
                             elems = getChildren( template );
                             node.appendChild( template );
@@ -878,14 +889,14 @@ There must be a better way! AngularJS’ two-way data-binding handles the synchr
                     var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
                     resultStrings.push(quotedKey);
                     resultStrings.push(":");
-//                    if(insertFields === true && key === "foreach"){//特殊处理foreach
-//                        var array = val.match($.rword);
-//                        val = array.shift();
-//                        if(array[0] === "as"){//如果用户定义了多余参数
-//                            extra.$itemName = array[1];
-//                            extra.$indexName = array[2];
-//                        }
-//                    }
+                    //                    if(insertFields === true && key === "foreach"){//特殊处理foreach
+                    //                        var array = val.match($.rword);
+                    //                        val = array.shift();
+                    //                        if(array[0] === "as"){//如果用户定义了多余参数
+                    //                            extra.$itemName = array[1];
+                    //                            extra.$indexName = array[2];
+                    //                        }
+                    //                    }
                     if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
                         val = $.normalizeJSON( val );//逐层加引号
                     }
