@@ -21,6 +21,7 @@ $.define("avalon","data,attr,event,fx", function(){
     var cur, ID = 1;
     var registry = {}
     var dependent = {}
+
     var fieldFns = {
         ensure : function(d){
             if(this.list.indexOf(d) == -1){

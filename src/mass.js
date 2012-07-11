@@ -2,14 +2,14 @@
 // 模块加载模块（种子模块）2012.1.29 by 司徒正美
 //=========================================
 void function( global, DOC ){
-  
-    var
-    _$ = global.$, //保存已有同名变量
-    namespace = DOC.URL.replace( /(#.+|\W)/g,''),
-    w3c = DOC.dispatchEvent, //w3c事件模型
-    HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0],
-    commonNs = global[ namespace ], mass = 1, postfix = "",
-    class2type = {
+    var _$ = global.$ //保存已有同名变量
+    , namespace = DOC.URL.replace( /(#.+|\W)/g,'')
+    , w3c = DOC.dispatchEvent        //w3c事件模型
+    , HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    , commonNs = global[ namespace ]
+    , mass = 1
+    , postfix = ""
+    , class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
         "[object StaticNodeList]" : "NodeList",
@@ -19,9 +19,12 @@ void function( global, DOC ){
         "null"                    : "Null"    ,
         "NaN"                     : "NaN"     ,
         "undefined"               : "Undefined"
-    },
-    toString = class2type.toString;
-
+    }
+    , rmodule =  /([^(\s]+)\(?([^)]*)\)?/   //用于从字符串中切割出模块名与真路路径
+    , loadings = []                         //正在加载中的模块列表
+    , returns  = {}                         //模块的返回值
+    , cbi      = 1e5                        //用于生成回调函数的名字
+    , toString = returns.toString;
     /**
      * @class $
      * mass Framework拥有两个命名空间,
@@ -211,12 +214,7 @@ void function( global, DOC ){
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
-    var
-    rmodule =  /([^(\s]+)\(?([^)]*)\)?/,
-    loadings = [],//正在加载中的模块列表
-    returns = {}, //模块的返回值
-    errorStack = $.deferred(),
-    cbi = 1e5 ;//用于生成回调函数的名字
+    var errorStack = $.deferred()
     var mapper = $[ "@modules" ] = {
         "@ready" : { }
     };
@@ -233,17 +231,16 @@ void function( global, DOC ){
      * 将要安装的模块通过iframe中的script加载下来
      * @param {String} name 模块名
      * @param {String} url  模块的路径
-     * @param {String} mass  当前框架的版本号
      */
     function loadJS( name, url ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
-        '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
-        (DOC.uniqueID ? "onreadystatechange" : "onload"),
-        '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
-        'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
-        '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
+            '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
+            (DOC.uniqueID ? "onreadystatechange" : "onload"),
+            '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
+            'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
+            '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
         iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
@@ -351,7 +348,7 @@ void function( global, DOC ){
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
-            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
+                for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -414,7 +411,7 @@ void function( global, DOC ){
         $.exports();
     });
     $.exports( "$"+  postfix );//防止不同版本的命名空间冲突
-/*combine modules*/
+    /*combine modules*/
 
 }( this, this.document );
 /**
@@ -477,4 +474,4 @@ https://github.com/eriwen/javascript-stacktrace
 http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
 http://tableclothjs.com/ 一个很好看的表格插件
 http://layouts.ironmyers.com/
-*/
+ */
