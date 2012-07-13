@@ -285,22 +285,88 @@ if(typeof trim !== "function"){
 
 // ES5 15.5.4.20
 // http://es5.github.com/#x15.5.4.20
-var ws = "\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003" +
-"\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028" +
-"\u2029\uFEFF";
-if (!String.prototype.trim || ws.trim()) {
-    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
-    // http://perfectionkills.com/whitespace-deviations/
-    ws = "[" + ws + "]";
-    var trimBeginRegexp = new RegExp("^" + ws + ws + "*"),
-    trimEndRegexp = new RegExp(ws + ws + "*$");
-    String.prototype.trim = function trim() {
-        if (this === undefined || this === null) {
-            throw new TypeError("can't convert "+this+" to object");
-        }
-        return String(this).replace(trimBeginRegexp, "").replace(trimEndRegexp, "");
-    };
+// http://blog.stevenlevithan.com/archives/faster-trim-javascript
+// http://perfectionkills.com/whitespace-deviations/
+
+function trim (str) {
+    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 }
+
+function trim (str) {
+    return str.replace(/^\s+/, '').replace(/\s+$/, '');
+}
+
+function trim (str) {
+    return str.substring(Math.max(str.search(/\S/), 0),
+        str.search(/\S\s*$/) + 1);
+}
+
+function trim (str) {
+    return str.replace(/^\s+|\s+$/g, '');
+}
+
+function trim (str) {
+    str = str.match(/\S+(?:\s+\S+)*/);
+    return str ? str[0] : '';
+}
+
+function trim (str) {
+    return str.replace(/^\s*(\S*(\s+\S+)*)\s*$/, '$1');
+}
+
+function trim (str) {
+    return str.replace(/^\s*(\S*(?:\s+\S+)*)\s*$/, '$1');
+}
+
+function trim (str) {
+    return str.replace(/^\s*((?:[\S\s]*\S)?)\s*$/, '$1');
+}
+
+function trim (str) {
+    return str.replace(/^\s*([\S\s]*?)\s*$/, '$1');
+}
+
+function trim (str) {
+    var whitespace = ' \n\r\t\f\x0b\xa0\u2000\u2001\u2002\u2003\n\
+  \u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000';
+    for (var i = 0; i < str.length; i++) {
+        if (whitespace.indexOf(str.charAt(i)) === -1) {
+            str = str.substring(i);
+            break;
+        }
+    }
+    for (i = str.length - 1; i >= 0; i--) {
+        if (whitespace.indexOf(str.charAt(i)) === -1) {
+            str = str.substring(0, i + 1);
+            break;
+        }
+    }
+    return whitespace.indexOf(str.charAt(0)) === -1 ? str : '';
+}
+function trim (str) {
+    str = str.replace(/^\s+/, '');
+    for (var i = str.length - 1; i >= 0; i--) {
+        if (/\S/.test(str.charAt(i))) {
+            str = str.substring(0, i + 1);
+            break;
+        }
+    }
+    return str;
+}
+function trim (str) {
+    var	str = str.replace(/^\s\s*/, ""),
+    ws = /\s/,
+    i = str.length;
+    while (ws.test(str.charAt(--i)));
+    return str.slice(0, i + 1);
+}
+function trim(str) {
+    var m = str.length;
+    for (var i = -1; str.charCodeAt(++i) <= 32;);
+    for (var j = m - 1; j > i && str.charCodeAt(j) <= 32 ; j--);
+    return str.slice(i, j + 1);
+}
+
 
 Array.prototype.indexOf = function (item, index) {
     var n = this.length, i = ~~index;
@@ -479,3 +545,83 @@ function max( target ) {
     return Math.max.apply(0, target);
 }
 
+if([].unshift(1) !== 1){
+    var _unshift = Array[P].unshift;
+    Array[P].unshift = function(){
+        _unshift.apply(this, arguments);
+        return this.length; //返回新数组的长度
+    }
+}
+
+Array.prototype.splice = function (s, d) {
+    var max = Math.max,min = Math.min,
+    a = [], // The return value array
+    e,  // element
+    i = max(arguments.length - 2, 0),   // insert count
+    k = 0,
+    l = this.length,
+    n,  // new length
+    v,  // delta
+    x;  // shift count
+
+    s = s || 0;
+    if (s < 0) {
+        s += l;
+    }
+    s = max(min(s, l), 0);  // start point
+    d = max(min(isNumber(d) ? d : l, l - s), 0);    // delete count
+    v = i - d;
+    n = l + v;
+    while (k < d) {
+        e = this[s + k];
+        if (e !== void 0) {
+            a[k] = e;
+        }
+        k += 1;
+    }
+    x = l - s - d;
+    if (v < 0) {
+        k = s + i;
+        while (x) {
+            this[k] = this[k - v];
+            k += 1;
+            x -= 1;
+        }
+        this.length = n;
+    } else if (v > 0) {
+        k = 1;
+        while (x) {
+            this[n - k] = this[l - k];
+            k += 1;
+            x -= 1;
+        }
+    }
+    for (k = 0; k < i; ++k) {
+        this[s + k] = arguments[k + 2];
+    }
+    return a;
+}
+
+var _slice = Array.prototype.slice;
+Array.prototype.pop = function () {
+    return this.splice(this.length - 1, 1)[0];
+}
+
+Array.prototype.push = function () {
+    this.splice.apply(this,
+        [this.length, 0].concat(_slice.call(arguments)));
+    return this.length;
+}
+
+Array.prototype.shift = function () {
+    return this.splice(0, 1)[0];
+}
+
+Array.prototype.unshift = function () {
+    this.splice.apply(this,
+        [0, 0].concat(_slice.call(arguments)));
+    return this.length;
+}
+//node chat源码解读（一）
+//http://yoyo.play175.com/p/node-cluster.html
+//https://github.com/learnboost/cluster
