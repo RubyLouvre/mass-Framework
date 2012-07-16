@@ -628,29 +628,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift,"+
         "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
     var NumberExt = {
-        times: function(target, fn, bind) {
-            for (var i=0; i < target; i++)
-                fn.call(bind, i);
-            return target;
-        },
         //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
-        constrain: function(target, n1, n2){
+        limit: function(target, n1, n2){
             var a = [n1, n2].sort();
             if(target < a[0]) target = a[0];
             if(target > a[1]) target = a[1];
             return target;
         },
-        upto: function(target, number, fn, scope) {
-            for (var i=target+0; i <= number; i++)
-                fn.call(scope, i);
-            return target;
-        },
-        downto: function(target, number, fn, scope) {
-            for (var i=target+0; i >= number; i--)
-                fn.call(scope, i);
-            return target;
-        },
-        //求出距离原数最近的那个数
+        //求出距离指定数值最近的那个数
         nearer: function(target, n1, n2){
             var diff1 = Math.abs(target - n1),
             diff2 = Math.abs(target - n2);

@@ -88,4 +88,102 @@ Safari5+ 虽然有Cache-Control: max-age=0, 但是这货刷新，永远都不会
 那么最后总结:
 reload(false).受益的浏览器: IE全系, FF全系, Safari5+, Chrome全系. 会因为false,而受益的是opera12-...和 Safari4-...
 
+var params = document.getElementsByTagName('param'),
+objects=[],
+html = document.body.innerHTML;
+
+for(var i=0,el; el=params[i++];){
+el.parentNode.__params = el.parentNode.__params || (objects.push(el.parentNode),[]);
+el.parentNode.__params.push(el.outerHTML);
+}
+
+for(i=0; el=objects[i++];){
+html = html.replace(trim(el.outerHTML), el.outerHTML.replace(/<\/object>$/i,'')+el.__params.join('')+'</object>');
+}
+return html;
+
+checkURL = function (url) {//检查trackLog URL 是否超出限制. 如果超出则 返回 false.
+        var len = url.length,
+            serverLimit = 2048, //上报服务器允许的url长度
+            ieLimit = Math.min(2083,serverLimit),
+            otherBrowserMinLimit = 65536,//Firefox 65536 , Safari 80000, Opera 190000, Chrome ~= 20000000
+            otherLimit = Math.min(serverLimit,otherBrowserMinLimit);
+        if(!+'\v1' || window.XDomainRequest ){//ie
+               return len <= ieLimit;
+        }
+        return len <= otherLimit;
+    }
+kb-929874  这个补丁出来之前
+IE6 有个傻逼问题
+就是
+el.xxx = fn;
+
+写上就废了
+包括用setAttribute的方式设置的
+所以也包含了 onxxx = fn 等方式
+
+
+及时你在页面刷新前  onxxx = null  你认为断开了， 其实 IE6 仍然会泄露
+
+只有attachEvent() detachEvent才能避免这个问题
+
+当时DE的一个方案 放弃attachEvent 和detachEvent的方案，还号称如何如何， 但是他就解决不了 IE6早期版本的泄露
+悲剧的是这个泄露，一般的工具无法检测， 只能靠肉眼
+一直到 kb-929874 补丁的出现
+kb-929874 /
+这个的出现 ，类似下面的代码 居然不会泄露， 就是这个补丁的功劳 ：
+
+
+document.onclick = function () {
+var ele, a =[];
+for (var k = 100000; k--;) a.push(k);
+ele = document.createElement('div');
+a.leak = ele;
+ele.xxx = a;
+ele.onclick = function () {
+  a;
+};
+document.body.appendChild(ele);
+};
+我说的是节点
+el -> element
+
+但是这个补丁，并没有解决所有问题
+所以最流行的做法 ，也是现在jq等库常用的做法 ， 引入超空间的概念.  来解决这个额问题， 也是针对这个补丁后的版本 ，
+
+也就是这样的东西:
+
+但实际上 这样,即使是SP3,也会出问题:
+
+<div id="woca">asdasdasdasd</div>
+       <script>
+            //'use strict';
+            var a = function () {
+                var ele, a =[];
+                for (var k = 100000; k--;) a.push(k);
+                ele = document.getElementById('woca');
+                a.leak = ele;
+                ele.xxx = a;
+                ele.onclick = function () {
+                  a;
+                };
+                return ele;
+            }();
+            //document.body.removeChild(a);
+       </script>
+
+移除节点,就会放到超空间.保留节点在DOM Tree, ie6 sp3就会像IE7那样.解决掉内存泄露问题.
+
+补丁的问题 基本上只有打了sp3就可以了
+，至于要求，当然不可能。 所以最多也就做到 借助超空间， 尽量避免泄露， 也是 现在各种类库能做到的极限了
+
+事实上早期的ie6，就像winter说的
+
+'abc'.replace;  就泄露了
+
+
+
+因为引擎需要 对 字符串装箱操作， 创建一个 wraper 的 new String对象. 但是ie6 的早期版本，无法回收这个 wraper 对象
+
+
 

@@ -625,3 +625,18 @@ Array.prototype.unshift = function () {
 //node chat源码解读（一）
 //http://yoyo.play175.com/p/node-cluster.html
 //https://github.com/learnboost/cluster
+
+function nearer(target, n1, n2){
+    var diff1 = Math.abs(target - n1),
+    diff2 = Math.abs(target - n2);
+    return diff1 < diff2 ? n1 : n2
+}
+
+isNaN(NaN);   //true
+isNaN([]);   //true
+isNaN({});   //true
+isNaN("xzy") // true
+
+Number.isNaN = function (value) {
+    return typeof value === 'number' && isNaN(value);
+}
