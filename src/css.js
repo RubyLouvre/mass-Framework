@@ -582,6 +582,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.5.26 重构$.fn.width, $.fn.height,$.fn.innerWidth, $.fn.innerHeight, $.fn.outerWidth, $.fn.outerHeight
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 http://boobstagram.fr/archive
+ccs3 网站 http://hakim.se/experiments
  */
 
 
