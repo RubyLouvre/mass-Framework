@@ -221,7 +221,7 @@ $.define("ajax","event", function(){
             return $.param(json, false);// 名值键值对序列化,数组元素名字前不加 []
         }
     });
-
+//http://sofish.de/file/demo/github/
     //如果没有指定dataType,服务器返回什么就是什么，不做转换
     var ajax = $.ajax = function( opts ) {
         if (!opts || !opts.url) {

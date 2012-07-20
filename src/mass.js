@@ -20,7 +20,7 @@ void function( global, DOC ){
         "NaN"                     : "NaN"     ,
         "undefined"               : "Undefined"
     }
-    , rmodule =  /([^(\s]+)\(?([^)]*)\)?/   //用于从字符串中切割出模块名与真路路径
+    , rmodule = /([^(\s]+)\(?([^)]*)\)?/ //用于从字符串中切割出模块名与真路路径
     , loadings = []                         //正在加载中的模块列表
     , returns  = {}                         //模块的返回值
     , cbi      = 1e5                        //用于生成回调函数的名字
