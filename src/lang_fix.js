@@ -105,6 +105,16 @@ $.define( "lang_fix", !!Array.isArray, function(){
             return this.length; //返回新数组的长度
         }
     }
+    if([1,2,3].splice(1).length === 0){
+        var _splice = Array[P].splice;
+        Array[P].splice = function(a){
+            if(arguments.length === 1){
+                return _splice.call(this, a, this.length)
+            }else{
+                return _splice.apply(this, arguments);
+            }
+        }
+    }
     if(!Array.isArray){
         Array.isArray = function(obj){
             return Object.prototype.toString.call(obj) =="[object Array]";
@@ -248,48 +258,3 @@ $.define( "lang_fix", !!Array.isArray, function(){
 2012.3.19 添加对split的修复
 2012.5.31 添加Object.create的不完全修复
 */
-
-var trimRegexp = function (s) {
-  return s.replace(/^\s+|\s+$/g,'');
-};
-
-var trimChunge = function (str) {
-  var m = str.length;
-  for (var i = 0; i < m; i++) {
-    if (str.charCodeAt(i) > 32) {
-      break;
-    }
-  }
-
-  for (var j = m - 1; j > i; j--) {
-    if (str.charCodeAt(j) > 32) {
-      break;
-    }
-  }
-
-  return str.slice(i, j + 1);
-};
-
-
-
-var trimChunge2 = function (str) {
-  var m = str.length;
-  for (var i = 0; str.charCodeAt(i) <= 32 && i < m; i++);
-
-  for (var j = m - 1; str.charCodeAt(j) <= 32; j--);
-
-  return str.slice(i, j + 1);
-};
-
-
-var trimChunge3 = function (str) {
-  var m = str.length;
-  for (var i = -1; str.charCodeAt(++i) <= 32;);
-
-  for (var j = m - 1; j > i && str.charCodeAt(j) <= 32 ; j--);
-
-  return str.slice(i, j + 1);
-};
-
-
-var orig = "   foo  ";  
