@@ -413,7 +413,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
                 }
             }
             return cnt;
-        }
+        },
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
         truncate: function(target, length, truncation) {
             length = length || 30;
