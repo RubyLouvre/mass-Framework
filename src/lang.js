@@ -398,10 +398,22 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
-        byteLen: function(target){
-            return target.replace(/[^\x00-\xff]/g,"--").length;
-        },
-       
+       // byteLen: function(target){
+       //     return target.replace(/[^\x00-\xff]/g,"--").length;
+       // },
+        byteLen: function(str){
+            for(var i = 0, cnt = 0; i < str.length; i++){
+                var value = str.charCodeAt(i);
+                if(value < 0x080){
+                    cnt += 1
+                }else if(value < 0x0800){
+                    cnt += 2
+                }else{
+                    cnt += 3
+                }
+            }
+            return cnt;
+        }
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
         truncate: function(target, length, truncation) {
             length = length || 30;
@@ -481,19 +493,6 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return String(target)
             .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
             .replace(/><wbr>/g, '>');
-        },
-        byteLen: function(str){
-            for(var i = 0, cnt = 0; i < str.length; i++){
-                var value = str.charCodeAt(i);
-                if(value < 0x080){
-                    cnt += 1
-                }else if(value < 0x0800){
-                    cnt += 2
-                }else{
-                    cnt += 3
-                }
-            }
-            return cnt;
         }
     });
     if(window.Blob){
