@@ -1,8 +1,7 @@
 //=========================================
-//  操作流模块
+//  操作流模块,用于流程控制
 //==========================================
-$.define("flow", function(){
-    //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
+$.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模块在同一目录
     function OperateFlow(){ //数据共享,但策略自定
         this.root = {};
         this.uuid = $.getUid({})
@@ -12,7 +11,7 @@ $.define("flow", function(){
     OperateFlow.prototype = {
         constructor: OperateFlow,
         //names 可以为数组，用逗号作为分隔符的字符串
-        bind:function(names,callback,reload){
+        bind: function(names,callback,reload){
             var  root = this.root, deps = {},args = [];
             (names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
@@ -33,6 +32,7 @@ $.define("flow", function(){
             callback.deps = deps;
             callback.args = args;
             callback.reload = !!reload;//默认每次重新加载
+            return this;
         },
         unbind : function(array,fn){//$.multiUnind("aaa,bbb")
             if(/string|number|object/.test(typeof array) ){
@@ -55,6 +55,7 @@ $.define("flow", function(){
                     });
                 }
             }
+            return this;
         },
         _args : function (arr){//对所有结果进行平坦化处理
             for(var i = 0, result = [], el; el = arr[i++];){
@@ -62,10 +63,10 @@ $.define("flow", function(){
             }
             return result;
         },
-        fire : function(name, args){
+        fire: function(name, args){
             var root = this.root, obj = root["__"+name], deps;
             if(!obj )
-                return ;
+                return this;
             obj.ret = $.slice(arguments,1);//这个供_args方法调用
             obj.state = 2;//标识此操作已完成
             var unfire = obj.unfire,fired = obj.fired;
@@ -82,10 +83,11 @@ $.define("flow", function(){
                     repeat = true;
                 }
             if(repeat){ //为了谨慎起见再检测一遍
-                return this.fire.apply(this,arguments);
+                this.fire.apply(this,arguments);
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
                     if(fn.deps["__"+name]){//只处理相关的
+                        this.name = name;
                         fn.apply(this, this._args( fn.args ));
                         if(fn.reload){//重新加载所有数据
                             fired.splice(i,1);
@@ -96,11 +98,15 @@ $.define("flow", function(){
                         }
                     }
                 }
+
             }
+            return this;
         }
     }
-    $.flow  = function(names,callback,reload){//一个工厂方法
+    return $.flow = function(names,callback,reload){//一个工厂方法
         return new OperateFlow(names,callback,reload)
     }
+    //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
 })
 //2012.6.8 对fire的传参进行处理
+//2012.7.13 使用新式的相对路径依赖模块
