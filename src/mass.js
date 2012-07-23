@@ -20,7 +20,7 @@ void function( global, DOC ){
         "NaN"                     : "NaN"     ,
         "undefined"               : "Undefined"
     }
-    , rmodule = /([^(\s]+)\(?([^)]*)\)?/ //用于从字符串中切割出模块名与真路路径
+    , rmodule =  /([^(\s]+)\(?([^)]*)\)?/   //用于从字符串中切割出模块名与真路路径
     , loadings = []                         //正在加载中的模块列表
     , returns  = {}                         //模块的返回值
     , cbi      = 1e5                        //用于生成回调函数的名字
@@ -82,13 +82,13 @@ void function( global, DOC ){
         mix: mix,
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
-        "@name": "$",
-        "@debug": true,
         "@bind": w3c ? "addEventListener" : "attachEvent",
         "@path": (function( url, scripts, node ){
             scripts = DOC.getElementsByTagName( "script" );
             node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
             url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
+            $["@name"] = node.getAttribute("namespace") || "$"
+            $["@debug"] = !!node.getAttribute("debug");
             return url.substr( 0, url.lastIndexOf('/') );
         })(),
         /**
@@ -236,11 +236,11 @@ void function( global, DOC ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js" + ( $[ "@debug" ] ? "?timestamp="+(new Date-0) : "" );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', name, '", $ = {}, Ns = parent.', $["@name" ],
-            '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
-            (DOC.uniqueID ? "onreadystatechange" : "onload"),
-            '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
-            'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
-            '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
+        '; $.define = ', innerDefine, '<\/script><script src="',url,'" ',
+        (DOC.uniqueID ? "onreadystatechange" : "onload"),
+        '="if(/loaded|complete|undefined/i.test(this.readyState) ){ ',
+        'Ns._checkDeps();Ns._checkFail(this.ownerDocument,nick); ',
+        '} " onerror="Ns._checkFail(this.ownerDocument, nick, true);" ><\/script>' ];
         iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
@@ -306,7 +306,7 @@ void function( global, DOC ){
             });
             var token = factory.token || "@cb"+ ( cbi++ ).toString(32);
             if( dn === cn ){//如果需要安装的等于已安装好的
-                (mapper[ token ] || {}).state = 2; 
+                (mapper[ token ] || {}).state = 2;
                 return returns[ token ] = install( token, args, factory );//装配到框架中
             }
             if( errback ){
@@ -348,7 +348,7 @@ void function( global, DOC ){
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         _checkDeps: function (){
             loop:
-                for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
+            for ( var i = loadings.length, name; name = loadings[ --i ]; ) {
                 var obj = mapper[ name ], deps = obj.deps;
                 for( var key in deps ){
                     if( deps.hasOwnProperty( key ) && mapper[ key ].state != 2 ){
@@ -411,7 +411,7 @@ void function( global, DOC ){
         $.exports();
     });
     $.exports( "$"+  postfix );//防止不同版本的命名空间冲突
-    /*combine modules*/
+/*combine modules*/
 
 }( this, this.document );
 /**
@@ -468,6 +468,7 @@ dom.namespace改为dom["mass"]
 2012.6.13 添加异步列队到命名空间,精简domReady
 2012.6.14 精简innerDefine,更改一些术语
 2012.6.25 domReady后移除绑定事件
+2012.7.23 动态指定mass Framewoke的命名空间与是否调试
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
