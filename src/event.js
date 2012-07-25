@@ -7,7 +7,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
     $.Object.merge(facade,{
         eventAdapter:{ } //添加或增强二级属性eventAdapter
     });
-    var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+)?\b/
+    var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
     var bindTop = !adapter.input;//如果没有加载event_fix模块,也就没有input分支,也就说明其是支持dispatchEvent API
     $.eventSupport = function( eventName,el ) {
         el = el || document.createElement("div");

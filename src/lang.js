@@ -9,7 +9,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     // JSON RegExp
     rvalidchars = /^[\],:{}\s]*$/,
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-    rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+    rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/,
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
