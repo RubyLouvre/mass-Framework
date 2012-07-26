@@ -581,6 +581,8 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
 2012.5.10 FIX toFloat BUG
 2012.5.26 重构$.fn.width, $.fn.height,$.fn.innerWidth, $.fn.innerHeight, $.fn.outerWidth, $.fn.outerHeight
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
+//z-index的最大值（各浏览器）http://hi.baidu.com/flondon/item/a64550ba98a9d3ef4ec7fd77
+http://joeist.com/2012/06/what-is-the-highest-possible-z-index-value/ 这里有更全面的测试
 http://boobstagram.fr/archive
 ccs3 网站 http://hakim.se/experiments
  */
