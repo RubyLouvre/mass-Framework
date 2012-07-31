@@ -26,7 +26,7 @@
             }
         </style>
         <script>
-            $.require("ready,node,event,attr,fx",function(){
+         /*   $.require("ready,node,event,attr,fx",function(){
                 var data = [
                     {   html:"菜单1",
                         sub:[
@@ -59,6 +59,7 @@
                 var addMenu = function( parent, cls ){
                     return $("<div />").appendTo( parent  ).addClass(cls)
                 }
+                $.log("================")
                 var addItems = function( parent, els ){
                     for(var i = 0, el; el = els[i++];){
                         var item = addItem(parent, el );
@@ -79,7 +80,10 @@
                 }
 
                 var target =  addMenu("body","mass_main_menu")
-                addItems(target , data );
+                addItems(target , data );*/
+    $.require("ready,lang", function(){
+        console.log("=================")
+    })
 
 
 
@@ -96,7 +100,7 @@
 
 
 
-            })
+        //    })
         </script>
 
     </head>
