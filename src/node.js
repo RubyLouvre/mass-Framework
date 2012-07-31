@@ -3,11 +3,7 @@
 //==================================================
 $.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
     $.log("已加载node模块");
-    var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName", 
-    merge = function(a, b){
-        Array.prototype.push.apply(a, b)
-        return a;
-    }
+    var rtag = /^[a-zA-Z]+$/, rtext =/option|script/i, TAGS = "getElementsByTagName"
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){
             if( el = arguments[ i ] ){
@@ -31,9 +27,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             if($.isArrayLike(context)){//typeof context === "string"
                 return $( context ).find( expr );
             }
+           
             if ( expr.nodeType ) { //分支3:  处理节点参数
                 this.ownerDocument  = expr.nodeType === 9 ? expr : expr.ownerDocument;
-                return merge( this, [expr] );
+                return $.Array.merge( this, [ expr ] );
             }
             this.selector = expr + "";
             if ( typeof expr === "string" ) {
@@ -41,16 +38,16 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 var scope = context || doc;
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
                     nodes = $.parseHTML( expr, doc );//分支5: 动态生成新节点
-                    nodes = nodes.childNodes;
+                    nodes = nodes.childNodes
                 } else if( rtag.test( expr ) ){//分支6: getElementsByTagName
                     nodes  = scope[ TAGS ]( expr ) ;
                 } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
-                return merge( this, nodes );
+                return $.Array.merge( this, $.slice( nodes) );
             }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
-                merge( this, $.isArrayLike(expr) ? expr : [ expr ]);
+                $.Array.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
                 delete this.selector;
             }
         },
@@ -71,7 +68,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             neo.context = this.context;
             neo.selector = this.selector;
             neo.ownerDocument = this.ownerDocument;
-            return merge( neo, nodes || [] );
+            return $.Array.merge( neo, nodes || [] );
         },
         slice: function( a, b ){
             return this.labor( $.slice(this, a, b) );
@@ -497,16 +494,16 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
     }
     var unknownTag = "<?XML:NAMESPACE"
     function cloneNode( node, dataAndEvents, deepDataAndEvents ) {
-        var bool //!undefined === true;
-        //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-        if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
-            var outerHTML = document.createElement(node.nodeName).outerHTML;
-            bool = outerHTML.indexOf( unknownTag ) // !0 === true;
-        }
-        //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
-        var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
         //   处理IE6-8下复制事件时一系列错误
         if( node.nodeType === 1 ){
+            var bool //!undefined === true;
+            //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
+            if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
+                var outerHTML = document.createElement(node.nodeName).outerHTML;
+                bool = outerHTML.indexOf( unknownTag ) // !0 === true;
+            }
+            //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
+            var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
             if(!support.cloneNode ){
                 fixNode( neo, node );
                 src = node[ TAGS ]( "*" );
@@ -527,8 +524,10 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 }
             }
             src = neos = null;
+            return neo;
+        }else{
+            return node.cloneNode(true)
         }
-        return neo;
     }
     //修正IE下对数据克隆时出现的一系列问题
     function fixNode( clone, src ) {
@@ -778,4 +777,5 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.5.4 $.access添加第六个可选参数，用于绑定作用域，因此顺带重构了html, text, outerHTML,data原型方法
 2012.5.21 Remove $("body") case; $(document.body) is 2x faster.
 2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
+2012.7.31 使用$.Array.merge代替不可靠的[].push,对cloneNode进行重构,只对元素节点进行修复
  */

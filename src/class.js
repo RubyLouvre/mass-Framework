@@ -2,7 +2,7 @@
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-    // $.log("已加载class模块")
+   $.log("已加载类工厂模块")
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
     rconst = /constructor|_init|_super/,
@@ -51,40 +51,12 @@ $.define("class", "lang",function(){
             return proto.constructor = this;
         },
         implement:function(){
-            var target = this.prototype, parent = this._super, reg = rconst;
+            var target = this.prototype, reg = rconst;
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
                 Object.keys(module).forEach(function(name){
                     if( !reg.test(name) ){
-                        var prop = target[name] = module[name];
-//                        if(typeof prop == "function"){
-//                            target[name] = (function(){
-//                                var _super = function() {
-//                                    return parent.prototype[ name ].apply( this, arguments );
-//                                };
-//                                var _superApply = function( args ) {
-//                                    return parent.prototype[ name ].apply( this, args );
-//                                };
-//                                return function() {
-//                                    var __super = this._super,
-//                                    __superApply = this._superApply,
-//                                    ret;
-//
-//                                    this._super = _super;
-//                                    this._superApply = _superApply;
-//
-//                                    ret = prop.apply( this, arguments );
-//
-//                                    this._super = __super;
-//                                    this._superApply = __superApply;
-//
-//                                    return ret;
-//                                };
-//                            })();
-//                            target[name].toString = function(){
-//                                return prop +"";
-//                            }
-//                        }
+                        target[name] = module[name];
                     }
                 }, this );
             }
@@ -132,4 +104,5 @@ fix 子类实例不是父类的实例的bug
 2012.1.29 修正setOptions中$.Object.merge方法的调用方式
 2012.2.25 改进setOptions，可以指定在this上扩展还是在this.XXX上扩展
 2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
+2012.7.22 v10 大幅简化,去掉defineProperty与方法链
 */

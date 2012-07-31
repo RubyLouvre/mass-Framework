@@ -1,15 +1,15 @@
 //=========================================
-// 类型扩展模块v3 by 司徒正美
+// 类型扩展模块v7 by 司徒正美
 //=========================================
 $.define("lang", Array.isArray ? "" : "lang_fix",function(){
-    // $.log("已加载语言扩展模块");
+    $.log("已加载语言扩展模块");
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
     // JSON RegExp
     rvalidchars = /^[\],:{}\s]*$/,
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-    rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d\d*\.|)\d+(?:[eE][\-+]?\d+|)/,
+    rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
@@ -398,9 +398,9 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
-       // byteLen: function(target){
-       //     return target.replace(/[^\x00-\xff]/g,"--").length;
-       // },
+        // byteLen: function(target){
+        //     return target.replace(/[^\x00-\xff]/g,"--").length;
+        // },
         byteLen: function(str){
             for(var i = 0, cnt = 0; i < str.length; i++){
                 var value = str.charCodeAt(i);
@@ -495,10 +495,17 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             .replace(/><wbr>/g, '>');
         }
     });
-    if(window.Blob){
+
+    if(global.netscape && global.Blob){//不要使用window前缀
         $.String.byteLen = function(str){
-            var a = new Blob([str],{type:"text/css"});
-            return a.size;
+            return new Blob([str],{
+                type:"text/css"
+            }).size
+        }
+    }
+    if(global.Buffer){//不要使用window前缀
+        $.String.byteLen = function(str){
+            return new Buffer(str, "utf-8").length
         }
     }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
@@ -518,6 +525,14 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             if (~index )
                 return $.Array.removeAt(target, index);
             return false;
+        },
+        merge: function( first, second ) {
+            var i = ~~first.length, j = 0;
+            for ( var n = second.length; j < n; j++ ) {
+                first[ i++ ] = second[ j ];
+            }
+            first.length = i;
+            return first;
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
