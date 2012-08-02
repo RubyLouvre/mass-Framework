@@ -4,7 +4,7 @@
         <meta charset="utf-8"/>
         <title>mass Framework</title>
         <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
-        <style>
+        <style id="aaa">
             .mass_main_menu , .mass_sub_menu{
                 width:130px;
                 -moz-box-shadow:0 0 10px #06c;
@@ -32,6 +32,44 @@
             }
         </style>
         <script>
+            $.require("ready,node", function(){
+                var  quote = String.quote ||  (function(){
+                    var meta = {
+                        '\b': '\\b',
+                        '\t': '\\t',
+                        '\n': '\\n',
+                        '\f': '\\f',
+                        '\r': '\\r',
+                        '"' : '\\"',
+                        '\\': '\\\\'
+                    },
+                    reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
+                    regFn = function(c){
+                        if (c in meta) {
+                            return '\\' + meta[c];
+                        }
+                        var ord = c.charCodeAt(0);
+                        return ord < 0x20   ? '\\x0' + ord.toString(16)
+                        :  ord < 0x7F   ? '\\'   + c
+                        :  ord < 0x100  ? '\\x'  + ord.toString(16)
+                        :  ord < 0x1000 ? '\\u0' + ord.toString(16)
+                        : '\\u'  + ord.toString(16)
+                    };
+                    return function (str) {
+                        return    '"' + str.replace(reg, regFn)+ '"';
+                    }
+                })()
+
+                var node = $("#bbb")[0];
+                var text = node.text;
+               // var text = node.styleSheet ? node.styleSheet.cssText : node.innerHTML;
+                console.log(text);
+                var text = "{test:"+quote(text)+"}"
+                var obj = eval("0,"+text)
+                console.log(obj)
+            })
+        </script>
+        <script type="txt" id="bbb">
             $.require("ready,node,event,attr,fx",function(){
           
 

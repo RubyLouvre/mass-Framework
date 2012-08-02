@@ -640,3 +640,177 @@ isNaN("xzy") // true
 Number.isNaN = function (value) {
     return typeof value === 'number' && isNaN(value);
 }
+
+var observable = function ( val ){
+    var cur = val;//一个内部变量
+    function field( neo ){
+        if( arguments.length ){//setter
+            if(cur !== neo  ){
+                cur = neo;
+            }
+        }else{//getter
+            return cur;
+        }
+    }
+    field();
+    return field;
+}
+
+Function.prototype.bind = function(context) {
+    if (arguments.length < 2 && context== void 0)
+        return this;
+    var __method = this, args = [].slice.call(arguments, 1);
+    return function() {
+        return __method.apply(context, args.concat.apply(args, arguments));
+    }
+}
+
+var addEvent = document.addEventListener ?
+function (el, type, fn, capture){
+    el.addEventListener(type, fn, capture)
+} :  function (el, type, fn){
+    el.attachEvent("on"+type,fn.bind( el, event ))
+}
+
+var bind = function(bind){
+    return{
+        bind: bind.bind(bind),
+        call: bind.bind(bind.call),
+        apply: bind.bind(bind.apply)
+    }
+}(Function.prototype.bind)
+
+
+var concat =  bind.apply([].concat);
+var a = [1,[2,3],4];
+var b = [1,3];
+
+console.log( b.concat(a) );//[1,3,1,[2,3],4]
+console.log( concat(b, a))//[1,3,1,2,3,4]
+
+var slice = bind([].slice)
+var array = slice({
+    0:"aaa",
+    1:"bbb",
+    2:"ccc",
+    length: 3
+});
+console.log( array )//[ "aaa", "bbb", "ccc"]
+
+function test(){
+    var args = slice(arguments)
+    console.log( args )//[1,2,3,4,5]
+}
+test(1,2,3,4,5)
+
+function curry(fn) {
+    function inner(len, arg) {
+        if (len == 0)
+            return fn.apply(null, arg);
+        return function(x) {
+            return inner(len-1, arg.concat(x));
+        };
+    }
+    return inner(fn.length, []);
+}
+
+function sum(x, y, z, w){
+    return x + y + z + w;
+}
+curry(sum)('a')('b')('c')('d'); // => 'abcd'
+
+function curry2(fn) {
+    function inner(len, arg) {
+        if (len <= 0)
+            return fn.apply(null, arg);
+        return function() {
+            //这里的slice请翻看前面的代理
+            return inner(len-arguments.length, arg.concat(Array.apply([],arguments)));
+        };
+    }
+    return inner(fn.length, []);
+}
+
+curry2(sum)('a')('b', 'c')('d'); // => 'abcde'
+
+Function.prototype.partial = function(){
+    var fn = this, args = Array.prototype.slice.call(arguments);
+    return function(){
+        var arg = 0;
+        for ( var i = 0; i < args.length && arg < arguments.length; i++ )
+            if ( args[i] === undefined )
+                args[i] = arguments[arg++];
+        return fn.apply(this, args);
+    };
+};
+
+var delay = setTimeout.partial(undefined, 10);
+//接着下来的工作就是代替掉第一个参数
+delay(function(){
+    alert( "A call to this function will be temporarily delayed." );
+});
+var _ = (function(){
+    var doc = new ActiveXObject('htmlfile')
+    doc.write('<script><\/script>')
+    doc.close()
+    var obj = doc.parentWindow.Object
+    if(!obj || obj === Object) return
+    var name, names =
+    [ 'constructor', 'hasOwnProperty', 'isPrototypeOf'
+    , 'propertyIsEnumerable', 'toLocaleString', 'toString', 'valueOf']
+    while(name = names.pop())
+        if(!delete Obj.prototype[name]) return
+    return obj
+}());
+
+var _ = Object.create(null)
+
+function partial(fn){
+    var A = [].slice.call(arguments, 1);
+    return A.length < 1 ? fn : function () {
+        var a = Array.apply([],arguments);
+        var c = A.concat();//复制一份
+        for (var i = 0; i < c.length; i++) {
+            if (c[i] === _) {//替换占位符
+                c[i] = a.shift();
+            }
+        }
+        return fn.apply(this, c.concat(a));
+    }
+}
+function test(a,b,c,d){
+    return "a = "+ a + " b = " + b + "c = "+ c +  "d = "+ d
+}
+var fn = partial(test, 1, _, 2, _);
+fn(44, 55);
+
+Function.prototype.apply || (Function.prototype.apply = function (x, y) {
+    x = x || window;
+    y = y ||[];
+    x.__apply = this;
+    if (!x.__apply)
+        x.constructor.prototype.__apply = this;//创建一个临时变量保存自身
+    var r, j = y.length;
+    switch (j) {//收集用户参数
+        case 0: r = x.__apply(); break;
+        case 1: r = x.__apply(y[0]); break;
+        case 2: r = x.__apply(y[0], y[1]); break;
+        case 3: r = x.__apply(y[0], y[1], y[2]); break;
+        case 4: r = x.__apply(y[0], y[1], y[2], y[3]); break;
+        default:
+            var a = [];
+            for (var i = 0; i < j; ++i)
+                a[i] = "y[" + i + "]";
+            r = eval("x.__apply(" + a.join(",") + ")");
+            break;
+    }
+    try {
+        delete x.__apply ? x.__apply : x.constructor.prototype.__apply;
+    }
+    catch (e) {}
+    return r;
+});
+
+
+
+
