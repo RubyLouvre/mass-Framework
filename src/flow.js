@@ -1,15 +1,12 @@
 //=========================================
 //  操作流模块,用于流程控制
 //==========================================
-$.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模块在同一目录
-    function OperateFlow(){ //数据共享,但策略自定
-        this.root = {};
-        this.uuid = $.getUid({})
-        if(typeof arguments[1] == "function")
-            this.bind.apply(this, arguments);
-    }
-    OperateFlow.prototype = {
-        constructor: OperateFlow,
+$.define("flow","class",function(){//~表示省略，说明lang模块与flow模块在同一目录
+    return $.Flow = $.factory({
+        init: function(){
+            this.root = {};//数据共享,但策略自定
+            this.uuid = $.getUid({})
+        },
         //names 可以为数组，用逗号作为分隔符的字符串
         bind: function(names,callback,reload){
             var  root = this.root, deps = {},args = [];
@@ -83,7 +80,11 @@ $.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模
                     repeat = true;
                 }
             if(repeat){ //为了谨慎起见再检测一遍
-                this.fire.apply(this,arguments);
+                try{
+                    this.fire.apply(this, arguments);
+                }catch(e){
+                    this.fire( "__error__", e);//如果发生异常，抛出500错误
+                }
             }else{//执行fired数组中的回调
                 for (i = fired.length; fn = fired[--i]; ) {
                     if(fn.deps["__"+name]){//只处理相关的
@@ -102,11 +103,8 @@ $.define("flow","./lang",function(){//~表示省略，说明lang模块与flow模
             }
             return this;
         }
-    }
-    return $.flow = function(names,callback,reload){//一个工厂方法
-        return new OperateFlow(names,callback,reload)
-    }
-    //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
+    });
+//像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
 })
 //2012.6.8 对fire的传参进行处理
 //2012.7.13 使用新式的相对路径依赖模块

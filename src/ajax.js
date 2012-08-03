@@ -97,6 +97,7 @@ $.define("ajax","event", function(){
                 callback = data;
                 data = undefined;
             }
+            console.log("xxxxxxxxxxxxxx")
             return $.ajax({
                 type: method,
                 url: url,
@@ -393,8 +394,8 @@ $.define("ajax","event", function(){
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
            
             this.fire( eventType, this.responseData, statusText);
-            $.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
-            $.log(this == ajax)
+            //$.log("xxxxxxxxxxxxxxxxxxxxxxxxx")
+            //$.log(this == ajax)
             ajax.fire( eventType );
             this.fire("complete", this.responseData, statusText);
             ajax.fire("complete");

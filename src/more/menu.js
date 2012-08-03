@@ -34,21 +34,21 @@ $.define("menu","more/uibase,fx,event,attr",function(Widget){
     function init( ui, hash ){
         ui.setOptions(defaults , typeof hash === "object" ? hash : {});
         delete ui.data;//结构过于庞大，没有必要储存它
-        ui.target = addMenu( ui.parent,"mass_menu" );
+        var target = ui.target = addMenu( ui.parent,"mass_menu" );
         addItems(ui.target , hash.data );
         var hover = ui.hover_class;
         if(ui.direction == "horizontal"){
-            var first = ui.target.find(">.menu_item").css("float","left");
+            var first = target.find(">.menu_item").css("float","left");
             first.find("> .sub_menu").css({
                 top: first.innerHeight(),
                 left: 0,//(parseFloat(first.css("border-left-width")) + parseFloat(first.css("padding-left"))) * -1,
                 zIndex:~~first.css("z-index")+1
             })
         }
-        ui.target.delegate(".menu_item", "mouseover", function(){
-            ui.target.find("."+hover).removeClass(hover);
+        target.delegate(".menu_item", "mouseover", function(){
+            target.find("."+hover).removeClass(hover);
             $(this).addClass(hover).find("> .sub_menu").show(600);
-            ui.target.find(".sub_menu:visible:not(:has(."+hover+"))").hide()
+            target.find(".sub_menu:visible:not(:has(."+hover+"))").hide()
         });
     }
 

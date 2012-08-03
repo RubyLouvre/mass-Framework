@@ -113,7 +113,11 @@ $.define("data", "lang", function(){
                         }
                 }
                 if(clear){
-                    delete database["@data_"+id];
+                    try{
+                        delete database["@data_"+id];
+                    }catch(e){
+                        database["@data_"+id] = void 0;
+                    }
                 }
                 return ret;
             }
