@@ -11,25 +11,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
     rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+    runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
-    Escapes = {
-        "\\": "\\\\",
-        '"': '\\"',
-        "\b": "\\b",
-        "\f": "\\f",
-        "\n": "\\n",
-        "\r": "\\r",
-        "\t": "\\t"
-    };
 
-    // Internal: Converts `value` into a zero-padded string such that its
-    // length is at least equal to `width`. The `width` must be <= 6.
-    var toPaddedString = function (width, value) {
-        // The `|| 0` expression is necessary to work around a bug in
-        // Opera <= 7.54u2 where `0 == -0`, but `String(-0) !== "0"`.
-        return ("000000" + (value || 0)).slice(-width);
-    };
     $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject: function (obj){
@@ -148,44 +133,21 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         },
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
-//        quote:  String.quote ||  (function(){
-//            var meta = {
-//                '\b': '\\b',
-//                '\t': '\\t',
-//                '\n': '\\n',
-//                '\f': '\\f',
-//                '\r': '\\r',
-//                '"' : '\\"',
-//                '\\': '\\\\'
-//            },
-//            reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
-//            regFn = function(c){
-//                if (c in meta) {
-//                    return '\\' + meta[c];
-//                }
-//                var ord = c.charCodeAt(0);
-//                return ord < 0x20   ? '\\x0' + ord.toString(16)
-//                :  ord < 0x7F   ? '\\'   + c
-//                :  ord < 0x100  ? '\\x'  + ord.toString(16)
-//                :  ord < 0x1000 ? '\\u0' + ord.toString(16)
-//                : '\\u'  + ord.toString(16)
-//            };
-//            return function (str) {
-//                return    '"' + (str||"").replace(reg, regFn)+ '"';
-//            }
-//        })(),
-        
-        quote : function (value) {
-            var result = '"', index = 0, symbol;
-            for (; symbol = value.charAt(index); index++) {
-                // Escape the reverse solidus, double quote, backspace, form feed, line
-                // feed, carriage return, and tab characters.
-                result += '\\"\b\f\n\r\t'.indexOf(symbol) > -1 ? Escapes[symbol] :
-                // If the character is a control character, append its Unicode escape
-                // sequence; otherwise, append the character as-is.
-                symbol < " " ? "\\u00" + toPaddedString(2, symbol.charCodeAt(0).toString(16)) : symbol;
-            }
-            return result + '"';
+        quote:  String.quote || function(s) {
+            return '"' + s.replace( runicode, function(a) {
+                switch (a) {
+                    case '"': return '\\"';
+                    case '\\': return '\\\\';
+                    case '\b': return '\\b';
+                    case '\f': return '\\f';
+                    case '\n': return '\\n';
+                    case '\r': return '\\r';
+                    case '\t': return '\\t';
+                }
+                a = a.charCodeAt(0).toString(16);
+                while (a.length < 4) a = '0' + a;
+                return '\\u' + a;
+            }) + '"';
         },
         dump: function(obj, indent) {
             indent = indent || "";
