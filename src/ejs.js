@@ -55,7 +55,7 @@ $.define("ejs", "lang",function(){
         var flag = true;//判定是否位于前定界符的左边
         var codes = []; //用于放置源码模板中普通文本片断
         var time = new Date * 1;// 时间截,用于构建codes数组的引用变量
-        var prefix = " r += txt"+ time +"[" //渲染函数输出部分的前面
+        var prefix = " ;r += txt"+ time +"[" //渲染函数输出部分的前面
         var postfix = "];"//渲染函数输出部分的后面
         var t = "return function(data){ try{var r = '',line"+time+" = 0;";//渲染函数的最开始部分
         var rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g;
@@ -101,7 +101,7 @@ $.define("ejs", "lang",function(){
                         if( code.indexOf("|") > 1 ){//使用过滤器
                             code = "="+ filtered(code);
                         }
-                        t += " r +" +code +";"
+                        t += " ;r +" +code +";"
                         break;
                     case "#"://注释,不输出
                         break
@@ -127,5 +127,5 @@ $.define("ejs", "lang",function(){
     return $.ejs;
 })
 
-
+//添加更多分号，防止编译错误
 
