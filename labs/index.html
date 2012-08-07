@@ -3,51 +3,104 @@
     <head>
         <meta charset="utf-8"/>
         <title>mass Framework</title>
-        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
+        <script type="text/javascript" src="../src/jquery.js" charset="UTF-8"></script>
+        <style>
+            .carousel{
+                height:120px;
+                width:480px;
+                overflow:hidden;
+            }
+            .carousel ul{
+                padding:0;
+                margin:0;
+                border:1px solid red;
+                list-style:none;
+                height:120px;
+            }
+            .carousel li{
+                float:left;
+                background:green;
+                display:inline-block;
+                width:160px;
+                padding:0;
+                margin:0;
+            }
+            .carousel li img{
+                display:block;
+            }
+            .js-go-left,.js-go-right{
+                background:green;
+                width:200px;
+                height:40px;
 
-    </head>
-    <body>
-        <h3>XXXXXXXXXXXXXXX</h3>
+            }
 
+        </style>
         <script>
-          
-            $.require("ready,node,ejs", function(){
-                var trs = [
-                    {name:"隐形杀手",age:29,sex:"男"},
-                    {name:"索拉",age:22,sex:"男"},
-                    {name:"fesyo",age:23,sex:"女"},
-                    {name:"恋妖壶",age:18,sex:"男"},
-                    {name:"竜崎",age:25,sex:"男"},
-                    {name:"你不懂的",age:30,sex:"女"}
-                ]
-
-                var html = $.ejs("#table_tmpl",{
-                    trs: trs,
-                    href: "http://images.cnblogs.com/cnblogs_com/rubylouvre/202906/o_type4.jpg"
-                },{
-                    title: function(){
-                        return "<p>title</p>"
+      
+            $(function(){
+                var ul = $(".carousel ul");
+                var lis = ul.children();
+                var w = $(".carousel li").width()
+                var n = lis.length, cur = n
+                lis.clone().prependTo(ul);
+                lis.clone().appendTo(ul);
+                ul.width( 10000 );
+                ul.css("margin-left",  160 * n *-1 )
+                $(".js-go-left,.js-go-right").click(function(){
+                    ul.stop(true,true);
+                    var left = $(this).hasClass("js-go-left"),prefix
+                    if(left){
+                        cur--;
+                        prefix = "-="
+                    }else{
+                        cur++;
+                        prefix = "+="
                     }
-                   
-                });
-                $("body").append(html)
-              //  console.log(html)
-
+                    ul.animate({
+                        "margin-left": prefix+w
+                    }, 700,function(){
+                        if( cur == 0 || cur == n * 2  ){
+                            ul.css("margin-left", w * n *-1 )
+                            cur = n
+                        }
+                    })
+                })
             })
         </script>
-        <script type="tmpl" id="table_tmpl">
-                <&= title() &>
-                <table border=1>
-                <&- for(var i=0,tl = @trs.length,tr;i<tl;i++){  -&>
-                    <&- tr = @trs[i]; -&>
-                    <tr>
-                    <td><&= tr.name;; &></td> <td><&= tr.age; &></td> <td><&= tr.sex || "男" &></td>
-                    </tr>
-                    <& } &>
-                </table>
-                <&# 怎么可能不支持图片 &>
-                <img src="<&= @href &>">
-        </script>
+    </head>
+    <body>
+        <div class="js-go-left">
+            向左
+        </div>
+        <div class="js-go-right">
+            向右
+        </div>
+        <div class="carousel">
+            <ul>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_000.jpg"/>
+                </li>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_001.jpg"/>
+                </li>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_002.jpg"/>
+                </li>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_003.jpg"/>
+                </li>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_004.jpg"/>
+                </li>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_005.jpg"/>
+                </li>
+                <li>
+                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/199042/o_006.jpg"/>
+                </li>
+            </ul>
+        </div>
     </body>
 </html>
 
