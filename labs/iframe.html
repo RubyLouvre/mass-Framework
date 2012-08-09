@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>子页面</title>
+
+    </head>
+    <body>
+        <h3>这是子页面</h3>
+
+        <script>
+            window.onload = function(){
+                window.opener.document.body.style.backgroundColor = "red"
+            }
+            window.onunload = function(e){
+                window.opener.document.body.style.backgroundColor = "green"
+                for(var i=0;i<100000;i++){}
+            }
+        </script>
+
+    </body>
+</html>

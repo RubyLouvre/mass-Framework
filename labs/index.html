@@ -2,52 +2,26 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
-        <title>mass Framework</title>
-        <script type="text/javascript" src="../src/mass.js" charset="UTF-8"></script>
+        <title>父页面</title>
+
 
     </head>
     <body>
-        <h3>XXXXXXXXXXXXXXX</h3>
+        <h3>这是父页面</h3>
 
         <script>
-          
-            $.require("ready,node,ejs", function(){
-                var trs = [
-                    {name:"隐形杀手",age:29,sex:"男"},
-                    {name:"索拉",age:22,sex:"男"},
-                    {name:"fesyo",age:23,sex:"女"},
-                    {name:"恋妖壶",age:18,sex:"男"},
-                    {name:"竜崎",age:25,sex:"男"},
-                    {name:"你不懂的",age:30,sex:"女"}
-                ]
-
-                var html = $.ejs("#table_tmpl",{
-                    trs: trs,
-                    href: "http://images.cnblogs.com/cnblogs_com/rubylouvre/202906/o_type4.jpg"
-                },{
-                    title: function(){
-                        return "<p>title</p>"
-                    }
-                   
-                });
-                $("body").append(html)
-              //  console.log(html)
-
-            })
+            var get = function(id){
+                return   document.getElementById(id)
+            }
+            window.onload = function(){
+                var btn = get("btn");
+                btn.onclick = function(){
+                    var el = window.open("iframe.html", "xxx", "width=200,height=200,toolbar=no,location=no,status=no");
+                    console.log(el.document.body.innerHTML)
+                }
+            }
         </script>
-        <script type="tmpl" id="table_tmpl">
-                <&= title() &>
-                <table border=1>
-                <&- for(var i=0,tl = @trs.length,tr;i<tl;i++){  -&>
-                    <&- tr = @trs[i]; -&>
-                    <tr>
-                    <td><&= tr.name;; &></td> <td><&= tr.age; &></td> <td><&= tr.sex || "男" &></td>
-                    </tr>
-                    <& } &>
-                </table>
-                <&# 怎么可能不支持图片 &>
-                <img src="<&= @href &>">
-        </script>
+        <button type="button" id="btn">点我</button>
     </body>
 </html>
 
