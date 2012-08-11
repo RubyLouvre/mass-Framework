@@ -5336,7 +5336,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
     //http://www.w3.org/TR/DOM-Level-3-Events/#interface-Event
     var revent = /(^|_|:)([a-z])/g, rmapper = /(\w+)_(\w+)/g;
     $.EventTarget = {
-        uniqueNumber : $.getUid({}),
+      //  uniqueNumber : $.getUid({}),
         defineEvents : function( names ){
             var events = [];
             if(typeof names == "string"){

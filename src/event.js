@@ -335,7 +335,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
     //http://www.w3.org/TR/DOM-Level-3-Events/#interface-Event
     var revent = /(^|_|:)([a-z])/g, rmapper = /(\w+)_(\w+)/g;
     $.EventTarget = {
-        uniqueNumber : $.getUid({}),
+      //  uniqueNumber : $.getUid({}),
         defineEvents : function( names ){
             var events = [];
             if(typeof names == "string"){
@@ -569,6 +569,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.28 Fix quickParse BUG
 2012.5.29 利用Object.defineProperty打破事件对象的封装
 2012.6.6 addEventListenter也能绑定自定义事件, 一些兼容逻辑移到event_fix中去 升级到v6
+2012.8.17 $.EventTarget不再自带uniqueNumber，此属性会在用户第一次调用bind
 http://jsbin.com/efalu/7 input例子
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
 ECMAScript Edition3, 5 execution context and scope chain http://user.qzone.qq.com/153720615/blog/1339563690#!app=2&pos=1323177459
