@@ -32,15 +32,14 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             return this;
         },
         unbind : function(array,fn){//$.multiUnind("aaa,bbb")
+            var names = [];
             if(/string|number|object/.test(typeof array) ){
-                var tmp = []
                 (array+"").replace($.rword,function(name){
-                    tmp.push( "__"+name)
+                    names.push( "__"+name)
                 });
-                array = tmp;
             }
             var removeAll = typeof fn !== "function";
-            for(var i = 0, name ; name = array[i++];){
+            for(var i = 0, name ; name = names[i++];){
                 var obj = this.root[name];
                 if(obj && obj.unfire){
                     obj.state = 1;
@@ -108,3 +107,16 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
 })
 //2012.6.8 对fire的传参进行处理
 //2012.7.13 使用新式的相对路径依赖模块
+/*
+ *一个简单的例子
+ $.require("flow", function(){
+                var node = new $.Flow();
+                node.bind("aaa", function(){
+                    $.log("aaa")
+                });
+                node.bind("aaa", function(){
+                    $.log("bbb")
+                });
+                node.fire("aaa")
+  })
+ */

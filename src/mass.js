@@ -221,7 +221,7 @@ void function( global, DOC ){
      * @param {String} url  模块的路径
      * @param {String} mass  当前框架的版本号
      */
-    function loadJS( name, url ){
+    function loadJS( name, url, parent ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js"
         url += (url.indexOf('?') > 0 ? '&' : '?') + '_time'+ new Date * 1;
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
@@ -285,7 +285,7 @@ void function( global, DOC ){
                 name  = "@"+ match[1];//取得模块名
                 if( !modules[ name ] ){ //防止重复生成节点与请求
                     modules[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
+                    loadJS( name, match[2], $["@path"] );//将要安装的模块通过iframe中的script加载下来
                 }else if( modules[ name ].state === 2 ){
                     cn++;
                 }
@@ -503,6 +503,11 @@ http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
 https://github.com/eriwen/javascript-stacktrace
 不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
+重新发明东西并不会给我带来论文发表，但是它却给我带来了更重要的东西，这就是独立的思考能力。
+一旦一个东西被你“想”出来，而不是从别人那里 “学”过来，那么你就知道这个想法是如何产生的。
+这比起直接学会这个想法要有用很多，因为你知道这里面所有的细节和犯过的错误。而最重要的，
+其实是由此得 到的直觉。如果直接去看别人的书或者论文，你就很难得到这种直觉，因为一般人写论文都会把直觉埋藏在一堆符号公式之下，
+让你看不到背后的真实想法。如果得到了直觉，下一次遇到类似的问题，你就有可能很快的利用已有的直觉来解决新的问题。
 http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
 http://tableclothjs.com/ 一个很好看的表格插件
 http://layouts.ironmyers.com/
