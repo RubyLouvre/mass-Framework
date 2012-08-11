@@ -17,6 +17,9 @@ mass Framework
 <p>mass.js -> lang.js -> lang_fix.js -> support.js -> class.js -> data.js -> query.js ->
 node.js -> css.js -> css_fix.js -> event.js -> event_fix.js -> fx.js -> ajax.js -> flow.js
 </p>
+<hr/>
+<h3>mass Framework的文档：</h3>
+<p>它大部分文档已经转移到newland.js项目之下，我们可以在<a href="http://rubylouvre.github.com/doc/index.html">这里</a>访问得到它！</p>
 <h3>mass Framework的优点：</h3>
 <ol>
 <li>多库共存。</li>
