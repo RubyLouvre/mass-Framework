@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8"/>
+        <script src="../src/mass.js"></script>
         <title>父页面</title>
 
 
@@ -10,16 +11,16 @@
         <h3>这是父页面</h3>
 
         <script>
-            var get = function(id){
-                return   document.getElementById(id)
-            }
-            window.onload = function(){
-                var btn = get("btn");
-                btn.onclick = function(){
-                    var el = window.open("iframe.html", "xxx", "width=200,height=200,toolbar=no,location=no,status=no");
-                    console.log(el.document.body.innerHTML)
-                }
-            }
+            $.require("flow", function(){
+                var node = new $.Flow();
+                node.bind("aaa", function(){
+                    $.log("aaa")
+                });
+                node.bind("aaa", function(){
+                    $.log("bbb")
+                });
+                node.fire("aaa")
+            })
         </script>
         <button type="button" id="btn">点我</button>
     </body>

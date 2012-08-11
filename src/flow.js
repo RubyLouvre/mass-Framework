@@ -7,10 +7,21 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             this.root = {};//数据共享,但策略自定
             this.uuid = $.getUid({})
         },
-        //names 可以为数组，用逗号作为分隔符的字符串
+        /**
+        names 可以为数组，用逗号作为分隔符的字符串，callback是回调函数，reload，布尔，可选，决定最后回调的第二次触发的条件
+        flow.bind("aaa",fn);那么当我们调用flow.fire("aaa")就会立即执行fn这个回调
+        flow.bind("aaa,bbb",fn1);那么只有当我们把flow.fire("aaa"),flow.fire("bbb")都执行了，才会执行fn1这个回调
+        flow.fire("aaa")与flow.fire("bbb")的触发顺序是随意的
+        flow.bind("aaa,bbb,ccc",fn2)，这时就需要触发了三个操作才执行fn2这个回调
+        flow.bind("ddd",fn)，ddd与fn之间类似发布者订阅者这样的机制，一个操作（指ddd）可以绑定多个回调，如
+        flow.bind("ddd",fn2);flow.bind("ddd",fn3);那么当flow.fire("ddd")时，它会依次执行fn,fn2,fn3这三个回调
+        reload参数的使用，比如flow.bind("aaa,bbb,ccc,ddd",fn)，当我们先后flow.fire("aaa"),flow.fire("bbb"),
+        flow.fire("ccc"),flow.fire("ddd")，那么fn就会第一次被触发！
+        然后我再调用flow.fire("aaa"),fn就会被第二次触发；反正我们无论是fire上述那个操作，bbb也好，ccc也好，fn都会立即执行,
+        不用着等到四个都触发才执行！只有当reload设置为true时，我们才需要每次把这个步骤都执行了一遍才触发fn。*/
         bind: function(names,callback,reload){
-            var  root = this.root, deps = {},args = [];
-            (names +"").replace($.rword,function(name){
+            var  root = this.root, deps = {},args = []
+            String(names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
                 if(!root[name]){
                     root[name] ={
@@ -31,7 +42,12 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             callback.reload = !!reload;//默认每次重新加载
             return this;
         },
-        unbind : function(array,fn){//$.multiUnind("aaa,bbb")
+        /**
+        移除某个操作的回调(1)或所有回调(2),或同时移除多个操作（3）
+        (1)$.unbind("aaa")
+        (2)$.unbind("aaa",fn)
+        (3)$.unbind("aaa,bbb,ccc")*/
+        unbind : function(array,fn){
             var names = [];
             if(/string|number|object/.test(typeof array) ){
                 (array+"").replace($.rword,function(name){
@@ -104,11 +120,11 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
         }
     });
 //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
-})
-//2012.6.8 对fire的传参进行处理
-//2012.7.13 使用新式的相对路径依赖模块
-/*
- *一个简单的例子
+});
+/**
+ 2012.6.8 对fire的传参进行处理
+ 2012.7.13 使用新式的相对路径依赖模块
+ 一个简单的例子
  $.require("flow", function(){
                 var node = new $.Flow();
                 node.bind("aaa", function(){

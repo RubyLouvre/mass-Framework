@@ -183,7 +183,7 @@ void function( global, DOC ){
         Ns.define.apply(Ns, args)
     }
     
-    function loadJS( name, url ){
+    function loadJS( name, url, parent ){
         url = url  || $[ "@path" ] +"/"+ name.slice(1) + ".js"
         url += (url.indexOf('?') > 0 ? '&' : '?') + '_time'+ new Date * 1;
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
@@ -247,7 +247,7 @@ void function( global, DOC ){
                 name  = "@"+ match[1];//取得模块名
                 if( !modules[ name ] ){ //防止重复生成节点与请求
                     modules[ name ] = { };//state: undefined, 未安装; 1 正在安装; 2 : 已安装
-                    loadJS( name, match[2] );//将要安装的模块通过iframe中的script加载下来
+                    loadJS( name, match[2], $["@path"] );//将要安装的模块通过iframe中的script加载下来
                 }else if( modules[ name ].state === 2 ){
                     cn++;
                 }
@@ -655,25 +655,10 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
     rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+    runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, '');
-    Escapes = {
-        "\\": "\\\\",
-        '"': '\\"',
-        "\b": "\\b",
-        "\f": "\\f",
-        "\n": "\\n",
-        "\r": "\\r",
-        "\t": "\\t"
-    };
 
-    // Internal: Converts `value` into a zero-padded string such that its
-    // length is at least equal to `width`. The `width` must be <= 6.
-    var toPaddedString = function (width, value) {
-        // The `|| 0` expression is necessary to work around a bug in
-        // Opera <= 7.54u2 where `0 == -0`, but `String(-0) !== "0"`.
-        return ("000000" + (value || 0)).slice(-width);
-    };
     $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject: function (obj){
@@ -780,44 +765,21 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             return result;
         },
         // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
-//        quote:  String.quote ||  (function(){
-//            var meta = {
-//                '\b': '\\b',
-//                '\t': '\\t',
-//                '\n': '\\n',
-//                '\f': '\\f',
-//                '\r': '\\r',
-//                '"' : '\\"',
-//                '\\': '\\\\'
-//            },
-//            reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
-//            regFn = function(c){
-//                if (c in meta) {
-//                    return '\\' + meta[c];
-//                }
-//                var ord = c.charCodeAt(0);
-//                return ord < 0x20   ? '\\x0' + ord.toString(16)
-//                :  ord < 0x7F   ? '\\'   + c
-//                :  ord < 0x100  ? '\\x'  + ord.toString(16)
-//                :  ord < 0x1000 ? '\\u0' + ord.toString(16)
-//                : '\\u'  + ord.toString(16)
-//            };
-//            return function (str) {
-//                return    '"' + (str||"").replace(reg, regFn)+ '"';
-//            }
-//        })(),
-        
-        quote : function (value) {
-            var result = '"', index = 0, symbol;
-            for (; symbol = value.charAt(index); index++) {
-                // Escape the reverse solidus, double quote, backspace, form feed, line
-                // feed, carriage return, and tab characters.
-                result += '\\"\b\f\n\r\t'.indexOf(symbol) > -1 ? Escapes[symbol] :
-                // If the character is a control character, append its Unicode escape
-                // sequence; otherwise, append the character as-is.
-                symbol < " " ? "\\u00" + toPaddedString(2, symbol.charCodeAt(0).toString(16)) : symbol;
-            }
-            return result + '"';
+        quote:  String.quote || function(s) {
+            return '"' + s.replace( runicode, function(a) {
+                switch (a) {
+                    case '"': return '\\"';
+                    case '\\': return '\\\\';
+                    case '\b': return '\\b';
+                    case '\f': return '\\f';
+                    case '\n': return '\\n';
+                    case '\r': return '\\r';
+                    case '\t': return '\\t';
+                }
+                a = a.charCodeAt(0).toString(16);
+                while (a.length < 4) a = '0' + a;
+                return '\\u' + a;
+            }) + '"';
         },
         dump: function(obj, indent) {
             indent = indent || "";
@@ -1424,6 +1386,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     return $.lang;
 });
 
+
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
@@ -1552,7 +1515,7 @@ $.define("support", function(){
 // 类工厂模块
 //==========================================
 $.define("class", "lang",function(){
-   $.log("已加载类工厂模块")
+   //$.log("已加载类工厂模块")
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
     rconst = /constructor|_init|_super/,
@@ -2224,18 +2187,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         not: function( expr ){
             return this.labor( filterhElement(this.valueOf(), expr, this.ownerDocument, true) );
         },
-        //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
-        is: function( expr ){
-            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
-            for( var i = 0 , node; node = nodes[ i++ ];){
-                uid = $.getUid(node);
-                obj[uid] = 1;
-            }
-            return $.slice(this).some(function( el ){
-                return  obj[ $.getUid(el) ];
-            });
-        },
-        //取得匹配节点中那些后代中能匹配给定CSS表达式的节点，组成新mass实例返回。
+
+        //在当前的节点中，往下遍历他们的后代，收集匹配给定的CSS表达式的节点，封装成新mass实例返回
         has: function( expr ) {
             var nodes = $( expr, this.ownerDocument );
             return this.filter(function() {
@@ -2246,6 +2199,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 }
             });
         },
+        // 在当前的节点中，往上遍历他们的祖先，收集最先匹配给定的CSS表达式的节点，封装成新mass实例返回
         closest: function( expr, context ) {
             var nodes = $( expr, context || this.ownerDocument ).valueOf();
             //遍历原mass对象的节点
@@ -2267,6 +2221,18 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor( ret );
         },
+                //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
+        is: function( expr ){
+            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
+            for( var i = 0 , node; node = nodes[ i++ ];){
+                uid = $.getUid(node);
+                obj[uid] = 1;
+            }
+            return $.slice(this).some(function( el ){
+                return  obj[ $.getUid(el) ];
+            });
+        },
+        //返回指定节点在其所有兄弟中的位置
         index: function( expr ){
             var first = this[0]
             if ( !expr ) {//如果没有参数，返回第一元素位于其兄弟的位置
@@ -2383,7 +2349,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
 
 //$.query v5 开发代号Icarus
 $.define("query", function(){
-     $.log("已加载选择器模块")
+    $.log("已加载选择器模块")
     var global = this, DOC = global.document;
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
@@ -4025,18 +3991,8 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
         not: function( expr ){
             return this.labor( filterhElement(this.valueOf(), expr, this.ownerDocument, true) );
         },
-        //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
-        is: function( expr ){
-            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
-            for( var i = 0 , node; node = nodes[ i++ ];){
-                uid = $.getUid(node);
-                obj[uid] = 1;
-            }
-            return $.slice(this).some(function( el ){
-                return  obj[ $.getUid(el) ];
-            });
-        },
-        //取得匹配节点中那些后代中能匹配给定CSS表达式的节点，组成新mass实例返回。
+
+        //在当前的节点中，往下遍历他们的后代，收集匹配给定的CSS表达式的节点，封装成新mass实例返回
         has: function( expr ) {
             var nodes = $( expr, this.ownerDocument );
             return this.filter(function() {
@@ -4047,6 +4003,7 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
                 }
             });
         },
+        // 在当前的节点中，往上遍历他们的祖先，收集最先匹配给定的CSS表达式的节点，封装成新mass实例返回
         closest: function( expr, context ) {
             var nodes = $( expr, context || this.ownerDocument ).valueOf();
             //遍历原mass对象的节点
@@ -4068,6 +4025,18 @@ $.define( "node", "lang,support,class,query,data,ready",function( lang, support 
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor( ret );
         },
+                //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
+        is: function( expr ){
+            var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
+            for( var i = 0 , node; node = nodes[ i++ ];){
+                uid = $.getUid(node);
+                obj[uid] = 1;
+            }
+            return $.slice(this).some(function( el ){
+                return  obj[ $.getUid(el) ];
+            });
+        },
+        //返回指定节点在其所有兄弟中的位置
         index: function( expr ){
             var first = this[0]
             if ( !expr ) {//如果没有参数，返回第一元素位于其兄弟的位置
@@ -4845,7 +4814,7 @@ $.define( "css", !!top.getComputedStyle ? "node" : "node,css_fix" , function(){
             }
             return val
         };
-        var method = "scroll" + name;//scrollTop,scrollLeft只有读方法
+        var method = "scroll" + name;
         $.fn[ method ] = function( val ) {
             var node, win, t = name == "Top";
             if ( val === void 0 ) {
@@ -5999,10 +5968,10 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             this.root = {};//数据共享,但策略自定
             this.uuid = $.getUid({})
         },
-        //names 可以为数组，用逗号作为分隔符的字符串
+        
         bind: function(names,callback,reload){
-            var  root = this.root, deps = {},args = [];
-            (names +"").replace($.rword,function(name){
+            var  root = this.root, deps = {},args = []
+            String(names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
                 if(!root[name]){
                     root[name] ={
@@ -6023,16 +5992,16 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             callback.reload = !!reload;//默认每次重新加载
             return this;
         },
-        unbind : function(array,fn){//$.multiUnind("aaa,bbb")
+        
+        unbind : function(array,fn){
+            var names = [];
             if(/string|number|object/.test(typeof array) ){
-                var tmp = []
                 (array+"").replace($.rword,function(name){
-                    tmp.push( "__"+name)
+                    names.push( "__"+name)
                 });
-                array = tmp;
             }
             var removeAll = typeof fn !== "function";
-            for(var i = 0, name ; name = array[i++];){
+            for(var i = 0, name ; name = names[i++];){
                 var obj = this.root[name];
                 if(obj && obj.unfire){
                     obj.state = 1;
@@ -6097,9 +6066,8 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
         }
     });
 //像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
-})
-//2012.6.8 对fire的传参进行处理
-//2012.7.13 使用新式的相对路径依赖模块
+});
+
 //=========================================
 //  数据交互模块
 //==========================================
