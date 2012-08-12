@@ -422,6 +422,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
+    var rtypes = /^[a-z0-9_\-\.\s\,]+$/i
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
         $.fn[ method ] = function(types, selector, fn ){
             if ( typeof types === "object" ) {
@@ -442,7 +443,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                         hash.live = el.trim();
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
-                        if(!/^[a-z0-9_\-\.\s]+$/i.test(hash.type)){
+                        if(!rtypes.test(hash.type)){
                             throw "hash.type should be a combination of this event type and the namespace!"
                         }
                     }
@@ -569,7 +570,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.5.28 Fix quickParse BUG
 2012.5.29 利用Object.defineProperty打破事件对象的封装
 2012.6.6 addEventListenter也能绑定自定义事件, 一些兼容逻辑移到event_fix中去 升级到v6
-2012.8.17 $.EventTarget不再自带uniqueNumber，此属性会在用户第一次调用bind
+2012.8.17 $.EventTarget不再自带uniqueNumber，此属性会在用户第一次调用bind,unbind方法时再为原对象添加此属性
 http://jsbin.com/efalu/7 input例子
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
 ECMAScript Edition3, 5 execution context and scope chain http://user.qzone.qq.com/153720615/blog/1339563690#!app=2&pos=1323177459

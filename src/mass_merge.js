@@ -5423,6 +5423,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
         }
     });
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
+    var rtypes = /^[a-z0-9_\-\.\s\,]+$/i
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
         $.fn[ method ] = function(types, selector, fn ){
             if ( typeof types === "object" ) {
@@ -5443,7 +5444,7 @@ $.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
                         hash.live = el.trim();
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
-                        if(!/^[a-z0-9_\-\.\s]+$/i.test(hash.type)){
+                        if(!rtypes.test(hash.type)){
                             throw "hash.type should be a combination of this event type and the namespace!"
                         }
                     }
