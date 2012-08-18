@@ -6004,6 +6004,12 @@ $.define("attr","support,node", function( support ){
 //==========================================
 $.define("flow","class",function(){//~表示省略，说明lang模块与flow模块在同一目录
     var uuid_arr =  '0123456789ABCDEFG'.split('');
+    var _args = function (root, arr){//对所有结果进行平坦化处理
+        for(var i = 0, result = [], el; el = arr[i++];){
+            result.push.apply( result,root[el].ret);
+        }
+        return result;
+    }
     return $.Flow = $.factory({
         init: function(){
             this.root = {};//数据共享,但策略自定
@@ -6151,12 +6157,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             }
             return this;
         },
-        _args : function (arr){//对所有结果进行平坦化处理
-            for(var i = 0, result = [], el; el = arr[i++];){
-                result.push.apply( result,this.root[el].ret);
-            }
-            return result;
-        },
+
         fire: function(name, args){
             var root = this.root, obj = root["__"+name], deps;
             if(!obj )
@@ -6186,7 +6187,7 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
                 for (i = fired.length; fn = fired[--i]; ) {
                     if(fn.deps["__"+name]){//只处理相关的
                         this.name = name;
-                        fn.apply(this, this._args( fn.args ));
+                        fn.apply(this, _args(this.root, fn.args ) );
                         if(fn.reload){//重新加载所有数据
                             fired.splice(i,1);
                             unfire.push(fn);
