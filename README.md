@@ -8,8 +8,8 @@ mass Framework
 <ol>
 <li>种子模块， mass.js，最精简的内核， 包含模块加载系统。</li>
 <li>补丁模块， lang_fix.js, css_fix.js, event_fix.js,主要是用于兼容旧式IE的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
-<li>核心模块， 所有位于mass-Framework/src目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
-<li>外围模块， 位于mass-Framework/src/more的JS文件。</li>
+<li>核心模块， 所有位于根目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
+<li>外围模块， 位于more的JS文件。</li>
 </ol>
 <hr/>
 <h3>mass Framework的源码阅读顺序</h3>
@@ -94,7 +94,7 @@ $.require("ready,lang",function(){//对字符串进行链式操作
                 }
             };//假设这是已存在的库
         &lt;/script&gt;
-        &lt;script type="text/javascript" src="../src/mass.js" charset="UTF-8"&gt;&lt;/script&gt;
+        &lt;script type="text/javascript" src="../mass.js" charset="UTF-8"&gt;&lt;/script&gt;
         &lt;script&gt;
             //mass的命名空间将自动改为$+它当前的版本号
             $1.require("lang",function(){
@@ -107,66 +107,8 @@ $.require("ready,lang",function(){//对字符串进行链式操作
     &lt;/body&gt;
 &lt;/html&gt;
 </pre>
-<h3>文档的使用：</h3>
-<p>还是刚才解压出来的文件夹，里面有个AspNet.exe服务器（需要微软的.net Framework支持），进去选doc目录就可以运行里面的示例了。
-</p>
-
-<h3>mass的JS文件合并</h3>
-<p>手动方式</p>
-<ol>
-<li>将模块加载模块mass.js里面的内容先复制到一个临时文件</li>
-<li>在其最后一行"})(this,this.document);" 与倒数第二行" $.exports("$"+postfix);"插入标识模块已加域的代码。
-其代码如下：<br/>
-<pre>
-    var module_value = {
-        state:2
-    };
-    var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr.event_fix"+
-        "event,fx,flow,ajax".match($.rword);
-    for(var i=0, module;module = list[i++];){
-        mapper["@"+module] = module_value;
-    }
-</pre>
-list里面的为要合并的模块名
-</li>
-<li>将其他模块里面的内容直接拷到上面的代码之下。</li>
-</ol>
-<p>成功后，整个代码结构如下：</p>
-<pre>
-(function(global , DOC){
-//这是最核心的模块加载模块
-//XXXXXXXXXXX
- //然后加上这样一段
-    var module_value = {
-        state:2
-    };
-    var list = "lang_fix,lang,support,class,data,query,node,css_fix,css,attr.event_fix,event,fx,flow,ajax".match($.rword);
-    for(var i=0, module;module = list[i++];){
-        mapper["@"+module] = module_value;
-    }
-//然后把要合并的JS文件的内容直接抽取出来放在下面
-   $.define("lang_fix", function(){
-//XXXXXXXXXXXXXX
-});
-   $.define("lang", function(){
-//XXXXXXXXXXXXXX
-})
-   dom.define("class", function(){
-//XXXXXXXXXXXXXX
-})
-   $.define("data", function(){
-//XXXXXXXXXXXXXX
-})
-   $.define("node", function(){
-//XXXXXXXXXXXXXX
-})
-//....
-})(this,this.document)
-</pre>
-<p>脚本方式</p>
-<p>位于doc/public/文件夹有个merge.js， 它需要后端<a href="http://nodejs.org/">node.js</a>的支持</p>
-
-
+<h3>JS文件的合并</h3>
+<p>请利用我的newland.js项目</p>
 <h3>BUG提交与插件的友情贡献。</h3>
 
 <p>大家在github注册后，就可以在<a href="https://github.com/RubyLouvre/mass-Framework/issues">https://github.com/RubyLouvre/mass-Framework/issues</a>里面提交建议或BUG什么了。</p>
