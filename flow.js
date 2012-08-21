@@ -76,22 +76,24 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             var root = this.root, callbacks = [], sorted = [], uniq = {}
             if(!names){//取得所有回调并去重
                 for(var i in root){
-                    callbacks = callbacks.concat(root[i].unfire);
+                    callbacks = callbacks.concat(root[ i ].unfire);
                     if(fired){
-                        callbacks = callbacks.concat(root[i].fired);
+                        callbacks = callbacks.concat(root[ i ].fired);
                     }
                 }
                 callbacks = $.Array.unique(callbacks);
             }else{
                 String(names +"").replace($.rword,function(name){
                     name = "__"+name;//处理toString与valueOf等属性
-                    callbacks = callbacks.concat(root[name].unfire);
-                    if(!uniq[name]){//去重
-                        sorted.push(name);
-                        uniq[name] = 1;
-                    }
-                    if(fired){
-                        callbacks = callbacks.concat(root[name].fired);
+                    if( root[ name ] ){
+                        callbacks = callbacks.concat(root[ name ].unfire);
+                        if(!uniq[ name ]){//去重
+                            sorted.push(name);
+                            uniq[ name ] = 1;
+                        }
+                        if(fired){
+                            callbacks = callbacks.concat(root[ name ].fired);
+                        }
                     }
                 });
                 callbacks = $.Array.unique(callbacks);
