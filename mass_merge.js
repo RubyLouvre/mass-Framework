@@ -130,17 +130,28 @@ void function( global, DOC ){
             }
             return result;
         },
-        
-        log: function ( text, force ){
-            if( force === true ){
-                $.require( "ready", function(){
-                    var div =  DOC.createElement("pre");
-                    div.className = "mass_sys_log";
-                    div.innerHTML = text +"";//确保为字符串
-                    DOC.body.appendChild(div)
-                });
-            }else if( global.console ){
-                global.console.log( text );
+        //$.log(str, showInPage=true, '>=5' )
+        log: function (){
+            var args = $.slice(arguments), show = true, page = false,  str = args.shift();
+            for(var i = 0 ; i < args.length; i++){
+                var el = args[i]
+                if(typeof el == "string" && /^\s*(?:[<>]=?|=)\s*\d\s*$/.test(el) ){
+                    show = Function ( "return "+ $.log.level + el)()
+                }else if(el === true){
+                    page = true;
+                }
+            }
+            if(show){
+                if( page === true ){
+                    $.require( "ready", function(){
+                        var div =  DOC.createElement("pre");
+                        div.className = "mass_sys_log";
+                        div.innerHTML = str +"";//确保为字符串
+                        DOC.body.appendChild(div)
+                    });
+                }else if( global.console ){
+                    global.console.log( str );
+                }
             }
         },
         //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
@@ -169,7 +180,7 @@ void function( global, DOC ){
             return result;
         }
     });
-
+    $.log.level = 1;
     $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
@@ -656,7 +667,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
 // 类型扩展模块v7 by 司徒正美
 //=========================================
 $.define("lang", Array.isArray ? "" : "lang_fix",function(){
-    $.log("已加载语言扩展模块");
+    $.log("已加载语言扩展模块", "> 6");
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
@@ -6066,22 +6077,24 @@ $.define("flow","class",function(){//~表示省略，说明lang模块与flow模�
             var root = this.root, callbacks = [], sorted = [], uniq = {}
             if(!names){//取得所有回调并去重
                 for(var i in root){
-                    callbacks = callbacks.concat(root[i].unfire);
+                    callbacks = callbacks.concat(root[ i ].unfire);
                     if(fired){
-                        callbacks = callbacks.concat(root[i].fired);
+                        callbacks = callbacks.concat(root[ i ].fired);
                     }
                 }
                 callbacks = $.Array.unique(callbacks);
             }else{
                 String(names +"").replace($.rword,function(name){
                     name = "__"+name;//处理toString与valueOf等属性
-                    callbacks = callbacks.concat(root[name].unfire);
-                    if(!uniq[name]){//去重
-                        sorted.push(name);
-                        uniq[name] = 1;
-                    }
-                    if(fired){
-                        callbacks = callbacks.concat(root[name].fired);
+                    if( root[ name ] ){
+                        callbacks = callbacks.concat(root[ name ].unfire);
+                        if(!uniq[ name ]){//去重
+                            sorted.push(name);
+                            uniq[ name ] = 1;
+                        }
+                        if(fired){
+                            callbacks = callbacks.concat(root[ name ].fired);
+                        }
                     }
                 });
                 callbacks = $.Array.unique(callbacks);
