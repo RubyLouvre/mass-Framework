@@ -1,7 +1,7 @@
 //==================================================
 // 属性操作模块
 //==================================================
-$.define("attr","support,node", function( support ){
+define("attr",["support","node"], function( support ){
     // $.log("已加载attr模块")
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,

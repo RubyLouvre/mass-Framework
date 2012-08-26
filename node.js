@@ -1,8 +1,8 @@
 //==================================================
 // 节点操作模块
 //==================================================
-$.define( "node", "lang,support,class,query,data,ready",function( lang, support ){
-    $.log("已加载node模块");
+define( "node", "lang,support,class,query,data,ready".split(","),function( lang, support ){
+    $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, rtext =/option|script/i, TAGS = "getElementsByTagName"
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){

@@ -1,7 +1,7 @@
 //=========================================
 //  样式补丁模块
 //==========================================
-$.define("css_fix", !!top.getComputedStyle, function(){
+define("css_fix", !!top.getComputedStyle, function(){
     $.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {},
     ropacity = /opacity=([^)]*)/i,

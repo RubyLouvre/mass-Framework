@@ -208,7 +208,7 @@
         $.core.name = node.getAttribute("namespace") || "$"
         var str = node.getAttribute("debug")
         $.core.debug = str == 'true' || str == '1';
-        $.core.url = url.substr( 0, url.lastIndexOf('/') ) +"/"
+        $.core.base = url.substr( 0, url.lastIndexOf('/') ) +"/"
     }(DOC.getElementsByTagName( "script" ));
 
 
@@ -230,7 +230,7 @@
     Module.update = function(id, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
-            module = new Module(id, $.core.url);
+            module = new Module(id, $.core.base);
             Module._cache[id] = module;
         }
         module.callback = factory || $.noop;
@@ -257,7 +257,7 @@
             }else {
                 var tmp = url.charAt(0);
                 if( tmp !== "." && tmp != "/"){  //相对于根路径
-                    ret = $.core.url + url;
+                    ret = $.core.base + url;
                 }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
                     ret = parent + "/" + url.substr(2);
                 }else if( url.slice(0,2) == ".."){ //相对于父路径
@@ -313,7 +313,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.core.url ), url = array[0]
+                var array = Module._resolveFilename(el, id || $.core.base ), url = array[0]
                 if(array[1] == "js"){
                     dn++
                     if( !modules[ url ] ){ //防止重复生成节点与请求
@@ -428,7 +428,7 @@
     }
 
     var loadJS = function( url, parent ){
-        modules[ url ] = new Module( url, parent || $.core.url);
+        modules[ url ] = new Module( url, parent || $.core.base);
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
@@ -454,7 +454,7 @@
             iframe = null;
         });
     }
-
+    $.define.amd = {};//满足AMD规范
     var innerDefine = function(  ){
         var args = Array.apply([],arguments);
         if(typeof args[0] == "string"){
@@ -498,7 +498,7 @@
         return ret;
     }
     all.replace($.rword,function(a){
-        $.core.alias[a] = $.core.url+a+".js"
+        $.core.alias[a] = $.core.base+a+".js"
     });
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
@@ -583,8 +583,8 @@
         $.exports();
     });
     $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
-    /*combine modules*/
-    // console.log($["@path"])
+/*combine modules*/
+// console.log($["@path"])
 }( this, this.document );
 
 

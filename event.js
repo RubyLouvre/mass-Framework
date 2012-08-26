@@ -1,7 +1,7 @@
 //=========================================
 // 事件系统v5
 //==========================================
-$.define("event", top.dispatchEvent ?  "node" : "node,event_fix",function(){
+define("event", top.dispatchEvent ?  ["node"] : ["node","event_fix"],function(){
     $.log("已加载event模块v5")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
