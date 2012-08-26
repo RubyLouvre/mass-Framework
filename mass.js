@@ -463,7 +463,6 @@
             iframe = null;
         });
     }
-    $.define.amd = {};//满足AMD规范
     var innerDefine = function(  ){
         var args = Array.apply([],arguments);
         if(typeof args[0] == "string"){
