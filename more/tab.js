@@ -1,5 +1,4 @@
-$.define("tab","node,event,attr,css",function(){
-
+define("tab","node,event,attr,css".split(","),function(){
     var Tab = $.factory({
         init: function(el, opts){
             this.element = $(el)

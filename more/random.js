@@ -1,7 +1,6 @@
 
-$.define("random", function(){
+define("random", function(){
     var cs = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; 
-    var uuid_arr =  '0123456789ABCDEFG'.split('');
    // $.log("已加载random模块");
     //http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
     //http://paulirish.com/2009/random-hex-color-code-snippets/
