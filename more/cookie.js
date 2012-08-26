@@ -1,4 +1,4 @@
-define("cookie",{
+define({
     /**
          * 获取 cookie 值
          * @return {string} 如果 name 不存在，返回 undefined

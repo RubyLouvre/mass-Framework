@@ -258,7 +258,7 @@
         }
     }
     Module._resolveFilename = function(url, parent, ret, ext){
-        if(/^\w+$/.test(url) && $.core.alias[url] ){
+        if(/^[\w$]+$/.test(url) && $.core.alias[url] ){//别名至少两个字符,并且除了$外不能有怪异字符
             ret = $.core.alias[url]
         }else{
             parent = parent.substr( 0, parent.lastIndexOf('/') )
