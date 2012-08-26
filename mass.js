@@ -141,6 +141,17 @@
             return result;
         },
         //$.log(str, showInPage=true, 5 )
+        //level Number，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
+        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.log.level。
+        //这个$.log.level默认为9。下面是level各代表的含义。
+        //0 EMERGENCY 致命错误,框架崩溃
+        //1 ALERT 需要立即采取措施进行修复
+        //2 CRITICAL 危急错误
+        //3 ERROR 异常
+        //4 WARNING 警告
+        //5 NOTICE 通知用户已经进行到方法
+        //6 INFO 更一般化的通知
+        //7 DEBUG 调试消息
         log: function (str){
             var  show = true, page = false
             for(var i = 1 ; i < arguments.length; i++){
@@ -210,7 +221,6 @@
         $.core.debug = str == 'true' || str == '1';
         $.core.base = url.substr( 0, url.lastIndexOf('/') ) +"/"
     }(DOC.getElementsByTagName( "script" ));
-
 
     var Module = function (id, parent) {
         this.id = id;
@@ -305,7 +315,6 @@
             }
         },
         resolveFilename: Module._resolveFilename,
-        //file:///F:/phpnow/vhosts/
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
         require: function( list, factory, id ){
             var deps = {}, // 用于检测它的依赖是否都为2
