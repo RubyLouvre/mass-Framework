@@ -1,4 +1,4 @@
-$.define("createFlash",function(){
+define("createFlash",function(){
     /**
 * 创建Flash对象 by 教主
 *
@@ -6,7 +6,7 @@ $.define("createFlash",function(){
 * @param {Object} info swf的相关信息
 * @param {string} [params] 可选的参数
 */
-    $.createFlash = function (container, info, params) {
+    return function (container, info, params) {
         /* IE使用appendChild添加object标签是没有用的，只能用innerHTML
            在Chrome中，如果object标签前面有一个元素有background-image样式，则很有可能该object不显示
            测试代码，保存为html文件，本地Chrome打开，刷新几次会出现该现象
@@ -55,8 +55,7 @@ $.define("createFlash",function(){
             (params ? '<param name="flashvars" value="' + params + '" />' : '') +
             '</object>';
 
-        }
-        else {
+        } else {
             //style="width:1px;height:1px" 是为了保证firefox下正常工作.
             html = '<embed style="width:' + info.width +'px;height:' + info.height + 'px;" wmode="window" src="' + info.src + '" quality="high" name="' + info.id + '" ' +
             (info.id ? 'id="' + info.id + '" ' : '') +
