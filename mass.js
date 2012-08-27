@@ -74,7 +74,7 @@
         mix: mix,
         rword: /[^, ]+/g,
         core: {
-            alias:{ },
+            alias:{},
             level: 9
         },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
@@ -257,8 +257,13 @@
             return Module._load(path, self)
         }
     }
-    Module._resolveFilename = function(url, parent, ret, ext){
-        if(/^[\w$]{2,}$/.test(url) && $.core.alias[url] ){//别名至少两个字符,并且除了$外不能有怪异字符
+    Module._resolveFilename = function(url, parent, ret){
+        //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
+        //别名至少两个字符；不用汉字是避开字符集的问题
+        if( url === "ready"){//特别处理ready标识符
+            return ["ready", "js"];
+        }
+        if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.core.alias[url] ){
             ret = $.core.alias[url]
         }else{
             parent = parent.substr( 0, parent.lastIndexOf('/') )
@@ -280,13 +285,13 @@
                 }
             }
         }
+        var ext = "js";
         tmp = ret.replace(/[?#].*/, '');
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
-        if(tmp == ret && ret.substr(-3,3) != ".js"){//如果没有后缀名会补上.js
+        if( tmp == ret && ret.substr(-3,3) != ".js"){//如果没有后缀名会补上.js
             ret += ".js";
-            ext = "js";
         }
         return [ret, ext];
     }
@@ -322,7 +327,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.core.base ), url = array[0]
+                var array = Module._resolveFilename(el, id || $.core.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
                     if( !modules[ url ] ){ //防止重复生成节点与请求
@@ -500,8 +505,8 @@
             ret =  callback.apply(0, array);
         }
         module.state = 2;
-        if(typeof ret !== "undefined"){
-            modules[ "$"+id ].exports = ret
+        if(typeof ret !== "undefined" && d){
+            modules[ d ].exports = ret
         }
         return ret;
     }

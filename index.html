@@ -8,9 +8,17 @@
 
         </script>
         <script>
-            $.require("lang",function(){
-                console.log($)
+            $.config({
+                alias:{
+                    "$language":$.core.base + "lang.js"
+                }
+            });
+            $.log($.core.alias);
+            $.require("$language,ready",function(){
+                console.log("已加载语言模块")
+                console.log($.modules)
             })
+
         </script>
     </head>
     <body>
