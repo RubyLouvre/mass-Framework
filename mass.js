@@ -74,7 +74,8 @@
         mix: mix,
         rword: /[^, ]+/g,
         core: {
-            alias:{ }
+            alias:{ },
+            level: 9
         },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": w3c ? "addEventListener" : "attachEvent",
@@ -157,7 +158,7 @@
             for(var i = 1 ; i < arguments.length; i++){
                 var el = arguments[i]
                 if(typeof el == "number"){
-                    show = el <=  $.log.level
+                    show = el <=  $.core.level
                 }else if(el === true){
                     page = true;
                 }
@@ -206,7 +207,6 @@
             return result;
         }
     });
-    $.log.level = 9;
     $.noop = $.error = $.debug = function(){};
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
@@ -506,7 +506,7 @@
         return ret;
     }
     all.replace($.rword,function(a){
-        $.core.alias[a] = $.core.base+a+".js"
+        $.core.alias["$"+a] = $.core.base+a+".js"
     });
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
@@ -653,6 +653,7 @@ dom.namespace改为dom["mass"]
 2012.6.25 domReady后移除绑定事件
 2012.7.23 动态指定mass Framewoke的命名空间与是否调试
 2012.8.26 升级到v17
+2012.8.27 将$.log.level改到$.core.level中去
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
