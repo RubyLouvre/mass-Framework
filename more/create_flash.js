@@ -1,4 +1,4 @@
-define("createFlash",function(){
+define(function(){
     /**
 * 创建Flash对象 by 教主
 *

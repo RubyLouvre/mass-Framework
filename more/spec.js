@@ -1,7 +1,7 @@
 //==================================================
 // 测试模块v4
 //==================================================
-define("spec",["lang"], function(){
+define( ["$lang"], function(){
     $.log("已加载spec v4模块",7);
     var global = this, DOC = global.document;
     //模块为$添加如下方法:

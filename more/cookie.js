@@ -1,4 +1,4 @@
-define(  ["../lang"], function(){
+define(  ["$lang"], function(){
     //引入语言模块确保能使用trim, forEach等方法
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;

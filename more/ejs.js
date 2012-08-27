@@ -1,25 +1,18 @@
-define("ejs", ["../lang"],function(){
-    //用法如如ASP，JSP，ruby的ERB, 完全没有入门难度
-    //不过太过自由写意，让用户任意在HTML镶嵌逻辑容易造成维护灾难
-    //使用者请自行约束
-    //http://www.cnblogs.com/rubylouvre/archive/2012/03/19/2405867.html
-    function filtered(js) {
-        return js.substr(1).split('|').reduce(function(js, filter){
-            var parts = filter.split(':')
-            , name = parts.shift()
-            , args = parts.shift() || '';
-            if (args) args = ', ' + args;
-            return '$.ejs.filters.' + name + '(' + js + args + ')';
-        });
-    };
-    $.log("ejs模板机制")
+define( ["$lang"],function(){
+    $.log("已加载ejs模块", 7)
     $.ejs = function( id,data,opts){
         var el, source
         if( !$.ejs.cache[ id] ){
             opts = opts || {}
             var doc = opts.doc || document;
             data = data || {};
-            el = $.query ? $(id, doc)[0] : doc.getElementById(id.slice(1));
+            if($.fn){
+                el = $(id, doc)[0];
+            }else if(doc.querySelectorAll){
+                el = doc.querySelectorAll(id)[0];
+            }else{
+                el = doc.getElementById(id.slice(1));
+            }
             if(! el )
                 throw "can not find the target element";
             source = el.innerHTML;
@@ -29,20 +22,21 @@ define("ejs", ["../lang"],function(){
             var fn = $.ejs.compile( source, opts );
             $.ejs.cache[ id ] = fn;
         }
-        $.log( $.ejs.cache[ id ] +"")
         return $.ejs.cache[ id ]( data );
     }
     var isNodejs = typeof exports == "object";
-    $.ejs.cache = {};
-    $.ejs.filters = {
-        contains: $.String.contains,
-        truncate: $.String.truncate,
-        camelize: $.String.camelize,
-        escape: $.String.escapeHTML,
-        unescape: $.String.unescapeHTML
-    };
+    if(isNodejs){
+        $.ejs = function( source,data,opts){
+            var fn = $.ejs.compile( source, opts );
+            return fn( data )
+        }
+    }
     $.ejs.compile = function( source, opts){
         opts = opts || {}
+        var tid = opts.tid
+        if(typeof tid === "string" && typeof $.ejs.cache[tid] == "function"){
+            return $.ejs.cache[tid];
+        }
         var open  = opts.open  || isNodejs ? "<%" : "<&";
         var close = opts.close || isNodejs ? "%>" : "&>";
         var helperNames = [], helpers = []
@@ -59,7 +53,9 @@ define("ejs", ["../lang"],function(){
         var postfix = "];"//渲染函数输出部分的后面
         var t = "return function(data){ try{var r = '',line"+time+" = 0;";//渲染函数的最开始部分
         var rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g;
+        var rstr = /(['"])(?:\\[\s\S]|[^\ \\r\n])*?\1/g // /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/
         var rtrim = /(^-|-$)/g;
+        var rmass = /mass/
         var js = []
         var pre = 0, cur, code, trim
         for(var i = 0, n = source.length; i < n; ){
@@ -99,7 +95,29 @@ define("ejs", ["../lang"],function(){
                         });
                         code = code.replace(rAt,"$1data.");
                         if( code.indexOf("|") > 1 ){//使用过滤器
-                            code = "="+ filtered(code);
+                            var arr = []
+                            var str = code.replace(rstr, function(str){
+                                arr.push(str);//先收拾所有字符串字面量
+                                return 'mass'
+                            }).replace(/\|\|/g,"@");//再收拾所有短路或
+                            if(str.indexOf("|") > 1){
+                                var segments = str.split("|")
+                                var filtered = segments.shift().replace(/\@/g,"||").replace(rmass, function(){
+                                    return arr.shift();
+                                });
+                                for( var filter;filter = arr.shift();){
+                                    segments = filter.split(":");
+                                    name = segments[0];
+                                    args = "";
+                                    if(segments[1]){
+                                        args = ', ' + segments[1].replace(rmass, function(){
+                                            return arr.shift();//还原
+                                        })
+                                    }
+                                    filtered = "$.ejs.filters."+ name +"(" +filtered + args+")"
+                                }
+                                code = "="+ filtered
+                            }
                         }
                         t += " ;r +" +code +";"
                         break;
@@ -122,10 +140,22 @@ define("ejs", ["../lang"],function(){
         var body = ["txt"+time,"js"+time, "filters"]
         var fn = Function.apply(Function, body.concat(helperNames,t) );
         var args = [codes, js, $.ejs.filters];
-        return fn.apply(this, args.concat(helpers));
+        var compiled = fn.apply(this, args.concat(helpers));
+        if(typeof tid === "string"){
+            return  $.ejs.cache[tid] = compiled
+        }
+        return compiled;
     }
+    $.ejs.cache = {};//用于保存编译好的模板函数
+    $.ejs.filters = {//用于添加各种过滤器
+        contains: $.String.contains,
+        truncate: $.String.truncate,
+        camelize: $.String.camelize,
+        escape: $.String.escapeHTML,
+        unescape: $.String.unescapeHTML
+    };
     return $.ejs;
 })
 
-//添加更多分号，防止编译错误
+
 
