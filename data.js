@@ -1,7 +1,7 @@
 //==================================================
 // 数据缓存模块
 //==================================================
-define("data", ["lang"], function(){
+define("data", ["$lang"], function(){
     $.log("已加载data模块",7);
     var remitter = /object|function/, rtype = /[^38]/
     function validate(target){

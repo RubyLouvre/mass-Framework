@@ -501,7 +501,7 @@
         }
         module.state = 2;
         if(typeof ret !== "undefined"){
-            modules[ id ].exports = ret
+            modules[ "$"+id ].exports = ret
         }
         return ret;
     }
