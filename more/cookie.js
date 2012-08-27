@@ -1,12 +1,14 @@
-define( function(){
+define(  ["../lang"], function(){
+    //引入语言模块确保能使用trim, forEach等方法
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;
+
     // serialize('foo', 'bar', { httpOnly: true })  => "foo=bar; httpOnly"
     //将两个字符串变成一个cookie字段
     var Cookie = {
         stringify:  function(name, val, opts){
             var pairs = [name + '=' + encode(val)];
-            if( isFinite( opts ) && $.type( opts, "Number" ) ){
+            if( isFinite( opts ) && typeof opts == "number"  ){
                 pairs.push('Max-Age=' + opts );
             }else{
                 opts = opts || {};
@@ -25,7 +27,7 @@ define( function(){
             var pairs = str.split(/[;,] */);
             pairs.forEach(function(pair) {
                 var eq_idx = pair.indexOf('=')
-                var key = pair.substr(0, eq_idx).trim()
+                var key = pair.substr(0, eq_idx).trim();
                 var val = pair.substr(++eq_idx, pair.length).trim();
                 if ('"' == val[0]) {
                     val = val.slice(1, -1);
