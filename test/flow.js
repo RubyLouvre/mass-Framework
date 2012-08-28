@@ -1,7 +1,7 @@
 define(["$flow","$spec"],function(){
     $.fixture('操作流模块-flow', {
         "reload = false": function(id){
-            var flow = new $.flow;
+            var flow = new $.Flow;
             var callback = function(a,b,c){
                 expect([].slice.call(arguments),id).same([10,20,30])//测试多路监听时收集的返回值
                 expect("此流程触发在aaa,bbb,ccc都被fire的情况下",id).eq("此流程触发在aaa,bbb,ccc都被fire的情况下")
@@ -59,7 +59,7 @@ define(["$flow","$spec"],function(){
             expect( node.find("aaa,ccc").length ).eq( 1 )
         },
         "reload = true": function(){
-            var flow = new $.flow;
+            var flow = new $.Flow;
             var fireCount = 0;//用于统计aa,bb这个组合的回调一共执行了多少次
             var callback = function(){
                 fireCount++
@@ -80,7 +80,7 @@ define(["$flow","$spec"],function(){
             expect(fireCount).eq(4);
         },
         "fire arguments":function(id){
-            var flow = new $.flow;
+            var flow = new $.Flow;
             var callback = function(){
                 var args = [].slice.call(arguments);
                 expect(arguments.length ,id).eq( 9 );
