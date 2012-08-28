@@ -163,7 +163,8 @@ define("attr",["$support","$node"], function( support ){
                 name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
                 if ( value !== void 0 ){
                     if( method === "attr" && ( value == null || value == false)){  //为元素节点移除特性
-                        return  $[ "@remove_"+method ]( node, name );
+                        console.log("XXXXXXXXXXX")
+                        return  $._remove_attr( node, name );
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
                     }
