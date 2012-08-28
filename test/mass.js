@@ -84,6 +84,20 @@ define("mass",["more/spec"],function(){
             expect( $.slice(a, 20, -21) ).same( a.slice( 20, -21) );
             expect( $.slice(a, -1, null) ).same( a.slice( -1, null) );
         },
+        "config, 用于配置": function(){
+            $.config({
+                level:0
+            });
+            expect( $.core.level ).eq( 0 );
+            //alias是用于对模块别名，方便移到文件后，其他模块也能访问到它
+            $.config({
+                level:9,
+                alias:{
+                    $xxx: "/aaa/ddd.js"
+                }
+            });
+            expect( $.core.alias.$xxx ).eq( "/aaa/ddd.js" );
+        },
         "mix,对象合并": function(){
             var a = {
                 cc:"cc"
