@@ -15,8 +15,8 @@
             });
             $.log($.core.alias);//查看所有别名
             $.require("$language,ready",function(){
-                console.log("已加载语言模块")
-                console.log($.modules);//查看所有模块
+                $.log("已加载语言模块")
+                $.log($.modules);//查看所有模块
             })
 
         </script>
@@ -25,5 +25,8 @@
         <h2>欢迎加入mass Framework团队！</h2>
         <p>新人请先看<a href="http://rubylouvre.github.com/doc/index.html">文档</a>（有关加载的部分不要看）</p>
         <p>模块加载部分可以看源码或这里的<a href="https://github.com/RubyLouvre/mass-Framework/issues?state=open">讨论</a></p>
+        <hr/>
+        <p>注意事项</p>
+        <p>不要在代码中直接用console.log，以免在IE中报错，请改用$.log</p>
 </body>
 </html>
