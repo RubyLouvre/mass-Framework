@@ -15,24 +15,49 @@
     <body>
         <h2>单元测试 </h2>
         <script type="text/javascript">
-            var testcases = "",
-            url = "mass";
-            url.replace($.rword,function(name){
-                testcases += ",test/"+name
-            });
+            var test_module = location.hash  || "mass"
             $.config({
                 alias:{
                     $spec: $.core.base + "more/spec.js"
                 }
             });
-          //  alert(1)
-            console.log($.core.alias.$spec)
-            $.require("ready,$spec,./test/mass", function(){
-            //    alert("1111111")
+            $.log($.core.alias.$spec);
+            $.require("$event",function(){
+                $("#js_test").change(function(){
+                    $.log(this.value)
+                })
+            })
+
+            $.require("ready,$spec,./test/" + test_module, function(){
                 $.log($.modules);
-                $.log($.isEqual)
+                $.log("开始测试 "+ test_module +" 模块")
             });
+          
             //http://trip.taobao.com/
         </script>
+        <select id="js_test">
+            <option value="mass">
+                模块加载模块
+            </option>
+            <option value="lang">
+                语言扩展模块
+            </option>
+            <option value="support">
+                特征嗅探模块
+            </option>
+            <option value="class">
+                类工厂模块
+            </option>
+            <option value="node">
+                节点操作模块
+            </option>
+            <option value="data">
+                数据缓存模块
+            </option>
+            <option value="css">
+                样式操作模块
+            </option>
+
+        </select>
     </body>
 </html>
