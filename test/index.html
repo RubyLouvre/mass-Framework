@@ -1,0 +1,38 @@
+
+<!doctype html>
+<html>
+    <head>
+        <title>测试首页</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <link rel="stylesheet" type="text/css" href="spec.css" />
+        <script src="../mass.js" type="text/javascript"></script>
+    </head>
+
+    <body>
+        <h2>单元测试 </h2>
+        <script type="text/javascript">
+            var testcases = "",
+            url = "mass";
+            url.replace($.rword,function(name){
+                testcases += ",test/"+name
+            });
+            $.config({
+                alias:{
+                    $spec: $.core.base + "more/spec.js"
+                }
+            });
+          //  alert(1)
+            console.log($.core.alias.$spec)
+            $.require("ready,$spec,./test/mass", function(){
+            //    alert("1111111")
+                $.log($.modules);
+                $.log($.isEqual)
+            });
+            //http://trip.taobao.com/
+        </script>
+    </body>
+</html>
