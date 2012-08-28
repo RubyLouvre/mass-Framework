@@ -128,8 +128,8 @@
         },
         //$.log(str, showInPage=true, 5 )
         //level Number，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
-        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.log.level。
-        //这个$.log.level默认为9。下面是level各代表的含义。
+        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.core.level。
+        //这个$.colre.level默认为9。下面是level各代表的含义。
         //0 EMERGENCY 致命错误,框架崩溃
         //1 ALERT 需要立即采取措施进行修复
         //2 CRITICAL 危急错误
@@ -244,7 +244,7 @@
             return ["ready", "js"];
         }
         if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.core.alias[url] ){
-            ret = $.core.alias[url]
+            ret = $.core.alias[url];
         }else{
             parent = parent.substr( 0, parent.lastIndexOf('/') )
             if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
@@ -270,7 +270,7 @@
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
-        if( tmp == ret && ret.substr(-3,3) != ".js"){//如果没有后缀名会补上.js
+        if( tmp == ret && !/\.js$/.test(ret)){//如果没有后缀名会补上.js
             ret += ".js";
         }
         return [ret, ext];
@@ -585,7 +585,7 @@ var define = function(a){
         var __core__ =  "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx".match(/\w+/g)
         for( var c = 0, cn ; cn = __core__[c++];){
             if(cn !== "mass"){
-                Module.update($.core.base + cn + ".js",0, 2)
+                Module.update($.core.base + cn + ".js", 0, 2);
             }
         }//=========================================
 //  语言补丁模块
