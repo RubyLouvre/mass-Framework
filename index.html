@@ -4,7 +4,7 @@
     <head>
         <title>sample by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="mass.js">
+        <script src="merge.js">
 
         </script>
         <script>
@@ -17,6 +17,11 @@
             $.require("$language,ready",function(){
                 $.log("已加载语言模块")
                 $.log($.modules);//查看所有模块
+            });
+            $.require("$event",function(){
+                $("body").dblclick(function(){
+                   $.log("dblclick")
+                })
             })
 
         </script>
