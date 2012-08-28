@@ -1,5 +1,4 @@
-
-$.define("support","more/spec,support",function(){
+define(["$spec","$support"],function(){
     $.fixture('特征嗅探模块-support', {
         '$.support': function() {
             var el = document.getElementById("mass-spec-case-$-support");

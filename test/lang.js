@@ -1,4 +1,4 @@
-$.define("lang","lang, more/spec",function(  ){
+define(["$lang","$spec"],function(  ){
     $.log("已加载text/lang模块");
     $.fixture("语言扩展模块-lang",{
         'Object.keys': function() {

@@ -1,8 +1,7 @@
-$.define("test/node","ready,more/spec,node",function($$){
+define(["$spec","$node"],function(){
    $.log("已加载text/node模块");
     var iframe =  $("<iframe id='test_node' frameBorder=0 style='display:none;width:0px;height:0px;' />" ).appendTo("body");//
     var idoc  =  iframe.contents()[0];
-   $.log("XXXXXXXXXXXXXXXXXXXX")
     idoc.write( "<!doctype html><html><script>var a = document.createElement('nav');<\/script><body>" );
     idoc.close();
     //=====================================================================================

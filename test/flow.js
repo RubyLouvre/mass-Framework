@@ -1,4 +1,4 @@
-$.define("flow","flow,more/spec",function(){
+define(["$flow","$spec"],function(){
     $.fixture('操作流模块-flow', {
         "reload = false": function(id){
             var flow = new $.flow;

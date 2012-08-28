@@ -1,4 +1,4 @@
-$.define("css","ready,more/random,more/spec,node,css",function(_,random){
+define("../more/random,$spec,$node,$css,ready".split(","),function(random){
 
     $.fixture("样式模块-css",{
         "$.css":function(id){

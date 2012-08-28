@@ -1,4 +1,4 @@
-define("mass",["more/spec"],function(){
+define(["$spec"],function(){
     $.log("已加载test/mass模块",7)
     $.isWindow = function(obj){//单独提出来，专门用于测试对window的判定
         return $.type(obj,"Window")

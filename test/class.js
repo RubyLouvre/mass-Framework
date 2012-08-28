@@ -1,4 +1,4 @@
-$.define("class","more/spec,class",function(){
+define(["$class","$spec"], function(){
     $.log("已加载text/class模块");
     $.fixture('类工厂模块-class', {
         "$.factory":function(){

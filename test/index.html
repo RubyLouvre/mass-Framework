@@ -15,16 +15,16 @@
     <body>
         <h2>单元测试 </h2>
         <script type="text/javascript">
-            var test_module = location.hash  || "mass"
+            var test_module = String(location.hash  || "mass").replace(/^#/,"");
             $.config({
                 alias:{
                     $spec: $.core.base + "more/spec.js"
                 }
             });
-            $.log($.core.alias.$spec);
             $.require("$event",function(){
                 $("#js_test").change(function(){
-                    $.log(this.value)
+                    location.href = location.href.replace(/[?#].*/, '') +"#"+this.value;
+                    location.reload()
                 })
             })
 
@@ -47,6 +47,9 @@
             </option>
             <option value="class">
                 类工厂模块
+            </option>
+            <option value="flow">
+                操作流
             </option>
             <option value="node">
                 节点操作模块
