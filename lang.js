@@ -492,10 +492,8 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             }).size
         }
     }
-    if(global.Buffer){//不要使用window前缀
-        $.String.byteLen = function(str){
-            return new Buffer(str, "utf-8").length
-        }
+    if(global.Buffer && Buffer.byteLength){//不要使用window前缀
+        $.String.byteLen = Buffer.byteLength;
     }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
