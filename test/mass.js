@@ -66,10 +66,10 @@ define("mass",["more/spec"],function(){
             expect( typeof $.getUid(document.body) ).eq("number");
         },
 
-        slice: function(){
+        "slice,用于数组化": function(){
             var a = [1,2,3,4,5,6,7]
             expect( $.slice(a, 0) ).same( a.slice(0) );
-            expect( $.slice(a, 1, 4) ).same( a.slice(0, 1, 4) );
+            expect( $.slice(a, 1, 4) ).same( a.slice( 1, 4) );
             expect( $.slice(a, -1) ).same( a.slice(-1) );
             expect( $.slice(a, 1, -2) ).same( a.slice(1, -2) );
             expect( $.slice(a, 1, NaN) ).same( a.slice(1, NaN) );
@@ -84,7 +84,7 @@ define("mass",["more/spec"],function(){
             expect( $.slice(a, 20, -21) ).same( a.slice( 20, -21) );
             expect( $.slice(a, -1, null) ).same( a.slice( -1, null) );
         },
-        mix: function(){
+        "mix,对象合并": function(){
             var a = {
                 cc:"cc"
             };
