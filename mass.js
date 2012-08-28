@@ -599,7 +599,7 @@
     $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 // console.log($["@path"])
-}( this, this.document );
+}( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
 /**
@@ -660,6 +660,7 @@ dom.namespace改为dom["mass"]
 2012.7.23 动态指定mass Framewoke的命名空间与是否调试
 2012.8.26 升级到v17
 2012.8.27 将$.log.level改到$.core.level中去
+2012.8.28 将最后一行的this改成self
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
