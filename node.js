@@ -1,7 +1,7 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define( "node", "$lang,$support,$class,$query,$data,$ready".split(","),function( lang, support ){
+define( "node", "$lang,$support,$class,$query,$data,ready".split(","),function( lang, support ){
     $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
