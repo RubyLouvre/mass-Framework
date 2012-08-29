@@ -1,5 +1,5 @@
 define(["$class","$spec"], function(){
-    $.log("已加载text/class模块");
+    $.log("已加载text/class模块",7);
     $.fixture('类工厂模块-class', {
         "$.factory":function(){
             var Ancestor = $.factory({
