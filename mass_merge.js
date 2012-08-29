@@ -2,7 +2,7 @@
 
     var  _$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
-
+ 
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
     var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
@@ -206,7 +206,7 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        //  this.state = 1
+        this.state = 1
         var m = Module._load[parent]
         m && m.children.push(this);
         this.children = [];
@@ -279,7 +279,7 @@
 
     var modules = Module._cache = {};
     $.modules = modules
-    Module._update("ready",0,0,1);
+    Module._update("ready");
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
     var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
     var rlcoment = /^\s*\/\/.*$/mg // line comments
@@ -328,9 +328,11 @@
             id = id || "@cb"+ ( cbi++ ).toString(32);
             //创建或更新模块的状态
             Module._update(id, 0, factory, 1, deps, args);
+            
             if( dn === cn ){//如果需要安装的等于已安装好的
                 return install( id, args, factory );//装配到框架中
             }
+            
             ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
@@ -362,8 +364,8 @@
         },
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
+            $.log( (error || modules[ id ].state )+" "+id)
             if( error || !modules[ id ].state ){
-                $.log( (error || modules[ id ].state )+"   "+id, 3)
                 this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
         },
@@ -400,6 +402,7 @@
                                 throw p + "不能重命名"
                             }
                             previous[p] = currValue
+
                         }
                     }
                 }
@@ -442,7 +445,7 @@
         doc.write( codes.join('') );
         doc.close();
         $.bind( iframe, "load", function(){
-            if( global.opera && doc.ok != 1 ){//ok写在$._checkFail里面
+            if( global.opera && doc.ok == void 0 ){//ok写在$._checkFail里面
                 $._checkFail(doc, url, true );//模拟opera的script onerror
             }
             doc.write( "<body/>" );//清空内容
@@ -457,7 +460,6 @@
         }
         args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
         var module = Ns.modules[ nick ];
-        module.state =1
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
             //劫持模块工厂,将$, exports, require, module等对象强塞进去
@@ -588,7 +590,7 @@ var define = function(a){
         }
         for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
-                Module._update($.core.base + cn + ".js", 0, 0, 2);
+                Module.update($.core.base + cn + ".js", 0, 0, 2);
             }
         }//=========================================
 //  语言补丁模块
@@ -1049,41 +1051,35 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         //http://oldenburgs.org/playground/autocomplete/
         //http://benalman.com/projects/jquery-throttle-debounce-plugin/
         //http://www.cnblogs.com/ambar/archive/2011/10/08/throttle-and-debounce.html
-        throttle: function( delay, no_trailing, callback, debounce_mode ) {
-            var timeout_id, last_exec = 0;//ms 时间内只执行 fn 一次, 即使这段时间内 fn 被调用多次
-            if ( typeof no_trailing !== 'boolean' ) {
-                debounce_mode = callback;
-                callback = no_trailing;
-                no_trailing = undefined;
-            }
-            function wrapper() {
-                var that = this,
-                elapsed = +new Date() - last_exec,
-                args = arguments;
-                function exec() {
-                    last_exec = +new Date();
-                    callback.apply( that, args );
-                };
-                function clear() {
-                    timeout_id = undefined;
-                };
-                if ( debounce_mode && !timeout_id ) {
-                    exec();
-                }
-                timeout_id && clearTimeout( timeout_id );
-                if ( debounce_mode === undefined && elapsed > delay ) {
-                    exec();
-                } else if ( no_trailing !== true ) {
-                    timeout_id = setTimeout( debounce_mode ? clear : exec, debounce_mode === undefined ? delay - elapsed : delay );
-                }
+        //https://gist.github.com/1306893
+        throttle:  function(delay,action,tail,debounce) {
+            var last_call = 0, last_exec = 0, timer = null, curr, diff,
+            ctx, args, exec = function() {
+                last_exec = Date.now;
+                action.apply(ctx,args);
             };
-            wrapper.uniqueNumber = $.getUid(callback)
-            return wrapper;
+            return function() {
+                ctx = this, args = arguments,
+                curr = Date.now, diff = curr - (debounce? last_call: last_exec) - delay;
+                clearTimeout(timer);
+                if(debounce){
+                    if(tail){
+                        timer = setTimeout(exec,delay);
+                    }else if(diff >= 0){
+                        exec();
+                    }
+                }else{
+                    if(diff >= 0){
+                        exec();
+                    }else if(tail){
+                        timer = setTimeout(exec,-diff);
+                    }
+                }
+                last_call = curr;
+            }
         },
-        debounce : function( delay, at_begin, callback ) {
-            return callback === undefined
-            ? $.throttle( delay, at_begin, false )
-            : $.throttle( delay, callback, at_begin !== false );
+        debounce : function(idle,action,tail) {
+            return $.throttle(idle,action,tail,true);
         }
 
     }, false);
