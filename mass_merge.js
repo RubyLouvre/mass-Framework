@@ -590,7 +590,7 @@ var define = function(a){
         }
         for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
-                Module.update($.core.base + cn + ".js", 0, 0, 2);
+                Module._update($.core.base + cn + ".js", 0, 0, 2);
             }
         }//=========================================
 //  语言补丁模块
