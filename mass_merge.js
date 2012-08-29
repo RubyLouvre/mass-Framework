@@ -588,10 +588,9 @@ var define = function(a){
             }
             return $.define.apply($, arguments)
         }
-        var __core__ =  "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx".match(/\w+/g)
-        for( var c = 0, cn ; cn = __core__[c++];){
+        for( var c = 0, cn ; cn = all[c++];){
             if(cn !== "mass"){
-                Module.update($.core.base + cn + ".js", 0, 2);
+                Module.update($.core.base + cn + ".js", 0, 0, 2);
             }
         }//=========================================
 //  语言补丁模块
