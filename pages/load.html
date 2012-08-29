@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <title>模块加载内部运作情况</title>
+    </head>
+    <body>
+        <h3>模块加载内部运作情况</h3>
+        <p>我就简单描述一下加载一个没有依赖的模块的内部执行情况</p>
+        <pre>
+   比如
+            $.require("$lang_fix", function(){
+                console.log("xxxxxxxxxxxxxx")
+            })
+进入$.require
+
+ String(list).replace( $.rword, function(el){
+
+  }）
+
+el  = "$lang_fix"
+
+进入Module._resolveFilename
+
+url = $.core.base + el + ".js"
+
+初次加载，肯定没有在modules中注册， modules[url]为undefined
+
+于是进入 loadJS( url, id );
+
+创建一个iframe，
+在第一个script节点 用nick, Ns, nick分别保存url, $, innerDefine
+在第二个script节点 用url去加载目标节点
+
+第二个节点视情况不同分别绑定onreadystatechange, onload, onerror
+
+值得注意的是我们在注册模块时state还是为defined
+然后我们通过iframe中的script加载模块,而模块一般是这样的格式
+
+define("lang_fix", function( ){
+  //==========略============
+})
+
+这里的define实质上是innerDefine
+
+innerDefine里面做了几个很重要的事情（我们现在只需要第一，第二）
+
+第一个事情把lang_fix这第一个参数换掉,换成nick, nick就是加载它的那个script的src。
+第二个事情是将它对应的模块的状态改为1，也是modules[url].state = 1。
+
+第三个事情是$, exports, require, module等对象强塞进模块工厂
+第四个事情是转交真正的$.define去处理
+
+在第二事情中，我们将模块的状态修改了，于是节点执行onreadystatechange/onload时
+if(/loaded|complete|undefined/i.test(this.readyState) }{
+    Ns._checkDeps();
+}
+Ns._checkFail(self.document, nick);
+
+Ns._checkFail发挥效力
+
+_checkFail : function(  doc, id, error ){
+    doc && (doc.ok = 1);
+    if( error || !modules[ id ].state ){
+         this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
+    }
+},
+如果是死链，那无法调用define函数，也就无法调用innerDefine，状态为undefine
+!modules[ id ].state == true，于是打印错误日志，当然以后我们讨论一下，是不是该throw
+
+如果在旧式opera,它是会进入onreadystatechange, onload, onerror这任一回调时
+在_checkFail中，我们会修复doc.ok = 1，那么在iframe中onload中我们检测doc.ok不等于1时，
+就在_checkFail传入第三个参数true，让它打印错误日志
+
+如果在FF，chrome, IE9，它们就会进入onerror回调，那里的调用代码中
+Ns._checkFail(self.document, nick, true)
+因此也顺利检测到死链。
+
+好了，如果成功加载，我们就通过innerDefine到达$.define，它有如下几个事件
+
+第一个事情，检测第二个参数是否为布尔，是说明其是补丁模块，如果布尔值为true，说明这个补丁模块对这个浏览器是没有用的，直接return，不执行它的模块工厂了。如果为false，比如IE6，补丁模块对它总是有用，先去掉此参数，继续往下执行。
+
+第二个事情，检测参数个数，如果只有两个，说明只有模块名与模块的回调（亦有可能不是回调），那么我们插入一个空数组作为依赖列表
+
+第三个就是检测第三个参数是否为函数，不是函数，比如说是个对象，我们要将它塞入一个函数
+比如
+define({
+  aaa:2
+})
+经上面几次转换，依次变为
+
+define("http://xxxxxxx/aa.js",{
+  aaa:2
+});
+-->
+define("http://xxxxxxx/aa.js" ,[],{
+  aaa:2
+});
+
+-->
+define("http://xxxxxxx/aa.js" ,[], function(){
+ return {
+    aaa:2
+  }
+});
+
+最后我们将参数的顺序重排一下，再次调用$.require
+ //0,1,2 --> 1,2,0
+ this.require( args[1], args[2], parent );
+
+由于lang_fix是没有依赖的，因此dn === cn 相当于 0 == 0，执行install( id, args, factory );
+
+install简而言之是将模块工厂执行，将state改为2。
+
+我们还需要注意一下，我们每次调用$.require或加载一个脚本时都执行_checkDeps方法。
+
+当lang_fix的状态改为2后
+
+
+ $.require("$lang_fix", function(){
+      console.log("xxxxxxxxxxxxxx")
+ })
+这个回调也将执行！
+控制台打印xxxxxxxxxxxxxxxx
+
+
+        </pre>
+    </body>
+</html>

@@ -2,7 +2,7 @@
 
     var  _$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
- 
+
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
     var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
@@ -227,7 +227,7 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        this.state = 1
+        //  this.state = 1
         var m = Module._load[parent]
         m && m.children.push(this);
         this.children = [];
@@ -300,7 +300,7 @@
 
     var modules = Module._cache = {};
     $.modules = modules
-    Module._update("ready");
+    Module._update("ready",0,0,1);
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
     var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
     var rlcoment = /^\s*\/\/.*$/mg // line comments
@@ -349,11 +349,9 @@
             id = id || "@cb"+ ( cbi++ ).toString(32);
             //创建或更新模块的状态
             Module._update(id, 0, factory, 1, deps, args);
-            
             if( dn === cn ){//如果需要安装的等于已安装好的
                 return install( id, args, factory );//装配到框架中
             }
-            
             ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
@@ -385,8 +383,8 @@
         },
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
-            $.log( (error || modules[ id ].state )+" "+id)
             if( error || !modules[ id ].state ){
+                $.log( (error || modules[ id ].state )+"   "+id, 3)
                 this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
         },
@@ -423,7 +421,6 @@
                                 throw p + "不能重命名"
                             }
                             previous[p] = currValue
-
                         }
                     }
                 }
@@ -466,7 +463,7 @@
         doc.write( codes.join('') );
         doc.close();
         $.bind( iframe, "load", function(){
-            if( global.opera && doc.ok == void 0 ){//ok写在$._checkFail里面
+            if( global.opera && doc.ok != 1 ){//ok写在$._checkFail里面
                 $._checkFail(doc, url, true );//模拟opera的script onerror
             }
             doc.write( "<body/>" );//清空内容
@@ -481,6 +478,7 @@
         }
         args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
         var module = Ns.modules[ nick ];
+        module.state =1
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
             //劫持模块工厂,将$, exports, require, module等对象强塞进去

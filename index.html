@@ -4,10 +4,15 @@
     <head>
         <title>sample by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="mass_merge.js">
+        <script src="mass.js">
 
         </script>
         <script>
+            $.require("$lang", function(){
+                console.log("xxxxxxxxxxxxxx")
+            })
+        </script>
+        <script type="text">
             $.config({
                 alias:{
                     "$language":$.core.base + "lang.js"
@@ -41,5 +46,9 @@
                 答: 我们更新太快了，github pages更新很慢，你提交后要等半小时才见效果
             </li>
         </ol>
+        <h3>重要学习资料</h3>
+        <p><a href="/pages/load.html">模块加载内部运作情况</a></p>
+
+      
     </body>
 </html>
