@@ -1,6 +1,7 @@
 define(["$spec"],function(require, exports, module){
 
     var gexports = exports
+  
     $.fixture('模块加载模块的加载测试', {
         "加载单个模块":function(id){
             //语言模块会返回一个函数
@@ -59,7 +60,12 @@ define(["$spec"],function(require, exports, module){
         "测试module相关的元信息": function(){
             expect( /\/test\/loader\.js/i.test(module.id) ).ok()
             expect( module.parent ).eq( $.core.base )
-            expect( module.args ).log()       //eq( $.core.base + "more/spec.js") ;
+            expect( module.args ).eq( $.core.base + "more/spec.js") ;
+        },
+        "死链测试": function(){
+            $.require("dead_link",function(){
+                $.log("这个回调是永远不执行， 我们可以在控制台查看打印日志")
+            });
         }
     })
 });

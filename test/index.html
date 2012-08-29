@@ -21,7 +21,8 @@
                     $spec: $.core.base + "more/spec.js"
                 }
             });
-            $.require("$event",function(){
+            $.require("$node,$event",function(){
+                $.log("========加载event模块进行单元测试========")
                 $("#js_test").change(function(){
                     location.href = location.href.replace(/[?#].*/, '') +"#"+this.value;
                     location.reload()

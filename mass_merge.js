@@ -325,12 +325,14 @@
                     loadCSS( url );
                 }
             });
-            id = id || "@cb"+ ( cbi++ ).toString(32)
+            id = id || "@cb"+ ( cbi++ ).toString(32);
+            //创建或更新模块的状态
+            Module._update(id, 0, factory, 1, deps, args);
+            
             if( dn === cn ){//如果需要安装的等于已安装好的
                 return install( id, args, factory );//装配到框架中
             }
-            //创建或更新模块的状态
-            Module._update(id, 0, factory, 1, deps, args)
+            
             ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
@@ -357,10 +359,12 @@
                     return ret
                 }
             }
+            //0,1,2 --> 1,2,0
             this.require( args[1], args[2], parent );
         },
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
+            $.log( (error || modules[ id ].state )+" "+id)
             if( error || !modules[ id ].state ){
                 this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
