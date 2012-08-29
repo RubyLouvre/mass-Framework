@@ -162,16 +162,16 @@
             }
         },
         //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
-        getUid: global.getComputedStyle ? function( node ){
-            return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
-        }: function( node ){
-            if(node.nodeType !== 1){
-                return node.uniqueNumber || ( node.uniqueNumber = commonNs.uuid++ );
+        getUid: global.getComputedStyle ? function( obj ){
+            return obj.uniqueNumber || ( obj.uniqueNumber = commonNs.uuid++ );
+        }: function( obj ){
+            if(obj.nodeType !== 1){
+                return obj.uniqueNumber || ( obj.uniqueNumber = commonNs.uuid++ );
             }
-            var uid = node.getAttribute("uniqueNumber");
+            var uid = obj.getAttribute("uniqueNumber");
             if ( !uid ){
                 uid = commonNs.uuid++;
-                node.setAttribute( "uniqueNumber", uid );
+                obj.setAttribute( "uniqueNumber", uid );
             }
             return +uid;//确保返回数字
         },
@@ -192,12 +192,12 @@
         class2type[ "[object " + name + "]" ] = name;
     });
 
-    -function(scripts, node){
-        node = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
-        var url = node.hasAttribute ?  node.src : node.getAttribute( 'src', 4 );
+    -function(scripts, cur){
+        cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
+        var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
-        $.core.name = node.getAttribute("namespace") || "$"
-        var str = node.getAttribute("debug")
+        $.core.name = cur.getAttribute("namespace") || "$"
+        var str = cur.getAttribute("debug")
         $.core.debug = str == 'true' || str == '1';
         $.core.base = url.substr( 0, url.lastIndexOf('/') ) +"/"
     }(DOC.getElementsByTagName( "script" ));
@@ -282,6 +282,7 @@
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
     var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
     var rlcoment = /^\s*\/\/.*$/mg // line comments
+    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g
     var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
@@ -347,7 +348,7 @@
                 [].splice.call( args, 1, 0, [] );
             }
             if(typeof args[2] == "function"){
-                args[2].toString().replace(rbcoment,"").replace(rlcoment,"").replace(rrequire,function(a,b){
+                args[2].toString().replace(rcomment,"").replace(rrequire,function(a,b){
                     args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
                 });
             }else{
@@ -475,10 +476,11 @@
             require: typeof module.require == "function" ? module.require() : $.noop,
             module:  module
         }
-        var match = callback.toString().replace(rparams,"$1") || [];
+        var match = callback.toString().replace(rparams,"$1").replace(rcomment,"").match($.rword)||[]
         var a = common[match[0]];
         var b = common[match[1]];
         var c = common[match[2]];
+        //  console.log([a,b,c])
         if( a && b && a != b && b != c  ){//exports, require, module的位置随便
             ret =  callback.apply(global, [a, b, c]);
         }else{
@@ -5909,7 +5911,7 @@ define("attr",["$support","$node"], function( support ){
                 name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
                 if ( value !== void 0 ){
                     if( method === "attr" && ( value == null || value == false)){  //为元素节点移除特性
-                        return  $[ "@remove_"+method ]( node, name );
+                        return  $._remove_attr( node, name );
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
                     }
