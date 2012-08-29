@@ -227,7 +227,6 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        //  this.state = 1
         var m = Module._load[parent]
         m && m.children.push(this);
         this.children = [];
@@ -300,12 +299,10 @@
 
     var modules = Module._cache = {};
     $.modules = modules
-    Module._update("ready",0,0,1);
-    var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
-    var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
-    var rlcoment = /^\s*\/\/.*$/mg // line comments
-    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g
-    var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*///用于取得函数的参数列表
+    Module._update( "ready" );
+    var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
+    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g;
+    var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*/;//用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
         bind: w3c ? function( el, type, fn, phase ){
@@ -384,7 +381,7 @@
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
             if( error || !modules[ id ].state ){
-                $.log( (error || modules[ id ].state )+"   "+id, 3)
+                $.log( (error || modules[ id ].state )+"   "+id, 3);
                 this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
         },
@@ -450,8 +447,8 @@
         codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
         (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
-        "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps();}",
-        'Ns._checkFail(self.document, nick);',
+        "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps(); ",
+        'Ns._checkFail(self.document, nick);}',
         '" onerror="Ns._checkFail(self.document, nick, true);" ><\/script>' ];
         iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
