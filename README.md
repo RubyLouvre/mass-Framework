@@ -39,7 +39,7 @@ node.js -> css.js -> css_fix.js -> event.js -> event_fix.js -> fx.js -> ajax.js 
 <li>API 95%与jQuery神似，学习成本极低。</li>
 </ol>
 <h3>框架的使用：</h3>
-<p>点击上面的ZIP按钮将框架下载回来，然后解压取得src文件里面的JS文件，统统放到你的项目下，然后在页面上引用mass.js。</p>
+<p style="color:red; font-weight: bold;">点击上面的ZIP按钮将框架下载回来，解压，运行里面的Sws.exe服务器。</p>
 <p>一个简单的例子</p>
 <pre>
 $.require("ready",function(){

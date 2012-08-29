@@ -1,7 +1,7 @@
 //=========================================
 // 动画模块v4
 //==========================================
-$.define("fx", "css",function(){
+define("fx", ["$css"],function(){
     var types = {
         color:/color/i,
         scroll:/scroll/i,

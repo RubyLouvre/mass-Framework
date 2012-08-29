@@ -1,5 +1,5 @@
 
-$.define("random", function(){
+define("random", function(){
     var cs = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; 
     var uuid_arr =  '0123456789ABCDEFG'.split('');
    // $.log("已加载random模块");

@@ -1,7 +1,7 @@
 //=========================================
 // 类型扩展模块v7 by 司徒正美
 //=========================================
-$.define("lang", Array.isArray ? "" : "lang_fix",function(){
+define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
     $.log("已加载语言扩展模块");
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
@@ -492,10 +492,8 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
             }).size
         }
     }
-    if(global.Buffer){//不要使用window前缀
-        $.String.byteLen = function(str){
-            return new Buffer(str, "utf-8").length
-        }
+    if(global.Buffer && Buffer.byteLength){//不要使用window前缀
+        $.String.byteLen = Buffer.byteLength;
     }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
@@ -792,6 +790,7 @@ $.define("lang", Array.isArray ? "" : "lang_fix",function(){
     return $.lang;
 });
 /**
+changlog:
 2011.7.12 将toArray转移到lang模块下
 2011.7.26 去掉toArray方法,添加globalEval,parseJSON,parseXML方法
 2011.8.6  增加tag方法

@@ -1,8 +1,8 @@
 //==================================================
 // 测试模块v4
 //==================================================
-$.define("spec","lang", function(){
-    $.log("已加载spec v4模块");
+define( ["$lang"], function(){
+    $.log("已加载spec v4模块",7);
     var global = this, DOC = global.document;
     //模块为$添加如下方法:
     // isEqual  fixture
@@ -214,6 +214,7 @@ $.define("spec","lang", function(){
         DOC.body.appendChild( parseHTML(html.join("")) );
     }
     var first_append = false;
+    var str_join = global.netscape ? '\n\t<kbd>expect' : "<kbd>expect"
     $.fixture = function( title, asserts ) {
 
         $.require("ready",function(){
@@ -239,7 +240,7 @@ $.define("spec","lang", function(){
 
             }
             //取得对象的所有方法名
-            var names = Object.keys(asserts), name;
+            var names = Object.keys(asserts),rbody = /[^{]*\{([\d\D]*)\}$/, name;
 
             ;(function runTest(){
                 if((name = names.shift())){
@@ -254,10 +255,16 @@ $.define("spec","lang", function(){
                         //取得方法UI元素,它是可以通过其previousSiblingElement来控制展开或折叠
                         var parentNode = get(fixtureId).getElementsByTagName("ul")[0];
                         //取得整行expec语句
-                        var body = (assert+"").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+                        var body = assert.toString().
+                            replace(rbody, '$1').
+                          //  replace(/^\s*|\s*$/g, '').
+                            replace(/</g,"&lt;").
+                            replace(/>/g,"&gt;");
+                        
                         body = body.split("expect").map(function(segment){
                             return segment.charAt(0) === "(" ? retouch(segment) : segment;
-                        }).join('<kbd>expect');
+                        }).join(str_join);
+
                         var node = parseHTML($.format('<li id="#{0}">#{1}<pre>#{2}</pre></li>', methodId, name, uni2hanzi(body)));
                         /** 最后变成以下样子
                         <li id="方法名(即asserts对象里面的每个键名)" class="通过|不通过|出错">

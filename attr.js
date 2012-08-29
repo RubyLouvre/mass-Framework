@@ -1,7 +1,7 @@
 //==================================================
 // 属性操作模块
 //==================================================
-$.define("attr","support,node", function( support ){
+define("attr",["$support","$node"], function( support ){
     // $.log("已加载attr模块")
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
@@ -163,7 +163,7 @@ $.define("attr","support,node", function( support ){
                 name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
                 if ( value !== void 0 ){
                     if( method === "attr" && ( value == null || value == false)){  //为元素节点移除特性
-                        return  $[ "@remove_"+method ]( node, name );
+                        return  $._remove_attr( node, name );
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
                     }

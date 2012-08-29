@@ -1,7 +1,7 @@
 //=========================================
 //  语言补丁模块
 //==========================================
-$.define( "lang_fix", !!Array.isArray, function(){
+define( "lang_fix", !!Array.isArray, function(){
      $.log("已加载语言补丁模块");
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
@@ -50,7 +50,7 @@ $.define( "lang_fix", !!Array.isArray, function(){
         var fun = 'for(var '+vars+'i=0,n = this.length;i < n;i++){'+
         body.replace('_', '((i in this) && fn.call(scope,this[i],i,this))')
         +'}'+ret
-        return new Function("fn,scope",fun);
+        return Function("fn,scope",fun);
     }
     $.mix(Array[P],{
         //定位操作，返回数组中第一个等于给定参数的元素的索引值。
