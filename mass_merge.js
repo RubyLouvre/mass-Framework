@@ -71,7 +71,7 @@
         rword: /[^, ]+/g,
         core: {
             alias:{},
-            level: 9
+            level: 6
         },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": w3c ? "addEventListener" : "attachEvent",
@@ -206,6 +206,7 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
+        this.state = 1
         var m = Module._load[parent]
         m && m.children.push(this);
         this.children = [];
@@ -217,14 +218,15 @@
             return module.exports;
         }
     };
-    Module.update = function(id, factory, state, deps, args){
+    Module.update = function(id, parent, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
-            module = new Module(id, $.core.base);
+            module = new Module(id, parent || $.core.base);
             Module._cache[id] = module;
         }
         module.callback = factory || $.noop;
-        module.state = state
+        if(isFinite(state))
+            module.state = state;
         module.deps = deps || {};
         module.args = args || [];
     }
@@ -278,7 +280,7 @@
 
     var modules = Module._cache = {};
     $.modules = modules
-    Module.update("ready", 0, 1);
+    Module.update("ready");
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
     var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
     var rlcoment = /^\s*\/\/.*$/mg // line comments
@@ -312,7 +314,6 @@
                 if(array[1] == "js"){
                     dn++
                     if( !modules[ url ] ){ //防止重复生成节点与请求
-                        //state: undefined, 未安装; 1 正在安装; 2 : 已安装
                         loadJS( url, id );//将要安装的模块通过iframe中的script加载下来
                     }else if( modules[ url ].state === 2 ){
                         cn++;
@@ -330,7 +331,7 @@
                 return install( id, args, factory );//装配到框架中
             }
             //创建或更新模块的状态
-            Module.update(id, factory, 1, deps, args)
+            Module.update(id, 0, factory, 1, deps, args)
             ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
@@ -362,7 +363,7 @@
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
             if( error || !modules[ id ].state ){
-                this.log("Failed to load [[ "+id+" ]]");
+                this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
         },
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
@@ -423,14 +424,14 @@
     }
 
     var loadJS = function( url, parent ){
-        modules[ url ] = new Module( url, parent || $.core.base);
+        Module.update( url, parent );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
         (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
         "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps();}",
         'Ns._checkFail(self.document, nick);',
-        '" onerror="Ns._checkFail(self.document, nick, true,5);" ><\/script>' ];
+        '" onerror="Ns._checkFail(self.document, nick, true);" ><\/script>' ];
         iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
         //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
         if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框

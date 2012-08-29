@@ -1,4 +1,5 @@
 define(["$spec","$support"],function(){
+    $.log("已加载/test/support模块")
     $.fixture('特征嗅探模块-support', {
         '$.support': function() {
             var el = document.getElementById("mass-spec-case-$-support");
