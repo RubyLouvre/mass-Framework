@@ -76,7 +76,7 @@
         rword: /[^, ]+/g,
         core: {
             alias:{},
-            level: 6
+            level: 9
         },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": w3c ? "addEventListener" : "attachEvent",
@@ -239,17 +239,16 @@
             return module.exports;
         }
     };
-    Module.update = function(id, parent, factory, state, deps, args){
+    Module._update = function(id, parent, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
             module = new Module(id, parent || $.core.base);
             Module._cache[id] = module;
         }
         module.callback = factory || $.noop;
-        if(isFinite(state))
-            module.state = state;
-        module.deps = deps || {};
-        module.args = args || [];
+        module.state = state || module.state;
+        module.deps = deps || module.deps || {};
+        module.args = args || module.args || [];
     }
     Module.prototype.require = function(a){
         var self = this;
@@ -301,7 +300,7 @@
 
     var modules = Module._cache = {};
     $.modules = modules
-    Module.update("ready");
+    Module._update("ready");
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g
     var rbcoment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
     var rlcoment = /^\s*\/\/.*$/mg // line comments
@@ -352,7 +351,7 @@
                 return install( id, args, factory );//装配到框架中
             }
             //创建或更新模块的状态
-            Module.update(id, 0, factory, 1, deps, args)
+            Module._update(id, 0, factory, 1, deps, args)
             ;//在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
@@ -445,7 +444,7 @@
     }
 
     var loadJS = function( url, parent ){
-        Module.update( url, parent );
+        Module._update( url, parent );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',

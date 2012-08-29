@@ -185,5 +185,28 @@ el -> element
 
 因为引擎需要 对 字符串装箱操作， 创建一个 wraper 的 new String对象. 但是ie6 的早期版本，无法回收这个 wraper 对象
 
+function myFunction1 ( name ) {
+	var content = 'return function '+name+' () {\n\
+		return [custom function];\n\
+	}';
+	return new Function( content );
+}
+function myFunction2 (name) {
+	var content = 'function ' + name +'(){\n[custom function]\n}';
+	return function () {
+		return content;
+	}
+}
+
+myFunction1 比 myFunction2 更省空间？
+
+func2确实占内存要少点啊
+ssddi456(592247119)  12:33:26
+啊 说反了
+ssddi456(592247119)  12:33:46
+//new Function造出来的 会少占内存
+ssddi456(592247119)  12:34:04
+linqjs这么干是有道理的
+
 
 
