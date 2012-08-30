@@ -129,12 +129,8 @@ define("attr",["$support","$node"], function( support ){
             });
         },
         removeAttr: function( name ) {
-            name = $.attrMap[ name ] || name;
-            var isBool = boolOne[ name ];
             return this.each(function() {
-                if( this.nodeType === 1 ){
-                    $._remove_attr( this, name, isBool );
-                }
+                $.removeAttr( this, name );
             });
         },
         removeProp: function( name ) {
@@ -163,7 +159,7 @@ define("attr",["$support","$node"], function( support ){
                 name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
                 if ( value !== void 0 ){
                     if( method === "attr" && ( value == null || value == false)){  //为元素节点移除特性
-                        return  $._remove_attr( node, name );
+                        return  $.removeAttr( node, name );
                     }else { //设置HTML元素的属性或特性
                         return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
                     }
@@ -188,16 +184,19 @@ define("attr",["$support","$node"], function( support ){
             "for": "htmlFor",
             "http-equiv": "httpEquiv"
         },
-        //内部函数，原则上拒绝用户的调用
-        _remove_attr: function( node, name, isBool ) {
-            var propName;
-            name = $.attrMap[ name ] || name;
-            //如果支持removeAttribute，则使用removeAttribute
-            $.attr( node, name, "" );
-            node.removeAttribute( name );
-            // 确保bool属性的值为bool
-            if ( isBool && (propName = $.propMap[ name ] || name) in node ) {
-                node[ propName ] = false;
+        removeAttr: function( node, value, isBool ) {
+            var name, propName
+            if(value && node.nodeType === 1){
+                var  names = value.match($.rword) ||[]
+                for(var i = 0 ; i < names.length; i++){
+                    name = $.attrMap[ names[i] ] ||  names[i];
+                    node.setAttribute(name,"")
+                    node.removeAttribute( name );
+                    // 确保bool属性的值为bool
+                    if ( boolOne[name] && (propName = $.propMap[ name ] || name) in node ) {
+                        node[ propName ] = false;
+                    }
+                }
             }
         },
         propAdapter:{
