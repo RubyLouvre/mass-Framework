@@ -676,5 +676,7 @@ http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
 http://tableclothjs.com/ 一个很好看的表格插件
 http://layouts.ironmyers.com/
 http://baidu.365rili.com/wnl.html?bd_user=1392943581&bd_sig=23820f7a2e2f2625c8945633c15089dd&canvas_pos=search&keyword=%E5%86%9C%E5%8E%86
+http://unscriptable.com/2011/10/02/closures-for-dummies-or-why-iife-closure/
+http://unscriptable.com/2011/09/30/amd-versus-cjs-whats-the-best-format/
 */
 
