@@ -15,20 +15,19 @@
         </script>
         <script>
          
-            //  document.addEventListener("click", function(e){
-            //      console.log(e)
-            //  },false)
+
             $.require("ready,$event",function(){
+        
                 $("body").click(function(e){
                     console.log(e.fake);
                     console.log(e)
-                    console.log("xxxxxxxxxxxxxxxxxxxx")
+                    console.log("这是回调函数")
                 })
                 var fake = new $.Event("click")
                 fake.fake = "这是自定义属性"
-
                 $("body").fire(fake, 1, 2, 3);
-                // $("body").off("click")
+                 fake.fake = "这是自定义属性2"
+                $("body").fire(fake, 1, 2, 3);
             })
 
         </script>
@@ -109,11 +108,10 @@
                     console.log(e)
                     console.log("xxxxxxxxxxxxxxxxxxxx")
                 })
-                 var fake = new $.Event("click")
+                var fake = new $.Event("click")
                 fake.fake = "这是自定义属性"
 
                 $("body").fire(fake, 1, 2, 3);
-               // $("body").off("click")
            })
     </pre>
 </body>

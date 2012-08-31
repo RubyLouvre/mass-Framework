@@ -99,7 +99,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             events = events.events || (events.events = []);
             hash.uuid = $.getUid( hash.fn );       //确保hash.uuid与fn.uuid一致
             types.replace( $.rword, function( t ){
-                var forged = new Event( t, live), type = forged.origType;
+                var forged = new $.Event( t, live), type = forged.origType;
+                $.log(t)
                 $.mix(forged, {
                     currentTarget: target,          //this,用于绑定数据的
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
@@ -189,19 +190,16 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         //将真事件对象的成员赋给伪事件对象，抹平浏览器差异
         fix: function( event, real, type){
             if( !event.originalEvent ){
+                var toString = event.toString;//IE无法遍历出toString;
                 event = $.Object.merge({}, event);
-                var more = real.more;
-                var args = real.args;
-                delete real.more;
-                delete real.args;
+                var more = real.more || {}
                 $.mix(more, real)
-                real.more = more;
-                real.args = args;
                 for( var p in more ){
-                    if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|toString|rns/.test(p) ){
+                    if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|rns/.test(p) ){
                         event[p] = more[p]
                     }
                 }
+                event.toString = toString;
                 event.originalEvent = real;
                 event.timeStamp = Date.now();
                 //如果不存在target属性，为它添加一个
@@ -266,7 +264,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             types.replace( $.rword, function( t ){
-                var quark = parseEvent( t, live ), type = quark.origType, hack = adapter[ type ] || {};
+                var quark = new $.Event( t, live ), type = quark.origType, hack = adapter[ type ] || {};
                 findHandlers( events, quark , hash.fn, live ).forEach( function(quark){
                     if( --events[type+"_count"] == 0 ){
                         if( !hack.teardown || hack.teardown( quark ) === false  ) {
@@ -437,7 +435,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
      */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
-            $.log("模拟mouseenter/mouseleave", 8)
             adapter[ type ]  = {
                 setup: function( quark ){//使用事件冒充
                     quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
@@ -460,7 +457,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     }
     //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
-        $.log("FF模拟focusin/focus", 8)
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, handler = function (event) {
                 var src = event.target;
