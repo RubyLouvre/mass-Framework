@@ -16,29 +16,18 @@
         <script>
          
 
-            $.require("ready,$event",function(){
-        
-                $("body").click(function(e){
-                    console.log(e.fake);
-                    console.log(e)
-                    console.log("这是回调函数")
-                })
-                var fake = new $.Event("click")
-                fake.fake = "这是自定义属性"
-                $("body").fire(fake, 1, 2, 3);
-                fake.fake = "这是自定义属性2"
-                $("body").fire(fake, 1, 2, 3);
-            })
+            $.require("ready,$event,$css",function(){
 
-            $.require("ready,event",function(){
-                $.log("000000000000000")
-                $("#red").bind("mouseenter",function(e){
-                    $("#blue").text(e.type)
+                $(".sample p").focusin(function(e) {
+                    var el = $(this).find("span").html("fire "+e.type).show()
+                    setTimeout(function(){
+                        el[0].style.display = "none";
+                    },500)
                 });
-                $("#red").bind("mouseleave",function(e){
-                    $("#blue").text(e.type)
-                });
-            })
+
+            });
+
+
 
         </script>
     </head>
@@ -93,16 +82,20 @@
             });
     </pre>
     <pre>
+           $.require("ready,$event,$css",function(){
+
                 $(".sample p").focusin(function(e) {
                     var el = $(this).find("span").html("fire "+e.type).show()
                     setTimeout(function(){
                         el[0].style.display = "none";
                     },500)
                 });
+
+            })
     </pre>
     <pre>
             $.require("ready,event",function(){
-                $.log("000000000000000")
+               // $.log("000000000000000")
                 $("#red").bind("mouseenter",function(e){
                     $("#blue").text(e.type)
                 });

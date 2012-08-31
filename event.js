@@ -152,7 +152,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var queue = ( $._data( ctarget, "events") || [] ).concat();
                 //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
                 if( !event.originalEvent || !bindTop || hash.type !== type ){
-                    var win = bindTop || ( ctarget.ownerDocument || ctarget.document || ctarget ).parentWindow || window
+                    var win = bindTop || ( ctarget.ownerDocument || ctarget.document || ctarget ).parentWindow || window;
                     event = facade.fix( hash, (event || win.event), type );
                 }
                 var args = [ event ].concat( event.args ||  [] ), result;
@@ -193,7 +193,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var toString = event.toString;//IE无法遍历出toString;
                 event = $.Object.merge({}, event);
                 var more = real.more || {}
-                $.mix(more, real)
+                $.mix(more, real);
+               
                 for( var p in more ){
                     if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|rns/.test(p) ){
                         event[p] = more[p]
@@ -210,7 +211,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 if ( event.target.nodeType === 3 ) {
                     event.target = event.target.parentNode;
                 }
-
                 event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
 
                 if( /^(?:mouse|contextmenu)|click/.test( type ) ){
@@ -239,7 +239,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                                 delta = -delta;
                             event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
                         }else if( "detail" in real ){
-                            console.log(event.detail+"!!!")
                             event.wheelDelta = -real.detail * 40;//修正FF的detail 为更大众化的wheelDelta
                         }
                     }
@@ -435,7 +434,6 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
      */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
-              $.log("XXXX5555555555XXXXX")
             adapter[ type ]  = {
                 setup: function( quark ){//使用事件冒充
                     quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
@@ -458,6 +456,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     }
     //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
+        console.log("ccccccccc")
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, handler = function (event) {
                 var src = event.target;
