@@ -52,6 +52,7 @@
      * @param {Object} supplier 提供者
      * @return  {Object} 目标对象
      */
+    var has = Object.prototype.hasOwnProperty
     function mix( receiver, supplier ){
         var args = Array.apply([], arguments ),i = 1, key,//如果最后参数是布尔，判定是否覆写同名属性
         ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
@@ -61,7 +62,7 @@
         }
         while((supplier = args[i++])){
             for ( key in supplier ) {//允许对象糅杂，用户保证都是对象
-                if (supplier.hasOwnProperty(key) && (ride || !(key in receiver))) {
+                if ( has.call(supplier,key) && (ride || !(key in receiver))) {
                     receiver[ key ] = supplier[ key ];
                 }
             }
