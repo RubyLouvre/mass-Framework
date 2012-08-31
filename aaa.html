@@ -10,24 +10,111 @@
 
             }
         </style>
-         <script src="mass.js">
+        <script src="mass.js">
 
         </script>
         <script>
+         
+            //  document.addEventListener("click", function(e){
+            //      console.log(e)
+            //  },false)
             $.require("ready,$event",function(){
                 $("body").click(function(e){
-                    console.log(e.fake)
+                    console.log(e.fake);
+                    console.log(e)
                     console.log("xxxxxxxxxxxxxxxxxxxx")
                 })
                 var fake = new $.Event("click")
                 fake.fake = "这是自定义属性"
 
-                $("body").fire(fake, 1, 2, 3)
-              //  $("body").off("click")
+                $("body").fire(fake, 1, 2, 3);
+                // $("body").off("click")
             })
+
         </script>
     </head>
     <body>
+    <style type="text/css">
+        .sample1 {
+            color:#000;
+            height:150px;
+            background: #3671a5;
+            padding: 5px;
+        }
+        div.out {
+            width:40%;
+            height:120px;
+            margin:0 10px;
+            background-color:#D6EDFC;
+            float:left;
+        }
+        div.in {
+            width:60%;
+            height:60%;
+            background-color:#FFCC00;
+            margin:10px auto;
+        }
+        #red {
+            width: 150px;
+            height: 150px;
+            background: red;
+            padding:20px;
+        }
+        #blue {
+            width: 100px;
+            height: 100px;
+            background: blue;
+        }
+    </style>
+    <div id="red">
+        <div id="blue">
 
-    </body>
+        </div>
+    </div>
+    <div class="sample">
+        <p><input type="text"> <span>focus fire</span></p>
+
+        <p><input type="password"> <span>focus fire</span></p>
+    </div>
+    <pre>
+            $.require("ready,event",function(){
+                $("body").mousewheel(function(e){
+                    console.log( e.wheelDelta )
+                })
+            });
+    </pre>
+    <pre>
+                $(".sample p").focusin(function(e) {
+                    var el = $(this).find("span").html("fire "+e.type).show()
+                    setTimeout(function(){
+                        el[0].style.display = "none";
+                    },500)
+                });
+    </pre>
+    <pre>
+            $.require("ready,event",function(){
+                $.log("000000000000000")
+                $("#red").bind("mouseenter",function(e){
+                    $("#blue").text(e.type)
+                });
+                $("#red").bind("mouseleave",function(e){
+                    $("#blue").text(e.type)
+                });
+            })
+    </pre>
+    <pre>
+          $.require("ready,$event",function(){
+               $("body").click(function(e){
+                    console.log(e.fake);
+                    console.log(e)
+                    console.log("xxxxxxxxxxxxxxxxxxxx")
+                })
+                 var fake = new $.Event("click")
+                fake.fake = "这是自定义属性"
+
+                $("body").fire(fake, 1, 2, 3);
+               // $("body").off("click")
+           })
+    </pre>
+</body>
 </html>

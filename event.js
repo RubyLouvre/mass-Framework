@@ -4,7 +4,6 @@
 define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(){
     $.log("已加载event模块v7")
     var facade = $.event = $.event || {};
-    var rtypenamespace = /^([^\.]*|)(?:\.(.+)|)$/
     $.Object.merge(facade,{
         eventAdapter:{ } //添加或增强二级属性eventAdapter
     });
@@ -50,13 +49,13 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         return events.filter(function(quark) {
             return quark && (!hash.rns || hash.rns.test(quark.ns))  //通过事件类型进行过滤
             && (!hash.origType || hash.origType === quark.origType) //通过命名空间进行进行过滤
-            && (!fn || fn.uniqueNumber === quark.uuid)//通过uuid进行过滤
+            && (!fn || fn.uniqueNumber === quark.uuid)              //通过uuid进行过滤
             && (!live || live === quark.live || live === "**" && quark.live )//通过选择器进行过滤
         })
     }
     Event.prototype = {
         toString: function(){
-            return "[object Uncia]"
+            return "[object Event]"
         },
         preventDefault: function() {
             this.isDefaultPrevented = true;
@@ -89,8 +88,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         bind: function( target, hash ){//事件系统三大核心方法之一，绑定事件
             var bindTarget =  $[ "@bind" ] in target,//是否能直接绑定到目标对象上
             events = $._data( target ),              //是否能绑定事件
-            types  = hash.type,                    //原有的事件类型,可能是复数个
-            live   = hash.live;                   //是否使用事件代理
+            types  = hash.type,                      //原有的事件类型,可能是复数个
+            live   = hash.live;                      //是否使用事件代理
             if( !events ){
                 return
             }
@@ -102,14 +101,14 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             types.replace( $.rword, function( t ){
                 var forged = new Event( t, live), type = forged.origType;
                 $.mix(forged, {
-                    currentTarget: target,                 //this,用于绑定数据的
+                    currentTarget: target,          //this,用于绑定数据的
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
                 }, hash, false);
                 events.push( forged );               //用于事件拷贝
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
                 var hack = adapter[ forged.type ] || {};
                 if( count == 1 ){
-                    //   forged.handle = facade.curry( forged );     //  一个curry
+                    forged.handle = facade.curry( forged );     //  一个curry
                     $._data( target, "first_" + type, forged);  //用于事件派发：$.event.dispatch
                     if( !hack.setup || hack.setup( forged ) === false  ) {
                         if( bindTop && !bindTarget  ){//如果不能绑到当前对象上,尝试绑到window上
@@ -127,22 +126,40 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             //以及让无论是自定义事件与原生事件都能沿着DOM树人为地冒泡
             });
         },
-        curry: function( event ){// 用于对用户回调进行改造
-            var fn =  function( e ){//真正的事件对象
-                var ctarget = event.currentTarget//原来绑定事件的对象
-                var queue = ( $._data( ctarget, "events") || [] ).concat();
-                var args = [ event ].concat( e.args ||  [] ), result;
-                event.target = e.target;
-                //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
-                if( !event._fix  ){
-                    var win = bindTop || ( ctarget.ownerDocument || ctarget.document || ctarget ).parentWindow || window
-                    event = facade.fix( event, (e || win.event) );
+        _dispatch: function( list, event, type ){//level2 API 用于事件冒充
+            event.more = event.more ||{}
+            event.more.type = type
+            for(var i in list){
+                if( list.hasOwnProperty(i)){
+                    facade.dispatch( list[ i ], event, type );
                 }
+            }
+        },
+        dispatch: function( target, event, type ){// level2 API 用于旧式的$.event.fire中
+            var quark = $._data(target, "first_" + (type || event.type) );//取得此元素此类型的第一个quark
+            quark && quark.handle.call( target, event )
+        },
+        curry: function( hash ){// 这是元信息,不要污染这个对象
+            var fn =  function( event){//真正的事件对象
+                var type = hash.origType;
+                var ctarget = hash.currentTarget//原来绑定事件的对象
+                var more = event.more || {};
+                //防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
+                if( more.origType && more.origType !== type ){
+                    return
+                }
+                var queue = ( $._data( ctarget, "events") || [] ).concat();
+                //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
+                if( !event.originalEvent || !bindTop || hash.type !== type ){
+                    var win = bindTop || ( ctarget.ownerDocument || ctarget.document || ctarget ).parentWindow || window
+                    event = facade.fix( hash, (event || win.event), type );
+                }
+                var args = [ event ].concat( event.args ||  [] ), result;
                 for ( var i = 0, quark; quark = queue[i++]; ) {
-                    if ( !e.target.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
+                    if ( !event.target.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
                         && (  event.type == quark.origType )//确保事件类型一致
                         && (!event.rns || event.rns.test( quark.ns ) )//如果存在命名空间，则检测是否一致
-                        && ( quark.live ? facade.match( e.target, ctarget, quark ) :
+                        && ( quark.live ? facade.match( event.target, ctarget, quark ) :
                             event.currentTarget == quark.currentTarget )
                         //如果是事件代理，则检测元素是否匹配给定选择器，否则检测此元素是否是绑定事件的元素
                         ) {
@@ -166,12 +183,13 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     }
                 }
             }
-            fn.uuid = event.uuid;
+            fn.uuid = hash.uuid;
             return fn;
         },
         //将真事件对象的成员赋给伪事件对象，抹平浏览器差异
-        fix: function(event, real){
-            if( !event._fix ){
+        fix: function( event, real, type){
+            if( !event.originalEvent ){
+                event = $.Object.merge({}, event);
                 var more = real.more;
                 var args = real.args;
                 delete real.more;
@@ -180,12 +198,11 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 real.more = more;
                 real.args = args;
                 for( var p in more ){
-                    if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|rns/.test(p) ){
+                    if( !/preventDefault|stopPropagation|stopImmediatePropagation|type|origType|live|ns|toString|rns/.test(p) ){
                         event[p] = more[p]
                     }
                 }
                 event.originalEvent = real;
-                event._fix = true;
                 event.timeStamp = Date.now();
                 //如果不存在target属性，为它添加一个
                 if ( !event.target ) {
@@ -198,7 +215,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
 
                 event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
 
-                if( /^(?:mouse|contextmenu)|click/.test( event.type ) ){
+                if( /^(?:mouse|contextmenu)|click/.test( type ) ){
                     if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
                         var doc = event.target.ownerDocument || document,
                         html = doc.documentElement, body = doc.body;
@@ -215,7 +232,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     if ( !event.which && isFinite(button) ) {
                         event.which  = [0,1,3,0,2,0,0,0][button];//0现在代表没有意义
                     }
-                    if( event.type === "mousewheel" ){ //处理滚轮事件
+                    if( type === "mousewheel" ){ //处理滚轮事件
                         if ("wheelDelta" in real){//统一为±120，其中正数表示为向上滚动，负数表示向下滚动
                             // http://www.w3help.org/zh-cn/causes/SD9015
                             var delta = real.wheelDelta
@@ -224,7 +241,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                                 delta = -delta;
                             event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
                         }else if( "detail" in real ){
-                            event.wheelDelta = -event.detail * 40;//修正FF的detail 为更大众化的wheelDelta
+                            console.log(event.detail+"!!!")
+                            event.wheelDelta = -real.detail * 40;//修正FF的detail 为更大众化的wheelDelta
                         }
                     }
                 }else if ( event.which == null ) {//处理键盘事件
@@ -233,6 +251,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     event.pageX = event.touches[0].pageX//处理触摸事件
                     event.pageY = event.touches[0].pageY
                 }
+            }
+            if( type ){
+                event.type = type
             }
             return event;
         },
@@ -410,6 +431,73 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             return callback?  this.bind( type, callback ) : this.fire( type );
         }
     });
+    /**
+mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10都支持它们
+详见http://www.filehippo.com/pl/download_opera/changelog/9476/
+     */
+    if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
+        "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
+            $.log("模拟mouseenter/mouseleave", 8)
+            adapter[ type ]  = {
+                setup: function( quark ){//使用事件冒充
+                    quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
+                        var parent = event.relatedTarget;
+                        try {
+                            while ( parent && parent !== quark.currentTarget ) {
+                                parent = parent.parentNode;
+                            }
+                            if ( parent !== quark.currentTarget ) {
+                                facade._dispatch( [ quark.currentTarget ], event, type );
+                            }
+                        } catch(e) { };
+                    })
+                },
+                teardown: function( quark ){
+                    $.unbind( quark.currentTarget, mapper, quark[ type+"_handle" ] );
+                }
+            };
+        });
+    }
+    //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
+    if( !$.support.focusin ){
+        $.log("FF模拟focusin/focus", 8)
+        "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
+            var notice = 0, handler = function (event) {
+                var src = event.target;
+                do{//模拟冒泡
+                    if( $._data(src, "events") ) {
+                        facade._dispatch( [ src ], event, type );
+                    }
+                } while (src = src.parentNode );
+            }
+            adapter[ type ] = {
+                setup: function( ) {
+                    if ( notice++ === 0 ) {
+                        document.addEventListener( mapper, handler, true );
+                    }
+                },
+                teardown: function() {
+                    if ( --notice === 0 ) {
+                        document.removeEventListener( mapper, handler, true );
+                    }
+                }
+            };
+        });
+    }
+    try{
+        //FF需要用DOMMouseScroll事件模拟mousewheel事件
+        document.createEvent("MouseScrollEvents");
+        adapter.mousewheel = {
+            bindType    : "DOMMouseScroll",
+            delegateType: "DOMMouseScroll"
+        }
+        try{
+            //可能末来FF会支持标准的mousewheel事件，则需要删除此分支
+            document.createEvent("WheelEvent");
+            delete adapter.mousewheel;
+        }catch(e){ };
+
+    }catch(e){};
 })
     /**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象

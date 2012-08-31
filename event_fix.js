@@ -11,10 +11,10 @@ define("event_fix", !!document.dispatchEvent, function(){
         "radio": "checked",
         "checkbox": "checked"
     }
-    function changeNotify( event,type ){
+    function changeNotify( event, type ){
         if( event.propertyName === ( changeType[ this.type ] || "value") ){
             //$._data( this, "_just_changed", true );
-            $.event._dispatch( $._data( this, "publisher" ), type, event );
+            $.event._dispatch( $._data( this, "publisher" ), event, type );
         }
     }
     function delegate( fn ){
