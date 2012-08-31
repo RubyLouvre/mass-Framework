@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            html,body{
+                height:100%;
+                background:green;
+
+            }
+        </style>
+         <script src="mass.js">
+
+        </script>
+        <script>
+            $.require("ready,$event",function(){
+                $("body").click(function(e){
+                    console.log(e)
+                    console.log("xxxxxxxxxxx")
+                }).click(function(e){
+                    console.log(e)
+                    e.preventDefault()
+                    console.log("yyyyyyyyyyyyy")
+                })
+              //  $("body").off("click")
+            })
+        </script>
+    </head>
+    <body>
+
+    </body>
+</html>
