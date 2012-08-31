@@ -17,13 +17,17 @@
          
 
             $.require("ready,$event,$css",function(){
-
-                $(".sample p").focusin(function(e) {
-                    var el = $(this).find("span").html("fire "+e.type).show()
-                    setTimeout(function(){
-                        el[0].style.display = "none";
-                    },500)
+                //WheelEvent("wheel");
+                $("body").toggle(function(){
+                    $("#blue").text(1)
+                },function(){
+                    $("#blue").text(2)
+                },function(){
+                    $("#blue").text(3)
                 });
+                 $("body").toggle(function(){
+                       $("#blue").text(4)
+                 })
 
             });
 

@@ -2,7 +2,7 @@
 //  事件补丁模块
 //==========================================
 define("event_fix", !!document.dispatchEvent, function(){
-    $.log("已加载event_fix模块")
+    $.log("已加载event_fix模块",7)
     //模拟IE678的reset,submit,change的事件代理
     var rform  = /^(?:textarea|input|select)$/i ,
     changeType = {
@@ -95,30 +95,30 @@ define("event_fix", !!document.dispatchEvent, function(){
                 check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
                     return true;
                 },
-                setup: delegate(function( ancestor, item ){
-                    var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
-                    item.change_beforeactive = $.bind( ancestor, "beforeactivate", function() {
+                setup: delegate(function( node, quark ){
+                    var subscriber = quark.subscriber || ( quark.subscriber = {}) //用于保存订阅者的UUID
+                    quark.change_beforeactive = $.bind( node, "beforeactivate", function() {
                         //防止出现跨文档调用的情况,找错event
-                        var doc = ancestor.ownerDocument || ancestor.document || ancestor;
+                        var doc = node.ownerDocument || node.document || node;
                         var target = doc.parentWindow.event.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ $.getUid(ancestor) ] = ancestor;//此孩子可能同时要向N个顶层元素报告变化
-                            item.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, item.origType))
+                            publisher[ $.getUid( node ) ] = node;//此孩子可能同时要向N个顶层元素报告变化
+                            quark.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, quark.origType))
                         }
                     });//如果是事件绑定
-                    ancestor.fireEvent("onbeforeactivate")
+                    node.fireEvent("onbeforeactivate")
                 }),
-                teardown: delegate(function( src, item ){
-                    $.unbind( src, "beforeactive", item.change_beforeactive );
-                    var els = item.subscriber || {};
+                teardown: delegate(function( node, quark ){
+                    $.unbind( node, "beforeactive", quark.change_beforeactive );
+                    var els = quark.subscriber || {};
                     for(var i in els){
-                        $.unbind( els[i], "propertychange",  item.change_propertychange)  ;
+                        $.unbind( els[i], "propertychange",  quark.change_propertychange)  ;
                         var publisher = $._data( els[i], "publisher");
-                        if(publisher){
-                            delete publisher[ src.uniqueNumber ];
+                        if( publisher ){
+                            delete publisher[ node.uniqueNumber ];
                         }
                     }
                 })
@@ -132,18 +132,18 @@ define("event_fix", !!document.dispatchEvent, function(){
     //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
     "submit,reset".replace( $.rword, function( type ){
         adapter[ type ] = {
-            setup: delegate(function( src ){
-                $.fn.on.call( src, "click._"+type+" keypress._"+type, function( event ) {
+            setup: delegate(function( node ){
+                $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
                     var el = event.target;
                     if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].kind[  el.type ] ) ){
-                        facade._dispatch( [ src ], event, type );
+                        facade._dispatch( [ node ], event, type );
                     }
                 });
             }),
             keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
             kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
-            teardown: delegate(function( src ){
-                facade.unbind.call( src, "._"+type );
+            teardown: delegate(function( node ){
+                $( node ).unbind( "._"+type );
             })
         };
     });
