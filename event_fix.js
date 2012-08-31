@@ -19,36 +19,47 @@ define("event_fix", !!document.dispatchEvent, function(){
     }
     function delegate( fn ){
         return function( item ){
-            var adapter = $.event.eventAdapter, src = item.target, type = item.type,
+            var adapter = $.event.eventAdapter, src = item.currentTarget, type = item.type,
             fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
             return (fix || item.live ) ? fn( src, item ) : false;
         }
     }
 
     var facade = $.event = {
-        fire: function( event ){
+        fire: function( init ){
             //这里的代码仅用于IE678
-            if(!event.originalEvent){
-                event = new $.Event(event);
+            var transfer;
+            if( typeof init == "string"){
+                transfer = new $.Event(init);
+                init = false;
             }
-            event.target = this;
-            var type = event.origType || event.type;
-            var detail = $._parseEvent( type );
-            detail.args = [].slice.call(arguments,1) ;
-            facade.detail = detail;
+            if( init && typeof init == "object"){
+                if( init instanceof $.Event ){//如果是伪的
+                    transfer = init;
+                }else if( "cancelBubble" in init){
+                    transfer = new $.Event(init.type);
+                    transfer.originalEvent = init
+                }
+            }
+            if(!transfer){
+                throw "ie $.event.fire arguments error"
+            }
+            transfer.target = this;
+            transfer.args = [].slice.call(arguments,1) ;
+            var type = transfer.origType || transfer.type;
             if( $["@bind"] in this ){
                 var cur = this,  ontype = "on" + type;
                 do{//模拟事件冒泡与执行内联事件
-                    facade.dispatch( cur, event );
+                    facade.dispatch( cur, transfer );
                     if (cur[ ontype ] && cur[ ontype ].call(cur) === false) {
-                        event.preventDefault();
+                        transfer.preventDefault();
                     }
                     cur = cur.parentNode ||
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
-                } while ( cur && !event.isPropagationStopped );
+                } while ( cur && !transfer.isPropagationStopped );
             
-                if ( !event.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
+                if ( !transfer.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
                     && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
                     && (type == "click"|| this.nodeName != "A")//如果是点击事件则元素不能为A因为会跳转
                     && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
@@ -65,9 +76,9 @@ define("event_fix", !!document.dispatchEvent, function(){
                     this[ ontype ] = inline;
                 }
             }else{//普通对象的自定义事件
-                facade.dispatch(this, event);
+                facade.dispatch(this, transfer);
             }
-            delete facade.detail
+         
         },
         eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
             input: {
@@ -82,7 +93,7 @@ define("event_fix", !!document.dispatchEvent, function(){
             },
             change: {//change事件的冒泡情况 IE6-9全灭
                 check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
-                    return true //!target.disabled && rform.test( target.tagName ) &&( item.origType !== "input" || item.nodeName != "SELECT" )
+                    return true;
                 },
                 setup: delegate(function( ancestor, item ){
                     var subscriber = item.subscriber || ( item.subscriber = {}) //用于保存订阅者的UUID
@@ -102,7 +113,6 @@ define("event_fix", !!document.dispatchEvent, function(){
                 }),
                 teardown: delegate(function( src, item ){
                     $.unbind( src, "beforeactive", item.change_beforeactive );
-                    //   $.unbind( src, "change",  item.change_fire)  ;
                     var els = item.subscriber || {};
                     for(var i in els){
                         $.unbind( els[i], "propertychange",  item.change_propertychange)  ;
@@ -123,10 +133,10 @@ define("event_fix", !!document.dispatchEvent, function(){
     "submit,reset".replace( $.rword, function( type ){
         adapter[ type ] = {
             setup: delegate(function( src ){
-                $.fn.on.call( src, "click._"+type+" keypress._"+type, function( e ) {
-                    var el = e.target;
-                    if( el.form && (adapter[ type ].keyCode[ e.which ] || adapter[ type ].kind[  el.type ] ) ){
-                        facade._dispatch( [ src ], type, e );
+                $.fn.on.call( src, "click._"+type+" keypress._"+type, function( event ) {
+                    var el = event.target;
+                    if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].kind[  el.type ] ) ){
+                        facade._dispatch( [ src ], event, type );
                     }
                 });
             }),
