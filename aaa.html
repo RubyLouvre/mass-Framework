@@ -16,13 +16,13 @@
         <script>
             $.require("ready,$event",function(){
                 $("body").click(function(e){
-                    console.log(e)
-                    console.log("xxxxxxxxxxx")
-                }).click(function(e){
-                    console.log(e)
-                    e.preventDefault()
-                    console.log("yyyyyyyyyyyyy")
+                    console.log(e.fake)
+                    console.log("xxxxxxxxxxxxxxxxxxxx")
                 })
+                var fake = new $.Event("click")
+                fake.fake = "这是自定义属性"
+
+                $("body").fire(fake, 1, 2, 3)
               //  $("body").off("click")
             })
         </script>
