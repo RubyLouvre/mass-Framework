@@ -435,6 +435,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
      */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
+              $.log("XXXX5555555555XXXXX")
             adapter[ type ]  = {
                 setup: function( quark ){//使用事件冒充
                     quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){

@@ -26,8 +26,18 @@
                 var fake = new $.Event("click")
                 fake.fake = "这是自定义属性"
                 $("body").fire(fake, 1, 2, 3);
-                 fake.fake = "这是自定义属性2"
+                fake.fake = "这是自定义属性2"
                 $("body").fire(fake, 1, 2, 3);
+            })
+
+            $.require("ready,event",function(){
+                $.log("000000000000000")
+                $("#red").bind("mouseenter",function(e){
+                    $("#blue").text(e.type)
+                });
+                $("#red").bind("mouseleave",function(e){
+                    $("#blue").text(e.type)
+                });
             })
 
         </script>
