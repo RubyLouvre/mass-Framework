@@ -19,7 +19,8 @@
             $.config({
                 alias:{
                     $spec: $.core.base + "more/spec.js"
-                }
+                },
+                level: 6
             });
             $.require("$node,$event",function(){
                 $.log("========加载event模块进行单元测试========")
@@ -33,7 +34,8 @@
                 $.log($.modules);
                 $.log("开始测试 "+ test_module +" 模块")
             });
-          
+
+
             //http://trip.taobao.com/
         </script>
         <select id="js_test">

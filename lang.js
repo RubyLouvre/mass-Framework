@@ -234,44 +234,42 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             }
             return xml;
         },
-        //http://oldenburgs.org/playground/autocomplete/
-        //http://benalman.com/projects/jquery-throttle-debounce-plugin/
-        //http://www.cnblogs.com/ambar/archive/2011/10/08/throttle-and-debounce.html
-        throttle: function( delay, no_trailing, callback, debounce_mode ) {
-            var timeout_id, last_exec = 0;//ms 时间内只执行 fn 一次, 即使这段时间内 fn 被调用多次
-            if ( typeof no_trailing !== 'boolean' ) {
-                debounce_mode = callback;
-                callback = no_trailing;
-                no_trailing = undefined;
-            }
-            function wrapper() {
-                var that = this,
-                elapsed = +new Date() - last_exec,
-                args = arguments;
-                function exec() {
-                    last_exec = +new Date();
-                    callback.apply( that, args );
-                };
-                function clear() {
-                    timeout_id = undefined;
-                };
-                if ( debounce_mode && !timeout_id ) {
-                    exec();
-                }
-                timeout_id && clearTimeout( timeout_id );
-                if ( debounce_mode === undefined && elapsed > delay ) {
-                    exec();
-                } else if ( no_trailing !== true ) {
-                    timeout_id = setTimeout( debounce_mode ? clear : exec, debounce_mode === undefined ? delay - elapsed : delay );
-                }
+        /*http://oldenburgs.org/playground/autocomplete/
+         http://www.cnblogs.com/ambar/archive/2011/10/08/throttle-and-debounce.html
+         https://gist.github.com/1306893
+        在一连串调用中，如果我们throttle了一个函数，那么它会减少调用频率，
+        会把A调用之后的XXXms间的N个调用忽略掉，
+        然后再调用XXXms后的第一个调用，然后再忽略N个*/
+        throttle:  function(delay,action,tail,debounce) {
+            var last_call = 0, last_exec = 0, timer = null, curr, diff,
+            ctx, args, exec = function() {
+                last_exec = Date.now;
+                action.apply(ctx,args);
             };
-            wrapper.uniqueNumber = $.getUid(callback)
-            return wrapper;
+            return function() {
+                ctx = this, args = arguments,
+                curr = Date.now, diff = curr - (debounce? last_call: last_exec) - delay;
+                clearTimeout(timer);
+                if(debounce){
+                    if(tail){
+                        timer = setTimeout(exec,delay);
+                    }else if(diff >= 0){
+                        exec();
+                    }
+                }else{
+                    if(diff >= 0){
+                        exec();
+                    }else if(tail){
+                        timer = setTimeout(exec,-diff);
+                    }
+                }
+                last_call = curr;
+            }
         },
-        debounce : function( delay, at_begin, callback ) {
-            return callback === undefined
-            ? $.throttle( delay, at_begin, false )
-            : $.throttle( delay, callback, at_begin !== false );
+        //是在一连串调用中，按delay把它们分成几组，每组只有开头或结果的那个调用被执行
+        //debounce比throttle执行的次数更少
+        debounce : function(idle,action,tail) {
+            return $.throttle(idle,action,tail,true);
         }
 
     }, false);
