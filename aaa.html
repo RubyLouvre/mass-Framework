@@ -16,19 +16,10 @@
         <script>
          
 
-            $.require("ready,$event,$css",function(){
-                //WheelEvent("wheel");
-                $("body").toggle(function(){
-                    $("#blue").text(1)
-                },function(){
-                    $("#blue").text(2)
-                },function(){
-                    $("#blue").text(3)
-                });
-                 $("body").toggle(function(){
-                       $("#blue").text(4)
-                 })
-
+            $.require("ready,$lang",function(){
+                     var a = "<div><aa>xxx</aa>/</div>"
+                     var xml = $.parseXML(a);
+                     console.log(xml)
             });
 
 
@@ -120,6 +111,18 @@
 
                 $("body").fire(fake, 1, 2, 3);
            })
+    </pre>
+    <pre>
+ $("body").toggle(function(){
+                    $("#blue").text(1)
+                },function(){
+                    $("#blue").text(2)
+                },function(){
+                    $("#blue").text(3)
+                });
+                 $("body").toggle(function(){
+                       $("#blue").text(4)
+                 })
     </pre>
 </body>
 </html>
