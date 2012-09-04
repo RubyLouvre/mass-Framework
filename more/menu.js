@@ -1,4 +1,4 @@
-$.define( "$node,$event,$attr,$css".split(","),function(){
+define("menu",["$node","$event","$attr","$css"],function(){
 
     var defaults = {
         data:[],
