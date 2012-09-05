@@ -16,13 +16,16 @@
         <script>
          
 
-            $.require("ready,$lang",function(){
-                     var a = "<div><aa>xxx</aa>/</div>"
-                     var xml = $.parseXML(a);
-                     console.log(xml)
-            });
+            $.require("ready,$event,$css",function(){
+  $("#red").mouseleave(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                }).mouseenter(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                });
+               
+        })
 
-
+ 
 
         </script>
     </head>
@@ -86,6 +89,22 @@
                     },500)
                 });
 
+            })
+    </pre>
+    <pre>
+            $.require("ready,$event,$css",function(){
+
+                $("body").delegate("#red","mouseenter",function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                }).delegate("#red","mouseleave",function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                });
+
+                $("#red").mouseleave(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                }).mouseenter(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                });
             })
     </pre>
     <pre>
