@@ -130,7 +130,7 @@ define("data", ["$lang"], function(){
                 if(events){
                     curData .events = [];
                     for (var i = 0, item ; item =  events[i++]; ) {
-                        $.event.bind.call( cur, item );
+                        $.event.bind( cur, item );
                     }
                 }
             }
