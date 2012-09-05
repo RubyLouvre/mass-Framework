@@ -228,7 +228,6 @@ define("ajax",["$flow"], function(){
         opts = setOptions(opts);//规整化参数对象
         //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
         var dummyXHR = new $.XHR(opts), dataType = opts.dataType;
-
         if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
         }else if( dataType == "jsonp" ){
@@ -251,7 +250,6 @@ define("ajax",["$flow"], function(){
         for (var i in opts.headers) {
             dummyXHR.setRequestHeader( i, opts.headers[ i ] );
         }
- 
         "complete success error".replace( $.rword, function(name){
             if(typeof opts[ name ] === "function"){
                 dummyXHR.bind( name, opts[ name ] )
@@ -278,12 +276,12 @@ define("ajax",["$flow"], function(){
         return dummyXHR;
     }
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
-    ajax.isLocal = rlocalProtocol.test(ajaxLocParts[1]);
+    ajax.isLocal = rlocalProtocol.test(segments[1]);
     /**
          * XHR类,用于模拟原生XMLHttpRequest的所有行为
          */
     $.XHR = $.factory({
-        implement:$.Flow,
+        implement: $.Flow,
         init:function(option){
             $.mix(this, {
                 responseData:null,
@@ -295,9 +293,9 @@ define("ajax",["$flow"], function(){
                 requestHeaders: {},
                 readyState: 0,
                 //internal state
-                state:0,
+                state: 0,
                 statusText: null,
-                status:0,
+                status: 0,
                 transport: null
             });
             this.setOptions("options",option);//创建一个options保存原始参数
@@ -327,7 +325,7 @@ define("ajax",["$flow"], function(){
             return this;
         },
         toString: function(){
-            return "[object Lions]"
+            return "[object XMLHttpRequest]"
         },
         // 中止请求
         abort: function(statusText) {
