@@ -64,7 +64,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 e.preventDefault();
             }// 如果存在returnValue 那么就将它设为false
             e.returnValue = false;
-            $.log("preventDefault")
             return this;
         },
         stopPropagation: function() {
@@ -168,7 +167,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         delete quark._target;
                         quark.times--;
                         if(quark.times === 0){//如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind.call( this, quark)
+                            facade.unbind( this, quark)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
