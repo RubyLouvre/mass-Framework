@@ -17,21 +17,15 @@
          
 
             $.require("ready,$event,$css",function(){
-                //WheelEvent("wheel");
-                $("body").toggle(function(){
-                    $("#blue").text(1)
-                },function(){
-                    $("#blue").text(2)
-                },function(){
-                    $("#blue").text(3)
+  $("#red").mouseleave(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                }).mouseenter(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
                 });
-                 $("body").toggle(function(){
-                       $("#blue").text(4)
-                 })
+               
+        })
 
-            });
-
-
+ 
 
         </script>
     </head>
@@ -98,6 +92,22 @@
             })
     </pre>
     <pre>
+            $.require("ready,$event,$css",function(){
+
+                $("body").delegate("#red","mouseenter",function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                }).delegate("#red","mouseleave",function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                });
+
+                $("#red").mouseleave(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                }).mouseenter(function(e) {
+                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
+                });
+            })
+    </pre>
+    <pre>
             $.require("ready,event",function(){
                // $.log("000000000000000")
                 $("#red").bind("mouseenter",function(e){
@@ -120,6 +130,18 @@
 
                 $("body").fire(fake, 1, 2, 3);
            })
+    </pre>
+    <pre>
+ $("body").toggle(function(){
+                    $("#blue").text(1)
+                },function(){
+                    $("#blue").text(2)
+                },function(){
+                    $("#blue").text(3)
+                });
+                 $("body").toggle(function(){
+                       $("#blue").text(4)
+                 })
     </pre>
 </body>
 </html>

@@ -1,4 +1,4 @@
-define("tab","$node,$event,$attr,$css".split(","),function(){
+define("tab", ["$node","$event","$attr","$css"],function(){
 
     var Tab = $.factory({
         init: function(el, opts){

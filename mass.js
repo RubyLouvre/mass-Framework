@@ -177,6 +177,7 @@
                     global.console.log( str );
                 }
             }
+            return str
         },
         //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
         getUid: global.getComputedStyle ? function( obj ){

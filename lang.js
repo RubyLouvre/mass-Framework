@@ -216,9 +216,52 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             throw "Invalid JSON: " + data ;
         },
         //将字符串转化为一个XML文档
+        /*
+  "text/html",
+  "text/xml",
+  "application/xml",
+  "application/xhtml+xml",
+  "image/svg+xml"
+<courses>
+ <math>
+   <time>1:00pm</time>
+ </math>
+ <math>
+   <time>3:00pm</time>
+ </math>
+ <phisic>
+   <time>1:00pm</time>
+ </phisic>
+ <phisic>
+   <time>3:00pm</time>
+ </phisic>
+</courses>
+        loadXML: function (text) {
+   if (typeof ActiveXObject !== "undefined") {
+      // var xmldoc = this.createDocument();
+      // xmldoc.loadXML(text);
+      // return xmldoc;
+
+      text = text.replace(/\r\n/g,"");
+      var xmldoc = new ActiveXObject("Microsoft.XMLDOM");
+      xmldoc.async="false";
+      xmldoc.loadXML(text);
+      return xmldoc;
+    }else if(typeof DOMParser != "undefined") {
+      return (new DOMParser()).parseFromString(text,"text/xml");
+    }else {
+      var url = 'data:text/xml;charset=utf-8,' + encodeURIComponent(text), request = new XMLHttpRequest();
+      request.open("GET", url, false);
+      request.send();
+      return request.responseXML;
+    }
+  }
+         */
         parseXML: function ( data, xml, tmp ) {
             try {
-                if ( global.DOMParser ) { // Standard
+                var mode = document.documentMode
+                if ( global.DOMParser && (!mode || mode > 8) ) { // Standard
+                     
                     tmp = new DOMParser();
                     xml = tmp.parseFromString(data , "text/xml" );
                 } else { // IE

@@ -9,6 +9,31 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
         }
         return result;
     }
+    //   first  last  futue
+    // 0  push   push  push
+    // 1  unshift push  splice(0,-2,1)
+    function add(list, callback, flag){
+        if(flag == "first"){
+            if(list._first)//first回调总是第一个执行
+                throw "已存在first回调"
+            if( callback == list._last)
+                throw "first回调不能同时为last回调"
+            list._first = callback;
+            list.unshift(callback)
+        }else if(flag == "last"){
+            if(list._last)//last回调总是最后一个执行
+                throw "已存在last回调"
+            if( callback == list._first)
+                throw "last回调不能同时为first回调"
+            list.push(callback);
+            list._last = callback;
+        }else if(!list.last){
+            list.push(callback);
+        }else{//添加普通的回调
+            var second = [  list.length - 1 , 0, callback];
+            [].splice.apply(list,second)
+        }
+    }
     return $.Flow = $.factory({
         init: function(){
             this.root = {};//数据共享,但策略自定
@@ -39,7 +64,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
         flow.fire("ccc"),flow.fire("ddd")，那么fn就会第一次被触发！
         然后我再调用flow.fire("aaa"),fn就会被第二次触发；反正我们无论是fire上述那个操作，bbb也好，ccc也好，fn都会立即执行,
         不用着等到四个都触发才执行！只有当reload设置为true时，我们才需要每次把这个步骤都执行了一遍才触发fn。*/
-        bind: function(names,callback,reload){
+        bind: function(names,callback,reload, flag){
             var root = this.root, deps = {},args = []
             String(names +"").replace($.rword,function(name){
                 name = "__"+name;//处理toString与valueOf等属性
@@ -50,7 +75,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
                         state : 0
                     }
                 }else{
-                    root[name].unfire.unshift(callback)
+                    add(root[name].unfire, callback, flag)
                 }
                 if(!deps[name]){//去重
                     args.push(name);
@@ -61,6 +86,18 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
             callback.args = args;
             callback.reload = !!reload;//默认每次重新加载
             return this;
+        },
+        first: function(names,callback,reload){
+            this.first = function(){
+                return this;
+            }
+            return this.bind(names,callback,reload, "first")
+        },
+        last: function(names,callback,reload){
+            this.last = function(){
+                return this;
+            }
+            return this.bind(names,callback,reload, "last")
         },
         //用于取回符合条件的回调 opts = {match：正则,names:字符串,fired: 布尔}
         find: function(names,opts){
@@ -131,7 +168,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
                             state : 0
                         }
                     }else {
-                        root[name].unfire.unshift(fn)
+                        add(root[name].unfire, fn );
                     }
                 }
             });
@@ -141,7 +178,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
             var callback = this.find(names)
             var released = "__"+name
             callback.forEach(function(fn){
-                delete fn.deps[released];
+                delete fn.deps[released];//从fn.args字符串数组中删掉released这个操作标识
                 $.Array.remove(fn.args, released)
             });
             return this;
@@ -224,6 +261,7 @@ define("flow",["$class"],function(){//~表示省略，说明lang模块与flow模
  2012.7.13 使用新式的相对路径依赖模块
  2012.8.14 添加find append reduce三个方法，随意增删某一个步骤
  2012.8.17 添加uuid方法
+ 2012.9.4  添加last, first方法
  一个简单的例子
  $.require("flow", function(){
                 var node = new $.Flow();

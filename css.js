@@ -44,7 +44,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 }
             }
         }
-    
+
     });
 
     //IE9 FF等支持getComputedStyle
@@ -60,11 +60,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             if ( !(defaultView = node.ownerDocument.defaultView) ) {
                 return undefined;
             }
-            //   var underscored = name == "cssFloat" ? "float" :
-            //    name.replace( /([A-Z]|^ms)/g, "-$1" ).toLowerCase(),
-            var   rmargin = /^margin/, style = node.style ;
+            var style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
-                ret = computedStyle[name]           //.getPropertyValue( underscored );
+                ret = computedStyle[name] 
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
@@ -72,11 +70,17 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             // A tribute to the "awesome hack by Dean Edwards"
             // WebKit uses "computed value (percentage if specified)" instead of "used value" for margins
             // which is against the CSSOM draft spec: http://dev.w3.org/csswg/cssom/#resolved-values
-            if ( !$.support.cssPercentedMargin && computedStyle && rmargin.test( name ) && rnumnonpx.test( ret ) ) {
+            if (  /^margin/.test( name ) && rnumnonpx.test( ret ) ) {
                 var width = style.width;
-                style.width = ret;
+                var minWidth = style.minWidth;
+                var maxWidth = style.maxWidth;
+
+                style.minWidth = style.maxWidth = style.width = ret;
                 ret = computedStyle.width;
+
                 style.width = width;
+                style.minWidth = minWidth;
+                style.maxWidth = maxWidth;
             }
 
             return ret === "" ? "auto" : ret;
@@ -271,7 +275,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     //       P = event.offsetX/Y in IE6 ~ IE8
     //       C = event.offsetX/Y in Opera
      */
- 
+
     var cssPair = {
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
@@ -281,8 +285,11 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         visibility: "hidden",
         display: "block"
     }
+    var rdisplayswap = /^(none|table(?!-c[ea]).+)/
     var showHidden = function(node, array){
-        if( node && node.nodeType == 1 && !node.offsetWidth ){
+        if( node && node.nodeType == 1 && !node.offsetWidth
+            //如果是none table-column table-column-group table-footer-group table-header-group table-row table-row-group
+            && rdisplayswap.test(getter(node, "display")) ){
             var obj = {
                 node: node
             }
@@ -298,11 +305,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
     $.support.boxSizing = $.cssName( "boxSizing")
     function getWH( node, name, extra  ) {//注意 name是首字母大写
-        var getter  = $.cssAdapter["_default:get"], which = cssPair[name], hidden = [];
+        var which = cssPair[name], hidden = [];
         showHidden( node, hidden );
         var val = node["offset" + name]
-        //if($.support.boxSizing && $.css(node, "boxSizing" ) === "border-box" && extra == 0 ){ return val;  }
-        //innerWidth = paddingWidth outerWidth = borderWidth, width = contentWidth
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -448,7 +453,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         $.fn[ method ] = function(){
             return this.each(function(){
                 if(this.style){
-                    this.style.display = method == "show" ? "" : "hide"
+                    this.style.display = method == "show" ? "" : "none"
                 }
             })
         }
@@ -533,7 +538,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     return null;
                 }
                 win = getWindow( node );
-                // Return the scroll offset
                 return win ? ("pageXOffset" in win) ? win[ t ? "pageYOffset" : "pageXOffset" ] :
                 $.support.boxModel && win.document.documentElement[ method ] ||
                 win.document.body[ method ] :
