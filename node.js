@@ -515,6 +515,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if ( dataAndEvents ) {
                 $.mergeData( neo, node );
+                            console.log(neo)
                 if ( deepDataAndEvents ) {
                     src =  node[ TAGS ]( "*" );
                     neos = neo[ TAGS ]( "*" );

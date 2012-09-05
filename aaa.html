@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title></title>
+        <title>xxxx</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style>
             html,body{
@@ -10,20 +10,15 @@
 
             }
         </style>
-        <script src="mass.js">
+<!--        <script src="mass.js">
 
-        </script>
+        </script>-->
         <script>
          
-
-            $.require("ready,$event,$css",function(){
-  $("#red").mouseleave(function(e) {
-                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
-                }).mouseenter(function(e) {
-                    $(this).find("#blue").html("<p style='color:white'>"+e.type+"</p>")
-                });
-               
-        })
+            document.domain = "localhost2";
+            alert(window.location);
+            
+          
 
  
 
@@ -61,12 +56,20 @@
             height: 100px;
             background: blue;
         }
+        #source{
+            width:100px;
+            height:100px;
+            background:aqua;
+        }
     </style>
     <div id="red">
         <div id="blue">
 
         </div>
     </div>
+    <div id="source">
+    </div>
+
     <div class="sample">
         <p><input type="text"> <span>focus fire</span></p>
 
