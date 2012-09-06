@@ -3,11 +3,12 @@
 //==========================================
 define("ajax",["$flow"], function(){
     $.log("已加载ajax模块", 7);
-    var global = this, 
+    var global = this,
     DOC = global.document,
     r20 = /%20/g,
     rCRLF = /\r?\n/g,
     encode = encodeURIComponent,
+    decode = decodeURIComponent,
     rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE的换行符不包含 \r
     rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
@@ -22,34 +23,32 @@ define("ajax",["$flow"], function(){
         curl.href = "";
         curl = curl.href;
     }
- 
-    // Segment location into parts
+    //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
+    var s = ["XMLHttpRequest",
+    "ActiveXObject('Msxml2.XMLHTTP.6.0')",
+    "ActiveXObject('Msxml2.XMLHTTP.3.0')",
+    "ActiveXObject('Msxml2.XMLHTTP')",
+    "ActiveXObject('Microsoft.XMLHTTP')"];
+    if(!+"\v1"){
+        var v = DOC.documentMode;
+        s[0] =  v == 8 ? "XDomainRequest" : location.protocol === "file:" ? "!" : s[0]
+    }
+    for(var i = 0 ,axo;axo = s[i++];){
+        try{
+            if(eval("new "+ axo)){
+                $.xhr = new Function( "return new "+axo);
+                break;
+            }
+        }catch(e){}
+    }
     var segments = rurl.exec( curl.toLowerCase() ) || [],
-    transports = { },//传送器
-    converters ={//转换器
-        text: function(dummyXHR,text,xml){
-            return text != undefined ? text : ("xml" in xml ?  xml.xml: new XMLSerializer().serializeToString(xml));
-        },
-        xml : function(dummyXHR,text,xml){
-            return xml != undefined ? xml : $.parseXML(text);
-        },
-        html : function(dummyXHR,text,xml){
-            return  $.parseHTML(text);
-        },
-        json : function(dummyXHR,text,xml){
-            return  $.parseJSON(text);
-        },
-        script: function(dummyXHR,text,xml){
-            $.parseJS(text);
-        }
-    },
     accepts  = {
         xml: "application/xml, text/xml",
         html: "text/html",
         text: "text/plain",
         json: "application/json, text/javascript",
         script: "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript",
-        "*": "*/*"
+        "*": ["*/"] + ["*"]//避免被压缩掉
     },
     defaults  = {
         type: "GET",
@@ -72,7 +71,6 @@ define("ajax",["$flow"], function(){
         if ( opts.data && opts.data !== "string") {
             opts.data = $.param( opts.data );
         }
-        // fix #90 ie7 about "//x.htm"
         opts.url = opts.url.replace(/#.*$/,"").replace(/^\/\//, segments[1] + "//");
         opts.type = opts.type.toUpperCase();
         opts.hasContent = !rnoContent.test(opts.type);//是否为post请求
@@ -86,7 +84,7 @@ define("ajax",["$flow"], function(){
         }
         return opts;
     }
- 
+
     "get,post".replace( $.rword, function( method ){
         $[ method ] = function( url, data, callback, type ) {
             if ( $.isFunction( data ) ) {
@@ -102,7 +100,7 @@ define("ajax",["$flow"], function(){
                 dataType: type
             });
         };
- 
+
     });
     function isValidParamValue(val) {
         var t = typeof val;  // If the type of val is null, undefined, number, string, boolean, return true.
@@ -112,7 +110,7 @@ define("ajax",["$flow"], function(){
         getScript: function( url, callback ) {
             return $.get( url, null, callback, "script" );
         },
- 
+
         getJSON: function( url, data, callback ) {
             return $.get( url, data, callback, "json" );
         },
@@ -121,8 +119,7 @@ define("ajax",["$flow"], function(){
          * @param {String} url 提交地址
          * @param {HTMLElement} 元素
          * @param {Object} data 普通对象（用于添加额外参数）
-         * @param {Function} 正向回调
-         * with parameter<br/>
+         * @param {Function} 成功回调，它的参数依次是
          * 1. data returned from this request with type specified by dataType<br/>
          * 2. status of this request with type String<br/>
          * 3. XhrObject of this request , for details {@link IO.XhrObject}
@@ -158,7 +155,7 @@ define("ajax",["$flow"], function(){
                     // val is valid non-array value
                     if (isValidParamValue(val)) {
                         buf.push(key, "=", encode(val + ""), "&");
-                    } 
+                    }
                     else if (Array.isArray(val) && val.length) {//不能为空数组
                         for (var i = 0, len = val.length; i < len; ++i) {
                             if (isValidParamValue(val[i])) {
@@ -182,16 +179,16 @@ define("ajax",["$flow"], function(){
             var  pairs = url.split("&"),  pair, key, val,  i = 0, len = pairs.length;
             for (; i < len; ++i) {
                 pair = pairs[i].split("=");
-                key = decodeURIComponent(pair[0]);
+                key = decode(pair[0]);
                 try {
-                    val = decodeURIComponent(pair[1] || "");
+                    val = decode(pair[1] || "");
                 } catch (e) {
-                    $.log(e + "decodeURIComponent error : " + pair[1], "error");
+                    $.log(e + "decodeURIComponent error : " + pair[1], 3);
                     val = pair[1] || "";
                 }
                 key = key.replace(/\[\]$/,"")//如果参数名以[]结尾，则当作数组
                 var item = json[key];
-                if ('undefined' == typeof item) {
+                if ( item === void 0 ) {
                     json[key] = val;//第一次
                 } else if (Array.isArray(item)) {
                     item.push(val);//第三次或三次以上
@@ -219,8 +216,28 @@ define("ajax",["$flow"], function(){
             return $.param(json, false);// 名值键值对序列化,数组元素名字前不加 []
         }
     });
-    //如果没有指定dataType,服务器返回什么就是什么，不做转换
+    /*=============================================================================================
+    从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,
+    =============================================================================================*/
     var ajaxflow = new $.Flow
+    var transports = { }//传送器，我们可以通过XMLHttpRequest, Script, Iframe与后端
+    var converters = {   //转换器，返回用户想要做的数据（从原始返回值中提取加工）
+        text: function(xhr, text, xml){
+            return text != undefined ? text : ("xml" in xml ?  xml.xml: new XMLSerializer().serializeToString(xml));
+        },
+        xml: function(xhr, text, xml){
+            return xml != undefined ? xml : $.parseXML(text);
+        },
+        html: function(xhr, text, xml){
+            return  $.parseHTML(text);
+        },
+        json: function(xhr, text, xml){
+            return  $.parseJSON(text);
+        },
+        script: function(xhr, text, xml){
+            $.parseJS(text);
+        }
+    }
     var ajax = $.ajax = function( opts ) {
         if (!opts || !opts.url) {
             throw "参数必须为Object并且拥有url属性";
@@ -278,11 +295,11 @@ define("ajax",["$flow"], function(){
     //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     /**
-         * XHR类,用于模拟原生XMLHttpRequest的所有行为
-         */
+     * XHR类,用于模拟原生XMLHttpRequest的所有行为
+     */
     $.XHR = $.factory({
         implement: $.Flow,
-        init:function(option){
+        init:function( opts ){
             $.mix(this, {
                 responseData:null,
                 timeoutID:null,
@@ -298,9 +315,8 @@ define("ajax",["$flow"], function(){
                 status: 0,
                 transport: null
             });
-            this.setOptions("options",option);//创建一个options保存原始参数
+            this.setOptions("options", opts );//创建一个options保存原始参数
         },
-
         setRequestHeader: function(name, value) {
             this.requestHeaders[ name ] = value;
             return this;
@@ -317,8 +333,8 @@ define("ajax",["$flow"], function(){
             }
             return match === undefined ? null : match;
         },
-        // 重写 content-type 首部
         overrideMimeType: function(type) {
+            // 只有在没有发出请求前才能重写 content-type 首部
             if ( !this.state ) {
                 this.mimeType = type;
             }
@@ -337,11 +353,11 @@ define("ajax",["$flow"], function(){
             return this;
         },
         /**
-             * 用于派发success,error,complete等回调
-             * http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
-             * @param {Number} status 状态码
-             * @param {String} statusText 对应的扼要描述
-             */
+         * 用于派发success,error,complete等回调
+         * http://www.cnblogs.com/rubylouvre/archive/2011/05/18/2049989.html
+         * @param {Number} status 状态码
+         * @param {String} statusText 对应的扼要描述
+         */
         dispatch: function(status, statusText) {
             // 只能执行一次，防止重复执行
             if (this.state == 2) {//2:已执行回调
@@ -370,7 +386,7 @@ define("ajax",["$flow"], function(){
                         statusText = "parsererror : " + e;
                     }
                 }
- 
+
             }else  if (status < 0) {
                 status = 0;
             }
@@ -381,33 +397,16 @@ define("ajax",["$flow"], function(){
                 delete this.timeoutID;
             }
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
-           
+
             this.fire( eventType, this.responseData, statusText);
             ajaxflow.fire( eventType );
             this.fire("complete", this.responseData, statusText);
-            ajaxflow.fire("complete");
-            this.transport = undefined;
+            ajaxflow.fire( "complete" );
+            delete this.transport;
         }
     });
 
-    //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
-    var s = ["XMLHttpRequest",
-    "ActiveXObject('Msxml2.XMLHTTP.6.0')",
-    "ActiveXObject('Msxml2.XMLHTTP.3.0')",
-    "ActiveXObject('Msxml2.XMLHTTP')",
-    "ActiveXObject('Microsoft.XMLHTTP')"];
-    if(!+"\v1"){
-        var v = DOC.documentMode;
-        s[0] =  v == 8 ? "XDomainRequest" : location.protocol === "file:" ? "!" : s[0]
-    }
-    for(var i = 0 ,axo;axo = s[i++];){
-        try{
-            if(eval("new "+ axo)){
-                $.xhr = new Function( "return new "+axo);
-                break;
-            }
-        }catch(e){}
-    }
+
     if ( $.xhr ) {
         var nativeXHR = new $.xhr, allowCrossDomain = false;
         if ("withCredentials" in nativeXHR) {
@@ -437,12 +436,12 @@ define("ajax",["$flow"], function(){
                 }
                 try {
                     for ( i in dummyXHR.requestHeaders) {
-                        nativeXHR.setRequestHeader( i, dummyXHR.requestHeaders[ i ]);
+                        nativeXHR.setRequestHeader( i, dummyXHR.requestHeaders[ i ] );
                     }
                 } catch(e) {
                     $.log(" nativeXHR setRequestHeader occur error ");
                 }
- 
+
                 nativeXHR.send(options.hasContent && options.data || null);
                 //在同步模式中,IE6,7可能会直接从缓存中读取数据而不会发出请求,因此我们需要手动发出请求
                 if (!options.async || nativeXHR.readyState == 4) {
@@ -489,7 +488,7 @@ define("ajax",["$flow"], function(){
                             try {
                                 var statusText = nativeXHR.statusText;
                             } catch(e) {
-                                $.log("xhr statustext error : " + e);
+                                $.log("xhr statustext error : " + e, 3);
                                 statusText = "";
                             }
                             //用于处理特殊情况,如果是一个本地请求,只要我们能获取数据就假当它是成功的
@@ -523,7 +522,6 @@ define("ajax",["$flow"], function(){
             var self = this, dummyXHR = self.dummyXHR, options = dummyXHR.options,
             head = $.head,
             script = self.script = DOC.createElement("script");
-            script.async = "async";
             $.log("ScriptTransport.sending.....");
             if (options.charset) {
                 script.charset = options.charset;
@@ -536,7 +534,7 @@ define("ajax",["$flow"], function(){
             script.src = options.url
             head.insertBefore(script, head.firstChild);
         },
- 
+
         respond: function(event, isAbort) {
             var node = this.script, dummyXHR = this.dummyXHR;
             // 防止重复调用,成功后 abort
@@ -548,7 +546,7 @@ define("ajax",["$flow"], function(){
                 var parent = node.parentNode;
                 if(parent && parent.nodeType === 1){
                     parent.removeChild(node);
-                    this.script = undefined;
+                    delete this.script;
                 }
                 //如果没有中止请求并没有报错
                 if (!isAbort && event != "error") {
@@ -561,13 +559,13 @@ define("ajax",["$flow"], function(){
             }
         }
     });
- 
+
     //http://www.decimage.com/web/javascript-cross-domain-solution-with-jsonp.html
     //JSONP请求，借用【script节点】传送器
-    converters["script json"] = function(dummyXHR){
-        return $["jsonp"+ dummyXHR.uniqueID ]();
+    converters["script json"] = function(xhr){
+        return $["jsonp"+ xhr.uniqueID ]();
     }
-    ajaxflow.bind("start", function(e, dummyXHR, url, jsonp) {
+    ajaxflow.bind("start", function(dummyXHR, url, jsonp) {
         $.log("jsonp start...");
         var jsonpCallback = "jsonp"+dummyXHR.uniqueID;
         dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + DOC.URL.replace(/(#.+|\W)/g,'')+"."+jsonpCallback;
@@ -579,17 +577,17 @@ define("ajax",["$flow"], function(){
             };
         };
     });
- 
+
     function createIframe(dummyXHR, transport) {
         var id = "iframe-upload-"+dummyXHR.uniqueID;
         var iframe = $.parseHTML("<iframe " +
             " id='" + id + "'" +
             " name='" + id + "'" +
-            "  style='position:absolute;left:-9999px;top:-9999px;/>").firstChild;
+            " style='position:absolute;left:-9999px;top:-9999px;/>").firstChild;
         iframe.transport = transport;
         return  (DOC.body || DOC.documentElement).insertBefore(iframe,null);
     }
- 
+
     function addDataToForm(data, form, serializeArray) {
         data = $.unparam(data);
         var ret = [], d, isArray, vs, i, e;
@@ -641,7 +639,7 @@ define("ajax",["$flow"], function(){
                 form.submit();
             }, 16);
         },
- 
+
         respond: function( event  ) {
             var iframe = this,
             transport = iframe.transport;
@@ -691,12 +689,12 @@ define("ajax",["$flow"], function(){
             }, 16);
         }
     });
- 
+
 });
-    /**
+/**
 2011.8.31
 将会传送器的abort方法上传到$.XHR.abort去处理
 修复serializeArray的bug
 对XMLHttpRequest.abort进行try...catch
 2012.3.31 v2 大重构,支持XMLHttpRequest Level2
-     */
+ */
