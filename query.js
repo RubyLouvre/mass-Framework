@@ -1,4 +1,6 @@
-//$.query v5 开发代号Icarus
+//=========================================
+// 选择器模块 v5 开发代号Icarus
+//==========================================
 define("query", function(){
     $.log("已加载选择器模块",7)
     var global = this, DOC = global.document;
