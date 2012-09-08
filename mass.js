@@ -11,7 +11,7 @@
     var postfix = "";//用于强制别名
     var loadings = [];//正在加载中的模块列表
     var cbi = 1e5 ; //用于生成回调函数的名字
-    var all = "mass,lang_fix,lang,support,class,node,query,data,node,css_fix,css,event_fix,event,attr,flow,ajax,fx"
+    var all = "mass,lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
