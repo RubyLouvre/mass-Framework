@@ -1,8 +1,6 @@
 + function( global, DOC ){
-
     var  _$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
-
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
     var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
@@ -75,17 +73,13 @@
         head: HEAD,
         mix: mix,
         rword: /[^, ]+/g,
-        core: {
-            alias:{},
-            level: 9
-        },//放置框架的一些重要信息
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": w3c ? "addEventListener" : "attachEvent",
         //将内部对象挂到window下，此时可重命名，实现多库共存  name String 新的命名空间
         exports: function( name ) {
             _$ && ( global.$ = _$ );//多库共存
-            name = name || $.core.name;//取得当前简短的命名空间
-            $.core.name = name;
+            name = name || $.config.nick;//取得当前简短的命名空间
+            $.config.nick = name;
             global[ namespace ] = commonNs;
             return global[ name ]  = this;
         },
@@ -145,7 +139,7 @@
         },
         //$.log(str, showInPage=true, 5 )
         //level Number，通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
-        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.core.level。
+        //7则连普通的调试消息也打印出来。 显示算法为 level <= $.config.level。
         //这个$.colre.level默认为9。下面是level各代表的含义。
         //0 EMERGENCY 致命错误,框架崩溃
         //1 ALERT 需要立即采取措施进行修复
@@ -160,7 +154,7 @@
             for(var i = 1 ; i < arguments.length; i++){
                 var el = arguments[i]
                 if(typeof el == "number"){
-                    show = el <=  $.core.level
+                    show = el <=  $.config.level
                 }else if(el === true){
                     page = true;
                 }
@@ -208,22 +202,50 @@
                 result[ array[i] ] = value;
             }
             return result;
+        },
+        config: function( settings ) {
+            var kernel  = $.config;
+            for ( var p in settings ) {
+                if (!settings.hasOwnProperty( p ))
+                    continue
+                var prev = kernel[ p ];
+                var curr = settings[ p ];
+                if (prev && p === 'alias') {
+                    for (var c in curr) {
+                        if (curr.hasOwnProperty( c )) {
+                            var prevValue = prev[ c ];
+                            var currValue = curr[ c ];
+                            if( prevValue && prev !== curr ){
+                                throw c + "不能重命名"
+                            }
+                            prev[ c ] = currValue;
+                        }
+                    }
+                } else {
+                    kernel[ p ] = curr;
+                }
+            }
+            return this
         }
     });
-    $.noop = $.error = $.debug = function(){};
-    "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
-        class2type[ "[object " + name + "]" ] = name;
-    });
-
-    -function(scripts, cur){
+    (function(scripts, cur){
         cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
-        $.core.name = cur.getAttribute("namespace") || "$"
-        var str = cur.getAttribute("debug")
-        $.core.debug = str == 'true' || str == '1';
-        $.core.base = url.substr( 0, url.lastIndexOf('/') ) +"/"
-    }(DOC.getElementsByTagName( "script" ));
+        var str = cur.getAttribute("debug");
+        var kernel = $.config;
+        kernel.debug = str == 'true' || str == '1';
+        kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
+        kernel.nick = cur.getAttribute("nick") || "$";
+        kernel.alias = {};
+        kernel.level = 9;
+    })(DOC.getElementsByTagName( "script" ));
+
+    $.noop = $.error = $.debug = function(){};
+
+    "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
+        class2type[ "[object " + name + "]" ] = name;
+    });
 
     var Module = function (id, parent) {
         this.id = id;
@@ -243,7 +265,7 @@
     Module._update = function(id, parent, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
-            module = new Module(id, parent || $.core.base);
+            module = new Module(id, parent || $.config.base);
             Module._cache[id] = module;
         }
         module.callback = factory || $.noop;
@@ -266,8 +288,8 @@
         if( url === "ready"){//特别处理ready标识符
             return ["ready", "js"];
         }
-        if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.core.alias[url] ){
-            ret = $.core.alias[url];
+        if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url] ){
+            ret = $.config.alias[url];
         }else{
             parent = parent.substr( 0, parent.lastIndexOf('/') )
             if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
@@ -275,7 +297,7 @@
             }else {
                 var tmp = url.charAt(0);
                 if( tmp !== "." && tmp != "/"){  //相对于根路径
-                    ret = $.core.base + url;
+                    ret = $.config.base + url;
                 }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
                     ret = parent + "/" + url.substr(2);
                 }else if( url.slice(0,2) == ".."){ //相对于父路径
@@ -329,7 +351,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.core.base ), url = array[0];
+                var array = Module._resolveFilename(el, id || $.config.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
                     if( !modules[ url ] ){ //防止重复生成节点与请求
@@ -404,32 +426,11 @@
                     $._checkDeps();
                 }
             }
-        },
-        config: function(o) {
-            var core = $.core
-            for (var k in o) {
-                if (!o.hasOwnProperty(k)) continue
-                var previous = core[k]
-                var current = o[k]
-                if (previous && k === 'alias') {
-                    for (var p in current) {
-                        if (current.hasOwnProperty(p)) {
-                            var prevValue = previous[p]
-                            var currValue = current[p]
-                            if(prevValue && previous !== current){
-                                throw p + "不能重命名"
-                            }
-                            previous[p] = currValue
-                        }
-                    }
-                }
-                else {
-                    core[k] = current
-                }
-            }
-            return this
         }
+
     });
+
+
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
         if (DOC.getElementById(id))
@@ -446,7 +447,7 @@
     var loadJS = function( url, parent ){
         Module._update( url, parent );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.core.name,
+        codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.config.nick,
         '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
         (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
         "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps(); ",
@@ -515,7 +516,7 @@
         return ret;
     }
     all.replace($.rword,function(a){
-        $.core.alias[ "$"+a ] = $.core.base+a+".js"
+        $.config.alias[ "$"+a ] = $.config.base + a + ".js"
     });
     //domReady机制
     var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
@@ -576,7 +577,7 @@
         }
     }
     $.debug = function(name){
-        if(!$.core.debug )
+        if(!$.config.debug )
             return
         for( var i in $){
             debug($, i, name);
@@ -599,7 +600,7 @@
         namespace = DOC.URL.replace(rmakeid,'');
         $.exports();
     });
-    $.exports( $.core.name +  postfix );//防止不同版本的命名空间冲突
+    $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 // console.log($["@path"])
 }( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
@@ -662,7 +663,7 @@ dom.namespace改为dom["mass"]
 2012.6.25 domReady后移除绑定事件
 2012.7.23 动态指定mass Framewoke的命名空间与是否调试
 2012.8.26 升级到v17
-2012.8.27 将$.log.level改到$.core.level中去
+2012.8.27 将$.log.level改到$.config.level中去
 2012.8.28 将最后一行的this改成self
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
@@ -677,6 +678,7 @@ https://github.com/eriwen/javascript-stacktrace
 http://sourceforge.net/apps/trac/pies/wiki/TypeSystem/zh
 http://tableclothjs.com/ 一个很好看的表格插件
 http://layouts.ironmyers.com/
+http://warpech.github.com/jquery-handsontable/
 http://baidu.365rili.com/wnl.html?bd_user=1392943581&bd_sig=23820f7a2e2f2625c8945633c15089dd&canvas_pos=search&keyword=%E5%86%9C%E5%8E%86
 http://unscriptable.com/2011/10/02/closures-for-dummies-or-why-iife-closure/
 http://unscriptable.com/2011/09/30/amd-versus-cjs-whats-the-best-format/

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>xxxx</title>
+        <title>SAW规范的模块加载例子 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style>
             html,body{
@@ -10,13 +10,14 @@
 
             }
         </style>
-<!--        <script src="mass.js">
+     <script src="mass.js">
 
-        </script>-->
+        </script>
         <script>
          
-            document.domain = "localhost2";
-            alert(window.location);
+         $.require("./more/aaa", function(a){
+             console.log(a)
+         })
             
           
 
