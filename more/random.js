@@ -1,10 +1,13 @@
 
 define("random", function(){
     var cs = "_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"; 
-    var uuid_arr =  '0123456789ABCDEFG'.split('');
-   // $.log("已加载random模块");
-    //http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
+    // $.log("已加载random模块");
+    // http://www.flickriver.com/groups/coresvivas/pool/random/
     //http://paulirish.com/2009/random-hex-color-code-snippets/
+    //http://stackoverflow.com/questions/1484506/random-color-generator-in-javascript
+    var rgb =  function () {
+        return Math.floor(Math.random()*256)
+    };
     return {
         hex: function(){
             return  '#'+('00000'+(Math.random()*0x1000000<<0).toString(16)).slice(-6);
@@ -13,9 +16,23 @@ define("random", function(){
             return "hsb(" + Math.random()  + ", 1, 1)";
         },
         rgb: function(){
-            return [Math.floor(Math.random() * 255),
-            Math.floor(Math.random() * 255),
-            Math.floor(Math.random() * 255)];
+            return "rgb("+ [ rgb(), rgb(), rgb() ]+")";
+        },
+        vivid: function(ranges) {
+            if (!ranges) {
+                ranges = [
+                [150,256],
+                [0, 190],
+                [0, 30]
+                ];
+            }
+            var g = function() {
+                //select random range and remove
+                var range = ranges.splice(Math.floor(Math.random()*ranges.length), 1)[0];
+                //pick a random number from within the range
+                return Math.floor(Math.random() * (range[1] - range[0])) + range[0];
+            }
+            return "rgb(" + g() + "," + g() + "," + g() +")";
         },
         str: function(len,prefix) {
             if (!len) len = 10;

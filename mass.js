@@ -9,7 +9,7 @@
     var postfix = "";//用于强制别名
     var loadings = [];//正在加载中的模块列表
     var cbi = 1e5 ; //用于生成回调函数的名字
-    var all = "mass,lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -682,5 +682,6 @@ http://warpech.github.com/jquery-handsontable/
 http://baidu.365rili.com/wnl.html?bd_user=1392943581&bd_sig=23820f7a2e2f2625c8945633c15089dd&canvas_pos=search&keyword=%E5%86%9C%E5%8E%86
 http://unscriptable.com/2011/10/02/closures-for-dummies-or-why-iife-closure/
 http://unscriptable.com/2011/09/30/amd-versus-cjs-whats-the-best-format/
+http://news.cnblogs.com/n/157042/
 */
 
