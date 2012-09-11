@@ -732,6 +732,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             diff2 = Math.abs(target - n2);
             return diff1 < diff2 ? n1 : n2
         },
+        //http://www.cnblogs.com/xiao-yao/archive/2012/09/11/2680424.html
         round: function(target, base) {
             if (base) {
                 base = Math.pow(10, base);
