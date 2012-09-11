@@ -96,4 +96,37 @@ KB947864  2008 年 4 月
 部署用于 Internet Explorer 的更新 912945 后，包含在安全更新 912812 中的 Internet Explorer ActiveX 更新的行为将会被禁用。包含在安全更新 912812 中的安全修补程序仍然存在并起作用。只有 Internet Explorer ActiveX 更新行为被禁用。
 
 2008年才取消这种破玩意的限制.....
+
+其实现在可以不用js创建flash了
+教主Franky(449666)  18:42:50
+如果是页面固有的flash可以这样:
+
+
+兼容 IOS:
+<object style="outline:none" id="video_player" type="application/x-shockwave-flash" data=" http://player.ku6.com/refer/HNy8VYICR0BTOwr7/v.swf" height="400" width="500">
+<!--[if lt IE 9.0]>
+<param name="movie" value=" http://player.ku6.com/refer/HNy8VYICR0BTOwr7/v.swf">
+<![endif]-->
+<param name="quality" value="high">
+<param name="allowScriptAccess" value="always">
+<param name="allowFullScreen" value="true">
+<param name="wMode" value="window">
+<param name="swLiveConnect" value="true">
+<param name="flashvars" value="img= http://i0.ku6img.com/cms/news/201104/13/891.jpg&amp;auto=1">
+<video controls height="400" width="500" poster=" http://i0.ku6img.com/cms/news/201104/13/891.jpg" src=" http://v.ku6.com/fetchwebm/HNy8VYICR0BTOwr7.m3u8"></video>
+</object>
+
+教主Franky(449666)  18:43:11
+简易版本: 
+
+<OBJECT id="id_2324" name="id_2324" type="application/x-shockwave-flash" width="480" height="400" data=" http://player.ku6.com/refer/8pf0RgHjbRXRBALK/v.swf">
+            <PARAM NAME="Movie" VALUE=" http://player.ku6.com/refer/8pf0RgHjbRXRBALK/v.swf">
+            <PARAM NAME="AllowScriptAccess" VALUE="always">
+            <PARAM NAME="AllowNetworking" VALUE="all">
+</OBJECT>
+教主Franky(449666)  18:43:26
+
+非IE也可以使用: 
+ <embed id="id_2324" name="id_2324" src=" http://player.ku6.com/refer/8pf0RgHjbRXRBALK/v.swf" width="480" height ="400" allowNetworking="all" allowScriptAccess="always"  type="application/x-shockwave-flash" />
+
 */

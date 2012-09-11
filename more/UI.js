@@ -624,3 +624,8 @@ ssddi456(592247119)  15:42:21
                     if(baseElement){
                         resetBase(baseElement);
                     }
+					
+					swfobject 要解决的是这个问题:
+
+xp ie6 : KB912945  2/10/2006  参考地址:  http://support.microsoft.com/kb/912945
+
