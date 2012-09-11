@@ -1,5 +1,5 @@
 define( ["$lang"],function(){
-    $.log("已加载ejs模块", 7)
+    $.log("已加载ejs模块!", 7)
     $.ejs = function( id,data,opts){
         var el, source
         if( !$.ejs.cache[ id] ){
@@ -42,16 +42,17 @@ define( ["$lang"],function(){
         var helperNames = [], helpers = []
         for(var name in opts){
             if(opts.hasOwnProperty(name) && typeof opts[name] == "function"){
-                helperNames.push(name)
-                helpers.push( opts[name] )
+                helperNames.push(name);
+                helpers.push( opts[name] );//收集所有helper!
             }
         }
+      //  helpers.push("__self__")
         var flag = true;//判定是否位于前定界符的左边
         var codes = []; //用于放置源码模板中普通文本片断
         var time = new Date * 1;// 时间截,用于构建codes数组的引用变量
         var prefix = " ;r += txt"+ time +"[" //渲染函数输出部分的前面
         var postfix = "];"//渲染函数输出部分的后面
-        var t = "return function(data){ try{var r = '',line"+time+" = 0;";//渲染函数的最开始部分
+        var t = "return function a(data){ var s = a; try{var r = '',line"+time+" = 0;";//渲染函数的最开始部分
         var rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g;
         var rstr = /(['"])(?:\\[\s\S]|[^\ \\r\n])*?\1/g // /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/
         var rtrim = /(^-|-$)/g;
@@ -63,7 +64,12 @@ define( ["$lang"],function(){
             if( cur < pre){
                 if( flag ){//取得最末尾的HTML片断
                     t += prefix + codes.length + postfix
-                    code = source.slice( pre+ close.length );
+                     if(cur == -1){
+                        code = source
+                    }else{
+                        code = source.slice( pre+ close.length );
+                    }
+                  //  code = source.slice( pre+ close.length );
                     if(trim){
                         code = code.trim();
                         trim = false;
@@ -140,7 +146,7 @@ define( ["$lang"],function(){
         var body = ["txt"+time,"js"+time, "filters"]
         var fn = Function.apply(Function, body.concat(helperNames,t) );
         var args = [codes, js, $.ejs.filters];
-        var compiled = fn.apply(this, args.concat(helpers));
+        var compiled = fn.apply(this, args.concat(helpers) );
         if(typeof tid === "string"){
             return  $.ejs.cache[tid] = compiled
         }
