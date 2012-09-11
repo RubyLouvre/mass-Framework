@@ -1094,7 +1094,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         在一连串调用中，如果我们throttle了一个函数，那么它会减少调用频率，
         会把A调用之后的XXXms间的N个调用忽略掉，
         然后再调用XXXms后的第一个调用，然后再忽略N个*/
-        throttle:  function(delay,action,tail,debounce) {
+        throttle:  function(action,delay,tail,debounce) {
             var last_call = 0, last_exec = 0, timer = null, curr, diff,
             ctx, args, exec = function() {
                 last_exec = Date.now;
@@ -1122,8 +1122,8 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         //是在一连串调用中，按delay把它们分成几组，每组只有开头或结果的那个调用被执行
         //debounce比throttle执行的次数更少
-        debounce : function(idle,action,tail) {
-            return $.throttle(idle,action,tail,true);
+        debounce : function( action, idle, tail) {
+            return $.throttle( action, idle, tail,true);
         }
 
     }, false);
