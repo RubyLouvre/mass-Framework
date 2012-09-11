@@ -489,8 +489,8 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             return  target.replace(/&quot;/g,'"')
             .replace(/&lt;/g,'<')
             .replace(/&gt;/g,'>')
-            .replace(/&amp;/g, "&"); //处理转义的中文和实体字符
-            return target.replace(/&#([\d]+);/g, function($0, $1){
+            .replace(/&amp;/g, "&") //处理转义的中文和实体字符
+            .replace(/&#([\d]+);/g, function($0, $1){
                 return String.fromCharCode(parseInt($1, 10));
             });
         },
@@ -732,6 +732,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             diff2 = Math.abs(target - n2);
             return diff1 < diff2 ? n1 : n2
         },
+        //http://www.cnblogs.com/xiao-yao/archive/2012/09/11/2680424.html
         round: function(target, base) {
             if (base) {
                 base = Math.pow(10, base);

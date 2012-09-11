@@ -52,7 +52,7 @@ define( ["$lang"],function(){
         var time = new Date * 1;// 时间截,用于构建codes数组的引用变量
         var prefix = " ;r += txt"+ time +"[" //渲染函数输出部分的前面
         var postfix = "];"//渲染函数输出部分的后面
-        var t = "return function a(data){ var s = a; try{var r = '',line"+time+" = 0;";//渲染函数的最开始部分
+        var t = "return function (data){ try{var r = '',line"+time+" = 0;";//渲染函数的最开始部分
         var rAt = /(^|[^\w\u00c0-\uFFFF_])(@)(?=\w)/g;
         var rstr = /(['"])(?:\\[\s\S]|[^\ \\r\n])*?\1/g // /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/
         var rtrim = /(^-|-$)/g;
