@@ -587,3 +587,40 @@ ssddi456(592247119)  15:42:21
 还有很多坑，总是非IE别用伪协议 能解决很多问题
 教主Franky(449666)  15:43:40
 总之..
+
+(1). 当parent页存在 base标签,且target 为_blank时, 使用伪协议方式,会导致IE系弹窗(并可能会被浏览器拦截). 
+　　　　解决办法: 扫描parent页面的所有base标签,看是不是target为_blank.如果有,就暂时把它的target改为 _self.  后面对iframe写入伪协议结束后.再改回去.
+　　　　ps: 务必迭代所有base标签,网上有资料说, 多个base标签 只有第一个生效是错误的. 实际上只要有target=_blank的base,无论他在哪，优先级都高于其他.
+　　　　　　且,务必不要移除base标签,因为你可能遇到 IE6 base单闭合引发的bug.导致base后面的节点都被IE6解析成base的子节点.移除它，再恢复是很可怕的.
+
+
+教主Franky(449666)  16:57:46
+ fixBase = function () {
+                    var baseList = document.getElementsByTagName('base');
+                    var baseElement;
+
+                    for (var i = baseList.length ; i--; ){
+                        if(baseList[i].target === '_blank'){
+                            baseElement = baseList[i];
+                            break;
+                        }
+                    }
+                    
+                    if(baseElement){
+                        baseElement.target = '_self';
+                        return baseElement;
+                    }
+                };
+                resetBase = function (baseElement) {
+                    baseElement.target = '_blank';
+                };
+教主Franky(449666)  16:57:55
+用着来货来搞
+教主Franky(449666)  16:58:07
+
+                    var baseElement = fixBase(ifm);
+                    
+                    ifm.contentWindow.location.replace('javascript:document.open();document.write("' + url + '");document.close();');
+                    if(baseElement){
+                        resetBase(baseElement);
+                    }
