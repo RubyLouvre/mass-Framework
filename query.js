@@ -489,7 +489,7 @@ define("query", function(){
         }
         return elems;
     }
-    var onePosition = $.oneObject("eq|gt|lt|first|last|even|odd".split("|"));
+     var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
 
     $.mix(Icarus, {
         //getAttribute总会返回字符串

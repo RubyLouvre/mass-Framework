@@ -3,6 +3,7 @@
     var rmakeid = /(#.+|\W)/g;
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
+    var HTML = DOC.documentElement;
     var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
     var commonNs = global[ namespace ];//公共命名空间
     var mass = 1;//当前框架的版本号
@@ -64,7 +65,7 @@
     }
 
     mix( $, {//为此版本的命名空间对象添加成员
-        html: DOC.documentElement,
+        html: HTML,
         head: HEAD,
         mix: mix,
         rword: /[^, ]+/g,
@@ -300,8 +301,7 @@
         return [ret, ext];
     }
 
-    var modules = Module._cache = {};
-    $.modules = modules
+    var modules = $.modules = Module._cache = {};
     Module._update( "ready" );
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
     var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g;
@@ -324,17 +324,18 @@
         },
         resolveFilename: Module._resolveFilename,
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-        require: function( list, factory, id ){
+        require: function( list, factory, parent ){
             var deps = {}, // 用于检测它的依赖是否都为2
             args = [],      // 用于依赖列表中的模块的返回值
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, id || $.config.base ), url = array[0];
+                var array = Module._resolveFilename(el, parent || $.config.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
-                    if( !modules[ url ] ){ //防止重复生成节点与请求
-                        loadJS( url, id );//将要安装的模块通过iframe中的script加载下来
+                    //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
+                    if( (!modules[ url ]) && loadStorage( url ) ){
+                        loadJS( url, parent );
                     }else if( modules[ url ].state === 2 ){
                         cn++;
                     }
@@ -346,13 +347,13 @@
                     loadCSS( url );
                 }
             });
-            id = id || "@cb"+ ( cbi++ ).toString(32);
+            var id = parent || "@cb"+ ( cbi++ ).toString(32);
             //创建或更新模块的状态
             Module._update(id, 0, factory, 1, deps, args);
             if( dn === cn ){//如果需要安装的等于已安装好的
                 return install( id, args, factory );//装配到框架中
             }
-            ;//在正常情况下模块只能通过_checkDeps执行
+            //在正常情况下模块只能通过_checkDeps执行
             loadings.unshift( id );
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
@@ -369,17 +370,22 @@
                 [].splice.call( args, 1, 0, [] );
             }
             if(typeof args[2] == "function"){
-                args[2].toString().replace(rcomment,"").replace(rrequire,function(a,b){
+                var factroy = args[2].toString().replace(rcomment,"")
+                factroy.replace(rrequire,function(a,b){
                     args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
                 });
+                if(this.exports){
+                    Storage.setItem( this.id+"_args", args[1]+"")
+                    Storage.setItem( this.id+"_parent", this.parent)
+                    Storage.setItem( this.id,factroy )
+                }
             }else{
                 var ret = args[2];
                 args[2] = function(){
                     return ret
                 }
             }
-            //0,1,2 --> 1,2,0
-            this.require( args[1], args[2], parent );
+            $.require( args[1], args[2], parent ); //0,1,2 --> 1,2,0
         },
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
@@ -408,7 +414,61 @@
         }
 
     });
-
+    var Storage =  {
+        setItem: $.noop,
+        getItem: $.noop,
+        removeItem: $.noop
+    }
+    if( global.localStorage){
+        Storage = localStorage;
+    }else if( HTML.addBehavior){
+        HTML.addBehavior('#default#userData');
+        HTML.save("massdata");
+        //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
+        //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
+        var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g")
+        function curry(fn) {
+            return function(a, b) {
+                HTML.load("massdata");
+                a = a.replace(rstoragekey, function(w){
+                    return w.charCodeAt(0);
+                })
+                var result = fn( a, b );
+                HTML.save("massdata");
+                return result
+            }
+        }
+        Storage = {
+            setItem : curry(function(key, val){
+                HTML.setAttribute(key, val);
+            }),
+            getItem: curry(function(key){
+                $.log(key,true)
+                return HTML.getAttribute(key);
+            }),
+            removeItem: curry(function(key){
+                HTML.removeAttribute(key);
+            })
+        }
+    }
+    function loadStorage( id ){
+        var factory =  Storage.getItem( id);
+        if(!!factory){
+            var parent = Storage.getItem(id+"_parent");
+            var deps = Storage.getItem(id+"_args") ;
+            deps = deps ?  deps.match($.rword) : "";
+            Module._update(id, parent);
+            var module = $.modules[id];
+            module.state = 1;
+            var fn = Function( "$,module,exports,require","return "+ factory )
+            ($, module, module.exports, module.require());
+            $.log("这是通过本地储存来获取目标模块", 7);
+            $.define( id, deps, fn );
+            return false;
+        }else{
+            return true;
+        }
+    }
 
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
@@ -457,7 +517,7 @@
         }
         args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
         var module = Ns.modules[ nick ];
-        module.state =1
+        module.state = 1
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
             //劫持模块工厂,将$, exports, require, module等对象强塞进去
@@ -465,7 +525,7 @@
             (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
         }
         //将iframe中的函数转换为父窗口的函数
-        Ns.define.apply(Ns, args)
+        Ns.define.apply(module, args)
     }
 
     function install( id, deps, callback ){
@@ -509,7 +569,7 @@
     };
     function doScrollCheck() {
         try {
-            $.html.doScroll( "left" ) ;
+            HTML.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
             setTimeout( doScrollCheck, 31 );
@@ -524,7 +584,7 @@
                 fireReady();
             }
         });
-        if( $.html.doScroll && self.eval === parent.eval)
+        if( HTML.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
     var rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/;
@@ -1295,8 +1355,8 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             return  target.replace(/&quot;/g,'"')
             .replace(/&lt;/g,'<')
             .replace(/&gt;/g,'>')
-            .replace(/&amp;/g, "&"); //处理转义的中文和实体字符
-            return target.replace(/&#([\d]+);/g, function($0, $1){
+            .replace(/&amp;/g, "&") //处理转义的中文和实体字符
+            .replace(/&#([\d]+);/g, function($0, $1){
                 return String.fromCharCode(parseInt($1, 10));
             });
         },
@@ -2579,7 +2639,7 @@ define("query", function(){
         }
         return elems;
     }
-    var onePosition = $.oneObject("eq|gt|lt|first|last|even|odd".split("|"));
+    var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
 
     $.mix(Icarus, {
         //getAttribute总会返回字符串
