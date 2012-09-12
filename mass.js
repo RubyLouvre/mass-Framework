@@ -445,9 +445,15 @@
     }else if( HTML.addBehavior){
         HTML.addBehavior('#default#userData');
         HTML.save("massdata");
+        //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
+        //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
+        var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g")
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
+                a = a.replace(rstoragekey, function(w){
+                    return w.charCodeAt(0);
+                })
                 var result = fn( a, b );
                 HTML.save("massdata");
                 return result
@@ -458,6 +464,7 @@
                 HTML.setAttribute(key, val);
             }),
             getItem: curry(function(key){
+                $.log(key,true)
                 return HTML.getAttribute(key);
             }),
             removeItem: curry(function(key){
@@ -718,6 +725,7 @@ dom.namespace改为dom["mass"]
 2012.8.26 升级到v17
 2012.8.27 将$.log.level改到$.config.level中去
 2012.8.28 将最后一行的this改成self
+2012.9.12 添加本地储存的支持
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
@@ -736,5 +744,8 @@ http://baidu.365rili.com/wnl.html?bd_user=1392943581&bd_sig=23820f7a2e2f2625c894
 http://unscriptable.com/2011/10/02/closures-for-dummies-or-why-iife-closure/
 http://unscriptable.com/2011/09/30/amd-versus-cjs-whats-the-best-format/
 http://news.cnblogs.com/n/157042/
+http://www.cnblogs.com/beiyuu/archive/2011/07/18/iframe-tech-performance.html iframe异步加载技术及性能
+http://www.cnblogs.com/lhb25/archive/2012/09/11/resources-that-complement-twitter-bootstrap.html
+http://www.cnblogs.com/rainman/archive/2011/06/22/2086069.html
  */
 
