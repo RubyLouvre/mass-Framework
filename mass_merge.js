@@ -1,5 +1,5 @@
 + function( global, DOC ){
-    var  _$ = global.$//保存已有同名变量
+    var _$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var namespace = DOC.URL.replace( rmakeid,'')
     var w3c = DOC.dispatchEvent //w3c事件模型
@@ -374,8 +374,8 @@
                 factroy.replace(rrequire,function(a,b){
                     args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
                 });
-                if(this.exports){
-                    Storage.setItem( this.id+"_args", args[1]+"")
+                if(this.exports && this.id){
+                    Storage.setItem( this.id+"_deps", args[1]+"")
                     Storage.setItem( this.id+"_parent", this.parent)
                     Storage.setItem( this.id,factroy )
                 }
@@ -417,7 +417,8 @@
     var Storage =  {
         setItem: $.noop,
         getItem: $.noop,
-        removeItem: $.noop
+        removeItem: $.noop,
+        clear: $.noop
     }
     if( global.localStorage){
         Storage = localStorage;
@@ -430,7 +431,7 @@
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
-                a = a.replace(rstoragekey, function(w){
+                a = String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
                 })
                 var result = fn( a, b );
@@ -443,19 +444,30 @@
                 HTML.setAttribute(key, val);
             }),
             getItem: curry(function(key){
-                $.log(key,true)
                 return HTML.getAttribute(key);
             }),
             removeItem: curry(function(key){
                 HTML.removeAttribute(key);
-            })
+            }),
+            clear: function(){
+                var attributes = HTML.XMLDocument.documentElement.attributes
+                for (var i=0, attr; attr=attributes[i]; i++) {
+                    HTML.removeAttribute(attr.name)
+                }
+            }
         }
     }
+    $.erase = function( id ){
+        Storage.removeItem( id );
+        Storage.removeItem( id+"_deps" )
+        Storage.removeItem( id+"_parent" )
+    }
+
     function loadStorage( id ){
         var factory =  Storage.getItem( id);
         if(!!factory){
             var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_args") ;
+            var deps = Storage.getItem(id+"_deps") ;
             deps = deps ?  deps.match($.rword) : "";
             Module._update(id, parent);
             var module = $.modules[id];
