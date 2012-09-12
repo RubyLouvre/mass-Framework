@@ -334,7 +334,8 @@
                 if(array[1] == "js"){
                     dn++
                     //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
-                    if( (!modules[ url ]) && loadStorage( url ) ){
+                    loadStorage( url )
+                    if( (!modules[ url ])  ){//&& loadStorage( url )
                         loadJS( url, parent );
                     }else if( modules[ url ].state === 2 ){
                         cn++;
@@ -370,14 +371,16 @@
                 [].splice.call( args, 1, 0, [] );
             }
             if(typeof args[2] == "function"){
-                var factroy = args[2].toString().replace(rcomment,"")
+                var factroy = args[2].toString()
+                .replace(/^\s*\/\*[\s\S]*?\*\/\s*$/mg, '') // block comments
+                .replace(/^\s*\/\/.*$/mg, '')
                 factroy.replace(rrequire,function(a,b){
                     args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
                 });
-                if(this.exports && this.id){
+                if(this.exports && this.id && $.config.storage ){
                     Storage.setItem( this.id+"_deps", args[1]+"")
                     Storage.setItem( this.id+"_parent", this.parent)
-                    Storage.setItem( this.id,factroy )
+                    Storage.setItem( this.id,factroy)
                 }
             }else{
                 var ret = args[2];
@@ -411,8 +414,12 @@
                     $._checkDeps();
                 }
             }
+        },
+        erase : function( id ){
+            Storage.removeItem( id );
+            Storage.removeItem( id+"_deps" )
+            Storage.removeItem( id+"_parent" )
         }
-
     });
     var Storage =  {
         setItem: $.noop,
@@ -457,28 +464,19 @@
             }
         }
     }
-    $.erase = function( id ){
-        Storage.removeItem( id );
-        Storage.removeItem( id+"_deps" )
-        Storage.removeItem( id+"_parent" )
-    }
 
     function loadStorage( id ){
         var factory =  Storage.getItem( id);
-        if(!!factory){
+        if(factory && !modules[id]){
             var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps") ;
-            deps = deps ?  deps.match($.rword) : "";
-            Module._update(id, parent);
-            var module = $.modules[id];
-            module.state = 1;
+            var deps = Storage.getItem(id+"_deps");
+            deps = deps ?  deps.match( $.rword ) : "";
+            Module._update( id, parent );
+            var module = $.modules[ id ];
+            module.state =  module.state || 1;
             var fn = Function( "$,module,exports,require","return "+ factory )
             ($, module, module.exports, module.require());
-            $.log("这是通过本地储存来获取目标模块", 7);
             $.define( id, deps, fn );
-            return false;
-        }else{
-            return true;
         }
     }
 
@@ -536,8 +534,7 @@
             args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
             (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
         }
-        //将iframe中的函数转换为父窗口的函数
-        Ns.define.apply(module, args)
+        Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
 
     function install( id, deps, callback ){
@@ -554,7 +551,6 @@
         var a = common[match[0]];
         var b = common[match[1]];
         var c = common[match[2]];
-        //  console.log([a,b,c])
         if( a && b && a != b && b != c  ){//exports, require, module的位置随便
             ret =  callback.apply(global, [a, b, c]);
         }else{
@@ -7064,7 +7060,7 @@ define("fx", ["$css"],function(){
 })
 
 
-// console.log($["@path"])
+
 }( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
