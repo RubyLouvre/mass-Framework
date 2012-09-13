@@ -69,7 +69,7 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
             }
             return [ obj ]
         },
-        //将字符串中的占位符替换为对应的键值
+        //字符串插值
         //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
         format: function(str, object){
             var array = $.slice(arguments,1);
