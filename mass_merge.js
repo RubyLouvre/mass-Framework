@@ -1,14 +1,14 @@
 + function( global, DOC ){
-    var _$ = global.$//保存已有同名变量
+    var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
-    var namespace = DOC.URL.replace( rmakeid,'')
-    var w3c = DOC.dispatchEvent //w3c事件模型
-    var HTML = DOC.documentElement;
-    var HEAD = DOC.head || DOC.getElementsByTagName( "head" )[0]
-    var commonNs = global[ namespace ];//公共命名空间
+    var NsKey = DOC.URL.replace( rmakeid,'')
+    var NsVal = global[ NsKey ];//公共命名空间
+    var W3C   = DOC.dispatchEvent //w3c事件模型
+    var HTML  = DOC.documentElement;
+    var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var loadings = [];//正在加载中的模块列表
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
-    var loadings = [];//正在加载中的模块列表
     var cbi = 1e5 ; //用于生成回调函数的名字
     var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
     var class2type = {
@@ -21,8 +21,8 @@
         "null"                    : "Null"    ,
         "NaN"                     : "NaN"     ,
         "undefined"               : "Undefined"
-    },
-    toString = class2type.toString;
+    }
+    var toString = class2type.toString;
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return  $.require( all+",ready", expr );
@@ -33,13 +33,13 @@
         }
     }
     //多版本共存
-    if( typeof commonNs !== "function"){
-        commonNs = $;//公用命名空间对象
-        commonNs.uuid = 1;
+    if( typeof NsVal !== "function"){
+        NsVal = $;//公用命名空间对象
+        NsVal.uuid = 1;
     }
-    if(commonNs.mass !== mass  ){
-        commonNs[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
-        if(commonNs.mass || (_$ && _$.mass == null)) {
+    if(NsVal.mass !== mass  ){
+        NsVal[ mass ] = $;//保存当前版本的命名空间对象到公用命名空间对象上
+        if(NsVal.mass || ($$ && $$.mass == null)) {
             postfix = ( mass + "" ).replace(/\D/g, "" ) ;//是否强制使用多库共存
         }
     }else{
@@ -70,13 +70,13 @@
         mix: mix,
         rword: /[^, ]+/g,
         mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
-        "@bind": w3c ? "addEventListener" : "attachEvent",
+        "@bind": W3C ? "addEventListener" : "attachEvent",
         //将内部对象挂到window下，此时可重命名，实现多库共存  name String 新的命名空间
         exports: function( name ) {
-            _$ && ( global.$ = _$ );//多库共存
+            $$ && ( global.$ = $$ );//多库共存
             name = name || $.config.nick;//取得当前简短的命名空间
             $.config.nick = name;
-            global[ namespace ] = commonNs;
+            global[ NsKey ] = NsVal;
             return global[ name ]  = this;
         },
         
@@ -160,14 +160,14 @@
         },
         //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
         getUid: global.getComputedStyle ? function( obj ){
-            return obj.uniqueNumber || ( obj.uniqueNumber = commonNs.uuid++ );
+            return obj.uniqueNumber || ( obj.uniqueNumber = NsVal.uuid++ );
         }: function( obj ){
             if(obj.nodeType !== 1){
-                return obj.uniqueNumber || ( obj.uniqueNumber = commonNs.uuid++ );
+                return obj.uniqueNumber || ( obj.uniqueNumber = NsVal.uuid++ );
             }
             var uid = obj.getAttribute("uniqueNumber");
             if ( !uid ){
-                uid = commonNs.uuid++;
+                uid = NsVal.uuid++;
                 obj.setAttribute( "uniqueNumber", uid );
             }
             return +uid;//确保返回数字
@@ -237,7 +237,7 @@
     }
     Module._load = function( url, parent) {
         url = Module._resolveFilename( url, parent.id )[0];
-        var module = Module._cache[url];
+        var module = Module._cache[ url ];
         if (module) {
             return module.exports;
         }
@@ -304,18 +304,18 @@
     var modules = $.modules = Module._cache = {};
     Module._update( "ready" );
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
-    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g;
+    var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*/;//用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
-        bind: w3c ? function( el, type, fn, phase ){
+        bind: W3C ? function( el, type, fn, phase ){
             el.addEventListener( type, fn, !!phase );
             return fn;
         } : function( el, type, fn ){
             el.attachEvent && el.attachEvent( "on"+type, fn );
             return fn;
         },
-        unbind: w3c ? function( el, type, fn, phase ){
+        unbind: W3C ? function( el, type, fn, phase ){
             el.removeEventListener( type, fn || $.noop, !!phase );
         } : function( el, type, fn ){
             if ( el.detachEvent ) {
@@ -372,15 +372,16 @@
             }
             if(typeof args[2] == "function"){
                 var factroy = args[2].toString()
-                .replace(/^\s*\/\*[\s\S]*?\*\/\s*$/mg, '') // block comments
-                .replace(/^\s*\/\/.*$/mg, '')
-                factroy.replace(rrequire,function(a,b){
+                .replace(rcomment,"")
+                .replace(rrequire,function(a,b){
                     args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
+                    return a;
                 });
-                if(this.exports && this.id && $.config.storage ){
-                    Storage.setItem( this.id+"_deps", args[1]+"")
-                    Storage.setItem( this.id+"_parent", this.parent)
-                    Storage.setItem( this.id,factroy)
+                if(this.exports && this.id && $.config.storage && !Storage.getItem( this.id) ){
+                    Storage.setItem( this.id, factroy);
+                    Storage.setItem( this.id+"_deps", args[1]+"");
+                    Storage.setItem( this.id+"_parent",  this.parent);
+                    Storage.setItem( this.id+"_version", new Date - 0);
                 }
             }else{
                 var ret = args[2];
@@ -415,10 +416,18 @@
                 }
             }
         },
-        erase : function( id ){
-            Storage.removeItem( id );
-            Storage.removeItem( id+"_deps" )
-            Storage.removeItem( id+"_parent" )
+        erase : function( id, v ){
+            if(id == void 0){
+                Storage.clear();
+            }else{
+                var old = Storage.getItem( id+"_version" );
+                if(old && (!v || v > Number(old)) ){
+                    Storage.removeItem( id );
+                    Storage.removeItem( id+"_deps" )
+                    Storage.removeItem( id+"_parent" )
+                    Storage.removeItem( id+"_version" )
+                }
+            }
         }
     });
     var Storage =  {
@@ -474,7 +483,7 @@
             Module._update( id, parent );
             var module = $.modules[ id ];
             module.state =  module.state || 1;
-            var fn = Function( "$,module,exports,require","return "+ factory )
+            var fn = Function( "$,module,exports,require,define","return "+ factory )
             ($, module, module.exports, module.require());
             $.define( id, deps, fn );
         }
@@ -566,7 +575,7 @@
         $.config.alias[ "$"+a ] = $.config.base + a + ".js"
     });
     //domReady机制
-    var readyFn, ready =  w3c ? "DOMContentLoaded" : "readystatechange" ;
+    var readyFn, ready =  W3C ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
         modules[ "ready" ].state = 2;
         $._checkDeps();
@@ -588,7 +597,7 @@
         fireReady();//如果在domReady之外加载
     }else {
         $.bind( DOC, ready, readyFn = function(){
-            if ( w3c || DOC.readyState === "complete" ){
+            if ( W3C || DOC.readyState === "complete" ){
                 fireReady();
             }
         });
@@ -644,7 +653,7 @@
     }
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind( global, "popstate", function(){
-        namespace = DOC.URL.replace(rmakeid,'');
+        NsKey = DOC.URL.replace(rmakeid,'');
         $.exports();
     });
     $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
@@ -3233,7 +3242,7 @@ define("data", ["$lang"], function(){
 //==================================================
 // 节点操作模块
 //==================================================
-define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang, support ){
+define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang,support ){
     $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
@@ -4885,7 +4894,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     }  else if ( size === void 0 ) {
                         return getWH( target, name, num )
                     } else {
-                        $.log(size)
                         return num > 0  ? this : $.css( target, lower, size );
                     }
                 }, this)

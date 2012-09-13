@@ -358,7 +358,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     }  else if ( size === void 0 ) {
                         return getWH( target, name, num )
                     } else {
-                        $.log(size)
                         return num > 0  ? this : $.css( target, lower, size );
                     }
                 }, this)
