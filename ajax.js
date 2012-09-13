@@ -1,7 +1,7 @@
 //=========================================
-//  数据交互模块 去掉node event模块等依赖
+//  数据交互模块
 //==========================================
-define("ajax",["$flow","$node"], function(){
+define("ajax",["$flow"], function(){
     $.log("已加载ajax模块", 7);
     var global = this,
     DOC = global.document,
@@ -317,7 +317,6 @@ define("ajax",["$flow","$node"], function(){
                 status: 0,
                 transport: null
             });
-            this.uniqueID = "xhr" + this.uuid().replace(/-/g,"");
             this.setOptions("options", opts );//创建一个options保存原始参数
         },
         setRequestHeader: function(name, value) {
@@ -329,7 +328,7 @@ define("ajax",["$flow","$node"], function(){
         },
         getResponseHeader:function (name, match) {
             if (this.state === 2) {
-                while (( match = rheaders.exec( this.responseHeadersString ) )) {
+                while (( match = rheaders.exec(this.responseHeadersString) )) {
                     this.responseHeaders[ match[1] ] = match[ 2 ];
                 }
                 match = this.responseHeaders[ name ];
@@ -537,13 +536,13 @@ define("ajax",["$flow","$node"], function(){
             head.insertBefore(script, head.firstChild);
         },
 
-        respond: function(event, abort) {
+        respond: function(event, isAbort) {
             var node = this.script, dummyXHR = this.dummyXHR;
             // 防止重复调用,成功后 abort
             if (!node) {
                 return;
             }
-            if (abort || /loaded|complete|undefined/i.test(node.readyState)  || event == "error"  ) {
+            if (isAbort || /loaded|complete|undefined/i.test(node.readyState)  || event == "error"  ) {
                 node.onerror = node.onload = node.onreadystatechange = null;
                 var parent = node.parentNode;
                 if(parent && parent.nodeType === 1){
@@ -551,7 +550,7 @@ define("ajax",["$flow","$node"], function(){
                     delete this.script;
                 }
                 //如果没有中止请求并没有报错
-                if (!abort && event != "error") {
+                if (!isAbort && event != "error") {
                     dummyXHR.dispatch(200, "success");
                 }
                 // 非 ie<9 可以判断出来
@@ -572,7 +571,7 @@ define("ajax",["$flow","$node"], function(){
     ajaxflow.bind("start", function(dummyXHR, url, jsonp, jsonpCallback) {
         $.log("jsonp start...");
         var namespace =  DOC.URL.replace(/(#.+|\W)/g,'');
-        jsonpCallback =  dummyXHR.jsonp = jsonpCallback || dummyXHR.uniqueID;
+        jsonpCallback = dummyXHR.jsonp = jsonpCallback || "jsonp"+dummyXHR.uuid().replace(/-/g,"");
         dummyXHR.options.url = url  + (rquery.test(url) ? "&" : "?" ) + jsonp + "=" + namespace +"."+ jsonpCallback;
         dummyXHR.options.dataType = "jsonp";
         //将后台返回的json保存在惰性函数中
@@ -628,36 +627,34 @@ define("ajax",["$flow","$node"], function(){
             };
             var iframe = createIframe(dummyXHR, this);
             //必须指定method与enctype，要不在FF报错
-            // 表单包含了一个文件输入元素，但是其中缺少 method=POST 以及 enctype=multipart/form-data，所以文件将不会被发送。
+            //“表单包含了一个文件输入元素，但是其中缺少 method=POST 以及 enctype=multipart/form-data，所以文件将不会被发送。”
             // 设置target到隐藏iframe，避免整页刷新
-            form.target =  dummyXHR.uniqueID;
+            form.target =  "iframe-upload-"+dummyXHR.uniqueID;
             form.action =  options.url;
             form.method =  "POST";
             form.enctype = "multipart/form-data";
-            var self = this;
-            var callback = function(e){
-                self.respond.call( self, e || event, 0, iframe, form)
-            }
-            this.callback = callback;
             this.fields = options.data ? addDataToForm(options.data, form) : [];
+            this.form = form;//一个表单元素
             $.log("iframe transport...");
             setTimeout(function () {
-                $.bind(iframe, "load", callback);
-                $.bind(iframe, "error", callback);
+                $(iframe).bind("load error",this.respond);
                 form.submit();
             }, 16);
         },
 
-        respond: function( event, abort, iframe, form   ) {
+        respond: function( event  ) {
+            var iframe = this,
+            transport = iframe.transport;
             // 防止重复调用 , 成功后 abort
-            if (!this.callback) {
+            if (!transport) {
                 return;
             }
             $.log("transports.iframe respond")
-            var dummyXHR = this.dummyXHR;
-            var callback = this.callback;
-            delete this.callback;
-            if (event.type == "load") {
+            var form = transport.form,
+            eventType = event.type,
+            dummyXHR = transport.dummyXHR;
+            iframe.transport = undefined;
+            if (eventType == "load") {
                 var doc = iframe.contentDocument ? iframe.contentDocument : window.frames[iframe.id].document;
                 var iframeDoc = iframe.contentWindow.document;
                 if (doc.XMLDocument) {
@@ -675,22 +672,21 @@ define("ajax",["$flow","$node"], function(){
                     dummyXHR.responseXML = doc;
                 }
                 dummyXHR.dispatch(200, "success");
-            } else if (event.type == 'error') {
+            } else if (eventType == 'error') {
                 dummyXHR.dispatch(500, "error");
             }
-            for(var i in this.backups){
-                form[i] = this.backups[i];
+            for(var i in transport.backups){
+                form[i] = transport.backups[i];
             }
             //还原form的属性
-            this.fields.forEach(function(elem){
+            transport.fields.forEach(function(elem){
                 elem.parentNode.removeChild(elem);
             });
-            $.unbind(iframe, "load", callback);
-            $.unbind(iframe, "error", callback);
+            $(iframe).unbind("load",transport.respond).unbind("error",transport.respond);
             iframe.clearAttributes &&  iframe.clearAttributes();
             setTimeout(function() {
                 // Fix busy state in FF3
-                iframe.parentNode.removeChild( iframe );
+                iframe.parentNode.removeChild(iframe);
                 $.log("iframe.parentNode.removeChild(iframe)")
             }, 16);
         }

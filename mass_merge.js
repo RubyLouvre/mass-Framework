@@ -6016,8 +6016,6 @@ define("ajax",["$flow"], function(){
                 ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
                 dataType = "script"
             }else{
-                $.log("xxxxxxxxxxxxxxxx")
-                            $.log(opts)
                 dataType = dummyXHR.options.dataType = "json";
             }
         }
