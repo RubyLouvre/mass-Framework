@@ -233,13 +233,17 @@
         cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
-        var str = cur.getAttribute("debug");
+        var a = cur.getAttribute("debug");
+        var b = cur.getAttribute("storage");
         var kernel = $.config;
-        kernel.debug = str == 'true' || str == '1';
+        kernel.debug = a == 'true' || a == '1';
+        kernel.storage = b == 'true' || b == '1';
         kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
+        kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
+
     })(DOC.getElementsByTagName( "script" ));
 
     $.noop = $.error = $.debug = function(){};
@@ -257,8 +261,8 @@
         this.children = [];
     }
     Module._load = function( url, parent) {
-        url = Module._resolveFilename( url, parent.id )[0];
-        var module = Module._cache[url];
+        url = Module._resolve( url, parent.id )[0];
+        var module = Module._cache[ url ];
         if (module) {
             return module.exports;
         }
@@ -283,7 +287,7 @@
             return Module._load(path, self)
         }
     }
-    Module._resolveFilename = function(url, parent, ret){
+    Module._resolve = function(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
         if( url === "ready"){//特别处理ready标识符
@@ -325,9 +329,7 @@
     var modules = $.modules = Module._cache = {};
     Module._update( "ready" );
     var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
-    var rcomment = /\/\/.*?[\r\n]|\/\*(?:.|[\r\n])*?\*\//g;
-    var rbcomment = /^\s*\/\*[\s\S]*?\*\/\s*$/mg // block comments
-    var rlcomment = /^\s*\/\/.*$/mg
+    var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*/;//用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
@@ -345,7 +347,6 @@
                 el.detachEvent( "on" + type, fn || $.noop );
             }
         },
-        resolveFilename: Module._resolveFilename,
         //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
         require: function( list, factory, parent ){
             var deps = {}, // 用于检测它的依赖是否都为2
@@ -353,7 +354,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolveFilename(el, parent || $.config.base ), url = array[0];
+                var array = Module._resolve(el, parent || $.config.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
                     //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
@@ -395,16 +396,15 @@
             }
             if(typeof args[2] == "function"){
                 var factroy = args[2].toString()
-                .replace(/^\s*\/\*[\s\S]*?\*\/\s*$/mg, '') // block comments
-                .replace(/^\s*\/\/.*$/mg, '');
-                factroy.replace(rrequire,function(a,b){
+                .replace(rcomment,"")
+                .replace(rrequire,function(a,b){
                     args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
+                    return a;
                 });
-                console.log(factroy)
                 if(this.exports && this.id && $.config.storage && !Storage.getItem( this.id) ){
                     Storage.setItem( this.id, factroy);
                     Storage.setItem( this.id+"_deps", args[1]+"");
-                    Storage.setItem( this.id+"_parent", this.parent);
+                    Storage.setItem( this.id+"_parent",  this.parent);
                     Storage.setItem( this.id+"_version", new Date - 0);
                 }
             }else{
@@ -454,12 +454,7 @@
             }
         }
     });
-    var Storage =  {
-        setItem: $.noop,
-        getItem: $.noop,
-        removeItem: $.noop,
-        clear: $.noop
-    }
+    var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
         Storage = localStorage;
     }else if( HTML.addBehavior){
@@ -497,7 +492,17 @@
             }
         }
     }
-
+    var rerase = new RegExp('(?:^| )' + $.config.erase + '(?:(?:=([^;]*))|;|$)')
+    var match = String(DOC.cookie).match( rerase );
+    //读取从后端过来的cookie指令，转换成一个对象，键名为模块的URL，值为版本号（这是一个时间戮）
+    if(match && match[1]){
+        try{
+            var obj = eval("0,"+match[1]);
+            for(var i in obj){//$.erase会版本号比现在小的模块从本地储存中删掉
+                $.erase(i, obj[i])
+            }
+        }catch(e){}
+    }
     function loadStorage( id ){
         var factory =  Storage.getItem( id);
         if(factory && !modules[id]){
@@ -570,6 +575,7 @@
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
 
+    
     function install( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
@@ -580,7 +586,7 @@
             require: typeof module.require == "function" ? module.require() : $.noop,
             module:  module
         }
-        var match = callback.toString().replace(rparams,"$1").replace(rbcomment,"").replace(rlcomment,"").match($.rword)||[]
+        var match = callback.toString().replace(rparams,"$1").replace(rcomment,"").match($.rword)||[]
         var a = common[match[0]];
         var b = common[match[1]];
         var c = common[match[2]];
@@ -770,5 +776,6 @@ http://www.cnblogs.com/rainman/archive/2011/06/22/2086069.html
 http://www.infoq.com/cn/articles/how-to-create-great-js-module 优秀的JavaScript模块是怎样炼成的
 https://github.com/aralejs
 http://y.duowan.com/resources/js/jsFrame/demo/index.html
+https://github.com/etaoux/brix
  */
 
