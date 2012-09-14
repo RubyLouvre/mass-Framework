@@ -13,13 +13,14 @@
         </script>
         <script>
             //加载当前目录下的more目录的aaa.js
-            $.require("./more/aaa", function(a){
-                $.log(a)
+            $.require("ready,node,attr", function(a){
+          
+                $.log($("h1").attr("@data"))
             })
 
         </script>
     </head>
     <body>
-        <h1>SAW规范的模块加载例子 by 司徒正美</h1>
+        <h1 @data=eee>SAW规范的模块加载例子 by 司徒正美</h1>
     </body>
 </html>
