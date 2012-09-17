@@ -26,7 +26,6 @@
                         }
                     }
                 });
-                var test = document.getElementById("test")
                 $.View(model);
                 setTimeout(function(){
                     model.firstName("司徒正美")
@@ -34,7 +33,7 @@
 
             })
         </script>
-        <p> <strong @bind="text: firstName" > </strong></p>
+        <p> <strong @bind="text: firstName" >默认值 </strong></p>
         <p> <input @bind="value: lastName" /> </p>
         <p @bind="html: fullName"> </p>
     </body>

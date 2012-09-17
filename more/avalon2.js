@@ -1,6 +1,7 @@
 define("avalon",["$attr","$event"], function(){
     $.log("已加载avalon v2")
     //http://angularjs.org/
+    var BINDING = $.config.binding || "@bind"
     $.ViewModel = function(data){
         var model = {}
         if(Array.isArray(data)){
@@ -22,6 +23,7 @@ define("avalon",["$attr","$event"], function(){
     }
     var uuid = 0;
     var expando = new Date - 0;
+    //ViewModel的组成单位
     function Field( host, key, field ){
         field.toString = field.valueOf = function(){
             return field.value;
@@ -39,6 +41,8 @@ define("avalon",["$attr","$event"], function(){
     //一个域对象拥有parents属性,里面是其他依赖于它的域对象
     //一个域对象拥有uuid属性,用于区分它是否已经初始化了
     //一个域对象的toString与valueOf函数总是返回其value值
+    //undividedFiled是指在ViewModel定义时，值为类型为字符串，布尔或数值的Field。
+    //它们是位于双向依赖链的最底层。不需要依赖于其他Field！
     function undividedFiled( host, key, val ){
         function field( neo ){
             if( this[ expando ] ){ //收集依赖
@@ -58,7 +62,8 @@ define("avalon",["$attr","$event"], function(){
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
-    //用于生成一个高级域对象
+    //computedFiled是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
+    //它们是位于双向依赖链的中间层，需要依赖于其他undividedFiled或computedFiled的返回值计算自己的value。
     function computedFiled( host, key, val, type){
         var getter, setter//构建一个至少拥有getter,scope属性的对象
         if(type == "get"){//getter必然存在
@@ -98,7 +103,8 @@ define("avalon",["$attr","$event"], function(){
         }
         return Field( host, key, field );
     }
- 
+    //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
+    //把写在元素节点上的@bind属性的分解出来之时生成的。
     function interactedFiled (node, value, directive ){
         function field(neo){
             if( arguments.length ){//如果是写方法,则可能改变其value值,并引发其依赖域的值的改变
@@ -120,6 +126,7 @@ define("avalon",["$attr","$event"], function(){
         }
         return field
     }
+    //执行绑定在元素标签内的各种指令
     var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
     $.ViewDirectives = {
         text: {
@@ -148,6 +155,19 @@ define("avalon",["$attr","$event"], function(){
                 $( node ).html( val )
             },
             stopBindings: true
+        },
+        visible: {
+            update:  function( node, val ){
+                node.style.display = val ? "" : "none";
+            }
+        },
+        enable: {
+            update:  function( node, val ){
+                if (val && node.disabled)
+                    node.removeAttribute("disabled");
+                else if ((!val) && (!node.disabled))
+                    node.disabled = true;
+            }
         }
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
@@ -176,7 +196,7 @@ define("avalon",["$attr","$event"], function(){
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, model, setData ){
         //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        var attr = node.getAttribute("@bind"), names = [], fns = []
+        var attr = node.getAttribute(BINDING), names = [], fns = []
         for(var i in model){
             if(model.hasOwnProperty(i)){
                 names.push(i);
@@ -212,7 +232,7 @@ define("avalon",["$attr","$event"], function(){
         }
     }
     function hasBindings( node ){
-        var str = node.getAttribute( "@bind" );
+        var str = node.getAttribute( BINDING );
         return typeof str === "string" && str.indexOf(":") > 1
     }
     function getChildren(node){

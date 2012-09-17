@@ -236,6 +236,7 @@
         var a = cur.getAttribute("debug");
         var b = cur.getAttribute("storage");
         var kernel = $.config;
+        $.basenode = cur;
         kernel.debug = a == 'true' || a == '1';
         kernel.storage = b == 'true' || b == '1';
         kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
