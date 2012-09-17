@@ -12,49 +12,33 @@
                 XXXX
             </li>
         </ul>
-        <div {{bindAttr class="isUrgent priority"}} id=aaa>
-            Warning!
-    </div>
-    <script>
 
-        $.require("ready,./more/avalon2", function(){
+        <script>
+
+            $.require("ready,./more/avalon2", function(){
    
-            var model = $.ViewModel({
-                firstName: "aaa",
-                lastName:  "bbb",
-           /*   otherName: function(){
-                    return this.firstName() + " other"
-                },
-                moreName: function(){
-                    return this.otherName() + " more"
-                },*/
-                fullName: {
-                    setter: function(val){
-                        console.log(val)
-                        var arr = val.split(" ")
-                        this.firstName(arr[0])
-                        this.lastName(arr[1]);
-                        return val
-                    },
-                    getter: function(){
-                        return this.firstName() +" "+ this.lastName()
+                var model = $.ViewModel({
+                    firstName: "aaa",
+                    lastName:  "bbb",
+                    fullName: {
+                        setter: function(val){
+                            var arr = val.split(" ")
+                            this.firstName(arr[0])
+                            this.lastName(arr[1]);
+                        },
+                        getter: function(){
+                            return this.firstName() +" "+ this.lastName()
+                        }
                     }
-                }
-               /* nickName: function(){
-                    return this.fullName() + " nick"
-                }*/
-            });
-            /* console.log(model.firstName.uuid)
-            console.log(model.firstName.parents)
-            console.log(model.otherName.parents)
-            console.log(model.fullName.parents)
-            console.log(model.nickName.uuid)*/
-
-          //  model.firstName("777")
-          console.log("====================")
-            console.log( model.fullName("111 2222") )
-         //   console.log( model.nickName() )
-        })
-    </script>
-</body>
+                });
+                var test = document.getElementById("test")
+                $.View(model, test);
+                setTimeout(function(){
+                    model.firstName("司徒正美")
+                },1000)
+  
+            })
+        </script>
+        <p> <strong @bind="text: firstName" id="test"> </strong></p>
+    </body>
 </html>
