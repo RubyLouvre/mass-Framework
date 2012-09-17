@@ -112,15 +112,17 @@ define("avalon",["$attr","$event"], function(){
                     field.value = neo;
                 }
             }
+            var val = value.uuid ? value() : value
             if( directive.init && !field.init){
-                directive.init(node, value(), value)
+                directive.init(node, val, value)
             }
             field.init = 1
-            directive.update && directive.update(node, value())
+            directive.update && directive.update(node, val)
             return field.value;
         }
         Field(node, "interacted" ,field);
-        if( !field.uuid ){
+        //这里要想办法收集依赖！
+        if( !field.uuid && typeof value == "function"){
             $.Array.ensure( value.parents, field );
             field.uuid = ++uuid;
         }
@@ -156,6 +158,7 @@ define("avalon",["$attr","$event"], function(){
             },
             stopBindings: true
         },
+        //通过display样式控制显隐
         visible: {
             update:  function( node, val ){
                 node.style.display = val ? "" : "none";
@@ -167,6 +170,17 @@ define("avalon",["$attr","$event"], function(){
                     node.removeAttribute("disabled");
                 else if ((!val) && (!node.disabled))
                     node.disabled = true;
+            }
+        },
+        style: {
+            update:  function( node, val ){
+                console.log(node)
+                var style = node.style, styleName
+                for (var name in val) {
+                    styleName = $.cssName(name, style) || name
+                    style[styleName] = val[ name ] || "";
+                }
+                console.log("---------------------")
             }
         }
     }
@@ -200,11 +214,16 @@ define("avalon",["$attr","$event"], function(){
         for(var i in model){
             if(model.hasOwnProperty(i)){
                 names.push(i);
-                fns.push( model[i] )
+                fns.push( model[i] );
             }
         }
-        var str = normalizeJSON("{"+ attr+"}");
-        var fn = Function( names, " return "+ str);
+        var fn
+        try{
+            fn = Function( names, " return ({"+ str +"})");
+        }catch(e){
+            var str = normalizeJSON("{"+ attr+"}");
+            fn = Function( names, " return ("+ str +")");
+        }
         var obj = fn.apply(node, fns);
         var continueBindings = true;
         for(var key in obj){
@@ -274,145 +293,140 @@ define("avalon",["$attr","$event"], function(){
         }
     }
 
-    function normalizeJSON( json ){
-        return json
-    }
     //============================================================
     // IE678+IE9的兼容模式补丁 by 司徒正美
     //============================================================
-    try{
-        Function("return {float:10,class:11}")();
-        $.log("safe!", 8)
-    } catch(e){
-        $.log("这浏览器的对象的键名为关键字时，需要用引号括起来");
-        normalizeJSON = function(json){
-            $.log("IE normalizeJSON", 8)
-            var keyValueArray = parseObjectLiteral(json),resultStrings = [],
-            keyValueEntry, propertyToHook = [];
-            for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
-                if (resultStrings.length > 0)
-                    resultStrings.push(",");
-                if (keyValueEntry['key']) {
-                    var key = keyValueEntry['key'].trim();
-                    var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
-                    resultStrings.push(quotedKey);
-                    resultStrings.push(":");
-                    if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
-                        val = normalizeJSON( val );//逐层加引号
-                    }
-                    resultStrings.push(val);
-                } else if (keyValueEntry['unknown']) {
-                    resultStrings.push(keyValueEntry['unknown']);//基于跑到这里就是出错了
+    $.log("这浏览器的对象的键名为关键字时，需要用引号括起来");
+    function normalizeJSON(json, array){
+        var keyValueArray = parseObjectLiteral(json),resultStrings = [],
+        keyValueEntry, propertyToHook = [];
+        for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
+            if (resultStrings.length > 0)
+                resultStrings.push(",");
+            if (keyValueEntry['key']) {
+                var key = keyValueEntry['key'].trim();
+                var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
+                resultStrings.push(quotedKey);
+                resultStrings.push(":");
+                if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
+                    val = normalizeJSON( val );//逐层加引号
+                }
+                resultStrings.push(val);
+            } else if (keyValueEntry['unknown']) {
+                resultStrings.push(keyValueEntry['unknown']);//基于跑到这里就是出错了
+            }
+        }
+        if(array){
+            return resultStrings
+        }
+        resultStrings = resultStrings.join("");
+        return "{" +resultStrings +"}";
+    };
+    //------------------------------------------
+    var restoreCapturedTokensRegex = /\@mass_token_(\d+)\@/g;
+    function restoreTokens(string, tokens) {
+        var prevValue = null;
+        while (string != prevValue) { // Keep restoring tokens until it no longer makes a difference (they may be nested)
+            prevValue = string;
+            string = string.replace(restoreCapturedTokensRegex, function (match, tokenIndex) {
+                return tokens[tokenIndex];
+            });
+        }
+        return string;
+    }
+    function parseObjectLiteral(objectLiteralString) {
+        var str = objectLiteralString.trim();
+        if (str.length < 3)
+            return [];
+        if (str.charAt(0) === "{")// 去掉最开始{与最后的}
+            str = str.substring(1, str.length - 1);
+        // 首先用占位符把字段中的字符串与正则处理掉
+        var tokens = [];
+        var tokenStart = null, tokenEndChar;
+        for (var position = 0; position < str.length; position++) {
+            var c = str.charAt(position);//IE6字符串不支持[],开始一个个字符分析
+            if (tokenStart === null) {
+                switch (c) {
+                    case '"':
+                    case "'":
+                    case "/":
+                        tokenStart = position;//索引
+                        tokenEndChar = c;//值
+                        break;
+                }//如果再次找到一个与tokenEndChar相同的字符,并且此字符前面不是转义符
+            } else if ((c == tokenEndChar) && (str.charAt(position - 1) !== "\\")) {
+                var token = str.substring(tokenStart, position + 1);
+                tokens.push(token);
+                var replacement = "@mass_token_" + (tokens.length - 1) + "@";//对应的占位符
+                str = str.substring(0, tokenStart) + replacement + str.substring(position + 1);
+                position -= (token.length - replacement.length);
+                tokenStart = null;
+            }
+        }
+        // 将{},[],()等括起来的部分全部用占位符代替
+        tokenEndChar = tokenStart = null;
+        var tokenDepth = 0, tokenStartChar = null;
+        for (position = 0; position < str.length; position++) {
+            var c = str.charAt(position);
+            if (tokenStart === null) {
+                switch (c) {
+                    case "{": tokenStart = position; tokenStartChar = c;
+                        tokenEndChar = "}";
+                        break;
+                    case "(": tokenStart = position; tokenStartChar = c;
+                        tokenEndChar = ")";
+                        break;
+                    case "[": tokenStart = position; tokenStartChar = c;
+                        tokenEndChar = "]";
+                        break;
                 }
             }
-            resultStrings = resultStrings.join("");
-            return "{" +resultStrings +"}";
-        };
-        //------------------------------------------
-        var restoreCapturedTokensRegex = /\@mass_token_(\d+)\@/g;
-        function restoreTokens(string, tokens) {
-            var prevValue = null;
-            while (string != prevValue) { // Keep restoring tokens until it no longer makes a difference (they may be nested)
-                prevValue = string;
-                string = string.replace(restoreCapturedTokensRegex, function (match, tokenIndex) {
-                    return tokens[tokenIndex];
-                });
-            }
-            return string;
-        }
-        function parseObjectLiteral(objectLiteralString) {
-            var str = objectLiteralString.trim();
-            if (str.length < 3)
-                return [];
-            if (str.charAt(0) === "{")// 去掉最开始{与最后的}
-                str = str.substring(1, str.length - 1);
-            // 首先用占位符把字段中的字符串与正则处理掉
-            var tokens = [];
-            var tokenStart = null, tokenEndChar;
-            for (var position = 0; position < str.length; position++) {
-                var c = str.charAt(position);//IE6字符串不支持[],开始一个个字符分析
-                if (tokenStart === null) {
-                    switch (c) {
-                        case '"':
-                        case "'":
-                        case "/":
-                            tokenStart = position;//索引
-                            tokenEndChar = c;//值
-                            break;
-                    }//如果再次找到一个与tokenEndChar相同的字符,并且此字符前面不是转义符
-                } else if ((c == tokenEndChar) && (str.charAt(position - 1) !== "\\")) {
+            if (c === tokenStartChar)
+                tokenDepth++;
+            else if (c === tokenEndChar) {
+                tokenDepth--;
+                if (tokenDepth === 0) {
                     var token = str.substring(tokenStart, position + 1);
                     tokens.push(token);
-                    var replacement = "@mass_token_" + (tokens.length - 1) + "@";//对应的占位符
+                    replacement = "@mass_token_" + (tokens.length - 1) + "@";
                     str = str.substring(0, tokenStart) + replacement + str.substring(position + 1);
                     position -= (token.length - replacement.length);
                     tokenStart = null;
                 }
             }
-            // 将{},[],()等括起来的部分全部用占位符代替
-            tokenEndChar = tokenStart = null;
-            var tokenDepth = 0, tokenStartChar = null;
-            for (position = 0; position < str.length; position++) {
-                var c = str.charAt(position);
-                if (tokenStart === null) {
-                    switch (c) {
-                        case "{": tokenStart = position; tokenStartChar = c;
-                            tokenEndChar = "}";
-                            break;
-                        case "(": tokenStart = position; tokenStartChar = c;
-                            tokenEndChar = ")";
-                            break;
-                        case "[": tokenStart = position; tokenStartChar = c;
-                            tokenEndChar = "]";
-                            break;
-                    }
-                }
-                if (c === tokenStartChar)
-                    tokenDepth++;
-                else if (c === tokenEndChar) {
-                    tokenDepth--;
-                    if (tokenDepth === 0) {
-                        var token = str.substring(tokenStart, position + 1);
-                        tokens.push(token);
-                        replacement = "@mass_token_" + (tokens.length - 1) + "@";
-                        str = str.substring(0, tokenStart) + replacement + str.substring(position + 1);
-                        position -= (token.length - replacement.length);
-                        tokenStart = null;
-                    }
-                }
-            }
-            //拆解字段，还原占位符的部分
-            var result = [];
-            var keyValuePairs = str.split(",");
-            for (var i = 0, j = keyValuePairs.length; i < j; i++) {
-                var pair = keyValuePairs[i];
-                var colonPos = pair.indexOf(":");
-                if ((colonPos > 0) && (colonPos < pair.length - 1)) {
-                    var key = pair.substring(0, colonPos);
-                    var value = pair.substring(colonPos + 1);
-                    result.push({
-                        'key': restoreTokens(key, tokens),
-                        'value': restoreTokens(value, tokens)
-                    });
-                } else {//到这里应该抛错吧
-                    result.push({
-                        'unknown': restoreTokens(pair, tokens)
-                    });
-                }
-            }
-            return result;
         }
-        function ensureQuoted(key) {
-            var trimmedKey = key.trim()
-            switch (trimmedKey.length && trimmedKey.charAt(0)) {
-                case "'":
-                case '"':
-                    return key;
-                default:
-                    return "'" + trimmedKey + "'";
+        //拆解字段，还原占位符的部分
+        var result = [];
+        var keyValuePairs = str.split(",");
+        for (var i = 0, j = keyValuePairs.length; i < j; i++) {
+            var pair = keyValuePairs[i];
+            var colonPos = pair.indexOf(":");
+            if ((colonPos > 0) && (colonPos < pair.length - 1)) {
+                var key = pair.substring(0, colonPos);
+                var value = pair.substring(colonPos + 1);
+                result.push({
+                    'key': restoreTokens(key, tokens),
+                    'value': restoreTokens(value, tokens)
+                });
+            } else {//到这里应该抛错吧
+                result.push({
+                    'unknown': restoreTokens(pair, tokens)
+                });
             }
+        }
+        return result;
+    }
+    function ensureQuoted(key) {
+        var trimmedKey = key.trim()
+        switch (trimmedKey.length && trimmedKey.charAt(0)) {
+            case "'":
+            case '"':
+                return key;
+            default:
+                return "'" + trimmedKey + "'";
         }
     }
+//  }
 
 })
 /*
