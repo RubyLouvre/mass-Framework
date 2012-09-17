@@ -105,20 +105,27 @@ define("avalon",["$attr","$event"], function(){
     }
     //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
-    function interactedFiled (node, value, directive ){
+    function interactedFiled (node,  names, values, str, directive ){
         function field(neo){
-            if( arguments.length ){//如果是写方法,则可能改变其value值,并引发其依赖域的值的改变
-                if( field.value !== neo ){
-                    field.value = neo;
-                }
-            }
-            var val = value.uuid ? value() : value
-            if( directive.init && !field.init){
-                directive.init(node, val, value)
-            }
-            field.init = 1
-            directive.update && directive.update(node, val)
-            return field.value;
+
+            var fn = Function(names, "return "+ str);
+            var ret = fn.apply(null, values );
+
+
+            ret.call({
+                expando: field
+            });
+
+            console.log(ret.parents)
+
+            //            var val = value.uuid ? value() : value
+            //            if( directive.init && !field.init){
+            //                directive.init(node, val, value)
+            //            }
+            //            field.init = 1
+            //            directive.update && directive.update(node, val)
+            //            return field.value;
+            return "CCCCCCCCCCC"
         }
         Field(node, "interacted" ,field);
         //这里要想办法收集依赖！
@@ -174,13 +181,11 @@ define("avalon",["$attr","$event"], function(){
         },
         style: {
             update:  function( node, val ){
-                console.log(node)
                 var style = node.style, styleName
                 for (var name in val) {
                     styleName = $.cssName(name, style) || name
                     style[styleName] = val[ name ] || "";
                 }
-                console.log("---------------------")
             }
         }
     }
@@ -209,32 +214,27 @@ define("avalon",["$attr","$event"], function(){
 
     //为当前元素把数据隐藏与视图模块绑定在一块
     function setBindingsToElement( node, model, setData ){
-        //如果bindings不存在，则通过getBindings获取，getBindings会调用parseBindingsString，变成对象
-        var attr = node.getAttribute(BINDING), names = [], fns = []
-        for(var i in model){
-            if(model.hasOwnProperty(i)){
-                names.push(i);
-                fns.push( model[i] );
+        //取得标签内的属性绑定，然后构建成interactedFiled，并与ViewModel关联在一块
+        var attr = node.getAttribute( BINDING ), names = [], values = [], continueBindings = true,
+        key, val, directive;
+        for(var name in model){
+            if(model.hasOwnProperty(name)){
+                names.push( name );
+                values.push( model[ name ] );
             }
         }
-        var fn
-        try{
-            fn = Function( names, " return ({"+ str +"})");
-        }catch(e){
-            var str = normalizeJSON("{"+ attr+"}");
-            fn = Function( names, " return ("+ str +")");
-        }
-        var obj = fn.apply(node, fns);
-        var continueBindings = true;
-        for(var key in obj){
-            if(obj.hasOwnProperty(key)){
-                var directive = $.ViewDirectives[key];
-                if( directive ){
-                    if( directive.stopBindings ){
-                        continueBindings = false;
-                    }
-                    interactedFiled(node,  obj[key], directive);
+        var array = normalizeJSON("{"+ attr+"}",true);
+        console.log(array)
+        for(var i = 0; i < array.length; i += 2){
+            key = array[i]
+            val = array[i+1];
+            directive = $.ViewDirectives[ key ];
+            console.log(directive)
+            if( directive ){
+                if( directive.stopBindings ){
+                    continueBindings = false;
                 }
+                interactedFiled(node,  names, values, val, directive);
             }
         }
         return continueBindings;
@@ -301,13 +301,14 @@ define("avalon",["$attr","$event"], function(){
         var keyValueArray = parseObjectLiteral(json),resultStrings = [],
         keyValueEntry, propertyToHook = [];
         for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
-            if (resultStrings.length > 0)
+            if (resultStrings.length > 0 && !array)
                 resultStrings.push(",");
             if (keyValueEntry['key']) {
                 var key = keyValueEntry['key'].trim();
-                var quotedKey = ensureQuoted(key), val = keyValueEntry['value'].trim();
+                var quotedKey = ensureQuoted(key, array), val = keyValueEntry['value'].trim();
                 resultStrings.push(quotedKey);
-                resultStrings.push(":");
+                if(!array)
+                    resultStrings.push(":");
                 if(val.charAt(0) == "{" && val.charAt(val.length - 1) == "}"){
                     val = normalizeJSON( val );//逐层加引号
                 }
@@ -416,8 +417,11 @@ define("avalon",["$attr","$event"], function(){
         }
         return result;
     }
-    function ensureQuoted(key) {
+    function ensureQuoted(key, array) {
         var trimmedKey = key.trim()
+        if(array){
+            return trimmedKey;
+        }
         switch (trimmedKey.length && trimmedKey.charAt(0)) {
             case "'":
             case '"':
