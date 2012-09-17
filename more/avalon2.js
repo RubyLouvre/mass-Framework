@@ -1,7 +1,7 @@
 define("avalon",["$attr","$event"], function(){
     $.log("已加载avalon v2")
     //http://angularjs.org/
-    var BINDING = $.config.binding || "@bind"
+    var BINDING = $.config.binding || "@bind", bridge = {}, uuid = 0, expando = new Date - 0;
     $.ViewModel = function(data){
         var model = {}
         if(Array.isArray(data)){
@@ -21,12 +21,10 @@ define("avalon",["$attr","$event"], function(){
         //开始在其自身与孩子中绑定
         return setBindingsToElementAndChildren( node, model, true );
     }
-    var uuid = 0;
-    var expando = new Date - 0;
     //ViewModel的组成单位
     function Field( host, key, field ){
         field.toString = field.valueOf = function(){
-            return field.value;
+            return field.value
         }
         if(!host.nodeType){
             field.nick = key;
@@ -45,10 +43,10 @@ define("avalon",["$attr","$event"], function(){
     //它们是位于双向依赖链的最底层。不需要依赖于其他Field！
     function undividedFiled( host, key, val ){
         function field( neo ){
-            if( this[ expando ] ){ //收集依赖
-                $.Array.ensure( field.parents, this[ expando ] );
+            if( bridge[ expando ] ){ //收集依赖于它的computedFiled,以便它的值改变时,通它们更新自身
+                $.Array.ensure( field.parents, bridge[ expando ] );
             }
-            if( arguments.length ){//如果是写方法,则可能改变其value值,并引发其依赖域的值的改变
+            if( arguments.length ){//在传参不等于已有值时,才更新自已,并通知其依赖域
                 if( field.value !== neo ){
                     field.value = neo;
                     notifyParentsUpdate( field );
@@ -57,6 +55,7 @@ define("avalon",["$attr","$event"], function(){
             return field.value;
         }
         field.value = val;
+        field.uuid = ++uuid
         return Field( host, key, field );
     }
     //当顶层的VM改变了,通知底层的改变
@@ -64,6 +63,7 @@ define("avalon",["$attr","$event"], function(){
     //当中间层的VM改变,通知两端的改变
     //computedFiled是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
     //它们是位于双向依赖链的中间层，需要依赖于其他undividedFiled或computedFiled的返回值计算自己的value。
+
     function computedFiled( host, key, val, type){
         var getter, setter//构建一个至少拥有getter,scope属性的对象
         if(type == "get"){//getter必然存在
@@ -74,8 +74,9 @@ define("avalon",["$attr","$event"], function(){
             host = val.scope || host;
         }
         function field( neo ){
-            if( this[ expando ] ){ //收集依赖
-                $.Array.ensure( field.parents, this[ expando ] );
+            if( bridge[ expando ] ){
+                //收集依赖于它的computedFiled与interactedFiled,以便它的值改变时,通知它们更新自身
+                $.Array.ensure( field.parents, bridge[ expando ] );
             }
             var change = false;
             if( arguments.length ){//写入
@@ -85,12 +86,12 @@ define("avalon",["$attr","$event"], function(){
             }else{
                 if( !("value" in field) ){
                     if( !field.uuid ){
-                        host[ expando ] = field;
+                        bridge[ expando ] = field;
                         field.uuid = ++uuid;
                     }
                     neo = getter.call( host );
                     change = true;
-                    delete host[ expando ];
+                    delete bridge[ expando ];
                 }
             }
             //放到这里是为了当是最底层的域的值发出改变后,当前域跟着改变,然后再触发更高层的域
@@ -106,33 +107,26 @@ define("avalon",["$attr","$event"], function(){
     //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
     function interactedFiled (node,  names, values, str, directive ){
-        function field(neo){
-
-            var fn = Function(names, "return "+ str);
-            var ret = fn.apply(null, values );
-
-
-            ret.call({
-                expando: field
-            });
-
-            console.log(ret.parents)
-
-            //            var val = value.uuid ? value() : value
-            //            if( directive.init && !field.init){
-            //                directive.init(node, val, value)
-            //            }
-            //            field.init = 1
-            //            directive.update && directive.update(node, val)
-            //            return field.value;
-            return "CCCCCCCCCCC"
+        function field( neo ){
+            var fn = Function(names, "return "+ str), callback, val
+            if( !field.uuid ){ //如果是第一次执行这个域
+                bridge[ expando ] = field;
+            }
+            val = fn.apply(null, values );
+            if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
+                callback = val
+                val = callback();//如果是域对象
+            }
+            if( !field.uuid ){
+                delete bridge[ expando ];
+                field.uuid = ++uuid;
+                directive.init && directive.init(node, val, callback);
+            }
+           
+            directive.update && directive.update(node, val)
+            return field.value = val;
         }
         Field(node, "interacted" ,field);
-        //这里要想办法收集依赖！
-        if( !field.uuid && typeof value == "function"){
-            $.Array.ensure( value.parents, field );
-            field.uuid = ++uuid;
-        }
         return field
     }
     //执行绑定在元素标签内的各种指令
@@ -224,12 +218,10 @@ define("avalon",["$attr","$event"], function(){
             }
         }
         var array = normalizeJSON("{"+ attr+"}",true);
-        console.log(array)
         for(var i = 0; i < array.length; i += 2){
             key = array[i]
             val = array[i+1];
             directive = $.ViewDirectives[ key ];
-            console.log(directive)
             if( directive ){
                 if( directive.stopBindings ){
                     continueBindings = false;
