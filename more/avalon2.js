@@ -141,8 +141,14 @@ define("avalon",["$attr","$event"], function(){
     }
     $.ViewDirectives = {
         text: {
-            init:function(){},
-            update: function(){}
+            update:  function( node, val ){
+                val = val == null ? "" : val+""
+                if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
+                    node.firstChild.data = val;
+                }else{
+                    $( node ).text( val );
+                }
+            }
         }
     }
     function hasBindings( node ){
@@ -177,13 +183,13 @@ define("avalon",["$attr","$event"], function(){
         var obj = fn.apply(node, fns);
         var continueBindings = true;
         for(var key in obj){
-            if(obj.hasOwnProperty(i)){
+            if(obj.hasOwnProperty(key)){
                 var directive = $.ViewDirectives[key];
                 if( directive ){
                     if( directive.stopBindings ){
                         continueBindings = false;
                     }
-                    interactedFiled(node,  obj[i], directive);
+                    interactedFiled(node,  obj[key], directive);
                 }
             }
         }
@@ -196,7 +202,12 @@ define("avalon",["$attr","$event"], function(){
                     field.value = neo;
                 }
             }
-            directive(node, value)
+            if( directive.init && !field.init){
+                directive.init(node, value())
+            }
+            field.init = 1
+            directive.update(node, value())
+            $.log("-------------------------")
             return field.value;
         }
         Field(node, "interacted" ,field);
