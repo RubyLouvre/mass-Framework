@@ -13,6 +13,13 @@ define("avalon",["$attr","$event"], function(){
         }
         return model;
     }
+
+    $.View = function(model, node){
+        //确保是绑定在元素节点上，没有指定默认是绑在body上
+        node = node || document.body;
+        //开始在其自身与孩子中绑定
+        return setBindingsToElementAndChildren( node, model, true );
+    }
     var uuid = 0;
     var expando = new Date - 0;
     function Field( host, key, field ){
@@ -91,55 +98,29 @@ define("avalon",["$attr","$event"], function(){
         }
         return Field( host, key, field );
     }
-
-    //通知此域的所有直接依赖者更新自身
-    function notifyParentsUpdate(field){
-        var list = field.parents || [] ;
-        if( list.length ){
-            var safelist = list.concat();
-            for(var i = 0, el; el = safelist[i++];){
-                delete el.value;
-                el()
-            }
-        }
-    }
-    var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
-    function defineProperty(host, key, val, scope ){
-        switch( $.type( val )){
-            case "String":
-            case "Number":
-            case "Boolean":
-                undividedFiled(host, key, val);
-                break;
-            case "Function":
-                computedFiled(host, key, val, "get");
-                break;
-            case "Array":
-                $.ArrayViewModel(host, key, val, scope);
-                break;
-            case "Object":
-                if($.isPlainObject( val )){
-                    if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        computedFiled(host, key, val, "setget");
-                    }else{
-                        $.ViewModel(val, scope, host)
-                    }
-                }else{
-                    throw err
+ 
+    function interactedFiled (node, value, directive ){
+        function field(neo){
+            if( arguments.length ){//如果是写方法,则可能改变其value值,并引发其依赖域的值的改变
+                if( field.value !== neo ){
+                    field.value = neo;
                 }
-                break;
-            default:
-                throw err
+            }
+            if( directive.init && !field.init){
+                directive.init(node, value(), value)
+            }
+            field.init = 1
+            directive.update && directive.update(node, value())
+            return field.value;
         }
-
+        Field(node, "interacted" ,field);
+        if( !field.uuid ){
+            $.Array.ensure( value.parents, field );
+            field.uuid = ++uuid;
+        }
+        return field
     }
-
-    $.View = function(model, node){
-        //确保是绑定在元素节点上，没有指定默认是绑在body上
-        node = node || document.body; 
-        //开始在其自身与孩子中绑定
-        return setBindingsToElementAndChildren( node, model, true );
-    }
+    var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
     $.ViewDirectives = {
         text: {
             update:  function( node, val ){
@@ -150,20 +131,24 @@ define("avalon",["$attr","$event"], function(){
                     $( node ).text( val );
                 }
             }
-        }
-    }
-    function hasBindings( node ){
-        var str = node.getAttribute( "@bind" );
-        return typeof str === "string" && str.indexOf(":") > 1
-    }
-    function getChildren(node){
-        var elems = [] ,ri = 0;
-        for (node = node.firstChild; node; node = node.nextSibling){
-            if (node.nodeType === 1){
-                elems[ri++] = node;
+        },
+        value:{
+            init: function(node, val, field){
+                node.value = val;
+                if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
+                    $(node).on("input",function(){
+                        field(node.value)
+                    });
+                }
+
             }
+        },
+        html: {
+            update:  function( node, val ){
+                $( node ).html( val )
+            },
+            stopBindings: true
         }
-        return elems;
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     function setBindingsToElementAndChildren( node, model, setData ){
@@ -215,27 +200,60 @@ define("avalon",["$attr","$event"], function(){
         }
         return continueBindings;
     }
-    function interactedFiled (node, value, directive ){
-        function field(neo){
-            if( arguments.length ){//如果是写方法,则可能改变其value值,并引发其依赖域的值的改变
-                if( field.value !== neo ){
-                    field.value = neo;
-                }
+    //通知此域的所有直接依赖者更新自身
+    function notifyParentsUpdate(field){
+        var list = field.parents || [] ;
+        if( list.length ){
+            var safelist = list.concat();
+            for(var i = 0, el; el = safelist[i++];){
+                delete el.value;
+                el()
             }
-            if( directive.init && !field.init){
-                directive.init(node, value())
-            }
-            field.init = 1
-            directive.update(node, value())
-            return field.value;
         }
-        Field(node, "interacted" ,field);
-        if( !field.uuid ){
-            $.Array.ensure( value.parents, field );
-            field.uuid = ++uuid;
-        }
-        return field
     }
+    function hasBindings( node ){
+        var str = node.getAttribute( "@bind" );
+        return typeof str === "string" && str.indexOf(":") > 1
+    }
+    function getChildren(node){
+        var elems = [] ,ri = 0;
+        for (node = node.firstChild; node; node = node.nextSibling){
+            if (node.nodeType === 1){
+                elems[ri++] = node;
+            }
+        }
+        return elems;
+    }
+    var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
+    function defineProperty(host, key, val, scope ){
+        switch( $.type( val )){
+            case "String":
+            case "Number":
+            case "Boolean":
+                undividedFiled(host, key, val);
+                break;
+            case "Function":
+                computedFiled(host, key, val, "get");
+                break;
+            case "Array":
+                $.ArrayViewModel(host, key, val, scope);
+                break;
+            case "Object":
+                if($.isPlainObject( val )){
+                    if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
+                        computedFiled(host, key, val, "setget");
+                    }else{
+                        $.ViewModel(val, scope, host)
+                    }
+                }else{
+                    throw err
+                }
+                break;
+            default:
+                throw err
+        }
+    }
+
     function normalizeJSON( json ){
         return json
     }
@@ -386,7 +404,7 @@ define("avalon",["$attr","$event"], function(){
                 fullName: function(){
                    return this.firstName() + this.lastName()
                 }
-            });
+      });
 
 在VM中，它里面的每一项都叫做域的函数，与原始对象的属性同名。
 如果这个属性是最简单的数据类型，比如字符串，布尔，数值，就最简单不过，它们都没有依赖，自己构建自己的域就行了。

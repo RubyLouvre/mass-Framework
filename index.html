@@ -34,6 +34,8 @@
 
             })
         </script>
-        <p> <strong @bind="text: firstName" id="test"> </strong></p>
+        <p> <strong @bind="text: firstName" > </strong></p>
+        <p> <input @bind="value: lastName" /> </p>
+        <p @bind="html: fullName"> </p>
     </body>
 </html>
