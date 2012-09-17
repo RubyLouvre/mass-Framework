@@ -27,11 +27,11 @@
                     }
                 });
                 var test = document.getElementById("test")
-                $.View(model, test);
+                $.View(model);
                 setTimeout(function(){
                     model.firstName("司徒正美")
                 },1000)
-  
+
             })
         </script>
         <p> <strong @bind="text: firstName" id="test"> </strong></p>

@@ -59,6 +59,7 @@ define("avalon",["$attr","$event"], function(){
         }else if(type == "setget"){
             getter = val.getter
             setter = val.setter;
+            host = val.scope || host;
         }
         function field( neo ){
             if( this[ expando ] ){ //收集依赖
@@ -143,7 +144,6 @@ define("avalon",["$attr","$event"], function(){
         text: {
             update:  function( node, val ){
                 val = val == null ? "" : val+""
-                console.log("00000000000000")
                 if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
                     node.firstChild.data = val;
                 }else{
@@ -156,6 +156,15 @@ define("avalon",["$attr","$event"], function(){
         var str = node.getAttribute( "@bind" );
         return typeof str === "string" && str.indexOf(":") > 1
     }
+    function getChildren(node){
+        var elems = [] ,ri = 0;
+        for (node = node.firstChild; node; node = node.nextSibling){
+            if (node.nodeType === 1){
+                elems[ri++] = node;
+            }
+        }
+        return elems;
+    }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     function setBindingsToElementAndChildren( node, model, setData ){
         if ( node.nodeType === 1  ){
@@ -164,9 +173,18 @@ define("avalon",["$attr","$event"], function(){
                 continueBindings = setBindingsToElement(node, model, setData )
             }
             if( continueBindings ){
-        //  var elems = getChildren( node )
-        //  elems.length && setBindingsToChildren( elems, model, setData )
+                var elems = getChildren( node )
+                elems.length && setBindingsToChildren( elems, model, setData )
+            }
         }
+    }
+    function setBindingsToChildren( elems, model, setData, force ){
+        for(var i = 0, n = elems.length; i < n ; i++){
+            var node = elems[i]
+            setBindingsToElementAndChildren( node, model, setData && !force );
+            if( setData && force ){//这是由foreach绑定触发
+                $._data(node,"bindings-context", model)
+            }
         }
     }
 
@@ -180,7 +198,8 @@ define("avalon",["$attr","$event"], function(){
                 fns.push( model[i] )
             }
         }
-        var fn = Function( names, " return {"+ attr+"}");
+        var str = normalizeJSON("{"+ attr+"}");
+        var fn = Function( names, " return "+ str);
         var obj = fn.apply(node, fns);
         var continueBindings = true;
         for(var key in obj){
@@ -208,7 +227,6 @@ define("avalon",["$attr","$event"], function(){
             }
             field.init = 1
             directive.update(node, value())
-            $.log("-------------------------")
             return field.value;
         }
         Field(node, "interacted" ,field);
@@ -221,15 +239,16 @@ define("avalon",["$attr","$event"], function(){
     function normalizeJSON( json ){
         return json
     }
-    //=========================================
+    //============================================================
     // IE678+IE9的兼容模式补丁 by 司徒正美
-    //=========================================
+    //============================================================
     try{
         Function("return {float:10,class:11}")();
         $.log("safe!", 8)
     } catch(e){
         $.log("这浏览器的对象的键名为关键字时，需要用引号括起来");
         normalizeJSON = function(json){
+            $.log("IE normalizeJSON", 8)
             var keyValueArray = parseObjectLiteral(json),resultStrings = [],
             keyValueEntry, propertyToHook = [];
             for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
