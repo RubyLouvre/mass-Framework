@@ -59,7 +59,7 @@
     <div bind="visible: shouldShowMessage">
         当shouldShowMessage的传参为true时,你会看到这段文字
     </div>
-    <label><input type="checkbox" data-bind="checked: displayMessage" /> 通过是否打钩显示下面消息</label>
+    <label><input type="checkbox" bind="checked: displayMessage" /> 通过是否打钩显示下面消息</label>
     <div bind="if: displayMessage">xxxxxxxxxxxxxxxxxxxxx</div>
     <p> <strong bind="text: firstName" >默认值 </strong></p>
     <p> <input bind="value: lastName" /> </p>

@@ -201,7 +201,7 @@ define("avalon",["$attr","$event"], function(){
         },
         checked: {
             init:  function( node, val, field ){
-                if(typeof filed !== "function"){
+                if(typeof field !== "function"){
                     throw new Error("check的值必须是一个Feild")
                 }
                 $(node).bind("change",function(){
@@ -240,7 +240,7 @@ define("avalon",["$attr","$event"], function(){
                     field.prevData = [{}];//这是伪数据，目的让其update
                 }
                 var first = field.references[0];
-                console.log(first)
+                
                 if( code > 0 ){ //处理with if bindings
                     template = first.recovery();
                     var elems = getChildren( template );

@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>SAW规范的模块加载例子 by 司徒正美</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js"></script>
+
+    </head>
+    <body>
+
+        <script>
+
+            $.require("ready,./more/avalon2", function(){
+                var model = $.ViewModel({
+                    displayMessage: false
+                });
+                $.View(model);
+
+            })
+        </script>
+    <style>
+        .blue{
+            color:blue;
+        }
+        .red {
+            color:red!important;
+        }
+    </style>
+
+
+    <label><input type="checkbox" bind="checked: displayMessage" /> 通过是否打钩显示下面消息</label>
+    <div bind="if: displayMessage">xxxxxxxxxxxxxxxxxxxxx</div>
+
+</body>
+</html>
