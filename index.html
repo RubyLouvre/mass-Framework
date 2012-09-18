@@ -16,6 +16,9 @@
                     firstName: "aaa",
                     lastName:  "bbb",
                     level: 6,
+                    currentProfit: 15000, //此时显示为蓝色
+                    shouldShowMessage: true,
+                    displayMessage: false,
                     fullName: {
                         setter: function(val){
                             var arr = val.split(" ")
@@ -26,17 +29,46 @@
                             return this.firstName() +" "+ this.lastName()
                         }
                     }
+
+
                 });
                 $.View(model);
                 setTimeout(function(){
                     model.firstName("司徒正美")
+                },1000);
+                setTimeout(function(){
+                    model.shouldShowMessage(false); // ... now it's hidden
                 },1000)
-
+                setTimeout(function(){
+                    model.shouldShowMessage(true); // ... now it's visible again
+                },2000);
+                setTimeout(function(){
+                    model.currentProfit(-50); //这时为红色
+                },1500)
             })
         </script>
-        <p> <strong @bind="text: firstName" >默认值 </strong></p>
-        <p> <input @bind="value: lastName" /> </p>
-        <p @bind="html: fullName"> </p>
-        <p @bind="style:{box-shadow: '5px 5px 7px #888',background-color:'orange'}">测试字体 </p>
-    </body>
+    <style>
+        .blue{
+            color:blue;
+        }
+        .red {
+            color:red!important;
+        }
+    </style>
+    <div class="blue" bind="class: { red: currentProfit() < 0 }">留意字体颜色</div>
+    <div bind="visible: shouldShowMessage">
+        当shouldShowMessage的传参为true时,你会看到这段文字
+    </div>
+    <label><input type="checkbox" data-bind="checked: displayMessage" /> 通过是否打钩显示下面消息</label>
+    <div bind="if: displayMessage">xxxxxxxxxxxxxxxxxxxxx</div>
+    <p> <strong bind="text: firstName" >默认值 </strong></p>
+    <p> <input bind="value: lastName" /> </p>
+    <p bind="html: fullName"> </p>
+    <p bind="style:{box-shadow: '5px 5px 7px #888',
+       background-color:'orange',
+       text-indent:currentProfit() < 0 ? '2em' : '4em',
+       line-height: 3,
+       width:'200px'
+       }">测试字体 </p>
+</body>
 </html>

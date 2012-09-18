@@ -1,7 +1,7 @@
 define("avalon",["$attr","$event"], function(){
     $.log("已加载avalon v2")
     //http://angularjs.org/
-    var BINDING = $.config.binding || "@bind", bridge = {}, uuid = 0, expando = new Date - 0;
+    var BINDING = $.config.binding || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
     $.ViewModel = function(data){
         var model = {}
         if(Array.isArray(data)){
@@ -32,7 +32,7 @@ define("avalon",["$attr","$event"], function(){
         }
         field.parents = [];
         field();
-        return field
+        return field;
     }
     //一个域对象是一个函数,它总是返回其的value值
     //一个域对象拥有nick属性,表示它在model中的属性名
@@ -63,13 +63,12 @@ define("avalon",["$attr","$event"], function(){
     //当中间层的VM改变,通知两端的改变
     //computedFiled是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
     //它们是位于双向依赖链的中间层，需要依赖于其他undividedFiled或computedFiled的返回值计算自己的value。
-
     function computedFiled( host, key, val, type){
         var getter, setter//构建一个至少拥有getter,scope属性的对象
         if(type == "get"){//getter必然存在
-            getter = val
+            getter = val;
         }else if(type == "setget"){
-            getter = val.getter
+            getter = val.getter;
             setter = val.setter;
             host = val.scope || host;
         }
@@ -106,7 +105,7 @@ define("avalon",["$attr","$event"], function(){
     }
     //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
-    function interactedFiled (node,  names, values, str, directive ){
+    function interactedFiled (node, names, values, key, str, directive, model ){
         function field( neo ){
             var fn = Function(names, "return "+ str), callback, val
             if( !field.uuid ){ //如果是第一次执行这个域
@@ -114,7 +113,7 @@ define("avalon",["$attr","$event"], function(){
             }
             val = fn.apply(null, values );
             if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
-                callback = val
+                callback = val;
                 val = callback();//如果是域对象
             }
             if( !field.uuid ){
@@ -122,12 +121,10 @@ define("avalon",["$attr","$event"], function(){
                 field.uuid = ++uuid;
                 directive.init && directive.init(node, val, callback);
             }
-           
-            directive.update && directive.update(node, val)
+            directive.update && directive.update(node, val, field, model);
             return field.value = val;
         }
-        Field(node, "interacted" ,field);
-        return field
+        return Field(node, "interacted" ,field);
     }
     //执行绑定在元素标签内的各种指令
     var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
@@ -155,7 +152,7 @@ define("avalon",["$attr","$event"], function(){
         },
         html: {
             update:  function( node, val ){
-                $( node ).html( val )
+                $( node ).html( val );
             },
             stopBindings: true
         },
@@ -175,13 +172,177 @@ define("avalon",["$attr","$event"], function(){
         },
         style: {
             update:  function( node, val ){
-                var style = node.style, styleName
+                var style = node.style, styleName;
                 for (var name in val) {
-                    styleName = $.cssName(name, style) || name
+                    styleName = $.cssName(name, style) || name;
                     style[styleName] = val[ name ] || "";
                 }
             }
+        },
+        "class": {
+            update:  function( node, val ){
+                if (typeof val == "object") {
+                    for (var className in val) {
+                        var shouldHaveClass = val[className];
+                        toggleClass(node, className, shouldHaveClass);
+                    }
+                } else {
+                    val = String(val || '');
+                    toggleClass(node, val, true);
+                }
+            }
+        } ,
+        attr: {
+            update:  function( node, val ){
+                for (var name in val) {
+                    $.attr(node, name, val[ name ] );
+                }
+            }
+        },
+        checked: {
+            init:  function( node, val, field ){
+                if(typeof filed !== "function"){
+                    throw new Error("check的值必须是一个Feild")
+                }
+                $(node).bind("change",function(){
+                    field(node.checked);
+                });
+            },
+            update:function( node, val ){
+                if ( node.type == "checkbox" ) {
+                    if (Array.isArray( val )) {
+                        node.checked = val.indexOf(node.value) >= 0;
+                    } else {
+                        node.checked = val;
+                    }
+                } else if (node.type == "radio") {
+                    node.checked = ( node.value == val );
+                }
+            }
+        },
+        template: {
+            update: function( node, val, callback){
+                var array = callback(), code = array[0], field = array[1], el
+                var template = field.template;//取得最初的那个节点的内部作为模块
+                if(!template){
+                    //合并文本节点数
+                    node.normalize();
+                    //保存模板
+                    template = node.ownerDocument.createDocumentFragment();
+                    while((el = node.firstChild)){
+                        template.appendChild(el)
+                    }
+                    field.template = template;
+                    //复制一份出来放回原位
+                    var first = template.cloneNode(true);
+                    field.references = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
+                    node.appendChild( first );
+                    field.prevData = [{}];//这是伪数据，目的让其update
+                }
+                var first = field.references[0];
+                console.log(first)
+                if( code > 0 ){ //处理with if bindings
+                    template = first.recovery();
+                    var elems = getChildren( template );
+                    node.appendChild( template );  //显示出来
+
+                }else if( code == 0){//处理unless bindings
+                    first.recovery();
+                }
+
+            },
+            stopBindings: true
         }
+
+    }
+    var Tmpl = function(t){
+        this.template = t
+        this.nodes = $.slice(t.childNodes)
+    }
+    Tmpl.prototype.recovery = function(){
+        this.nodes.forEach(function( el ){
+            this.template.appendChild(el)
+        },this);
+        return this.template
+    }
+    $.ViewDirectives.disable = {
+        update: function( node, val ){
+            $.ViewDirectives.enable.update(node, !val);
+        }
+    }
+    //if unless with foreach四种bindings都是使用template bindings
+    "if,unless,with,foreach,case".replace($.rword, function( type ){
+        $.ViewDirectives[ type ] = {
+            update : function(node, val, field, model){
+                if(type == "case" && (typeof model.$switch != "function" )){
+                    throw "Must define switch statement above all";
+                }
+                console.log(type)
+                $.ViewDirectives['template']['update'](node, val, function(){
+                    switch(type){//返回结果可能为 -1 0 1 2
+                        case "case":
+                        case "if":
+                            return [ !!val - 0, field];//1
+                        case "unless":
+                            return [!val - 0, field];//0
+                        case "with":
+                            return [2, field];//2
+                        default:
+                            return [-1, field];
+                    }
+                }, model);
+            },
+            stopBindings: true
+        }
+    });
+
+
+
+
+
+
+
+
+
+    var toggleClass = function (node, className, shouldHaveClass) {
+        var classes = (node.className || "").split(/\s+/);
+        var hasClass = classes.indexOf( className) >= 0;//原className是否有这东西
+        if (shouldHaveClass && !hasClass) {
+            node.className += (classes[0] ? " " : "") + className;
+        } else if (hasClass && !shouldHaveClass) {
+            var newClassName = "";
+            for (var i = 0; i < classes.length; i++)
+                if (classes[i] != className)
+                    newClassName += classes[i] + " ";
+            node.className = newClassName.trim();
+        }
+    }
+
+
+    //为当前元素把数据隐藏与视图模块绑定在一块
+    function setBindingsToElement( node, model, setData ){
+        //取得标签内的属性绑定，然后构建成interactedFiled，并与ViewModel关联在一块
+        var attr = node.getAttribute( BINDING ), names = [], values = [], continueBindings = true,
+        key, val, directive;
+        for(var name in model){
+            if(model.hasOwnProperty(name)){
+                names.push( name );
+                values.push( model[ name ] );
+            }
+        }
+        var array = normalizeJSON("{"+ attr+"}",true);
+        for(var i = 0; i < array.length; i += 2){
+            key = array[i]
+            val = array[i+1];
+            directive = $.ViewDirectives[ key ];
+            if( directive ){
+                if( directive.stopBindings ){
+                    continueBindings = false;
+                }
+                interactedFiled(node,  names, values, key, val, directive, model);
+            }
+        }
+        return continueBindings;
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     function setBindingsToElementAndChildren( node, model, setData ){
@@ -205,32 +366,6 @@ define("avalon",["$attr","$event"], function(){
             }
         }
     }
-
-    //为当前元素把数据隐藏与视图模块绑定在一块
-    function setBindingsToElement( node, model, setData ){
-        //取得标签内的属性绑定，然后构建成interactedFiled，并与ViewModel关联在一块
-        var attr = node.getAttribute( BINDING ), names = [], values = [], continueBindings = true,
-        key, val, directive;
-        for(var name in model){
-            if(model.hasOwnProperty(name)){
-                names.push( name );
-                values.push( model[ name ] );
-            }
-        }
-        var array = normalizeJSON("{"+ attr+"}",true);
-        for(var i = 0; i < array.length; i += 2){
-            key = array[i]
-            val = array[i+1];
-            directive = $.ViewDirectives[ key ];
-            if( directive ){
-                if( directive.stopBindings ){
-                    continueBindings = false;
-                }
-                interactedFiled(node,  names, values, val, directive);
-            }
-        }
-        return continueBindings;
-    }
     //通知此域的所有直接依赖者更新自身
     function notifyParentsUpdate(field){
         var list = field.parents || [] ;
@@ -246,7 +381,7 @@ define("avalon",["$attr","$event"], function(){
         var str = node.getAttribute( BINDING );
         return typeof str === "string" && str.indexOf(":") > 1
     }
-    function getChildren(node){
+    function getChildren( node ){
         var elems = [] ,ri = 0;
         for (node = node.firstChild; node; node = node.nextSibling){
             if (node.nodeType === 1){
@@ -286,9 +421,8 @@ define("avalon",["$attr","$event"], function(){
     }
 
     //============================================================
-    // IE678+IE9的兼容模式补丁 by 司徒正美
+    // 将bindings变成一个对象或一个数组 by 司徒正美
     //============================================================
-    $.log("这浏览器的对象的键名为关键字时，需要用引号括起来");
     function normalizeJSON(json, array){
         var keyValueArray = parseObjectLiteral(json),resultStrings = [],
         keyValueEntry, propertyToHook = [];
@@ -315,7 +449,9 @@ define("avalon",["$attr","$event"], function(){
         resultStrings = resultStrings.join("");
         return "{" +resultStrings +"}";
     };
-    //------------------------------------------
+    //============================================================
+    // normalizeJSON的辅助函数 by 司徒正美
+    //============================================================
     var restoreCapturedTokensRegex = /\@mass_token_(\d+)\@/g;
     function restoreTokens(string, tokens) {
         var prevValue = null;
@@ -422,8 +558,6 @@ define("avalon",["$attr","$event"], function(){
                 return "'" + trimmedKey + "'";
         }
     }
-//  }
-
 })
 /*
 <p>ViewModel的设计难点</p>
@@ -440,4 +574,4 @@ define("avalon",["$attr","$event"], function(){
 如果这个属性是最简单的数据类型，比如字符串，布尔，数值，就最简单不过，它们都没有依赖，自己构建自己的域就行了。
 如果这个属性是函数，那么函数里面的this其实是指向VM，它会依赖于VM的其他域的返回值来计算自己的返回值。
 于是问题来了，根据上文的例子，fullName是怎么知道自己是依赖于firstName与lastName这两个域呢？！
- */
+*/
