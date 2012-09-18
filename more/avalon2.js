@@ -227,42 +227,36 @@ define("avalon",["$attr","$event"], function(){
         },
         template: {
             update: function( node, val, callback, model){
-                var array = callback(), code = array[0], field = array[1], el, tmpl
-                //这个域对象储存着的文档碎片
+                var transfer = callback(), code = transfer[0], field = transfer[1], el, tmpl;
                 var tmpls = field.tmpls;
-             
-                if(!tmpls){
-                    //合并文本节点数
-                    node.normalize();
-                    //创建一个文档碎片作为MVVM的动态模板
+                if( !Array.isArray(tmpls)){
+                    node.normalize();           //合并文本节点数
                     tmpl = node.ownerDocument.createDocumentFragment();
                     while((el = node.firstChild)){
-                        tmpl.appendChild(el)
+                        tmpl.appendChild(el); //将Field所引用着的节点移出DOM树
                     }
-                    field.tmpls = [ new Tmpl( tmpl ) ];//先取得nodes的引用再插入DOM树
-                    node.appendChild( tmpl );
-                    field.prevData = [{}];//这是伪数据，目的让其update
+                    field.tmpls = [ new Tmpl( tmpl ) ];//取得模板中所有节点的引用
+                    node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
                 }
-                tmpl = field.tmpls[0];//取得原始模板
-                if( code > 0 ){ //处理with if 绑定
-                    tmpl =  tmpl.remove();    //将Field所引用着的节点移出DOM树
+                tmpl = field.tmpls[0];         //取得原始模板
+                if( code > 0 ){                //处理with if 绑定
+                    tmpl =  tmpl.remove();     //将Field所引用着的节点移出DOM树
                     var elems = getChildren( tmpl );//取得它们当中的元素节点
-                    node.appendChild( tmpl );  //再Field所引用着的节点放回DOM树
+                    node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
                     if( elems.length ){
-                        if( code == 2 ){//处理with 绑定
-                            model = array[2]
+                        if( code == 2 ){      //处理with 绑定
+                            model = transfer[2]
                         }
                         return setBindingsToChildren( elems, model, true )
                     }
-                }else if( code == 0){//处理unless 绑定
+                }else if( code === 0 ){        //处理unless 绑定
                     tmpl.remove();
                 }
-               
-                if( code < 0  && val ){//处理foreach 绑定
-                    var data = []
-                    if(typeof val.length  == "number"  ){
+                if( code < 0  && val ){      //处理foreach 绑定
+                    var modelArray = [];     //构建新的VM数组
+                    if(typeof val.length  == "number" && /^[1-9]\d*$/.test(val.length) ){
                         for(var index = 0; index < val.length; index++){
-                            data.push( $.ViewModel({
+                            modelArray.push( $.ViewModel({
                                 $key: index,
                                 $value: val[ index ]
                             }))
@@ -270,15 +264,23 @@ define("avalon",["$attr","$event"], function(){
                     }else{
                         for(var key in val){
                             if(val.hasOwnProperty( key )){
-                                data.push( $.ViewModel({
+                                modelArray.push( $.ViewModel({
                                     $key: key,
                                     $value: val[ key ]
                                 }));
                             }
                         }
                     }
-                    
-
+                    tmpl =  tmpl.remove();
+                    var nodeArray = [tmpl];    //构建新的DOM模板
+                    for(var i = 1; i < modelArray.length; i++ ){
+                        nodeArray.push( tmpl.cloneNode(true) );
+                    }
+                    for( i = 0, el ; el = nodeArray[i]; i++){
+                        elems = getChildren( el );
+                        node.appendChild( el );//将VM绑定到模板上
+                        setBindingsToChildren( elems, modelArray[i], true );
+                    }
                 }
             },
             stopBindings: true
@@ -323,16 +325,12 @@ define("avalon",["$attr","$event"], function(){
         },this);
         return this.fragment;
     }
+
     $.ViewDirectives.disable = {
         update: function( node, val ){
             $.ViewDirectives.enable.update(node, !val);
         }
     }
-
-
-
-
-
 
     var toggleClass = function (node, className, shouldHaveClass) {
         var classes = (node.className || "").split(/\s+/);
@@ -379,11 +377,11 @@ define("avalon",["$attr","$event"], function(){
         if ( node.nodeType === 1  ){
             var continueBindings = true;
             if( hasBindings( node ) ){
-                continueBindings = setBindingsToElement(node, model, setData )
+                continueBindings = setBindingsToElement(node, model, setData );
             }
             if( continueBindings ){
-                var elems = getChildren( node )
-                elems.length && setBindingsToChildren( elems, model, setData )
+                var elems = getChildren( node );
+                elems.length && setBindingsToChildren( elems, model, setData );
             }
         }
     }
