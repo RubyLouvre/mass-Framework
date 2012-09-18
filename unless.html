@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>unless绑定 by 司徒正美</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js"></script>
+
+    </head>
+    <body>
+        <script>
+
+            $.require("ready,./more/avalon2", function(){
+
+                var model = $.ViewModel({
+                    someProperty: false
+                });
+                $.View(model);
+
+                setTimeout(function(){
+                    model.someProperty(true); //show
+                },1000);
+
+                setTimeout(function(){
+                    model.someProperty(false); // hide
+                },2000);
+               
+            })
+        </script>
+
+        <div bind="if: !+someProperty">XXX</div>
+        <div bind="if: someProperty">YYY</div>
+        <div bind="unless: someProperty">ZZZ</div>
+        <p>
+            由于!fn这样方式不经过函数的toString或valueOf,因此<strong>&lt;div bind="if: !someProperty"&gt;XXX&lt;/div&gt;</strong>无法实现双向绑定,
+            这正是unless绑定存在的理由
+        </p>
+        <pre>
+                var a = function(){}
+                a.uuid = 111111
+                a.valueOf = function(){
+                    console.log("aaaaaaaaaaaaaaaaa")
+                }
+                Function.prototype.valueOf = function(){
+                    if(this.uuid){
+                        console.log("bbbbbbbbbbbbbb")
+                    }
+                }
+                Object.prototype.valueOf = function(){
+                    if(this.uuid){
+                        console.log("bbbbbbbbbbbbbb")
+                    }
+                }
+                console.log(!a)
+        </pre>
+
+    </body>
+</html>

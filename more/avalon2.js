@@ -2,8 +2,8 @@ define("avalon",["$attr","$event"], function(){
     $.log("已加载avalon v2")
     //http://angularjs.org/
     var BINDING = $.config.binding || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
-    $.ViewModel = function(data){
-        var model = {}
+    $.ViewModel = function(data, model){
+        model = model || {}
         if(Array.isArray(data)){
             return $.ArrayViewModel(data)
         }
@@ -24,6 +24,10 @@ define("avalon",["$attr","$event"], function(){
     //ViewModel的组成单位
     function Field( host, key, field ){
         field.toString = field.valueOf = function(){
+            if( bridge[ expando ] ){
+                //收集依赖于它的computedFiled与interactedFiled,以便它的值改变时,通知它们更新自身
+                $.Array.ensure( field.parents, bridge[ expando ] );
+            }
             return field.value
         }
         if(!host.nodeType){
@@ -107,10 +111,10 @@ define("avalon",["$attr","$event"], function(){
     //把写在元素节点上的@bind属性的分解出来之时生成的。
     function interactedFiled (node, names, values, key, str, directive, model ){
         function field( neo ){
-            var fn = Function(names, "return "+ str), callback, val
             if( !field.uuid ){ //如果是第一次执行这个域
                 bridge[ expando ] = field;
             }
+            var fn = Function(names, "return "+ str), callback, val;
             val = fn.apply(null, values );
             if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
                 callback = val;
@@ -264,7 +268,6 @@ define("avalon",["$attr","$event"], function(){
                 if(type == "case" && (typeof model.$switch != "function" )){
                     throw "Must define switch statement above all";
                 }
-                console.log(type)
                 $.ViewDirectives['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2
                         case "case":
@@ -392,25 +395,26 @@ define("avalon",["$attr","$event"], function(){
         return elems;
     }
     var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
-    function defineProperty(host, key, val, scope ){
+    function defineProperty(model, key, val, data ){
         switch( $.type( val )){
             case "String":
             case "Number":
             case "Boolean":
-                undividedFiled(host, key, val);
+                undividedFiled(model, key, val);
                 break;
             case "Function":
-                computedFiled(host, key, val, "get");
+                computedFiled(model, key, val, "get");
                 break;
             case "Array":
-                $.ArrayViewModel(host, key, val, scope);
+                $.ArrayViewModel(model, key, val, data);
                 break;
             case "Object":
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        computedFiled(host, key, val, "setget");
+                        computedFiled(model, key, val, "setget");
                     }else{
-                        $.ViewModel(val, scope, host)
+                        model[key] = model[key] || {};
+                        $.ViewModel(val, model[key] );
                     }
                 }else{
                     throw err

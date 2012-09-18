@@ -629,3 +629,49 @@ ssddi456(592247119)  15:42:21
 
 xp ie6 : KB912945  2/10/2006  参考地址:  http://support.microsoft.com/kb/912945
 
+总结:
+. 引入 manifest方式为 :  <html manifest="name.appcache">
+. manifest的加载是晚于页面其他资源的.
+. manifest的contentType应为 : text/cache-manifest
+. 建议其扩展名为 : appcache
+. manifest文件本质是一个,要采用UTF-8编码方式编码的文本文件.
+. 引入manifest的页面,即使没有被列入缓存清单中，仍然会被用户代理缓存.
+. manifest文件从标准角度来说,是不能直接从缓存读取的.即使像上一条说的,你明确的把manifest放入另一个清单中.至少也是服务器尝试返回304.再去读缓存.(注1)
+. 在线的情况下,用户代理每次访问页面，都会去读一次manifest.如果发现其改变, 则重新加载全部清单中的资源(注2).
+. 对于浏览器来说,manifest的加载是要晚于其他资源的. 这就导致check manifest的过程是滞后的.发现manifest改变.所有浏览器的实现都是紧随这做静默更新资源.以保证下次pv,应用到更新.
+. manifest文件必须与引入它的页面同源.
+. 如果manifest文件是一个https或其他加密协议资源,则其清单中明示项(explicit section)的资源都必须和manifest同源.
+. 备用项和备用名称空间,必须与当前的manifest同源.
+. 备用项如果发生命中,则也会被缓存.
+. 明示项和备用项优先级高于白名单.
+. 白名单使用通配符"*". 则会进入白名单的open状态. 这种状态下.所有不在相关Cache区域出现的url都默认使用HTTP相关缓存头策略.
+. 白名单使用具体的前缀匹配或更具体的URL,则都属于blocking状态.这种状态下,白名单所匹配的,非Cache区域出现的URL,与open的*匹配的结果一致,但是不在白名单中,又不在整个manifest的资源,会block.也就是访问，加载不能.
+. manifest中的url ,必须与manifest使用相同的协议.
+. 一个manifest的明示项中可以包含另一个manifest.(但这种设计，我认为很2.)
+. manifest中的url,不应有"#" 锚点部分出现(比如 abc.htm#1,如果出现#,则 #以及后面部分，会被丢弃.)
+. 建议使用<!DOCTYPE html> DTD, 因为据说,某些浏览器会因为，进入非标准模式,而无视manifest.
+     (我本人没有实测，但我个人猜测，如果有这样一款浏览器，那么它很可能就是IE10. 因为IE10进入兼容模式,很多html5草案的API都使用不能.比如performance API)
+. 被清单缓存的资源,是无视http cache 相关 头域, 或其是否是https资源的.
+. 相同备用名称空间,不能重复出现在 备用区域中.
+. 不应有相包含的备用名称空间出现在备用区域中(因为前缀匹配的原因.出现包含，显然是多余的，如果真有一个URL同时匹配两个通配符.那么就以更长的那个为准.).
+. 备用名称空间 和 白名单名称空间 都使用前缀匹配模式.即支持通配符匹配模式.(可以放心的是 // www.a.com/abc 是不匹配 // www.a.com/ab的,因为// www.a.com/ab 实际上是// www.a.com/ab/)
+. 前缀匹配对端口的匹配是宽松的.如abc.com:80/a.png 就会被 abc.com/所匹配.
+. 在写相对路径的时候 不是相对 引入它的html  而是相对 manifest文件所在目录的
+. 一但manifest检测,需要更新,导致所有cache资源更新。其中manifest会再次加载一次.(所以给所有缓存资源配置合理的304机制.是十分有必要的.)
+. 一组不同的页面引入相同的manifest文件时,这组页面的即构构成一个group.并已document作为标识,来区分他们.其中任何一个的manifest或资源更新,甚至是检测都会触发其他页面的applicationCache的相应事件.
+. applicationCache.update(), 只会立刻检测manifest文件,而不会更新相应资源.并且会遵守304相关http缓存头.
+. a,b两个页面,引入相同资源,但a有使用manifest,而b没有.那么,即使a页面缓存了资源.b页面也不会有效.而且b页面强制更新了资源.a页面的缓存也不会因为b的更新，而更新.
+. a页面引入manifest,缓存的资源, 在浏览器地址栏中直接访问,则也命中offline application的缓存.刷新也如此.至少chrome,FF都是如此实现的.
+. a,b两个页面,分别引入A,B两个manifest文件,且分别缓存相同的一个资源R,则 如果此时更新R,然后更新B.则.b刷新后重新获取资源R,但是a的R资源缓存副本是不会被更新的.
+. a,b两个页面,引用同一份manifest A. 则更新A,更新R,刷新b, b对应的R资源更新后,a的R资源副本也会随之更新. 这就是cache group的机制.因为a和b对应的application cache,同属于同一个application cache group.
+
+. 建议为manifest文件配置304相关 头域时,也配置expires和cache-control : max-age.因为chrome,safari,以及android,只有304相关头域，而没有expires 或 max-age时,不会有304，而只会是200, opera则无视一切http cache头域.总是200.
+  (浏览器的实现都有问题,webkit的问题是,没有遵守http协议.因为304相关头域是足矣使浏览器是具备资源副本,并做握手的. 而opera则完全无视http缓存头域.更加不靠谱. (IE10 pp2,FF系列.不方便测试))
+
+
+
+注1: FF的实现有bug.他有自己的时间管理,在短时间内重复请求一个manifest,FF会有直接从cache中读取的情况出现.即使,我们主动使用applicationCache.update().而 FF9+开始,这个所谓的短时间,被延长了很久,至少我个人没有实测出到底要多久.因为同样一个manifest,有时候他就要我等很久，有时候很短暂(暂时没有找出具体规律,至少和Expires,max-age等头域无关.). 这是不符合规范的做法.规范中唯一允许，不经验证，直接从cache读取manifest的就是,如在地址栏直接get manifest或类似的的情况.
+
+注2 : 所谓重新加载, 是依然遵守http 的缓存相关头域的, android webkit browser, chrome ,FF6- 等. 但是FF7+ 开始有了优化, 当缓存资源的http Expires 等相关缓存头域显示该资源没有过期时,FF6+依然会去本地缓存去的资源. 而不像其他浏览器,则会尝试带着304相关头域发起http请求.
+
+
