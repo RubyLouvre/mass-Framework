@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>if流程 by 司徒正美</title>
+        <title>if绑定 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="mass.js"></script>
 
@@ -17,18 +17,10 @@
 
             })
         </script>
-    <style>
-        .blue{
-            color:blue;
-        }
-        .red {
-            color:red!important;
-        }
-    </style>
 
 
-    <label><input type="checkbox" bind="checked: displayMessage" /> 通过checkbox显示下面的DIV</label>
-    <div bind="if: displayMessage">这由上面的元素checked状态控制显示的</div>
+        <label><input type="checkbox" bind="checked: displayMessage" /> 通过checkbox显示下面的DIV</label>
+        <div bind="if: displayMessage">这由上面的元素checked状态控制显示的</div>
 
-</body>
+    </body>
 </html>

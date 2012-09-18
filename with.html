@@ -6,7 +6,7 @@
         <script src="mass.js"></script>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script>
-
+            $.config.bindname = "data-bind"
             $.require("ready,./more/avalon2", function(){
 
                 var model = $.ViewModel({
@@ -17,16 +17,16 @@
                     }
                 });
                 $.View(model)
-                console.log(model)
 
             })
         </script>
+  
     </head>
     <body>
-        <h1 bind="text: city"> </h1>
+        <h1 data-bind="text: city"> </h1>
         <p data-bind="with: coords">
-            Latitude: <span bind="text: coords.latitude"> </span>,<br/>
-            Longitude: <span bind="text: coords.longitude"> </span>
+            Latitude: <span data-bind="text: latitude"> </span>,<br/>
+            Longitude: <span data-bind="text: longitude"> </span>
         </p>
     </body>
 </html>

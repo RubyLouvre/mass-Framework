@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>foreach绑定 by 司徒正美</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js"></script>
+
+    </head>
+    <body>
+
+        <script>
+            $.require("ready,./more/avalon2", function(){
+                var model = $.ViewModel({
+                    user: {
+                        display :'编号',
+                        name :'id',
+                        align :'left',
+                        width :600,
+                        minWidth :60
+                    }
+                });
+                $.View(model);
+
+            })
+        </script>
+
+
+        <dl bind="foreach: user">
+            <dt >
+            </dt>
+            <dd >
+            </dd>
+        </dl>
+
+        <hr/>
+    </body>
+</html>
+
+      

@@ -1,7 +1,7 @@
 define("avalon",["$attr","$event"], function(){
     $.log("已加载avalon v2")
     //http://angularjs.org/
-    var BINDING = $.config.binding || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
+    var BINDING = $.config.bindname || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
     $.ViewModel = function(data, model){
         model = model || {}
         if(Array.isArray(data)){
@@ -226,9 +226,10 @@ define("avalon",["$attr","$event"], function(){
             }
         },
         template: {
-            update: function( node, val, callback){
+            update: function( node, val, callback, model){
                 var array = callback(), code = array[0], field = array[1], el
                 var template = field.template;//取得最初的那个节点的内部作为模块
+                console.log(val)
                 if(!template){
                     //合并文本节点数
                     node.normalize();
@@ -244,17 +245,36 @@ define("avalon",["$attr","$event"], function(){
                     node.appendChild( first );
                     field.prevData = [{}];//这是伪数据，目的让其update
                 }
-                var first = field.references[0];//模板中第一个元素节点
+                first = field.references[0];//模板中第一个元素节点
                 
                 if( code > 0 ){ //处理with if bindings
                     template = first.recovery();
                     var elems = getChildren( template );
                     node.appendChild( template );  //显示出来
-
+                    if( elems.length ){
+                        if( code == 2 ){//处理with bindings
+                            model = array[2]
+                        }
+                        return setBindingsToChildren( elems, model, true )
+                    }
                 }else if( code == 0){//处理unless bindings
                     first.recovery();
                 }
+                if( code < 0  && val ){//处理foreach bindings
+                    if(typeof val.length  == "number"  ){
+                    //处理数组形式
+                    }else{
+                        for(var key in val){
+                            if(val.hasOwnProperty( key ))
+                                $.View({
+                                    $key: key,
+                                    $value: val[key]
+                                })
+                            console.log(key)
+                        }
+                    }
 
+                }
             },
             stopBindings: true
         }
@@ -276,7 +296,7 @@ define("avalon",["$attr","$event"], function(){
                         case "unless":
                             return [!val - 0, field];//0
                         case "with":
-                            return [2, field];//2
+                            return [2, field, val];//2
                         default:
                             return [-1, field];
                     }
