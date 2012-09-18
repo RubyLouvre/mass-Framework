@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>SAW规范的模块加载例子 by 司徒正美</title>
+        <title>if流程 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="mass.js"></script>
 
@@ -9,7 +9,6 @@
     <body>
 
         <script>
-
             $.require("ready,./more/avalon2", function(){
                 var model = $.ViewModel({
                     displayMessage: false
@@ -28,8 +27,8 @@
     </style>
 
 
-    <label><input type="checkbox" bind="checked: displayMessage" /> 通过是否打钩显示下面消息</label>
-    <div bind="if: displayMessage">xxxxxxxxxxxxxxxxxxxxx</div>
+    <label><input type="checkbox" bind="checked: displayMessage" /> 通过checkbox显示下面的DIV</label>
+    <div bind="if: displayMessage">这由上面的元素checked状态控制显示的</div>
 
 </body>
 </html>

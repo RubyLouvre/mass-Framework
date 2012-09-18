@@ -141,13 +141,14 @@ define("avalon",["$attr","$event"], function(){
         },
         value:{
             init: function(node, val, field){
-                node.value = val;
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
                     $(node).on("input",function(){
                         field(node.value)
                     });
                 }
-
+            },
+            update:  function( node, val ){
+                node.value = val;
             }
         },
         html: {
@@ -239,7 +240,7 @@ define("avalon",["$attr","$event"], function(){
                     node.appendChild( first );
                     field.prevData = [{}];//这是伪数据，目的让其update
                 }
-                var first = field.references[0];
+                var first = field.references[0];//模板中第一个元素节点
                 
                 if( code > 0 ){ //处理with if bindings
                     template = first.recovery();
@@ -255,21 +256,7 @@ define("avalon",["$attr","$event"], function(){
         }
 
     }
-    var Tmpl = function(t){
-        this.template = t
-        this.nodes = $.slice(t.childNodes)
-    }
-    Tmpl.prototype.recovery = function(){
-        this.nodes.forEach(function( el ){
-            this.template.appendChild(el)
-        },this);
-        return this.template
-    }
-    $.ViewDirectives.disable = {
-        update: function( node, val ){
-            $.ViewDirectives.enable.update(node, !val);
-        }
-    }
+
     //if unless with foreach四种bindings都是使用template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewDirectives[ type ] = {
@@ -297,7 +284,21 @@ define("avalon",["$attr","$event"], function(){
     });
 
 
-
+    var Tmpl = function(t){
+        this.template = t
+        this.nodes = $.slice(t.childNodes)
+    }
+    Tmpl.prototype.recovery = function(){
+        this.nodes.forEach(function( el ){
+            this.template.appendChild(el)
+        },this);
+        return this.template
+    }
+    $.ViewDirectives.disable = {
+        update: function( node, val ){
+            $.ViewDirectives.enable.update(node, !val);
+        }
+    }
 
 
 
