@@ -227,52 +227,57 @@ define("avalon",["$attr","$event"], function(){
         },
         template: {
             update: function( node, val, callback, model){
-                var array = callback(), code = array[0], field = array[1], el
-                var template = field.template;//取得最初的那个节点的内部作为模块
-                console.log(val)
-                if(!template){
+                var array = callback(), code = array[0], field = array[1], el, tmpl
+                //这个域对象储存着的文档碎片
+                var tmpls = field.tmpls;
+             
+                if(!tmpls){
                     //合并文本节点数
                     node.normalize();
-                    //保存模板
-                    template = node.ownerDocument.createDocumentFragment();
+                    //创建一个文档碎片作为MVVM的动态模板
+                    tmpl = node.ownerDocument.createDocumentFragment();
                     while((el = node.firstChild)){
-                        template.appendChild(el)
+                        tmpl.appendChild(el)
                     }
-                    field.template = template;
-                    //复制一份出来放回原位
-                    var first = template.cloneNode(true);
-                    field.references = [ new Tmpl( first ) ];//先取得nodes的引用再插入DOM树
-                    node.appendChild( first );
+                    field.tmpls = [ new Tmpl( tmpl ) ];//先取得nodes的引用再插入DOM树
+                    node.appendChild( tmpl );
                     field.prevData = [{}];//这是伪数据，目的让其update
                 }
-                first = field.references[0];//模板中第一个元素节点
-                
-                if( code > 0 ){ //处理with if bindings
-                    template = first.recovery();
-                    var elems = getChildren( template );
-                    node.appendChild( template );  //显示出来
+                tmpl = field.tmpls[0];//取得原始模板
+                if( code > 0 ){ //处理with if 绑定
+                    tmpl =  tmpl.remove();    //将Field所引用着的节点移出DOM树
+                    var elems = getChildren( tmpl );//取得它们当中的元素节点
+                    node.appendChild( tmpl );  //再Field所引用着的节点放回DOM树
                     if( elems.length ){
-                        if( code == 2 ){//处理with bindings
+                        if( code == 2 ){//处理with 绑定
                             model = array[2]
                         }
                         return setBindingsToChildren( elems, model, true )
                     }
-                }else if( code == 0){//处理unless bindings
-                    first.recovery();
+                }else if( code == 0){//处理unless 绑定
+                    tmpl.remove();
                 }
-                if( code < 0  && val ){//处理foreach bindings
+               
+                if( code < 0  && val ){//处理foreach 绑定
+                    var data = []
                     if(typeof val.length  == "number"  ){
-                    //处理数组形式
+                        for(var index = 0; index < val.length; index++){
+                            data.push( $.ViewModel({
+                                $key: index,
+                                $value: val[ index ]
+                            }))
+                        }
                     }else{
                         for(var key in val){
-                            if(val.hasOwnProperty( key ))
-                                $.View({
+                            if(val.hasOwnProperty( key )){
+                                data.push( $.ViewModel({
                                     $key: key,
-                                    $value: val[key]
-                                })
-                            console.log(key)
+                                    $value: val[ key ]
+                                }));
+                            }
                         }
                     }
+                    
 
                 }
             },
@@ -307,15 +312,16 @@ define("avalon",["$attr","$event"], function(){
     });
 
 
-    var Tmpl = function(t){
-        this.template = t
-        this.nodes = $.slice(t.childNodes)
+    var Tmpl = function( fragment ){
+        this.fragment = fragment;
+        this.nodes = $.slice( fragment.childNodes );
     }
-    Tmpl.prototype.recovery = function(){
+    //将此实例所引用着的节点移出DOM,放进DOM超空间中,并返回它
+    Tmpl.prototype.remove = function(){
         this.nodes.forEach(function( el ){
-            this.template.appendChild(el)
+            this.fragment.appendChild(el)
         },this);
-        return this.template
+        return this.fragment;
     }
     $.ViewDirectives.disable = {
         update: function( node, val ){
