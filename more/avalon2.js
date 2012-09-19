@@ -9,8 +9,15 @@ define("avalon",["$attr","$event"], function(){
         }
         for(var p in data) {
             if(data.hasOwnProperty(p)) {
-                defineProperty(model, p, data[p], data);
+                addFields(p, data[p], model);
             }
+        }
+        return model;
+    }
+    $.ArrayViewModel = function(data, model){
+        model = model || []
+        for(var i = 0; i < data.length; i++){
+            addFields(i, data[i], model )
         }
         return model;
     }
@@ -419,7 +426,7 @@ define("avalon",["$attr","$event"], function(){
         return elems;
     }
     var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
-    function defineProperty(model, key, val, data ){
+    function addFields( key, val, model ){
         switch( $.type( val )){
             case "String":
             case "Number":
@@ -430,7 +437,8 @@ define("avalon",["$attr","$event"], function(){
                 computedFiled(model, key, val, "get");
                 break;
             case "Array":
-                $.ArrayViewModel(model, key, val, data);
+                model[key] = model[key] || []
+                $.ArrayViewModel(val, model[key]);
                 break;
             case "Object":
                 if($.isPlainObject( val )){
