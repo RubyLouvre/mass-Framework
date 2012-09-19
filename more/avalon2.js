@@ -255,37 +255,13 @@ define("avalon",["$attr","$event"], function(){
                     fragment.recover();
                 }
                 if( code < 0  && val ){      //处理foreach 绑定
-                    console.log("这原来的foreach绑定的代码");
-                    console.log(field.models);
-                    console.log(field.fragments);
-                //                    var modelArray = [];     //构建新的VM数组
-                //                    if(typeof val.length  == "number" && /^[1-9]\d*$/.test(val.length) ){
-                //                        for(var index = 0; index < val.length; index++){
-                //                            modelArray.push( $.ViewModel({
-                //                                $key: index,
-                //                                $value: val[ index ]
-                //                            }))
-                //                        }
-                //                    }else{
-                //                        for(var key in val){
-                //                            if(val.hasOwnProperty( key )){
-                //                                modelArray.push( $.ViewModel({
-                //                                    $key: key,
-                //                                    $value: val[ key ]
-                //                                }));
-                //                            }
-                //                        }
-                //                    }
-                //                    tmpl =  tmpl.remove();
-                //                    var nodeArray = [tmpl];    //构建新的DOM模板
-                //                    for(var i = 1; i < modelArray.length; i++ ){
-                //                        nodeArray.push( tmpl.cloneNode(true) );
-                //                    }
-                //                                    for( i = 0, el ; el = nodeArray[i]; i++){
-                //                                        elems = getChildren( el );
-                //                                        node.appendChild( el );//将VM绑定到模板上
-                //                                        setBindingsToChildren( elems, modelArray[i], true );
-                //                                    }
+                    $.log("这原来的foreach绑定的代码");
+                    var nodeArray = field.fragments, modelArray = field.models;
+                    for( var i = 0, el ; el = nodeArray[i]; i++){
+                        elems = getChildren( el );
+                        node.appendChild( el );//将VM绑定到模板上
+                        setBindingsToChildren( elems, modelArray[i], true );
+                    }
                 }
             },
             stopBindings: true
@@ -334,18 +310,20 @@ define("avalon",["$attr","$event"], function(){
 
     });
     $.ViewDirectives.foreach.preupdate = function(node, field, array, method, args){
-        var models = []
-        for(var index = 0; index < array.length; index++){
-            models.push( $.ViewModel({
-                $key: index,
-                $value: array[ index ]
-            }))
-        }
-        field.models = models;
-        var fragments = field.fragments
-        fragments[0].recover();
-        for(var i = 1; i < models.length; i++ ){
-            fragments.push( field.cloneFragment() );
+        if(method == "init"){
+            var models = []
+            for(var index = 0; index < array.length; index++){
+                models.push( $.ViewModel({
+                    $key: index,
+                    $value: array[ index ]
+                }))
+            }
+            field.models = models;
+            var fragments = field.fragments
+            fragments[0].recover();
+            for(var i = 1; i < models.length; i++ ){
+                field.cloneFragment()
+            }
         }
      
     }
@@ -402,7 +380,6 @@ define("avalon",["$attr","$event"], function(){
                 if( directive.stopBindings ){
                     continueBindings = false;
                 }
-                // console.log([node,  names, values, key, val, directive, model])
                 interactedFiled(node,  names, values, key, val, directive, model);
             }
         }
@@ -506,8 +483,7 @@ define("avalon",["$attr","$event"], function(){
     // 将bindings变成一个对象或一个数组 by 司徒正美
     //============================================================
     function normalizeJSON(json, array){
-        var keyValueArray = parseObjectLiteral(json),resultStrings = [],
-        keyValueEntry, propertyToHook = [];
+        var keyValueArray = parseObjectLiteral(json),resultStrings = [],keyValueEntry;
         for (var i = 0; keyValueEntry = keyValueArray[i]; i++) {
             if (resultStrings.length > 0 && !array)
                 resultStrings.push(",");
