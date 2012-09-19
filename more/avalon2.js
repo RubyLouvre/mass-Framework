@@ -22,7 +22,11 @@ define("avalon",["$attr","$event"], function(){
         //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
         model.push = function(){
-             console.log("push")
+            var fields = model["arr_"+expando];
+            for(var i = 0, field; field = fields[i++];){
+
+                field("push", arguments)
+            }
         }
         return model;
     }
@@ -108,22 +112,29 @@ define("avalon",["$attr","$event"], function(){
     function interactedFiled (node, names, values, key, str, directive, model ){
         function field( neo ){
             if( !field.uuid ){ //如果是第一次执行这个域
-                if(Array.isArray(model) ){
-                    model[uuid] = model[uuid] || [];
-                    $.Array.ensure(model[uuid],field)
+                var arr = model[str]
+                if(Array.isArray( arr ) ){
+                    var p = arr["arr_"+expando] || ( arr[ "arr_"+ expando] =  [] );
+                    $.Array.ensure( p ,field);
+                    arguments = ["pushall"]
                 }
                 bridge[ expando ] = field;
             }
+       
             var fn = Function(names, "return "+ str), callback, val;
             val = fn.apply(null, values );
             if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
-                callback = val;
+                callback = val; //这里的域为它所依赖的域
                 val = callback();//如果是域对象
             }
             if( !field.uuid ){
                 delete bridge[ expando ];
                 field.uuid = ++uuid;
-                directive.init && directive.init(node, val, callback);
+                //第四个参数供流程绑定使用
+                directive.init && directive.init(node, val, callback, field);
+            }
+            if(key == "foreach" && arguments.length){
+                     console.log(key)
             }
             //这里需要另一种指令！用于处理数组增删改查与排序
             directive.update && directive.update(node, val, field, model);
@@ -229,17 +240,6 @@ define("avalon",["$attr","$event"], function(){
         template: {
             update: function( node, val, callback, model){
                 var transfer = callback(), code = transfer[0], field = transfer[1], el, tmpl;
-                var tmpls = field.tmpls;
-                if( !Array.isArray(tmpls)){
-                    node.normalize();           //合并文本节点数
-                    tmpl = node.ownerDocument.createDocumentFragment();
-                    while((el = node.firstChild)){
-                        tmpl.appendChild(el); //将Field所引用着的节点移出DOM树
-                    }
-                    field.tmpl = tmpl.cloneNode(true);
-                    field.tmpls = [ new Tmpl( tmpl ) ];//取得模板中所有节点的引用
-                    node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
-                }
                 tmpl = field.tmpls[0];         //取得原始模板
                 if( code > 0 ){                //处理with if 绑定
                     tmpl =  tmpl.remove();     //将Field所引用着的节点移出DOM树
@@ -290,13 +290,26 @@ define("avalon",["$attr","$event"], function(){
 
     }
     
-   function updateNodeArray(field, method, args){
+    function updateNodeArray(field, method, args){
        
-   }
+    }
 
     //if unless with foreach四种bindings都是使用template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewDirectives[ type ] = {
+            init: function(node, _, _, field){
+                node.normalize();           //合并文本节点数
+                var tmpl = node.ownerDocument.createDocumentFragment(), el
+                while((el = node.firstChild)){
+                    tmpl.appendChild(el); //将Field所引用着的节点移出DOM树
+                }
+                field.tmpl = tmpl.cloneNode(true);
+                field.tmpls = [ new Tmpl( tmpl ) ];//取得模板中所有节点的引用
+                node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
+            },
+            preupdate: function(){
+
+            },
             update : function(node, val, field, model){
                 if(type == "case" && (typeof model.$switch != "function" )){
                     throw "Must define switch statement above all";
@@ -307,16 +320,17 @@ define("avalon",["$attr","$event"], function(){
                         case "if":
                             return [ !!val - 0, field];//1
                         case "unless":
-                            return [!val - 0, field];//0
+                            return [!val - 0, field]; //0
                         case "with":
-                            return [2, field, val];//2
+                            return [2, field, val];   //2
                         default:
-                            return [-1, field];
+                            return [-1, field];       //-1 foreach
                     }
                 }, model);
             },
             stopBindings: true
         }
+
     });
 
 
@@ -373,6 +387,7 @@ define("avalon",["$attr","$event"], function(){
                 if( directive.stopBindings ){
                     continueBindings = false;
                 }
+                // console.log([node,  names, values, key, val, directive, model])
                 interactedFiled(node,  names, values, key, val, directive, model);
             }
         }
