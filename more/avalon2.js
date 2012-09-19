@@ -3,9 +3,9 @@ define("avalon",["$attr","$event"], function(){
     //http://angularjs.org/
     var BINDING = $.config.bindname || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
     $.ViewModel = function(data, model){
-        model = model || {}
+        model = model || {};//默认容器是对象
         if(Array.isArray(data)){
-            return $.ArrayViewModel(data)
+            return $.ArrayViewModel(data);
         }
         for(var p in data) {
             if(data.hasOwnProperty(p)) {
@@ -17,7 +17,12 @@ define("avalon",["$attr","$event"], function(){
     $.ArrayViewModel = function(data, model){
         model = model || []
         for(var i = 0; i < data.length; i++){
-            addFields(i, data[i], model )
+            addFields(i, data[i], model );
+        }
+        //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
+        //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
+        model.push = function(){
+
         }
         return model;
     }
