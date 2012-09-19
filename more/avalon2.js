@@ -134,6 +134,8 @@ define("avalon",["$attr","$event"], function(){
                 directive.init && directive.init(node, val, callback, field);
             }
             if(directive.preupdate && arguments.length){
+                $.log(arguments[0])
+                $.log(arguments[1])
                 directive.preupdate(node, field, model[str], arguments[0],arguments[1] )
             }
             //这里需要另一种指令！用于处理数组增删改查与排序
@@ -260,6 +262,7 @@ define("avalon",["$attr","$event"], function(){
                     for( var i = 0, el ; el = nodeArray[i]; i++){
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
+                        $.log(elems)//为空????
                         setBindingsToChildren( elems, modelArray[i], true );
                     }
                 }
@@ -280,12 +283,13 @@ define("avalon",["$attr","$event"], function(){
                 }
                 field.fragments = [];         //添加一个数组属性,用于储存经过改造的文档碎片
                 field.fragment = fragment;    //最初的文档碎片,用于克隆
-                field.cloneFragment = function( node ){ //改造文档碎片并放入数组
-                    node = node || field.fragment.cloneNode(true);
-                    field.fragments.push( patchFragment(node) );
+                field.cloneFragment = function( dom ){ //改造文档碎片并放入数组
+                    dom = dom || field.fragment.cloneNode(true);
+                    field.fragments.push( patchFragment(dom) );
+                    return dom;
                 }
-                field.cloneFragment(fragment); //先改造一翻,方便在update时调用recover方法
-                node.appendChild( fragment );  //将文档碎片中的节点放回DOM树
+                var clone = field.cloneFragment(); //先改造一翻,方便在update时调用recover方法
+                node.appendChild( clone );  //将文档碎片中的节点放回DOM树
             },
             update : function(node, val, field, model){
                 if(type == "case" && (typeof model.$switch != "function" )){
@@ -325,7 +329,28 @@ define("avalon",["$attr","$event"], function(){
                 field.cloneFragment()
             }
         }
-     
+        if(method === "push"){
+            for( i = 0; i < args.length; i++ ){
+                var n = array.length + i;
+                field.models.push( $.ViewModel({
+                    $key: n,
+                    $value: args[i]
+                }))
+                addFields( n , args[i], array );
+                field.cloneFragment()
+            }
+        }
+        if(method === "shift"){
+//            for( i = 0; i < args.length; i++ ){
+//                var n = array.length + i;
+//                field.models.push( $.ViewModel({
+//                    $key: n,
+//                    $value: args[i]
+//                }))
+//                addFields( n , args[i], array );
+//                field.cloneFragment()
+//            }
+        }
     }
 
     //nodes属性为了取得所有子节点的引用
@@ -402,9 +427,9 @@ define("avalon",["$attr","$event"], function(){
         for(var i = 0, n = elems.length; i < n ; i++){
             var node = elems[i]
             setBindingsToElementAndChildren( node, model, setData && !force );
-            if( setData && force ){//这是由foreach绑定触发
-                $._data(node,"bindings-context", model)
-            }
+        //            if( setData && force ){//这是由foreach绑定触发
+        //                $._data(node,"bindings-context", model)
+        //            }
         }
     }
     //通知此域的所有直接依赖者更新自身
