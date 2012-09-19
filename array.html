@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>array by 司徒正美</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js"></script>
+
+    </head>
+    <body>
+
+        <script>
+            $.require("ready,./more/avalon2", function(){
+                var model = $.ViewModel({
+                    array: [1,2,3,4]
+                });
+                $.View(model);
+
+            })
+        </script>
+
+
+        <ul  bind="foreach: array" >
+           <li bind="text:$value"></li>
+        </ul>
+
+
+    </body>
+</html>

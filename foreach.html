@@ -33,7 +33,17 @@
         </dl>
 
         <hr/>
+        <table>
+            <thead>
+                <tr><th>First name</th><th>Last name</th></tr>
+            </thead>
+            <tbody data-bind="foreach: people">
+                <tr>
+                    <td data-bind="text: firstName"></td>
+                    <td data-bind="text: lastName"></td>
+                </tr>
+            </tbody>
+        </table>
     </body>
 </html>
 
-      
