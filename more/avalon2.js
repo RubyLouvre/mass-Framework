@@ -22,7 +22,7 @@ define("avalon",["$attr","$event"], function(){
         //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
         model.push = function(){
-
+             console.log("push")
         }
         return model;
     }
@@ -108,6 +108,10 @@ define("avalon",["$attr","$event"], function(){
     function interactedFiled (node, names, values, key, str, directive, model ){
         function field( neo ){
             if( !field.uuid ){ //如果是第一次执行这个域
+                if(Array.isArray(model) ){
+                    model[uuid] = model[uuid] || [];
+                    $.Array.ensure(model[uuid],field)
+                }
                 bridge[ expando ] = field;
             }
             var fn = Function(names, "return "+ str), callback, val;
@@ -121,6 +125,7 @@ define("avalon",["$attr","$event"], function(){
                 field.uuid = ++uuid;
                 directive.init && directive.init(node, val, callback);
             }
+            //这里需要另一种指令！用于处理数组增删改查与排序
             directive.update && directive.update(node, val, field, model);
             return field.value = val;
         }
@@ -231,6 +236,7 @@ define("avalon",["$attr","$event"], function(){
                     while((el = node.firstChild)){
                         tmpl.appendChild(el); //将Field所引用着的节点移出DOM树
                     }
+                    field.tmpl = tmpl.cloneNode(true);
                     field.tmpls = [ new Tmpl( tmpl ) ];//取得模板中所有节点的引用
                     node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
                 }
@@ -283,6 +289,10 @@ define("avalon",["$attr","$event"], function(){
         }
 
     }
+    
+   function updateNodeArray(field, method, args){
+       
+   }
 
     //if unless with foreach四种bindings都是使用template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
