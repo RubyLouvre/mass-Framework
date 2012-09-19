@@ -116,7 +116,7 @@ define("avalon",["$attr","$event"], function(){
                 if(Array.isArray( arr ) ){
                     var p = arr["arr_"+expando] || ( arr[ "arr_"+ expando] =  [] );
                     $.Array.ensure( p ,field);
-                    arguments = ["pushall"]
+                    arguments = ["init"]
                 }
                 bridge[ expando ] = field;
             }
@@ -133,8 +133,8 @@ define("avalon",["$attr","$event"], function(){
                 //第四个参数供流程绑定使用
                 directive.init && directive.init(node, val, callback, field);
             }
-            if(key == "foreach" && arguments.length){
-                     console.log(key)
+            if(directive.preupdate && arguments.length){
+                directive.preupdate(node, field, model[str], arguments[0],arguments[1] )
             }
             //这里需要另一种指令！用于处理数组增删改查与排序
             directive.update && directive.update(node, val, field, model);
@@ -255,43 +255,40 @@ define("avalon",["$attr","$event"], function(){
                     tmpl.remove();
                 }
                 if( code < 0  && val ){      //处理foreach 绑定
-                    var modelArray = [];     //构建新的VM数组
-                    if(typeof val.length  == "number" && /^[1-9]\d*$/.test(val.length) ){
-                        for(var index = 0; index < val.length; index++){
-                            modelArray.push( $.ViewModel({
-                                $key: index,
-                                $value: val[ index ]
-                            }))
-                        }
-                    }else{
-                        for(var key in val){
-                            if(val.hasOwnProperty( key )){
-                                modelArray.push( $.ViewModel({
-                                    $key: key,
-                                    $value: val[ key ]
-                                }));
-                            }
-                        }
-                    }
-                    tmpl =  tmpl.remove();
-                    var nodeArray = [tmpl];    //构建新的DOM模板
-                    for(var i = 1; i < modelArray.length; i++ ){
-                        nodeArray.push( tmpl.cloneNode(true) );
-                    }
-                    for( i = 0, el ; el = nodeArray[i]; i++){
-                        elems = getChildren( el );
-                        node.appendChild( el );//将VM绑定到模板上
-                        setBindingsToChildren( elems, modelArray[i], true );
-                    }
+                    console.log("这原来的foreach绑定的代码")
+                //                    var modelArray = [];     //构建新的VM数组
+                //                    if(typeof val.length  == "number" && /^[1-9]\d*$/.test(val.length) ){
+                //                        for(var index = 0; index < val.length; index++){
+                //                            modelArray.push( $.ViewModel({
+                //                                $key: index,
+                //                                $value: val[ index ]
+                //                            }))
+                //                        }
+                //                    }else{
+                //                        for(var key in val){
+                //                            if(val.hasOwnProperty( key )){
+                //                                modelArray.push( $.ViewModel({
+                //                                    $key: key,
+                //                                    $value: val[ key ]
+                //                                }));
+                //                            }
+                //                        }
+                //                    }
+                //                    tmpl =  tmpl.remove();
+                //                    var nodeArray = [tmpl];    //构建新的DOM模板
+                //                    for(var i = 1; i < modelArray.length; i++ ){
+                //                        nodeArray.push( tmpl.cloneNode(true) );
+                //                    }
+                //                    for( i = 0, el ; el = nodeArray[i]; i++){
+                //                        elems = getChildren( el );
+                //                        node.appendChild( el );//将VM绑定到模板上
+                //                        setBindingsToChildren( elems, modelArray[i], true );
+                //                    }
                 }
             },
             stopBindings: true
         }
 
-    }
-    
-    function updateNodeArray(field, method, args){
-       
     }
 
     //if unless with foreach四种bindings都是使用template bindings
@@ -306,9 +303,6 @@ define("avalon",["$attr","$event"], function(){
                 field.tmpl = tmpl.cloneNode(true);
                 field.tmpls = [ new Tmpl( tmpl ) ];//取得模板中所有节点的引用
                 node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
-            },
-            preupdate: function(){
-
             },
             update : function(node, val, field, model){
                 if(type == "case" && (typeof model.$switch != "function" )){
@@ -332,6 +326,10 @@ define("avalon",["$attr","$event"], function(){
         }
 
     });
+    $.ViewDirectives.foreach.preupdate = function(node, field, array, method, args){
+        console.log(array)
+        console.log(method)
+    }
 
 
     var Tmpl = function( fragment ){
