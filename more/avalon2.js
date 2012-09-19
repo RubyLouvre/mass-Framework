@@ -28,23 +28,7 @@ define("avalon",["$attr","$event"], function(){
         //开始在其自身与孩子中绑定
         return setBindingsToElementAndChildren( node, model, true );
     }
-    //ViewModel的组成单位
-    function Field( host, key, field ){
-        field.toString = field.valueOf = function(){
-            if( bridge[ expando ] ){
-                //收集依赖于它的computedFiled与interactedFiled,以便它的值改变时,通知它们更新自身
-                $.Array.ensure( field.parents, bridge[ expando ] );
-            }
-            return field.value
-        }
-        if(!host.nodeType){
-            field.nick = key;
-            host[ key ] = field;
-        }
-        field.parents = [];
-        field();
-        return field;
-    }
+
     //一个域对象是一个函数,它总是返回其的value值
     //一个域对象拥有nick属性,表示它在model中的属性名
     //一个域对象拥有parents属性,里面是其他依赖于它的域对象
@@ -67,7 +51,7 @@ define("avalon",["$attr","$event"], function(){
         }
         field.value = val;
         field.uuid = ++uuid
-        return Field( host, key, field );
+        return addField( key, field, host );
     }
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
@@ -112,7 +96,7 @@ define("avalon",["$attr","$event"], function(){
             }
             return field.value;
         }
-        return Field( host, key, field );
+        return addField( key, field, host );
     }
     //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
@@ -135,7 +119,7 @@ define("avalon",["$attr","$event"], function(){
             directive.update && directive.update(node, val, field, model);
             return field.value = val;
         }
-        return Field(node, "interacted" ,field);
+        return addField( "interacted" ,field, node);
     }
     //执行绑定在元素标签内的各种指令
     var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
@@ -424,6 +408,22 @@ define("avalon",["$attr","$event"], function(){
             }
         }
         return elems;
+    }
+    function addField( key, field, host ){
+        field.toString = field.valueOf = function(){
+            if( bridge[ expando ] ){
+                //收集依赖于它的computedFiled与interactedFiled,以便它的值改变时,通知它们更新自身
+                $.Array.ensure( field.parents, bridge[ expando ] );
+            }
+            return field.value
+        }
+        if(!host.nodeType){
+            field.nick = key;
+            host[ key ] = field;
+        }
+        field.parents = [];
+        field();
+        return field;
     }
     var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
     function addFields( key, val, model ){
