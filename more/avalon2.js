@@ -239,12 +239,12 @@ define("avalon",["$attr","$event"], function(){
         },
         template: {
             update: function( node, val, callback, model){
-                var transfer = callback(), code = transfer[0], field = transfer[1], el, tmpl;
-                tmpl = field.tmpls[0];         //取得原始模板
+                var transfer = callback(), code = transfer[0], field = transfer[1];
+                var fragment = field.fragments[0];         //取得原始模板
                 if( code > 0 ){                //处理with if 绑定
-                    tmpl =  tmpl.remove();     //将Field所引用着的节点移出DOM树
-                    var elems = getChildren( tmpl );//取得它们当中的元素节点
-                    node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
+                    fragment.recover();        //将Field所引用着的节点移出DOM树
+                    var elems = getChildren( fragment );//取得它们当中的元素节点
+                    node.appendChild( fragment );  //将Field所引用着的节点放回DOM树
                     if( elems.length ){
                         if( code == 2 ){      //处理with 绑定
                             model = transfer[2]
@@ -252,10 +252,12 @@ define("avalon",["$attr","$event"], function(){
                         return setBindingsToChildren( elems, model, true )
                     }
                 }else if( code === 0 ){        //处理unless 绑定
-                    tmpl.remove();
+                    fragment.recover();
                 }
                 if( code < 0  && val ){      //处理foreach 绑定
-                    console.log("这原来的foreach绑定的代码")
+                    console.log("这原来的foreach绑定的代码");
+                    console.log(field.models);
+                    console.log(field.fragments);
                 //                    var modelArray = [];     //构建新的VM数组
                 //                    if(typeof val.length  == "number" && /^[1-9]\d*$/.test(val.length) ){
                 //                        for(var index = 0; index < val.length; index++){
@@ -279,11 +281,11 @@ define("avalon",["$attr","$event"], function(){
                 //                    for(var i = 1; i < modelArray.length; i++ ){
                 //                        nodeArray.push( tmpl.cloneNode(true) );
                 //                    }
-                //                    for( i = 0, el ; el = nodeArray[i]; i++){
-                //                        elems = getChildren( el );
-                //                        node.appendChild( el );//将VM绑定到模板上
-                //                        setBindingsToChildren( elems, modelArray[i], true );
-                //                    }
+                //                                    for( i = 0, el ; el = nodeArray[i]; i++){
+                //                                        elems = getChildren( el );
+                //                                        node.appendChild( el );//将VM绑定到模板上
+                //                                        setBindingsToChildren( elems, modelArray[i], true );
+                //                                    }
                 }
             },
             stopBindings: true
@@ -295,14 +297,19 @@ define("avalon",["$attr","$event"], function(){
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewDirectives[ type ] = {
             init: function(node, _, _, field){
-                node.normalize();           //合并文本节点数
-                var tmpl = node.ownerDocument.createDocumentFragment(), el
+                node.normalize();            //合并文本节点数
+                var fragment = node.ownerDocument.createDocumentFragment(), el
                 while((el = node.firstChild)){
-                    tmpl.appendChild(el); //将Field所引用着的节点移出DOM树
+                    fragment.appendChild(el); //将node中的所有节点移出DOM树
                 }
-                field.tmpl = tmpl.cloneNode(true);
-                field.tmpls = [ new Tmpl( tmpl ) ];//取得模板中所有节点的引用
-                node.appendChild( tmpl );  //将Field所引用着的节点放回DOM树
+                field.fragments = [];         //添加一个数组属性,用于储存经过改造的文档碎片
+                field.fragment = fragment;    //最初的文档碎片,用于克隆
+                field.cloneFragment = function( node ){ //改造文档碎片并放入数组
+                    node = node || field.fragment.cloneNode(true);
+                    field.fragments.push( patchFragment(node) );
+                }
+                field.cloneFragment(fragment); //先改造一翻,方便在update时调用recover方法
+                node.appendChild( fragment );  //将文档碎片中的节点放回DOM树
             },
             update : function(node, val, field, model){
                 if(type == "case" && (typeof model.$switch != "function" )){
@@ -327,21 +334,31 @@ define("avalon",["$attr","$event"], function(){
 
     });
     $.ViewDirectives.foreach.preupdate = function(node, field, array, method, args){
-        console.log(array)
-        console.log(method)
+        var models = []
+        for(var index = 0; index < array.length; index++){
+            models.push( $.ViewModel({
+                $key: index,
+                $value: array[ index ]
+            }))
+        }
+        field.models = models;
+        var fragments = field.fragments
+        fragments[0].recover();
+        for(var i = 1; i < models.length; i++ ){
+            fragments.push( field.cloneFragment() );
+        }
+     
     }
 
-
-    var Tmpl = function( fragment ){
-        this.fragment = fragment;
-        this.nodes = $.slice( fragment.childNodes );
-    }
-    //将此实例所引用着的节点移出DOM,放进DOM超空间中,并返回它
-    Tmpl.prototype.remove = function(){
-        this.nodes.forEach(function( el ){
-            this.fragment.appendChild(el)
-        },this);
-        return this.fragment;
+    //nodes属性为了取得所有子节点的引用
+    function patchFragment( fragment ){
+        fragment.nodes = $.slice( fragment.childNodes );
+        fragment.recover = function(){
+            this.nodes.forEach(function( el ){
+                this.appendChild(el)
+            },this);
+        }
+        return fragment;
     }
 
     $.ViewDirectives.disable = {
