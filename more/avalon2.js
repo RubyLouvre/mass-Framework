@@ -22,7 +22,9 @@ define("avalon",["$attr","$event"], function(){
         //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
+            var arrayMethod = model[ method ];
             model[ method ] = function(){
+                arrayMethod.apply( model, arguments)
                 var fields = model["arr_"+expando];
                 for(var i = 0, field; field = fields[i++];){
                     field(method, arguments);
@@ -110,6 +112,7 @@ define("avalon",["$attr","$event"], function(){
     }
     //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
+    var testArray = []
     function interactedFiled (node, names, values, key, str, directive, model ){
         function field( neo ){
             if( !field.uuid ){ //如果是第一次执行这个域
@@ -264,6 +267,7 @@ define("avalon",["$attr","$event"], function(){
                     for( var i = 0, el ; el = nodeArray[i]; i++){
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
+                        $.log(elems)
                         setBindingsToChildren( elems, modelArray[i], true );
                     }
                 }
@@ -312,6 +316,7 @@ define("avalon",["$attr","$event"], function(){
             stopBindings: true
         }
     });
+    //Google IO 2012 - V8引擎突破速度障碍 http://www.tudou.com/programs/view/bqxvrifP4mk/
     //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
     var foreach = $.ViewDirectives.foreach;
     foreach.start =function( field, models, fragments, array, method, args ){
@@ -327,8 +332,9 @@ define("avalon",["$attr","$event"], function(){
         }
     };
     foreach.push = function( field, models, fragments, array, method, args ){
+        var l = models.length
         for(var i = 0; i < args.length; i++ ){
-            var n = array.length + i;
+            var n = l + i;
             models.push( $.ViewModel({
                 $key: n,
                 $value: args[i]
@@ -337,8 +343,31 @@ define("avalon",["$attr","$event"], function(){
             field.cloneFragment()
         }
     }
-
-    foreach.shift = function( field, models, fragments, array, method ){
+    //unshift 
+    foreach.unshift = function( field, models, fragments, array, method, args ){
+        var n = args.length;//更新已有的model的$key值
+        for(var i = 0; i < models.length; i++){
+            var model = models[i];
+            model.$key(i + n);
+        }
+        var doms = []
+        for( i = 0; i < n; i++ ){//再添加新的model
+            models.splice(i,0, $.ViewModel({
+                $key: i,
+                $value: args[i]
+            }))
+            addFields( i , args[i], array );
+            var dom = field.fragment.cloneNode(true);//在中间插入节点
+            doms.push(patchFragment(dom))
+          
+        }
+          [].unshift( fragments, doms );
+        console.log(fragments);
+        
+       // console.log(models)
+    }
+    // shift pop ok
+    foreach.shift = function( field, models, fragments, array, method, args ){
         models[method]();
         var fragment = fragments[method]()
         fragment.recover();
@@ -348,47 +377,33 @@ define("avalon",["$attr","$event"], function(){
         }
     }
     foreach.pop = foreach.shift;
+    //sort reverse ok
     foreach.sort = function( field, models, fragments, array, method, args ){
-        Array.prototype[method].apply(array,args);
         for(var i = 0; i < models.length; i++){
             var model = models[i];
             model.$value( array[i]() );
         }
     }
     foreach.reverse = foreach.sort;
-    foreach.unshift = function( field, models, fragments, array, method, args ){
-        var n = args.length;//更新已有的model的$key值
-        for(var i = 0; i < models.length; i++){
-            var model = models[i];
-            model.$key(i + n);
-        }
-        for( i = 0; i < n; i++ ){//再添加新的model
-            models.push( $.ViewModel({
-                $key: i,
-                $value: args[i]
-            }))
-            addFields( n , args[i], array );
-            field.cloneFragment( 0, true);
-        }
-    }
+    //splice ok
     foreach.splice = function(field, models, fragments, array, method, args){
-        var index = args[0], removeTo = args[0] || array.length;
-        models.splice(index, removeTo);
-        var removes = fragments.splice(index, removeTo);
-        //同步DOM树
+        var index = args[0];
+        models.splice(index, args[1]);
+        var removes = fragments.splice(index, args[1]);
         for(var i = 0; i < removes.length; i++){
-            removes[i].recover();
+            removes[i].recover();//移除节点
         }
+        var ri = 0
         for( i = 2; i < args.length; i++){
-            n = index+1
-            models.push( $.ViewModel({
+            var n = index + ri++;
+            models.splice(n, 0, $.ViewModel({
                 $key: n,
                 $value: args[i]
             }));
             addFields( n , args[i], array );
-          //  field.cloneFragment( 0, true);主要是这里的同步
+            var dom = field.fragment.cloneNode(true);//在中间插入节点
+            field.fragments.splice(n, 0, patchFragment(dom) );
         }
-     //   fragment.recover();
 
     }
     //nodes属性为了取得所有子节点的引用
@@ -620,13 +635,19 @@ define("avalon",["$attr","$event"], function(){
             var c = str.charAt(position);
             if (tokenStart === null) {
                 switch (c) {
-                    case "{": tokenStart = position; tokenStartChar = c;
+                    case "{":
+                        tokenStart = position;
+                        tokenStartChar = c;
                         tokenEndChar = "}";
                         break;
-                    case "(": tokenStart = position; tokenStartChar = c;
+                    case "(":
+                        tokenStart = position;
+                        tokenStartChar = c;
                         tokenEndChar = ")";
                         break;
-                    case "[": tokenStart = position; tokenStartChar = c;
+                    case "[":
+                        tokenStart = position;
+                        tokenStartChar = c;
                         tokenEndChar = "]";
                         break;
                 }
