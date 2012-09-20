@@ -28,6 +28,10 @@
                 setTimeout(function(){
                     model.array.splice(1,2,"a","b","c")
                 },1000);
+                   setTimeout(function(){
+                   console.log( model.array[1]("p")) //model.array.splice(1,2,"a","b","c")
+                   console.log(  model.array[1].parents)
+                },1400);
                 //   setTimeout(function(){
                 //    model.array.remove( 2 )
                 //  },1000)

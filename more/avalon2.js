@@ -138,7 +138,7 @@ define("avalon",["$attr","$event"], function(){
                 }
                 bridge[ expando ] = field;
             }
-
+            field.node = node;
             var fn = Function(names, "return "+ str), callback, val;
             val = fn.apply(null, values );
             if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
@@ -259,6 +259,7 @@ define("avalon",["$attr","$event"], function(){
             }
         },
         template: {
+            //●●●●●●●●●●●●●
             update: function( node, val, callback, model){
                 var transfer = callback(), code = transfer[0], field = transfer[1];
                 var fragment = field.fragments[0];         //取得原始模板
@@ -282,6 +283,7 @@ define("avalon",["$attr","$event"], function(){
                         el.recover(); //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
+                        console.log(modelArray[i])
                         setBindingsToChildren( elems, modelArray[i], true );
                     }
                 }
@@ -333,7 +335,7 @@ define("avalon",["$attr","$event"], function(){
     //Google IO 2012 - V8引擎突破速度障碍 http://www.tudou.com/programs/view/bqxvrifP4mk/
     //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
     var foreach = $.ViewDirectives.foreach;
-    foreach.start =function( field, models, fragments, array, method, args ){
+    foreach.start = function( field, models, fragments, array, method, args ){
         for(var index = 0; index < array.length; index++){
             models.push( $.ViewModel({
                 $key: index,
@@ -485,13 +487,10 @@ define("avalon",["$attr","$event"], function(){
             }
         }
     }
-    function setBindingsToChildren( elems, model, setData, force ){
+    function setBindingsToChildren( elems, model, setData ){
         for(var i = 0, n = elems.length; i < n ; i++){
             var node = elems[i]
-            setBindingsToElementAndChildren( node, model, setData && !force );
-        //            if( setData && force ){//这是由foreach绑定触发
-        //                $._data(node,"bindings-context", model)
-        //            }
+            setBindingsToElementAndChildren( node, model, setData  );
         }
     }
     //通知此域的所有直接依赖者更新自身
@@ -600,7 +599,7 @@ define("avalon",["$attr","$event"], function(){
     var restoreCapturedTokensRegex = /\@mass_token_(\d+)\@/g;
     function restoreTokens(string, tokens) {
         var prevValue = null;
-        while (string != prevValue) { // Keep restoring tokens until it no longer makes a difference (they may be nested)
+        while (string != prevValue) { //把原字符串放回占位符的位置之上
             prevValue = string;
             string = string.replace(restoreCapturedTokensRegex, function (match, tokenIndex) {
                 return tokens[tokenIndex];
