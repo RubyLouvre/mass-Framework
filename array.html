@@ -11,19 +11,28 @@
         <script>
             $.require("ready,./more/avalon2", function(){
                 var model = $.ViewModel({
-                    array: [1,2,3,4]
+                    array: [1,4,2,3]
                 });
                 $.View(model);
-               model.array.push( 8 )
+                // setTimeout(function(){
+                //            model.array.push(1,3)
+                // },1000)
+                setTimeout(function(){
+                    model.array.sort()
+                },1000);
 
             })
         </script>
 
 
         <ul  bind="foreach: array" >
-           <li bind="text:$value"></li>
+            <li bind="text:$value"></li>
         </ul>
+        http://acsaga.diandian.com/post/2011-11-10/6646629
 
+        http://acsaga.diandian.com/post/2011-12-27/10211193
+
+        http://knockoutjs.com/documentation/observableArrays.html
 
     </body>
 </html>

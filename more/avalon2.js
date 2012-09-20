@@ -21,13 +21,14 @@ define("avalon",["$attr","$event"], function(){
         }
         //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
-        model.push = function(){
-            var fields = model["arr_"+expando];
-            for(var i = 0, field; field = fields[i++];){
-
-                field("push", arguments)
+        String("push,pop,shift,unshift,splice,sort").replace($.rword, function(method){
+            model[ method ] = function(){
+                var fields = model["arr_"+expando];
+                for(var i = 0, field; field = fields[i++];){
+                    field(method, arguments);
+                }
             }
-        }
+        });
         return model;
     }
 
@@ -45,7 +46,7 @@ define("avalon",["$attr","$event"], function(){
     //一个域对象的toString与valueOf函数总是返回其value值
     //undividedFiled是指在ViewModel定义时，值为类型为字符串，布尔或数值的Field。
     //它们是位于双向依赖链的最底层。不需要依赖于其他Field！
-    function undividedFiled( host, key, val ){
+    function undividedFiled( key, val, host ){
         function field( neo ){
             if( bridge[ expando ] ){ //收集依赖于它的computedFiled,以便它的值改变时,通它们更新自身
                 $.Array.ensure( field.parents, bridge[ expando ] );
@@ -67,7 +68,7 @@ define("avalon",["$attr","$event"], function(){
     //当中间层的VM改变,通知两端的改变
     //computedFiled是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
     //它们是位于双向依赖链的中间层，需要依赖于其他undividedFiled或computedFiled的返回值计算自己的value。
-    function computedFiled( host, key, val, type){
+    function computedFiled( key, val,host, type){
         var getter, setter//构建一个至少拥有getter,scope属性的对象
         if(type == "get"){//getter必然存在
             getter = val;
@@ -116,7 +117,7 @@ define("avalon",["$attr","$event"], function(){
                 if(Array.isArray( arr ) ){
                     var p = arr["arr_"+expando] || ( arr[ "arr_"+ expando] =  [] );
                     $.Array.ensure( p ,field);
-                    arguments = ["init"]
+                    arguments = ["start"]
                 }
                 bridge[ expando ] = field;
             }
@@ -133,10 +134,13 @@ define("avalon",["$attr","$event"], function(){
                 //第四个参数供流程绑定使用
                 directive.init && directive.init(node, val, callback, field);
             }
-            if(directive.preupdate && arguments.length){
-                $.log(arguments[0])
-                $.log(arguments[1])
-                directive.preupdate(node, field, model[str], arguments[0],arguments[1] )
+            $.log(key)
+            var method = arguments[0], args = arguments[1]
+            if( typeof directive[method] == "function" ){
+                var models =  field.models || (field.models = []);
+                var fragments = field.fragments;
+                console.log(method)
+                directive[method]( field, models, fragments, model[str], method, args );
             }
             //这里需要另一种指令！用于处理数组增删改查与排序
             directive.update && directive.update(node, val, field, model);
@@ -262,16 +266,13 @@ define("avalon",["$attr","$event"], function(){
                     for( var i = 0, el ; el = nodeArray[i]; i++){
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
-                        $.log(elems)//为空????
                         setBindingsToChildren( elems, modelArray[i], true );
                     }
                 }
             },
             stopBindings: true
         }
-
     }
-
     //if unless with foreach四种bindings都是使用template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewDirectives[ type ] = {
@@ -283,9 +284,10 @@ define("avalon",["$attr","$event"], function(){
                 }
                 field.fragments = [];         //添加一个数组属性,用于储存经过改造的文档碎片
                 field.fragment = fragment;    //最初的文档碎片,用于克隆
-                field.cloneFragment = function( dom ){ //改造文档碎片并放入数组
+                field.cloneFragment = function( dom, unshift ){ //改造文档碎片并放入数组
                     dom = dom || field.fragment.cloneNode(true);
-                    field.fragments.push( patchFragment(dom) );
+                    var add = unshift == true ? "unshift" : "push"
+                    field.fragments[add]( patchFragment(dom) );
                     return dom;
                 }
                 var clone = field.cloneFragment(); //先改造一翻,方便在update时调用recover方法
@@ -311,48 +313,66 @@ define("avalon",["$attr","$event"], function(){
             },
             stopBindings: true
         }
-
     });
-    $.ViewDirectives.foreach.preupdate = function(node, field, array, method, args){
-        if(method == "init"){
-            var models = []
-            for(var index = 0; index < array.length; index++){
-                models.push( $.ViewModel({
-                    $key: index,
-                    $value: array[ index ]
-                }))
-            }
-            field.models = models;
-            var fragments = field.fragments
-            fragments[0].recover();
-            for(var i = 1; i < models.length; i++ ){
-                field.cloneFragment()
-            }
+    //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
+    var foreach = $.ViewDirectives.foreach;
+    foreach.start =function( field, models, fragments, array, method, args ){
+        for(var index = 0; index < array.length; index++){
+            models.push( $.ViewModel({
+                $key: index,
+                $value: array[index]()
+            }));
         }
-        if(method === "push"){
-            for( i = 0; i < args.length; i++ ){
-                var n = array.length + i;
-                field.models.push( $.ViewModel({
-                    $key: n,
-                    $value: args[i]
-                }))
-                addFields( n , args[i], array );
-                field.cloneFragment()
-            }
+        fragments[0].recover();
+        for(var i = 1; i < models.length; i++ ){
+            field.cloneFragment()
         }
-        if(method === "shift"){
-//            for( i = 0; i < args.length; i++ ){
-//                var n = array.length + i;
-//                field.models.push( $.ViewModel({
-//                    $key: n,
-//                    $value: args[i]
-//                }))
-//                addFields( n , args[i], array );
-//                field.cloneFragment()
-//            }
+    };
+    foreach.push = function( field, models, fragments, array, method, args ){
+        for(var i = 0; i < args.length; i++ ){
+            var n = array.length + i;
+            models.push( $.ViewModel({
+                $key: n,
+                $value: args[i]
+            }))
+            addFields( n , args[i], array );
+            field.cloneFragment()
         }
     }
 
+    foreach.shift = function( field, models, fragments, array, method ){
+        models[method]();
+        var fragment = fragments[method]()
+        fragment.recover();
+        for(var i = 0; i < models.length; i++){
+            var model = models[i];
+            model.$key(i)
+        }
+    }
+    foreach.pop = foreach.shift;
+    foreach.sort = function( field, models, fragments, array, method, args ){
+        Array.prototype[method].apply(array,args);
+        for(var i = 0; i < models.length; i++){
+            var model = models[i];
+            model.$value( array[i]() );
+        }
+    }
+    foreach.reverse = foreach.sort;
+    foreach.unshift = function( field, models, fragments, array, method, args ){
+        var n = args.length;//更新已有的model的$key值
+        for(var i = 0; i < models.length; i++){
+            var model = models[i];
+            model.$key(i + n);
+        }
+        for( i = 0; i < n; i++ ){//再添加新的model
+            models.push( $.ViewModel({
+                $key: i,
+                $value: args[i]
+            }))
+            addFields( n , args[i], array );
+            field.cloneFragment( 0, true);
+        }
+    }
     //nodes属性为了取得所有子节点的引用
     function patchFragment( fragment ){
         fragment.nodes = $.slice( fragment.childNodes );
@@ -457,9 +477,9 @@ define("avalon",["$attr","$event"], function(){
         return elems;
     }
     function addField( key, field, host ){
+        //收集依赖于它的computedFiled与interactedFiled,以便它的值改变时,通知它们更新自身
         field.toString = field.valueOf = function(){
             if( bridge[ expando ] ){
-                //收集依赖于它的computedFiled与interactedFiled,以便它的值改变时,通知它们更新自身
                 $.Array.ensure( field.parents, bridge[ expando ] );
             }
             return field.value
@@ -478,22 +498,22 @@ define("avalon",["$attr","$event"], function(){
             case "String":
             case "Number":
             case "Boolean":
-                undividedFiled(model, key, val);
+                undividedFiled( key, val, model );
                 break;
             case "Function":
-                computedFiled(model, key, val, "get");
+                computedFiled( key, val, model, "get");
                 break;
             case "Array":
-                model[key] = model[key] || []
-                $.ArrayViewModel(val, model[key]);
+                model[key] = model[key] || [];
+                $.ArrayViewModel( val, model[key] );
                 break;
             case "Object":
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        computedFiled(model, key, val, "setget");
+                        computedFiled( key, val, model, "setget");
                     }else{
                         model[key] = model[key] || {};
-                        $.ViewModel(val, model[key] );
+                        $.ViewModel( val, model[key] );
                     }
                 }else{
                     throw err
@@ -657,4 +677,4 @@ define("avalon",["$attr","$event"], function(){
 如果这个属性是最简单的数据类型，比如字符串，布尔，数值，就最简单不过，它们都没有依赖，自己构建自己的域就行了。
 如果这个属性是函数，那么函数里面的this其实是指向VM，它会依赖于VM的其他域的返回值来计算自己的返回值。
 于是问题来了，根据上文的例子，fullName是怎么知道自己是依赖于firstName与lastName这两个域呢？！
-*/
+ */
