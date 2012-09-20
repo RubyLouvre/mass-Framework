@@ -14,12 +14,13 @@ define("avalon",["$attr","$event"], function(){
         }
         return model;
     }
+    //接着下来移除无用的Field
     $.ArrayViewModel = function(data, model){
         model = model || []
         for(var i = 0; i < data.length; i++){
             addFields(i, data[i], model );
         }
-        //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
+        //pop,push,shift,unshift,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
             var arrayMethod = model[ method ];
@@ -31,6 +32,20 @@ define("avalon",["$attr","$event"], function(){
                 }
             }
         });
+        model.removeAt = function(index){//移除指定索引上的元素
+            model.splice( index,1 );
+            var fields = model["arr_"+expando];
+            for(var i = 0, field; field = fields[i++];){
+                field("splice", [ index ]);
+            }
+        }
+        model.remove = function(item){//移除第一个等于给定值的元素
+            var array = model.map(function(el){
+                return el();
+            })
+            var index = array.indexOf(item);
+            model.removeAt(index);
+        }
         return model;
     }
 
@@ -112,7 +127,6 @@ define("avalon",["$attr","$event"], function(){
     }
     //interactedFiled用于DOM树或节点打交道的Field，它们仅在用户调用了$.View(viewmodel, node )，
     //把写在元素节点上的@bind属性的分解出来之时生成的。
-    var testArray = []
     function interactedFiled (node, names, values, key, str, directive, model ){
         function field( neo ){
             if( !field.uuid ){ //如果是第一次执行这个域
@@ -265,9 +279,9 @@ define("avalon",["$attr","$event"], function(){
                     $.log("这原来的foreach绑定的代码");
                     var nodeArray = field.fragments, modelArray = field.models;
                     for( var i = 0, el ; el = nodeArray[i]; i++){
+                        el.recover(); //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
-                        $.log(elems)
                         setBindingsToChildren( elems, modelArray[i], true );
                     }
                 }
@@ -326,11 +340,11 @@ define("avalon",["$attr","$event"], function(){
                 $value: array[index]()
             }));
         }
-        fragments[0].recover();
         for(var i = 1; i < models.length; i++ ){
             field.cloneFragment()
         }
     };
+    //push ok
     foreach.push = function( field, models, fragments, array, method, args ){
         var l = models.length
         for(var i = 0; i < args.length; i++ ){
@@ -343,28 +357,22 @@ define("avalon",["$attr","$event"], function(){
             field.cloneFragment()
         }
     }
-    //unshift 
+    //unshift ok
     foreach.unshift = function( field, models, fragments, array, method, args ){
-        var n = args.length;//更新已有的model的$key值
+        var l = args.length;//更新已有的model的$key值
         for(var i = 0; i < models.length; i++){
             var model = models[i];
-            model.$key(i + n);
+            model.$key(i + l);
         }
-        var doms = []
-        for( i = 0; i < n; i++ ){//再添加新的model
+        for( i = 0; i < l; i++ ){//再添加新的model
             models.splice(i,0, $.ViewModel({
                 $key: i,
                 $value: args[i]
             }))
             addFields( i , args[i], array );
-            var dom = field.fragment.cloneNode(true);//在中间插入节点
-            doms.push(patchFragment(dom))
-          
+            field.cloneFragment(0,true);
         }
-          [].unshift( fragments, doms );
-        console.log(fragments);
-        
-       // console.log(models)
+         
     }
     // shift pop ok
     foreach.shift = function( field, models, fragments, array, method, args ){
@@ -406,6 +414,10 @@ define("avalon",["$attr","$event"], function(){
         }
 
     }
+    foreach.remove = function(field, models, fragments, array, method, args){
+        
+    }
+    
     //nodes属性为了取得所有子节点的引用
     function patchFragment( fragment ){
         fragment.nodes = $.slice( fragment.childNodes );
