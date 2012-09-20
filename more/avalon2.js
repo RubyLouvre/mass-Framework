@@ -21,7 +21,7 @@ define("avalon",["$attr","$event"], function(){
         }
         //pop,push,shift,unshift,slice,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
-        String("push,pop,shift,unshift,splice,sort").replace($.rword, function(method){
+        String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
             model[ method ] = function(){
                 var fields = model["arr_"+expando];
                 for(var i = 0, field; field = fields[i++];){
@@ -134,12 +134,10 @@ define("avalon",["$attr","$event"], function(){
                 //第四个参数供流程绑定使用
                 directive.init && directive.init(node, val, callback, field);
             }
-            $.log(key)
             var method = arguments[0], args = arguments[1]
             if( typeof directive[method] == "function" ){
                 var models =  field.models || (field.models = []);
-                var fragments = field.fragments;
-                console.log(method)
+                var fragments = field.fragments;//sort,reserve,unshift,shift,pop,push
                 directive[method]( field, models, fragments, model[str], method, args );
             }
             //这里需要另一种指令！用于处理数组增删改查与排序
@@ -372,6 +370,26 @@ define("avalon",["$attr","$event"], function(){
             addFields( n , args[i], array );
             field.cloneFragment( 0, true);
         }
+    }
+    foreach.splice = function(field, models, fragments, array, method, args){
+        var index = args[0], removeTo = args[0] || array.length;
+        models.splice(index, removeTo);
+        var removes = fragments.splice(index, removeTo);
+        //同步DOM树
+        for(var i = 0; i < removes.length; i++){
+            removes[i].recover();
+        }
+        for( i = 2; i < args.length; i++){
+            n = index+1
+            models.push( $.ViewModel({
+                $key: n,
+                $value: args[i]
+            }));
+            addFields( n , args[i], array );
+          //  field.cloneFragment( 0, true);主要是这里的同步
+        }
+     //   fragment.recover();
+
     }
     //nodes属性为了取得所有子节点的引用
     function patchFragment( fragment ){
