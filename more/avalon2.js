@@ -138,7 +138,7 @@ define("avalon",["$attr","$event"], function(){
                 }
                 bridge[ expando ] = field;
             }
-       
+
             var fn = Function(names, "return "+ str), callback, val;
             val = fn.apply(null, values );
             if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
@@ -372,7 +372,7 @@ define("avalon",["$attr","$event"], function(){
             addFields( i , args[i], array );
             field.cloneFragment(0,true);
         }
-         
+
     }
     // shift pop ok
     foreach.shift = function( field, models, fragments, array, method, args ){
@@ -401,9 +401,8 @@ define("avalon",["$attr","$event"], function(){
         for(var i = 0; i < removes.length; i++){
             removes[i].recover();//移除节点
         }
-        var ri = 0
         for( i = 2; i < args.length; i++){
-            var n = index + ri++;
+            var n = index++;
             models.splice(n, 0, $.ViewModel({
                 $key: n,
                 $value: args[i]
@@ -414,10 +413,8 @@ define("avalon",["$attr","$event"], function(){
         }
 
     }
-    foreach.remove = function(field, models, fragments, array, method, args){
-        
-    }
-    
+
+
     //nodes属性为了取得所有子节点的引用
     function patchFragment( fragment ){
         fragment.nodes = $.slice( fragment.childNodes );
