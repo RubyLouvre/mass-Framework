@@ -14,39 +14,41 @@ define("avalon",["$attr","$event"], function(){
         }
         return model;
     }
-    //接着下来移除无用的Field
-    $.ArrayViewModel = function(data, model){
-        model = model || []
-        for(var i = 0; i < data.length; i++){
-            addFields(i, data[i], model );
+    /*
+  var model = $.ViewModel({
+    array: [1,2,3,4]
+  });
+//这时array会被改造成一个重型对象,里面每一个是对象,每个对象都拥有$value, $array, $key属性
+    */
+    $.ArrayViewModel = function(array, models){
+        models = models || [];
+        for(var index = 0; index < array.length; index++){
+            var field =  addFields(index, array[index], models);
+            field.$value = field;
         }
         //pop,push,shift,unshift,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
-            var arrayMethod = model[ method ];
-            model[ method ] = function(){
-                arrayMethod.apply( model, arguments)
-                var fields = model["arr_"+expando];
+            var nativeMethod = models[ method ];
+            models[ method ] = function(){
+                nativeMethod.apply( models, arguments)
+                var fields = models["arr_"+expando];
                 for(var i = 0, field; field = fields[i++];){
                     field(method, arguments);
                 }
             }
         });
-        model.removeAt = function(index){//移除指定索引上的元素
-            model.splice( index,1 );
-            var fields = model["arr_"+expando];
-            for(var i = 0, field; field = fields[i++];){
-                field("splice", [ index ]);
-            }
+        models.removeAt = function(index){//移除指定索引上的元素
+            models.splice(index, 1);
         }
-        model.remove = function(item){//移除第一个等于给定值的元素
-            var array = model.map(function(el){
+        models.remove = function(item){//移除第一个等于给定值的元素
+            var array = models.map(function(el){
                 return el();
             })
             var index = array.indexOf(item);
-            model.removeAt(index);
+            models.removeAt(index);
         }
-        return model;
+        return models;
     }
 
     $.View = function(model, node){
@@ -57,7 +59,7 @@ define("avalon",["$attr","$event"], function(){
     }
 
     //一个域对象是一个函数,它总是返回其的value值
-    //一个域对象拥有nick属性,表示它在model中的属性名
+    //一个域对象拥有$key属性,表示它在model中的属性名
     //一个域对象拥有parents属性,里面是其他依赖于它的域对象
     //一个域对象拥有uuid属性,用于区分它是否已经初始化了
     //一个域对象的toString与valueOf函数总是返回其value值
@@ -138,7 +140,6 @@ define("avalon",["$attr","$event"], function(){
                 }
                 bridge[ expando ] = field;
             }
-            field.node = node;
             var fn = Function(names, "return "+ str), callback, val;
             val = fn.apply(null, values );
             if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
@@ -153,9 +154,9 @@ define("avalon",["$attr","$event"], function(){
             }
             var method = arguments[0], args = arguments[1]
             if( typeof directive[method] == "function" ){
-                var models =  field.models || (field.models = []);
-                var fragments = field.fragments;//sort,reserve,unshift,shift,pop,push
-                directive[method]( field, models, fragments, model[str], method, args );
+                //处理foreach.start, sort, reserve, unshift, shift, pop, push
+                console.log(method)
+                directive[method]( field, model[str], field.fragments, method, args );
             }
             //这里需要另一种指令！用于处理数组增删改查与排序
             directive.update && directive.update(node, val, field, model);
@@ -278,19 +279,19 @@ define("avalon",["$attr","$event"], function(){
                 }
                 if( code < 0  && val ){      //处理foreach 绑定
                     $.log("这原来的foreach绑定的代码");
-                    var nodeArray = field.fragments, modelArray = field.models;
-                    for( var i = 0, el ; el = nodeArray[i]; i++){
+                    var fragments = field.fragments, models = val;
+                    for( var i = 0, el ; el = fragments[i]; i++){
                         el.recover(); //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
                         node.appendChild( el );//将VM绑定到模板上
-                        console.log(modelArray[i])
-                        setBindingsToChildren( elems, modelArray[i], true );
+                        setBindingsToChildren( elems, models[i], true );
                     }
                 }
             },
             stopBindings: true
         }
     }
+    //位于数组中的Field,它们每一个增加i
     //if unless with foreach四种bindings都是使用template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewDirectives[ type ] = {
@@ -335,85 +336,63 @@ define("avalon",["$attr","$event"], function(){
     //Google IO 2012 - V8引擎突破速度障碍 http://www.tudou.com/programs/view/bqxvrifP4mk/
     //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
     var foreach = $.ViewDirectives.foreach;
-    foreach.start = function( field, models, fragments, array, method, args ){
-        for(var index = 0; index < array.length; index++){
-            models.push( $.ViewModel({
-                $key: index,
-                $value: array[index]()
-            }));
-        }
+    foreach.start = function( field, models, fragments, method, args ){
         for(var i = 1; i < models.length; i++ ){
-            field.cloneFragment()
+            field.cloneFragment();
         }
     };
     //push ok
-    foreach.push = function( field, models, fragments, array, method, args ){
-        var l = models.length
-        for(var i = 0; i < args.length; i++ ){
-            var n = l + i;
-            models.push( $.ViewModel({
-                $key: n,
-                $value: args[i]
-            }))
-            addFields( n , args[i], array );
+    foreach.push = function( field, models, fragments, method, args ){
+        var l = fragments.length
+        for(var index = 0; index < args.length; index++ ){
+            var n = index + l;
+            var f =  addFields(n, models[n], models);
+            f.$value = f;
             field.cloneFragment()
         }
     }
     //unshift ok
-    foreach.unshift = function( field, models, fragments, array, method, args ){
-        var l = args.length;//更新已有的model的$key值
-        for(var i = 0; i < models.length; i++){
-            var model = models[i];
-            model.$key(i + l);
+    foreach.unshift = function( field, models, fragments, method, args ){
+        for(var index = 0; index < args.length; index++ ){
+            var f =  addFields(index, models[index], models);
+            f.$value = f;
+            field.cloneFragment(0, true)
         }
-        for( i = 0; i < l; i++ ){//再添加新的model
-            models.splice(i,0, $.ViewModel({
-                $key: i,
-                $value: args[i]
-            }))
-            addFields( i , args[i], array );
-            field.cloneFragment(0,true);
+        for( index = 0; index < models.length; index++ ){
+            models[index].$key = index
         }
-
     }
     // shift pop ok
-    foreach.shift = function( field, models, fragments, array, method, args ){
-        models[method]();
+    foreach.shift = function( field, models, fragments, method, args ){
         var fragment = fragments[method]()
         fragment.recover();
-        for(var i = 0; i < models.length; i++){
-            var model = models[i];
-            model.$key(i)
+        for(var index = 0; index < models.length; index++ ){
+            models[index].$key = index
         }
     }
     foreach.pop = foreach.shift;
     //sort reverse ok
-    foreach.sort = function( field, models, fragments, array, method, args ){
-        for(var i = 0; i < models.length; i++){
-            var model = models[i];
-            model.$value( array[i]() );
-        }
-    }
-    foreach.reverse = foreach.sort;
-    //splice ok
-    foreach.splice = function(field, models, fragments, array, method, args){
-        var index = args[0];
-        models.splice(index, args[1]);
-        var removes = fragments.splice(index, args[1]);
-        for(var i = 0; i < removes.length; i++){
-            removes[i].recover();//移除节点
-        }
-        for( i = 2; i < args.length; i++){
-            var n = index++;
-            models.splice(n, 0, $.ViewModel({
-                $key: n,
-                $value: args[i]
-            }));
-            addFields( n , args[i], array );
-            var dom = field.fragment.cloneNode(true);//在中间插入节点
-            field.fragments.splice(n, 0, patchFragment(dom) );
-        }
 
+    //splice ok
+    foreach.splice = function( field, models, fragments, method, args ){
+        var start = args[0], n = args.length - 2;
+        var removes = fragments.splice(start, args[1]);
+        //移除对应的文档碎片
+        for(var i = 0; i < removes.length; i++){
+            removes[i].recover();
+        }
+        for(var i = 0; i < n; i++ ){
+            //将新数据封装成域
+            var index = start + i
+            var f =  addFields(index, models[ index ], models);
+            f.$value = f;
+            //为这些新数据创建对应的文档碎片
+            var dom = field.fragment.cloneNode(true);
+            field.fragments.splice(index, 0, patchFragment(dom) );
+        }
+        for( index = start+n; index < models.length; index++ ){
+            models[index].$key = index
+        }
     }
 
 
@@ -469,7 +448,7 @@ define("avalon",["$attr","$event"], function(){
                 if( directive.stopBindings ){
                     continueBindings = false;
                 }
-                interactedFiled(node,  names, values, key, val, directive, model);
+                interactedFiled(node, names, values, key, val, directive, model);
             }
         }
         return continueBindings;
@@ -526,7 +505,7 @@ define("avalon",["$attr","$event"], function(){
             return field.value
         }
         if(!host.nodeType){
-            field.nick = key;
+            field.$key = key;
             host[ key ] = field;
         }
         field.parents = [];
@@ -539,19 +518,17 @@ define("avalon",["$attr","$event"], function(){
             case "String":
             case "Number":
             case "Boolean":
-                undividedFiled( key, val, model );
-                break;
+                return  undividedFiled( key, val, model );
             case "Function":
-                computedFiled( key, val, model, "get");
-                break;
+                return computedFiled( key, val, model, "get");
             case "Array":
-                model[key] = model[key] || [];
-                $.ArrayViewModel( val, model[key] );
+                var models = model[key] || (model[key] = []);
+                $.ArrayViewModel( val, models );
                 break;
             case "Object":
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        computedFiled( key, val, model, "setget");
+                        return  computedFiled( key, val, model, "setget");
                     }else{
                         model[key] = model[key] || {};
                         $.ViewModel( val, model[key] );

@@ -14,27 +14,36 @@
                     array: [1,2,3,4]
                 });
                 $.View(model);
-             
-                // setTimeout(function(){
-                //            model.array.push(1,3)
-                // },1000)
+                  setTimeout(function(){
+                    model.array[1](4)
+                },1000)
+                /*
+                setTimeout(function(){
+                    model.array.sort()
+                },1000)
+                 */
+                /*
+                 setTimeout(function(){
+                           model.array.push(1,3)
+                },1000)
+                 */
                 //要求页面输出a,b,c,d,1,2,3,4
                 /*
                 setTimeout(function(){
-                    model.array.push("a","b","c","d")
+                    model.array.pop("a","b","c","d")
                     $.log(model.array.length)
                 },1000);
                  */
+                /* 
+              setTimeout(function(){
+                   model.array.splice(1,2,"a","b","c")
+              },1000);
+                 */
+           /*
                 setTimeout(function(){
-                    model.array.splice(1,2,"a","b","c")
-                },1000);
-                   setTimeout(function(){
-                   console.log( model.array[1]("p")) //model.array.splice(1,2,"a","b","c")
-                   console.log(  model.array[1].parents)
-                },1400);
-                //   setTimeout(function(){
-                //    model.array.remove( 2 )
-                //  },1000)
+                    model.array.remove( 2 )
+                },1000)
+        */
                 /*             setTimeout(function(){
                     model.array.unshift("a","b","c","d")
                     $.log(model.array.length)
@@ -43,7 +52,7 @@
         </script>
 
 
-        <ul  bind="foreach: array" >
+        <ul bind="foreach: array" >
             <li bind="text:$value"></li>
         </ul>
 
