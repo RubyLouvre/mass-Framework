@@ -1,6 +1,7 @@
 define("avalon",["$attr","$event"], function(){
     $.log("已加载avalon v2")
     //http://angularjs.org/
+    //明天处理命令模式
     var BINDING = $.config.bindname || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
     $.ViewModel = function(data, model){
         model = model || {};//默认容器是对象
@@ -22,9 +23,10 @@ define("avalon",["$attr","$event"], function(){
     */
     $.ArrayViewModel = function(array, models){
         models = models || [];
+        
         for(var index = 0; index < array.length; index++){
-            var field =  addFields(index, array[index], models);
-            field.$value = field;
+            var f =  addFields(index, array[index], models);
+            f.$value = f.$value || f;
         }
         //pop,push,shift,unshift,splice,sort,reverse,remove,removeAt
         //必须对执行foreach指令的那个交互域发出特别指令，同于同步DOM
@@ -47,6 +49,9 @@ define("avalon",["$attr","$event"], function(){
             })
             var index = array.indexOf(item);
             models.removeAt(index);
+        }
+        models.$value = function(){
+            return models
         }
         return models;
     }
@@ -142,7 +147,7 @@ define("avalon",["$attr","$event"], function(){
             }
             var fn = Function(names, "return "+ str), callback, val;
             val = fn.apply(null, values );
-            if(typeof val == "function" && isFinite( val.uuid )){ //如果返回值也是个域
+            if(typeof val == "function" ){ //&& isFinite( val.uuid ) 如果返回值也是个域
                 callback = val; //这里的域为它所依赖的域
                 val = callback();//如果是域对象
             }
@@ -523,15 +528,18 @@ define("avalon",["$attr","$event"], function(){
                 return computedFiled( key, val, model, "get");
             case "Array":
                 var models = model[key] || (model[key] = []);
-                $.ArrayViewModel( val, models );
-                break;
+                return $.ArrayViewModel( val, models );
             case "Object":
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
                         return  computedFiled( key, val, model, "setget");
                     }else{
-                        model[key] = model[key] || {};
-                        $.ViewModel( val, model[key] );
+                        var object = model[key] || (model[key] = {});
+                        $.ViewModel( val,object );
+                        object.$value = function(){
+                            return object
+                        }
+                        return object
                     }
                 }else{
                     throw err
