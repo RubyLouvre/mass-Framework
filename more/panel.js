@@ -1,8 +1,5 @@
 define('panel',[
-    '$node',
-    '$event',
     '$css',
-    '$flow',
     "./panel.css",
     "./avalon"
     ], function(){
@@ -64,3 +61,17 @@ define('panel',[
             }
         });
     })
+    /*
+     <script>
+            $.require("ready,./more/panel", function(){
+                var model = new $.ui.Panel()
+                setTimeout(function(){
+                    model.hide()
+                },1000)
+                setTimeout(function(){
+                    model.show()
+                },2000)
+            })
+        </script>
+     *
+     */
