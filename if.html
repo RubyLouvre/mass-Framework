@@ -9,21 +9,26 @@
     <body>
 
         <script>
-            $.require("ready,./more/avalon2", function(){
+            $.require("ready,./more/avalon", function(){
                 var model = $.ViewModel({
-                    displayMessage: false
+                    show: false
                 });
-                $.View(model);
                 setTimeout(function(){
-                    model.displayMessage( true )
-                },1000)
-
+                    model.show(true)
+                },2000);
+                $.View(model)
             })
         </script>
-
-
-        <label><input type="checkbox" bind="checked: displayMessage" /> 通过checkbox显示下面的DIV</label>
-        <div bind="if: displayMessage">这由上面的元素checked状态控制显示的</div>
-
+        <fieldset><legend>示例</legend>
+            <p bind="if: show">
+                XXXXXXXXXXXXXXXXXXXXXXXXXXX
+            </p>
+            <p bind="if: function(){return 1}">
+                YYYYYYYYYYYYYYYYYYYYYYYYYYYYY
+            </p>
+            <p bind="if:2">
+                ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+            </p>
+        </fieldset>
     </body>
 </html>

@@ -9,7 +9,7 @@
     <body>
 
         <script>
-            $.require("ready,./more/avalon2", function(){
+            $.require("ready,./more/avalon", function(){
                 var model = $.ViewModel({
                     user: {
                         display :'编号',
@@ -31,7 +31,7 @@
             <dd bind="text:$value">dd
             </dd>
         </dl>
-
+        <p bind="html:user.name"></p>
         <hr/>
         <table>
             <thead>
