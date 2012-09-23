@@ -3,93 +3,26 @@
     <head>
         <title>SAW规范的模块加载例子 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="mass.js"></script>
+        <script src="mass.js" debug="1"></script>
+        <style>
+            .blue{
+                color:blue;
+            }
+            .red {
+                color:red!important;
+            }
+        </style>
 
     </head>
     <body>
 
         <script>
 
-            $.require("ready,./more/avalon", function(){
-   
-                var model = $.ViewModel({
-                    firstName: "aaa",
-                    lastName:  "bbb",
-                    level: 6,
-                    currentProfit: 15000, //此时显示为蓝色
-                    shouldShowMessage: true,
-                    displayMessage: false,
-                    fullName: {
-                        setter: function(val){
-                            var arr = val.split(" ")
-                            this.firstName(arr[0])
-                            this.lastName(arr[1]);
-                        },
-                        getter: function(){
-                            return this.firstName() +" "+ this.lastName()
-                        }
-                    }
+            $.require("ready,./more/panel", function(){
+                var model = new $.ui.Panel()
 
-
-                });
-                $.View(model);
-                setTimeout(function(){
-                    model.firstName("司徒正美")
-                },1000);
-                setTimeout(function(){
-                    model.shouldShowMessage(false); // ... now it's hidden
-                },1000)
-                setTimeout(function(){
-                    model.shouldShowMessage(true); // ... now it's visible again
-                },2000);
-                setTimeout(function(){
-                    model.currentProfit(-50); //这时为红色
-                },1500)
             })
         </script>
-    <style>
-        .blue{
-            color:blue;
-        }
-        .red {
-            color:red!important;
-        }
-    </style>
-    <div class="blue" bind="class: { red: currentProfit() < 0 }">留意字体颜色</div>
-    <div bind="visible: shouldShowMessage">
-        当shouldShowMessage的传参为true时,你会看到这段文字
-    </div>
-    <label><input type="checkbox" bind="checked: displayMessage" /> 通过是否打钩显示下面消息</label>
-    <div bind="if: displayMessage">xxxxxxxxxxxxxxxxxxxxx</div>
-    <p> <strong bind="text: firstName" >默认值 </strong></p>
-    <p> <input bind="value: lastName" /> </p>
-    <p bind="html: fullName"> </p>
-    <p bind="style:{box-shadow: '5px 5px 7px #888',
-       background-color:'orange',
-       text-indent:currentProfit() < 0 ? '2em' : '4em',
-       line-height: 3,
-       width:'200px'
-       }">测试字体 </p>
-      datas:{
-        display :'编号',
-        name :'id',
-        align :'left',
-        width :600,
-        minWidth :60
-        },
-        {
-        display :'用户名',
-        name :'username',
-        minWidth :120
-        },
-        {
-        display :'密码',
-        name :'password',
-        minWidth :140
-        },
-        {
-        display :'权限',
-        name :'isroot'
-        }
-</body>
+
+    </body>
 </html>

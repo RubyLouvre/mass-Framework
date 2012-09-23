@@ -1,0 +1,26 @@
+.panel_wrap{
+    border:1px solid #5e850a;
+    -moz-border-radius: 5px;      /* Gecko browsers */
+    -webkit-border-radius: 5px;   /* Webkit browsers */
+    border-radius:5px;            /* W3C syntax */
+}
+.panel_head{
+    background:#638c0b;
+    line-height:2em;
+    padding-left:1em;
+    font-size:13px;
+    font-weight:700;
+    position:relative;
+}
+.panel_body{
+    padding:5px;
+}
+.panel_closer{
+    position:absolute;
+    right:10px;;
+    top: 2px;
+    display:inline-block;
+    width:25px;
+    height:20px;
+    background: url(panel_closer.jpg) no-repeat center center;
+}
