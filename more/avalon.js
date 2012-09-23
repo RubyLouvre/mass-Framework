@@ -57,9 +57,11 @@ define("avalon",["$attr","$event"], function(){
         //开始在其自身与孩子中绑定
         return setBindingsToElementAndChildren.call( node, model, true );
     }
-    var err = new Error("只能是字符串，数值，布尔，函数以及纯净的对象")
+    var err = new Error("只能是字符串，数值，布尔，Null，Undefined，函数以及纯净的对象")
     function addWatchs( key, val, model ){
         switch( $.type( val )){
+            case "Null":
+            case "Undefined":
             case "String":
             case "Number":
             case "Boolean":
@@ -512,7 +514,7 @@ define("avalon",["$attr","$event"], function(){
         for(var i = 0; i < array.length; i += 2){
             key = array[i]
             val = array[i+1];
-           
+
             binding = $.ViewBindings[ key ];
 
             if( binding ){
@@ -584,7 +586,7 @@ define("avalon",["$attr","$event"], function(){
         Watch();
         return Watch;
     }
-   
+
 
     //============================================================
     // 将bindings变成一个对象或一个数组 by 司徒正美
@@ -730,19 +732,3 @@ define("avalon",["$attr","$event"], function(){
         }
     }
 })
-/*
-<p>ViewModel的设计难点</p>
-
-        var model = $.ViewModel({
-                firstName: "aaa",
-                lastName:  "bbb",
-                fullName: function(){
-                   return this.firstName() + this.lastName()
-                }
-      });
-
-在VM中，它里面的每一项都叫做域的函数，与原始对象的属性同名。
-如果这个属性是最简单的数据类型，比如字符串，布尔，数值，就最简单不过，它们都没有依赖，自己构建自己的域就行了。
-如果这个属性是函数，那么函数里面的this其实是指向VM，它会依赖于VM的其他域的返回值来计算自己的返回值。
-于是问题来了，根据上文的例子，fullName是怎么知道自己是依赖于firstName与lastName这两个域呢？！
- */
