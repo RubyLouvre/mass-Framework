@@ -28,7 +28,7 @@ define('panel',[
             init: function(opts) {
                 this.setOptions ("data", defaults, opts );
                 var data = this.data;
-                var html =
+                var html = //不要使用换行符,这在压缩时很容易出现问题
                 '<div class="panel_wrap" bind="display:show">'+
                 '    <div class="panel_head" bind="if:showHead">'+
                 '        <div class="panel_title" bind="html:content.title"></div>'+
@@ -40,22 +40,27 @@ define('panel',[
                 this.ui = $(html)
                 .appendTo( data.parent )
                 .css     ( data.css )
-console.log(data)
-                var model =  $.ViewModel( data)
-                $.View(model,this.ui[0])
-
-
-
-               // self.show();
+                this.VM =  $.ViewModel( data);
+                $.View(this.VM, this.ui[0]);
             },
             show : function() {
-
+                $.log("show")
+                this.VM.show(true)
             },
             hide : function() {
-
+                $.log("hide")
+                this.VM.show(false)
             },
-            set : function( keyChain, val ) {//每改一个属性就重刷整个视图，因此不能容纳子控件,除非我们多做一些额外工作
-        
+            set : function( name, val ) {
+                if( this.VM[name] ){
+                    this.VM[name](val)
+                }
+                return this;
+            },
+            get: function(name){
+                if( this.VM[name] ){
+                    return this.VM[name]()
+                }
             }
         });
     })
