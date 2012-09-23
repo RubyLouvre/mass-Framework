@@ -29,7 +29,7 @@ define("data", ["$lang"], function(){
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
                         var key = attr.name;
-                        if ( key.indexOf( "data-" ) === 0 && key.length > 5 ) {
+                        if (  key.length > 5 && !key.indexOf( "data-" ) ) {
                             $.parseData(target, key.slice(5), inner, attr.value);
                         }//camelize
                     }

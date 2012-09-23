@@ -346,7 +346,7 @@ define("attr",["$support","$node"], function( support ){
             return node.style.cssText.toLowerCase() || undefined ;
         }
         attrAdapter[ "style:set" ] = function( node, name, value ) {
-            return (node.style.cssText = "" + value);
+            return (node.style.cssText = value + "");
         }
     }
 

@@ -409,7 +409,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
     }
     $.fn.offset = function(options){//取得第一个元素位于页面的坐标
-        throw "ccccccccccccc"
         if ( arguments.length ) {
             return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
             this.each(function() {

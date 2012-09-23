@@ -113,7 +113,7 @@ define("avalon",["$attr","$event"], function(){
     }
 
     //depsWatch，依赖监控者，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
-    //它们是位于双向依赖链的中间层，需要依赖于其他atomWatch或depsWatch的返回值计算自己的value。
+    //它们是位于双向绑定链的中间层，需要依赖于其他atomWatch或depsWatch的返回值计算自己的value。
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
@@ -472,7 +472,7 @@ define("avalon",["$attr","$event"], function(){
     }
     $.fn.$value = function(){
         var watch = $(this).model()
-        if(watch){
+        if(typeof watch == "function"){
             var v = watch();
             $.log(v)
             return v

@@ -20,12 +20,12 @@
 
             $.require("ready,./more/panel", function(){
                 var model = new $.ui.Panel()
+
+        
                 setTimeout(function(){
-                    model.hide()
+                    model.VM.content.title("xxxx")
                 },1000)
-                setTimeout(function(){
-                    model.show()
-                },2000)
+         
             })
         </script>
 

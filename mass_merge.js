@@ -299,7 +299,7 @@
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
-        if( tmp == ret && !/\.js$/.test(ret)){//如果没有后缀名会补上.js
+        if( ext!="css" &&tmp == ret && !/\.js$/.test(ret)){//如果没有后缀名会补上.js
             ret += ".js";
         }
         return [ret, ext];
@@ -554,7 +554,7 @@
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
 
-    
+
     function install( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
