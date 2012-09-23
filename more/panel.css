@@ -15,12 +15,14 @@
 .panel_body{
     padding:5px;
 }
-.panel_closer{
+.panel_tool{
     position:absolute;
     right:10px;;
     top: 2px;
+}
+.panel_tool_close{
     display:inline-block;
     width:25px;
     height:20px;
-    background: url(panel_closer.jpg) no-repeat center center;
+    background: url(panel_tool_close.jpg) no-repeat center center;
 }
