@@ -47,6 +47,7 @@ define("avalon",["$attr","$event"], function(){
         models.$value = function(){
             return models
         }
+        models.$value.$uuid = ++uuid;
         return models;
     }
 
@@ -103,7 +104,7 @@ define("avalon",["$attr","$event"], function(){
             if( arguments.length ){//在传参不等于已有值时,才更新自已,并通知其依赖域
                 if( Watch.$val !== neo ){
                     Watch.$val = neo;
-                    notify$depsUpdate( Watch );
+                    updateDeps( Watch );
                 }
             }
             return Watch.$val;
@@ -151,7 +152,7 @@ define("avalon",["$attr","$event"], function(){
             if( change && (Watch.$val !== neo) ){
                 Watch.$val = neo;
                 //通知此域的所有直接依赖者更新自身
-                notify$depsUpdate( Watch );
+                updateDeps( Watch );
             }
             return Watch.$val;
         }
@@ -274,17 +275,6 @@ define("avalon",["$attr","$event"], function(){
                     $.attr(node, name, val[ name ] );
                 }
             }
-        },
-        click: {
-            init: function(node, val, callback){
-                $(node).click(callback)
-              //  console.log("-------------------")
-              //  console.log(val)
-            },
-            update: function(){
-
-            }
-
         },
         checked: {
             init:  function( node, val, Watch ){
@@ -484,15 +474,26 @@ define("avalon",["$attr","$event"], function(){
 
 
     //为当前元素把数据隐藏与视图模块绑定在一块
-    //参数分别为model, setData, pnames, pvalues
-    function setBindingsToElement( model, setData, pnames, pvalues ){
+    //参数分别为model, pnames, pvalues
+    $.fn.model = function(){
+        return $._data(this[0], "$model")
+    }
+    $.fn.$value = function(){
+        var watch = $(this).model()
+        if(watch){
+            var v = watch();
+            $.log(v)
+            return v
+        }
+    }
+    function setBindingsToElement( model, pnames, pvalues ){
         //取得标签内的属性绑定，然后构建成actionWatch，并与ViewModel关联在一块
         var node = this;
         pnames = pnames || [];
         pvalues = pvalues || [];
         var attr = node.getAttribute( BINDING ), names = [], values = [], continueBindings = true,
         key, val, binding;
-    
+        $._data(node,"$model",model);
         for(var name in model){
             if(model.hasOwnProperty(name)){
                 names.push( name );
@@ -524,7 +525,7 @@ define("avalon",["$attr","$event"], function(){
         return continueBindings;
     }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
-    //参数分别为model, setData, pnames, pvalues
+    //参数分别为model, pnames, pvalues
     function setBindingsToElementAndChildren(){
         if ( this.nodeType === 1  ){
             var continueBindings = true;
@@ -537,14 +538,14 @@ define("avalon",["$attr","$event"], function(){
             }
         }
     }
-    //参数分别为model, setData, pnames, pvalues
+    //参数分别为model, pnames, pvalues
     function setBindingsToChildren( ){
         for(var i = 0, n = this.length; i < n ; i++){
             setBindingsToElementAndChildren.apply( this[i], arguments );
         }
     }
     //通知此域的所有直接依赖者更新自身
-    function notify$depsUpdate(Watch){
+    function updateDeps(Watch){
         var list = Watch.$deps || [] ;
         if( list.length ){
             var safelist = list.concat();
