@@ -3138,7 +3138,7 @@ define("data", ["$lang"], function(){
                     //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
                     for ( var i = 0, attr; attr = attrs[i++];) {
                         var key = attr.name;
-                        if ( key.indexOf( "data-" ) === 0 && key.length > 5 ) {
+                        if (  key.length > 5 && !key.indexOf( "data-" ) ) {
                             $.parseData(target, key.slice(5), inner, attr.value);
                         }//camelize
                     }
@@ -4336,7 +4336,7 @@ define("attr",["$support","$node"], function( support ){
             return node.style.cssText.toLowerCase() || undefined ;
         }
         attrAdapter[ "style:set" ] = function( node, name, value ) {
-            return (node.style.cssText = "" + value);
+            return (node.style.cssText = value + "");
         }
     }
 
@@ -4573,10 +4573,11 @@ define("css_fix", !!top.getComputedStyle, function(){
 // 样式操作模块 by 司徒正美
 //=========================================
 define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , function(){
+    try{
     //$.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
-    var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
+    var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
     $.implement({
         css : function( name, value , neo){
             if(typeof name === "string"){
@@ -4633,7 +4634,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             }
             var style = node.style ;
             if ( (computedStyle = defaultView.getComputedStyle( node, null )) ) {
-                ret = computedStyle[name]
+                ret = computedStyle[name] 
                 if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
                     ret = style[name];//如果还没有加入DOM树，则取内联样式
                 }
@@ -4970,7 +4971,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         if( node.tagName === "BODY" ){
             pos.top = node.offsetTop;
-            pos.left = node.offsetLeft;
+            pos.left = body.offsetLeft;
             //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
             if(getBodyOffsetNoMargin()){
                 pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
@@ -5112,6 +5113,10 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
+    }catch(e){
+        throw module.id;
+        throw e
+    }
 });
 
 
@@ -5788,15 +5793,10 @@ define("ajax",["$flow"], function(){
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
     rurl =  /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
-    curl;
-    //在IE下如果重置了document.domain，访问window.location会抛错
-    try {
-        curl = global.location.href;
-    } catch( e ) {
-        curl = DOC.createElement( "a" );
-        curl.href = "";
-        curl = curl.href;
-    }
+    //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
+    //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
+    curl = DOC.URL;
+
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
     var s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
@@ -5834,13 +5834,9 @@ define("ajax",["$flow"], function(){
     function setOptions( opts ) {
         opts = $.Object.merge( {}, defaults, opts );
         if (opts.crossDomain == null) { //判定是否跨域
-            var parts = rurl.exec(opts.url.toLowerCase());
-            opts.crossDomain = !!( parts &&
-                ( parts[ 1 ] != segments[ 1 ] || parts[ 2 ] != segments[ 2 ] ||
-                    ( parts[ 3 ] || ( parts[ 1 ] === "http:" ?  80 : 443 ) )
-                    !=
-                    ( segments[ 3 ] || ( segments[ 1 ] === "http:" ?  80 : 443 ) ) )
-                );
+            var parts = rurl.exec( opts.url.toLowerCase() ) || false;
+            opts.crossDomain = parts && ( parts.join(":") + ( parts[ 3 ] ? "" : parts[ 1 ] === "http:" ? 80 : 443 ) ) !==
+            ( segments.join(":") + ( segments[ 3 ] ? "" : segments[ 1 ] === "http:" ? 80 : 443 ) );
         }
         if ( opts.data && opts.data !== "string") {
             opts.data = $.param( opts.data );
