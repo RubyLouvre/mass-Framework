@@ -320,7 +320,7 @@
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
-        if( tmp == ret && !/\.js$/.test(ret)){//如果没有后缀名会补上.js
+        if( ext!="css" &&tmp == ret && !/\.js$/.test(ret)){//如果没有后缀名会补上.js
             ret += ".js";
         }
         return [ret, ext];
