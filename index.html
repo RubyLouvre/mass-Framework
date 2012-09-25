@@ -8,11 +8,11 @@
         <link rel="stylesheet" href="more/bootstrap-responsive.css" type="text/css" />
         <script>
 
-            $.require("ready,./more/avalon", function(){
-                var el = $("#btn_text")[0]
-                var model = $.ViewModel({
+            $.require("ready,./more/dropdown", function(){
+
+                new $.ui.DropDown({
                     btn_text:"下拉",
-                    lis:[
+                    menu:[
                         {text:"动作1"},
                         {text:"动作2"},
                         {text:"动作3"},
@@ -20,7 +20,6 @@
                         {text:"被间隔的链接"}
                     ]
                 })
-                $.View(model,el)
 
             })
 
@@ -29,15 +28,7 @@
     </head>
     <body>
 
-        <div class="btn-group" id="aaa">
-            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-                <span bind="text:btn_text">Action</span>
-                <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" bind="foreach:lis">
-                <li bind="text:text,attr:{class:cls }" href="#" ></li>
-            </ul>
-        </div>
+       
 
 
     </body>

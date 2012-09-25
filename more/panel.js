@@ -1,4 +1,4 @@
-define('panel',[ '$css',"./avalon","./panel.css" ], function(){
+define('panel',[ '$css',"../avalon","./panel.css" ], function(){
     $.ui = $.ui||{}
     var defaults = {
         show        : true,

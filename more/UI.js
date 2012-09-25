@@ -18,7 +18,8 @@ http://d.hatena.ne.jp/cyokodog/20101101/exresize01
 http://d.hatena.ne.jp/cyokodog/20100530/exfitframe01
 //jsonp
 http://d.hatena.ne.jp/shinichitomita/20060825/1156504036
-
+http://www.cnblogs.com/pansly/archive/2011/12/18/2292743.html
+http://www.cnblogs.com/zr824946511/archive/2010/02/25/1673520.html
 CSSReg
 http://www.businessinfo.co.uk/labs/CSSReg/CSSReg.html
 各种REG

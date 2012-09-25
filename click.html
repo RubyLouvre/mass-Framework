@@ -1,0 +1,40 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>foreach绑定 by 司徒正美</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js"></script>
+        <style>
+            .red{
+                color:red;
+            }
+        </style>
+    </head>
+    <body>
+
+        <script>
+            $.require("ready,./more/avalon", function(){
+                var model = $.ViewModel({
+                    places:['London', 'Paris', 'Tokyo']
+                  
+                })
+               
+                $.View(model);
+
+                $("span").click(function(){
+                    // $(this).remove();
+                    model.places.remove( $(this).$value() )
+                    console.log(model.places.length)
+                })
+            });
+
+        </script>
+
+        <ul bind="foreach: places">
+            <li>
+                <span bind="text: $value,class:{red:1}"></span>
+            </li>
+        </ul>
+    </body>
+</html>
+
