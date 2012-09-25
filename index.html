@@ -9,18 +9,48 @@
         <script>
 
             $.require("ready,./more/dropdown", function(){
-
-                new $.ui.DropDown({
-                    btn_text:"下拉",
+                var opts = { btn_text:"下拉33333333",
+                    parent:".btn-toolbar",
                     menu:[
-                        {text:"动作1"},
-                        {text:"动作2"},
-                        {text:"动作3"},
+                        {text:"子菜单1"},
+                        {text:"子菜单2"},
+                        {text:"子菜单3"},
                         {cls: "divider"},
                         {text:"被间隔的链接"}
                     ]
-                })
+                }
+                var btn =  new $.ui.DropDown(opts);
+                var blue_btn =  new $.ui.DropDown(opts)
+                blue_btn.VM.btn_cls("btn-primary");
 
+             
+
+
+              
+                var red_btn =  new $.ui.DropDown(opts)
+                red_btn.VM.btn_cls("btn-danger")
+                var yellow_btn =  new $.ui.DropDown(opts)
+                yellow_btn.VM.btn_cls("btn-warning")
+                var green_btn =  new $.ui.DropDown(opts)
+                green_btn.VM.btn_cls("btn-success")
+                var cyan_btn = new $.ui.DropDown(opts)
+                cyan_btn.VM.btn_cls("btn-info")
+                var black_btn = new $.ui.DropDown(opts)
+                black_btn.VM.btn_cls("btn-inverse")
+                new $.ui.DropDown({split:1,menu:[1]})
+                setTimeout(function(){
+                    blue_btn.VM.btn_cls({"btn-large":0})
+                },500)
+                setTimeout(function(){
+                    blue_btn.VM.btn_cls("btn-large")
+                },2000)
+                setTimeout(function(){
+                    blue_btn.size("btn-small")
+                   
+                },3000)
+
+            
+                //MVVM 有个BUG,不能为空数组
             })
 
         </script>
@@ -28,8 +58,8 @@
     </head>
     <body>
 
-       
 
+        <div class="btn-toolbar"></div>
 
     </body>
 </html>
