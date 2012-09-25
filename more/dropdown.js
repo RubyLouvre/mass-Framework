@@ -1,10 +1,11 @@
-define('panel',[ '$css',"./avalon","./panel.css" ], function(){
+define('dropdown',[ '$css',"./avalon" ], function(){
     $.ui = $.ui||{}
     var defaults = {
         btn_text: "action",
-        menu: []
+        menu: [],
+        parent: "body"
     }
-    $.ui.DropDown = $.factory({
+    $.ui.DropDown  = $.factory({
         inherit: $.Flow,
         init: function(opts) {
             opts =  opts || [];
@@ -22,26 +23,32 @@ define('panel',[ '$css',"./avalon","./panel.css" ], function(){
                 el.cls = el.cls || ""
                 el.href = el.href || "#"
             })
-
             this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
-            '<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">'+
-            '    <span bind="text:btn_text"></span><span class="caret"></span>'+
+            '<div class="btn-group">'+
+            '    <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">'+
+            '        <span bind="text:btn_text"></span><span class="caret"></span>'+
+            '    </a>'+
             '    <ul class="dropdown-menu" bind="foreach:menu">'+
             '        <li bind="text:text,attr:{class:cls, href:href }"></li>'+
             '     <ul>'+
             '</div>'
-            this.ui = $(this.tmpl).appendTo( data.parent ).css( data.css );
-            this.VM =  $.ViewModel( data);
-            $.View(this.VM, this.ui[0]);
-        },
-        show : function() {
-            $.log("show",7)
-           // this.VM.show(true)
-        },
-        hide : function() {
-            $.log("hide",7)
-          //  this.VM.show(false)
+            var ui = this.ui = $(this.tmpl).appendTo( data.parent )
+            this.VM =  $.ViewModel( data );
+            $.View(this.VM, ui[0]);
+            var open = false;
+            ui.on("click",function(){
+                if(!open){
+                    ui.addClass("open");
+                    ui.find(".dropdown-menu").show();
+                    open = true;
+                }else{
+                    ui.removeClass("open");
+                    ui.find(".dropdown-menu").hide();
+                    open = false
+                }
+            })
         }
+   
     });
 })
 
@@ -177,7 +184,7 @@ define('panel',[ '$css',"./avalon","./panel.css" ], function(){
 //  })
 
     
-} )
+//} )
 
 
 
