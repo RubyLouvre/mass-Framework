@@ -163,8 +163,8 @@ define("avalon",["$attr","$event"], function(){
     function bindWatch (node, names, values, key, str, binding, model ){
         function Watch( neo ){
             if( !Watch.$uuid ){ //只有在第一次执行它时才进入此分支
-                var arr = model[str]
                 if( key == "foreach" ){
+                    var arr = model[str]
                     var p = arr["$"+expando] || ( arr[ "$"+ expando] =  [] );
                     $.Array.ensure( p ,Watch);
                     arguments = ["start"];
@@ -195,6 +195,7 @@ define("avalon",["$attr","$event"], function(){
                     val = ret;
                 }
             }
+            //只有执行到这里才知道要不要中断往下渲染
             binding.update(node, val, Watch, model, names, values);
             return Watch.$val = val;
         }
@@ -316,6 +317,10 @@ define("avalon",["$attr","$event"], function(){
                 }
                 if( code < 0  && val ){                    //处理foreach 绑定
                     var fragments = Watch.fragments, models = val;
+                    if(!models.length){
+                         fragments[0].recover();
+                         return
+                    }
                     for( var i = 0, el ; el = fragments[i]; i++){
                         el.recover();                      //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
@@ -473,9 +478,7 @@ define("avalon",["$attr","$event"], function(){
     $.fn.$value = function(){
         var watch = $(this).model()
         if(typeof watch == "function"){
-            var v = watch();
-            $.log(v)
-            return v
+            return watch();
         }
     }
     //取得标签内的属性绑定，然后构建成bindWatch，并与ViewModel关联在一块
@@ -508,6 +511,10 @@ define("avalon",["$attr","$event"], function(){
             if( binding ){
                 if( binding.stopBindings ){
                     continueBindings = false;
+                }
+                if(key == "foreach" && Array.isArray(model[key]) && !model[key].length ){
+                    continueBindings = false;
+                  //  continue
                 }
                 bindWatch(node, names, values, key, val, binding, model);
             }
