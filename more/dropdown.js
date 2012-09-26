@@ -77,7 +77,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     }
                 }).keyup(function(e){
                     var keyCode = e.which;
-                  
+                    $.log(keyCode)
                     if (!/(38|40|27)/.test(keyCode))
                         return
                   
@@ -93,12 +93,16 @@ define('dropdown',[ '$css',"./avalon" ], function(){
 
                     var cur = items.filter(':focus');
                     var index = items.index( cur )
-                    if ( keyCode == 38 && index > 0) index--                                        // up
-                    if (e.keyCode == 40 && index < items.length - 1) index++                        // down
-                    if (!~index) index = 0
-                    console.log(keyCode)
-                    items.eq(index).addClass("focus").focus();
-                    cur.removeClass("focus")
+                    if ( keyCode == 38){
+                        index--
+                    }
+                    if ( keyCode == 40){
+                        index++
+                    }
+                    if( index == items.length){
+                        index = 0;
+                    }
+                    items.eq(index).focus();
                 })
             }
            
