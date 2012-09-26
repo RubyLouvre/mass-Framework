@@ -5182,23 +5182,25 @@ define("event_fix", !!document.dispatchEvent, function(){
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !transfer.isPropagationStopped );
-            
-                if ( !transfer.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
-                    && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
-                    && (type == "click"|| this.nodeName != "A")//如果是点击事件则元素不能为A因为会跳转
-                    && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
-                    ) {
-                    var inline = this[ ontype ];
-                    var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
-                    this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
-                    this[ ontype ] = null;
-                    if(type == "click" && /checkbox|radio/.test(this.type)){
-                        this.checked = !this.checked
+
+                if ( !transfer.isDefaultPrevented ) {//如果用户没有阻止普通行为，defaultPrevented
+                    if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
+                        if ( ontype && this[ type ] && ((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) &&  !this.eval ) {
+                            var inline = this[ ontype ];
+                    //        var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
+                     //       this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
+                            this[ ontype ] = null;
+                            if(type == "click" && /checkbox|radio/.test(this.type)){
+                                this.checked = !this.checked
+                            }
+                            this[ type ]();
+                      //      this.disabled = disabled
+                            this[ ontype ] = inline;
+                        }
                     }
-                    this[ type ]();
-                    this.disabled = disabled
-                    this[ ontype ] = inline;
+
                 }
+
             }else{//普通对象的自定义事件
                 facade.dispatch(this, transfer);
             }
@@ -5272,7 +5274,7 @@ define("event_fix", !!document.dispatchEvent, function(){
         };
     });
 });
-//2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
+    //2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 
 
 
@@ -5333,16 +5335,16 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         },
         preventDefault: function() {
             this.isDefaultPrevented = true;
-            var e = this.originalEvent;
-            if ( e.preventDefault ) {
+            var e = this.originalEvent || {};
+            if (e && e.preventDefault ) {
                 e.preventDefault();
             }// 如果存在returnValue 那么就将它设为false
             e.returnValue = false;
             return this;
         },
         stopPropagation: function() {
-            var e = this.originalEvent;
-            if ( e.stopPropagation ) {
+            var e = this.originalEvent || {};
+            if (e && e.stopPropagation ) {
                 e.stopPropagation();
             } // 如果存在returnValue 那么就将它设为true
             e.cancelBubble = this.isPropagationStopped = true;
@@ -5653,8 +5655,11 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 type = new Event( type );
                 type = type.origType;
                 var doc = target.ownerDocument || target.document || target || document;
-                transfer = doc.createEvent( eventMap[type] || "CustomEvent");
-                transfer.initEvent( type, true, true, doc.defaultView);
+                transfer = doc.createEvent(eventMap[type] || "CustomEvent");// 
+                if(/^(focus|blur|select|submit|reset)$/.test(type)){
+                    target[type] && target[type]()
+                }
+                transfer.initEvent( type, true,true);//, doc.defaultView
             }
             transfer.args = [].slice.call( arguments, 1 ) ;
             transfer.more = more;
@@ -5678,7 +5683,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     hash.times = el;
                 }else if(typeof el == "function"){
                     hash.fn = el
-                }if(typeof el === "string"){
+                }
+                if(typeof el === "string"){
                     if(hash.type != null){
                         hash.live = el.trim();
                     }else{
@@ -5724,7 +5730,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         var target = quark.currentTarget
                         var related = event.relatedTarget;
                         if(quark.live || !related || (related !== target && !$.contains( target, related )) ){
-                             facade._dispatch( [ target  ], event, type );
+                            facade._dispatch( [ target  ], event, type );
                         }
 
                     })
