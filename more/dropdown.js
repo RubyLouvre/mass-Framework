@@ -77,15 +77,15 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     }
                 }).keyup(function(e){
                     var keyCode = e.which;
-                    $.log(keyCode)
+                    $.log(keyCode+"!!!!!!!!")
                     if (!/(38|40|27)/.test(keyCode))
                         return
-                  
+                    //$.log(ui.is('.disabled, :disabled'))
                     if (ui.is('.disabled, :disabled'))
                         return
                     var  isActive = ui.hasClass('open')
                     var items = menu.find("li:not(.divider) a");
-                    
+                 
                     if (!isActive || (isActive && e.keyCode == 27))
                         return ui.click()
                     if (!items.length) 
@@ -102,6 +102,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     if( index == items.length){
                         index = 0;
                     }
+                       $.log("99999999")
                     items.eq(index).focus();
                 })
             }
@@ -123,4 +124,11 @@ define('dropdown',[ '$css',"./avalon" ], function(){
    
     });
 })
+/*
+ * 
+ * 作为一种十天搞出来的语言，能获取如此地位，javascript已经算是非常了不起，但BUG依旧是免不了。而且微软与当时的网景斗气，
+javascript还没有成长起来时，就岔出一个分支JScript，在这个分支在IE6的强势地位后，竟然哗宾夺主肆虐了十多年，这景况真是语言界的奇葩啊，也正因为如此，
+语言自身的发展一直滞后，这任务竟然成为了框架类库的绝活了。
+ * 
+ */
 
