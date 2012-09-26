@@ -12,8 +12,9 @@
         <script>
 
             $.require("ready,./more/dropdown", function(){
-                
-                var opts = { btn_text:"下拉框",
+  
+                 new $.ui.DropDown({split:1,menu:[]})
+            /*    var opts = { btn_text:"下拉框",
                     parent:".btn-toolbar",
                     menu:[
                         {text:"子菜单1"},
@@ -52,7 +53,7 @@
                 //MVVM 有个BUG,不能为空数组
                // setTimeout(function(){
               //      document.getElementById("aa").focus()
-               // },2000)
+               // },2000)*/
             })
 
 
@@ -62,7 +63,9 @@
     <body>
 
 
-        <div class="btn-toolbar"></div>
-        <a href="#" id="aa">xxx</a>
+        <div class="btn-toolbar" bind="foreach">
+            <a href="#" bind="text:inner">xxx</a>
+        </div>
+        
     </body>
 </html>
