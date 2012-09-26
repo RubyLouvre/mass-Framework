@@ -59,16 +59,16 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         },
         preventDefault: function() {
             this.isDefaultPrevented = true;
-            var e = this.originalEvent;
-            if ( e.preventDefault ) {
+            var e = this.originalEvent || {};
+            if (e && e.preventDefault ) {
                 e.preventDefault();
             }// 如果存在returnValue 那么就将它设为false
             e.returnValue = false;
             return this;
         },
         stopPropagation: function() {
-            var e = this.originalEvent;
-            if ( e.stopPropagation ) {
+            var e = this.originalEvent || {};
+            if (e && e.stopPropagation ) {
                 e.stopPropagation();
             } // 如果存在returnValue 那么就将它设为true
             e.cancelBubble = this.isPropagationStopped = true;

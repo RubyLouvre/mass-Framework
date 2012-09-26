@@ -30,7 +30,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             '        <span bind="text:btn_text">Action</span><span class="caret"></span>'+
             '    </a>'+
             '    <ul class="dropdown-menu" bind="foreach:menu">'+
-            '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }"></a></li>'+
+            '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }" ></a></li>'+
             '     </ul>'+
             '</div>'
             if(opts.split){
@@ -68,8 +68,8 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             }).mouseenter(function(){
                 ui.flag_can_collapse = false;
             });
-            if(!$.ui.DropDown.flag_bind){
-                $.ui.DropDown.flag_bind = true;
+           // if(!$.ui.DropDown.flag_bind){
+           //     $.ui.DropDown.flag_bind = true;
                 $(document).click(function(){
                     if(ui.flag_close_menu){
                         ui.removeClass("open");
@@ -77,20 +77,17 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     }
                 }).keyup(function(e){
                     var keyCode = e.which;
-                    $.log(keyCode+"!!!!!!!!")
                     if (!/(38|40|27)/.test(keyCode))
                         return
-                    //$.log(ui.is('.disabled, :disabled'))
                     if (ui.is('.disabled, :disabled'))
                         return
                     var  isActive = ui.hasClass('open')
                     var items = menu.find("li:not(.divider) a");
-                 
-                    if (!isActive || (isActive && e.keyCode == 27))
+                    if (!isActive || (isActive && keyCode == 27))
                         return ui.click()
                     if (!items.length) 
                         return
-
+                    //IE7不支持:focus添加样式,使用:active代替
                     var cur = items.filter(':focus');
                     var index = items.index( cur )
                     if ( keyCode == 38){
@@ -102,10 +99,9 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     if( index == items.length){
                         index = 0;
                     }
-                       $.log("99999999")
                     items.eq(index).focus();
                 })
-            }
+          //  }
            
 
         },

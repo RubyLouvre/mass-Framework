@@ -2818,6 +2818,7 @@ table [class*=span],
 
 .dropdown-menu li > a:hover,
 .dropdown-menu li > a:focus,
+.dropdown-menu li a:active,
 .dropdown-submenu:hover > a {
   color: #ffffff;
   text-decoration: none;

@@ -12,6 +12,7 @@
         <script>
 
             $.require("ready,./more/dropdown", function(){
+                
                 var opts = { btn_text:"下拉33333333",
                     parent:".btn-toolbar",
                     menu:[
@@ -25,10 +26,6 @@
                 var btn =  new $.ui.DropDown(opts);
                 var blue_btn =  new $.ui.DropDown(opts)
                 blue_btn.VM.btn_cls("btn-primary");
-
-             
-
-
               
                 var red_btn =  new $.ui.DropDown(opts)
                 red_btn.VM.btn_cls("btn-danger")
@@ -51,19 +48,21 @@
                     blue_btn.size("btn-small");
                 },3000)
                 
-         
-         
-            
+     
                 //MVVM 有个BUG,不能为空数组
+               // setTimeout(function(){
+              //      document.getElementById("aa").focus()
+               // },2000)
             })
+
 
         </script>
 
     </head>
     <body>
 
-        
-        <div class="btn-toolbar"></div>
 
+        <div class="btn-toolbar"></div>
+        <a href="#" id="aa">xxx</a>
     </body>
 </html>

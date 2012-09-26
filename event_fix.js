@@ -58,31 +58,25 @@ define("event_fix", !!document.dispatchEvent, function(){
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !transfer.isPropagationStopped );
-                $.log("===================")
-                $.log(!transfer.isDefaultPrevented)
-                		// Call a native DOM method on the target with the same name name as the event.
-				// Can't use an .isFunction() check here because IE6/7 fails that test.
-				// Don't do default actions on window, that's where global variables be (#6170)
-				// IE<9 dies on focus/blur to hidden element (#1486)
-				//if ( ontype && elem[ type ] && ((type !== "focus" && type !== "blur") || event.target.offsetWidth !== 0) && !jQuery.isWindow( elem ) ) {
-                
-                if ( !transfer.isDefaultPrevented  //如果用户没有阻止普通行为，defaultPrevented
-                    && this[ type ] && ontype && !this.eval  //并且事件源不为window，并且是原生事件
-                    && (type == "click"|| this.nodeName != "A")//如果是点击事件则元素不能为A因为会跳转
-                    && ( (type !== "focus" && type !== "blur") || this.offsetWidth !== 0 ) //focus,blur的目标元素必须可点击到，换言之，拥有“尺寸”
-                    ) {
-                          
-                    var inline = this[ ontype ];
-                    var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
-                    this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
-                    this[ ontype ] = null;
-                    if(type == "click" && /checkbox|radio/.test(this.type)){
-                        this.checked = !this.checked
+
+                if ( !transfer.isDefaultPrevented ) {//如果用户没有阻止普通行为，defaultPrevented
+                    if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
+                        if ( ontype && this[ type ] && ((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) &&  !this.eval ) {
+                            var inline = this[ ontype ];
+                    //        var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
+                     //       this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
+                            this[ ontype ] = null;
+                            if(type == "click" && /checkbox|radio/.test(this.type)){
+                                this.checked = !this.checked
+                            }
+                            this[ type ]();
+                      //      this.disabled = disabled
+                            this[ ontype ] = inline;
+                        }
                     }
-                    this[ type ]();
-                    this.disabled = disabled
-                    this[ ontype ] = inline;
+
                 }
+
             }else{//普通对象的自定义事件
                 facade.dispatch(this, transfer);
             }
@@ -156,6 +150,6 @@ define("event_fix", !!document.dispatchEvent, function(){
         };
     });
 });
-//2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
+    //2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 
 
