@@ -1179,3 +1179,23 @@ Franky:  17:22:38
 誰的錯很重要嗎？不就說是歷史共業了？
 恐龙♂(396686)  17:26:46
 但现在在 JS 里说的通。
+
+好消息是  一个困然很长时间的历史问题， 在将来会被修正
+Object.prototype.xxx = 1;
+
+typeof xxx //Firefix1.5-, IE8- undefined , others number
+
+这本质上是ES3没有提过的细节, 我个人认为是一种疏漏. 因为 打印undefined才是符合我们直觉,并期待的结果. 而ES5,仍然没有明确提到标识符查找到global后.如何. 但相对ES3,的global object,却补充了这样一段相关的话:
+
+The values of the [[Prototype]] and [[Class]] internal properties of the global object are implementation-dependent . 显然.按照结果. 我们有符合ES的推测是.大部分浏览器的global.[[Prototype]] = Object.prototype
+
+我们测试下即可 :  alert(Object.prototype.isPrototypeOf(window)) .  这至少说明在非IE8- 中,  Object.prototype在window的原型链上.
+
+但这些都不是我们关心的,我们真正关心的是ES应该明确指出 标识符查找过程.到global是否应该中断,而不要去global的原型链上去找. 这是我认为的javascript的一大败笔
+
+但是将来是否能改进呢?
+     现在看起来希望不大, 因为似乎IE9+ 和其他那些浏览器,都把很多宿主方法 挂在DOMWindow的原型上了, 当前window对象访问那些宿主方法都是原型上访问的..所以理论上,这些浏览器里:
+     alert(123) ; 发生的标识符alert的查找，是找到原型链上的..如果把这种机制干掉. 那alert 这些东西,就要放到global(may be window)实例上去,而不是window原型上. 否则 alert(123) 就会抛出异常,除非我们使用window.alert(123) .这显然也不合理.
+     所以.改动的成本也是很大的..涉及到浏览器DOM BOM 和 ES的桥接模型的改变..... 哎.一声叹息...
+     BE自己也承认此处，是当初的设计失误.
+     好消息是 : es-discuss有讨论这个问题。基本上好像是决定不遍历prototype。然后改webIDL让那些属性都打平到每个接口上。

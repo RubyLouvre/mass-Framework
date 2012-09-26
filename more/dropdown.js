@@ -75,7 +75,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                         ui.removeClass("open");
                     // menu.hide();
                     }
-                }).keydown(function(e){
+                }).keyup(function(e){
                     var keyCode = e.which
                     if (!/(38|40|27)/.test(keyCode))
                         return
@@ -85,14 +85,16 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     var items = menu.find("li:not(.divider) a");
                     if (!isActive || (isActive && e.keyCode == 27))
                         return ui.click()
-                    if (!items.length) return
-                    var index = items.index( items.filter(':focus'))
-
+                    if (!items.length) 
+                        return
+                    var cur = items.filter('.focus');
+                    var index = items.index( cur )
                     if ( keyCode == 38 && index > 0) index--                                        // up
                     if (e.keyCode == 40 && index < items.length - 1) index++                        // down
                     if (!~index) index = 0
 
-                    items.eq(index).focus()
+                    items.eq(index).addClass("focus").focus();
+                    cur.removeClass("focus")
                 })
             }
            

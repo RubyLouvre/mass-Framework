@@ -360,6 +360,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
 
     if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( init ){
+            console.log(init+"!!")
             var bindTarget = $["@bind"] in this, more = {}
             var target = bindTarget ? this : window;
             var type, transfer;
@@ -380,6 +381,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 type = type.origType;
                 var doc = target.ownerDocument || target.document || target || document;
                 transfer = doc.createEvent( eventMap[type] || "CustomEvent");
+                $.log(eventMap[type])
                 transfer.initEvent( type, true, true, doc.defaultView);
             }
             transfer.args = [].slice.call( arguments, 1 ) ;
