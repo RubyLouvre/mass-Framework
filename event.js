@@ -360,7 +360,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
 
     if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( init ){
-            console.log(init+"!!")
             var bindTarget = $["@bind"] in this, more = {}
             var target = bindTarget ? this : window;
             var type, transfer;
@@ -380,9 +379,11 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 type = new Event( type );
                 type = type.origType;
                 var doc = target.ownerDocument || target.document || target || document;
-                transfer = doc.createEvent( eventMap[type] || "CustomEvent");
-                $.log(eventMap[type])
-                transfer.initEvent( type, true, true, doc.defaultView);
+                transfer = doc.createEvent(eventMap[type] || "CustomEvent");// 
+                if(/^(focus|blur|select|submit|reset)$/.test(type)){
+                    target[type] && target[type]()
+                }
+                transfer.initEvent( type, true,true);//, doc.defaultView
             }
             transfer.args = [].slice.call( arguments, 1 ) ;
             transfer.more = more;
@@ -406,7 +407,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     hash.times = el;
                 }else if(typeof el == "function"){
                     hash.fn = el
-                }if(typeof el === "string"){
+                }
+                if(typeof el === "string"){
                     if(hash.type != null){
                         hash.live = el.trim();
                     }else{
@@ -455,7 +457,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
                         var target = quark.currentTarget
                         var related = event.relatedTarget;
                         if(quark.live || !related || (related !== target && !$.contains( target, related )) ){
-                             facade._dispatch( [ target  ], event, type );
+                            facade._dispatch( [ target  ], event, type );
                         }
 
                     })
