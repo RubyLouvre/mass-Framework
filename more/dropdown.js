@@ -6,6 +6,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
         menu: [],
         parent: "body"
     }
+
     $.ui.DropDown  = $.factory({
         inherit: $.Flow,
         init: function(opts) {
@@ -57,53 +58,22 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                     return
                 //要求open加在与btn-group类的同一元素上
                 ui.toggleClass("open");
-                //  menu.toggle();??????这里是否要在IE6下处理
                 if(ui.hasClass("open")){
                     menu.focus()
                 }
                 return false;
-            })
+            });
+            //当在其他地方点击时会收起下拉框
             ui.mouseleave(function(){
                 ui.flag_can_collapse = true;
             }).mouseenter(function(){
                 ui.flag_can_collapse = false;
             });
-           // if(!$.ui.DropDown.flag_bind){
-           //     $.ui.DropDown.flag_bind = true;
-                $(document).click(function(){
-                    if(ui.flag_close_menu){
-                        ui.removeClass("open");
-                    // menu.hide();
-                    }
-                }).keyup(function(e){
-                    var keyCode = e.which;
-                    if (!/(38|40|27)/.test(keyCode))
-                        return
-                    if (ui.is('.disabled, :disabled'))
-                        return
-                    var  isActive = ui.hasClass('open')
-                    var items = menu.find("li:not(.divider) a");
-                    if (!isActive || (isActive && keyCode == 27))
-                        return ui.click()
-                    if (!items.length) 
-                        return
-                    //IE7不支持:focus添加样式,使用:active代替
-                    var cur = items.filter(':focus');
-                    var index = items.index( cur )
-                    if ( keyCode == 38){
-                        index--
-                    }
-                    if ( keyCode == 40){
-                        index++
-                    }
-                    if( index == items.length){
-                        index = 0;
-                    }
-                    items.eq(index).focus();
-                })
-          //  }
-           
-
+            $(document).click(function(){
+                if(ui.flag_close_menu){
+                    ui.removeClass("open");
+                }
+            })
         },
         size: function(name){
             this.VM.btn_cls({
@@ -116,15 +86,61 @@ define('dropdown',[ '$css',"./avalon" ], function(){
         }
     //   如果想下拉框向上方显示,在.btn-group加个类名dropup
     //   如果想并排显示多个.btn-group 那么在它们外面最套个DIV,类名为btn-toolbar
-
-   
     });
+    function getDropDown($this) {
+        var selector = $this.attr('data-target'), el
+        if (!selector) {
+            selector = $this.attr('href')
+            selector = selector && /#/.test(selector) && selector.replace(/.*(?=#[^\s]*$)/, '') //strip for ie7
+        }
+        el = $(selector);
+        if(!el.length){
+            el = $(".dropdown-toggle").eq(0)
+        }
+        if(el.length){
+            el = el.parent()
+        }
+        return el
+    }
+
+    $(document).keyup(function(e){
+        var keyCode = e.which;
+        if (!/(38|40|27)/.test(keyCode))
+            return
+        e.preventDefault();
+        e.stopPropagation();
+        //决定要操作哪一个
+        var el = $(this)
+        if (el.is('.disabled, :disabled'))
+            return
+        var ui = getDropDown( el );
+        console.log(ui)
+        var isActive = ui.hasClass('open')
+        var items = ui.find("li:not(.divider) a");
+        if (!isActive || (isActive && keyCode == 27))
+            return ui.click()
+        if (!items.length)
+            return
+        //IE7不支持:focus添加样式,使用:active代替
+        var cur = items.filter(':focus');
+        var index = items.index( cur )
+        if ( keyCode == 38){
+            index--
+        }
+        if ( keyCode == 40){
+            index++
+        }
+        if( index == items.length){
+            index = 0;
+        }
+        items.eq(index).focus();
+    })
 })
-/*
- * 
- * 作为一种十天搞出来的语言，能获取如此地位，javascript已经算是非常了不起，但BUG依旧是免不了。而且微软与当时的网景斗气，
+    /*
+     *
+     * 作为一种十天搞出来的语言，能获取如此地位，javascript已经算是非常了不起，但BUG依旧是免不了。而且微软与当时的网景斗气，
 javascript还没有成长起来时，就岔出一个分支JScript，在这个分支在IE6的强势地位后，竟然哗宾夺主肆虐了十多年，这景况真是语言界的奇葩啊，也正因为如此，
 语言自身的发展一直滞后，这任务竟然成为了框架类库的绝活了。
- * 
- */
+     *
+     */
 
