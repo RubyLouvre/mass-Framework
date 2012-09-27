@@ -38,7 +38,7 @@ define('button',[ '$css',"./avalon" ], function(){
                 el.text = el.text || "";
                 el.cls = el.cls || defaults.cls
             });
-            console.log(btns)
+
             var tmpl = '<$tag class="btn" data-toggle="button" bind="$text:text,class:cls">单独开关</$tag>';
             switch(data.type){
                 case "button":
@@ -58,22 +58,13 @@ define('button',[ '$css',"./avalon" ], function(){
                     '</div>'
                     break;
             }
-            $.log(data.tag);
-            $.log(/\$tag/g)
-            this.tmpl =  tmpl.replace(/\$tag/g, data.tag);
+            tmpl =  tmpl.replace(/\$tag/g, data.tag);
             this.tmpl =  tmpl.replace(/\$text/g, data.tag == "input"? "value" : "text");
-            console.log(this.tmpl+"!!!!!!!!!1")
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
             
             this.VM =  $.ViewModel( data );
 
             $.View(this.VM, ui[0]);
-            //保存实例
-            if(data.type == "button"){
-                this.ui.data("button", this)
-            }else{
-                this.ui.children("[data-toggle^=button]").data("button", this)
-            }
         }
     })
     
@@ -81,11 +72,11 @@ define('button',[ '$css',"./avalon" ], function(){
         var el = $(e.target)
         if (!el.hasClass('btn')) 
             el = el.closest('.btn')
-        var button = el.data("button");
-        if( button && button.data.type == "buttons-radio" ){
-            button.ui.find('.active').removeClass('active')
-            el.toggleClass('active')
+        var parent = el.parent('[data-toggle="buttons-radio"]');
+        if(parent.length){
+            parent.find('.active').removeClass('active');
         }
+        el.toggleClass('active')
     })
     
 })

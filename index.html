@@ -10,9 +10,18 @@
 
         </style>
         <script>
-             $.require("ready,./more/button",function(){
-                 new $.ui.Button()
-             })
+            $.require("ready,./more/button",function(){
+                new $.ui.Button();
+                 
+                new $.ui.Button({
+                    type:"buttons-checkbox",
+                    btns:["左","中","右"]
+                })
+                new $.ui.Button({
+                    type:"buttons-radio",
+                    btns:["左","中","右"]
+                })
+            })
 
         </script>
 
@@ -20,6 +29,6 @@
     <body>
 
 
-       
+
     </body>
 </html>
