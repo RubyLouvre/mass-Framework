@@ -1,8 +1,12 @@
 define('dropdown',[ '$css',"./avalon" ], function(){
     $.ui = $.ui||{}
     var defaults = {
+        //按钮内的文字
         btn_text: "action",
-        btn_cls: "",
+        //可供换肤用的类名btn-primary btn-danger btn-warning btn-success btn-info btn-inverse
+        //可供调整大小的类名btn-mini btn-small btn-large
+        cls: "",
+        menucls: "", //使用pull-left pull-right让下拉框相对按钮组对齐
         menu: [],
         parent: "body"
     }
@@ -27,20 +31,20 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             });
             this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
             '<div class="btn-group">'+
-            '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
+            '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
             '        <span bind="text:btn_text">Action</span><span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length,class:pullright">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length,class:menucls">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }" ></a></li>'+
             '     </ul>'+
             '</div>'
             if(opts.split){
                 this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
                 '<div class="btn-group">'+
-            '    <a class="btn" bind="class:btn_cls"  href="#">'+
+            '    <a class="btn" bind="class:cls"  href="#">'+
             '        <span bind="text:btn_text">Action</span>'+
             '    </a>'+
-            '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
+            '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
             '        <span class="caret"></span>'+
             '    </a>'+
             '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length,class:pullright">'+
@@ -81,12 +85,12 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             })
         },
         size: function(name){
-            this.VM.btn_cls({
+            this.VM.cls({
                 "btn-mini":false,
                 "btn-small":false,
                 "btn-large":false
             })
-            this.VM.btn_cls(name)
+            this.VM.cls(name)
         //只能是这几个:.btn-mini, .btn-small, or .btn-large
         }
     //   如果想下拉框向上方显示,在.btn-group加个类名dropup
@@ -110,6 +114,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
 
     $(document).keyup(function(e){
         var keyCode = e.which;
+        //27 enter 38 up 40 down
         if (!/(38|40|27)/.test(keyCode))
             return
         e.preventDefault();

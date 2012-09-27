@@ -10,49 +10,9 @@
 
         </style>
         <script>
-
-            $.require("ready,./more/dropdown", function(){
-  
-
-            var opts = { btn_text:"下拉框",
-                    parent:".btn-toolbar",
-                    menu:[
-                        {text:"子菜单1"},
-                        {text:"子菜单2"},
-                        {text:"子菜单3"},
-                        {cls: "divider"},
-                        {text:"被间隔的链接"}
-                    ]
-                }
-                var btn =  new $.ui.DropDown(opts);
-                var blue_btn =  new $.ui.DropDown(opts)
-                blue_btn.VM.btn_cls("btn-primary");
-              
-                var red_btn =  new $.ui.DropDown(opts)
-                red_btn.VM.btn_cls("btn-danger")
-                var yellow_btn =  new $.ui.DropDown(opts)
-                yellow_btn.VM.btn_cls("btn-warning")
-                var green_btn =  new $.ui.DropDown(opts)
-                green_btn.VM.btn_cls("btn-success")
-                var cyan_btn = new $.ui.DropDown(opts)
-                cyan_btn.VM.btn_cls("btn-info")
-                var black_btn = new $.ui.DropDown(opts)
-                black_btn.VM.btn_cls("btn-inverse")
-                new $.ui.DropDown({split:1,menu:[1]})
-                setTimeout(function(){
-                    blue_btn.VM.btn_cls({"btn-large":0})
-                },500)
-                setTimeout(function(){
-                    blue_btn.VM.btn_cls("btn-large")
-                },2000)
-                setTimeout(function(){
-                    blue_btn.size("btn-small");
-                },3000)
-                
-     
-         
-            })
-
+             $.require("ready,./more/button",function(){
+                 new $.ui.Button()
+             })
 
         </script>
 
@@ -60,9 +20,6 @@
     <body>
 
 
-        <div class="btn-toolbar" bind="foreach">
-            <a href="#" bind="text:inner">xxx</a>
-        </div>
-        
+       
     </body>
 </html>
