@@ -30,7 +30,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
             '        <span bind="text:btn_text">Action</span><span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length,class:pullright">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }" ></a></li>'+
             '     </ul>'+
             '</div>'
@@ -43,11 +43,13 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             '    <a class="btn dropdown-toggle" bind="class:btn_cls" data-toggle="dropdown" href="#">'+
             '        <span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length,class:pullright">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }"></a></li>'+
             '     </ul>'+
             '</div>'
             }
+            //在.btn-group 的元素上添加dropup类 ,可以向上展出菜单
+            //在.dropdown-menu的元素上添加pull-right类可以向右对齐
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
             
             this.VM =  $.ViewModel( data );
