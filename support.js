@@ -52,8 +52,9 @@ define("support", function(){
         //http://w3help.org/zh-cn/causes/RD1002
         //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
         keepSize: true,
-        //getComputedStyle API是否能支持将margin的百分比原始值自动转换为像素值
-        cssPercentedMargin: true
+        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
+        pixelPosition: true,
+        transition: false
     };
     //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
     input.checked = true;
@@ -80,6 +81,20 @@ define("support", function(){
         table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
     }catch(e){ };
+    var endNames = {
+        'WebkitTransition' : 'webkitTransitionEnd',
+        'MozTransition'    : 'transitionend' ,
+        'OTransition'      : 'oTransitionEnd otransitionend' ,
+        'transition'       : 'transitionend'
+    }
+    for (var name in endNames){
+        if (div.style[name] !== undefined) {
+            support.transition  = {
+                end: endNames[name]
+            }
+            break
+        }
+    }
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
@@ -96,6 +111,10 @@ define("support", function(){
         var ib = '<div style="height:20px;display:inline-block"></div>';
         div.innerHTML = ib + ib;//div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
         support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
+        if( window.getComputedStyle ) {
+            div.style.top = "1%";
+            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
+        }
         div.style.cssText = "width:20px;"
         div.innerHTML = "<div style='width:40px;'></div>";
         support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
@@ -110,15 +129,10 @@ define("support", function(){
         }
         div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
         support.boxModel = div.offsetWidth === 20;
-        if( window.getComputedStyle ) {
-            div.style.marginTop = "1%";//检测是否能转换百分比的margin值
-            support.cssPercentedMargin = ( window.getComputedStyle( div, null ) || {
-                marginTop: 0
-            } ).marginTop !== "1%";
-        }
         body.removeChild( div );
         div =  null;
     });
+    
     return support;
 });
 /**
