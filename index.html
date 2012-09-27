@@ -9,9 +9,12 @@
         <style>
 
         </style>
+  
         <script>
             $.require("ready,./more/button",function(){
-                new $.ui.Button();
+                new $.ui.Button({
+                    cls:"btn-danger"
+                });
                  
                 new $.ui.Button({
                     type:"buttons-checkbox",

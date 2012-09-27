@@ -23,6 +23,8 @@ define('button',[ '$css',"./avalon" ], function(){
             }
             this.setOptions ("data", defaults, opts );
             var data = this.data;
+            this.preRender = data.preRender || $.noop
+            delete data.preRender
             data.tag = data.tag.toLowerCase()
             if(!/^(buttons-checkbox|button|buttons-radio)$/.test(data.type)){
                 data.type = "button"
@@ -60,8 +62,7 @@ define('button',[ '$css',"./avalon" ], function(){
             }
             tmpl =  tmpl.replace(/\$tag/g, data.tag);
             this.tmpl =  tmpl.replace(/\$text/g, data.tag == "input"? "value" : "text");
-            if(typeof this.preRender ==="function" )
-                this.preRender();
+            this.preRender();
             //插入DOM并绑定数据
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
             this.VM =  $.ViewModel( data );

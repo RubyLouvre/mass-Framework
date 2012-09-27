@@ -29,6 +29,8 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                 el.cls = el.cls || "";
                 el.href = el.href || "#";
             });
+            this.preRender = data.preRender || $.noop
+            delete data.preRender
             this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
             '<div class="btn-group">'+
             '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
@@ -54,8 +56,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             }
             //在.btn-group 的元素上添加dropup类 ,可以向上展出菜单
             //在.dropdown-menu的元素上添加pull-right类可以向右对齐
-            if(typeof this.preRender ==="function" )
-                this.preRender();
+            this.preRender();
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
             //插入DOM并绑定数据
             this.VM =  $.ViewModel( data );
