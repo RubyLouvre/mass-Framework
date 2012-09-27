@@ -60,10 +60,11 @@ define('button',[ '$css',"./avalon" ], function(){
             }
             tmpl =  tmpl.replace(/\$tag/g, data.tag);
             this.tmpl =  tmpl.replace(/\$text/g, data.tag == "input"? "value" : "text");
+            if(typeof this.preRender ==="function" )
+                this.preRender();
+            //插入DOM并绑定数据
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
-            
             this.VM =  $.ViewModel( data );
-
             $.View(this.VM, ui[0]);
         }
     })

@@ -54,11 +54,13 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             }
             //在.btn-group 的元素上添加dropup类 ,可以向上展出菜单
             //在.dropdown-menu的元素上添加pull-right类可以向右对齐
+            if(typeof this.preRender ==="function" )
+                this.preRender();
             var ui = this.ui = $(this.tmpl).appendTo( data.parent )
-            
+            //插入DOM并绑定数据
             this.VM =  $.ViewModel( data );
-
             $.View(this.VM, ui[0]);
+            //绑定独立的事件
             var menu = ui.find(".dropdown-menu")
             //点击按钮时显示下拉框
             ui.on("click",function(){
@@ -67,7 +69,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                 //要求open加在与btn-group类的同一元素上
                 ui.toggleClass("open");
                 if(ui.hasClass("open")){
-                    menu.focus()
+                    menu.focus();
                 }
                 return false;
             });
