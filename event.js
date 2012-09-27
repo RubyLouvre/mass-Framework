@@ -555,4 +555,12 @@ Firefox6 - Firefox10 (仅未实现stopImmediatePropagation)
 Firefox11(终于实现了stopImmediatePropagation)
 isTrusted 表明当前事件是否是由用户行为触发(比如说真实的鼠标点击触发一个click事件),
 还是由一个脚本生成的(使用事件构造方法,比如event.initEvent)
+//不要把事件写在标签内
+http://www.cnblogs.com/_franky/archive/2010/07/20/1781513.html
+和 submit 事件的另类是一样的。
+submit 挺有意思的，不知道有人研究过没。我那天想了想，感觉也是历史原因使然——和别的事件不一样，执行 xxx 方法触发 xxx 事件，执行 submit 方法后是不会触发 submit 事件的，submit 事件只能由用户的行为触发。
+所有浏览器都没这么做。原因是太多人在 submit 事件里做表单验证，通过了就调用 form.submit() 方法，而不是没通过调用 e.preventDefault() 什么的。
+
+如果调用 submit 方法再触发一次 submit 事件的话，就进入死循环了……
+
      */
