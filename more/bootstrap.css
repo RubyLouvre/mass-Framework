@@ -2970,10 +2970,10 @@ table [class*=span],
 
 .fade {
   opacity: 0;
-  -webkit-transition: opacity 0.15s linear;
-     -moz-transition: opacity 0.15s linear;
-       -o-transition: opacity 0.15s linear;
-          transition: opacity 0.15s linear;
+  -webkit-transition: opacity 0.45s linear;
+     -moz-transition: opacity 0.45s linear;
+       -o-transition: opacity 0.45s linear;
+          transition: opacity 0.45s linear;
 }
 
 .fade.in {

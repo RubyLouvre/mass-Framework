@@ -9,29 +9,32 @@
         <style>
 
         </style>
-  
-        <script>
-            $.require("ready,./more/button",function(){
-                new $.ui.Button({
-                    cls:"btn-danger"
-                });
-                 
-                new $.ui.Button({
-                    type:"buttons-checkbox",
-                    btns:["左","中","右"]
-                })
-                new $.ui.Button({
-                    type:"buttons-radio",
-                    btns:["左","中","右"]
-                })
-            })
 
+        <script>
+
+            $.require("ready,./more/alert", function(){
+                new $.ui.Alert('<a href="javascript:void(0);">有 3 条新微博，点击查看</a>',"alert-info");
+                new $.ui.Alert("<strong>警告！</strong> 不要拿法律当挡箭牌。");
+                var ui = new $.ui.Alert({
+
+                    block:1,
+                    head:"微博控们注意了！",
+                    text:"<p>出游微博晒幸福时，最好不要泄露出游时间、人数，别泄露住址，谨慎晒出游照片，"+
+                        "以免让贼判断出你家是否有人。因为小偷说不定会盯上你的微博，“随着微博的发展，贼也很时尚啊！”</p>"+
+                        '<p><a class="btn btn-danger" href="#">接受建议</a> <a class="btn" href="#">不当回事</a></p>'
+                });
+                setTimeout(function(){
+                    ui.close(function(e){
+                        alert(e.data.cls)
+                    })
+                },2000)
+            })
         </script>
 
     </head>
     <body>
 
-
+        <div class="btn-toolbar"></div>
 
     </body>
 </html>

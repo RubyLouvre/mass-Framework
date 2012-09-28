@@ -1,8 +1,9 @@
 define('dropdown',[ '$css',"./avalon" ], function(){
-    $.ui = $.ui||{}
+    $.log("已加载dropdown模块",7)
+    $.ui = $.ui || {};
     var defaults = {
         //按钮内的文字
-        btn_text: "action",
+        text: "action",
         //可供换肤用的类名btn-primary btn-danger btn-warning btn-success btn-info btn-inverse
         //可供调整大小的类名btn-mini btn-small btn-large
         cls: "",
@@ -12,7 +13,6 @@ define('dropdown',[ '$css',"./avalon" ], function(){
     }
 
     $.ui.DropDown  = $.factory({
-        inherit: $.Flow,
         init: function(opts) {
             opts =  opts || [];
             this.setOptions ("data", defaults, opts );
@@ -34,7 +34,7 @@ define('dropdown',[ '$css',"./avalon" ], function(){
             this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
             '<div class="btn-group">'+
             '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
-            '        <span bind="text:btn_text">Action</span><span class="caret"></span>'+
+            '        <span bind="text:text">Action</span><span class="caret"></span>'+
             '    </a>'+
             '    <ul class="dropdown-menu" bind="foreach:menu,display:menu.length,class:menucls">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }" ></a></li>'+
@@ -44,12 +44,12 @@ define('dropdown',[ '$css',"./avalon" ], function(){
                 this.tmpl  = //不要使用换行符,这在压缩时很容易出现问题
                 '<div class="btn-group">'+
             '    <a class="btn" bind="class:cls"  href="#">'+
-            '        <span bind="text:btn_text">Action</span>'+
+            '        <span bind="text:text">Action</span>'+
             '    </a>'+
             '    <a class="btn dropdown-toggle" bind="class:cls" data-toggle="dropdown" href="#">'+
             '        <span class="caret"></span>'+
             '    </a>'+
-            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length,class:pullright">'+
+            '    <ul class="dropdown-menu" bind="foreach:menu, display:menu.length,class:menucls">'+
             '        <li bind="class:cls"><a bind="text:text,attr:{ href:href }"></a></li>'+
             '     </ul>'+
             '</div>'
@@ -149,11 +149,4 @@ define('dropdown',[ '$css',"./avalon" ], function(){
     })
 
 })
-    /*
-     *
-     * 作为一种十天搞出来的语言，能获取如此地位，javascript已经算是非常了不起，但BUG依旧是免不了。而且微软与当时的网景斗气，
-javascript还没有成长起来时，就岔出一个分支JScript，在这个分支在IE6的强势地位后，竟然哗宾夺主肆虐了十多年，这景况真是语言界的奇葩啊，也正因为如此，
-语言自身的发展一直滞后，这任务竟然成为了框架类库的绝活了。
-     *
-     */
-
+   

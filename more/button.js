@@ -1,5 +1,5 @@
 define('button',[ '$css',"./avalon" ], function(){
-    $.log("button...",7)
+    $.log("已加载button",7)
     $.ui = $.ui || {};
     var defaults ={
         parent:"body",
@@ -10,7 +10,6 @@ define('button',[ '$css',"./avalon" ], function(){
         btns: []
     }
     $.ui.Button  = $.factory({
-        inherit: $.Flow,
         init: function(opts){
             var _type
             if(typeof  opts == "string"){
@@ -38,7 +37,7 @@ define('button',[ '$css',"./avalon" ], function(){
                     };
                 }
                 el.text = el.text || "";
-                el.cls = el.cls || defaults.cls
+                el.cls = el.cls || data.cls || defaults.cls
             });
 
             var tmpl = '<$tag class="btn" data-toggle="button" bind="$text:text,class:cls">单独开关</$tag>';
