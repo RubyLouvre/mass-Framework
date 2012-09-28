@@ -2,14 +2,14 @@ define('dropdown',[ '$css',"./avalon" ], function(){
     $.log("已加载dropdown模块",7)
     $.ui = $.ui || {};
     var defaults = {
+        parent: "body",
         //按钮内的文字
         text: "action",
         //可供换肤用的类名btn-primary btn-danger btn-warning btn-success btn-info btn-inverse
         //可供调整大小的类名btn-mini btn-small btn-large
         cls: "",
         menucls: "", //使用pull-left pull-right让下拉框相对按钮组对齐
-        menu: [],
-        parent: "body"
+        menu: []
     }
 
     $.ui.DropDown  = $.factory({
