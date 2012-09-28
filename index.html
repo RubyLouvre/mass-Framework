@@ -12,17 +12,8 @@
 
         <script>
 
-            $.require("ready,./more/alert", function(){
-                new $.ui.Alert('<a href="javascript:void(0);">有 3 条新微博，点击查看</a>',"alert-info");
-                new $.ui.Alert("<strong>警告！</strong> 不要拿法律当挡箭牌。");
-                var ui = new $.ui.Alert({
-
-                    block:1,
-                    head:"微博控们注意了！",
-                    text:"<p>出游微博晒幸福时，最好不要泄露出游时间、人数，别泄露住址，谨慎晒出游照片，"+
-                        "以免让贼判断出你家是否有人。因为小偷说不定会盯上你的微博，“随着微博的发展，贼也很时尚啊！”</p>"+
-                        '<p><a class="btn btn-danger" href="#">接受建议</a> <a class="btn" href="#">不当回事</a></p>'
-                });
+            $.require("ready,./more/tooltip", function(){
+               
    
             })
         </script>
@@ -30,8 +21,8 @@
     </head>
     <body>
         <p class="muted" style="margin-bottom: 0;">
-            “这是我的第一次英文访问,很抱歉它不够严谨,但是我不得不这么做,不只因为采访时间限制，更因为我面对的是卡梅隆，这个人喜爱挑战、从无畏惧，他也希望别人如此，他可以原谅不完美，但他无法接受一个人不去努力接近自己的极限。”
-            ——<a href="#"  data-tooltip="柴静始终站在离新闻最近的地方，她以她的犀利和敏锐、坚定与坚持，最终历练成为一名优秀的新闻工作者。 ">柴静</a>《看见》专访<a href="#" rel="tooltip" data-original-title="1954年8月16日生于加拿大的著名电影导演，擅长拍摄动作片以及科幻电影。">卡梅隆</a>
+	      “这是我的第一次英文访问,很抱歉它不够严谨,但是我不得不这么做,不只因为采访时间限制，更因为我面对的是卡梅隆，这个人喜爱挑战、从无畏惧，他也希望别人如此，他可以原谅不完美，但他无法接受一个人不去努力接近自己的极限。”
+	      ——<a href="#" class="tooltip-wrap" title="柴静始终站在离新闻最近的地方，她以她的犀利和敏锐、坚定与坚持，最终历练成为一名优秀的新闻工作者。 ">柴静</a>《看见》专访<a href="#" class="tooltip-wrap" title="1954年8月16日生于加拿大的著名电影导演，擅长拍摄动作片以及科幻电影。">卡梅隆</a>
         </p>
         <div class="btn-toolbar"></div>
 

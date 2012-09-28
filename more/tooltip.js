@@ -15,10 +15,96 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             opts =  opts || [];
             this.setOptions ("data", defaults, opts );
             var data = this.data;
+            var parent = this.parent = $(parent)
+            var placement = data.placement
+            this.tmpl = '<div class="tooltip" bind="class:cls"><div class="tooltip-arrow"></div><div class="tooltip-inner" bind="html:text"></div></div>'
+            this.preRender = data.preRender || $.noop;
+            data.delay = data.delay || 0;
+            delete data.preRender
+            var ui = this.ui = $(this.tmpl).appendTo( data.parent );
+            if (data.animation) {
+                placement += "fade"
+            }
+            $.log(data)
+            this.VM =  $.ViewModel( {
+                cls: placement,  //top | bottom | left | right | in top
+                text: data.text
+            } );
+            $.View(this.VM, ui[0]);
+            var inside = /in/.test( placement)
+
+            ui.remove().css({
+                top: 0,
+                text: data.text,
+                left: 0,
+                display: 'block'
+            })
+            .appendTo(inside ? parent : document.body)
+            $.log(ui)
+            $.log(placement)
+            var pos = this.getPosition(inside),
+
+            actualWidth = ui[0].offsetWidth,
+            actualHeight = ui[0].offsetHeight,
+            tp
+
+            switch (inside ? placement.split(' ')[1] : placement) {
+                case 'bottom':
+                    tp = {
+                        top: pos.top + pos.height,
+                        left: pos.left + pos.width / 2 - actualWidth / 2
+                    }
+                    break
+                case 'top':
+                    tp = {
+                        top: pos.top - actualHeight,
+                        left: pos.left + pos.width / 2 - actualWidth / 2
+                    }
+                    break
+                case 'left':
+                    tp = {
+                        top: pos.top + pos.height / 2 - actualHeight / 2,
+                        left: pos.left - actualWidth
+                    }
+                    break
+                case 'right':
+                    tp = {
+                        top: pos.top + pos.height / 2 - actualHeight / 2,
+                        left: pos.left + pos.width
+                    }
+                    break
+            }
+
+            ui.css(tp)
+        },
+        show: function(){
+            
+        },
+        hide: function(){
+            this.parent.attr("title", this.data.text );
+            var ui = this.ui
+            if($.support.transition && this.ui.hasClass('fade')){
+                ui.one($.support.transition.end, function () {
+                    ui.remove()
+                });
+                ui.removeClass('in')
+            } else{
+                ui.remove()
+            }
+        },
+        toggel: function(){},
+        getPosition: function (inside) {
+            return $.Object.merge({}, (inside ? {
+                top: 0,
+                left: 0
+            } : this.ui.offset()), {
+                width: this.ui[0].offsetWidth ,
+                height: this.ui[0].offsetHeight
+            })
         }
     })
     
-    $(document).on("click mouseenter",".tooltip", function(){
+    $(document).on("click mouseenter",".tooltip-wrap[title]", function(){
         var el = $(this)
         var tooltip = el.data("tooltip");
         if(!tooltip){
@@ -26,10 +112,12 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             el.removeAttr("title");
             var opts = {
                 text: title,
-                placement: el.data("placement") || "top",
-                trigger: el.data("trigger") || "hover",
-                delay: Number(el.data("delay")) || 0
+                parent: this,
+                placement: el.data("placement") ,
+                trigger: el.data("trigger"),
+                delay: Number(el.data("delay")) 
             }
+            $.log(opts)
             tooltip = new $.ui.Tooltip(opts)
             el.data("tooltip", tooltip)
         }
