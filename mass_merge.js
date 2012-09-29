@@ -554,7 +554,7 @@
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
 
-
+    
     function install( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
@@ -1901,6 +1901,9 @@ define("class", ["$lang"], function(){
             proto.setOptions = function(){
                 var first = arguments[0];
                 if( typeof first === "string" ){
+                    if(first == "data"){
+                        $.log(this)
+                    }
                     first =  this[first] || (this[first] = {});
                     [].splice.call( arguments, 0, 1, first );
                 }else{
@@ -3266,7 +3269,7 @@ define("data", ["$lang"], function(){
 //==================================================
 // 节点操作模块
 //==================================================
-define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang,support ){
+define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang, support ){
     $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
