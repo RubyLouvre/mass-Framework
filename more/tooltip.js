@@ -77,22 +77,20 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             }, this.data.delay.hide)
         },
         show: function(){
-            var el = this.ui[0], tp
            
-            var inside =  /in/.test(el.className)
+            var el = this.ui[0], tp
             this.ui.css({
                 top: 0,
                 left: 0,
                 text: this.data.text,
                 display: 'block'
             })
-            .appendTo( this.parent )
-            var position = this.data.position
-            var pos = this.getPosition(inside)
+            .appendTo( this.parent );
+            this.parent[0].removeAttribute("title")
+            var pos = this.getPosition()
             var actualWidth = el.offsetWidth
             var actualHeight = el.offsetHeight
-          
-            switch (inside ? position.split(' ')[1] : position) {
+            switch (this.data.position) {
                 case 'bottom':
                     tp = {
                         top: pos.top + pos.height,
@@ -118,9 +116,6 @@ define('tooltip',[ '$css',"./avalon" ], function(){
                     }
                     break
             }
-            $.log(el)
-            $.log(position)
-            $.log(tp)
             this.ui.css(tp).addClass("in")
         },
         hide: function(){
@@ -138,11 +133,8 @@ define('tooltip',[ '$css',"./avalon" ], function(){
         toggel: function(){
             this[ this.ui.hasClass('in')  ? 'hide' : 'show']()
         },
-        getPosition: function (inside) {
-            return $.Object.merge({}, (inside ? {
-                top: 0,
-                left: 0
-            } : this.parent.offset()), {
+        getPosition: function () {
+            return $.Object.merge({},  this.parent.offset(), {
                 width: this.parent[0].offsetWidth ,
                 height: this.parent[0].offsetHeight
             })
@@ -153,10 +145,9 @@ define('tooltip',[ '$css',"./avalon" ], function(){
         var el = $(this)
         var tooltip = el.data("tooltip");
         if(!tooltip){
-            var title = this.title
-            el.removeAttr("title");
+
             var opts = {
-                text: title,
+                text: this.title,
                 parent: this,
                 position: el.data("position") ,
                 trigger: el.data("trigger"),
@@ -172,7 +163,8 @@ define('tooltip',[ '$css',"./avalon" ], function(){
 
 
 
-/* 
+/*
+ * $.fn.removeAttr 有问题
 http://www.cnblogs.com/pansly/archive/2011/12/18/2292743.html
 http://www.cnblogs.com/zr824946511/archive/2010/02/25/1673520.html
  */
