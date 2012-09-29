@@ -18,6 +18,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             var position = data.position;
             this.tmpl = data.tmpl || '<div class="tooltip" bind="class:cls"><div class="tooltip-arrow"></div><div class="tooltip-inner" bind="html:text"></div></div>'
             this.preRender = data.preRender || $.noop;
+            $.log(data)
             var parent = this.parent = $(data.parent);
             data.delay = data.delay || 0;
             if (data.delay && typeof data.delay == 'number') {
@@ -41,7 +42,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             $.View(this.VM, ui[0]);
             var trigger = data.trigger;
             var self = this;
-            $.log("init tooltip")
+          
             if (trigger == 'click') {
                 parent.click( function(){
                     self.toggle();
@@ -50,7 +51,6 @@ define('tooltip',[ '$css',"./avalon" ], function(){
                 var eventIn = trigger == 'hover' ? 'mouseenter' : 'focus';
                 var eventOut = trigger == 'hover' ? 'mouseleave' : 'blur';
                 parent.on(eventIn, function(){
-                    $.log("mouseenter tooltip")
                     self.enter()
                 });
                 parent.on(eventOut, function(){
@@ -61,7 +61,6 @@ define('tooltip',[ '$css',"./avalon" ], function(){
         },
         enter: function () {
             var self = this
-            $.log("xxxxxxxxxxxxx")
             if (!this.data.delay.show)
                 return this.show()
             clearTimeout(this.timeout)
