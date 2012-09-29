@@ -16,7 +16,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             this.setOptions ("data", defaults, opts );
             var data = this.data;
             var position = data.position;
-            this.tmpl = '<div class="tooltip" bind="class:cls"><div class="tooltip-arrow"></div><div class="tooltip-inner" bind="html:text"></div></div>'
+            this.tmpl = data.tmpl || '<div class="tooltip" bind="class:cls"><div class="tooltip-arrow"></div><div class="tooltip-inner" bind="html:text"></div></div>'
             this.preRender = data.preRender || $.noop;
             var parent = this.parent = $(data.parent);
             data.delay = data.delay || 0;
@@ -27,6 +27,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
                 }
             }
             delete data.preRender;
+            delete data.tmpl;
             this.preRender();
             var ui = this.ui = $(this.tmpl).appendTo( data.parent );
          
