@@ -41,14 +41,16 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             $.View(this.VM, ui[0]);
             var trigger = data.trigger;
             var self = this;
+            $.log("init tooltip")
             if (trigger == 'click') {
                 parent.click( function(){
-                    ui.toggle();
+                    self.toggle();
                 });
             } else if (trigger != 'manual') {
                 var eventIn = trigger == 'hover' ? 'mouseenter' : 'focus';
                 var eventOut = trigger == 'hover' ? 'mouseleave' : 'blur';
                 parent.on(eventIn, function(){
+                    $.log("mouseenter tooltip")
                     self.enter()
                 });
                 parent.on(eventOut, function(){
@@ -59,6 +61,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
         },
         enter: function () {
             var self = this
+            $.log("xxxxxxxxxxxxx")
             if (!this.data.delay.show)
                 return this.show()
             clearTimeout(this.timeout)
@@ -78,19 +81,20 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             }, this.data.delay.hide)
         },
         show: function(){
-           
             var el = this.ui[0], tp
+            var inside = /in/.test(el.className)
             this.ui.css({
                 top: 0,
                 left: 0,
                 text: this.data.text,
                 display: 'block'
             })
-            .appendTo( this.parent );
+            .appendTo( inside ? this.parent : "body");
             this.parent[0].removeAttribute("title")
-            var pos = this.getPosition()
+            var pos = this.getPosition(inside)
             var actualWidth = el.offsetWidth
             var actualHeight = el.offsetHeight
+
             switch (this.data.position) {
                 case 'bottom':
                     tp = {
@@ -120,29 +124,32 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             this.ui.css(tp).addClass("in")
         },
         hide: function(){
-            this.parent.attr("title", this.data.text );
-            var ui = this.ui
+            var self = this,  ui = this.ui
+            function callback(){
+                self.parent.attr("title", self.data.text );
+                ui.removeClass("in").remove();  
+            }
             if($.support.transition && this.ui.hasClass('fade')){
-                ui.one($.support.transition.end, function () {
-                    ui.remove()
-                });
-                ui.removeClass('in')
+                ui.one($.support.transition.end, callback);
             } else{
-                ui.remove()
+                callback();
             }
         },
         toggel: function(){
             this[ this.ui.hasClass('in')  ? 'hide' : 'show']()
         },
-        getPosition: function () {
-            return $.Object.merge({},  this.parent.offset(), {
+        getPosition: function (inside) {
+            return $.Object.merge({},  (inside ? {
+                top: 0, 
+                left: 0
+            } : this.parent.offset()), {
                 width: this.parent[0].offsetWidth ,
                 height: this.parent[0].offsetHeight
             })
         }
     })
     
-    $(document).on("click mouseenter",".tooltip-wrap[title]", function(){
+    $(document).on("click mouseenter",".tooltip-parent[title]", function(){
         var el = $(this)
         var tooltip = el.data("tooltip");
         if(!tooltip){
@@ -150,6 +157,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             var opts = {
                 text: this.title,
                 parent: this,
+                animation: el.data("animation") ,
                 position: el.data("position") ,
                 trigger: el.data("trigger"),
                 delay: Number(el.data("delay")) 
