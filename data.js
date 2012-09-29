@@ -68,7 +68,7 @@ define("data", ["$lang"], function(){
                 value = target.getAttribute( attr );
             }
             if ( typeof value === "string") {//转换 /^(?:\{.*\}|null|false|true|NaN)$/
-                if(/^(?:\{.*\}|null|false|true|NaN)$/.test(value) || +value + "" === value){
+                if(/^(?:\{.*\}|\[.*\]|null|false|true|NaN)$/.test(value) || +value + "" === value){
                     _eval = true
                 }
                 try {

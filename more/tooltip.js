@@ -1,6 +1,7 @@
 define('tooltip',[ '$css',"./avalon" ], function(){
     $.log("已加载dropdown模块",7)
     $.ui = $.ui || {};
+    //https://github.com/jaz303/tipsy/blob/master/src/javascripts/jquery.tipsy.js
     //有两个方式创建tooltip，一种直接定义在标签里，当点击或滑过该元素时，发现有tooltip就创建它
     //另一种手动创建，parent
     var defaults = {
@@ -18,7 +19,6 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             var position = data.position;
             this.tmpl = data.tmpl || '<div class="tooltip" bind="class:cls"><div class="tooltip-arrow"></div><div class="tooltip-inner" bind="html:text"></div></div>'
             this.preRender = data.preRender || $.noop;
-            $.log(data)
             var parent = this.parent = $(data.parent);
             data.delay = data.delay || 0;
             if (data.delay && typeof data.delay == 'number') {
@@ -40,26 +40,18 @@ define('tooltip',[ '$css',"./avalon" ], function(){
                 text: data.text
             } );
             $.View(this.VM, ui[0]);
-            var trigger = data.trigger;
-            var self = this;
-          
-            if (trigger == 'click') {
-                parent.click( function(){
-                    self.toggle();
-                });
-            } else if (trigger != 'manual') {
-                var eventIn = trigger == 'hover' ? 'mouseenter' : 'focus';
-                var eventOut = trigger == 'hover' ? 'mouseleave' : 'blur';
-                parent.on(eventIn, function(){
-                    self.enter()
-                });
-                parent.on(eventOut, function(){
+
+            if (data.trigger == 'hover') {
+                var self = this;
+                parent.bind("mouseleave", function(){
                     self.leave()
                 });
             }
+
             ui.remove();
         },
         enter: function () {
+            return
             var self = this
             if (!this.data.delay.show)
                 return this.show()
@@ -81,7 +73,8 @@ define('tooltip',[ '$css',"./avalon" ], function(){
         },
         show: function(){
             var el = this.ui[0], tp
-            var inside = /in/.test(el.className)
+            var inside = false;// /in/.test(el.className)
+            $.log(el.className)
             this.ui.css({
                 top: 0,
                 left: 0,
@@ -89,7 +82,7 @@ define('tooltip',[ '$css',"./avalon" ], function(){
                 display: 'block'
             })
             .appendTo( inside ? this.parent : "body");
-            this.parent[0].removeAttribute("title")
+            //    this.parent[0].removeAttribute("title")
             var pos = this.getPosition(inside)
             var actualWidth = el.offsetWidth
             var actualHeight = el.offsetHeight
@@ -120,13 +113,14 @@ define('tooltip',[ '$css',"./avalon" ], function(){
                     }
                     break
             }
+            $.log(tp.top+"  "+tp.left)
             this.ui.css(tp).addClass("in")
         },
         hide: function(){
-            var self = this,  ui = this.ui
+            var ui = this.ui
+            ui.removeClass("in")
             function callback(){
-                self.parent.attr("title", self.data.text );
-                ui.removeClass("in").remove();  
+                ui.remove();  
             }
             if($.support.transition && this.ui.hasClass('fade')){
                 ui.one($.support.transition.end, callback);
@@ -148,13 +142,14 @@ define('tooltip',[ '$css',"./avalon" ], function(){
         }
     })
     
-    $(document).on("click mouseenter",".tooltip-parent[title]", function(){
+    $(document).on("click mouseenter",".tooltip-parent[title]", function(e){
         var el = $(this)
         var tooltip = el.data("tooltip");
         if(!tooltip){
-
+            var text = this.title;
+            this.title = "";
             var opts = {
-                text: this.title,
+                text: text,
                 parent: this,
                 animation: el.data("animation") ,
                 position: el.data("position") ,
@@ -164,6 +159,13 @@ define('tooltip',[ '$css',"./avalon" ], function(){
             tooltip = new $.ui.Tooltip(opts)
             el.data("tooltip", tooltip)
         }
+        var trigger = tooltip.data.trigger;
+        if ( e.type == trigger) { //click
+            tooltip.toggle();
+        } else if(trigger == "hover" && e.type == "mouseenter" ){
+            tooltip.enter()
+        }
+
     })
     
     
