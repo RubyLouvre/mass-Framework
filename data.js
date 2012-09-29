@@ -3,7 +3,7 @@
 //==================================================
 define("data", ["$lang"], function(){
     $.log("已加载data模块",7);
-    var remitter = /object|function/, rtype = /[^38]/
+    var remitter = /object|function/, rtype = /[^38]/;
     function validate(target){
         return target && remitter.test(typeof target) && rtype.test(target.nodeType)
     }
@@ -60,16 +60,19 @@ define("data", ["$lang"], function(){
             return $.data(target, name, data, true)
         },
         parseData: function(target, name, table, value){
-            var data, key = $.String.camelize(name);
+            var data, key = $.String.camelize(name),_eval
             if(table && (key in table))
                 return table[key];
             if(arguments.length != 4){
                 var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
                 value = target.getAttribute( attr );
             }
-            if ( typeof value === "string") {//转换
+            if ( typeof value === "string") {//转换 /^(?:\{.*\}|null|false|true|NaN)$/
+                if(/^(?:\{.*\}|null|false|true|NaN)$/.test(value) || +value + "" === value){
+                    _eval = true
+                }
                 try {
-                    data = eval("0,"+ value );
+                    data = _eval ?  eval("0,"+ value ) : value
                 } catch( e ) {
                     data = value
                 }
@@ -146,4 +149,5 @@ define("data", ["$lang"], function(){
 2012.4.5 修正mergeData BUG, 让$.data能获取HTML5 data-*
 2012.5.2 $._db -> $["@data]
 2012.5.21 抽象出validate私有方法
+2012.9.29 对parseData的数据进行严格的验证后才转换
 */

@@ -1901,9 +1901,6 @@ define("class", ["$lang"], function(){
             proto.setOptions = function(){
                 var first = arguments[0];
                 if( typeof first === "string" ){
-                    if(first == "data"){
-                        $.log(this)
-                    }
                     first =  this[first] || (this[first] = {});
                     [].splice.call( arguments, 0, 1, first );
                 }else{
@@ -3129,7 +3126,7 @@ define("query", function(){
 //==================================================
 define("data", ["$lang"], function(){
     $.log("已加载data模块",7);
-    var remitter = /object|function/, rtype = /[^38]/
+    var remitter = /object|function/, rtype = /[^38]/;
     function validate(target){
         return target && remitter.test(typeof target) && rtype.test(target.nodeType)
     }
@@ -3186,16 +3183,19 @@ define("data", ["$lang"], function(){
             return $.data(target, name, data, true)
         },
         parseData: function(target, name, table, value){
-            var data, key = $.String.camelize(name);
+            var data, key = $.String.camelize(name),_eval
             if(table && (key in table))
                 return table[key];
             if(arguments.length != 4){
                 var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
                 value = target.getAttribute( attr );
             }
-            if ( typeof value === "string") {//转换
+            if ( typeof value === "string") {//转换 /^(?:\{.*\}|null|false|true|NaN)$/
+                if(/^(?:\{.*\}|null|false|true|NaN)$/.test(value) || +value + "" === value){
+                    _eval = true
+                }
                 try {
-                    data = eval("0,"+ value );
+                    data = _eval ?  eval("0,"+ value ) : value
                 } catch( e ) {
                     data = value
                 }
