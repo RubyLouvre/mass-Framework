@@ -59,7 +59,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
                 } while ( cur && !transfer.isPropagationStopped );
 
-                if ( !transfer.isDefaultPrevented ) {//如果用户没有阻止普通行为，defaultPrevented
+                if ( !transfer.defaultPrevented ) {//如果用户没有阻止普通行为，defaultPrevented
                     if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
                         if ( ontype && this[ type ] && ((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) &&  !this.eval ) {
                             var inline = this[ ontype ];
