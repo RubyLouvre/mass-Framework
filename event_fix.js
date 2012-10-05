@@ -57,7 +57,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                     cur = cur.parentNode ||
                     cur.ownerDocument ||
                     cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
-                } while ( cur && !transfer.isPropagationStopped );
+                } while ( cur && !transfer.propagationStopped );
 
                 if ( !transfer.defaultPrevented ) {//如果用户没有阻止普通行为，defaultPrevented
                     if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
