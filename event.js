@@ -146,6 +146,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var ctarget = hash.currentTarget//原来绑定事件的对象
                 var more = event.more || {};
                 //防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
+                if(facade.type == type){
+                    return
+                }
                 if(  more.origType && more.origType !== type ){
                     return
                 }
@@ -164,8 +167,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         handlers.push(quark)
                     }
                 }
-
-              
                 //DOM树的每一个元素都有可以作为代理节点
                 if ( lives.length && !(event.button && type === "click") ) {
                     for ( var k = 0, cur; (cur = lives[k++]) ; ) {
@@ -185,7 +186,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                     }
                 }
-
                 for ( var i = 0, quark; quark = handlers[i++]; ) {
                     if ( ( event.type == quark.origType ) &&
                         (!event.rns || event.rns.test( quark.ns )) ) {
@@ -207,7 +207,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                     }
                 }
-               
 
             }
             fn.uuid = hash.uuid;
@@ -314,38 +313,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             if( !events.length ){
                 $.removeData( target, "events") ;
             }
-        },
-        match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
-            var expr  = quark.live;
-            var matcher = expr.input ? quickIs : $.match;
-            for ( ; cur != parent; cur = cur.parentNode || parent ) {
-                if(matcher(cur, expr)){
-                    return true
-                }
-            }
-            return false;
         }
     })
-    var rquickIs = /^(\w*)(?:#([\w\-]+))?(?:\.([\w\-]+))?$/;
     var rmapper = /(\w+)_(\w+)/g;
-    function quickParse( selector ) {
-        var quick = rquickIs.exec( selector );
-        if ( quick ) {
-            //   0  1    2   3
-            // [ _, tag, id, class ]
-            quick[1] = ( quick[1] || "" ).toLowerCase();
-            quick[3] = quick[3] && new RegExp( "(?:^|\\s)" + quick[3] + "(?:\\s|$)" );
-        }
-        return quick || selector;//如果为null ,或许这是个复杂的表达式,交由选择器引擎去处理
-    }
-    function quickIs( elem, m ) {
-        var attrs = elem.attributes || {};
-        return (
-            (!m[1] || elem.nodeName.toLowerCase() === m[1]) &&
-            (!m[2] || (attrs.id || {}).value === m[2]) &&
-            (!m[3] || m[3].test( (attrs[ "class" ] || {}).value ))
-            );
-    }
     //以下是用户使用的API
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
@@ -450,7 +420,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     return this;
                 }
                 hash.times = hash.times > 0  ? hash.times : Infinity;
-            //    hash.live =  hash.live ? quickParse( hash.live ) : false
             }
             return this.each(function() {
                 facade[ mapper ]( this, hash );
