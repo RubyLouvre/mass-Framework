@@ -3,27 +3,140 @@
     <head>
         <title>SAW规范的模块加载例子 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="mass_merge.js" ></script>
+        <script src="mass.js" ></script>
         <link rel="stylesheet" href="more/bootstrap.css" />
         <link rel="stylesheet" href="more/bootstrap-responsive.css" type="text/css" />
         <style>
-
+            #gravity { width: 100%; margin: 5px 0; border-spacing: 5px; }
+            #gravity td { text-align: center; vertical-align: middle; padding: 5px 0; background-color: #d0d0d0; width: 33%; }
+            #gravity a { }
+            #gravity a:hover { color: #505050; background: none; }
+            #aaa{
+                width:200px;
+                height:100px;
+                background:red;
+            }
+            #example-3{
+                display:inline-block;
+                background:green;
+                height:40px;
+                width:100px;
+            }
         </style>
 
         <script>
 
-            $.require("ready,./more/tooltip", function(){
-     
-            })
+            $.require("ready,./more/tipsy", function(){
+                //  $('#example-1').tipsy();
+                /*
+                $("#aaa").mouseenter(function(){
+                    $.log("xxxxxxxxxxxxxxxxxxxxxx")
+                }).mouseleave(function(){
+                    $.log("yyyyyyyyyyyyyyyy")
+                })
+                 */
+
+
+                function addEvent(el, type, callback, phase ){
+                    if(el.dispatchEvent){//w3c方式优先
+                        el.addEventListener( type, callback, !!phase );
+                    }else {
+                        el.attachEvent( "on"+type, callback );
+                    }
+                    return callback;//返回callback方便卸载时用
+                }
+                function removeEvent(el, type, callback, phase ){
+                    if(el.dispatchEvent){//w3c方式优先
+                        el.removeEventListener( type, callback, !!phase );
+                    }else {
+                        el.detachEvent( "on"+type, callback );
+                    }
+                }
+                function fireEvent(el, type, args){
+                    args = args || {}
+                    if(el.dispatchEvent){//w3c方式优先
+                        var event = document.createEvent("HTMLEvents");
+                        event.initEvent(type, true, true );
+                    }else {
+                        var event = document.createEventObject();
+                    }
+                    for(var i in args)  if(args.hasOwnProperty(i)){
+                        event[i] = args[i]
+                    }
+                    if(el.dispatchEvent){
+                        el.dispatchEvent(event);
+                    }else{
+                        el.fireEvent('on'+type,event)
+                    }
+                }
+                var el = $("h2")[0];
+             
+                $("#field")[0].addEventListener("input", function(e){
+                    console.log(e.target.value)
+                })
+
+            });
+         
+          
+
         </script>
 
     </head>
     <body>
-        <p class="muted" style="margin-bottom: 0;">
-	      “这是我的第一次英文访问,很抱歉它不够严谨,但是我不得不这么做,不只因为采访时间限制，更因为我面对的是卡梅隆，这个人喜爱挑战、从无畏惧，他也希望别人如此，他可以原谅不完美，但他无法接受一个人不去努力接近自己的极限。”
-	      ——<a href="#"  class="tooltip-parent" title="柴静始终站在离新闻最近的地方，她以她的犀利和敏锐、坚定与坚持，最终历练成为一名优秀的新闻工作者。 ">柴静</a>《看见》专访<a href="#" data-position="bottom" class="tooltip-parent" title="1954年8月16日生于加拿大的著名电影导演，擅长拍摄动作片以及科幻电影。">卡梅隆</a>
-        </p>
-        <div class="btn-toolbar"></div>
+        <h2 class='first' id='overview' >Overview</h2>
+        <input id="field" />
+        <p>Tipsy is a jQuery plugin for creating a Facebook-like tooltips effect based on
+            an anchor tag's title attribute.</p>
 
+        <h2 id='examples'>Examples &amp; Usage</h2>
+        <h3>Basic</h3>
+
+        <p>By default, tooltips will appear centred underneath their anchor:</p>
+
+        <p>
+            <a id='example-1' href='#' title='Hello World'>Hover over me</a>
+        </p>
+
+        <div class='caption'>Basic example:</div>
+        <div class='code'><pre>$('#example-1').tipsy();</pre></div>
+
+        <h3>Gravities</h3>
+        <table id='gravity' cellspacing='5'>
+            <tr>
+                <td>
+                    <a id='north-west' href='#' title='This is an example of north-west gravity'>Northwest</a>
+                </td>
+                <td>
+                    <a id='north' href='#' title='This is an example of north gravity'>North</a>
+                </td>
+                <td>
+                    <a id='north-east' href='#' title='This is an example of north-east gravity'>Northeast</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a id='west' href='#' title='This is an example of west gravity'>West</a>
+                </td>
+                <td>&nbsp;</td>
+                <td>
+                    <a id='east' href='#' title='This is an example of east gravity'>East</a>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <a id='south-west' href='#' title='This is an example of south-west gravity'>Southwest</a>
+                </td>
+                <td>
+                    <a id='south' href='#' title='This is an example of south gravity'>South</a>
+                </td>
+                <td>
+                    <a id='south-east' href='#' title='This is an example of south-east gravity'>Southeast</a>
+                </td>
+            </tr>
+        </table>
+        <div id="aaa">
+
+        </div>
     </body>
 </html>
+
