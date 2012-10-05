@@ -58,7 +58,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             return "[object Event]"
         },
         preventDefault: function() {
-            this.isDefaultPrevented = true;
+            this.defaultPrevented = true;
             var e = this.originalEvent || {};
             if (e && e.preventDefault ) {
                 e.preventDefault();
@@ -114,7 +114,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                             target = window;
                         }
                         //此元素在此事件类型只绑定一个回调
-                        $.bind(target, forged.type, facade.curry( forged ), live);
+                        $.bind(target, forged.type, forged.handle, live);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -468,7 +468,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
             };
         });
     }
-    //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
+    //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
             var notice = 0, handler = function (event) {
@@ -508,7 +508,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 
     }catch(e){};
 })
-    /**
+/**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
 2011.9.17 事件发送器增加一个uniqueID属性
 2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
@@ -563,4 +563,46 @@ submit 挺有意思的，不知道有人研究过没。我那天想了想，感�
 
 如果调用 submit 方法再触发一次 submit 事件的话，就进入死循环了……
 
+http://heroicyang.com/blog/javascript-timers.html
+http://heroicyang.com/blog/javascript-event-loop.html
+http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
      */
+//addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+(function(win, doc){
+    if(win.addEventListener)return;		//No need to polyfill
+
+    function docHijack(p){
+        var old = doc[p];doc[p] = function(v){
+            return addListen(old(v))
+        }
+    }
+    function addEvent(on, fn, self){
+        return (self = this).attachEvent('on' + on, function(e){
+            e = e || win.event;
+            e.preventDefault  = e.preventDefault  || function(){
+                e.returnValue = false
+            }
+            e.stopPropagation = e.stopPropagation || function(){
+                e.cancelBubble = true
+            }
+            fn.call(self, e);
+        });
+    }
+    function addListen(obj, i){
+        if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
+        else obj.addEventListener = addEvent;
+        return obj;
+    }
+
+    addListen([doc, win]);
+    if('Element' in win)win.Element.prototype.addEventListener = addEvent;			//IE8
+    else{		//IE < 8
+        doc.attachEvent('onreadystatechange', function(){
+            addListen(doc.all)
+        });		//Make sure we also init at domReady
+        docHijack('getElementsByTagName');
+        docHijack('getElementById');
+        docHijack('createElement');
+        addListen(doc.all);
+    }
+})(window, document);
