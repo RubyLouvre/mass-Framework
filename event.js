@@ -145,16 +145,16 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var type = hash.origType;
                 var ctarget = hash.currentTarget//原来绑定事件的对象
                 var more = event.more || {};
-                //防止在fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
-                if(facade.type == type){
+                //第一个分支防止在旧式IE下,fire click时二次触发 
+                //第二个分支防止在chrome下,fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
+                if(facade.type == type ){
                     return
                 }
+                $.log(type+"!!!!!!!!"+event.type)
                 if(  more.origType && more.origType !== type ){
                     return
                 }
                 var queue = ( $._data( ctarget, "events") || [] );
-                if(!queue.length)
-                    return
                 //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
                 if( !event.originalEvent || !bindTop || hash.type !== type ){
                     event = facade.fix( hash, event, type );
@@ -372,7 +372,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
             if(type){
                 type = new Event( type );
-                type = type.origType;
+                type = type.type;
                 var doc = target.ownerDocument || target.document || target || document;
                 transfer = doc.createEvent(eventMap[type] || "CustomEvent");//
                 if(/^(focus|blur|select|submit|reset)$/.test(type)){
@@ -445,6 +445,8 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
          */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
+            $.log("不支持mouseenter")
+
             adapter[ type ]  = {
                 setup: function( quark ){//使用事件冒充
                     quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
@@ -456,6 +458,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 
                     })
                 },
+               bindType: mapper,
                 teardown: function( quark ){
                     $.unbind( quark.currentTarget, mapper, quark[ type+"_handle" ] );
                 }

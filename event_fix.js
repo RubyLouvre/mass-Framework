@@ -13,7 +13,6 @@ define("event_fix", !!document.dispatchEvent, function(){
     }
     function changeNotify( event, type ){
         if( event.propertyName === ( changeType[ this.type ] || "value") ){
-            //$._data( this, "_just_changed", true );
             $.event._dispatch( $._data( this, "publisher" ), event, type );
         }
     }
@@ -46,7 +45,8 @@ define("event_fix", !!document.dispatchEvent, function(){
             }
             transfer.target = this;
             transfer.args = [].slice.call(arguments,1) ;
-            var type = transfer.origType || transfer.type;
+            var type =  transfer.type || transfer.origType
+            console.log(type);
             if( $["@bind"] in this ){
                 var cur = this,  ontype = "on" + type;
                 do{//模拟事件冒泡与执行内联事件
@@ -63,17 +63,15 @@ define("event_fix", !!document.dispatchEvent, function(){
                     if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
                         if ( ontype && this[ type ] && ((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) &&  !this.eval ) {
                             var inline = this[ ontype ];
-                            //        var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
-                            //       this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
+                            //当我们直接调用元素的click,submit,reset,focus,blur
+                            //会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
                             this[ ontype ] = null;
                             facade.type = type
-
                             if(type == "click" && /checkbox|radio/.test(this.type)){
                                 this.checked = !this.checked
                             }
                             this[ type ]();
                             facade.type = void 0
-                            //      this.disabled = disabled
                             this[ ontype ] = inline;
                         }
                     }
