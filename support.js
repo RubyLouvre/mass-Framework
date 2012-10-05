@@ -82,10 +82,10 @@ define("support", function(){
         support.insertAdjacentHTML = true;
     }catch(e){ };
     var endNames = {
-        'WebkitTransition' : 'webkitTransitionEnd',
-        'MozTransition'    : 'transitionend' ,
-        'OTransition'      : 'oTransitionEnd otransitionend' ,
-        'transition'       : 'transitionend'
+        WebkitTransition : "webkitTransitionEnd",
+        MozTransition    : "transitionend" ,
+        OTransition      : "oTransitionEnd otransitionend" ,
+        transition       : "transitionend"
     }
     for (var name in endNames){
         if (div.style[name] !== undefined) {
