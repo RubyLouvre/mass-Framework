@@ -72,7 +72,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 e.stopPropagation();
             } // 如果存在returnValue 那么就将它设为true
             //http://opera.im/kb/userjs/
-            e.cancelBubble = this.propagationStopped = true;
+            e.cancelBubble = this.isImmediatePropagationStopped = this.propagationStopped = true;
             return this;
         },
         stopImmediatePropagation: function() {
@@ -106,13 +106,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 }, hash, false);
                 events.push( forged );               //用于事件拷贝
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
-                if(forged.live){
-                    if(!facade.lives[type]){  
-                        facade.lives[type] = [forged]
-                    }else if( facade.lives[type].indexOf(forged) !== -1){
-                        facade.lives[type].push(forged)
-                    }
-                }
                 var hack = adapter[ forged.type ] || {};
                 if( count == 1 ){
                     forged.handle = facade.curry( forged );     //  一个curry
@@ -122,7 +115,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                             target = window;
                         }
                         //此元素在此事件类型只绑定一个回调
-                        $.bind(target, forged.type, forged.handle, live);
+                        $.bind(target, forged.type, forged.handle, false);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -156,20 +149,48 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 if(  more.origType && more.origType !== type ){
                     return
                 }
-                var queue = ( $._data( ctarget, "events") || [] ).concat();
+                var queue = ( $._data( ctarget, "events") || [] );
+                if(!queue.length)
+                    return
                 //如果是自定义事件, 或者旧式IE678, 或者需要事件冒充
                 if( !event.originalEvent || !bindTop || hash.type !== type ){
-                    var win = bindTop || ( ctarget.ownerDocument || ctarget.document || ctarget ).parentWindow || window;
-                    event = facade.fix( hash, (event || win.event), type );
+                    event = facade.fix( hash, event, type );
                 }
-                var args = [ event ].concat( event.args ||  [] ), result;
+                var args = [ event ].concat( event.args ||  [] ), result,lives = [],  handlers = []
                 for ( var i = 0, quark; quark = queue[i++]; ) {
-                    if ( !quark.live && !event.target.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
-                        && (  event.type == quark.origType )//确保事件类型一致
-                        && (!event.rns || event.rns.test( quark.ns ) )//如果存在命名空间，则检测是否一致
-                        ) {
+                    if(quark.live){
+                        lives.push(quark)
+                    }else{
+                        handlers.push(quark)
+                    }
+                }
+
+              
+                //DOM树的每一个元素都有可以作为代理节点
+                if ( lives.length && !(event.button && type === "click") ) {
+                    for ( var k = 0, cur; (cur = lives[k++]) ; ) {
+                        var cc = cur.currentTarget
+                        var nodes = $(cc).find(cur.live);
+                        for(var node = event.target; node != cc; node = node.parentNode || cc ){
+                            if ( node.disabled !== true || type !== "click" ) {
+                                if( nodes.index(node) !== -1){
+                                    handlers.push({
+                                        elem: node,
+                                        fn:   cur.fn,
+                                        origType: cur.origType,
+                                        ns:   cur.ns
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for ( var i = 0, quark; quark = handlers[i++]; ) {
+                    if ( ( event.type == quark.origType ) &&
+                        (!event.rns || event.rns.test( quark.ns )) ) {
                         //谁绑定了事件,谁就是事件回调中的this
-                        result = quark.fn.apply( ctarget, args);// quark._target ||
+                        result = quark.fn.apply( quark.elem || ctarget, args);
                         quark.times--;
                         if(quark.times === 0){//如果有次数限制并到用光所有次数，则移除它
                             facade.unbind( this, quark)
@@ -186,14 +207,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                     }
                 }
-                var lives = facade.lives[event.type]
-                if(lives || lives.length){
-                    for(var k = 0, obj; obj = lives[k++];){
-                        if(facade.match(ctarget,obj.currentTarget, obj) ){
-                            obj.fn.apply(ctarget,args);
-                        }
-                    }
-                }
+               
+
             }
             fn.uuid = hash.uuid;
             return fn;
@@ -283,7 +298,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                             if( bindTarget === false && bindTop ){//如果不能绑到当前对象上,尝试绑到window上
                                 target = window;
                             }
-                            $.unbind( target, quark.type, quark.handle, live );
+                            $.unbind( target, quark.type, quark.handle, false );
                         }
                         $.removeData( target, "first_" + type, true );
                         delete events[ type+"_count"];
@@ -389,7 +404,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 type = new Event( type );
                 type = type.origType;
                 var doc = target.ownerDocument || target.document || target || document;
-                transfer = doc.createEvent(eventMap[type] || "CustomEvent");// 
+                transfer = doc.createEvent(eventMap[type] || "CustomEvent");//
                 if(/^(focus|blur|select|submit|reset)$/.test(type)){
                     target[type] && target[type]()
                 }
@@ -435,7 +450,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     return this;
                 }
                 hash.times = hash.times > 0  ? hash.times : Infinity;
-                hash.live =  hash.live ? quickParse( hash.live ) : false
+            //    hash.live =  hash.live ? quickParse( hash.live ) : false
             }
             return this.each(function() {
                 facade[ mapper ]( this, hash );
@@ -458,7 +473,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     /**
 mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10都支持它们
 详见http://www.filehippo.com/pl/download_opera/changelog/9476/
-     */
+         */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
             adapter[ type ]  = {
@@ -518,7 +533,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 
     }catch(e){};
 })
-/**
+    /**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
 2011.9.17 事件发送器增加一个uniqueID属性
 2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
@@ -577,4 +592,4 @@ http://heroicyang.com/blog/javascript-timers.html
 http://heroicyang.com/blog/javascript-event-loop.html
 http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
      */
-//addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+    //addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
