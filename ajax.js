@@ -56,9 +56,11 @@ define("ajax",["$flow"], function(){
     function setOptions( opts ) {
         opts = $.Object.merge( {}, defaults, opts );
         if (opts.crossDomain == null) { //判定是否跨域
-            var parts = rurl.exec( opts.url.toLowerCase() ) || false;
-            opts.crossDomain = parts && ( parts.join(":") + ( parts[ 3 ] ? "" : parts[ 1 ] === "http:" ? 80 : 443 ) ) !==
-            ( segments.join(":") + ( segments[ 3 ] ? "" : segments[ 1 ] === "http:" ? 80 : 443 ) );
+            var parts = rurl.exec( opts.url.toLowerCase() ) ;
+            opts.crossDomain = !!( parts &&
+                ( parts[ 1 ] !== segments[ 1 ] || parts[ 2 ] !== segments[ 2 ] ||
+                    ( parts[ 3 ] || ( parts[ 1 ] === "http:" ? 80 : 443 ) ) !=
+                    ( segments[ 3 ] || ( segments[ 1 ] === "http:" ? 80 : 443 ) ) ) );
         }
         if ( opts.data && opts.data !== "string") {
             opts.data = $.param( opts.data );
