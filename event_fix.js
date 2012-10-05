@@ -63,14 +63,17 @@ define("event_fix", !!document.dispatchEvent, function(){
                     if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
                         if ( ontype && this[ type ] && ((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) &&  !this.eval ) {
                             var inline = this[ ontype ];
-                    //        var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
-                     //       this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
+                            //        var disabled = this.disabled;//当我们直接调用元素的click,submit,reset,focus,blur
+                            //       this.disabled = true;//会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
                             this[ ontype ] = null;
+                            facade.type = type
+
                             if(type == "click" && /checkbox|radio/.test(this.type)){
                                 this.checked = !this.checked
                             }
                             this[ type ]();
-                      //      this.disabled = disabled
+                            facade.type = void 0
+                            //      this.disabled = disabled
                             this[ ontype ] = inline;
                         }
                     }
