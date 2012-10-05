@@ -71,7 +71,8 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             if (e && e.stopPropagation ) {
                 e.stopPropagation();
             } // 如果存在returnValue 那么就将它设为true
-            e.cancelBubble = this.isPropagationStopped = true;
+            //http://opera.im/kb/userjs/
+            e.cancelBubble = this.propagationStopped = true;
             return this;
         },
         stopImmediatePropagation: function() {
@@ -105,6 +106,13 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 }, hash, false);
                 events.push( forged );               //用于事件拷贝
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
+                if(forged.live){
+                    if(!facade.lives[type]){  
+                        facade.lives[type] = [forged]
+                    }else if( facade.lives[type].indexOf(forged) !== -1){
+                        facade.lives[type].push(forged)
+                    }
+                }
                 var hack = adapter[ forged.type ] || {};
                 if( count == 1 ){
                     forged.handle = facade.curry( forged );     //  一个curry
@@ -125,6 +133,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             //以及让无论是自定义事件与原生事件都能沿着DOM树人为地冒泡
             });
         },
+        lives:{ },
         _dispatch: function( list, event, type ){//level2 API 用于事件冒充
             event.more = event.more ||{}
             event.more.type = type
@@ -155,16 +164,12 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 }
                 var args = [ event ].concat( event.args ||  [] ), result;
                 for ( var i = 0, quark; quark = queue[i++]; ) {
-                    if ( !event.target.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
+                    if ( !quark.live && !event.target.disabled && !(event.button && event.type === "click")//非左键不能冒泡(e.button 左键为0)
                         && (  event.type == quark.origType )//确保事件类型一致
                         && (!event.rns || event.rns.test( quark.ns ) )//如果存在命名空间，则检测是否一致
-                        && ( quark.live ? facade.match( event.target, ctarget, quark ) :
-                            event.currentTarget == quark.currentTarget )
-                        //如果是事件代理，则检测元素是否匹配给定选择器，否则检测此元素是否是绑定事件的元素
                         ) {
                         //谁绑定了事件,谁就是事件回调中的this
-                        result = quark.fn.apply( quark._target || ctarget, args);
-                        delete quark._target;
+                        result = quark.fn.apply( ctarget, args);// quark._target ||
                         quark.times--;
                         if(quark.times === 0){//如果有次数限制并到用光所有次数，则移除它
                             facade.unbind( this, quark)
@@ -178,6 +183,14 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                         if ( event.isImmediatePropagationStopped ) {
                             break;
+                        }
+                    }
+                }
+                var lives = facade.lives[event.type]
+                if(lives || lives.length){
+                    for(var k = 0, obj; obj = lives[k++];){
+                        if(facade.match(ctarget,obj.currentTarget, obj) ){
+                            obj.fn.apply(ctarget,args);
                         }
                     }
                 }
@@ -288,13 +301,10 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
         },
         match: function( cur, parent, quark ){//用于判定此元素是否为绑定回调的那个元素或其孩子，并且匹配给定表达式
-            if(quark._target)
-                return true
             var expr  = quark.live;
             var matcher = expr.input ? quickIs : $.match;
             for ( ; cur != parent; cur = cur.parentNode || parent ) {
                 if(matcher(cur, expr)){
-                    quark._target = cur
                     return true
                 }
             }
@@ -568,41 +578,3 @@ http://heroicyang.com/blog/javascript-event-loop.html
 http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
      */
 //addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
-(function(win, doc){
-    if(win.addEventListener)return;		//No need to polyfill
-
-    function docHijack(p){
-        var old = doc[p];doc[p] = function(v){
-            return addListen(old(v))
-        }
-    }
-    function addEvent(on, fn, self){
-        return (self = this).attachEvent('on' + on, function(e){
-            e = e || win.event;
-            e.preventDefault  = e.preventDefault  || function(){
-                e.returnValue = false
-            }
-            e.stopPropagation = e.stopPropagation || function(){
-                e.cancelBubble = true
-            }
-            fn.call(self, e);
-        });
-    }
-    function addListen(obj, i){
-        if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
-        else obj.addEventListener = addEvent;
-        return obj;
-    }
-
-    addListen([doc, win]);
-    if('Element' in win)win.Element.prototype.addEventListener = addEvent;			//IE8
-    else{		//IE < 8
-        doc.attachEvent('onreadystatechange', function(){
-            addListen(doc.all)
-        });		//Make sure we also init at domReady
-        docHijack('getElementsByTagName');
-        docHijack('getElementById');
-        docHijack('createElement');
-        addListen(doc.all);
-    }
-})(window, document);
