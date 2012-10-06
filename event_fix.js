@@ -41,16 +41,15 @@ define("event_fix", !!document.dispatchEvent, function(){
                 }
             }
             if(!transfer){
-                throw "ie $.event.fire arguments error"
+                throw "first arguments of $.event.fire is a event type, native even or instance of $.Event"
             }
             transfer.target = this;
             transfer.args = [].slice.call(arguments,1) ;
-            var type =  transfer.type || transfer.origType
-            console.log(type);
+            var type =  transfer.origType || transfer.type
             if( $["@bind"] in this ){
                 var cur = this,  ontype = "on" + type;
                 do{//模拟事件冒泡与执行内联事件
-                    facade.dispatch( cur, transfer );
+                    facade.dispatch( cur, transfer, type );
                     if (cur[ ontype ] && cur[ ontype ].call(cur) === false) {
                         transfer.preventDefault();
                     }
@@ -98,9 +97,9 @@ define("event_fix", !!document.dispatchEvent, function(){
                 check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
                     return true;
                 },
-                setup: delegate(function( node, quark ){
-                    var subscriber = quark.subscriber || ( quark.subscriber = {}) //用于保存订阅者的UUID
-                    quark.change_beforeactive = $.bind( node, "beforeactivate", function() {
+                setup: delegate(function( node, desc ){
+                    var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
+                    desc.change_beforeactive = $.bind( node, "beforeactivate", function() {
                         //防止出现跨文档调用的情况,找错event
                         var doc = node.ownerDocument || node.document || node;
                         var target = doc.parentWindow.event.srcElement, tid = $.getUid( target )
@@ -109,16 +108,16 @@ define("event_fix", !!document.dispatchEvent, function(){
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid( node ) ] = node;//此孩子可能同时要向N个顶层元素报告变化
-                            quark.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, quark.origType))
+                            desc.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, desc.origType))
                         }
                     });//如果是事件绑定
                     node.fireEvent("onbeforeactivate")
                 }),
-                teardown: delegate(function( node, quark ){
-                    $.unbind( node, "beforeactive", quark.change_beforeactive );
-                    var els = quark.subscriber || {};
+                teardown: delegate(function( node, desc ){
+                    $.unbind( node, "beforeactive", desc.change_beforeactive );
+                    var els = desc.subscriber || {};
                     for(var i in els){
-                        $.unbind( els[i], "propertychange",  quark.change_propertychange)  ;
+                        $.unbind( els[i], "propertychange",  desc.change_propertychange)  ;
                         var publisher = $._data( els[i], "publisher");
                         if( publisher ){
                             delete publisher[ node.uniqueNumber ];

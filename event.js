@@ -1,8 +1,8 @@
 //=========================================
-// 事件系统 v7
+// 事件系统 v8
 //==========================================
 define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(){
-    $.log("已加载event模块v7")
+    $.log("已加载event模块v8")
     var facade = $.event = $.event || {};
     $.Object.merge(facade,{
         eventAdapter:{ } //添加或增强二级属性eventAdapter
@@ -38,19 +38,20 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 break
             }
         }
+        //比如在chrome下fire mouseenter, 到这里type为mouseover, origType为mouseenter
         this.type = type;          //事件类型
-        this.origType = parts[0]  //原事件类型
+        this.origType = parts[0]   //原事件类型
         this.live = live;          //是否使用了事件代理,可以是正则,字符串,布尔或空值
         this.ns =   ns,            //命名空间
         this.rns =  ns ? new RegExp("(^|\\.)" + ns.replace(' ', ' .* ?') + "(\\.|$)") : null
     }
     //events为要过滤的集合,后面个参数为过滤条件
     function findHandlers( events, hash, fn, live ) {
-        return events.filter(function(quark) {
-            return quark && (!hash.rns || hash.rns.test(quark.ns))  //通过事件类型进行过滤
-            && (!hash.origType || hash.origType === quark.origType) //通过命名空间进行进行过滤
-            && (!fn || fn.uniqueNumber === quark.uuid)              //通过uuid进行过滤
-            && (!live || live === quark.live || live === "**" && quark.live )//通过选择器进行过滤
+        return events.filter(function(desc) {
+            return desc && (!hash.rns || hash.rns.test(desc.ns))  //通过事件类型进行过滤
+            && (!hash.origType || hash.origType === desc.origType) //通过命名空间进行进行过滤
+            && (!fn || fn.uniqueNumber === desc.uuid)              //通过uuid进行过滤
+            && (!live || live === desc.live || live === "**" && desc.live )//通过选择器进行过滤
         })
     }
     Event.prototype = {
@@ -70,7 +71,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             var e = this.originalEvent || {};
             if (e && e.stopPropagation ) {
                 e.stopPropagation();
-            } // 如果存在returnValue 那么就将它设为true
+            } 
             //http://opera.im/kb/userjs/
             e.cancelBubble = this.isImmediatePropagationStopped = this.propagationStopped = true;
             return this;
@@ -87,35 +88,34 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
         bind: function( target, hash ){//事件系统三大核心方法之一，绑定事件
             var bindTarget =  $[ "@bind" ] in target,//是否能直接绑定到目标对象上
-            events = $._data( target ),              //是否能绑定事件
+            data = $._data( target ),              //是否能绑定事件
             types  = hash.type,                      //原有的事件类型,可能是复数个
             live   = hash.live;                      //是否使用事件代理
-            if( !events ){
+            if( !data ){
                 return
             }
             if( bindTarget ){                       //处理DOM的hover事件
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
-            events = events.events || (events.events = []);
+            var events = data.events || (data.events = []);
             hash.uuid = $.getUid( hash.fn );       //确保hash.uuid与fn.uuid一致
             types.replace( $.rword, function( t ){
-                var forged = new $.Event( t, live), type = forged.origType;
-                $.mix(forged, {
+                var desc = new $.Event( t, live), type = desc.origType;
+                $.mix(desc, {
                     currentTarget: target,          //this,用于绑定数据的
                     index:  events.length           //记录其在列表的位置，在卸载事件时用
                 }, hash, false);
-                events.push( forged );               //用于事件拷贝
+                events.push( desc );               //用于事件拷贝
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
-                var hack = adapter[ forged.type ] || {};
+                var hack = adapter[ desc.type ] || {};
                 if( count == 1 ){
-                    forged.handle = facade.curry( forged );     //  一个curry
-                    $._data( target, "first_" + type, forged);  //用于事件派发：$.event.dispatch
-                    if( !hack.setup || hack.setup( forged ) === false  ) {
+                    var handle = data[type+"_handle"] = facade.curry( desc );     //  一个curry
+                    if( !hack.setup || hack.setup( desc ) === false  ) {
                         if( bindTop && !bindTarget  ){//如果不能绑到当前对象上,尝试绑到window上
                             target = window;
                         }
                         //此元素在此事件类型只绑定一个回调
-                        $.bind(target, forged.type, forged.handle, false);
+                        $.bind(target, desc.type, handle, false);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -126,20 +126,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             //以及让无论是自定义事件与原生事件都能沿着DOM树人为地冒泡
             });
         },
-        lives:{ },
-        _dispatch: function( list, event, type ){//level2 API 用于事件冒充
-            event.more = event.more ||{}
-            event.more.type = type
-            for(var i in list){
-                if( list.hasOwnProperty(i)){
-                    facade.dispatch( list[ i ], event, type );
-                }
-            }
-        },
-        dispatch: function( target, event, type ){// level2 API 用于旧式的$.event.fire中
-            var quark = $._data(target, "first_" + (type || event.type) );//取得此元素此类型的第一个quark
-            quark && quark.handle.call( target, event )
-        },
+
         curry: function( hash ){// 这是元信息,不要污染这个对象
             var fn =  function( event){//真正的事件对象
                 var type = hash.origType;
@@ -147,11 +134,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var more = event.more || {};
                 //第一个分支防止在旧式IE下,fire click时二次触发 
                 //第二个分支防止在chrome下,fire mouseover时,把用于冒充mouseenter用的mouseover也触发了
-                if(facade.type == type ){
-                    return
-                }
-                $.log(type+"!!!!!!!!"+event.type)
-                if(  more.origType && more.origType !== type ){
+                if(facade.type == type || more.origType && more.origType !== type ){
                     return
                 }
                 var queue = ( $._data( ctarget, "events") || [] );
@@ -160,11 +143,11 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     event = facade.fix( hash, event, type );
                 }
                 var args = [ event ].concat( event.args ||  [] ), result,lives = [],  handlers = []
-                for ( var i = 0, quark; quark = queue[i++]; ) {
-                    if(quark.live){
-                        lives.push(quark)
+                for ( var i = 0, desc; desc = queue[i++]; ) {
+                    if(desc.live){
+                        lives.push(desc)
                     }else{
-                        handlers.push(quark)
+                        handlers.push(desc)
                     }
                 }
                 //DOM树的每一个元素都有可以作为代理节点
@@ -186,14 +169,14 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                     }
                 }
-                for ( var i = 0, quark; quark = handlers[i++]; ) {
-                    if ( ( event.type == quark.origType ) &&
-                        (!event.rns || event.rns.test( quark.ns )) ) {
+                for ( var i = 0, desc; desc = handlers[i++]; ) {
+                    if ( ( event.type == desc.origType ) &&
+                        (!event.rns || event.rns.test( desc.ns )) ) {
                         //谁绑定了事件,谁就是事件回调中的this
-                        result = quark.fn.apply( quark.elem || ctarget, args);
-                        quark.times--;
-                        if(quark.times === 0){//如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind( this, quark)
+                        result = desc.fn.apply( desc.elem || ctarget, args);
+                        desc.times--;
+                        if(desc.times === 0){//如果有次数限制并到用光所有次数，则移除它
+                            facade.unbind( this, desc)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
@@ -211,6 +194,19 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
             fn.uuid = hash.uuid;
             return fn;
+        },
+        _dispatch: function( list, event, type ){//level2 API 用于事件冒充
+            event.more = event.more ||{}
+            event.more.type = type
+            for(var i in list){
+                if( list.hasOwnProperty(i)){
+                    facade.dispatch( list[ i ], event, type );
+                }
+            }
+        },
+        dispatch: function( target, event, type ){// level2 API 用于旧式的$.event.fire中
+            var handle = $._data(target, (type || event.type) +"_handle" );//取得此元素此类型的第一个quark
+            handle && handle.call( target, event )
         },
         //将真事件对象的成员赋给伪事件对象，抹平浏览器差异
         fix: function( event, real, type){
@@ -290,19 +286,20 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 types = types.replace( rhoverHack, "mouseover$1 mouseout$1" );
             }
             types.replace( $.rword, function( t ){
-                var quark = new $.Event( t, live ), type = quark.origType, hack = adapter[ type ] || {};
-                findHandlers( events, quark , hash.fn, live ).forEach( function(quark){
+                var desc = new $.Event( t, live ), type = desc.origType, hack = adapter[ type ] || {};
+                findHandlers( events, desc , hash.fn, live ).forEach( function(desc){
                     if( --events[type+"_count"] == 0 ){
-                        if( !hack.teardown || hack.teardown( quark ) === false  ) {
+                        if( !hack.teardown || hack.teardown( desc ) === false  ) {
                             if( bindTarget === false && bindTop ){//如果不能绑到当前对象上,尝试绑到window上
                                 target = window;
                             }
-                            $.unbind( target, quark.type, quark.handle, false );
+                            var handle = $._data(target, type+"_handle");
+                            $.unbind( target, desc.type, handle, false );
                         }
-                        $.removeData( target, "first_" + type, true );
+                        $.removeData( target, type +"_handle", true );
                         delete events[ type+"_count"];
                     }
-                    events[ quark.index ] = null;
+                    events[ desc.index ] = null;
                 })
             });
             for ( var i = events.length; i >= 0; i-- ) {
@@ -315,11 +312,40 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
         }
     })
+    if( bindTop ){//事件系统三大核心方法之一，触发事件
+        facade.fire = function( init ){
+            var bindTarget = $["@bind"] in this, more
+            var target = bindTarget ? this : window;
+            var initEvent = true, type, transfer;
+            if(typeof init == "string"){
+                more = new Event( init );
+            }else if(init && init.preventDefault){
+                if(!( init instanceof $.Event) ){//如果是真的事件对象
+                    more = new Event( init.type );
+                    initEvent = false;
+                }else{
+                    more = init;//如果是$.Event实例
+                }
+            }
+            if(initEvent && more){
+                type = more.type;
+                var doc = target.ownerDocument || target.document || target || document;
+                transfer = doc.createEvent(eventMap[type] || "CustomEvent");
+                if(/^(focus|blur|select|submit|reset)$/.test(type)){
+                    target[type] && target[type]()
+                }
+                transfer.initEvent( type, true,true);//, doc.defaultView
+            }
+            transfer.args = [].slice.call( arguments, 1 ) ;
+            transfer.more = more
+            target.dispatchEvent(transfer);
+        }
+    }
     var rmapper = /(\w+)_(\w+)/g;
     //以下是用户使用的API
     $.implement({
         toggle: function(/*fn1,fn2,fn3*/){
-            var fns = Array.apply([],arguments), i = 0;
+            var fns = Array.apply([], arguments), i = 0;
             return this.click(function(e){
                 var fn  = fns[i++] || fns[i = 0, i++];
                 fn.call( this, e );
@@ -353,38 +379,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         }
     });
 
-    if( bindTop ){//事件系统三大核心方法之一，触发事件
-        facade.fire = function( init ){
-            var bindTarget = $["@bind"] in this, more = {}
-            var target = bindTarget ? this : window;
-            var type, transfer;
-            if( typeof init == "string"){
-                type = init;
-                init = false;
-            }
-            if( init && init.preventDefault ){//如果是一个真事件对象或伪事件对象
-                if( init instanceof $.Event ){//如果是伪的
-                    type = init.origType;
-                    more = init;
-                }else{
-                    transfer = init;//如果是真的
-                }
-            }
-            if(type){
-                type = new Event( type );
-                type = type.type;
-                var doc = target.ownerDocument || target.document || target || document;
-                transfer = doc.createEvent(eventMap[type] || "CustomEvent");//
-                if(/^(focus|blur|select|submit|reset)$/.test(type)){
-                    target[type] && target[type]()
-                }
-                transfer.initEvent( type, true,true);//, doc.defaultView
-            }
-            transfer.args = [].slice.call( arguments, 1 ) ;
-            transfer.more = more;
-            target.dispatchEvent(transfer);
-        }
-    }
+
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
     var rtypes = /^[a-z0-9_\-\.\s\,]+$/i
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
@@ -445,24 +440,24 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
          */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
-            $.log("不支持mouseenter")
-
             adapter[ type ]  = {
-                setup: function( quark ){//使用事件冒充
-                    quark[type+"_handle"]= $.bind( quark.currentTarget, mapper, function( event ){
-                        var target = quark.currentTarget
+                setup: function( desc ){//使用事件冒充
+                    desc[type+"_handle"] = $.bind( desc.currentTarget, mapper, function( event ){
+                        var target = desc.currentTarget
                         var related = event.relatedTarget;
-                        if(quark.live || !related || (related !== target && !$.contains( target, related )) ){
-                            facade._dispatch( [ target  ], event, type );
+                        if(desc.live || !related || (related !== target && !$.contains( target, related )) ){
+                            facade.dispatch( target, event, type );
                         }
-
                     })
                 },
-               bindType: mapper,
-                teardown: function( quark ){
-                    $.unbind( quark.currentTarget, mapper, quark[ type+"_handle" ] );
+                teardown: function( desc ){
+                    $.unbind( desc.currentTarget, mapper, desc[ type+"_handle" ] );
                 }
             };
+            if(!$.eventSupport("mouseenter")){
+                adapter[ type ].bindType =  adapter[ type ].delegateType = mapper
+            }
+
         });
     }
     //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
