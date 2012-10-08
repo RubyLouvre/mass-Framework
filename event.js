@@ -73,7 +73,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 e.stopPropagation();
             } 
             //http://opera.im/kb/userjs/
-            e.cancelBubble = this.isImmediatePropagationStopped = this.propagationStopped = true;
+            e.cancelBubble = this.propagationStopped = true;
             return this;
         },
         stopImmediatePropagation: function() {
@@ -185,7 +185,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                                 event.stopPropagation();
                             }
                         }
-                        if ( event.isImmediatePropagationStopped ) {
+                        if ( event.propagationStopped ) {
                             break;
                         }
                     }
