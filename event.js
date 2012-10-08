@@ -429,7 +429,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     var types = mouseEvents +",keypress,keydown,keyup," + "blur,focus,focusin,focusout,"+
     "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input"
     types.replace( $.rword, function( type ){//这里产生以事件名命名的快捷方法
-        eventMap[type] = eventMap[type] || (/key/.test(type) ? "UIEvents" : "HTMLEvents")
+        eventMap[type] = eventMap[type] || (/key/.test(type) ? "KeyboardEvent" : "HTMLEvents")
         $.fn[ type ] = function( callback ){
             return callback?  this.bind( type, callback ) : this.fire( type );
         }
