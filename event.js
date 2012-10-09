@@ -239,9 +239,11 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 if( /^(?:mouse|contextmenu)|click/.test( type ) ){
                     if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
                         var doc = event.target.ownerDocument || document,
-                        html = doc.documentElement, body = doc.body;
-                        event.pageX = event.clientX + (html && html.scrollLeft || body && body.scrollLeft || 0) - (html && html.clientLeft || body && body.clientLeft || 0);
-                        event.pageY = event.clientY + (html && html.scrollTop  || body && body.scrollTop  || 0) - (html && html.clientTop  || body && body.clientTop  || 0);
+                        body = doc.body;
+                        event.pageX = event.clientX + ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) 
+                        - ( doc && doc.clientLeft || body && body.clientLeft || 0 );
+                        event.pageY = event.clientY + ( doc && doc.scrollTop  || body && body.scrollTop  || 0 )
+                        - ( doc && doc.clientTop  || body && body.clientTop  || 0 );
                     }
                     //如果不存在relatedTarget属性，为它添加一个
                     if ( !event.relatedTarget && event.fromElement ) {
