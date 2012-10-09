@@ -1,0 +1,43 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            #aaa {
+                padding:20px;
+                background: gray
+            }
+            #bbb {
+                padding:20px;
+                background: blue;
+            }
+            #ccc {
+                padding:20px;
+                background: red;
+            }
+        </style>
+        <script>
+            document.onclick = function(e){
+                e = e || event;
+                console.log(e.layerX+"  "+e.layerY)
+                console.log(e.offsetX+"  "+e.offsetY)
+                console.log(e.clientX+"  "+e.clientY)
+                console.log(e.pageX+"  "+e.pageY)
+            }
+        </script>
+    </head>
+    <body>
+        <div id="aaa">
+            <div id="bbb">
+                <div id="ccc">
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
