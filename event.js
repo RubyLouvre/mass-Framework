@@ -313,32 +313,31 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         }
     })
     if( bindTop ){//事件系统三大核心方法之一，触发事件
-        facade.fire = function( init ){
-            var bindTarget = $["@bind"] in this, more
+        facade.fire = function( type ){
+            var bindTarget = $["@bind"] in this, initEvent = true, more, event
             var target = bindTarget ? this : window;
-            var initEvent = true, type, transfer;
             if(typeof init == "string"){
-                more = new Event( init );
-            }else if(init && init.preventDefault){
-                if(!( init instanceof $.Event) ){//如果是真的事件对象
-                    more = new Event( init.type );
+                more = new Event( type );
+            }else if(type && type.preventDefault){
+                if(!( type instanceof $.Event) ){//如果是真的事件对象
+                    more = new Event( type.type );
                     initEvent = false;
                 }else{
-                    more = init;//如果是$.Event实例
+                    more = type;//如果是$.Event实例
                 }
             }
             if(initEvent && more){
                 type = more.type;
                 var doc = target.ownerDocument || target.document || target || document;
-                transfer = doc.createEvent(eventMap[type] || "CustomEvent");
+                event = doc.createEvent(eventMap[type] || "CustomEvent");
                 if(/^(focus|blur|select|submit|reset)$/.test(type)){
                     target[type] && target[type]()
                 }
-                transfer.initEvent( type, true,true);//, doc.defaultView
+                event.initEvent( type, true,true, doc.defaultView,1);//, doc.defaultView
             }
-            transfer.args = [].slice.call( arguments, 1 ) ;
-            transfer.more = more
-            target.dispatchEvent(transfer);
+            event.args = [].slice.call( arguments, 1 ) ;
+            event.more = more
+            target.dispatchEvent(event);
         }
     }
     var rmapper = /(\w+)_(\w+)/g;
