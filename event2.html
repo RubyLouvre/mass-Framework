@@ -1,0 +1,34 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>IE fireEvent</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            function log(s){
+                window.console && console.log(s)
+            }
+            window.onload = function(){
+                var a = document.getElementById("span");
+                var div  = document.getElementById("div2");
+                div.onclick = function(e){
+                    log("div2")
+                    if(e){
+                        e.stopPropagation() 
+                    }else{
+                        window.event.cancelBubble = true;
+                    }
+                }
+                a.click();
+            }
+
+        </script>
+    </head>
+    <body onclick="log('body')">
+        <div id="div2">
+            <div onclick="log('div');" >
+                <span  onclick="log('span')" id="span">span</span>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,68 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="jquery1.82.js"> </script>
+        <script>
+            $(function(){
+                var log = function(s){
+                    window.console && console.log(s)
+                }
+                $("#aaa").click(function(e){
+                    log("aaa")
+                })
+                $("#bbb").click(function(e){
+                    log("bbb1")
+                })
+                $("#bbb").click(function(e){
+                    log("bbb2")
+                })
+                $("#ccc").click(function(e){
+                    log("ccc")
+                })
+                $("a").click(function(e){
+                    log("href")
+                })
+                $("body").delegate("div","click", function(e){
+                    log("delegate");
+                })
+                $("#ccc")[0].focus()
+           
+            })
+        </script>
+        <style>
+            html,body{
+                background:#999;
+                height:90%;
+            }
+            body{
+                padding:20px;
+            }
+            #aaa{
+                background:#cc9;
+                padding:20px;
+            }
+            #bbb{
+                background:#c9c;
+                padding:20px;
+                height:100px;
+            }
+            #ccc{
+                background:#5e850a;
+                padding:20px;
+                height:40px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="aaa">
+            <div id="bbb">
+                <div id="ccc" style="display:none;">
+                    <a href="http://www.cnblogs.com/micccn/archive/2010/06/07/1753071.html">xxx</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

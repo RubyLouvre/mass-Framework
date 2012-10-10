@@ -24,10 +24,12 @@ and open the template in the editor.
         <script>
             document.onclick = function(e){
                 e = e || event;
-                console.log(e.layerX+"  "+e.layerY)
-                console.log(e.offsetX+"  "+e.offsetY)
-                console.log(e.clientX+"  "+e.clientY)
-                console.log(e.pageX+"  "+e.pageY)
+                console.log("layer"+e.layerX+"  "+e.layerY)
+                console.log("offset"+e.offsetX+"  "+e.offsetY)
+                console.log("client"+e.clientX+"  "+e.clientY)
+                console.log("page"+e.pageX+"  "+e.pageY)
+                console.log("screen"+e.screenX+"  "+e.screenY)
+                console.log("xy"+e.x+"  "+e.y)
             }
         </script>
     </head>
