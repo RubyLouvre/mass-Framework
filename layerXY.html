@@ -8,6 +8,7 @@ and open the template in the editor.
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style>
+  
             #aaa {
                 padding:20px;
                 background: gray
@@ -22,23 +23,34 @@ and open the template in the editor.
             }
         </style>
         <script>
+            var log = function(s){
+                window.console && console.log(s);
+            }
             document.onclick = function(e){
                 e = e || event;
-                console.log("layer"+e.layerX+"  "+e.layerY)
-                console.log("offset"+e.offsetX+"  "+e.offsetY)
-                console.log("client"+e.clientX+"  "+e.clientY)
-                console.log("page"+e.pageX+"  "+e.pageY)
-                console.log("screen"+e.screenX+"  "+e.screenY)
-                console.log("xy"+e.x+"  "+e.y)
+//http://bbs.51js.com/thread-84330-1-1.html http://www.360doc.com/content/08/0312/19/24120_1113143.shtml
+                log(document.documentElement.clientTop)
+                log(document.body.clientTop)
+  
+                //                console.log("layer"+e.layerX+"  "+e.layerY)
+                //                console.log("offset"+e.offsetX+"  "+e.offsetY)
+                //                console.log("client"+e.clientX+"  "+e.clientY)
+                //                console.log("page"+e.pageX+"  "+e.pageY)
+                //                console.log("screen"+e.screenX+"  "+e.screenY)
+                //                console.log("xy"+e.x+"  "+e.y)
             }
         </script>
     </head>
     <body>
         <div id="aaa">
             <div id="bbb">
-                <div id="ccc">
+                <pre id="ccc">
+IE8 标准模式 0 0 
+IE6-7 标准模式2 0
+IE6-8 怪异模式0 2
+IE在怪异模式下通过改样式消除它，IE6-8在标准模式下不能
 
-                </div>
+                </pre>
             </div>
         </div>
     </body>
