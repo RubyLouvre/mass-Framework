@@ -67,9 +67,10 @@
                             if( window.opera && opera.version() < 10 )
                                 delta = -delta;
                             //由于事件对象的原有属性是只读，我们只能通过添加一个私有属性delta来解决兼容问题
-                            event.delta = Math.round(delta) /12; //修正safari的浮点 bug
+                            event.delta = Math.round(delta) /120; //修正safari的浮点 bug
                         }else if( "detail" in event ){
-                            event.delta = event.wheelDelta = -event.detail * 40 /12//修正FF的detail 为更大众化的wheelDelta
+                            event.wheelDelta = -event.detail * 40//为FF添加更大众化的wheelDelta
+                            event.delta = event.wheelDelta /120  //添加私有的delta
                         }
                         callback.call(obj,event);//修正IE的this指向
                     });
@@ -105,7 +106,7 @@
                         e.returnValue = false;
                     }
                 })
-                 wheel(get("img"), function(e){
+                wheel(get("img"), function(e){
                     if(focusImg){
                         this.style.width =  this.offsetWidth + e.delta + 'px';
                         this.style.height =  this.offsetHeight + e.delta + 'px';
@@ -140,14 +141,14 @@
             </div>
         </div>
         <div style="background:red;height:400px;width:300px;">
-/* <h2>鼠标滚动控制滑块移动</h2> */
-addEvent( $('slider'), 'mousewheel',function(e)
-{
-stopEvent( e );
-var delta = getWheelValue(e),
-tar = $('sliderTrigger');
-//杯具的反转，因为tar.offsetTop 越大，滑块就越往下，所以delta又需要反转回来，向上是负的，向下是正的，所以乘以-1
-tar.style.top = range( tar.offsetTop + ( -1 * delta * 10 ),160,0 ) + 'px';
+            /* <h2>鼠标滚动控制滑块移动</h2> */
+            addEvent( $('slider'), 'mousewheel',function(e)
+            {
+            stopEvent( e );
+            var delta = getWheelValue(e),
+            tar = $('sliderTrigger');
+            //杯具的反转，因为tar.offsetTop 越大，滑块就越往下，所以delta又需要反转回来，向上是负的，向下是正的，所以乘以-1
+            tar.style.top = range( tar.offsetTop + ( -1 * delta * 10 ),160,0 ) + 'px';
 
         </div>
     </body>
