@@ -1,0 +1,154 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            .slider
+            {
+                width:50px;
+                height:180px;
+                background:#eee;
+                padding:10px 0;
+                cursor:n-resize;
+            }
+            .slider-slot
+            {
+                width:16px;
+                margin:0 auto;
+                height:180px;
+                background:#eee;
+                border:1px solid gray;
+                border-color:#999 white white #999;
+                position:relative;
+            }
+            .slider-trigger
+            {
+                width:14px;
+                height:18px;
+                font:1px/0 arial;
+                border:1px solid gray;
+                border-color:white #999 #999 white;
+                background:#ccc;
+                position:absolute;
+            }
+            .slider-trigger b
+            {
+                display:block;
+                margin:1px 3px;
+                border-top:1px solid #999;
+                border-bottom:1px solid white;
+            }
+        </style>
+        <script type="text/javascript">// <![CDATA[
+            window.onload = function(){
+                var get = function(i) {
+                    return document.getElementById( i );
+                }
+                function addEvent(el, type, callback, useCapture  ){
+                    if(el.dispatchEvent){//w3c方式优先
+                        el.addEventListener( type, callback, !!useCapture  );
+                    }else {
+                        el.attachEvent( "on"+type, callback );
+                    }
+                    return callback;//返回callback方便卸载时用
+                }
+                var wheel = function(obj,callback){
+                    var wheelType = "mousewheel"
+                    try{
+                        document.createEvent("MouseScrollEvents")
+                        wheelType = "DOMMouseScroll"
+                    }catch(e){}
+                    addEvent(obj, wheelType,function(event){
+                        if ("wheelDelta" in event){//统一为±120，其中正数表示为向上滚动，负数表示向下滚动
+                            var delta = event.wheelDelta
+                            //opera 9x系列的滚动方向与IE保持一致，10后修正
+                            if( window.opera && opera.version() < 10 )
+                                delta = -delta;
+                            //由于事件对象的原有属性是只读，我们只能通过添加一个私有属性delta来解决兼容问题
+                            event.delta = Math.round(delta) /12; //修正safari的浮点 bug
+                        }else if( "detail" in event ){
+                            event.delta = event.wheelDelta = -event.detail * 40 /12//修正FF的detail 为更大众化的wheelDelta
+                        }
+                        callback.call(obj,event);//修正IE的this指向
+                    });
+                }
+　　
+                var focusNumber, focusImg
+                addEvent(get("number"),"focus", function(e){
+                    focusNumber = true;
+                })
+                addEvent(get("number"),"blur", function(e){
+                    focusNumber = false;
+                })
+                wheel(get("number"), function(e){
+                    if(focusNumber){
+                        this.value = Number(this.value) + e.delta  //120  ;    
+                        if( e.preventDefault )
+                            e.preventDefault();
+                        e.returnValue = false;
+                    }
+                })
+                addEvent(get("number"),"mouseover", function(e){
+                    focusImg = true;
+                })
+                addEvent(get("number"),"mouseout", function(e){
+                    focusImg = false;
+                })
+                wheel(get("img"), function(e){
+                    if(focusImg){
+                        this.style.width =  this.offsetWidth + e.delta + 'px';
+                        this.style.height =  this.offsetHeight + e.delta + 'px';
+                        if( e.preventDefault )
+                            e.preventDefault();
+                        e.returnValue = false;
+                    }
+                })
+                 wheel(get("img"), function(e){
+                    if(focusImg){
+                        this.style.width =  this.offsetWidth + e.delta + 'px';
+                        this.style.height =  this.offsetHeight + e.delta + 'px';
+                        if( e.preventDefault )
+                            e.preventDefault();
+                        e.returnValue = false;
+                    }
+                })
+            }
+
+            zoomer
+            //http://www.niumowang.org/javascript/js-scroll-bar/
+        </script>
+    </head>
+    <body>
+        <h2>文本框增加/减少值</h2>
+        <div><input type="text" value="300" id="number">
+            <span>文本框获得焦点后滚动鼠标滚轮</span>
+        </div>
+        <h2>鼠标滚动缩放图片</h2>
+        <div><img width="300" title="鼠标滚动 缩放大小" style="cursor: -moz-zoom-in;" id="img" src="http://www.baidu.com/img/baidu.gif"></div>
+        <h2>鼠标滚动控制滑块移动</h2>
+        <div id="slider" class="slider">
+            <div class="slider-slot">
+                <div id="sliderTrigger" class="slider-trigger">
+                    <strong>&nbsp;</strong>
+                    <strong>&nbsp;</strong>
+                    <strong>&nbsp;</strong>
+                    <strong></strong> 
+                    <strong></strong>
+                </div>
+            </div>
+        </div>
+        <div style="background:red;height:400px;width:300px;">
+/* <h2>鼠标滚动控制滑块移动</h2> */
+addEvent( $('slider'), 'mousewheel',function(e)
+{
+stopEvent( e );
+var delta = getWheelValue(e),
+tar = $('sliderTrigger');
+//杯具的反转，因为tar.offsetTop 越大，滑块就越往下，所以delta又需要反转回来，向上是负的，向下是正的，所以乘以-1
+tar.style.top = range( tar.offsetTop + ( -1 * delta * 10 ),160,0 ) + 'px';
+
+        </div>
+    </body>
+</html>

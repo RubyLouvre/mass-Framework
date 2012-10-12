@@ -1,57 +1,37 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
-<!DOCTYPE html>
+
+<!DOCTYPE HTML>
 <html>
     <head>
-        <title></title>
+        <title>2px 偏移值 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style>
-  
-            #aaa {
-                padding:20px;
-                background: gray
+            html{
+                background:lime;
+                 border:0px;
             }
-            #bbb {
-                padding:20px;
-                background: blue;
+            body{
+                background:orange;
+                border:0px;
             }
-            #ccc {
+            #log {
                 padding:20px;
                 background: red;
             }
         </style>
         <script>
             var log = function(s){
-                window.console && console.log(s);
+                document.getElementById("log").innerHTML = s;
             }
             document.onclick = function(e){
                 e = e || event;
-//http://bbs.51js.com/thread-84330-1-1.html http://www.360doc.com/content/08/0312/19/24120_1113143.shtml
-                log(document.documentElement.clientTop)
-                log(document.body.clientTop)
-  
-                //                console.log("layer"+e.layerX+"  "+e.layerY)
-                //                console.log("offset"+e.offsetX+"  "+e.offsetY)
-                //                console.log("client"+e.clientX+"  "+e.clientY)
-                //                console.log("page"+e.pageX+"  "+e.pageY)
-                //                console.log("screen"+e.screenX+"  "+e.screenY)
-                //                console.log("xy"+e.x+"  "+e.y)
+                log(document.documentElement.clientTop+"  "  +document.body.clientTop)
             }
         </script>
     </head>
     <body>
-        <div id="aaa">
-            <div id="bbb">
-                <pre id="ccc">
-IE8 标准模式 0 0 
-IE6-7 标准模式2 0
-IE6-8 怪异模式0 2
-IE在怪异模式下通过改样式消除它，IE6-8在标准模式下不能
 
-                </pre>
-            </div>
-        </div>
+        <pre id="log">
+
+        </pre>
     </body>
 </html>
