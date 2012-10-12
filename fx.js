@@ -643,4 +643,6 @@ http://canvimation.github.com/
 https://github.com/sole/tween.js/blob/master/src/Tween.js
 http://lab.soledadpenades.com/js/webgl_vga/
 http://tmlife.net/tag/enchant-js
+GSAP JS, 出自GreenSock的JS动效库，绝对不能错过。包括TweenLite，TweenMax，TimelineLite和TimelineMax，号称比jQuery快20倍！
+http://www.greensock.com/gsap-js/
 */

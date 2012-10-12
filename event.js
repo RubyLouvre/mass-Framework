@@ -557,5 +557,7 @@ submit 挺有意思的，不知道有人研究过没。我那天想了想，感�
 http://heroicyang.com/blog/javascript-timers.html
 http://heroicyang.com/blog/javascript-event-loop.html
 http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
+ http://hi.baidu.com/flondon/item/59993d95625d19ceb72531a3
+beforeunload 丢失率统计及优化方案
      */
-//addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+   
