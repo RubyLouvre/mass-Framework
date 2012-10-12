@@ -238,10 +238,10 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
 
                 if( /^(?:mouse|contextmenu)|click/.test( type ) ){
                     if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
-                        var doc = event.target.ownerDocument || document,
-                        html = doc.documentElement, body = doc.body;
-                        event.pageX = event.clientX + (html && html.scrollLeft || body && body.scrollLeft || 0) - (html && html.clientLeft || body && body.clientLeft || 0);
-                        event.pageY = event.clientY + (html && html.scrollTop  || body && body.scrollTop  || 0) - (html && html.clientTop  || body && body.clientTop  || 0);
+                        var doc = event.target.ownerDocument || document;
+                        var box = document.compatMode == "BackCompat" ?  doc.body : doc.documentElement
+                        event.pageX = event.clientX + (box && box.scrollLeft  || 0) - (box && box.clientLeft || 0);
+                        event.pageY = event.clientY + (box && box.scrollTop   || 0) - (box && box.clientTop  || 0);
                     }
                     //如果不存在relatedTarget属性，为它添加一个
                     if ( !event.relatedTarget && event.fromElement ) {
@@ -499,7 +499,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 
     }catch(e){};
 })
-    /**
+/**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
 2011.9.17 事件发送器增加一个uniqueID属性
 2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
@@ -558,4 +558,4 @@ http://heroicyang.com/blog/javascript-timers.html
 http://heroicyang.com/blog/javascript-event-loop.html
 http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
      */
-    //addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
+//addEventListener polyfill 1.0 / Eirik Backer / MIT Licence
