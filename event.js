@@ -434,7 +434,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         }
     });
     /**
-mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10都支持它们
+mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10+都支持它们
 详见http://www.filehippo.com/pl/download_opera/changelog/9476/
          */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
@@ -561,3 +561,4 @@ http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
 beforeunload 丢失率统计及优化方案
      */
    
+

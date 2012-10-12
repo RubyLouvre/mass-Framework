@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            .menu_wrap{
+                display: none;
+                padding:5px;
+                width:120px;
+                border:1px solid #006dcc;
+            }
+            .menu{
+                list-style: none;
+                padding:0;
+                margin:0;
+            }
+            .menu li{
+                width:120px;
+                text-indent: 1em;
+                height: 25px;
+                line-height: 25px;
+            }
+            .menu li:hover{
+                background: #06a3d6;
+                color:#fff;
+            }
+        </style>
+        <script>
+            window.onload = function(){
+                function log(s){
+                    window.console && console.log(s);
+                } 
+                var get = function(i) {
+                    return document.getElementById( i );
+                }
+                function addEvent(el, type, callback, useCapture  ){
+                    if(el.dispatchEvent){//w3c方式优先
+                        el.addEventListener( type, callback, !!useCapture  );
+                    }else {
+                        el.attachEvent( "on"+type, callback );
+                    }
+                    return callback;//返回callback方便卸载时用
+                }
+                addEvent(get("button"),"click",function(){
+                    get("menu_wrap").style.display = "block";
+                })
+                addEvent(document,"click",function(){
+                    // ?
+                    //  get("menu_wrap").style.display = "none";
+                })
+            }
+        </script>
+    </head>
+    <body>
+     在前端开发中经常会碰到当鼠标放到一个元素上时会弹出你一个元素，鼠标离开那个弹出元素后隐藏。这类效果一般要用到一些鼠标事件，一类是mouseout和mouseover，另一类是mouseenter和mouseleave。
+
+　　其中mouseout和mouseover是会冒泡的，可能会出现不想要的结果；而mouseenter和mouseleave是不会冒泡，这个比较理想。
+
+        <div>
+            <strong id="button">显示下拉菜单 </strong>
+            <div class="menu_wrap" id="menu_wrap">
+                <ul class="menu">
+                    <li>item1</li>
+                    <li>item2</li>
+                    <li>item3</li>
+                </ul>
+            </div>
+        </div>
+
+    </body>
+</html>
