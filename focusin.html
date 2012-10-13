@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>placeholer的模拟</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+
+            #username_wrap{
+                position:relative;
+                width:200px;
+                height:25px;
+                line-height:25px;
+            }
+            #username{
+                position:absolute;
+                width:200px;
+                height:25px;
+                line-height:25px;
+                text-indent:10px;
+                background:transparent;
+            }
+            #username_placeholder{
+                position:absolute;
+                top:3px;
+                width:200px;
+                height:25px;
+                text-indent:10px;
+                line-height:25px;
+                color:gray;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="username_wrap">
+            <div id="username_placeholder">请输入用户名</div>
+            <input id="username" autocomplete="off">
+        </div>
+    </body>
+</html>

@@ -559,6 +559,8 @@ http://heroicyang.com/blog/javascript-event-loop.html
 http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
  http://hi.baidu.com/flondon/item/59993d95625d19ceb72531a3
 beforeunload 丢失率统计及优化方案
+统计日志打点方案的权衡
+http://www.irideas.com/?p=26
      */
    
 

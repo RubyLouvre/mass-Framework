@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title></title>
+        <title>点击弹出层以外的地方隐藏层 by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <style>
             .menu_wrap{
@@ -45,18 +45,22 @@
                 addEvent(get("button"),"click",function(){
                     get("menu_wrap").style.display = "block";
                 })
+                var flag
+                addEvent(get("menu_wrap"),"mouseenter",function(){
+                    flag = false;
+                })
+                addEvent(get("menu_wrap"),"mouseleave",function(){
+                    flag = true;
+                })
                 addEvent(document,"click",function(){
-                    // ?
-                    //  get("menu_wrap").style.display = "none";
+                    if(flag){
+                        get("menu_wrap").style.display = "none";
+                    }
                 })
             }
         </script>
     </head>
     <body>
-     在前端开发中经常会碰到当鼠标放到一个元素上时会弹出你一个元素，鼠标离开那个弹出元素后隐藏。这类效果一般要用到一些鼠标事件，一类是mouseout和mouseover，另一类是mouseenter和mouseleave。
-
-　　其中mouseout和mouseover是会冒泡的，可能会出现不想要的结果；而mouseenter和mouseleave是不会冒泡，这个比较理想。
-
         <div>
             <strong id="button">显示下拉菜单 </strong>
             <div class="menu_wrap" id="menu_wrap">
@@ -67,6 +71,5 @@
                 </ul>
             </div>
         </div>
-
     </body>
 </html>
