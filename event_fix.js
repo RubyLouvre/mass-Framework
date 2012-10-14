@@ -18,9 +18,10 @@ define("event_fix", !!document.dispatchEvent, function(){
     }
     function delegate( fn ){
         return function( item ){
-            var adapter = $.event.eventAdapter, src = item.currentTarget, type = item.type,
-            fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
-            return (fix || item.live ) ? fn( src, item ) : false;
+            //   var adapter = $.event.eventAdapter, src = item.currentTarget, type = item.type
+            //   fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
+            //    return (fix || item.live ) ? fn( src, item ) : false;
+            return item.live  ? fn( item.currentTarget, item ) : false;
         }
     }
 
