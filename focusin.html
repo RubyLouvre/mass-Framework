@@ -1,39 +1,64 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
     <head>
-        <title>placeholer的模拟</title>
+        <title>focusin/focusout by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <style>
+         <script src="mass.js" ></script>
+         <style>
+             input {
+                 border:1px solid green;
+             }
+         </style>
+         <script>
+             $.require("ready,event", function(){
+                 $("#form").focusin(function(e){
+                     e.target.style.border = "1px solid red"
 
-            #username_wrap{
-                position:relative;
-                width:200px;
-                height:25px;
-                line-height:25px;
+                       $("#form").unbind("focusin")
+                 })
+             })
+         </script>
+        <script type="text/javascript2">
+            window.onload = function(){
+                var get = function(i) {
+                    return document.getElementById( i );
+                }
+                function addEvent(el, type, callback, useCapture  ){
+                    if(el.dispatchEvent){//w3c方式优先
+                        el.addEventListener( type, callback, !!useCapture  );
+                    }else {
+                        el.attachEvent( "on"+type, callback );
+                    }
+                    return callback;//返回callback方便卸载时用
+                }
+                var form = get("form")
+                function focusin (event) {
+                    var target = event.target ? event.target : event.srcElement;
+                    if (target) {
+                        target.style.color = "blue";
+                    }
+                }
+                function focusout (event) {
+                    var target = event.target ? event.target : event.srcElement;
+                    if (target) {
+                        target.style.color = "";
+                    }
+                }
+                if ("onfocusin" in form) {
+                    addEvent(form,"focusin",focusin, false)
+                    addEvent(form,"focusout",focusout, false)
+                }else{
+                    addEvent(form,"focus",focusin, true)
+                    addEvent(form,"blur",focusout, true)
+                }
             }
-            #username{
-                position:absolute;
-                width:200px;
-                height:25px;
-                line-height:25px;
-                text-indent:10px;
-                background:transparent;
-            }
-            #username_placeholder{
-                position:absolute;
-                top:3px;
-                width:200px;
-                height:25px;
-                text-indent:10px;
-                line-height:25px;
-                color:gray;
-            }
-        </style>
+
+        </script>
     </head>
     <body>
-        <div id="username_wrap">
-            <div id="username_placeholder">请输入用户名</div>
-            <input id="username" autocomplete="off">
-        </div>
+        <form id="form">
+           姓名: <input placeholder="请填写用户名"/><br />
+           邮箱: <input placeholder="请填写邮箱"/>
+        </form>
     </body>
 </html>

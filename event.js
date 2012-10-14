@@ -108,6 +108,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 events.push( desc );               //用于事件拷贝
                 var count = events[ type+"_count" ] = ( events[ type+"_count" ] | 0 )+ 1;
                 var hack = adapter[ desc.type ] || {};
+                if(hack.add){
+                    hack.add(desc)
+                }
                 if( count == 1 ){
                     var handle = data[type+"_handle"] = facade.curry( desc );     //  一个curry
                     if( !hack.setup || hack.setup( desc ) === false  ) {
@@ -169,10 +172,14 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                     }
                 }
+
                 for ( var i = 0, desc; desc = handlers[i++]; ) {
                     if ( ( event.type == desc.origType ) &&
                         (!event.rns || event.rns.test( desc.ns )) ) {
                         //谁绑定了事件,谁就是事件回调中的this
+                        if(desc.preHandle && desc.preHandle(desc.elem || ctarget, event, desc) === false){
+                            return
+                        }
                         result = desc.fn.apply( desc.elem || ctarget, args);
                         desc.times--;
                         if(desc.times === 0){//如果有次数限制并到用光所有次数，则移除它
@@ -440,17 +447,11 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
         "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, mapper){
             adapter[ type ]  = {
-                setup: function( desc ){//使用事件冒充
-                    desc[type+"_handle"] = $.bind( desc.currentTarget, mapper, function( event ){
-                        var target = desc.currentTarget
+                add: function(desc){
+                    desc.preHandle = function(target, event){
                         var related = event.relatedTarget;
-                        if(desc.live || !related || (related !== target && !$.contains( target, related )) ){
-                            facade.dispatch( target, event, type );
-                        }
-                    })
-                },
-                teardown: function( desc ){
-                    $.unbind( desc.currentTarget, mapper, desc[ type+"_handle" ] );
+                        return !related || (related !== target && !$.contains( target, related ))
+                    }
                 }
             };
             if(!$.eventSupport("mouseenter")){

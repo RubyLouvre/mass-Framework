@@ -15,6 +15,7 @@
                 padding:0;
                 margin:0;
             }
+
             .menu li{
                 width:120px;
                 text-indent: 1em;
@@ -26,8 +27,8 @@
                 color:#fff;
             }
         </style>
-        <script>
-            window.onload = function(){
+        <script type="xxxxxx">
+            /*  window.onload = function(){
                 function log(s){
                     window.console && console.log(s);
                 } 
@@ -54,22 +55,49 @@
                 })
                 addEvent(document,"click",function(){
                     if(flag){
+
                         get("menu_wrap").style.display = "none";
                     }
                 })
-            }
+            }*/
+        </script>
+        <script src="mass.js" ></script>
+        <script>
+            $.require("ready,event,css",function(){
+                var flag
+                $("#button").click(function(){
+                    flag = false;
+                    $("#menu_wrap").show()
+                })
+             
+                $("#menu_wrap").mouseleave(function(){
+                    $.log("mouseleave")
+                    flag = true;
+                });
+                $("#menu_wrap").mouseenter(function(){
+                    $.log("mouseenter")
+                    flag = false;
+                })
+                $(document).click(function(){
+                    $.log(flag)
+                    if(flag){
+                        $("#menu_wrap").hide()
+                        //  flag = false;
+                    }
+                })
+            })
         </script>
     </head>
     <body>
-        <div>
-            <strong id="button">显示下拉菜单 </strong>
-            <div class="menu_wrap" id="menu_wrap">
-                <ul class="menu">
-                    <li>item1</li>
-                    <li>item2</li>
-                    <li>item3</li>
-                </ul>
-            </div>
+
+        <div><strong id="button">显示下拉菜单 </strong></div>
+        <div class="menu_wrap" id="menu_wrap">
+            <ul class="menu">
+                <li>item1</li>
+                <li>item2</li>
+                <li>item3</li>
+            </ul>
         </div>
+
     </body>
 </html>

@@ -2,8 +2,7 @@
 // 样式操作模块 by 司徒正美
 //=========================================
 define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , function(){
-    try{
-    //$.log( "已加载css模块" );
+    $.log( "已加载css模块" );
     var adapter = $.cssAdapter = $.cssAdapter || {}
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     var  rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
@@ -453,7 +452,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         $.fn[ method ] = function(){
             return this.each(function(){
                 if(this.style){
-                    this.style.display = method == "show" ? "" : "none"
+                    this.style.display = method == "show" ? "block" : "none"
                 }
             })
         }
@@ -567,10 +566,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
-    }catch(e){
-        throw module.id;
-        throw e
-    }
 });
 /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
