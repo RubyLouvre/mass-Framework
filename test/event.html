@@ -1,0 +1,92 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js"> </script>
+        <script >
+            $.require("ready,event", function(){
+                var log = function(s){
+                    window.console && console.log(s)
+                }
+                $("#aaa").click(function(e){
+                    log("aaa")
+                })
+                $("#bbb").click(function(e){
+                    log("bbb1")
+                })
+                $("#bbb").click(function(e){
+                    log("bbb2")
+                })
+                $("#ccc").click(function(e){
+                    log("ccc")
+                })
+                $("body").delegate("div","click", function(e){
+                    log("delegate");
+                });
+                   $("#ccc").fire("click")
+            })
+        </script>
+        <script type="aaa">
+            $(function(){
+                var log = function(s){
+                    window.console && console.log(s)
+                }
+                $("#aaa").click(function(e){
+                    log("aaa")
+                    //   log(e.currentTarget)
+                })
+                $("#bbb").click(function(e){
+                    log("bbb1")
+                    log(e.currentTarget)
+                })
+                $("#bbb").click(function(e){
+                    log("bbb2")
+                    log(e.currentTarget)
+                })
+                $("#ccc").click(function(e){
+                    log("ccc")
+                    log(e.currentTarget)
+                })
+                $("body").delegate("div","click", function(e){
+                    log("delegate");
+                    //  log(e.currentTarget)
+                })
+
+            })
+        </script>
+        <style>
+            html,body{
+                background:#999;
+                height:90%;
+            }
+            body{
+                padding:20px;
+            }
+            #aaa{
+                background:#cc9;
+                padding:20px;
+            }
+            #bbb{
+                background:#c9c;
+                padding:20px;
+                height:100px;
+            }
+            #ccc{
+                background:#5e850a;
+                padding:20px;
+                height:40px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="aaa">
+            <div id="bbb">
+                <div id="ccc">
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

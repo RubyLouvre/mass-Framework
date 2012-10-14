@@ -321,30 +321,34 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     })
     if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( type ){
-            var bindTarget = $["@bind"] in this, initEvent = true, more, event
+            var bindTarget = $["@bind"] in this, more, event
             var target = bindTarget ? this : window;
-            if(typeof init == "string"){
+            if(typeof type == "string"){
                 more = new Event( type );
             }else if(type && type.preventDefault){
                 if(!( type instanceof $.Event) ){//如果是真的事件对象
                     more = new Event( type.type );
-                    initEvent = false;
+                    event = type;
                 }else{
                     more = type;//如果是$.Event实例
                 }
             }
-            if(initEvent && more){
+            if( more ){
                 type = more.type;
                 var doc = target.ownerDocument || target.document || target || document;
-                event = doc.createEvent(eventMap[type] || "CustomEvent");
+                if(!event){
+                    event = doc.createEvent(eventMap[type] || "CustomEvent");
+                    event.initEvent( type, true,true, doc.defaultView, 1);//, doc.defaultView
+                }
+                event.args = [].slice.call( arguments, 1 ) ;
+                event.more = more
+                target.dispatchEvent(event);
                 if(/^(focus|blur|select|submit|reset)$/.test(type)){
                     target[type] && target[type]()
                 }
-                event.initEvent( type, true,true, doc.defaultView,1);//, doc.defaultView
+            }else{
+                throw "fire的第一个参数是必须是事件类或真伪事件对象 "
             }
-            event.args = [].slice.call( arguments, 1 ) ;
-            event.more = more
-            target.dispatchEvent(event);
         }
     }
     var rmapper = /(\w+)_(\w+)/g;
@@ -492,12 +496,9 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
             bindType    : "DOMMouseScroll",
             delegateType: "DOMMouseScroll"
         }
-        try{
-            //可能末来FF会支持标准的mousewheel事件，则需要删除此分支
-            document.createEvent("WheelEvent");
+        if($.eventSupport("mousewheel")){
             delete adapter.mousewheel;
-        }catch(e){ };
-
+        }
     }catch(e){};
 })
 /**

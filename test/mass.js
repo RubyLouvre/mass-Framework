@@ -88,7 +88,7 @@ define(["$spec"],function(){
             $.config({
                 level:0
             });
-            expect( $.core.level ).eq( 0 );
+            expect( $.config.level ).eq( 0 );
             //alias是用于对模块别名，方便移到文件后，其他模块也能访问到它
             $.config({
                 level:9,
@@ -96,7 +96,7 @@ define(["$spec"],function(){
                     $xxx: "/aaa/ddd.js"
                 }
             });
-            expect( $.core.alias.$xxx ).eq( "/aaa/ddd.js" );
+            expect( $.config.alias.$xxx ).eq( "/aaa/ddd.js" );
         },
         "mix,对象合并": function(){
             var a = {

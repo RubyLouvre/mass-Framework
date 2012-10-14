@@ -17,7 +17,7 @@ define("event_fix", !!document.dispatchEvent, function(){
         }
     }
     function delegate( fn ){
-        return function( item ){
+        return function( item ){//用于判定是否要使用代理
             //   var adapter = $.event.eventAdapter, src = item.currentTarget, type = item.type
             //   fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
             //    return (fix || item.live ) ? fn( src, item ) : false;
@@ -95,9 +95,9 @@ define("event_fix", !!document.dispatchEvent, function(){
                 delegateType: "focusout"
             },
             change: {//change事件的冒泡情况 IE6-9全灭
-                check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
-                    return true;
-                },
+//                check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
+//                    return true;
+//                },
                 setup: delegate(function( node, desc ){
                     var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
                     desc.change_beforeactive = $.bind( node, "beforeactivate", function() {
