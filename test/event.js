@@ -1,7 +1,8 @@
-define(["$event","$spec"],function( ){
+define(["$event","$spec","$css"],function( ){
     $.fixture('事件模块-event', {
         "click": function(id){
-            var div = $("<div style='width:200px;height:200px;background:red;float:left;'/>").appendTo("body").text("验证click事件");
+            var div = $("<div style='width:200px;height:200px;background:red;float:left;'/>")
+            .appendTo("body").text("验证click事件");
             div.bind("click", function(e){   
                 expect( e.type,id ).eq("click");
             })
@@ -30,6 +31,27 @@ define(["$event","$spec"],function( ){
             setTimeout(function(){
                 div.remove();
             },10000)
+        },
+        "mouseover": function(id){
+            var div = $("<div style='width:200px;height:200px;background:blue;float:left;'/>")
+            .appendTo("body").text("验证mouseover/mouseout事件");
+            div.mouseover(function(e){
+                div.css("background","green")
+                expect( e.type,id ).eq("mouseover");
+                setTimeout( function(){
+                    div.fire("mouseout")
+                },500 )
+            }).mouseout(function(e){
+                div.css("background","#8000ff")
+                expect( e.type,id ).eq("mouseout");
+            })
+            div.fire("mouseover")
+            setTimeout(function(){
+                div.remove();
+            },10000)
+        },
+        "mouseenter": function(id){
+           
         }
     })
 })
