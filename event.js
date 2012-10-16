@@ -319,6 +319,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
         }
     })
+    var unbubbleEvents = $.oneObject("load unload focus blur mouseenter mouseleave",1)
     if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( type ){
             var bindTarget = $["@bind"] in this, more, event
@@ -338,12 +339,12 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var doc = target.ownerDocument || target.document || target || document;
                 if(!event){
                     event = doc.createEvent(eventMap[type] || "CustomEvent");
-                    event.initEvent( type, true,true, doc.defaultView, 1);//, doc.defaultView
+                    event.initEvent( type,!unbubbleEvents[type],true, doc.defaultView, 1);//, doc.defaultView
                 }
                 event.args = [].slice.call( arguments, 1 ) ;
                 event.more = more
                 target.dispatchEvent(event);
-                if(/^(focus|blur|select|submit|reset)$/.test(type)){
+                if(/^(focus|blur|select|reset)$/.test(type)){
                     target[type] && target[type]()
                 }
             }else{
@@ -464,6 +465,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 
         });
     }
+
     //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
         "focusin_focus,focusout_blur".replace(rmapper, function(_,type, mapper){
