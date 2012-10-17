@@ -307,6 +307,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             wrap = translations[ tag ] || translations._default,
             fragment = doc.createDocumentFragment(),
             wrapper = doc.createElement("div"), firstChild;
+            html = wrap[3] ? wrap[3](html) : html
             wrapper.innerHTML = wrap[1] + html + wrap[2];
             var els = wrapper[ TAGS ]("script");
             if( els.length ){//使用innerHTML生成的script节点不会发出请求与执行text属性
@@ -368,8 +369,21 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         area: [ 1, "<map>", "</map>" ],
         _default: [ 0, "", "" ]
     };
+
     if(!support.createAll ){//IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
         translations._default = [ 1, "X<div>", "</div>" ]
+        translations.param = [ 1, "X<object>", "</object>" ,function ( elem ) {
+            return elem.replace(/<param([^>]*)>/gi, function( m, s1, offset ) {
+                var name = s1.match( /name=["']([^"']*)["']/i );
+                return name ? ( name[1].length ?
+                    // It has a name attr with a value
+                    "<param" + s1 + ">" :
+                    // It has name attr without a value
+                    "<param" + s1.replace( name[0], "name='_" + offset +  "'" ) + ">" ) :
+                // No name attr
+                "<param name='_" + offset +  "' " + s1 + ">";
+            });
+        }]
     }
     translations.optgroup = translations.option;
     translations.tbody = translations.tfoot = translations.colgroup = translations.caption = translations.thead;
@@ -515,7 +529,6 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if ( dataAndEvents ) {
                 $.mergeData( neo, node );
-                            console.log(neo)
                 if ( deepDataAndEvents ) {
                     src =  node[ TAGS ]( "*" );
                     neos = neo[ TAGS ]( "*" );
@@ -630,7 +643,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             //将节点集合重新包装成一个新jQuery对象返回
             return this.labor( ret );
         },
-                //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
+        //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
         is: function( expr ){
             var nodes = $.query( expr, this.ownerDocument ), obj = {}, uid;
             for( var i = 0 , node; node = nodes[ i++ ];){

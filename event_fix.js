@@ -39,7 +39,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                 }
             }
             if(!transfer){
-                throw "first arguments of $.event.fire is a event type, native even or instance of $.Event"
+                throw "fire的第一个参数是必须是事件类或真伪事件对象"
             }
             transfer.target = this;
             transfer.args = [].slice.call(arguments,1) ;
