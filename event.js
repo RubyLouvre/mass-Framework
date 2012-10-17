@@ -418,18 +418,18 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
                         if(!rtypes.test(hash.type)){
-                            throw "hash.type should be a combination of this event type and the namespace!"
+                            throw "事件类型格式不正确"
                         }
                     }
                 }
             }
-            if(method === "on"){
-                if( !hash.type || !hash.fn ){
-                    $.log("$.fn."+ method + " occur error: type and callback must be specified!");
-                    return this;
-                }
-                hash.times = hash.times > 0  ? hash.times : Infinity;
+            if(!hash.type){
+                throw "必须指明事件类型"
             }
+            if(method === "on" && !hash.fn ){
+                throw "必须指明事件回调"
+            }
+            hash.times = hash.times > 0  ? hash.times : Infinity;
             return this.each(function() {
                 facade[ mapper ]( this, hash );
             });
