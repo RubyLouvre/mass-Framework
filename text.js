@@ -928,49 +928,23 @@ if ( !jQuery.support.focusinBubbles ) {
     });
 }
 
-// IE submit delegation
-if ( !jQuery.support.submitBubbles ) {
-
-    jQuery.event.special.submit = {
-        setup: function() {
-            // Only need this for delegated form submit events
-            if ( jQuery.nodeName( this, "form" ) ) {
-                return false;
-            }
-
-            // Lazy-add a submit handler when a descendant form may potentially be submitted
-            jQuery.event.add( this, "click._submit keypress._submit", function( e ) {
-                // Node name check avoids a VML-related crash in IE (#9807)
-                var elem = e.target,
-                form = jQuery.nodeName( elem, "input" ) || jQuery.nodeName( elem, "button" ) ? elem.form : undefined;
-                if ( form && !jQuery._data( form, "_submit_attached" ) ) {
-                    jQuery.event.add( form, "submit._submit", function( event ) {
-                        event._submit_bubble = true;
-                    });
-                    jQuery._data( form, "_submit_attached", true );
+var adapter = facade.eventAdapter;
+//submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
+//同reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
+"submit,reset".replace( $.rword, function( type ){
+    adapter[ type ] = {
+        setup: delegate(function( node ){
+            $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
+                var el = event.target;
+                if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].input[  el.type ] ) ){
+                    facade._dispatch( [ node ], event, type );
                 }
             });
-            // return undefined since we don't need an event listener
-        },
-
-        postDispatch: function( event ) {
-            // If form was submitted by the user, bubble the event up the tree
-            if ( event._submit_bubble ) {
-                delete event._submit_bubble;
-                if ( this.parentNode && !event.isTrigger ) {
-                    jQuery.event.simulate( "submit", this.parentNode, event, true );
-                }
-            }
-        },
-
-        teardown: function() {
-            // Only need this for delegated form submit events
-            if ( jQuery.nodeName( this, "form" ) ) {
-                return false;
-            }
-
-            // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
-            jQuery.event.remove( this, "._submit" );
-        }
+        }),
+        keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
+        input:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
+        teardown: delegate(function( node ){
+            $( node ).unbind( "._"+type );
+        })
     };
-}
+});

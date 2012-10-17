@@ -3,31 +3,34 @@
     <head>
         <title>change</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+      <!--  <script src="jquery1.82.js" ></script>-->
         <script src="mass.js" ></script>
         <script>
-            $.require("ready,event,css",function(){
-                function fn(){
-                    $.log("fn")
-                }
-                function fn1(){
-                    $.log("fn1")
-                }
-                function fn2(){
-                    $.log("fn2")
-                }
-                $("body").click(fn).click(fn1).click(fn2)
-                setTimeout(function(){
-                    $.log("remove")
-                      $("body").unbind("click",fn)
-                },2000 )
+            /*   $(function(){
+                $('body').on('submit', 'form.haha', function() { alert(1);
+                    return false; 
+                });
+                $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
+            })*/
+            $.require("ready,event", function(){
+                $('body').on('submit', 'form.haha', function() { alert(1);
+                    return false; 
+                });
+                $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
+                  $('body').on( "change",'select', function() { $.log("xxxxxxx") })
             })
+          
         </script>
     </head>
-    <body style="height:200px;background:red;">
+    <body>
+        <div id="div1"></div>
         <select>
-            <option>xxx</option>
-            <option>yyy</option>
-            <option>zzz</option>
+            <option>
+                1111111
+            </option>
+             <option>
+                113333
+            </option>
         </select>
     </body>
 </html>

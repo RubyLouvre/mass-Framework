@@ -11,9 +11,9 @@ define("event_fix", !!document.dispatchEvent, function(){
         "radio": "checked",
         "checkbox": "checked"
     }
-    function changeNotify( event, type ){
+    function changeNotify( event ){
         if( event.propertyName === ( changeType[ this.type ] || "value") ){
-            $.event._dispatch( $._data( this, "publisher" ), event, type );
+            $.event._dispatch( $._data( this, "publisher" ), event, "change" );
         }
     }
     function delegate( fn ){
@@ -95,16 +95,14 @@ define("event_fix", !!document.dispatchEvent, function(){
                 //详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
                 setup: delegate(function( node, desc ){
                     var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
-                    desc.change_beforeactive = $.bind( node, "beforeactivate", function() {
-                        //防止出现跨文档调用的情况,找错event
-                        var doc = node.ownerDocument || node.document || node;
-                        var target = doc.parentWindow.event.srcElement, tid = $.getUid( target )
+                    desc.change_beforeactive = $.bind( node, "beforeactivate", function(event) {
+                        var target = event.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid( node ) ] = node;//此孩子可能同时要向N个顶层元素报告变化
-                            desc.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event, desc.origType))
+                            desc.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event) );
                         }
                     });//如果是事件绑定
                     node.fireEvent("onbeforeactivate")
@@ -125,56 +123,27 @@ define("event_fix", !!document.dispatchEvent, function(){
     }
 
     var adapter = facade.eventAdapter;
-    // adapter.input = adapter.change;
     //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
-    //reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
+    //同reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
     "submit,reset".replace( $.rword, function( type ){
         adapter[ type ] = {
             setup: delegate(function( node ){
                 $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
                     var el = event.target;
-                    if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].kind[  el.type ] ) ){
+                    if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].input[  el.type ] ) ){
                         facade._dispatch( [ node ], event, type );
                     }
                 });
             }),
             keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
-            kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
+            input:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
             teardown: delegate(function( node ){
                 $( node ).unbind( "._"+type );
             })
         };
     });
 })
-//    "submit,reset".replace( $.rword, function( type ){
-//        adapter[ type ] = {
-//            setup: delegate(function( node,item ){
-//                $(node).bind( "click._"+type+" keypress._"+type, item.fn)
-//            }),
-//            add: function( desc ){
-//                if(desc.live){
-//                    desc.preHandle = function(el, event){
-//                        var t = event.type;
-//                        if(adapter[ t ].keyCode[ event.which ] || adapter[ t ].kind[  el.type ] ){
-//                            event.type = type;
-//                            if(el.document){//如果是window
-//                                el.submit()
-//                            }
-//                            return true;
-//                        }
-//                    }
-//                    desc.postHandle = function(el, event){
-//                        event.type = event.originalEvent.type;
-//                    }
-//                }
-//            },
-//            keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
-//            kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
-//            teardown: delegate(function( node ){
-//                $( node ).unbind( "._"+type );
-//            })
-//        };
-//    });
+
     //2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 
 
