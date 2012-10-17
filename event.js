@@ -118,7 +118,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                             target = window;
                         }
                         //此元素在此事件类型只绑定一个回调
-                        $.bind(target, desc.type, handle, false);
+                        $.bind(target, desc.type, handle);
                     }
                 }
             //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
@@ -181,6 +181,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                             return
                         }
                         result = desc.fn.apply( desc.elem || ctarget, args);
+                        if(desc.postHandle && desc.postHandle(desc.elem || ctarget, event, desc) === false){
+                            return
+                        }
                         desc.times--;
                         if(desc.times === 0){//如果有次数限制并到用光所有次数，则移除它
                             facade.unbind( this, desc)
@@ -301,7 +304,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                                 target = window;
                             }
                             var handle = $._data(target, type+"_handle");
-                            $.unbind( target, desc.type, handle, false );
+                            $.unbind( target, desc.type, handle );
                         }
                         $.removeData( target, type +"_handle", true );
                         delete events[ type+"_count"];
@@ -534,29 +537,18 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 http://jsbin.com/efalu/7 input例子
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
 ECMAScript Edition3, 5 execution context and scope chain http://user.qzone.qq.com/153720615/blog/1339563690#!app=2&pos=1323177459
-DOM Level3 Event对象新增API 浏览器实现 一览表:
 
-IE9+(全部实现)(但是,IE9,IE10的e.isTrusted有bug .link.click();后出发的也是true...)
-
-chrome5 - chrome17 部分实现.(e.isTrusted未支持),
-
-Safari5 才部分实现.(e.isTrusted未支持).
-
-Opera10 - Opera11部分实现(stopImmediatePropagation以及e.isTrusted未实现，而仅仅实现了defaultPrevented).
-Opera12 部分实现 (stopImmediatePropagation,仍然为实现, 但实现了e.isTrusted)
-
-Firefox1.0 - Firefox5 (stopImmediatePropagation和defaultPrevented 未实现,仅仅实现了e.isTrusted,isTrusted,在成为标准前，是MOZ的私有实现啊)
-Firefox6 - Firefox10 (仅未实现stopImmediatePropagation)
-Firefox11(终于实现了stopImmediatePropagation)
-isTrusted 表明当前事件是否是由用户行为触发(比如说真实的鼠标点击触发一个click事件),
-还是由一个脚本生成的(使用事件构造方法,比如event.initEvent)
-//不要把事件写在标签内
-http://www.cnblogs.com/_franky/archive/2010/07/20/1781513.html
-和 submit 事件的另类是一样的。
-submit 挺有意思的，不知道有人研究过没。我那天想了想，感觉也是历史原因使然——和别的事件不一样，执行 xxx 方法触发 xxx 事件，执行 submit 方法后是不会触发 submit 事件的，submit 事件只能由用户的行为触发。
-所有浏览器都没这么做。原因是太多人在 submit 事件里做表单验证，通过了就调用 form.submit() 方法，而不是没通过调用 e.preventDefault() 什么的。
-
-如果调用 submit 方法再触发一次 submit 事件的话，就进入死循环了……
+	    IE6-9   IE6-9  IE6-9    firefox16  firefox16 firefox16
+            keydown keyup  keypress keydow     keyup     keypress
+区分大小写	 ×	×	√	×	 ×	√
+监听A类功能键	√     √	       √       √        √      √
+监听B类功能键	√     √	       ×       √	√      ×
+获取charCode ×	 ×	  √	  ×	   ×	   ×
+监听tab	   √	 ×	  ×	  √	   √	   √
+　　
+A类功能键是指enter，del，insert，方向。
+B类功能键是指上下翻页，shift，win，alt，ctrl，caps，退格。
+Chrome23，safari5的情况同IE。Opera12的情况与FF相近，但不能获取charCode值是返回undefined，并且只能通过keydown,keyup监听tab键。
 
 http://heroicyang.com/blog/javascript-timers.html
 http://heroicyang.com/blog/javascript-event-loop.html

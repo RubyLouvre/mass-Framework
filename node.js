@@ -645,7 +645,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         index: function( expr ){
             var first = this[0]
             if ( !expr ) {//如果没有参数，返回第一元素位于其兄弟的位置
-                return ( first && first.parentNode ) ? this.prevAll().length : -1;
+                return ( first && first.parentNode ) ? this.first().prevAll().length : -1;
             }
             // 返回第一个元素在新实例中的位置
             if ( typeof expr === "string" ) {

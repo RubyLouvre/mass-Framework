@@ -18,9 +18,6 @@ define("event_fix", !!document.dispatchEvent, function(){
     }
     function delegate( fn ){
         return function( item ){//用于判定是否要使用代理
-            //   var adapter = $.event.eventAdapter, src = item.currentTarget, type = item.type
-            //   fix = adapter[ type ] && adapter[ type ].check && adapter[ type ].check( src, item );
-            //    return (fix || item.live ) ? fn( src, item ) : false;
             return item.live  ? fn( item.currentTarget, item ) : false;
         }
     }
@@ -95,9 +92,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                 delegateType: "focusout"
             },
             change: {//change事件的冒泡情况 IE6-9全灭
-//                check: function(){//详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
-//                    return true;
-//                },
+                //详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
                 setup: delegate(function( node, desc ){
                     var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
                     desc.change_beforeactive = $.bind( node, "beforeactivate", function() {
@@ -150,7 +145,36 @@ define("event_fix", !!document.dispatchEvent, function(){
             })
         };
     });
-});
+})
+//    "submit,reset".replace( $.rword, function( type ){
+//        adapter[ type ] = {
+//            setup: delegate(function( node,item ){
+//                $(node).bind( "click._"+type+" keypress._"+type, item.fn)
+//            }),
+//            add: function( desc ){
+//                if(desc.live){
+//                    desc.preHandle = function(el, event){
+//                        var t = event.type;
+//                        if(adapter[ t ].keyCode[ event.which ] || adapter[ t ].kind[  el.type ] ){
+//                            event.type = type;
+//                            if(el.document){//如果是window
+//                                el.submit()
+//                            }
+//                            return true;
+//                        }
+//                    }
+//                    desc.postHandle = function(el, event){
+//                        event.type = event.originalEvent.type;
+//                    }
+//                }
+//            },
+//            keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
+//            kind:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
+//            teardown: delegate(function( node ){
+//                $( node ).unbind( "._"+type );
+//            })
+//        };
+//    });
     //2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 
 
