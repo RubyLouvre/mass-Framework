@@ -11,15 +11,17 @@
                 var callback = function(e){
                     $.log(e.type)
                 }
+
                 $("input").bind("valuechange", function(e){
-                   $.log(e.oldValue+" "+e.newValue)   
-                   $.log(e.oldType)
+                    $.log(e.oldValue+" "+e.newValue)
+                    $.log(e.type)
                 })
-           //     $("input").click(callback)
-           //     $("input").focus(callback)
-           //     $("input").keyup(callback)
-           //     $("input").keydown(callback)
-           //     $("input").blur(callback)
+              
+                //     $("input").click(callback)
+                //     $("input").focus(callback)
+                //     $("input").keyup(callback)
+                //     $("input").keydown(callback)
+                //     $("input").blur(callback)
             })
           
         </script>
@@ -29,8 +31,8 @@
 
         <div id="parent">
             <form action="javascript:void 0">
-                <input type="text"/>
-              
+                <input type="text" id="aa"/>
+
                 <select>
                     <option>
                         1111111
@@ -46,13 +48,13 @@
             </form>
 
         </div>
-        <!--
+     <!--
         <pre>
                 $(document).on('submit', 'form', function() {
                     $.log("form")
                 });
                 $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
         </pre>
--->
+        -->
     </body>
 </html>

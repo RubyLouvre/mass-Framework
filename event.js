@@ -340,13 +340,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     var rmapper = /(\w+)_(\w+)/g;
     //以下是用户使用的API
     $.implement({
-        toggle: function(/*fn1,fn2,fn3*/){
-            var fns = Array.apply([], arguments), i = 0;
-            return this.click(function(e){
-                var fn  = fns[i++] || fns[i = 0, i++];
-                fn.call( this, e );
-            })
-        },
         hover: function( fnIn, fnOut ) {
             return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
         },
@@ -516,6 +509,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.6.6 addEventListenter也能绑定自定义事件, 一些兼容逻辑移到event_fix中去 升级到v6
 2012.8.17 $.EventTarget不再自带uniqueNumber，此属性会在用户第一次调用bind,unbind方法时再为原对象添加此属性
 2012.8.31 移除$.EventTarget,以后所有自定义事件由操作流代劳,升级到v7
+2012.10.18 移除$.fn.toggle,$.event._dispatch,重构focusin,fire,change,submit等实现,升级到v8
 
 http://jsbin.com/efalu/7 input例子
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/

@@ -14,7 +14,7 @@ define("valuechange", ["$event"], function(){
         if(old !== neo){
             $._data(elem, DATA, neo);
             var event = new $.Event("valuechange")
-            event.oldType = type
+            event.realType = type
             event.oldValue = old;
             event.newValue = neo;
             $.event.fire.call(elem, event)
@@ -23,7 +23,6 @@ define("valuechange", ["$event"], function(){
     function unTestChange(elem){
         var id = $._removeData(elem, ID)
         clearTimeout( id )
-        $.log("===============")
         $.log($._removeData)
         $._removeData(elem, DATA);
     }
@@ -40,19 +39,22 @@ define("valuechange", ["$event"], function(){
     }
     
     function listen(elem) {
-        unlisten(elem);
+        unlisten(elem);//keydown keyup是对付键盘输入 mousedown是对象粘贴 focus是对付触摸
         "keydown keyup mousedown focus".replace($.rword, function(name){
             $(elem).bind(name+"._valuechange", startTest)
         })
         $(elem).bind('blur._valuechange', stopTest);
-        //http://liumiao.me/html/wd/W3C/264.html
-        $(elem).bind('webkitspeechchange._valuechange', function(e){
+        //语音输入 http://liumiao.me/html/wd/W3C/264.html
+        $(elem).bind('webkitspeechchange._valuechange', function(e){//chrome 11
             testChange(e.target,e.type)
         });
     }
     function unlisten(elem){
         unTestChange(elem)
         $(elem).unbind("._valuechange")
+    }
+    $.fn.valuechange = function(callback){
+         return callback?  this.bind( "valuechange", callback ) : this.fire( "valuechange" );
     }
     $.eventAdapter.valuechange = {
         setup: function(desc){
