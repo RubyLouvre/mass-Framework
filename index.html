@@ -46,6 +46,12 @@
             </form>
 
         </div>
+        <pre>
+                $(document).on('submit', 'form', function() {
+                    $.log("form")
+                });
+                $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
+        </pre>
 
     </body>
 </html>
