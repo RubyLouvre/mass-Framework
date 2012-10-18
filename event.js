@@ -8,7 +8,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         eventAdapter:{ } //添加或增强二级属性eventAdapter
     });
     var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
-    var bindTop = !facade.change;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
+    var bindTop = !adapter.change;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
     $.eventSupport = function( eventName, el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
@@ -121,12 +121,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         $.bind(target, desc.type, handle);
                     }
                 }
-            //mass Framework早期的事件系统与jQuery都脱胎于 Dean Edwards' addEvent library
-            //对于每个元素的某一种事件只绑定一个代理回调，通过它执行用户的所有回调，
-            //藉此解决this指向，event存无与标准化，回调顺序这三大问题
-            //jquery的创新在于使用多投事件API取代DOM 0事件绑定，解决对DOMMouseScroll，
-            //DOMContentLoaded，DOMAttrModified的绑定，并引入命名空间与实现事件冒充，事件代理，
-            //以及让无论是自定义事件与原生事件都能沿着DOM树人为地冒泡
             });
         },
 
@@ -202,18 +196,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 }
 
             }
-           // fn.uuid = hash.uuid;
             return fn;
         },
-        _dispatch: function( list, event, type ){//level2 API 用于事件冒充
-            event.more = event.more ||{}
-            event.more.type = type
-            for(var i in list){
-                if( list.hasOwnProperty(i)){
-                    facade.dispatch( list[ i ], event, type );
-                }
-            }
-        },
+
         dispatch: function( target, event, type ){// level2 API 用于旧式的$.event.fire中
             var handle = $._data(target, (type || event.type) +"_handle" );//取得此元素此类型的第一个quark
             handle && handle.call( target, event )
@@ -393,7 +378,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         }
     });
 
-
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
     var rtypes = /^[a-z0-9_\-\.\s\,]+$/i
     "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
@@ -476,7 +460,9 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
                 var src = event.target;
                 do{//模拟冒泡
                     if( $._data(src, "events") ) {
-                        facade._dispatch( [ src ], event, type );
+                        event.more = event.more ||{}
+                        event.more.type = type
+                        facade.dispatch( src, event, type );
                     }
                 } while (src = src.parentNode );
             }

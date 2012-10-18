@@ -8,6 +8,8 @@ define("event_fix", !!document.dispatchEvent, function(){
 
     function changeNotify( event ){
         if( event.type == "change" || event.propertyName == "checked" ){
+            $.log("changeNotify")
+            alert($.event.fire)
             $.event.fire.call(this,"change")
         }
     }
@@ -75,11 +77,7 @@ define("event_fix", !!document.dispatchEvent, function(){
             }
          
         },
-        eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
-            //            input: {
-            //                bindType: "change",
-            //                delegateType: "change"
-            //            },
+        eventAdapter: {
             focus: {
                 delegateType: "focusin"
             },
@@ -91,7 +89,8 @@ define("event_fix", !!document.dispatchEvent, function(){
                 setup: delegate(function( node, desc ){
                     var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
                     desc.__beforeactive__ = $.bind( node, "beforeactivate", function(event) {
-                        var target = event.srcElement, tid = $.getUid( target )
+                        var target = event.srcElement;
+                        var tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
@@ -102,7 +101,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                             }
                         }
                     });//如果是事件绑定
-                    node.fireEvent("onbeforeactivate")
+                // node.fireEvent("onbeforeactivate")
                 }),
                 teardown: delegate(function( node, desc ){
                     $.unbind( node, "beforeactive", desc.__beforeactive__ );
@@ -138,6 +137,9 @@ define("event_fix", !!document.dispatchEvent, function(){
     });
 })
 
-    //2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
-
+/*
+ * input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
+ * 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
+ * 2012.10.18 重构reset, change, submit的事件代理
+ */
 

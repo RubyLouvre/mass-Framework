@@ -11,32 +11,39 @@
                     return false; 
                 });
                 $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
+                $('body').on( "submit", function() { $.log(this.tagName) })
+                $(document).on( "submit",'form', function() {  $.log(this.tagName)  })
             })*/
             $.require("ready,event", function(){
-                  $(document).on('submit', 'form', function() {
-                    $.log("form")
-                });
-                $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
-             //   $('body').on( "submit", function() { $.log(this.tagName) })
-              //  $(document).on( "submit",'form', function() {  $.log(this.tagName)  })
+
+                
+                $("form").on( "change", function() {  $.log(this.tagName)  })
+                $(document).on( "change",'select', function() {  $.log(this.tagName)  })
+                $("select").fire("change")
+
             })
           
         </script>
     </head>
     <body >
-        <div id="div1"></div>
-        <select>
-            <option>
-                1111111
-            </option>
-            <option>
-                113333
-            </option>
-        </select>
+
+
         <div id="parent">
             <form action="javascript:void 0">
                 <input type="text"/>
                 <input type="submit" value="提交"/>
+                <select>
+                    <option>
+                        1111111
+                    </option>
+                    <option>
+                        113333
+                    </option>
+                    <option>
+                        113333
+                    </option>
+                </select>
+                <br/>
             </form>
 
         </div>
