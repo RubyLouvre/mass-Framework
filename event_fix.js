@@ -3,20 +3,6 @@
 //==========================================
 define("event_fix", !!document.dispatchEvent, function(){
     $.log("已加载event_fix模块",7)
-    //模拟IE678的reset,submit,change的事件代理
-    var rform  = /^(?:textarea|input|select)$/i 
-
-    function changeNotify( event ){
-        if( event.type == "change" || event.propertyName == "checked" ){
-            $.event.fire.call(this,"change")
-        }
-    }
-    function delegate( fn ){
-        return function( item ){//用于判定是否要使用代理
-            return item.live  ? fn( item.currentTarget, item ) : false;
-        }
-    }
-
     var facade = $.event = {
         fire: function( init ){
             //这里的代码仅用于IE678
@@ -73,47 +59,56 @@ define("event_fix", !!document.dispatchEvent, function(){
             }else{//普通对象的自定义事件
                 facade.dispatch(this, transfer);
             }
-         
-        },
-        eventAdapter: {
-            focus: {
-                delegateType: "focusin"
-            },
-            blur: {
-                delegateType: "focusout"
-            },
-            change: {//change事件的冒泡情况 IE6-9全灭
-                //详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
-                setup: delegate(function( node, desc ){
-                    var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
-                    desc.__beforeactive__ = $.bind( node, "beforeactivate", function(event) {
-                        var target = event.srcElement;
-                        var tid = $.getUid( target )
-                        //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                        if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
-                            subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
-                            if(/checkbox|radio/.test(target.type)){
-                                desc.__change__ = $.bind( target, "propertychange", changeNotify.bind(target, event) );
-                            }else{
-                                desc.__change__ = $.bind( target, "change", changeNotify.bind(target, event) );
-                            }
-                        }
-                    });//如果是事件绑定
-                // node.fireEvent("onbeforeactivate")
-                }),
-                teardown: delegate(function( node, desc ){
-                    $.unbind( node, "beforeactive", desc.__beforeactive__ );
-                    var els = desc.subscriber ;
-                    for(var i in els){
-                        $.unbind( els[i], "propertychange",  desc.__change__) ;
-                        $.unbind( els[i], "change",  desc.__change__);
-                    }
-                })
-            }
         }
     }
-
-    var adapter = facade.eventAdapter;
+    //模拟IE678的reset,submit,change的事件代理
+    var rform  = /^(?:textarea|input|select)$/i 
+    function changeNotify( event ){
+        if( event.type == "change" || event.propertyName == "checked" ){
+            $.event.fire.call(this,"change")
+        }
+    }
+    function delegate( fn ){
+        return function( item ){//用于判定是否要使用代理
+            return item.live  ? fn( item.currentTarget, item ) : false;
+        }
+    }
+    var adapter = $.eventAdapter = {
+        focus: {
+            delegateType: "focusin"
+        },
+        blur: {
+            delegateType: "focusout"
+        },
+        change: {//change事件的冒泡情况 IE6-9全灭
+            //详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
+            setup: delegate(function( node, desc ){
+                var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
+                desc.__beforeactive__ = $.bind( node, "beforeactivate", function(event) {
+                    var target = event.srcElement;
+                    var tid = $.getUid( target )
+                    //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
+                    if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
+                        subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
+                        if(/checkbox|radio/.test(target.type)){
+                            desc.__change__ = $.bind( target, "propertychange", changeNotify.bind(target, event) );
+                        }else{
+                            desc.__change__ = $.bind( target, "change", changeNotify.bind(target, event) );
+                        }
+                    }
+                });//如果是事件绑定
+            // node.fireEvent("onbeforeactivate")
+            }),
+            teardown: delegate(function( node, desc ){
+                $.unbind( node, "beforeactive", desc.__beforeactive__ );
+                var els = desc.subscriber ;
+                for(var i in els){
+                    $.unbind( els[i], "propertychange",  desc.__change__) ;
+                    $.unbind( els[i], "change",  desc.__change__);
+                }
+            })
+        }
+    }
     //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
     //同reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
     "submit,reset".replace( $.rword, function( type ){

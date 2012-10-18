@@ -1,60 +1,70 @@
 define("valuechange", ["$event"], function(){
-    var adapter = $.event.eventAdapter,
-    KEY = 'event/valuechange',
-    old_key = KEY + '/history',
-    new_key = KEY + '/poll',
-    interval = 50;
-    function startPoll(target, type) {
-        var id = setTimeout(function(){
-            startPoll(target, type);
-        },interval);
-        $._data(target, "valuechangeID",id)
-        var old = $._data(target, old_key);
-        var neo = target.value;
+    var DATA = "valuechangeData";
+    var ID  = "valuechangeID"
+    var interval = 50;
+    //如果值前后发生改变,触发绑定回调
+    function testChange(elem, type, poll) {
+        if(poll){
+            $._data(elem, ID, setTimeout(function(){
+                testChange(elem, type, poll);
+            },interval));
+        }
+        var old = $._data(elem, DATA);
+        var neo = elem.value;
         if(old !== neo){
-            $._data(target, old_key,neo);
+            $._data(elem, DATA, neo);
             var event = new $.Event("valuechange")
-            event.origtype = type
+            event.oldType = type
             event.oldValue = old;
             event.newValue = neo;
-            $.event.fire.call(target, event) 
+            $.event.fire.call(elem, event)
         }
     }
-    //http://liumiao.me/html/wd/W3C/264.html
-    function startPollHandler(e) {
-        var target = e.target;
-        if (e.type == 'focus' ) {
-            $._data(target, old_key , target.value);
-        }
-        startPoll(target,e.type);
+    function unTestChange(elem){
+        var id = $._removeData(elem, ID)
+        clearTimeout( id )
+        $.log("===============")
+        $.log($._removeData)
+        $._removeData(elem, DATA);
     }
-    function stopPollHandler(e){
-        var target = e.target;
-        var id = $._data(target, "valuechangeID")
-        clearTimeout(id)
-        
+   
+    function startTest(event) {
+        var elem = event.target;
+        if (event.type == 'focus' ) {
+            $._data(elem, DATA , elem.value);
+        }
+        testChange(elem,event.type, true);
+    }
+    function stopTest(event){
+        unTestChange(event.target)
     }
     
-    function monitor(elem) {
-        $(elem).bind('keydown keyup focus', startPollHandler)
-        $(elem).bind('blur', stopPollHandler)
-    // unmonitored(target);
-    // fix #94
-    // see note 2012-02-08
-    //   Event.on(elem, 'webkitspeechchange', webkitSpeechChangeHandler);
-    // Event.on(elem, 'mousedown keyup keydown focus', startPollHandler);
+    function listen(elem) {
+        unlisten(elem);
+        "keydown keyup mousedown focus".replace($.rword, function(name){
+            $(elem).bind(name+"._valuechange", startTest)
+        })
+        $(elem).bind('blur._valuechange', stopTest);
+        //http://liumiao.me/html/wd/W3C/264.html
+        $(elem).bind('webkitspeechchange._valuechange', function(e){
+            testChange(e.target,e.type)
+        });
     }
-    adapter.valuechange = {
+    function unlisten(elem){
+        unTestChange(elem)
+        $(elem).unbind("._valuechange")
+    }
+    $.eventAdapter.valuechange = {
         setup: function(desc){
             var elem = desc.currentTarget, nodeName = elem.tagName;
             if (nodeName == 'INPUT' || nodeName == 'TEXTAREA') {
-                monitor(elem);
+                listen(elem);
                 return false
             }
-            
         },
         tearDown: function (desc) {
-            unmonitored(desc.currentTarge);
+            unlisten(desc.currentTarge);
+            return false
         }
     }
 })

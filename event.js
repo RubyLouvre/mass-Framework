@@ -3,11 +3,9 @@
 //==========================================
 define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(){
     $.log("已加载event模块v8")
-    var facade = $.event = $.event || {};
-    $.Object.merge(facade,{
-        eventAdapter:{ } //添加或增强二级属性eventAdapter
-    });
-    var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
+    var facade = $.event || ($.event = {});
+    var adapter = $.eventAdapter || ($.eventAdapter = {})
+    var rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
     var bindTop = !adapter.change;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
     $.eventSupport = function( eventName, el ) {
         el = el || document.createElement("div");
@@ -198,7 +196,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
             return fn;
         },
-
         dispatch: function( target, event, type ){// level2 API 用于旧式的$.event.fire中
             var handle = $._data(target, (type || event.type) +"_handle" );//取得此元素此类型的第一个quark
             handle && handle.call( target, event )
