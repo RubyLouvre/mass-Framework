@@ -18,14 +18,15 @@
                 });
                 $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
                 $('body').on( "change",'select', function() { $.log("xxxxxxx") })
-                $('body').on( "change",'input', function() { 
+                $('#parent').on( "submit", function() { $.log(this.tagName) })
+                $(document).on( "submit",'form', function() { 
                     $.log(this.value) 
                     $.log(this.checked) })
             })
           
         </script>
     </head>
-    <body>
+    <body >
         <div id="div1"></div>
         <select>
             <option>
@@ -35,7 +36,13 @@
                 113333
             </option>
         </select>
-        <input  >
-        <input type="checkbox"/>
+        <div id="parent">
+            <form action="javascript:void 0">
+
+                <input type="submit" value="提交"/>
+            </form>
+
+        </div>
+
     </body>
 </html>

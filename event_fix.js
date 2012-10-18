@@ -8,7 +8,7 @@ define("event_fix", !!document.dispatchEvent, function(){
 
     function changeNotify( event ){
         if( event.type == "change" || event.propertyName == "checked" ){
-            $.event._dispatch( $._data( this, "publisher" ), event, "change" );
+             $.event.fire.call(this,"change")
         }
     }
     function delegate( fn ){
@@ -95,8 +95,6 @@ define("event_fix", !!document.dispatchEvent, function(){
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
-                            var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
-                            publisher[ $.getUid( node ) ] = node;//此孩子可能同时要向N个顶层元素报告变化
                             if(/checkbox|radio/.test(target.type)){
                                 desc.__change__ = $.bind( target, "propertychange", changeNotify.bind(target, event) );
                             }else{
@@ -111,11 +109,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                     var els = desc.subscriber ;
                     for(var i in els){
                         $.unbind( els[i], "propertychange",  desc.__change__) ;
-                        $.unbind( els[i], "change",  desc.__change__)  ;
-                        var publisher = $._data( els[i], "publisher");
-                        if( publisher ){
-                            delete publisher[ node.uniqueNumber ];
-                        }
+                        $.unbind( els[i], "change",  desc.__change__);
                     }
                 })
             }
