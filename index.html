@@ -13,15 +13,12 @@
                 $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
             })*/
             $.require("ready,event", function(){
-                $('body').on('submit', 'form.haha', function() { alert(1);
-                    return false; 
+                  $(document).on('submit', 'form', function() {
+                    $.log("form")
                 });
                 $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
-                $('body').on( "change",'select', function() { $.log("xxxxxxx") })
-                $('#parent').on( "submit", function() { $.log(this.tagName) })
-                $(document).on( "submit",'form', function() { 
-                    $.log(this.value) 
-                    $.log(this.checked) })
+             //   $('body').on( "submit", function() { $.log(this.tagName) })
+              //  $(document).on( "submit",'form', function() {  $.log(this.tagName)  })
             })
           
         </script>
@@ -38,7 +35,7 @@
         </select>
         <div id="parent">
             <form action="javascript:void 0">
-
+                <input type="text"/>
                 <input type="submit" value="提交"/>
             </form>
 

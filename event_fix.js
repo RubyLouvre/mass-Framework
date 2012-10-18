@@ -8,7 +8,7 @@ define("event_fix", !!document.dispatchEvent, function(){
 
     function changeNotify( event ){
         if( event.type == "change" || event.propertyName == "checked" ){
-             $.event.fire.call(this,"change")
+            $.event.fire.call(this,"change")
         }
     }
     function delegate( fn ){
@@ -76,10 +76,10 @@ define("event_fix", !!document.dispatchEvent, function(){
          
         },
         eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
-//            input: {
-//                bindType: "change",
-//                delegateType: "change"
-//            },
+            //            input: {
+            //                bindType: "change",
+            //                delegateType: "change"
+            //            },
             focus: {
                 delegateType: "focusin"
             },
@@ -125,7 +125,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                 $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
                     var el = event.target;
                     if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].input[  el.type ] ) ){
-                        facade._dispatch( [ node ], event, type );
+                        $.event.fire.call(el, type)
                     }
                 });
             }),

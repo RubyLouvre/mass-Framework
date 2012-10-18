@@ -8,7 +8,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         eventAdapter:{ } //添加或增强二级属性eventAdapter
     });
     var adapter = $.event.eventAdapter, rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
-    var bindTop = top.dispatchEvent;//如果没有加载event_fix模块,也就没有input分支,也就说明其是支持dispatchEvent API
+    var bindTop = !facade.change;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
     $.eventSupport = function( eventName, el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
