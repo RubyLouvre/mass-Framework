@@ -8,8 +8,6 @@ define("event_fix", !!document.dispatchEvent, function(){
 
     function changeNotify( event ){
         if( event.type == "change" || event.propertyName == "checked" ){
-            $.log("changeNotify")
-            alert($.event.fire)
             $.event.fire.call(this,"change")
         }
     }
@@ -141,5 +139,39 @@ define("event_fix", !!document.dispatchEvent, function(){
  * input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
  * 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
  * 2012.10.18 重构reset, change, submit的事件代理
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>change</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js" ></script>
+        <script>
+
+            $.require("ready,event", function(){
+                
+                $("form").on( "change", function() {  $.log(this.tagName)  })
+                $(document).on( "change",'select', function() {  $.log(this.tagName)  })
+
+            })
+          
+        </script>
+    </head>
+    <body >
+            <form action="javascript:void 0">
+                <select>
+                    <option>
+                        1111111
+                    </option>
+                    <option>
+                        222222
+                    </option>
+                    <option>
+                        33333
+                    </option>
+                </select>
+            </form>
+
+    </body>
+</html>
  */
 

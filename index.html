@@ -6,21 +6,20 @@
         <!--  <script src="jquery1.82.js" ></script>-->
         <script src="mass.js" ></script>
         <script>
-            /*   $(function(){
-                $('body').on('submit', 'form.haha', function() { alert(1);
-                    return false; 
-                });
-                $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
-                $('body').on( "submit", function() { $.log(this.tagName) })
-                $(document).on( "submit",'form', function() {  $.log(this.tagName)  })
-            })*/
-            $.require("ready,event", function(){
 
-                
-                $("form").on( "change", function() {  $.log(this.tagName)  })
-                $(document).on( "change",'select', function() {  $.log(this.tagName)  })
-                $("select").fire("change")
-
+            $.require("ready,more/valuechange", function(){
+                var callback = function(e){
+                    $.log(e.type)
+                }
+                $("input").bind("valuechange", function(e){
+                   $.log(e.oldValue+" "+e.newValue)   
+                   $.log(e.origtype)
+                })
+           //     $("input").click(callback)
+           //     $("input").focus(callback)
+           //     $("input").keyup(callback)
+           //     $("input").keydown(callback)
+           //     $("input").blur(callback)
             })
           
         </script>
@@ -31,7 +30,7 @@
         <div id="parent">
             <form action="javascript:void 0">
                 <input type="text"/>
-                <input type="submit" value="提交"/>
+              
                 <select>
                     <option>
                         1111111
