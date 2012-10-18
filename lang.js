@@ -199,20 +199,20 @@ define("lang", Array.isArray ? [] : ["$lang_fix"],function(){
         },
         //将字符串解析成JSON对象
         parseJSON: function( data ) {
-            if ( typeof data !== "string" || !data ) {
-                return null;
+            if ( typeof data === "string" ) {
+                data = data.trim();//IE不会去掉字符串两边的空白
+                if ( global.JSON && global.JSON.parse ) {
+                    //使用原生的JSON.parse转换字符串为对象
+                    return global.JSON.parse( data );
+                }
+                if ( rvalidchars.test( data.replace( rvalidescape, "@" )
+                    .replace( rvalidtokens, "]" )
+                    .replace( rvalidbraces, "")) ) {
+                    //使用new Function生成一个JSON对象
+                    return (new Function( "return " + data ))();
+                }
             }
-            data = data.trim();
-            if ( global.JSON && global.JSON.parse ) {
-                //使用原生的JSON.parse转换字符串为对象
-                return global.JSON.parse( data );
-            }
-            if ( rvalidchars.test( data.replace( rvalidescape, "@" )
-                .replace( rvalidtokens, "]" )
-                .replace( rvalidbraces, "")) ) {
-                //使用new Function生成一个JSON对象
-                return (new Function( "return " + data ))();
-            }
+           
             throw "Invalid JSON: " + data ;
         },
         //将字符串转化为一个XML文档
