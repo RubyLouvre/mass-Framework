@@ -7,8 +7,18 @@ and open the template in the editor.
   <head>
     <title></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script>
+        log = function(s){
+            window.console && console.log(s)
+        }
+    </script>
   </head>
   <body>
-    TODO write content
+      <input onfocusout="log('focusout')"
+             onbeforedeactivate="log('beforedeactivate')"
+             onclick="log('click')"
+             onkeydown="log('keydown')"
+             onbeforeactivate="log('beforeactivate')">
+           <input onchange="log(this.value)" >
   </body>
 </html>

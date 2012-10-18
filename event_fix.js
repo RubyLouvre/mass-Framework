@@ -4,15 +4,10 @@
 define("event_fix", !!document.dispatchEvent, function(){
     $.log("已加载event_fix模块",7)
     //模拟IE678的reset,submit,change的事件代理
-    var rform  = /^(?:textarea|input|select)$/i ,
-    changeType = {
-        "select-one": "selectedIndex",
-        "select-multiple": "selectedIndex",
-        "radio": "checked",
-        "checkbox": "checked"
-    }
+    var rform  = /^(?:textarea|input|select)$/i 
+
     function changeNotify( event ){
-        if( event.propertyName === ( changeType[ this.type ] || "value") ){
+        if( event.type == "change" || event.propertyName == "checked" ){
             $.event._dispatch( $._data( this, "publisher" ), event, "change" );
         }
     }
@@ -81,10 +76,10 @@ define("event_fix", !!document.dispatchEvent, function(){
          
         },
         eventAdapter: {//input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
-            input: {
-                bindType: "change",
-                delegateType: "change"
-            },
+//            input: {
+//                bindType: "change",
+//                delegateType: "change"
+//            },
             focus: {
                 delegateType: "focusin"
             },
@@ -95,23 +90,28 @@ define("event_fix", !!document.dispatchEvent, function(){
                 //详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
                 setup: delegate(function( node, desc ){
                     var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
-                    desc.change_beforeactive = $.bind( node, "beforeactivate", function(event) {
+                    desc.__beforeactive__ = $.bind( node, "beforeactivate", function(event) {
                         var target = event.srcElement, tid = $.getUid( target )
                         //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
                         if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
                             subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
                             var publisher = $._data( target,"publisher") || $._data( target,"publisher",{} );
                             publisher[ $.getUid( node ) ] = node;//此孩子可能同时要向N个顶层元素报告变化
-                            desc.change_propertychange = $.bind( target, "propertychange", changeNotify.bind(target, event) );
+                            if(/checkbox|radio/.test(target.type)){
+                                desc.__change__ = $.bind( target, "propertychange", changeNotify.bind(target, event) );
+                            }else{
+                                desc.__change__ = $.bind( target, "change", changeNotify.bind(target, event) );
+                            }
                         }
                     });//如果是事件绑定
                     node.fireEvent("onbeforeactivate")
                 }),
                 teardown: delegate(function( node, desc ){
-                    $.unbind( node, "beforeactive", desc.change_beforeactive );
-                    var els = desc.subscriber || {};
+                    $.unbind( node, "beforeactive", desc.__beforeactive__ );
+                    var els = desc.subscriber ;
                     for(var i in els){
-                        $.unbind( els[i], "propertychange",  desc.change_propertychange)  ;
+                        $.unbind( els[i], "propertychange",  desc.__change__) ;
+                        $.unbind( els[i], "change",  desc.__change__)  ;
                         var publisher = $._data( els[i], "publisher");
                         if( publisher ){
                             delete publisher[ node.uniqueNumber ];

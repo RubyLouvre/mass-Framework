@@ -3,7 +3,7 @@
     <head>
         <title>change</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-      <!--  <script src="jquery1.82.js" ></script>-->
+        <!--  <script src="jquery1.82.js" ></script>-->
         <script src="mass.js" ></script>
         <script>
             /*   $(function(){
@@ -17,7 +17,10 @@
                     return false; 
                 });
                 $('#div1').append('<form action="." class="haha"><button type=submit>haha</button></form>');
-                  $('body').on( "change",'select', function() { $.log("xxxxxxx") })
+                $('body').on( "change",'select', function() { $.log("xxxxxxx") })
+                $('body').on( "change",'input', function() { 
+                    $.log(this.value) 
+                    $.log(this.checked) })
             })
           
         </script>
@@ -28,9 +31,11 @@
             <option>
                 1111111
             </option>
-             <option>
+            <option>
                 113333
             </option>
         </select>
+        <input  >
+        <input type="checkbox"/>
     </body>
 </html>

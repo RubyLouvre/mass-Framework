@@ -132,7 +132,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
 
         curry: function( hash ){// 这是元信息,不要污染这个对象
             var fn =  function( event){//真正的事件对象
-                var type = hash.origType;
+                var type = hash.origType;//用户在调用API时绑定的事件
                 var ctarget = hash.currentTarget//原来绑定事件的对象
                 var more = event.more || {};
                 //第一个分支防止在旧式IE下,fire click时二次触发 
@@ -192,7 +192,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                             event.result = result;
                             if ( result === false ) {
                                 event.preventDefault();
-                                event.stopPropagation();
+                                event.stopPropagation();//这个参照jQuery的行为办事
                             }
                         }
                         if ( event.propagationStopped ) {
@@ -202,7 +202,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 }
 
             }
-            fn.uuid = hash.uuid;
+           // fn.uuid = hash.uuid;
             return fn;
         },
         _dispatch: function( list, event, type ){//level2 API 用于事件冒充
@@ -441,7 +441,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     var mouseEvents =  "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,"
     var eventMap = $.oneObject(mouseEvents, "MouseEvents");
     var types = mouseEvents +",keypress,keydown,keyup," + "blur,focus,focusin,focusout,"+
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit,input"
+    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit"//input
     types.replace( $.rword, function( type ){//这里产生以事件名命名的快捷方法
         eventMap[type] = eventMap[type] || (/key/.test(type) ? "KeyboardEvent" : "HTMLEvents")
         $.fn[ type ] = function( callback ){
