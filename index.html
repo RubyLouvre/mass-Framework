@@ -11,63 +11,17 @@
         </style>
         <script>
          
-            $.require("ready,event",function(){
+            $.require("ready,more/hashchange",function(){
                 document.onclick = function(){
                     var t = Math.random();
                     location.hash = '#' + t;
                 }
-            
-              
-                if(window.parent == self){
-                    function get_fragment (url) {
-                        url = url || document.URL
-                        // IE6直接用location.hash去hash是不安全的
-                        // 比如 https://www.google.com.hk/reader/view/#stream/xxxxx?lang=zh_c
-                        // ie6 => location.hash = #stream/xxxxx
-                        // 其他浏览器 => location.hash = #stream/xxxxx?lang=zh_c
-                        // 2.
-                        // #!/home/q={%22thedate%22:%2220121010~20121010%22}
-                        // firefox 15 => #!/home/q={"thedate":"20121010~20121010"}
-                        return '#' + url.replace( /^[^#]*#?(.*)$/, '$1' );
-                    }
-                    var cur = get_fragment();
-                    var div = document.createElement("div")
-                    div.innerHTML =  '<iframe src="'+ location.href+'" width=400 height=200></iframe>'
-                    document.body.appendChild(div)
-                    var iframe = div.getElementsByTagName("iframe")[0].contentWindow
-                    $.bind(iframe,"load",function(){
-                        var doc = iframe.document
-                        doc.open();
-                        doc.write("<!doctype html><html><body>xxx</body></html>")
-                        doc.close();
-                    })
-                    function setHash(iframe,  hash){
-                        var doc = iframe.document
-                        //                        doc.open();
-                        //                        iframe.write("<!doctype html><html><body></body></html>")
-                        //                        doc.close();
-                        // var old = iframe.location 
-                        // alert(location.href.replace( /#.*/, '' ) + hash)
-                        iframe.location  = location.href.replace( /#.*/, '' ) + hash
-                    }
-                    
-                    //   location.href.replace( /#.*/, '' ) + history_hash;
-                    setInterval(function(){
-                        var now =  get_fragment();
-                        if(cur !== now){
-                            setHash(iframe,now)
-                            cur = now;
-                            console.log(location.href)
-                        }
-                    },50)
-                  
-                }
-    
-                $(window).bind("hashchange",function(){
-                    console.log(location.href)
-                })
+              $(window).hashchange(function(){
+                  alert(document.URL)
+              })
+
             })
-            //   })
+        
           
         </script>
     </head>
