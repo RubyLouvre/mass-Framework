@@ -11,10 +11,14 @@
         </style>
         <script>
          
-            $.require("ready,node",function(){
-                   document.domain = "dancewithnet.com"
-                $.log("dddddddddddddddd")
-                $.log($.getEmptyIframeSrc())
+            $.require("ready,more/hashchange",function(){
+                   document.onclick = function(){
+                var t = Math.random();
+                location.hash = '#' + t;
+            }
+               $(window).hashchange(function(){
+                   console.log(location.href)
+               })
             })
             //   })
           
