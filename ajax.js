@@ -163,6 +163,8 @@ define("ajax",["$flow"], function(){
             return buf.join("").replace(r20, "+");
         },
         //将一个字符串转换为对象
+        //$.deparam = jq_deparam = function( params, coerce ) {
+        //https://github.com/cowboy/jquery-bbq/blob/master/jquery.ba-bbq.js
         unparam: function ( url, query ) {
             var json = {};
             if (!url || !$.type(url, "String")) {
