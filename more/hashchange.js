@@ -23,12 +23,13 @@ define("hashchange", ["$event"], function(){
         //将主窗口的location.href加工一下，赋给iframe中的location
         function setHash( hash){
             if(iframe){
-                iframe.location  = DOC.URL.replace( /#.*/, '' ) + hash;
                 $.log("利用document.write产生历史")
                 var doc = iframe.document
+                // Create History Entry
                 doc.open();
                 doc.write($.format(html, hash));
                 doc.close();
+                iframe.location  = DOC.URL.replace( /#.*/, '' ) + hash;
             }
         }
         var iframe, cur = getHash(), now, timeoutID
@@ -76,4 +77,4 @@ define("hashchange", ["$event"], function(){
 
 //https://github.com/tkyk/jquery-history-plugin/blob/master/jquery.history.js
 //https://github.com/documentcloud/backbone/blob/master/backbone.js
-//http://www.cnblogs.com/sking7/archive/2011/10/12/2209554.html
+//http://jackliu185.cnblogs.com/
