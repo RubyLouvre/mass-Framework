@@ -225,12 +225,12 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     //http://www.w3.org/TR/2000/WD-css3-userint-20000216#user-select
     //具体支持情况可见下面网址
     //http://help.dottoro.com/lcrlukea.php
-    var userSelect = $.cssName("userSelect");
-    if( userSelect ){
-        adapter[ userSelect+":set" ] = function( node, name, value ) {
-            return node.style[ name ] = value;
-        };
-    }
+//    var userSelect = $.cssName("userSelect");
+//    if( userSelect ){
+//        adapter[ userSelect+":set" ] = function( node, name, value ) {
+//            return node.style[ name ] = value;
+//        };
+//    }
     adapter[ "zIndex:get" ] = function( node, name, value, position ) {
         while ( node.nodeType !== 9 ) {
             //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto

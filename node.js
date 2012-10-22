@@ -230,14 +230,13 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         st:  "scrollTop",
         sl:  "scrollLeft",
         bgc: "backgroundColor",
-        opacity: "opacity",//fix IE
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
     function cssName( name, host, test ){//name必须小写开头
         if( cssMap[ name ] ){
             return cssMap[ name ];
         }
-        host = host || $.html.style;
+        host = host || $.html.style;//$.html为document.documentElement
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
             test = $.String.camelize( prefixes[i] + name || "")
             if( test in host ){

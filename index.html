@@ -7,35 +7,47 @@
         <script src="mass.js" ></script>
         <style type="text/css">
             a {display:inline-block; margin-right:10px;}
-            #clickHistory {border:1px solid #406c99; padding:15px; margin-top:10px; width:600px;}
+            #clickHistory {border:1px solid #406c99; padding:15px; margin-top:10px; width:50px;height:50px;background: red;}
         </style>
         <script>
          
-            $.require("ready,more/hashchange",function(){
-                document.onclick = function(){
-                    var t = Math.random();
-                    location.hash = '#' + t;
-                }
-              $(window).hashchange(function(){
-                  alert(document.URL)
-              })
-
+            $.require("ready,node",function(){
+                //    document.onclick = function(){
+                //         var t = Math.random();
+                //         location.hash = '#' + t;
+                //    }
+                var el = $("#clickHistory")[0]
+                console.log($.cssName("transform"))
+          
+                // var computedStyle =  defaultView.getComputedStyle(el,null)
+                //   $.log(computedStyle.getPropertyValue("background-color"))
+                //   $.log(computedStyle.getPropertyValue("backgroundColor"))
             })
         
+        
+            var getStyle = function(el, name){
+                if( el.style ){
+                    name = name.replace(/\-(\w)/g, function(all, letter){
+                        return letter.toUpperCase();
+                    });
+                    if(window.getComputedStyle){
+                        //getComputedStyle的第二个伪类是用于对付伪类的，如滚动条，placeholder，
+                        //但IE9不支持，因此我们只管元素节点，上面的el.style过滤掉了
+                        return el.ownerDocument.getComputedStyle(el, null)[ name ]
+                    }else{
+                        return el.currentStyle[ name ];
+                    }
+                }
+            }
+           
+
           
         </script>
     </head>
     <body >
 
 
-        <p>但这个方案并不是实时触发的，而且究竟该多久检测一次，没有一个有依据的数值。如果数值过大，可能会影响到页面的快速呈现；如果数值过小，则会引起过高的资源占用。</p>
-        <p>常用ajax的同学应该对onhashchange并不陌生，ajax并不是一个完美的东西，无刷新的页面会导致我们丢失本该有的浏览器历史记录，通常我们需要通过url hash来手动的产生浏览器历史记录，从而使“后退”/“前进”按钮有效。所以，还没有关注这点的同学也需要注意onhashchange了，有“后退”/“前进”功能的页面才是一个好页面。</p>
-        <p>遗憾的是onhashchange事件是html5里新增加的，所以一些古老的浏览器并不支持它，目前的支持情况如下(<a href="http://blog.gslin.org/archives/2011/03/05/2491/window-%E7%9A%84-hashchange-onhashchange-%E4%BA%8B%E4%BB%B6" target="_blank">via</a>)：</p>
-        <ul>
-            <li>IE 的部份，IE8 之后才有支持：「<a href="http://msdn.microsoft.com/en-us/library/cc288209%28VS.85%29.aspx" target="_blank">onhashchange Event</a>」</li>
-            <li>Firefox 則是 3.6 之后才有支持：「<a href="https://developer.mozilla.org/en/DOM/window.onhashchange" target="_blank">window.onhashchange</a>」</li>
-            <li>Webkit 是 528 版以后 (2009/08/07 的 ticket)：「<a href="https://bugs.webkit.org/show_bug.cgi?id=21605" target="_blank">Support for HTML5 “hashchange” event</a>」，对应的版本是 <a href="http://www.google.com/chrome" target="_blank">Google Chrome</a> 1.0.154 之后，以及 <a href="http://www.apple.com/safari/" target="_blank">Safari</a> 4.0+。</li>
-        </ul>
-        <p>对于不支持的浏览器，可以使用隐藏的iframe来达到更改浏览器历史记录的目的。<br />
+        <div id="clickHistory">
+        </div>
     </body>
 </html>
