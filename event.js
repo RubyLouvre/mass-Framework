@@ -178,7 +178,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                         desc.times--;
                         if(desc.times === 0){//如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind( this, desc)
+                            facade.unbind( ctarget, desc)
                         }
                         if ( result !== void 0 ) {
                             event.result = result;
@@ -403,7 +403,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             if(method === "on" && !hash.fn ){
                 throw "必须指明事件回调"
             }
-            $.log( hash.type)
             hash.times = hash.times > 0  ? hash.times : Infinity;
             return this.each(function() {
                 facade[ mapper ]( this, hash );
