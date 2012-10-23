@@ -6,48 +6,32 @@
         <!--  <script src="jquery1.82.js" ></script>-->
         <script src="mass.js" ></script>
         <style type="text/css">
-            a {display:inline-block; margin-right:10px;}
-            #clickHistory {border:1px solid #406c99; padding:15px; margin-top:10px; width:50px;height:50px;background: red;}
+            body,html{
+                height:100%;
+                background:red;
+            }
         </style>
         <script>
          
-            $.require("ready,node",function(){
-                //    document.onclick = function(){
-                //         var t = Math.random();
-                //         location.hash = '#' + t;
-                //    }
-                var el = $("#clickHistory")[0]
-                console.log($.cssName("transform"))
-          
-                // var computedStyle =  defaultView.getComputedStyle(el,null)
-                //   $.log(computedStyle.getPropertyValue("background-color"))
-                //   $.log(computedStyle.getPropertyValue("backgroundColor"))
+            $.require("ready,more/hashchange",function(){
+                var body = $("body")
+                document.onclick = function(){
+                    var t = "#"+ Math.random();
+                    location.hash = t
+                    body.html(t+"<br/>")
+                }
+                $(window).hashchange(function(){
+                    body.append(location.href)
+                })
+
             })
         
         
-            var getStyle = function(el, name){
-                if( el.style ){
-                    name = name.replace(/\-(\w)/g, function(all, letter){
-                        return letter.toUpperCase();
-                    });
-                    if(window.getComputedStyle){
-                        //getComputedStyle的第二个伪类是用于对付伪类的，如滚动条，placeholder，
-                        //但IE9不支持，因此我们只管元素节点，上面的el.style过滤掉了
-                        return el.ownerDocument.getComputedStyle(el, null)[ name ]
-                    }else{
-                        return el.currentStyle[ name ];
-                    }
-                }
-            }
-           
 
           
         </script>
     </head>
     <body >
 
-
-        <div id="clickHistory">
-        </div>
     </body>
 </html>

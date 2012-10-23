@@ -24,13 +24,13 @@ define("hashchange", ["$event"], function(){
         //将主窗口的location.href加工一下，赋给iframe中的location
         function setHash( hash){
             if(iframe){
-                $.log("利用document.write产生历史")
                 var doc = iframe.document
                 //用于产生历史
                 doc.open();
                 doc.write($.format(html, hash));
                 doc.close();
                 iframe.location  = DOC.URL.replace( /#.*/, '' ) + hash;
+
             }
         }
         var iframe, cur = getHash(), now, timeoutID, html = '<!doctype html><html><body>#{0}</body></html>'
