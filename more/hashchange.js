@@ -50,8 +50,7 @@ define("hashchange", ["$event"], function(){
                 $.require("ready", function(){
                     if (!iframe) {
                         //创建一个隐藏的iframe，使用这博文提供的技术 http://www.paciellogroup.com/blog/?p=604.
-                        //iframe是直接加载父页面，为了防止死循环，在DOM树未建完之前就擦入新的内容
-                        //style="display:none" widht=0 height=0 title="empty" 
+                        //iframe是直接加载父页面，为了防止死循环，在DOM树未建完之前就擦入新的内容 
                         var el = $('<iframe tabindex="-1" style="display:none" widht=0 height=0 title="empty" />').appendTo( document.body )[0], fn
                         iframe = el.contentWindow
                         $.bind(el, "load",fn = function(){
