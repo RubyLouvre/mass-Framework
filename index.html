@@ -3,35 +3,40 @@
     <head>
         <title>change</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <!--  <script src="jquery1.82.js" ></script>-->
+        <!--  <script src="jquery1.82.js" ></script>
+        <script src="hashchange.js" ></script>-->
         <script src="mass.js" ></script>
         <style type="text/css">
             body,html{
                 height:100%;
-                background:red;
+                background:#ddc;
             }
+            #click_text { color:red; }
+            #callback_text { color:green; }
         </style>
-        <script>
-         
-            $.require("ready,more/hashchange",function(){
-                var body = $("body")
-                document.onclick = function(){
-                    var t = "#"+ Math.random();
+
+        <script >
+
+            $.require("ready,more/hashchange", function() {
+                var el = $("#click_text"), el2 = $("#callback_text")
+                $(document).bind("click",function() {
+                    var t = "#" + Math.random();
                     location.hash = t
-                    body.html(t+"<br/>")
-                }
-                $(window).hashchange(function(){
-                    body.append(location.href)
+                    el.html(t)
+                })
+                
+                $(window).hashchange(function() {
+                    el2.html(location.href)
                 })
 
             })
-        
-        
 
-          
+
         </script>
     </head>
     <body >
-
+        <p>hashchange by 司徒正美</p>
+        <div id="click_text"></div>
+        <div id="callback_text"></div>
     </body>
 </html>
