@@ -11,24 +11,25 @@
                 height:100%;
                 background:#ddc;
             }
-            #click_text { color:red; }
+            div{
+                width:200px;
+                height:200px;
+            }
+            #click_text { background:red; }
             #callback_text { color:green; }
         </style>
 
         <script >
 
             $.require("ready,more/hashchange", function() {
-                var el = $("#click_text"), el2 = $("#callback_text")
-                $(document).bind("click",function() {
-                    var t = "#" + Math.random();
-                    location.hash = t
-                    el.html(t)
-                })
+                var div = $("#click_text")[0];
+                var el = $("<div style='color:red'/>")[0]
                 
-                $(window).hashchange(function() {
-                    el2.html(location.href)
-                })
-
+                $.log(   el.style.color );
+             
+                $.log(   el.currentStyle.color );
+             
+  $.log(   el.runtimeStyle.color );
             })
 
 

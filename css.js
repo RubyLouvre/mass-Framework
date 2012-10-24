@@ -21,6 +21,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 ret = style[name];//如果还没有加入DOM树，则取内联样式
             }
             //  Dean Edwards大神的hack，用于转换margin的百分比值为更有用的像素值
+            // webkit不能转换top, bottom, left, right, margin, text-indent的百分比值
             if (  /^margin/.test( name ) && rnumnonpx.test( ret ) ) {
                 width = style.width;
                 minWidth = style.minWidth;
