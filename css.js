@@ -12,30 +12,31 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
     //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if ( window.getComputedStyle ) {
-    adapter[ "_default:get" ] = function( node, name ) {
-        var ret, width, minWidth, maxWidth, computed = window.getComputedStyle( node, null )
-        if (computed ) {
-            ret = name == "filter" ? computed.getPropertyValue(name) :computed[name]
-            var style = node.style ;
-            if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
-                ret = style[name];//如果还没有加入DOM树，则取内联样式
-            }
-            //  Dean Edwards大神的hack，用于转换margin的百分比值为更有用的像素值
-            // webkit不能转换top, bottom, left, right, margin, text-indent的百分比值
-            if (  /^margin/.test( name ) && rnumnonpx.test( ret ) ) {
-                width = style.width;
-                minWidth = style.minWidth;
-                maxWidth = style.maxWidth;
+        adapter[ "_default:get" ] = function( node, name ) {
+            var ret, width, minWidth, maxWidth, computed = window.getComputedStyle( node, null )
+            if (computed ) {
+                ret = name == "filter" ? computed.getPropertyValue(name) :computed[name]
+                var style = node.style ;
+                if ( ret === "" && !$.contains( node.ownerDocument, node ) ) {
+                    ret = style[name];//如果还没有加入DOM树，则取内联样式
+                }
+                //  Dean Edwards大神的hack，用于转换margin的百分比值为更有用的像素值
+                // webkit不能转换top, bottom, left, right, margin, text-indent的百分比值
+                if (  /^margin/.test( name ) && rnumnonpx.test( ret ) ) {
+                    width = style.width;
+                    minWidth = style.minWidth;
+                    maxWidth = style.maxWidth;
 
-                style.minWidth = style.maxWidth = style.width = ret;
-                ret = computed.width;
+                    style.minWidth = style.maxWidth = style.width = ret;
+                    ret = computed.width;
                 
-                style.width = width;
-                style.minWidth = minWidth;
-                style.maxWidth = maxWidth;
-            }
-        };
-        return ret === "" ? "auto" : ret;
+                    style.width = width;
+                    style.minWidth = minWidth;
+                    style.maxWidth = maxWidth;
+                }
+            };
+            return ret === "" ? "auto" : ret;
+        }
     }
     var getter = adapter[ "_default:get" ]
 
@@ -74,6 +75,10 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
     }
     
+
+    $.fn.css =  function( name, value , neo){
+        return $.access( this, name, value, $.css );
+    }
     $.scrollbarWidth = function (){
         if( $.scrollbarWidth.ret ){
             return $.scrollbarWidth.ret
@@ -83,10 +88,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         test.remove();
         return $.scrollbarWidth.ret = ret;
     }
-    $.fn.css =  function( name, value , neo){
-        return $.access( this, name, value, $.css );
-    }
-
     var cssPair = {
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']

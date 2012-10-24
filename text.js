@@ -948,3 +948,28 @@ var adapter = facade.eventAdapter;
         })
     };
 });
+var cssMap ={}
+var $ = {
+    css: function(el, name,value){},
+    cssName: function(name, el){},
+    cssNumber:{},
+    cssAdapter:{
+        "_default:set":function(){},
+        "_default:get":function(){}
+    }
+}
+$.fn = {
+    css: function(name,value){},
+    width: function(val){},
+    height: function(val){},
+    innerWidth: function(){},
+    innerHeight: function(){},
+    outerWidth: function(margin){},
+    outerHeight: function(margin){},
+    offset: function(obj){},
+    position: function(){},
+    scrollTop: function(val){},
+    scrollLeft: function(val){},
+    offsetParent: function(){},
+    scrollParent: function(){}
+}
