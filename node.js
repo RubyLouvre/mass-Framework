@@ -232,18 +232,21 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         bgc: "backgroundColor",
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
-    function cssName( name, host, test ){//name必须小写开头
+    function cssName( name, host, hode ){//name必须小写开头
         if( cssMap[ name ] ){
             return cssMap[ name ];
         }
         host = host || $.html.style;//$.html为document.documentElement
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
-            test = $.String.camelize( prefixes[i] + name || "")
-            if( test in host ){
-                return ( cssMap[ name ] = test );
+            var camelCase  = $.String.camelize( prefixes[i] + name || "")
+            if(i == 0){
+                hode = camelCase
+            }
+            if( camelCase  in host ){
+                return ( cssMap[ name ] = camelCase  );
             }
         }
-        return null;
+        return hode;
     }
     var matchesAPI = cssName( "matchesSelector",$.html );
     $.mix({
@@ -279,7 +282,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
                     setter.call(bind, elems[i], key, value );
                 }
                 return elems;
-            } //取得第一个元素的属性, getter的参数总是很小的
+            } //取得第一个元素的属性, getter的参数总是少于setter
             return length ? getter.call( bind, elems[0], key ) : void 0;
         },
         /**
