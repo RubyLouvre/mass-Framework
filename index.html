@@ -17,8 +17,7 @@
             }
 
             #click_text {
-                filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color="#FFFFFF") progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',
-        M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558);
+
                 background: blue;
             }
             #callback_text { color:green; }
@@ -27,7 +26,7 @@
         <script >
 
             $.require("ready,node,css", function() {
-                 $("#click_text").css("opacity",1) 
+                 $("#wrap").css("user-select","all") 
    
   
             })

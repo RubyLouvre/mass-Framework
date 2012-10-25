@@ -89,15 +89,26 @@ define("css_fix", !!top.getComputedStyle, function(){
         }
     }
     //=========================　处理　user-select　=========================
-
-    var runselectable = /^(br|input|link|meta|hr|col|area|base|hr|embed|param|iframe|textarea|input|select|script|noscript)/i
+    //auto——默认值，用户可以选中元素中的内容
+    //none——用户不能选择元素中的任何内容
+    //text——用户可以选择元素中的文本
+    //element——文本可选，但仅限元素的边界内(只有IE和FF支持)
+    //all——在编辑器内，如果双击/上下文点击发生在子元素上，改值的最高级祖先元素将被选中。
+    //-moz-none——firefox私有，元素和子元素的文本将不可选，但是，子元素可以通过text重设回可选。
     adapter[ "userSelect:set" ] = function( node, name, value ) {
-        if(!runselectable.test(node.nodeName)){//跳过不显示的标签与表单控件
-            var allow = /none/.test(value||"all");
-            node.unselectable  = allow ? "" : "on";
-            node.onselectstart = allow ? "" : function(){
-                return false;
-            };
+        var allow = /none/.test(value) ? "on" : "",
+        e, i = 0, els = node.getElementsByTagName('*');
+        node.setAttribute('unselectable', allow);
+        while (( e = els[ i++ ] )) {
+            switch (e.tagName.toLowerCase()) {
+                case 'iframe' :
+                case 'textarea' :
+                case 'input' :
+                case 'select' :
+                    break;
+                default :
+                    e.setAttribute('unselectable', allow);
+            }
         }
     };
     //=========================　处理　background-position　=========================

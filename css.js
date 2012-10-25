@@ -59,7 +59,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     $.css = function( node, name, value){
         if(node.style){//注意string经过call之后，变成String伪对象，不能简单用typeof来检测
-            name = $.cssName( name ) || name;
+            name = $.cssName( name ) || $.String.camelize(name)
             if( value === void 0){ //获取样式
                 return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
             }else {//设置样式
