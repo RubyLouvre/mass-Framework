@@ -50,20 +50,23 @@ define("css_fix", !!top.getComputedStyle, function(){
     adapter[ "opacity:get" ] = function( node ){
         //这是最快的获取IE透明值的方式，不需要动用正则了！
         var alpha = node.filters.alpha || node.filters[salpha],
-            op = alpha ? alpha.opacity: 100;
+        op = alpha ? alpha.opacity: 100;
         return ( op /100 )+"";//确保返回的是字符串
     }
     //http://www.freemathhelp.com/matrix-multiplication.html
     //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
     adapter[ "opacity:set" ] = function( node, name, value ){
         var currentStyle = node.currentStyle, style = node.style;
+        if(isFinite(value)){//"xxx" * 100 = NaN
+            return
+        }
+        value = (value > 0.999) ? 100: (value < 0.001) ? 0 : value * 100;
         if(!currentStyle.hasLayout)
             style.zoom = 1;//让元素获得hasLayout
-        value = (value > 0.999) ? 100: (value < 0.001) ? 0 : value * 100;
         var filter = currentStyle.filter || style.filter || "";
         //http://snook.ca/archives/html_and_css/ie-position-fixed-opacity-filter
         //IE78的透明滤镜当其值为100时会让文本模糊不清
-        if(value == 100 || isNaN(value) ){  //IE78的透明滤镜当其值为100时会让文本模糊不清
+        if(value == 100  ){  //IE78的透明滤镜当其值为100时会让文本模糊不清
             // var str =  "filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color='#FFFFFF')"+
             //   "progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',"+
             //   "M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558)";
@@ -71,7 +74,6 @@ define("css_fix", !!top.getComputedStyle, function(){
                 return /alpha/i.test(a) ? "" : a;//可能存在多个滤镜，只清掉透明部分
             });
             //如果只有一个透明滤镜 就直接去掉
-            $.log(style.removeAttribute)
             if(value.trim() == "" && style.removeAttribute){
                 style.removeAttribute( "filter" );
             }
@@ -79,6 +81,7 @@ define("css_fix", !!top.getComputedStyle, function(){
         }
         //如果已经设置过透明滤镜可以使用以下便捷方式
         var alpha = node.filters.alpha || node.filters[salpha];
+
         if( alpha ){
             alpha.opacity = value ;
         }else{
