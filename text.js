@@ -973,3 +973,14 @@ $.fn = {
     offsetParent: function(){},
     scrollParent: function(){}
 }
+adapter[ "opacity:get" ] = function( node, op ){
+    //这是最快的获取IE透明值的方式，不需要动用正则了！
+    if(node.filters.alpha){
+        op = node.filters.alpha.opacity;
+    }else if(node.filters["DXImageTransform.Microsoft.Alpha"]){
+        op = node.filters["DXImageTransform.Microsoft.Alpha"].opacity
+    }else{
+        op = 100
+    }
+    return (op  ? op /100 :op)+"";//如果是零就不用除100了
+}

@@ -17,21 +17,19 @@
             }
 
             #click_text {
-                          background-color:rgba(0,0,0,.5); }
+                filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color="#FFFFFF") progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',
+        M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558);
+                background: blue;
+            }
             #callback_text { color:green; }
         </style>
 
         <script >
 
-            $.require("ready,more/hashchange", function() {
-                var div = $("#click_text")[0];
-                var el = $("<div style='color:red'/>")[0]
-                
-                $.log(   el.style.color );
-             
-                $.log(   el.currentStyle.color );
-             
-  $.log(   el.runtimeStyle.color );
+            $.require("ready,node,css", function() {
+                 $("#click_text").css("opacity",1) 
+   
+  
             })
 
 
@@ -39,10 +37,10 @@
     </head>
     <body >
         <p>hashchange by 司徒正美</p>
-        <div class="wrap">
-                <div id="click_text">xxxxx</div>
+        <div id="wrap">
+            <div id="click_text">xxxxx</div>
         </div>
-    
+
         <div id="callback_text"></div>
     </body>
 </html>

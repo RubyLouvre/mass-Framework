@@ -534,6 +534,32 @@ http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
 beforeunload 丢失率统计及优化方案
 统计日志打点方案的权衡
 http://www.irideas.com/?p=26
+hammer.js 是一个多点触摸手势库，能够为网页加入Tap、Double Tap、Swipe、Hold、Pinch、Drag等多点触摸事件，
+免去自己监听底层touchstart、touchmove、touchend事件并且写一大堆判断逻辑的痛苦。
+http://eightmedia.github.com/hammer.js/
+// 先要对监听的DOM进行一些初始化
+var hammer = new Hammer(document.getElementById("container"));
+
+// 然后加入相应的回调函数即可
+hammer.ondragstart = function(ev) { };  // 开始拖动
+hammer.ondrag = function(ev) { }; // 拖动中
+hammer.ondragend = function(ev) { }; // 拖动结束
+hammer.onswipe = function(ev) { }; // 滑动
+
+hammer.ontap = function(ev) { }; // 单击
+hammer.ondoubletap = function(ev) { }; //双击
+hammer.onhold = function(ev) { }; // 长按
+
+hammer.ontransformstart = function(ev) { }; // 双指收张开始
+hammer.ontransform = function(ev) { }; // 双指收张中
+hammer.ontransformend = function(ev) { }; // 双指收张结束
+
+hammer.onrelease = function(ev) { }; // 手指离开屏幕
+伸缩布局 — 打开布局天堂之门？
+
+http://dev.oupeng.com/articles/flexbox-basics
+http://www.alloyteam.com/2012/10/common-javascript-design-patterns/
+【腾讯TAT倾情推出】最通俗易懂的Javascript设计模式(昨天10.24节的连载巨献) 
      */
    
 
