@@ -42,8 +42,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
 
     adapter[ "zIndex:get" ] = function( node, name, value, position ) {
         while ( node.nodeType !== 9 ) {
-            //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto，如果没有指定zindex值，IE会返回数字0，其他返回auto
-            position = $.css(node, "position" );
+            //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto;
+            //如果没有指定zindex值，IE会返回数字0，其他返回auto
+            position = getter(node, "position" );//getter = adapter[ "_default:get" ]
             if ( position === "absolute" || position === "relative" || position === "fixed" ) {
                 // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
                 value = parseInt( getter(node,"zIndex"), 10 );
@@ -310,36 +311,13 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
     }
 
-    "Left,Top".replace( $.rword, function( name ) {
-        adapter[ name.toLowerCase() +":get"] =  function(node){//添加top, left到cssAdapter
-            var val = getter(node, name.toLowerCase()), offset;
-            // 1. 当没有设置 style.left 时，getComputedStyle 在不同浏览器下，返回值不同
-            //    比如：firefox 返回 0, webkit/ie 返回 auto
-            // 2. style.left 设置为百分比时，返回值为百分比
-            // 对于第一种情况，如果是 relative 元素，值为 0. 如果是 absolute 元素，值为 offsetLeft - marginLeft
-            // 对于第二种情况，大部分类库都未做处理，属于“明之而不 fix”的保留 bug
-            if(val === "auto"){
-                val = 0;
-                if(/absolute|fixed/.test(getter(node,"position"))){
-                    offset = node["offset"+name ];
-                    // old-ie 下，elem.offsetLeft 包含 offsetParent 的 border 宽度，需要减掉
-                    if (node.uniqueID && document.documentMode < 9 || window.opera) {
-                        // 类似 offset ie 下的边框处理
-                        // 如果 offsetParent 为 html ，需要减去默认 2 px == documentElement.clientTop
-                        // 否则减去 borderTop 其实也是 clientTop
-                        // http://msdn.microsoft.com/en-us/library/aa752288%28v=vs.85%29.aspx
-                        // ie<9 注意有时候 elem.offsetParent 为 null ...
-                        // 比如 DOM.append(DOM.create("<div class='position:absolute'></div>"),document.body)
-                        offset -= node.offsetParent && node.offsetParent['client' + name] || 0;
-                    }
-                    val = offset - (parseInt(getter(node, 'margin' + name),10) || 0) +"px";
-                }
-            }
-            return val
+    "left,top".replace( $.rword, function( name ) {
+        adapter[ name +":get"] =  function( node ){//添加top, left到cssAdapter
+            return  $(node).position()[ name ] + "px";
         };
-        var method = "scroll" + name;
+        var method = "scroll" + name.toUpperCase();
         $.fn[ method ] = function( val ) {
-            var node, win, t = name == "Top";
+            var node, win, t = name == "top";
             if ( val === void 0 ) {
                 node = this[ 0 ];
                 if ( !node ) {
