@@ -4,9 +4,9 @@
 define("css_fix", !!top.getComputedStyle, function(){
     $.log("已加载css_fix模块");
     var adapter = $.cssAdapter = {},
-    ropacity = /opacity=([^)]*)/i,
-    ralpha = /alpha\([^)]*\)/i,
     ie8 = !!top.XDomainRequest,
+    rfilters = /[\w\:\.]+\([^)]+\)/g,
+    salpha = "DXImageTransform.Microsoft.Alpha",
     rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
     rposition = /^(top|right|bottom|left)$/,
     border = {
@@ -47,33 +47,42 @@ define("css_fix", !!top.getComputedStyle, function(){
         return ret === "" ? "auto" : border[ret] ||  ret;
     }
     //=========================　处理　opacity　=========================
-    adapter[ "opacity:get" ] = function( node, op ){
+    adapter[ "opacity:get" ] = function( node ){
         //这是最快的获取IE透明值的方式，不需要动用正则了！
-        if(node.filters.alpha){
-            op = node.filters.alpha.opacity;
-        }else if(node.filters["DXImageTransform.Microsoft.Alpha"]){
-            op = node.filters["DXImageTransform.Microsoft.Alpha"].opacity
-        }else{
-            op = (node.currentStyle.filter ||"opacity=100").match(ropacity)[1];
-        }
-        return (op  ? op /100 :op)+"";//如果是零就不用除100了
+        var alpha = node.filters.alpha || node.filters[salpha],
+            op = alpha ? alpha.opacity: 100;
+        return ( op /100 )+"";//确保返回的是字符串
     }
     //http://www.freemathhelp.com/matrix-multiplication.html
     //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
-    adapter[ "opacity:set" ] = function( node, _, value ){
+    adapter[ "opacity:set" ] = function( node, name, value ){
         var currentStyle = node.currentStyle, style = node.style;
         if(!currentStyle.hasLayout)
             style.zoom = 1;//让元素获得hasLayout
-        value = (value > 0.999) ? 1: (value < 0.001) ? 0 : value;
-        if(node.filters.alpha){
-            //必须已经定义过透明滤镜才能使用以下便捷方式
-            node.filters.alpha.opacity = value * 100;
-        }else{
-            style.filter = "alpha(opacity="+((value * 100) | 0)+")";
+        value = (value > 0.999) ? 100: (value < 0.001) ? 0 : value * 100;
+        var filter = currentStyle.filter || style.filter || "";
+        //http://snook.ca/archives/html_and_css/ie-position-fixed-opacity-filter
+        //IE78的透明滤镜当其值为100时会让文本模糊不清
+        if(value == 100){  //IE78的透明滤镜当其值为100时会让文本模糊不清
+            // var str =  "filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color='#FFFFFF')"+
+            //   "progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',"+
+            //   "M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558)";
+            value = style.filter = filter.replace(rfilters, function(a){
+                return /alpha/i.test(a) ? "" : a;//可能存在多个滤镜，只清掉透明部分
+            });
+            //如果只有一个透明滤镜 就直接去掉
+            $.log(style.removeAttribute)
+            if(value.trim() == "" && style.removeAttribute){
+                style.removeAttribute( "filter" );
+            }
+            return;
         }
-        //IE7的透明滤镜当其值为100时会让文本模糊不清
-        if(value === 1){
-            style.filter = currentStyle.filter.replace(ralpha,'');
+        //如果已经设置过透明滤镜可以使用以下便捷方式
+        var alpha = node.filters.alpha || node.filters[salpha];
+        if( alpha ){
+            alpha.opacity = value ;
+        }else{
+            style.filter  += (filter ? "," : "")+ "alpha(opacity="+ value +")";
         }
     }
     //=========================　处理　user-select　=========================
@@ -99,4 +108,4 @@ define("css_fix", !!top.getComputedStyle, function(){
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
 //2012.5.9 完美支持CSS3 transform 2D
-
+//2012.10.25 重构透明度的读写
