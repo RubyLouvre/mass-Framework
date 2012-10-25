@@ -56,7 +56,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return 0;
     }
     //这里的属性不需要自行添加px
-    $.cssNubmer = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
+    $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     $.css = function( node, name, value){
         if(node.style){//注意string经过call之后，变成String伪对象，不能简单用typeof来检测
             name = $.cssName( name ) || name;
@@ -74,7 +74,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             }
         }
     }
-    
 
     $.fn.css =  function( name, value , neo){
         return $.access( this, name, value, $.css );
