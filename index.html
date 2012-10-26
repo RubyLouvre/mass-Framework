@@ -14,46 +14,36 @@
 
             #parent {
                 position:relative;
-                background: blue;
+                background: red;
                 width:300px;
                 height:300px;
+                border:1px solid greenyellow;
             }
             #son{
 
-                  position:absolute;
+                position:absolute;
                 left:30px;
                 top:15px;
                 width:100px;
                 height:100px;
-                background:green;
+                background-color:blue;
+
                 padding:20px;
-                margin:5px;
-                border:2px solid red;
-                -moz-box-shadow:5px 2px 6px #000;
+                margin:15px;
+                outline:  5px dotted yellow ;
+                border:5px dotted plum;
+                
             }
-            #son1{
-                  position:absolute;
-                  z-index:10;
-                  width:100px;
-                height:100px;
-                background:fuchsia;
-            }
-              #son2{
-                  position:absolute;
-                  z-index:-10;
-                  width:100px;
-                height:100px;
-                background:red;
-            }
+
         </style>
 
     </head>
     <body>
 
         <div id="parent">
-                <div id="son1">111</div>
+
             <div id="son">content</div>
-             <div id="son2">2222222</div>
+
         </div>
 
     </body>
