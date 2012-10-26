@@ -973,14 +973,19 @@ $.fn = {
     offsetParent: function(){},
     scrollParent: function(){}
 }
-adapter[ "opacity:get" ] = function( node, op ){
-    //这是最快的获取IE透明值的方式，不需要动用正则了！
-    if(node.filters.alpha){
-        op = node.filters.alpha.opacity;
-    }else if(node.filters["DXImageTransform.Microsoft.Alpha"]){
-        op = node.filters["DXImageTransform.Microsoft.Alpha"].opacity
-    }else{
-        op = 100
+adapter[ "zIndex:get" ] = function( node, name, value, position ) {
+    while ( node.nodeType !== 9 ) {
+        //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto;
+        //如果没有指定zindex值，IE会返回数字0，其他返回auto
+        position = getter(node, "position" );//getter = adapter[ "_default:get" ]
+        if ( position === "absolute" || position === "relative" || position === "fixed" ) {
+            // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
+            value = parseInt( getter(node,"zIndex"), 10 );
+            if ( !isNaN( value ) && value !== 0 ) {
+                return value;
+            }
+        }
+        node = node.parentNode;
     }
-    return (op  ? op /100 :op)+"";//如果是零就不用除100了
+    return 0;
 }

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>change</title>
+        <title>contentbox by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <!--  <script src="jquery1.82.js" ></script>
         <script src="hashchange.js" ></script>-->
@@ -11,35 +11,50 @@
                 height:100%;
                 background:#ddc;
             }
-            div{
-                width:200px;
-                height:200px;
-            }
 
-            #click_text {
-
+            #parent {
+                position:relative;
                 background: blue;
+                width:300px;
+                height:300px;
             }
-            #callback_text { color:green; }
+            #son{
+
+                  position:absolute;
+                left:30px;
+                top:15px;
+                width:100px;
+                height:100px;
+                background:green;
+                padding:20px;
+                margin:5px;
+                border:2px solid red;
+                -moz-box-shadow:5px 2px 6px #000;
+            }
+            #son1{
+                  position:absolute;
+                  z-index:10;
+                  width:100px;
+                height:100px;
+                background:fuchsia;
+            }
+              #son2{
+                  position:absolute;
+                  z-index:-10;
+                  width:100px;
+                height:100px;
+                background:red;
+            }
         </style>
 
-        <script >
-
-            $.require("ready,node,css", function() {
-                 $("#wrap").css("user-select","all") 
-   
-  
-            })
-
-
-        </script>
     </head>
-    <body >
-        <p>hashchange by 司徒正美</p>
-        <div id="wrap">
-            <div id="click_text">xxxxx</div>
+    <body>
+
+        <div id="parent">
+                <div id="son1">111</div>
+            <div id="son">content</div>
+             <div id="son2">2222222</div>
         </div>
 
-        <div id="callback_text"></div>
     </body>
 </html>
