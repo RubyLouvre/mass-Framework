@@ -202,9 +202,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     if ( target.nodeType === 9 ) {//取得页面尺寸
                         var doc = target.documentElement;
                         //IE6/IE7下，<html>的box-sizing默认值本就是border-box
-                        if ( doc[ clientProp ] >= doc[ scrollProp ] ) {
-                            return doc[ clientProp ];
-                        }
                         return Math.max(
                             target.body[ scrollProp ], doc[ scrollProp ],
                             target.body[ offsetProp ], doc[ offsetProp ],
