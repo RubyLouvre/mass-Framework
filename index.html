@@ -3,6 +3,9 @@
     <head>
         <title>contentbox by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js">
+
+        </script>
         <style type="text/css">
             body,html{
                 height:100%;
@@ -17,8 +20,8 @@
             #son{
                 width:100px;
                 height:100px;
-              /*  -moz-box-sizing:border-box;
-                box-sizing:border-box;*/
+                -moz-box-sizing:border-box;
+                box-sizing:border-box;
                 background-color:blue;
                 padding:20px;
                 margin:15px;
@@ -36,8 +39,11 @@
                     console.log( window.getComputedStyle(el, null).MozBoxSizing )//100px
                     console.log( window.getComputedStyle(el, null).WebkitBoxSizing )//100px
                     console.log( window.getComputedStyle(el, null).width )//100px
+
                 }
-             
+                $.require("ready, node, css", function(){
+                    $("#son").width(100)
+                })
                 //
             }
         </script>

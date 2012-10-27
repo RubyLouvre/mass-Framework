@@ -62,7 +62,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     $.css = function( node, name, value){
         if(node.style){//注意string经过call之后，变成String伪对象，不能简单用typeof来检测
             var prop = $.String.camelize(name)
-            name = $.cssName( name, node ) ;
+            name = $.cssName( name ) ;
             if( value === void 0){ //获取样式
                 return (adapter[ prop+":get" ] || adapter[ "_default:get" ])( node, name );
             }else {//设置样式
@@ -73,7 +73,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 if ( isFinite( value ) && !$.cssNumber[ prop ] ) {
                     value += "px";
                 }
-                (adapter[prop+":set"] || adapter[ "_default:set" ])( node, name, value );
+                ;(adapter[prop+":set"] || adapter[ "_default:set" ])( node, name, value );
             }
         }
     }
@@ -91,8 +91,8 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return $.scrollbarWidth.ret = ret;
     }
     var cssPair = {
-        Width:['Left', 'Right'],
-        Height:['Top', 'Bottom']
+        width:['Left', 'Right'],
+        height:['Top', 'Bottom']
     }
     var cssShow = {
         position: "absolute",

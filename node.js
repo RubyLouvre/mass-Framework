@@ -238,7 +238,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         }
         host = host || $.html.style;//$.html为document.documentElement
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
-            camelCase  = $.String.camelize( prefixes[i] + name )
+            camelCase  = $.String.camelize( prefixes[i] + name );
             if( camelCase in host ){
                 return ( cssMap[ name ] = camelCase  );
             }
