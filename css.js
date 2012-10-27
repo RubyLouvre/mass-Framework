@@ -81,15 +81,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     $.fn.css =  function( name, value , neo){
         return $.access( this, name, value, $.css );
     }
-    $.scrollbarWidth = function (){
-        if( $.scrollbarWidth.ret ){
-            return $.scrollbarWidth.ret
-        }
-        var test =  $('<div style="width: 100px;height: 100px;overflow: scroll;position: absolute;top: -9999px;"/>').appendTo("body");
-        var ret = test[0].offsetWidth - test[0].clientWidth;
-        test.remove();
-        return $.scrollbarWidth.ret = ret;
-    }
+
     var cssPair = {
         width:['Left', 'Right'],
         height:['Top', 'Bottom']
@@ -99,18 +91,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         visibility: "hidden",
         display: "block"
     }
-    /*
-     var rdisplayswap = /^(none|table(?!-c[ea]).+)/
-    上面是指代none table-column table-column-group table-header-group table-row-group table-footer-group table-row这几个属性
-　　在table中，有这么几个元素，它只是用于控制排板，但不会占据空间，它们在标准浏览器下各自默认一些特别的display值让它们能这样做。比如col标签，如IE下可以通过<col align="right" bgcolor="blue"/>控制它对应的这一列的TD或TH元素的文本对齐方式与背景色，它的display值为table-column。colgroup标签与col相仿，但可以控制相邻的几列元素，它的display值为table-column-group。
-　　
-　　tbody标签是表格布局时代是作用非常大。那时都是table套table。体形巨大的table不在少数。当时的浏览器在解释在表格时，如果没有tbody，会一直等到闭合table才显示它。如果一张网页是嵌套在一个大表格之内，那么很可能造成的后果就是，当浏览者敲入网址，他要先面对一片空白很长时间。tbody可以将一个很长的table分段显示出来，避免这种尴尬。不过现代浏览器都会自动插入tbody，差别在于够不够智能罢了。tbody标签是对行的分组，因此它的dispaly为table-row-group。
-　　
-　　与tbody齐名的是thead, tfoot。tbody是放置数据的本体，thead是放置每列的标题，tfoot是放置脚注，如制作日期，部门或放个分页栏组件进去。thead，tfoot也可以放置多个tr元素，因此它们的display值分别为able-header-group，table-footer-group。
-　　
-　　最后别忘了，tr元素也是不占据空间，它的display值为table-row。
-　　这些特殊的display值与none不同之处在于，它们不会影响后代的显示隐藏。
-     */
+    //http://www.cnblogs.com/rubylouvre/archive/2012/10/27/2742529.html
     var showHidden = function(node, array){
         if( node && node.nodeType == 1 && node.offsetWidth == 0 ){
             if(getter(node, "display") == "none"){
@@ -125,16 +106,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             }
             showHidden(node.parentNode, array)
         }
-    }
-    $.fn.hasScrollBar = function() {
-        //note: clientHeight= height of holder
-        //scrollHeight= we have content till this height
-        var _elm = $(this)[0];
-        var _hasScrollBar = false;
-        if ((_elm.clientHeight < _elm.scrollHeight) || (_elm.clientWidth < _elm.scrollWidth)) {
-            _hasScrollBar = true;
-        }
-        return _hasScrollBar;
     }
 
     var supportBoxSizing = $.cssName("box-sizing")
