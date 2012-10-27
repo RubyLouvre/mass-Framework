@@ -56,22 +56,24 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return 0;
     }
+
     //这里的属性不需要自行添加px
     $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     $.css = function( node, name, value){
         if(node.style){//注意string经过call之后，变成String伪对象，不能简单用typeof来检测
-            name = $.cssName( name, node, 1 ) ;
+            var prop = $.String.camelize(name)
+            name = $.cssName( name, node ) ;
             if( value === void 0){ //获取样式
-                return (adapter[ name+":get" ] || adapter[ "_default:get" ])( node, name );
+                return (adapter[ prop+":get" ] || adapter[ "_default:get" ])( node, name );
             }else {//设置样式
                 var temp;
                 if ( typeof value === "string" && (temp = rrelNum.exec( value )) ) {
                     value =  ( temp[1] + 1) * temp[2]  + parseFloat( $.css( node, name) );
                 }
-                if ( isFinite( value ) && !$.cssNumber[ name ] ) {
+                if ( isFinite( value ) && !$.cssNumber[ prop ] ) {
                     value += "px";
                 }
-                (adapter[name+":set"] || adapter[ "_default:set" ])( node, name, value );
+                (adapter[prop+":set"] || adapter[ "_default:set" ])( node, name, value );
             }
         }
     }
@@ -97,29 +99,52 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         visibility: "hidden",
         display: "block"
     }
-    var rdisplayswap = /^(none|table(?!-c[ea]).+)/
+    /*
+     var rdisplayswap = /^(none|table(?!-c[ea]).+)/
+    上面是指代none table-column table-column-group table-header-group table-row-group table-footer-group table-row这几个属性
+　　在table中，有这么几个元素，它只是用于控制排板，但不会占据空间，它们在标准浏览器下各自默认一些特别的display值让它们能这样做。比如col标签，如IE下可以通过<col align="right" bgcolor="blue"/>控制它对应的这一列的TD或TH元素的文本对齐方式与背景色，它的display值为table-column。colgroup标签与col相仿，但可以控制相邻的几列元素，它的display值为table-column-group。
+　　
+　　tbody标签是表格布局时代是作用非常大。那时都是table套table。体形巨大的table不在少数。当时的浏览器在解释在表格时，如果没有tbody，会一直等到闭合table才显示它。如果一张网页是嵌套在一个大表格之内，那么很可能造成的后果就是，当浏览者敲入网址，他要先面对一片空白很长时间。tbody可以将一个很长的table分段显示出来，避免这种尴尬。不过现代浏览器都会自动插入tbody，差别在于够不够智能罢了。tbody标签是对行的分组，因此它的dispaly为table-row-group。
+　　
+　　与tbody齐名的是thead, tfoot。tbody是放置数据的本体，thead是放置每列的标题，tfoot是放置脚注，如制作日期，部门或放个分页栏组件进去。thead，tfoot也可以放置多个tr元素，因此它们的display值分别为able-header-group，table-footer-group。
+　　
+　　最后别忘了，tr元素也是不占据空间，它的display值为table-row。
+　　这些特殊的display值与none不同之处在于，它们不会影响后代的显示隐藏。
+     */
     var showHidden = function(node, array){
-        if( node && node.nodeType == 1 && !node.offsetWidth
-            //如果是none table-column table-column-group table-footer-group table-header-group table-row table-row-group
-            && rdisplayswap.test(getter(node, "display")) ){
-            var obj = {
-                node: node
+        if( node && node.nodeType == 1 && node.offsetWidth == 0 ){
+            if(getter(node, "display") == "none"){
+                var obj = {
+                    node: node
+                }
+                for (var name in cssShow ) {
+                    obj[ name ] = node.style[ name ];
+                    node.style[ name ] = cssShow[ name ];
+                }
+                array.push( obj );
             }
-            for (var name in cssShow ) {
-                obj[ name ] = node.style[ name ];
-                node.style[ name ] = cssShow[ name ];
-            }
-            array.push( obj );
-            if(!node.offsetWidth){//如果设置了offsetWidth还是为零，说明父节点也是隐藏元素，继续往上递归
-                showHidden(node.parentNode, array)
-            }
+            showHidden(node.parentNode, array)
         }
     }
+    $.fn.hasScrollBar = function() {
+        //note: clientHeight= height of holder
+        //scrollHeight= we have content till this height
+        var _elm = $(this)[0];
+        var _hasScrollBar = false;
+        if ((_elm.clientHeight < _elm.scrollHeight) || (_elm.clientWidth < _elm.scrollWidth)) {
+            _hasScrollBar = true;
+        }
+        return _hasScrollBar;
+    }
 
-    function getWH( node, name, extra  ) {//注意 name是首字母大写
-        var which = cssPair[name], hidden = [];
-        showHidden( node, hidden );
-        var val = node["offset" + name]
+    var supportBoxSizing = $.cssName("box-sizing")
+    adapter[ "boxSizing:get" ] = function( node, name ) {
+        return  supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ?
+        "border-box" : "content-box"
+    }
+
+    function setWH(node, name, val, extra){
+        var which = cssPair[name]
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -127,8 +152,21 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 val -= parseFloat(getter(node, 'border' + direction + 'Width')) || 0;
             if(extra === 3){
                 val += parseFloat(getter(node, 'margin' + direction )) || 0;
+            } 
+            if(extra === "padding-box"){
+                val += parseFloat(getter(node, 'padding' + direction)) || 0;
+            }
+            if(extra === "border-box"){
+                val += parseFloat(getter(node, 'padding' + direction)) || 0;
+                val += parseFloat(getter(node, 'border' + direction + 'Width')) || 0;
             }
         });
+        return val
+    }
+    function getWH( node, name, extra  ) {//注意 name是首字母大写
+        var hidden = [];
+        showHidden( node, hidden );
+        var  val = setWH(node, name,  node["offset" + name], extra);
         for(var i = 0, obj; obj = hidden[i++];){
             node = obj.node;
             for ( name in obj ) {
@@ -147,6 +185,11 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         offsetProp = "offset" + name;
         $.cssAdapter[ lower+":get" ] = function( node ){
             return getWH( node, name, 0 ) + "px";//添加相应适配器
+        }
+        $.cssAdapter[ lower+":set" ] = function( node, name, value ){
+            var box = $.css(node, "box-sizing");
+            node.style[name] = box == "content-box" ? value:
+            setWH(node, name, parseFloat(value), box ) + "px";
         }
         "inner_1,b_0,outer_2".replace(/(\w+)_(\d)/g,function(a, b, num){
             var method = b == "b" ? lower : b + name;
@@ -354,7 +397,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
 });
-    /**
+/**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 2011.9.20 v2
@@ -379,6 +422,6 @@ http://www.zhangxinxu.com/wordpress/2011/09/cssom%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%
 //W3C DOM异常对象DOMException介绍 http://www.zhangxinxu.com/wordpress/2012/05/w3c-dom-domexception-object/
 //http://www.zhangxinxu.com/wordpress/2012/05/getcomputedstyle-js-getpropertyvalue-currentstyle/
 http://www.zhangxinxu.com/wordpress/2011/11/css3-font-face%E5%85%BC%E5%AE%B9%E6%80%A7%E4%B8%89%E8%A7%92%E6%95%88%E6%9E%9C/
-     */
+*/
 
 

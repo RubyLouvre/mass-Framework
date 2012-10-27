@@ -3,48 +3,49 @@
     <head>
         <title>contentbox by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <!--  <script src="jquery1.82.js" ></script>
-        <script src="hashchange.js" ></script>-->
-        <script src="mass.js" ></script>
         <style type="text/css">
             body,html{
                 height:100%;
-                background:#ddc;
+                background:gray;
             }
-
             #parent {
-                position:relative;
                 background: red;
                 width:300px;
                 height:300px;
                 border:1px solid greenyellow;
             }
             #son{
-
-                position:absolute;
-                left:30px;
-                top:15px;
                 width:100px;
                 height:100px;
+              /*  -moz-box-sizing:border-box;
+                box-sizing:border-box;*/
                 background-color:blue;
-
                 padding:20px;
                 margin:15px;
-                outline:  5px dotted yellow ;
-                border:5px dotted plum;
-                
+                overflow:hidden;
+                border:5px solid yellow;
             }
-
         </style>
-
+        <script>
+            window.onload = function(){
+                var el = document.getElementById("son")
+                console.log( el.offsetWidth )//150
+                if(el.currentStyle){
+                    console.log(el.currentStyle.width)
+                }else{
+                    console.log( window.getComputedStyle(el, null).MozBoxSizing )//100px
+                    console.log( window.getComputedStyle(el, null).WebkitBoxSizing )//100px
+                    console.log( window.getComputedStyle(el, null).width )//100px
+                }
+             
+                //
+            }
+        </script>
     </head>
     <body>
-
+        <div style="display:table-row-group">xxx</div>
         <div id="parent">
-
-            <div id="son">content</div>
-
+            <div id="son"> </div>
         </div>
-
     </body>
 </html>
