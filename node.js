@@ -232,21 +232,18 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         bgc: "backgroundColor",
         "float":  $.support.cssFloat ? 'cssFloat': 'styleFloat'
     };
-    function cssName( name, host, hode ){
+    function cssName( name, host, camelCase ){
         if( cssMap[ name ] ){
             return cssMap[ name ];
         }
         host = host || $.html.style;//$.html为document.documentElement
         for ( var i = 0, n = prefixes.length; i < n; i++ ) {
-            var camelCase  = $.String.camelize( prefixes[i] + name )
-            if(i == 0){
-                hode = camelCase
-            }
+            camelCase  = $.String.camelize( prefixes[i] + name )
             if( camelCase in host ){
                 return ( cssMap[ name ] = camelCase  );
             }
         }
-        return hode;
+        return null;
     }
     var matchesAPI = cssName( "matchesSelector",$.html );
     $.mix({
