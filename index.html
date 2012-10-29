@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>contentbox by 司徒正美</title>
+        <title>display by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="mass.js">
 
@@ -20,36 +20,58 @@
             #son{
                 width:100px;
                 height:100px;
-                -moz-box-sizing:border-box;
-                box-sizing:border-box;
                 background-color:blue;
                 padding:20px;
                 margin:15px;
-                overflow:hidden;
+                display:none;
                 border:5px solid yellow;
             }
         </style>
         <script>
             window.onload = function(){
                 var el = document.getElementById("son")
-                console.log( el.offsetWidth )//150
-                if(el.currentStyle){
-                    console.log(el.currentStyle.width)
+                el.style.display= ""
+                //   console.log( el.offsetWidth )//150
+                if(window.getComputedStyle){
+                  
+                  
+                    console.log(document.documentElement.scrollHeight)
+                    console.log(document.documentElement.offsetHeight)
+                    console.log(document.documentElement.clientHeight)
+                    console.log(document.body.scrollHeight)
+                    console.log(document.body.offsetHeight)
+                    console.log(document.body.clientHeight)
+                    console.log(window.scrollMaxY + window.innerHeight)
+                    console.log(document.height)
+                  
                 }else{
-                    console.log( window.getComputedStyle(el, null).MozBoxSizing )//100px
-                    console.log( window.getComputedStyle(el, null).WebkitBoxSizing )//100px
-                    console.log( window.getComputedStyle(el, null).width )//100px
-
+                    
+                    console.log(document.documentElement.scrollHeight)
+                    console.log(document.documentElement.offsetHeight)
+                    console.log(document.documentElement.clientHeight)
+                    console.log(document.body.scrollHeight)
+                    console.log(document.body.offsetHeight)
+                    console.log(document.body.clientHeight)
+                    console.log(window.scrollMaxY + window.innerHeight)
+                    console.log(document.height)
+                  
                 }
+                //document.body.clientWidth肯定最小的,不用比较
+                var pageWidth =  Math.max(
+                document.documentElement.scrollWidth,
+                document.documentElement.offsetWidth,
+                document.documentElement.clientWidth,
+                document.body.scrollWidth,
+                document.body.offsetWidth)
                 $.require("ready, node, css", function(){
                     $("#son").width(100)
+               
                 })
                 //
             }
         </script>
     </head>
     <body>
-        <div style="display:table-row-group">xxx</div>
         <div id="parent">
             <div id="son"> </div>
         </div>

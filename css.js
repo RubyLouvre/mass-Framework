@@ -166,28 +166,57 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             var method = b == "b" ? lower : b + name;
             $.fn[ method ] = function( value ) {
                 num = b == "outer" && value === true ? 3 : num;
-                return $.access( this, num, value, function( target, num, size ) {
-                    if ( $.type( target,"Window" ) ) {//取得窗口尺寸
-                        return target.document.documentElement[ clientProp ];
+                return $.access( this, num, value, function( node, num, size ) {
+                    if ( $.type( node,"Window" ) ) {//取得窗口尺寸,IE9后可以用node.innerWidth /innerHeight代替
+                        return node.documentElement[ clientProp ] ;
                     }
-                    if ( target.nodeType === 9 ) {//取得页面尺寸
-                        var doc = target.documentElement;
-                        //IE6/IE7下，<html>的box-sizing默认值本就是border-box
+                    if ( node.nodeType === 9 ) {//取得页面尺寸
+                        var doc = node.documentElement;
                         return Math.max(
-                            target.body[ scrollProp ], doc[ scrollProp ],
-                            target.body[ offsetProp ], doc[ offsetProp ],
+                            node.body[ scrollProp ], doc[ scrollProp ],
+                            node.body[ offsetProp ], doc[ offsetProp ],
                             doc[ clientProp ]
                             );
                     }  else if ( size === void 0 ) {
-                        return getWH( target, name, num )
+                        return getWH( node, name, num )
                     } else {
-                        return num > 0  ? this : $.css( target, lower, size );
+                        return num > 0  ? this : $.css( node, lower, size );
                     }
                 }, this)
             }
         })
 
     });
+
+    var sandbox,sandboxDoc;
+    $.callSandbox = function(parent,callback){
+        if ( !sandbox ) {
+            sandbox = document.createElement( "iframe" );
+            sandbox.frameBorder = sandbox.width = sandbox.height = 0;
+        }
+        parent.appendChild(sandbox);
+        if ( !sandboxDoc || !sandbox.createElement ) {
+            sandboxDoc = ( sandbox.contentWindow || sandbox.contentDocument ).document;
+            sandboxDoc.write( "<!doctype html><html><body>" );
+            sandboxDoc.close();
+        }
+        callback(sandboxDoc);
+        parent.removeChild(sandbox);
+    }
+
+    var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
+    var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
+    $.mix(cacheDisplay ,blocks);
+    function parseDisplay( nodeName ) {
+        if ( !cacheDisplay[ nodeName ] ) {
+            callSandbox(document.body, function(doc){
+                var  elem = doc.createElement( nodeName );
+                doc.body.appendChild( elem );
+                cacheDisplay[ nodeName ] = $.css( elem, "display" );
+            });
+        }
+        return cacheDisplay[ nodeName ];
+    }
 
     //=======================================================
     //获取body的offset
