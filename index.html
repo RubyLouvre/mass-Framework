@@ -28,52 +28,22 @@
             }
         </style>
         <script>
-            window.onload = function(){
-                var el = document.getElementById("son")
-                el.style.display= ""
-                //   console.log( el.offsetWidth )//150
-                if(window.getComputedStyle){
-                  
-                  
-                    console.log(document.documentElement.scrollHeight)
-                    console.log(document.documentElement.offsetHeight)
-                    console.log(document.documentElement.clientHeight)
-                    console.log(document.body.scrollHeight)
-                    console.log(document.body.offsetHeight)
-                    console.log(document.body.clientHeight)
-                    console.log(window.scrollMaxY + window.innerHeight)
-                    console.log(document.height)
-                  
-                }else{
-                    
-                    console.log(document.documentElement.scrollHeight)
-                    console.log(document.documentElement.offsetHeight)
-                    console.log(document.documentElement.clientHeight)
-                    console.log(document.body.scrollHeight)
-                    console.log(document.body.offsetHeight)
-                    console.log(document.body.clientHeight)
-                    console.log(window.scrollMaxY + window.innerHeight)
-                    console.log(document.height)
-                  
-                }
-                //document.body.clientWidth肯定最小的,不用比较
-                var pageWidth =  Math.max(
-                document.documentElement.scrollWidth,
-                document.documentElement.offsetWidth,
-                document.documentElement.clientWidth,
-                document.body.scrollWidth,
-                document.body.offsetWidth)
-                $.require("ready, node, css", function(){
-                    $("#son").width(100)
-               
-                })
-                //
-            }
+
+            $.require("ready, node, css", function(){
+                var val = $.display( "td" )
+                console.log(val)
+            })
+      
         </script>
     </head>
     <body>
         <div id="parent">
             <div id="son"> </div>
         </div>
+        <table>
+            <tr>
+                <td id="aa">ffffff</td>
+            </tr>
+        </table>
     </body>
 </html>

@@ -73,7 +73,8 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 if ( isFinite( value ) && !$.cssNumber[ prop ] ) {
                     value += "px";
                 }
-                ;(adapter[prop+":set"] || adapter[ "_default:set" ])( node, name, value );
+                ;
+                (adapter[prop+":set"] || adapter[ "_default:set" ])( node, name, value );
             }
         }
     }
@@ -92,7 +93,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         display: "block"
     }
     //http://www.cnblogs.com/rubylouvre/archive/2012/10/27/2742529.html
-    var showHidden = function(node, array){
+    function showHidden(node, array){
         if( node && node.nodeType == 1 && node.offsetWidth == 0 ){
             if(getter(node, "display") == "none"){
                 var obj = {
@@ -177,7 +178,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                             node.body[ offsetProp ], doc[ offsetProp ],
                             doc[ clientProp ]
                             );
-                    }  else if ( size === void 0 ) {
+                    } else if ( size === void 0 ) {
                         return getWH( node, name, num )
                     } else {
                         return num > 0  ? this : $.css( node, lower, size );
@@ -208,14 +209,57 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);
     function parseDisplay( nodeName ) {
+        nodeName = nodeName.toLowerCase();
         if ( !cacheDisplay[ nodeName ] ) {
-            callSandbox(document.body, function(doc){
+            $.callSandbox(document.body, function(doc){
                 var  elem = doc.createElement( nodeName );
                 doc.body.appendChild( elem );
-                cacheDisplay[ nodeName ] = $.css( elem, "display" );
+                cacheDisplay[ nodeName ] = getter( elem, "display" );
             });
         }
         return cacheDisplay[ nodeName ];
+    }
+    
+    function isHidden( elem) {
+        return getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
+    }
+
+    function toggelDisplay( nodes, show ) {
+        var elem,  values = [],   index = 0, length = nodes.length, status = [];
+        //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
+        for ( ; index < length; index++ ) {
+            elem = nodes[ index ];
+            if ( !elem.style ) {
+                continue;
+            }
+            values[ index ] = $._data( elem, "olddisplay" );
+            status[ index ] = isHidden(elem) 
+            if( !values[ index ] ){
+                values[ index ] =  status[index] ? defaultDisplay(elem.nodeName): 
+                getter(elem, "display");
+                $._data( elem, "olddisplay", values[ index ])
+            }
+        }
+        //第二个循环用于设置样式，-1为toggle, 1为show, 0为hide
+        for ( index = 0; index < length; index++ ) {
+            elem = nodes[ index ];
+            if ( !elem.style ) {
+                continue;
+            }
+            show = show === -1 ? !status[index] : show
+            elem.style.display = show ?  values[ index ] : "none";
+        }
+        return nodes;
+    }
+    $.fn.show =  function() {
+        return toggelDisplay( this, 1 );
+    }
+    $.fn.hide = function() {
+        return toggelDisplay( this, 0 );
+    }
+    //state为true时，强制全部显示，为false，强制全部隐藏
+    $.fn.toggle = function( state ) {
+        return toggelDisplay( this, typeof state == "boolean" ? state : -1 );
     }
 
     //=======================================================
@@ -300,15 +344,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return pos;
     }
-    "show,hide".replace($.rword, function(method){
-        $.fn[ method ] = function(){
-            return this.each(function(){
-                if(this.style){
-                    this.style.display = method == "show" ? "block" : "none"
-                }
-            })
-        }
-    })
+
     var rroot = /^(?:body|html)$/i;
     $.fn. position = function() {//取得元素相对于其offsetParent的坐标
         var ret =  this.offset(), node = this[0];
@@ -421,4 +457,7 @@ http://www.zhangxinxu.com/wordpress/2011/09/cssom%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%
 http://www.zhangxinxu.com/wordpress/2011/11/css3-font-face%E5%85%BC%E5%AE%B9%E6%80%A7%E4%B8%89%E8%A7%92%E6%95%88%E6%9E%9C/
 */
 
+function isHidden( elem) {
+    return getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
+}
 
