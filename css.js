@@ -346,7 +346,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
 
     var rroot = /^(?:body|html)$/i;
-    $.fn. position = function() {//取得元素相对于其offsetParent的坐标
+    $.fn.position = function() {//取得元素相对于其offsetParent的坐标
         var ret =  this.offset(), node = this[0];
         if ( node && node.nodeType ===1 ) {
             var offsetParent = this.offsetParent(),
@@ -363,6 +363,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return ret;
     }
+    //https://github.com/beviz/jquery-caret-position-getter/blob/master/jquery.caretposition.js
     $.fn.offsetParent = function() {
         return this.map(function() {
             var offsetParent = this.offsetParent || document.body;

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
-<html>
+<html id="html">
     <head>
-        <title>display by 司徒正美</title>
+        <title>offsetParent by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="mass.js">
 
@@ -9,44 +9,144 @@
         <style type="text/css">
             body,html{
                 height:100%;
-                background:gray;
+                background:orange;
             }
-            #parent {
-                background: red;
-                width:300px;
-                height:300px;
-                border:1px solid greenyellow;
+            #relative {
+                position: fixed;
             }
-            #son{
+            div{
                 width:100px;
                 height:100px;
-                background:blue;
-                padding:20px;
-                margin:15px;
-
-                border:5px solid yellow;
+                background: red;
+                margin:10px;
+            }
+            #aaa,#eee,#iii,#mmm,#qqq{
+                position: relative;
+            }
+            #bbb,#fff,#jjj,#nnn,#rrr{
+                position: absolute;
+            }
+            #ccc,#ggg,#kkk,#ooo,#sss{
+                position: fixed;
+                background: blue;
+            }
+            #td2 {
+                position: relative;
+            }
+            td{
+                background: green;
+            }
+            form{
+                margin-left:160px;
             }
         </style>
         <script>
 
-            $.require("ready, node, css", function(){
-                var node =  $("#son")[0]
-                node.style.display = "none"
-                node.style.display = ""
-              
-                console.log( window.getComputedStyle(  $("#bb")[0], null).top )
-               console.log( $("#bb")[0].offsetLeft )
-  console.log( $("#bb")[0].offsetTop )
-            })
+            window.onload = function(){
+                var add = "<ul>"
+                var i = 0
+                var hash = {
+                    1: "自身position: relative的DIV元素",
+                    2: "自身position: absolute的DIV元素",
+                    3: "自身position: fixed的DIV元素",
+                    0: "自身position: static的DIV元素"
+                }
+                "abcdefghijklmnopqrst".replace(/\w/g, function(id){
+                    i++;
+                    add += "<li>"
+                    if( i < 5){
+                        add += "没有已定位的父节点，且"
+                    } if(i >= 5 && i < 9){
+                        add += "拥有一个已定位的父节点，且"
+                    }else if( i >= 9 && i < 13){
+                        add += "在table之内，td与table都没有定位，且"
+                    }else if( i >= 13 && i < 17){
+                        add += "在table之内，td相对定位，且"
+                    }else if( i >= 17){
+                        add += "在table之内，table相对定位，且"
+                    }
+                    add += hash[ i % 4];
+                    id = id + id + id;
+                    var el = document.getElementById(id).offsetParent
+                    var ret = (el && el.id)+"";
+                    switch(ret){
+                        case "html":
+                            add += "的offsetParent为HTML"
+                            break
+                        case "body":
+                            add += "的offsetParent为BODY"
+                            break
+                        case "relative":
+                            add += "的offsetParent为其最近被定位的祖先"
+                            break
+                        case "td":
+                        case "td2":
+                        case "td3":
+                            add += "的offsetParent为其最近的<strong>TD、TH</strong>元素"    
+                            break
+                        case "table":
+                            add += "的offsetParent为其最近的<strong>TABLE</strong>元素"     
+                            break
+                        default:
+                            add += "的offsetParent为null"       
+                            break
+                    }
+                    add += "</li>"
+                })
+                add += "</ul>"
+                console.log(add)
+                var el = document.createElement("form");
+                document.body.appendChild( el );
+                el.innerHTML = add;
+            
+            }
       
         </script>
     </head>
-    <body>
-        <div id="parent">
-            <div id="son"> </div>
-        </div>
-        <div id="bb">
-            dddddddd
-        </div>
+    <body id="body">
+        <blockquote>
+            <div id="aaa">
+
+            </div>
+            <div id="bbb">
+
+            </div>
+            <div id="ccc">
+
+            </div>
+            <div id="ddd">
+
+            </div>
+        </blockquote>
+        <blockquote id="relative">
+            <div id="eee">
+
+            </div>
+            <div id="fff">
+
+            </div>
+            <div id="ggg">
+
+            </div>
+            <div id="hhh">
+
+            </div>
+        </blockquote>
+        <table border="1" id="table">
+            <tr>
+                <td id="td"><div id="iii"></div><div id="jjj"></div><div id="kkk"></div><div id="lll"></div></td>
+            </tr>
+            <tr>
+                <td id="td2" ><div id="mmm"></div><div id="nnn"></div><div id="ooo"></div><div id="ppp"></div></td>
+            </tr>
+        </table>
+        <table  style="float:left;border:1px solid black; position: relative;" id="table">
+            <tr>
+                <td id="td3"><div id="qqq"></div><div id="rrr"></div><div id="sss"></div><div id="ttt"></div></td>
+            </tr>
+        </table>
+
     </body>
 </html>
+
+
