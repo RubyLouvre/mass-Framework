@@ -208,7 +208,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);
-    function parseDisplay( nodeName ) {
+   function parseDisplay( nodeName ) {
         nodeName = nodeName.toLowerCase();
         if ( !cacheDisplay[ nodeName ] ) {
             $.callSandbox(document.body, function(doc){
@@ -225,7 +225,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
 
     function toggelDisplay( nodes, show ) {
-        var elem,  values = [],   index = 0, length = nodes.length, status = [];
+        var elem,  values = [], status = [], index = 0, length = nodes.length;
         //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
         for ( ; index < length; index++ ) {
             elem = nodes[ index ];

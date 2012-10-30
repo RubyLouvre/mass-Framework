@@ -20,18 +20,23 @@
             #son{
                 width:100px;
                 height:100px;
-                background-color:blue;
+                background:blue;
                 padding:20px;
                 margin:15px;
-                display:none;
+
                 border:5px solid yellow;
             }
         </style>
         <script>
 
             $.require("ready, node, css", function(){
-                var val = $.display( "td" )
-                console.log(val)
+                var node =  $("#son")[0]
+                node.style.display = "none"
+                node.style.display = ""
+              
+                console.log( window.getComputedStyle(  $("#bb")[0], null).top )
+               console.log( $("#bb")[0].offsetLeft )
+  console.log( $("#bb")[0].offsetTop )
             })
       
         </script>
@@ -40,10 +45,8 @@
         <div id="parent">
             <div id="son"> </div>
         </div>
-        <table>
-            <tr>
-                <td id="aa">ffffff</td>
-            </tr>
-        </table>
+        <div id="bb">
+            dddddddd
+        </div>
     </body>
 </html>
