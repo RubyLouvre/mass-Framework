@@ -364,6 +364,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return ret;
     }
     //https://github.com/beviz/jquery-caret-position-getter/blob/master/jquery.caretposition.js
+    //offsetParent returns a reference to the object which is the closest (nearest in the containment hierarchy) positioned containing element. If the element is non-positioned, the nearest table cell or root element (html in standards compliant mode; body in quirks rendering mode) is the offsetParent. offsetParent returns null when the element has style.display set to "none". The offsetParent is useful because offsetTop and offsetLeft are relative to its padding edge.
+
+ //https://developer.mozilla.org/en-US/docs/DOM/element.offsetParent
     $.fn.offsetParent = function() {
         return this.map(function() {
             var offsetParent = this.offsetParent || document.body;
