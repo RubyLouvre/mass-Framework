@@ -306,7 +306,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             curElem.css( props );
         }
     }
-    var RECT = "getBoundingClientRect"
+
     $.fn.offset = function(options){//取得第一个元素位于页面的坐标
         if ( arguments.length ) {
             return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
@@ -322,16 +322,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         if ( !doc ) {
             return pos;
         }
-        //        if( node.tagName === "BODY" ){
-        //            pos.top = node.offsetTop;
-        //            pos.left = node.offsetLeft;
-        //            //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
-        //            if(getBodyOffsetNoMargin()){
-        //                pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
-        //                pos.left += parseFloat( getter(node, "marginLeft") ) || 0;
-        //            }
-        //            return pos;
-        //        }else if ( $.html[ RECT ]) { //如果支持getBoundingClientRect
+        //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
         var box = node[ RECT ](),win = getWindow(doc),
@@ -345,13 +336,13 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
         pos.top  = box.top  + scrollTop  - clientTop,
         pos.left = box.left + scrollLeft - clientLeft;
-        //  }
+
         return pos;
     }
 
     $.fn.position = function() {//取得元素相对于其offsetParent的坐标
         var offset, offsetParent , node = this[0],
-        parentOffset = {
+        parentOffset = {//默认的offsetParent相对于视窗的距离
             top: 0,
             left: 0
         }
@@ -362,17 +353,14 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         if(getter( node, "position" ) === "fixed" ){
             offset  = node.getBoundingClientRect();
         } else {
+            offset = this.offset();//得到元素相对于视窗的距离（我们只有它的top与left）
             offsetParent = this.offsetParent();
-            offset = this.offset();
-            //如果offsetParent不是顶层元素，就重写parentOffset
             if ( offsetParent[ 0 ].tagName !== "HTML"  ) {
-                parentOffset = offsetParent.offset();
+                parentOffset = offsetParent.offset();//得到它的offsetParent相对于视窗的距离
             }
-            //添加上border
             parentOffset.top  += parseFloat( getter( offsetParent[ 0 ], "borderTopWidth" ) ) || 0;
             parentOffset.left += parseFloat( getter( offsetParent[ 0 ], "borderLeftWidth" ) ) || 0;
         }
-
         return {
             top:  offset.top  - parentOffset.top - ( parseFloat( getter( node, "marginTop" ) ) || 0 ),
             left: offset.left - parentOffset.left - ( parseFloat( getter( node, "marginLeft" ) ) || 0 )

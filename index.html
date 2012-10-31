@@ -11,6 +11,9 @@
                 height:100%;
                 background:orange;
             }
+            body{
+                margin:20px;
+            }
             #parent {
                 position: relative;
                 width:250px;
@@ -34,13 +37,13 @@
 
             window.onload = function(){
                 if($.require){
-               $.require("ready,node,css", function(){
-                   console.log( $("#parent").offset().left )
-               })
+                    $.require("ready,node,css", function(){
+                        console.log( $("#parent").offset().left )
+                    })
                   
                 }else{
                     $(function(){
-                         console.log( $("#parent").offset().left )
+                        console.log( $("#parent").offset().left )
                     })
                 }
 
