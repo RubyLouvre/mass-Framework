@@ -173,6 +173,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                     }
                     if ( node.nodeType === 9 ) {//取得页面尺寸
                         var doc = node.documentElement;
+                        //FF chrome    html.scrollHeight< body.scrollHeight
+                        //IE 标准模式 : html.scrollHeight> body.scrollHeight
+                        //IE 怪异模式 : html.scrollHeight 最大等于可视窗口多一点？
                         return Math.max(
                             node.body[ scrollProp ], doc[ scrollProp ],
                             node.body[ offsetProp ], doc[ offsetProp ],
@@ -208,7 +211,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);
-   function parseDisplay( nodeName ) {
+    function parseDisplay( nodeName ) {
         nodeName = nodeName.toLowerCase();
         if ( !cacheDisplay[ nodeName ] ) {
             $.callSandbox(document.body, function(doc){
@@ -303,6 +306,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             curElem.css( props );
         }
     }
+    var RECT = "getBoundingClientRect"
     $.fn.offset = function(options){//取得第一个元素位于页面的坐标
         if ( arguments.length ) {
             return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
@@ -311,69 +315,79 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             });
         }
 
-        var node = this[0], owner = node && node.ownerDocument, pos = {
+        var node = this[0], doc = node && node.ownerDocument, pos = {
             left:0,
             top:0
         };
-        if ( !node || !owner ) {
+        if ( !doc ) {
             return pos;
         }
-        if( node.tagName === "BODY" ){
-            pos.top = node.offsetTop;
-            pos.left = body.offsetLeft;
-            //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
-            if(getBodyOffsetNoMargin()){
-                pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
-                pos.left += parseFloat( getter(node, "marginLeft") ) || 0;
-            }
-            return pos;
-        }else if ( $.html[ RECT ]) { //如果支持getBoundingClientRect
-            //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
-            //http://msdn.microsoft.com/en-us/library/ms536433.aspx
-            var box = node[ RECT ](),win = getWindow(owner),
-            root = owner.documentElement,body = owner.body,
-            clientTop = root.clientTop || body.clientTop || 0,
-            clientLeft = root.clientLeft || body.clientLeft || 0,
-            scrollTop  = win.pageYOffset || $.support.boxModel && root.scrollTop  || body.scrollTop,
-            scrollLeft = win.pageXOffset || $.support.boxModel && root.scrollLeft || body.scrollLeft;
-            // 加上document的scroll的部分尺寸到left,top中。
-            // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
-            // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
-            pos.top  = box.top  + scrollTop  - clientTop,
-            pos.left = box.left + scrollLeft - clientLeft;
-        }
+        //        if( node.tagName === "BODY" ){
+        //            pos.top = node.offsetTop;
+        //            pos.left = node.offsetLeft;
+        //            //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
+        //            if(getBodyOffsetNoMargin()){
+        //                pos.top  += parseFloat( getter(node, "marginTop") ) || 0;
+        //                pos.left += parseFloat( getter(node, "marginLeft") ) || 0;
+        //            }
+        //            return pos;
+        //        }else if ( $.html[ RECT ]) { //如果支持getBoundingClientRect
+        //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
+        //http://msdn.microsoft.com/en-us/library/ms536433.aspx
+        var box = node[ RECT ](),win = getWindow(doc),
+        root = doc.documentElement,body = doc.body,
+        clientTop  = root.clientTop  || body.clientTop || 0,
+        clientLeft = root.clientLeft || body.clientLeft || 0,
+        scrollTop  = win.pageYOffset ||  root.scrollTop  || body.scrollTop,
+        scrollLeft = win.pageXOffset ||  root.scrollLeft || body.scrollLeft;
+        // 把滚动距离加到left,top中去。
+        // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
+        // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
+        pos.top  = box.top  + scrollTop  - clientTop,
+        pos.left = box.left + scrollLeft - clientLeft;
+        //  }
         return pos;
     }
 
-    var rroot = /^(?:body|html)$/i;
     $.fn.position = function() {//取得元素相对于其offsetParent的坐标
-        var ret =  this.offset(), node = this[0];
-        if ( node && node.nodeType ===1 ) {
-            var offsetParent = this.offsetParent(),
-            parentOffset = rroot.test(offsetParent[0].nodeName) ? {
-                top:0,
-                left:0
-            } : offsetParent.offset();
-            ret.top  -= parseFloat( getter(node, "marginTop") ) || 0;
-            ret.left -= parseFloat( getter(node, "marginLeft") ) || 0;
-            parentOffset.top  += parseFloat( getter(offsetParent[0], "borderTopWidth") ) || 0;
-            parentOffset.left += parseFloat( getter(offsetParent[0], "borderLeftWidth") ) || 0;
-            ret.top  -= parentOffset.top;
-            ret.left -= parentOffset.left
+        var offset, offsetParent , node = this[0],
+        parentOffset = {
+            top: 0,
+            left: 0
         }
-        return ret;
+        if ( !node ||  node.nodeType !== 1 ) {
+            return
+        }
+        //fixed 元素是相对于window
+        if(getter( node, "position" ) === "fixed" ){
+            offset  = node.getBoundingClientRect();
+        } else {
+            offsetParent = this.offsetParent();
+            offset = this.offset();
+            //如果offsetParent不是顶层元素，就重写parentOffset
+            if ( offsetParent[ 0 ].tagName !== "HTML"  ) {
+                parentOffset = offsetParent.offset();
+            }
+            //添加上border
+            parentOffset.top  += parseFloat( getter( offsetParent[ 0 ], "borderTopWidth" ) ) || 0;
+            parentOffset.left += parseFloat( getter( offsetParent[ 0 ], "borderLeftWidth" ) ) || 0;
+        }
+
+        return {
+            top:  offset.top  - parentOffset.top - ( parseFloat( getter( node, "marginTop" ) ) || 0 ),
+            left: offset.left - parentOffset.left - ( parseFloat( getter( node, "marginLeft" ) ) || 0 )
+        };
     }
     //https://github.com/beviz/jquery-caret-position-getter/blob/master/jquery.caretposition.js
-    //offsetParent returns a reference to the object which is the closest (nearest in the containment hierarchy) positioned containing element. If the element is non-positioned, the nearest table cell or root element (html in standards compliant mode; body in quirks rendering mode) is the offsetParent. offsetParent returns null when the element has style.display set to "none". The offsetParent is useful because offsetTop and offsetLeft are relative to its padding edge.
-
- //https://developer.mozilla.org/en-US/docs/DOM/element.offsetParent
+    //https://developer.mozilla.org/en-US/docs/DOM/element.offsetParent
+    //如果元素被移出DOM树，或display为none，或作为HTML或BODY元素，或其position的精确值为fixed时，返回null
     $.fn.offsetParent = function() {
         return this.map(function() {
-            var offsetParent = this.offsetParent || document.body;
-            while ( offsetParent && (!rroot.test(offsetParent.nodeName) && getter(offsetParent, "position") === "static") ) {
-                offsetParent = offsetParent.offsetParent;
+            var el = this.offsetParent;
+            while ( el && (el.parentNode.nodeType !== 9 ) && getter(el, "position") === "static" ) {
+                el = el.offsetParent;
             }
-            return offsetParent;
+            return el || document.documentElement;
         });
     }
     $.fn.scrollParent = function() {
@@ -460,8 +474,4 @@ http://www.zhangxinxu.com/wordpress/2011/09/cssom%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%
 //http://www.zhangxinxu.com/wordpress/2012/05/getcomputedstyle-js-getpropertyvalue-currentstyle/
 http://www.zhangxinxu.com/wordpress/2011/11/css3-font-face%E5%85%BC%E5%AE%B9%E6%80%A7%E4%B8%89%E8%A7%92%E6%95%88%E6%9E%9C/
 */
-
-function isHidden( elem) {
-    return getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
-}
 
