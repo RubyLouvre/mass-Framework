@@ -149,6 +149,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return val;
     };
+    var rmapper = /(\w+)_(\w+)/g
     //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
     "Height,Width".replace( $.rword, function(  name ) {
         var lower = name.toLowerCase(),
@@ -163,7 +164,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             node.style[name] = box == "content-box" ? value:
             setWH(node, name, parseFloat(value), box ) + "px";
         }
-        "inner_1,b_0,outer_2".replace(/(\w+)_(\d)/g,function(a, b, num){
+        "inner_1,b_0,outer_2".replace(rmapper,function(a, b, num){
             var method = b == "b" ? lower : b + name;
             $.fn[ method ] = function( value ) {
                 num = b == "outer" && value === true ? 3 : num;
@@ -319,11 +320,11 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
         var box = node.getBoundingClientRect(),win = getWindow(doc),
-        root = doc.documentElement,body = doc.body,
-        clientTop  = root.clientTop  || body.clientTop || 0,
-        clientLeft = root.clientLeft || body.clientLeft || 0,
-        scrollTop  = win.pageYOffset ||  root.scrollTop  || body.scrollTop,
-        scrollLeft = win.pageXOffset ||  root.scrollLeft || body.scrollLeft;
+        root = doc.documentElemen,
+        clientTop  = root.clientTop  || 0,
+        clientLeft = root.clientLeft || 0,
+        scrollTop  = win.pageYOffset ||  root.scrollTop  ,
+        scrollLeft = win.pageXOffset ||  root.scrollLeft ;
         // 把滚动距离加到left,top中去。
         // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
         // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
@@ -382,35 +383,27 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 return (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
             }).eq(0);
         }
-
         return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
     }
 
-    "left,top".replace( $.rword, function( name ) {
-        adapter[ name +":get"] =  function( node ){//添加top, left到cssAdapter
-            return  $(node).position()[ name ] + "px";
-        };
-        var method = "scroll" + name.toUpperCase();
+    "scrollLeft_pageXOffset,scrollTop_pageYOffset".replace( rmapper, function(_, method, prop ) {
         $.fn[ method ] = function( val ) {
-            var node, win, t = name == "top";
+            var node, win, top = method == "scrollTop";
             if ( val === void 0 ) {
                 node = this[ 0 ];
                 if ( !node ) {
                     return null;
                 }
-                win = getWindow( node );
-                return win ? ("pageXOffset" in win) ? win[ t ? "pageYOffset" : "pageXOffset" ] :
-                $.support.boxModel && win.document.documentElement[ method ] ||
-                win.document.body[ method ] :
-                node[ method ];
+                win = getWindow( node );//获取第一个元素的scrollTop/scrollLeft
+                return win ? (prop in win) ? win[ prop ] :
+                win.document.documentElement[ method ]  : node[ method ];
             }
-            // Set the scroll offset
-            return this.each(function() {
+            return this.each(function() {//设置匹配元素的scrollTop/scrollLeft
                 win = getWindow( this );
                 if ( win ) {
                     win.scrollTo(
-                        !t ? val : $( win ).scrollLeft(),
-                        t ? val : $( win ).scrollTop()
+                        !top ? val : $( win ).scrollLeft(),
+                        top ? val : $( win ).scrollTop()
                         );
                 } else {
                     this[ method ] = val;
