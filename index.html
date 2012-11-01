@@ -37,8 +37,9 @@
 
             window.onload = function(){
                 if($.require){
-                    $.require("ready,node,css", function(){
+                    $.require("ready,node,css,attr,event", function(){
                         console.log( $("#parent").offset().left )
+                          $("#aaa").focus().val("ccc")
                     })
                   
                 }else{
@@ -46,6 +47,7 @@
                         console.log( $("#parent").offset().left )
                     })
                 }
+
 
             }
       
@@ -55,6 +57,7 @@
         <div id="parent">
             <div id="son"></div>
         </div>
+        <input id="aaa" value="aaa">
 
     </body>
 </html>

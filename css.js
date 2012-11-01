@@ -266,33 +266,26 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
 
     //=======================================================
-    //获取body的offset
-    function getBodyOffsetNoMargin(){
-        var el = document.body, ret = parseFloat($.css(el,"marginTop"))!== el.offsetTop;
-        function getBodyOffsetNoMargin(){
-            return ret;//一次之后的执行结果
-        }
-        return ret;//第一次执行结果
-    }
-    function setOffset(elem, options){
-        if(elem && elem.nodeType == 1 ){
-            var position = $.css( elem, "position" );
-            // set position first, in-case top/left are set even on static elem
+
+    function setOffset(node, options){
+        if(node && node.nodeType == 1 ){
+            var position = $.css( node, "position" );
+            //强逼定位
             if ( position === "static" ) {
-                elem.style.position = "relative";
+                node.style.position = "relative";
             }
-            var curElem = $( elem ),
+            var curElem = $( node ),
             curOffset = curElem.offset(),
-            curCSSTop = $.css( elem, "top" ),
-            curCSSLeft = $.css( elem, "left" ),
+            curCSSTop = $.css( node, "top" ),
+            curCSSLeft = $.css( node, "left" ),
             calculatePosition = ( position === "absolute" || position === "fixed" ) &&  [curCSSTop, curCSSLeft].indexOf("auto") > -1,
             props = {}, curPosition = {}, curTop, curLeft;
-            // need to be able to calculate position if either top or left is auto and position is either absolute or fixed
             if ( calculatePosition ) {
                 curPosition = curElem.position();
                 curTop = curPosition.top;
                 curLeft = curPosition.left;
             } else {
+                //如果是相对定位只要用当前top,left做基数
                 curTop = parseFloat( curCSSTop ) || 0;
                 curLeft = parseFloat( curCSSLeft ) || 0;
             }
@@ -325,7 +318,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
-        var box = node[ RECT ](),win = getWindow(doc),
+        var box = node.getBoundingClientRect(),win = getWindow(doc),
         root = doc.documentElement,body = doc.body,
         clientTop  = root.clientTop  || body.clientTop || 0,
         clientLeft = root.clientLeft || body.clientLeft || 0,
