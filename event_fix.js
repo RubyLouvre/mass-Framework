@@ -3,7 +3,7 @@
 //==========================================
 define("event_fix", !!document.dispatchEvent, function(){
     $.log("已加载event_fix模块",7)
-    var facade = $.event = {
+    var facade =  {
         fire: function( init ){
             //这里的代码仅用于IE678
             var transfer;
@@ -65,7 +65,7 @@ define("event_fix", !!document.dispatchEvent, function(){
     var rform  = /^(?:textarea|input|select)$/i 
     function changeNotify( event ){
         if( event.type == "change" || event.propertyName == "checked" ){
-            $.event.fire.call(this,"change")
+            facade.fire.call(this,"change")
         }
     }
     function delegate( fn ){
@@ -117,7 +117,7 @@ define("event_fix", !!document.dispatchEvent, function(){
                 $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
                     var el = event.target;
                     if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].input[  el.type ] ) ){
-                        $.event.fire.call(el, type)
+                        facade.fire.call(el, type)
                     }
                 });
             }),
@@ -128,6 +128,7 @@ define("event_fix", !!document.dispatchEvent, function(){
             })
         };
     });
+    return facade;
 })
 
 /*

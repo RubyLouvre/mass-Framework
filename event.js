@@ -1,12 +1,12 @@
 //=========================================
 // 事件系统 v8
 //==========================================
-define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(){
+define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(node, facade){
     $.log("已加载event模块v8")
-    var facade = $.event || ($.event = {});
+    var bindTop = !!adapter;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
+    facade = facade || {};
     var adapter = $.eventAdapter || ($.eventAdapter = {})
     var rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
-    var bindTop = !adapter.change;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
     $.eventSupport = function( eventName, el ) {
         el = el || document.createElement("div");
         eventName = "on" + eventName;
@@ -363,7 +363,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
         fire: function() {
             var args = arguments;
             return this.each(function() {
-                $.event.fire.apply(this, args );
+                facade.fire.apply(this, args );
             });
         }
     });
@@ -510,6 +510,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
 2012.8.17 $.EventTarget不再自带uniqueNumber，此属性会在用户第一次调用bind,unbind方法时再为原对象添加此属性
 2012.8.31 移除$.EventTarget,以后所有自定义事件由操作流代劳,升级到v7
 2012.10.18 移除$.fn.toggle,$.event._dispatch,重构focusin,fire,change,submit等实现,升级到v8
+2012.11.2 去掉$.event，隐藏实现细节
 
 http://jsbin.com/efalu/7 input例子
 //http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
@@ -559,7 +560,9 @@ hammer.onrelease = function(ev) { }; // 手指离开屏幕
 
 http://dev.oupeng.com/articles/flexbox-basics
 http://www.alloyteam.com/2012/10/common-javascript-design-patterns/
-【腾讯TAT倾情推出】最通俗易懂的Javascript设计模式(昨天10.24节的连载巨献) 
+
+自定义下拉框
+http://odyniec.net/projects/selectlist/
      */
    
 
