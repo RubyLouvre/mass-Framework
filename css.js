@@ -1,5 +1,5 @@
 //=========================================
-// 样式操作模块 by 司徒正美
+// 样式操作模块 v4 by 司徒正美
 //=========================================
 define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , function(){
     $.log( "已加载css模块" );
@@ -447,5 +447,13 @@ http://www.zhangxinxu.com/wordpress/2011/09/cssom%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%
 //W3C DOM异常对象DOMException介绍 http://www.zhangxinxu.com/wordpress/2012/05/w3c-dom-domexception-object/
 //http://www.zhangxinxu.com/wordpress/2012/05/getcomputedstyle-js-getpropertyvalue-currentstyle/
 http://www.zhangxinxu.com/wordpress/2011/11/css3-font-face%E5%85%BC%E5%AE%B9%E6%80%A7%E4%B8%89%E8%A7%92%E6%95%88%E6%9E%9C/
+
+　　http://www.haogongju.net/art/1623802
+　　
+　　http://www.dwww.cn/News/2010-5/201051722222811058.shtml
+　　http://www.cnblogs.com/niuniu/archive/2010/06/07/1753035.html
+　　
+　　这里的阴影运用得不错
+　　http://www.soleilneon.com/blog/2010/10/add-css3-border-radius-and-box-shadow-to-your-design/
 */
 
