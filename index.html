@@ -1,65 +1,30 @@
-<!DOCTYPE HTML>
-<html id="html">
+<!doctype html>
+<html>
     <head>
-        <title>offsetParent by 司徒正美</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="mass.js">
-
-        </script>
-        <style type="text/css">
-            body,html{
-                height:100%;
-                background:orange;
-            }
-            body{
-                margin:20px;
-            }
-            #parent {
-                position: relative;
-                width:250px;
-                height:250px;
-                margin:20px;
-                background:aqua;
-                border:20px solid red;
-                padding:20px;
-            }
-            #son {
-                position: absolute;
-                width:150px;
-                height:150px;
-                margin:20px;
-                background:fuchsia;
-                border:20px solid blue;
-                padding:2px;
-            }
-        </style>
-        <script>
-
+        <title>如何区分属性与特性 by  司徒正美</title>
+　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+　　    <script>
             window.onload = function(){
-                if($.require){
-                    $.require("ready,node,css,attr,event", function(){
-                        console.log( $("#parent").offset().left )
-                          $("#aaa").focus().val("ccc")
-                    })
-                  
-                }else{
-                    $(function(){
-                        console.log( $("#parent").offset().left )
-                    })
-                }
-
+                document.getElementById("eee").innerText = "kkk"
 
             }
-      
         </script>
-    </head>
-    <body id="body">
-        <div id="parent">
-            <div id="son"></div>
-        </div>
-        <input id="aaa" value="aaa">
-
-    </body>
+　　  </head>
+　　  <body>
+　　   <form action="" method="get">
+            <select id="test" size=3 name="aaa">
+                <option>Mr.
+                <option>Ms.
+                <option>Miss
+                <option>Mrs.
+                <option>Dr.
+            </select>
+            <button name="bbb" value="zzz"  id="eee">yyy</button>
+             <input type="submit" value="提交"/>
+            <input type="checkbox" name="ccc" value="444">
+            <input type="checkbox" name="ccc" value="555">
+            <input type="checkbox" name="ddd" value="666">
+           
+        </form>
+　　  </body>
 </html>
-
-

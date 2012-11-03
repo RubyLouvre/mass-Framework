@@ -6,21 +6,13 @@ define("attr",["$support","$node"], function( support ){
     var rreturn = /\r/g,
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
-    rnospaces = /\S+/g,
-    valOne = {
-        "SELECT": "select",
-        "OPTION": "option",
-        "BUTTON": "button"
-    },
-    getValType = function( node ){
-        return "form" in node && (valOne[ node.tagName ] || node.type);
-    }
+    rnospaces = /\S+/g
     $.implement({
         /**
-             *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
-             *  如$("body").addClass("aaa");$("body").addClass("aaa bbb");
-             *  <a href="http://www.cnblogs.com/rubylouvre/archive/2011/01/27/1946397.html">相关链接</a>
-             */
+         *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
+         *  如$("body").addClass("aaa");$("body").addClass("aaa bbb");
+         *  <a href="http://www.cnblogs.com/rubylouvre/archive/2011/01/27/1946397.html">相关链接</a>
+         */
         addClass: function( item ){
             if ( typeof item == "string") {
                 for ( var i = 0, el; el = this[i++]; ) {
@@ -46,7 +38,7 @@ define("attr",["$support","$node"], function( support ){
             rclass = new RegExp('(\\s|^)'+item+'(\\s|$)');//判定多个元素，正则比indexOf快点
             return $.slice(this)[ method ](function( el ){//先转换为数组
                 return "classList" in el ? el.classList.contains( item ):
-                (el.className || "").match(rclass);
+                    (el.className || "").match(rclass);
             });
         },
         //如果不传入类名,则清空所有类名,允许同时删除多个类名
@@ -103,16 +95,17 @@ define("attr",["$support","$node"], function( support ){
             return this;
         },
         val : function( item ) {
-            var el = this[0], adapter = $.valAdapter, fn = adapter[ "option:get" ];
+            var el = this[0], getter = valAdapter[ "option:get" ];
             if ( !arguments.length ) {//读操作
                 if ( el && el.nodeType == 1 ) {
                     //处理select-multiple, select-one,option,button
-                    var ret =  (adapter[ getValType( el )+":get" ] || $.propAdapter[ "@xml:get" ])( el, "value", fn );
+                    var ret =  (valAdapter[ el.tagName.toLowerCase()+":get" ] ||
+                        $.propAdapter[ "@xml:get" ])( el, "value", getter );
                     return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
                 }
                 return void 0;
             }
-            //强制将null/undefined转换为"", number变为字符串
+            //我们确保传参为字符串数组或字符串，null/undefined强制转换为"", number变为字符串
             if( Array.isArray( item ) ){
                 item = item.map(function (item) {
                     return item == null ? "" : item + "";
@@ -120,11 +113,12 @@ define("attr",["$support","$node"], function( support ){
             }else if( isFinite(item) ){
                 item += "";
             }else{
-                item = item || "";//强制转换为数组
+                item = item || "";
             }
             return this.each(function( el ) {//写操作
                 if ( el.nodeType == 1 ) {
-                    (adapter[ getValType( el )+":set" ] || $.propAdapter[ "@xml:set" ])( el, "value", item , fn );
+                    (valAdapter[ el.tagName.toLowerCase()+":set" ] ||
+                        $.propAdapter[ "@xml:set" ])( el, "value", item , getter );
                 }
             });
         },
@@ -219,8 +213,8 @@ define("attr",["$support","$node"], function( support ){
                 // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
                 var attributeNode = node.getAttributeNode( "tabIndex" );
                 return attributeNode && attributeNode.specified ?
-                parseInt( attributeNode.value, 10 )  :
-                rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
+                    parseInt( attributeNode.value, 10 )  :
+                    rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
             },
             "value:get": function( node, name, _, orig ) {
                 if(node.nodeName ==="BUTTON"){
@@ -234,51 +228,60 @@ define("attr",["$support","$node"], function( support ){
                 }
                 node.value = value;
             }
-        },
-        valAdapter:  {
-            "option:get":  function( node ) {
-                var val = node.attributes.value;
-                return !val || val.specified ? node.value : node.text;
-            },
-            "select:get": function( node ,value, valOpt) {
-                var i, max, option, index = node.selectedIndex, values = [], options = node.options,
-                one = node.type === "select-one";
-                // 如果什么也没选中
-                if ( index < 0 ) {
-                    return null;
-                }
-                i = one ? index : 0;
-                max = one ? index + 1: options.length;
-                for ( ; i < max; i++ ) {
-                    option = options[ i ];
-                    //过滤所有disabled的option元素或其父亲是disabled的optgroup元素的孩子
-                    if ( option.selected && (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) &&
-                        (!option.parentNode.disabled || !$.type( option.parentNode, "OPTGROUP" )) ) {
-                        value = valOpt( option );
-                        if ( one ) {
-                            return value;
-                        }
-                        //收集所有selected值组成数组返回
-                        values.push( value );
-                    }
-                }
-                // Fixes Bug #2551 -- select.val() broken in IE after form.reset()
-                if ( one && !values.length && options.length ) {
-                    return  valOpt(  options[ index ] );
-                }
-                return values;
-            },
-            "select:set": function( node, name, values, fn ) {
-                $.slice(node.options).forEach(function( el ){
-                    el.selected = !!~values.indexOf( fn(el) );
-                });
-                if ( !values.length ) {
-                    node.selectedIndex = -1;
-                }
-            }
         }
     });
-    var attrAdapter = $.attrAdapter,propAdapter = $.propAdapter, valAdapter = $.valAdapter;//attr方法只能获得两种值 string undefined
+    var valAdapter = {
+        "option:get":  function( node ) {
+            var val = node.attributes.value;
+            //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
+            return !val || val.specified ? node.value : node.text;
+        },
+        "select:get": function( node ,value, getter) {
+            var option,  options = node.options,
+            index = node.selectedIndex,
+            one = node.type === "select-one" || index < 0,
+            values = one ? null : [],
+            max = one ? index + 1 : options.length,
+            i = index < 0 ? max :  one ? index : 0;
+
+            for ( ; i < max; i++ ) {
+                option = options[ i ];
+                //旧式IE在reset后不会改变selected，需要改用i === index判定
+                //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
+                //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
+                if ( ( option.selected || i === index ) &&
+                    (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) &&
+                    (!option.parentNode.disabled || !$.type( option.parentNode, "OPTGROUP" )) ) {
+                    value = getter( option );
+                    if ( one ) {
+                        return value;
+                    }
+                    //收集所有selected值组成数组返回
+                    values.push( value );
+                }
+            }
+            return values;
+        },
+        "select:set": function( node, name, values, getter ) {
+            $.slice(node.options).forEach(function( el ){
+                el.selected = !!~values.indexOf( getter(el) );
+            });
+            if ( !values.length ) {
+                node.selectedIndex = -1;
+            }
+        }
+    }
+    if(!support.attrProp){
+        valAdapter["button:get"] = function( node ) {
+            return node.innerText
+        }
+        valAdapter["button:set"] = function( node, name, value ) {
+            node.innerText = value
+        }
+    }
+
+
+    var attrAdapter = $.attrAdapter, propAdapter = $.propAdapter//attr方法只能获得两种值 string undefined
     "get,set".replace($.rword,function(method){
         attrAdapter[ "@html:"+method ] = attrAdapter[ "@xml:"+method ];
         propAdapter[ "@html:"+method ] = propAdapter[ "@xml:"+method ];
@@ -288,8 +291,8 @@ define("attr",["$support","$node"], function( support ){
     //========================propAdapter 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
-    "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
-    "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
+        "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
+        "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
     prop.replace($.rword, function(name){
         propMap[name.toLowerCase()] = name;
     });
@@ -306,6 +309,7 @@ define("attr",["$support","$node"], function( support ){
         }
     }
 
+
     //========================attrAdapter 的相关修正==========================
     var bools = $["@bools"];
     var boolOne = $.oneObject( support.attrProp ? bools.toLowerCase() : bools );
@@ -314,8 +318,8 @@ define("attr",["$support","$node"], function( support ){
         attrAdapter[ method+":get" ] = function( node, name ){
             var attrNode, property =  node[ name ];
             return property === true || typeof property !== "boolean" && ( attrNode = node.getAttributeNode(name) ) && attrNode.nodeValue !== false ?
-            name.toLowerCase() :
-            undefined;
+                name.toLowerCase() :
+                undefined;
         }
         attrAdapter[ method+":set" ] = function( node, name, value ){
             if ( value === false ) {//value只有等于false才移除此属性，其他一切值都当作赋为true
@@ -416,4 +420,5 @@ define("attr",["$support","$node"], function( support ){
 2011.10.22 FIX boolaAdapter.set方法
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
-*/
+ */
+
