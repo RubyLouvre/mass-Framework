@@ -33,31 +33,31 @@ define("attr",["$support","$node"], function( support ){
                             for (var j = a.length - 1; j > 0; --j)
                                 if (a[j] == a[j - 1])
                                     a.splice(j, 1);
-                            el.className = a.join(' ');
+                            el.className = a.join(" ");
                         }
                     }
                 }
             }
             return this;
         },
-        //如果第二个参数为true，则只判定第一个是否存在此类名，否则对所有元素进行操作；
+        //如果第二个参数为true，要求所有匹配元素都拥有此类名才返回true
         hasClass: function( item, every ) {
             var method = every === true ? "every" : "some",
             rclass = new RegExp('(\\s|^)'+item+'(\\s|$)');//判定多个元素，正则比indexOf快点
-            return $.slice(this)[ method ](function( el ){
+            return $.slice(this)[ method ](function( el ){//先转换为数组
                 return "classList" in el ? el.classList.contains( item ):
                 (el.className || "").match(rclass);
             });
         },
-        //如果不传入类名,则去掉所有类名,允许传入多个类名
+        //如果不传入类名,则清空所有类名,允许同时删除多个类名
         removeClass: function( item ) {
             if ( (item && typeof item === "string") || item === void 0 ) {
-                var classNames = ( item || "" ).match( rnospaces );
+                var classNames = ( item || "" ).match( rnospaces ), cl = classNames.length;
                 for ( var i = 0, node; node = this[ i++ ]; ) {
                     if ( node.nodeType === 1 && node.className ) {
-                        if ( item ) {
+                        if ( item ) {//rnospaces = /\S+/
                             var set = " " + node.className.match( rnospaces ).join(" ") + " ";
-                            for ( var c = 0, cl = classNames.length; c < cl; c++ ) {
+                            for ( var c = 0; c < cl; c++ ) {
                                 set = set.replace(" " + classNames[c] + " ", " ");
                             }
                             node.className = set.slice( 1, set.length - 1 );
@@ -69,9 +69,9 @@ define("attr",["$support","$node"], function( support ){
             }
             return this;
         },
-        //如果存在（不存在）就删除（添加）一个类。对所有匹配元素进行操作。
-        toggleClass: function( item ){
-            var type = typeof item , classNames = type === "string" && item.match( rnospaces ) || [],  className, i;
+        //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
+        toggleClass: function( value ){
+            var type = typeof value , classNames = type === "string" && value.match( rnospaces ) || [], className, i;
             return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
@@ -82,20 +82,20 @@ define("attr",["$support","$node"], function( support ){
                         }
                     } else if ( type === "undefined" || type === "boolean" ) {
                         if ( el.className ) {
-                            self._data( "__className__", el.className );
+                            $._data( el, "__className__", el.className );
                         }
-                        el.className = el.className || item === false ? "" : self.data( "__className__") || "";
+                        el.className = el.className || value === false ? "" : $._data( el, "__className__") || "";
                     }
                 }
             });
         },
-        //如果匹配元素存在old类名则将其改应neo类名
+        //如果匹配元素存在类名old则将其置换为类名neo
         replaceClass: function( old, neo ){
             for ( var i = 0, node; node = this[ i++ ]; ) {
                 if ( node.nodeType === 1 && node.className ) {
                     var arr = node.className.match( rnospaces ), arr2 = [];
                     for ( var j = 0; j < arr.length; j++ ) {
-                        arr2.push( arr[j] != old ? arr[j] : neo );
+                        arr2.push( arr[j] == old ? neo : arr[j]);
                     }
                     node.className = arr2.join(" ");
                 }
