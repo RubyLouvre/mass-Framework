@@ -1,5 +1,5 @@
 //==================================================
-// 属性操作模块 v2
+// 属性操作模块
 //==================================================
 define("attr",["$support","$node"], function( support ){
     // $.log("已加载attr模块")
@@ -7,10 +7,6 @@ define("attr",["$support","$node"], function( support ){
     rfocusable = /^(?:button|input|object|select|textarea)$/i,
     rclickable = /^a(?:rea)?$/i,
     rnospaces = /\S+/g
-    function getValType( el ){
-        var ret = el.tagName.toLowerCase;
-        return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
-    }
     $.implement({
         /**
          *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
@@ -103,7 +99,7 @@ define("attr",["$support","$node"], function( support ){
             if ( !arguments.length ) {//读操作
                 if ( el && el.nodeType == 1 ) {
                     //处理select-multiple, select-one,option,button
-                    var ret =  (valAdapter[ getValType(el)+":get" ] ||
+                    var ret =  (valAdapter[ el.tagName.toLowerCase()+":get" ] ||
                         $.propAdapter[ "@xml:get" ])( el, "value", getter );
                     return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
                 }
@@ -121,7 +117,7 @@ define("attr",["$support","$node"], function( support ){
             }
             return this.each(function( el ) {//写操作
                 if ( el.nodeType == 1 ) {
-                    (valAdapter[ getValType(el)+":set" ] ||
+                    (valAdapter[ el.tagName.toLowerCase()+":set" ] ||
                         $.propAdapter[ "@xml:set" ])( el, "value", item , getter );
                 }
             });
@@ -142,24 +138,39 @@ define("attr",["$support","$node"], function( support ){
             });
         }
     });
-
+    var result = {}
+    function isAttribute(attr, host){
+        //有些属性是特殊元素才有的，需要用到第二个参数
+        host = host || document.createElement("div");
+        var name = host.tagName +":"+attr;
+        if( name in result){
+            return result[name]
+        }
+        return result[name] = (host.getAttribute(attr) === null && host[attr] === void 0)
+    }
     "attr,prop".replace($.rword, function( method ){
         $[ method ] = function( node, name, value ) {
-            if( node.nodeType == 1){
-                var  notxml = !$.isXML(node)
-
-                if(notxml){
-                    orig = name.toLowerCase();
-                    if(!support.attrProp || method == "prop"){//不区分大小写
-                        name = propMap[name] || name
-                    }
-
-                }
-                //对于HTML元素节点，我们需要对一些属性名进行映射
+            if( node.nodeType === 1){
                 var orig = name.toLowerCase();
+
+                if( $.isXML(node) ){// 如果是XML，不需要名字映射
+                    method = "attr"
+                }else{
+                     isAttribute(orig, node) 
+                }
+
+
+
+
+                var isElement = "setAttribute" in node,
+                notxml = !isElement || !$.isXML(node),
+                //对于HTML元素节点，我们需要对一些属性名进行映射
+                orig = name.toLowerCase();
+                if ( !isElement ) {
+                    method = "prop"
+                }
                 var adapter = $[ method+"Adapter" ];
-      
-                //   name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
+                name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
                 if ( value !== void 0 ){
                     if( method === "attr" && ( value == null || value == false)){  //为元素节点移除特性
                         return  $.removeAttr( node, name );
@@ -174,7 +185,7 @@ define("attr",["$support","$node"], function( support ){
             return $.access( this, name, value, $[method] );
         }
     });
-
+    //$.fn["class"] = $.fn.addClass;
     $.mix({
         attrMap:{//特性名映射
             tabindex: "tabIndex"
@@ -288,23 +299,7 @@ define("attr",["$support","$node"], function( support ){
             node.innerText = value
         }
     }
-    //=========================valAdapter 的相关修正==========================
-    //checkbox的value默认为on，唯有Chrome 返回空字符串
-    if ( !support.checkOn ) {
-        "radio,checkbox".replace( $.rword, function( name ) {
-            valAdapter[ name + ":get" ] = function( node ) {
-                return node.getAttribute("value") === null ? "on" : node.value;
-            }
-        });
-    }
-    //处理单选框，复选框在设值后checked的值
-    "radio,checkbox".replace( $.rword, function( name ) {
-        valAdapter[ name + ":set" ] = function( node, name, value) {
-            if ( Array.isArray( value ) ) {
-                return node.checked = !!~value.indexOf(node.value ) ;
-            }
-        }
-    });
+
 
     var attrAdapter = $.attrAdapter, propAdapter = $.propAdapter//attr方法只能获得两种值 string undefined
     "get,set".replace($.rword,function(method){
@@ -415,7 +410,23 @@ define("attr",["$support","$node"], function( support ){
         });
     }
 
-
+    //=========================valAdapter 的相关修正==========================
+    //checkbox的value默认为on，唯有Chrome 返回空字符串
+    if ( !support.checkOn ) {
+        "radio,checkbox".replace( $.rword, function( name ) {
+            $.valAdapter[ name + ":get" ] = function( node ) {
+                return node.getAttribute("value") === null ? "on" : node.value;
+            }
+        });
+    }
+    //处理单选框，复选框在设值后checked的值
+    "radio,checkbox".replace( $.rword, function( name ) {
+        $.valAdapter[ name + ":set" ] = function( node, name, value) {
+            if ( Array.isArray( value ) ) {
+                return node.checked = !!~value.indexOf(node.value ) ;
+            }
+        }
+    });
 });
 
 /*
@@ -431,3 +442,12 @@ define("attr",["$support","$node"], function( support ){
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
  */
 
+var propMap = {//属性名映射，处理保留字、连字符风格、与错误的缩写
+    "accept-charset": "acceptCharset",
+    "char": "ch",
+    charoff: "chOff",
+    "class": "className",
+    "for": "htmlFor",
+    "http-equiv": "httpEquiv"
+}
+//基本上由于保留字
