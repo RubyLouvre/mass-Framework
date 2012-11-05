@@ -125,120 +125,9 @@ define("attr",["$support","$node"], function( support ){
                         $.propAdapter[ "@xml:set" ])( el, "value", item , getter );
                 }
             });
-        },
-        removeAttr: function( name ) {
-            return this.each(function() {
-                $.removeAttr( this, name );
-            });
-        },
-        removeProp: function( name ) {
-            name = $.propMap[ name ] || name;
-            return this.each(function() {
-                // try/catch handles cases where IE balks (such as removing a property on window)
-                try {
-                    this[ name ] = void 0;
-                    delete this[ name ];
-                } catch( e ) {};
-            });
         }
     });
-
-    "attr,prop".replace($.rword, function( method ){
-        $[ method ] = function( node, name, value ) {
-            if( node.nodeType == 1){
-                var  notxml = !$.isXML(node)
-
-                if(notxml){
-                    orig = name.toLowerCase();
-                    if(!support.attrProp || method == "prop"){//不区分大小写
-                        name = propMap[name] || name
-                    }
-
-                }
-                //对于HTML元素节点，我们需要对一些属性名进行映射
-                var orig = name.toLowerCase();
-                var adapter = $[ method+"Adapter" ];
-      
-                //   name = notxml && $[ boolOne[name] ? "propMap" : method+"Map" ][ name ] || name;
-                if ( value !== void 0 ){
-                    if( method === "attr" && ( value == null || value == false)){  //为元素节点移除特性
-                        return  $.removeAttr( node, name );
-                    }else { //设置HTML元素的属性或特性
-                        return (notxml && adapter[name+":set"] || adapter["@"+ ( notxml ? "html" : "xml")+":set"] )( node, name, value, orig );
-                    }
-                } //获取属性
-                return (adapter[name+":get"] || adapter["@"+ (notxml ? "html" : "xml")+":get"])( node, name, '', orig );
-            }
-        };
-        $.fn[ method ] = function( name, value ) {
-            return $.access( this, name, value, $[method] );
-        }
-    });
-
-    $.mix({
-        attrMap:{//特性名映射
-            tabindex: "tabIndex"
-        },
-        propMap:{//属性名映射
-            "accept-charset": "acceptCharset",
-            "char": "ch",
-            charoff: "chOff",
-            "class": "className",
-            "for": "htmlFor",
-            "http-equiv": "httpEquiv"
-        },
-        removeAttr: function( node, value, isBool ) {
-            var name, propName
-            if(value && node.nodeType === 1){
-                var  names = value.match($.rword) ||[]
-                for(var i = 0 ; i < names.length; i++){
-                    name = $.attrMap[ names[i] ] ||  names[i];
-                    node.setAttribute(name,"")
-                    node.removeAttribute( name );
-                    // 确保bool属性的值为bool
-                    if ( boolOne[name] && (propName = $.propMap[ name ] || name) in node ) {
-                        node[ propName ] = false;
-                    }
-                }
-            }
-        },
-        propAdapter:{
-            "@xml:get": function( node, name ){
-                return node[ name ]
-            },
-            "@xml:set": function(node, name, value){
-                node[ name ] = value;
-            }
-        },
-
-        attrAdapter: {
-            "@xml:get": function( node, name ){
-                return  node.getAttribute( name ) || void 0 ;
-            },
-            "@xml:set": function( node, name, value ){
-                node.setAttribute( name, "" + value )
-            },
-            "tabIndex:get": function( node ) {
-                // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
-                var attributeNode = node.getAttributeNode( "tabIndex" );
-                return attributeNode && attributeNode.specified ?
-                parseInt( attributeNode.value, 10 )  :
-                rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
-            },
-            "value:get": function( node, name, _, orig ) {
-                if(node.nodeName ==="BUTTON"){
-                    return attrAdapter["@html:get"](node,name);
-                }
-                return name in node ? node.value: void 0;
-            },
-            "value:set": function( node, name, value ) {
-                if(node.nodeName ==="BUTTON"){
-                    return attrAdapter["@html:set"]( node, name, value);
-                }
-                node.value = value;
-            }
-        }
-    });
+    //=========================valAdapter 部分==========================
     var valAdapter = {
         "option:get":  function( node ) {
             var val = node.attributes.value;
@@ -280,7 +169,7 @@ define("attr",["$support","$node"], function( support ){
             }
         }
     }
-    if(!support.attrProp){
+    if(!support.attrInnateName){
         valAdapter["button:get"] = function( node ) {
             return node.innerText
         }
@@ -288,8 +177,8 @@ define("attr",["$support","$node"], function( support ){
             node.innerText = value
         }
     }
-    //=========================valAdapter 的相关修正==========================
-    //checkbox的value默认为on，唯有Chrome 返回空字符串
+  
+    //checkbox的value默认为on，唯有chrome 返回空字符串
     if ( !support.checkOn ) {
         "radio,checkbox".replace( $.rword, function( name ) {
             valAdapter[ name + ":get" ] = function( node ) {
@@ -306,13 +195,154 @@ define("attr",["$support","$node"], function( support ){
         }
     });
 
-    var attrAdapter = $.attrAdapter, propAdapter = $.propAdapter//attr方法只能获得两种值 string undefined
-    "get,set".replace($.rword,function(method){
-        attrAdapter[ "@html:"+method ] = attrAdapter[ "@xml:"+method ];
-        propAdapter[ "@html:"+method ] = propAdapter[ "@xml:"+method ];
-        propAdapter[ "tabIndex:"+method ] = attrAdapter[ "tabIndex:"+method ];
+    //=========================prop attr 的部分==========================
+    $.prop = function(node, name, value){
+        if($["@bind"] in node){
+            if(node.nodeType === 1 && !$.isXML( node )){
+                name = $.propMap[ name.toLowerCase() ] || name;
+            }
+            var access = value === void 0 ? "get" : "set"
+            return ($.propAdapter[name+":"+access] ||
+                $.propAdapter["@default:"+access] )(node, name, value)
+        }
+    }
+    $.attr = function(node, name, value){
+        if($["@bind"] in node){
+            if ( typeof node.getAttribute === "undefined" ) {
+                return $.prop( node, name, value );
+            }
+            //这里只剩下元素节点
+            var noxml = !$.isXML( node ), type = "@w3c";
+            if( noxml ){
+                name = name.toLowerCase();
+                if(!support.attrInnateName)
+                    name = $.propMap[ name ] || name;
+                if(!support.attrInnateValue)
+                    type = "@ie"
+            }
+            //移除操作
+            if(noxml){
+                if (value === null || value === false && typeof node[name] == "boolean" ){
+                    return $.removeAttr(node, name )
+                }
+            }else if( value === null ) {
+                return node.removeAttribute(name)
+            }
+            //读写操作
+            var access = value === void 0 ? "get" : "set"
+            return ( noxml  && $.attrAdapter[ name+":"+access ] ||
+                $.attrAdapter[ type +":"+access] )(node, name, value)
+        }
+    }
+    var cacheProp = {}
+    function defaultProp(node, prop){
+        var name = node.tagName+":"+prop;
+        if(name in cacheProp){
+            return cacheProp[name]
+        }
+        return cacheProp[name] = document.createElement(node.tagName)[prop]
+    }
+    $.mix({
+        propMap:{//属性名映射
+            "accept-charset": "acceptCharset",
+            "char": "ch",
+            "charoff": "chOff",
+            "class": "className",
+            "for": "htmlFor",
+            "http-equiv": "httpEquiv"
+        },
+        //只能用于HTML,元素节点的内建不能删除（chrome真的能删除，会引发灾难性后果），使用默认值覆盖
+        removeProp: function( node, name ) {
+            if(node.nodeType === 1){
+                if(!support.attrInnateName){
+                    name = $.propMap[ name.toLowerCase() ] ||  name;
+                }
+                node[name] = defaultProp(node, name)
+            }else{
+                node[name] = void 0;
+            }
+        },
+        //只能用于HTML
+        removeAttr: function( node, name ) {
+            if(name && node.nodeType === 1){
+                name = name.toLowerCase();
+                if(!support.attrInnateName){
+                    name = $.propMap[ name ] ||  name;
+                }
+                node.setAttribute( name, "");
+                node.removeAttribute( name );
+                // 确保bool属性的值为bool
+                if ( node[ name ] === true ) {
+                    node[ name ] = false;
+                }
+            }
+        },
+        propAdapter:{
+            "@default:get": function( node, name ){
+                return node[ name ]
+            },
+            "@default:set": function(node, name, value){
+                node[ name ] = value;
+            },
+            "tabIndex:get": function( node ) {
+                // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
+                var attributeNode = node.getAttributeNode( "tabIndex" );
+                return attributeNode && attributeNode.specified ?
+                parseInt( attributeNode.value, 10 )  :
+                rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
+            }
+        },
+
+        attrAdapter: {
+            "@w3c:get": function( node, name ){
+                var ret =  node.getAttribute( name ) ;
+                return ret === null ? void 0 : ret;
+            },
+            "@w3c:set": function( node, name, value ){
+                node.setAttribute( name, "" + value )
+            },
+            "@ie:get": function( node, name ){
+                var str = node.outerHTML.replace(node.innerHTML, "")
+                var re = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g, obj = {}, t;
+                while (t = re.exec(str)) { //属性值只有双引号与无引号的情况
+                    obj[ t[1].toLowerCase() ] = t[2] ? t[2].charAt(0) == '"' ? t[2].slice(1, -1) : t[2] : "";
+                }
+                return obj[ name ];
+            },
+            "@ie:set": function( node, name, value ){
+                var attr = node.getAttributeNode( name );
+                if ( !attr ) {//不存在就创建一个同名的特性节点
+                    attr = node.ownerDocument.createAttribute( name );
+                    node.setAttributeNode( attr );
+                }
+                attr.value = value + "" ;
+            },
+            "value:get": function( node, name ) {
+                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
+                    return node.innerText
+                }
+                return name in node ? node.value: void 0;
+            },
+            "value:set": function( node, name, value ) {
+                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
+                    return node.innerText = value +""
+                }
+                node.value = value+"";
+            }
+        }
+    });
+    "Attr,Prop".replace($.rword, function( method ){
+        $.fn[ method.toLowerCase() ] = function( name, value ) {
+            return $.access( this, name, value, $[ method.toLowerCase() ] );
+        }
+        $.fn[ "remove" + method] = function(name){
+            return this.each(function() {
+                $["remove" + method]( this, name );
+            });
+        }
     });
 
+  
     //========================propAdapter 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
@@ -324,7 +354,6 @@ define("attr",["$support","$node"], function( support ){
     if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
         propMap.enctype = "encoding";
     }
-    propAdapter[ "tabIndex:get" ] = attrAdapter[ "tabIndex:get" ];
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.optSelected ) {
         $.propAdapter[ "selected:get" ] = function( node ) {
@@ -333,88 +362,72 @@ define("attr",["$support","$node"], function( support ){
             return node.selected;
         }
     }
+    if ( !support.attrInnateValue ) {
+        // https://github.com/kissyteam/kissy/issues/198
+        // http://social.msdn.microsoft.com/Forums/en-US/iewebdevelopment/thread/aa6bf9a5-0c0b-4a02-a115-c5b85783ca8c
+        // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
+        // https://groups.google.com/group/jquery-dev/browse_thread/thread/22029e221fe635c6?pli=1
+        $.propAdapter[ "href:set" ] = function( node, name, value ) {
+            var childNodes = node.childNodes,  b,  len = childNodes.length,
+            allText = len > 0;
+            for (len = len - 1; len >= 0; len--) {
+                if (childNodes[len].nodeType != 3) {
+                    allText = 0;
+                }
+            }
+            if (allText) {
+                b = node.ownerDocument.createElement('b');
+                b.style.display = 'none';
+                node.appendChild(b);
+            }
 
+            node.setAttribute(name, value+"");
+
+            if (b) {
+                node.removeChild(b);
+            }
+        }
+    }
 
     //========================attrAdapter 的相关修正==========================
-    var bools = $["@bools"];
-    var boolOne = $.oneObject( support.attrProp ? bools.toLowerCase() : bools );
-    bools.replace( $.rword,function( method ) {
-        //bool属性在attr方法中只会返回与属性同名的值或undefined
-        attrAdapter[ method+":get" ] = function( node, name ){
-            var attrNode, property =  node[ name ];
-            return property === true || typeof property !== "boolean" && ( attrNode = node.getAttributeNode(name) ) && attrNode.nodeValue !== false ?
-            name.toLowerCase() :
-            undefined;
-        }
-        attrAdapter[ method+":set" ] = function( node, name, value ){
-            if ( value === false ) {//value只有等于false才移除此属性，其他一切值都当作赋为true
-                $._remove_attr( node, name, true );
-            } else {
-                if ( name in node ) {
-                    node[ name ] = true;
-                }
-                node.setAttribute( name, name.toLowerCase() );
-            }
-            return name;
-        }
-    });
-    if ( !support.attrHref ) {
+    var attrAdapter = $.attrAdapter
+    if ( !support.attrInnateHref ) {
+        //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
         //IE的getAttribute支持第二个参数，可以为 0,1,2,4
-        //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效)。
+        //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
         //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
-        "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {//
+        "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
             attrAdapter[ method + ":get" ] =  function( node,name ) {
                 var ret = node.getAttribute( name, 2 );
-                return ret === null ? undefined : ret;
+                return ret === null ? void 0 : ret;
             }
         });
-    }
-    if ( !support.attrStyle ) {
-        //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-        attrAdapter[ "style:get" ] = function( node ) {
-            return node.style.cssText.toLowerCase() || undefined ;
-        }
-        attrAdapter[ "style:set" ] = function( node, name, value ) {
-            return (node.style.cssText = value + "");
-        }
-    }
+        "width,height".replace( $.rword, function( attr ){
+            attrAdapter[attr+":set"] = function(node, name, value){
+                node.setAttribute( attr, value === "" ? "auto" : value+"");
+            }
+        });
+        $.propAdapter["href:get"] = function( node, name ) {
+            return node.getAttribute( name, 4 );
+        };
 
-    if( !support.attrProp ){
-        //如果我们不能通过el.getAttribute("class")取得className,必须使用el.getAttribute("className")
-        //又如formElement[name] 相等于formElement.elements[name]，会返回其辖下的表单元素， 这时我们就需要用到特性节点了
-        $.mix( $.attrMap , $.propMap);//使用更全面的映射包
-        var fixSpecified = $.oneObject("name,id");
-        valAdapter[ "button:get" ] = attrAdapter[ "@html:get" ] =  function( node, name, value, orig ) {//用于IE6/7
-            if(orig in $.propMap){
-                return node[name];
-            }
-            var ret = node.getAttributeNode( name );//id与name的特性节点没有specified描述符，只能通过nodeValue判定
-            return ret && (fixSpecified[ name ] ? ret.nodeValue !== "" : ret.specified) ?  ret.nodeValue : undefined;
-        }
-        valAdapter[ "button:set" ] = attrAdapter[ "@html:set" ] =  function( node, name, value, orig ) {
-            if(orig in $.propMap){
-                return (node[name] = value);
-            }
-            var ret = node.getAttributeNode( name );
-            if ( !ret ) {
-                ret = node.ownerDocument.createAttribute( name );
-                node.setAttributeNode( ret );
-            }
-            ret.nodeValue = value + "";
-        }
         attrAdapter[ "contentEditable:set" ] =  function( node, name, value ) {
             if ( value === "" ) {
                 value = "false";
             }
             attrAdapter["@html:set"]( node, name, value );
         };
-        "width,height".replace( $.rword, function( attr ){
-            attrAdapter[attr+":set"] = function(node, name, value){
-                node.setAttribute( attr, value === "" ? "auto" : value+"");
-            }
-        });
     }
 
+    if ( !support.attrInnateStyle ) {
+        //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
+        attrAdapter[ "style:get" ] = function( node ) {
+            return node.style.cssText.toLowerCase() || undefined ;
+        }
+        attrAdapter[ "style:set" ] = function( node, name, value ) {
+            node.style.cssText = value + "";
+        }
+    }
 
 });
 
@@ -429,5 +442,5 @@ define("attr",["$support","$node"], function( support ){
 2011.10.22 FIX boolaAdapter.set方法
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
- */
+*/
 
