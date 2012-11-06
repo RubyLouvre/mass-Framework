@@ -6,7 +6,7 @@ define(["$attr","$spec"],function(){
                 var idoc = iframe.contents()[0];
                 //shortcuts
                 var get = function(ee){
-                    $.log(ee.selector+"   :   "+ee.length)
+                //   $.log(ee.selector+"   :   "+ee.length)
                 }
                 var foo = $('#foo',idoc),
                 a = $('#foo a',idoc),
@@ -151,6 +151,9 @@ define(["$attr","$spec"],function(){
                 expect( a.attr("tabindex") ).eq(undefined);
                 a = $("<a href=# tabindex=2 />");
                 expect( a.attr("tabindex") ).eq(2);
+                var email = $("#email",idoc)
+                email.attr("href", "http://www.dangdang.com/") 
+                expect( email.text() ).eq("fuckie@fuckie");
 
                 //测试表单的相关属性
                 var form = $.tag("form xx='zz' action='http://www.taobao.com'  name='form_name'  title='form_title'  onsubmit='return false;'",

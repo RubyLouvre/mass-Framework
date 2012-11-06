@@ -2,9 +2,8 @@
 <html>
     <head>
         <title>如何区分属性与特性 by  司徒正美</title>
-　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-        <script src="mass.js"></script>
-        <style>
+　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+       <style>
             div{
                 border:1px solid green;
                 width:200px;
@@ -12,49 +11,23 @@
                 background:lime;
             }
         </style>
+        <script src="mass.js"></script>
+       
 　　    <script>
       
               //  document.expando = false;
               $.require("ready,node,attr",function(){
-                  var node = document.getElementsByTagName("form")[0];
-                   console.log(   node.getAttributeNode("id") == null )
-                // console.log(   node.getAttributeNode("id").specified  )
-                
-                   $.log( $("form")[0].outerHTML)
-                //   $.log( node.attributes["Test"].value)
-                  //  $.log( node.attributes["test"].value)
-                    $.log( $("form").attr("class"))
-                  /*    $.log( $("#checked1").attr("checked") )
-                    $.log( $("#checked2").attr("checked") )
-                    $.log( $("#checked3").attr("checked") )
-                    $.log( $("#checked4").attr("checked") )*/
-
+                 // document.getElementById("aaa").href= 'http://docs.kissyui.com';
+   //   $.log( $("input").attr("value") )
+      $.log( $("input").attr("value") )
+//$("a").attr("href","http://docs.kissyui.com")
               })
         </script>
 
 　　  </head>
 　　  <body>
-        <div contenteditable>aaa</div>
-        <table>
-            <tr><td>1</td><td></td></tr>
-        </table>
-
-　　   <form action="" Test="aaa" class="aa bb cc" style="border:1px solid red" method="get" autocomplete="on">
-            <select id="test-select3" multiple autocomplete="off">
-                <option selected>1</option>
-                <option selected>2</option>
-                <option>3</option>
-            </select>
-            <input type="checkbox" id="checked1" readonly="" >
-            <input type="checkbox" id="checked2" checked >
-
-            <input type="checkbox" id="checked3" checked="yes">
-            <input type="checkbox" id="checked4" checked="checked">
-            <input type="checkbox" id="checked5" checked='' >
-            <button name="xxx" type="submit">xxxx</button>
-            <input type="submit" value="提交">
-            <textarea rows="2" cols="2">testtesttest</textarea>
-        </form>
+        <input type="text" id="test-input" readonly='' maxlength="20" value="hello"/>
+    
 　　  </body>
 
 </html>

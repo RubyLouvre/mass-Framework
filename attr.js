@@ -8,7 +8,7 @@ define("attr",["$support","$node"], function( support ){
     rclickable = /^a(?:rea)?$/i,
     rnospaces = /\S+/g
     function getValType( el ){
-        var ret = el.tagName.toLowerCase;
+        var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
     }
     $.implement({
@@ -102,12 +102,9 @@ define("attr",["$support","$node"], function( support ){
             var el = this[0], getter = valAdapter[ "option:get" ];
             if ( !arguments.length ) {//读操作
                 if ( el && el.nodeType == 1 ) {
-                    console.log(getValType(el))
                     //处理select-multiple, select-one,option,button
-                    var fn =  (valAdapter[ getValType(el)+":get" ] ||
-                        $.propAdapter[ "@default:get" ])
-                    //   console.log(fn+"")
-                    var ret = fn( el, "value", getter );
+                    var ret =  (valAdapter[ getValType(el)+":get" ] ||
+                        $.propAdapter[ "@default:get" ])( el, "value", getter );
                     return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
                 }
                 return void 0;
@@ -144,7 +141,6 @@ define("attr",["$support","$node"], function( support ){
             values = one ? null : [],
             max = one ? index + 1 : options.length,
             i = index < 0 ? max :  one ? index : 0;
-
             for ( ; i < max; i++ ) {
                 option = options[ i ];
                 //旧式IE在reset后不会改变selected，需要改用i === index判定
@@ -235,7 +231,7 @@ define("attr",["$support","$node"], function( support ){
             //读写操作
             var access = value === void 0 ? "get" : "set"
             if(isBool && access == "get"){
-                type = "@bool"
+                type = "@bool";
                 name = prop
             }
             return ( noxml  && $.attrAdapter[ name+":"+access ] ||
@@ -250,11 +246,7 @@ define("attr",["$support","$node"], function( support ){
         }
         return cacheProp[name] = document.createElement(node.tagName)[prop]
     }
-    var  fixSpecified = {
-        name: true,
-        id: true,
-        coords: true
-    };
+
     $.mix({
         propMap:{//属性名映射
             "accept-charset": "acceptCharset",
@@ -322,30 +314,33 @@ define("attr",["$support","$node"], function( support ){
                 return node[ name ] ? name.toLowerCase() : void 0 
             },
             "@ie:get": function( node, name ){
+                //http://rommelsantor.com/clog/2012/03/12/fixing-the-ie7-submit-value/
+               //  $.log(node.nodeName)
+                 //  $.log(node.value)
                 var ret = node.getAttributeNode( name );
-                return ret && ( fixSpecified[ name ] ? ret.value !== "" : ret.specified ) ?
-                ret.value :   undefined;
+                if(ret){
+                    if(ret.expando ){
+                       return ret.specified ? ret.value : undefined
+                    }else{
+                       return ret.value
+                    }
+                }else{
+                    return undefined
+                }
+                
+//                return ret && ( fixSpecified[ name ] ? ret.value !== "" : ret.specified ) ?
+//                ret.value :   undefined;
             },
             "@ie:set": function( node, name, value ){
+               
                 var attr = node.getAttributeNode( name );
                 if ( !attr ) {//不存在就创建一个同名的特性节点
                     attr = node.ownerDocument.createAttribute( name );
                     node.setAttributeNode( attr );
                 }
                 attr.value = value + "" ;
-            },
-            "value:get": function( node, name ) {
-                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
-                    return node.innerText
-                }
-                return name in node ? node.value: void 0;
-            },
-            "value:set": function( node, name, value ) {
-                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
-                    return node.innerText = value +""
-                }
-                node.value = value+"";
             }
+
         }
     });
     $.attrAdapter["tabindex:get"] =  $.propAdapter["tabIndex:get"]
@@ -382,25 +377,17 @@ define("attr",["$support","$node"], function( support ){
     }
     if ( !support.attrInnateValue ) {
         // https://github.com/kissyteam/kissy/issues/198
-        // http://social.msdn.microsoft.com/Forums/en-US/iewebdevelopment/thread/aa6bf9a5-0c0b-4a02-a115-c5b85783ca8c
         // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
-        // https://groups.google.com/group/jquery-dev/browse_thread/thread/22029e221fe635c6?pli=1
-        $.propAdapter[ "href:set" ] = function( node, name, value ) {
-            var childNodes = node.childNodes,  b,  len = childNodes.length,
-            allText = len > 0;
-            for (len = len - 1; len >= 0; len--) {
-                if (childNodes[len].nodeType != 3) {
-                    allText = 0;
-                }
-            }
-            if (allText) {
+        //大IE6-8如果一个A标签，它里面包含@值，并且没任何元素节点，那么它里面的文本会变成链接值
+        $.attrAdapter[ "href:set" ] = $.propAdapter[ "href:set" ] = function( node, name, value ) {
+            var b
+            if(node.tagName == "A" && node.innerText.indexOf("@") > 0 
+                && !node.children.length){
                 b = node.ownerDocument.createElement('b');
                 b.style.display = 'none';
                 node.appendChild(b);
             }
-
             node.setAttribute(name, value+"");
-
             if (b) {
                 node.removeChild(b);
             }
@@ -453,5 +440,18 @@ define("attr",["$support","$node"], function( support ){
 2011.10.22 FIX boolaAdapter.set方法
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
+// attrAdapter移除
+//            "value:get": function( node, name ) {
+//                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
+//                    return node.innerText
+//                }
+//                return name in node ? node.value: void 0;
+//            },
+//            "value:set": function( node, name, value ) {
+//                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
+//                    return node.innerText = value +""
+//                }
+//                node.value = value+"";
+//            }
 */
 
