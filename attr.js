@@ -4,8 +4,9 @@
 define("attr",["$support","$node"], function( support ){
     // $.log("已加载attr模块")
     var rreturn = /\r/g,
-    rfocusable = /^(?:button|input|object|select|textarea)$/i,
-    rclickable = /^a(?:rea)?$/i,
+    rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
+    rquote = /^['"]/,
+    rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
     rnospaces = /\S+/g
     function getValType( el ){
         var ret = el.tagName.toLowerCase();
@@ -136,7 +137,6 @@ define("attr",["$support","$node"], function( support ){
         }
         return cacheProp[name] = document.createElement(node.tagName)[prop]
     }
-
     $.mix({
         propMap:{//属性名映射
             "accept-charset": "acceptCharset",
@@ -228,7 +228,7 @@ define("attr",["$support","$node"], function( support ){
                 //http://www.cnblogs.com/rubylouvre/archive/2009/12/07/1618182.html
                 var ret = node.tabIndex;
                 if( ret === 0 ){//-1给那些不该拥有它的元素，0是默认分配给那些表单元素与链接
-                    ret = /^(a|area|button|input|object|select|textarea)$/i.test(node.nodeName) ? 0 : -1
+                    ret = rtabindex.test(node.nodeName) ? 0 : -1
                 }
                 return ret;
             }
@@ -251,10 +251,10 @@ define("attr",["$support","$node"], function( support ){
                 node[ name ]  = true;
             },
             "@ie:get": function( node, name ){
-                var str = node.outerHTML.replace(node.innerHTML, "")
-                var re = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g, obj = {}, t;
-                while (t = re.exec(str)) { //属性值只有双引号与无引号的情况
-                    obj[ t[1].toLowerCase() ] = t[2] ? t[2].charAt(0) == '"' ? t[2].slice(1, -1) : t[2] : ""
+                var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
+                while (k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
+                    v = k[2]
+                    obj[ k[1].toLowerCase() ] = v ? rquote.test( v ) ? v.slice(1, -1) : v : ""
                 }
                 return obj[ name ];
             },
