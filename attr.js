@@ -212,17 +212,18 @@ define("attr",["$support","$node"], function( support ){
                 return $.prop( node, name, value );
             }
             //这里只剩下元素节点
-            var noxml = !$.isXML( node ), type = "@w3c";
+            var noxml = !$.isXML( node ), type = "@w3c", isBool
             if( noxml ){
                 name = name.toLowerCase();
-                if(!support.attrInnateName)
-                    name = $.propMap[ name ] || name;
-                if(!support.attrInnateValue)
-                    type = "@ie"
+                if(!support.attrInnateName){
+                      name = $.propMap[ name ] || name;
+                      type = "@ie"
+                }     
+                isBool = typeof node[name] == "boolean" 
             }
             //移除操作
             if(noxml){
-                if (value === null || value === false && typeof node[name] == "boolean" ){
+                if (value === null || value === false && isBool ){
                     return $.removeAttr(node, name )
                 }
             }else if( value === null ) {
@@ -230,6 +231,8 @@ define("attr",["$support","$node"], function( support ){
             }
             //读写操作
             var access = value === void 0 ? "get" : "set"
+            if(isBool && access == "get")
+                type = "@bool"
             return ( noxml  && $.attrAdapter[ name+":"+access ] ||
                 $.attrAdapter[ type +":"+access] )(node, name, value)
         }
@@ -303,6 +306,9 @@ define("attr",["$support","$node"], function( support ){
             },
             "@w3c:set": function( node, name, value ){
                 node.setAttribute( name, "" + value )
+            },
+            "@bool:get": function(node, name){
+                 return node[ name ] ? name.toLowerCase() : void 0 
             },
             "@ie:get": function( node, name ){
                 var str = node.outerHTML.replace(node.innerHTML, "")

@@ -3,32 +3,46 @@
     <head>
         <title>如何区分属性与特性 by  司徒正美</title>
 　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-      <script src="mass.js"></script>
+        <script src="mass.js"></script>
+        <style>
+            div{
+                border:1px solid green;
+                width:200px;
+                height:100px;
+                background:lime;
+            }
+        </style>
 　　    <script>
       
-
-            $.require("ready,node,attr",function(){
-                $("div").removeAttr("contenteditable")
-            })
+            //  document.expando = false;
+              $.require("ready,node,attr",function(){
+                  var el = document.getElementById("checked1");
+                  var node = el.attributes
+                  for(var i = 0, n; n = node[i++];){
+                      if(n.expando){
+                          console.log (n.name + " = " + n.value);
+                      }
+                  }
+                  console.log(el.getAttribute("checked",2))
+                ///  console.log(el.parentNode.innerHTML+"!!!!!!!!!")
+                  // $("div").removeAttr("contenteditable")
+                  $.log( $("#checked3").attr("checked") );
+              })
         </script>
-      <style>
-          div{
-              border:1px solid green;
-              width:200px;
-              height:100px;
-              background:lime;
-          }
-      </style>
+
 　　  </head>
 　　  <body>
         <div contenteditable>aaa</div>
+        <div>
+            <span id="oSpan" unselectable="on">This text should not be selectable.</span>
+        </div>
+
 　　   <form action="" id="Form" class="aa bb cc" style="border:1px solid red" method="get" autocomplete="on">
-         
-            <input type="radio" id="aaa">
-            <input type="radio" checked id="bbb" >
-            <input type="radio" checked="checked" id="ccc">
-            <input type="radio" checked="true" id="ddd">
-            <input type="radio" checked="xxx" id="eee">
+
+            <input type="checkbox" id="checked1" >
+            <input type="checkbox" id="checked2" checked >
+            <input type="checkbox" id="checked3" checked="yes">
+            <input type="checkbox" id="checked4" checked="checked" xxx="bbb">
             <button name="xxx" type="submit">xxxx</button>
             <input type="submit" value="提交">
         </form>
