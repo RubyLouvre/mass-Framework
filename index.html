@@ -3,27 +3,25 @@
     <head>
         <title>如何区分属性与特性 by  司徒正美</title>
 　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+      <script src="mass.js"></script>
 　　    <script>
-            window.onload = function(){
-                "aaa,bbb,ccc,ddd,eee".replace(/\w+/g,function( id ){
-                    var elem =  document.getElementById( id )
-                    // console.log(elem.getAttribute("checked"));
-                    //    console.log( elem.attributes)
-                    //   console.log(elem.checked);
-                    //  console.log("xxxxxxxxxx")
-                })
+      
 
-                var elem =  document.getElementById( "Form" )
-       
-                var elem =  document.getElementById( "aaa" )
-           //   elem.attributes.removeNamedItem("checked")
-                console.log(elem.checked)
-                //   console.log(  elem.style.cssText )
-                 console.log(  elem.getAttribute( "checked" ) )
-            }
+            $.require("ready,node,attr",function(){
+                $("div").removeAttr("contenteditable")
+            })
         </script>
+      <style>
+          div{
+              border:1px solid green;
+              width:200px;
+              height:100px;
+              background:lime;
+          }
+      </style>
 　　  </head>
 　　  <body>
+        <div contenteditable>aaa</div>
 　　   <form action="" id="Form" class="aa bb cc" style="border:1px solid red" method="get" autocomplete="on">
          
             <input type="radio" id="aaa">

@@ -40,11 +40,15 @@ define(["$attr","$spec"],function(){
                 // 测试自定义属性的获取
                 expect( a.attr("no-exist") ).eq(undefined)
                 // 测试自定义属性的获取
-                expect( input.attr("readonly") ).eq("readonly");
+                expect( input.attr("readonly") ).eq("");
+                expect( $("#checkbox1",idoc).attr("checked") ).eq(undefined);
+                expect( $("#checkbox2",idoc).attr("checked") ).eq("");
+                expect( $("#checkbox3",idoc).attr("checked") ).eq("yes");
+                expect( $("#checkbox4",idoc).attr("checked") ).eq("checked");
                 expect( radio.attr('checked') ).eq(undefined);
                 expect( input.attr( 'value') ).eq('hello');
                 expect( $.type(a.attr("style")) ).eq("String");
-                expect( opt.attr("selected") ).eq("selected");
+                expect( opt.attr("selected") ).eq("");
                 expect( opt.prop("selected") ).eq(true);
                 expect( a.attr( 'data-test') ).eq('test');
 

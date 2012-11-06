@@ -269,7 +269,10 @@ define("attr",["$support","$node"], function( support ){
                 if(!support.attrInnateName){
                     name = $.propMap[ name ] ||  name;
                 }
-                node.setAttribute( name, "");
+                //小心contentEditable,会把用户编辑的内容清空
+                if(typeof node[ name ] != "boolean"){
+                    node.setAttribute( name, "")
+                }
                 node.removeAttribute( name );
                 // 确保bool属性的值为bool
                 if ( node[ name ] === true ) {
@@ -409,13 +412,6 @@ define("attr",["$support","$node"], function( support ){
         });
         $.propAdapter["href:get"] = function( node, name ) {
             return node.getAttribute( name, 4 );
-        };
-
-        attrAdapter[ "contentEditable:set" ] =  function( node, name, value ) {
-            if ( value === "" ) {
-                value = "false";
-            }
-            attrAdapter["@html:set"]( node, name, value );
         };
     }
 
