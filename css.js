@@ -84,8 +84,8 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     }
 
     var cssPair = {
-        width:['Left', 'Right'],
-        height:['Top', 'Bottom']
+        Width:['Left', 'Right'],
+        Height:['Top', 'Bottom']
     }
     var cssShow = {
         position: "absolute",
