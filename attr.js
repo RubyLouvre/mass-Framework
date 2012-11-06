@@ -127,109 +127,7 @@ define("attr",["$support","$node"], function( support ){
             });
         }
     });
-    //=========================valAdapter 部分==========================
-    var valAdapter = {
-        "option:get":  function( node ) {
-            var val = node.attributes.value;
-            //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
-            return !val || val.specified ? node.value : node.text;
-        },
-        "select:get": function( node ,value, getter) {
-            var option,  options = node.options,
-            index = node.selectedIndex,
-            one = node.type === "select-one" || index < 0,
-            values = one ? null : [],
-            max = one ? index + 1 : options.length,
-            i = index < 0 ? max :  one ? index : 0;
-            for ( ; i < max; i++ ) {
-                option = options[ i ];
-                //旧式IE在reset后不会改变selected，需要改用i === index判定
-                //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
-                //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
-                if ( ( option.selected || i === index ) &&
-                    (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) &&
-                    (!option.parentNode.disabled || !$.type( option.parentNode, "OPTGROUP" )) ) {
-                    value = getter( option );
-                    if ( one ) {
-                        return value;
-                    }
-                    //收集所有selected值组成数组返回
-                    values.push( value );
-                }
-            }
-            return values;
-        },
-        "select:set": function( node, name, values, getter ) {
-            $.slice(node.options).forEach(function( el ){
-                el.selected = !!~values.indexOf( getter(el) );
-            });
-            if ( !values.length ) {
-                node.selectedIndex = -1;
-            }
-        }
-    }
-
   
-    //checkbox的value默认为on，唯有chrome 返回空字符串
-    if ( !support.checkOn ) {
-        "radio,checkbox".replace( $.rword, function( name ) {
-            valAdapter[ name + ":get" ] = function( node ) {
-                return node.getAttribute("value") === null ? "on" : node.value;
-            }
-        });
-    }
-    //处理单选框，复选框在设值后checked的值
-    "radio,checkbox".replace( $.rword, function( name ) {
-        valAdapter[ name + ":set" ] = function( node, name, value) {
-            if ( Array.isArray( value ) ) {
-                return node.checked = !!~value.indexOf(node.value ) ;
-            }
-        }
-    });
-
-    //=========================prop attr 的部分==========================
-    $.prop = function(node, name, value){
-        if($["@bind"] in node){
-            if(node.nodeType === 1 && !$.isXML( node )){
-                name = $.propMap[ name.toLowerCase() ] || name;
-            }
-            var access = value === void 0 ? "get" : "set"
-            return ($.propAdapter[name+":"+access] ||
-                $.propAdapter["@default:"+access] )(node, name, value)
-        }
-    }
-    $.attr = function(node, name, value){
-        if($["@bind"] in node){
-            if ( typeof node.getAttribute === "undefined" ) {
-                return $.prop( node, name, value );
-            }
-            //这里只剩下元素节点
-            var noxml = !$.isXML( node ), type = "@w3c", isBool
-            if( noxml ){
-                name = name.toLowerCase();
-                var prop = $.propMap[ name ] || name
-                if( !support.attrInnateName ){
-                    type = "@ie"
-                }     
-                isBool = typeof node[ prop ] == "boolean" //判定是否为布尔属性
-            }
-            //移除操作
-            if(noxml){
-                if (value === null || value === false && isBool ){
-                    return $.removeAttr(node, name )
-                }
-            }else if( value === null ) {
-                return node.removeAttribute(name)
-            }
-            //读写操作
-            var access = value === void 0 ? "get" : "set"
-            if( isBool ){
-                type = "@bool"; name = prop
-            }
-            return ( noxml  && $.attrAdapter[ name+":"+access ] ||
-                $.attrAdapter[ type +":"+access] )(node, name, value)
-        }
-    }
     var cacheProp = {}
     function defaultProp(node, prop){
         var name = node.tagName+":"+prop;
@@ -247,6 +145,48 @@ define("attr",["$support","$node"], function( support ){
             "class": "className",
             "for": "htmlFor",
             "http-equiv": "httpEquiv"
+        },
+        prop: function(node, name, value){
+            if($["@bind"] in node){
+                if(node.nodeType === 1 && !$.isXML( node )){
+                    name = $.propMap[ name.toLowerCase() ] || name;
+                }
+                var access = value === void 0 ? "get" : "set"
+                return ($.propAdapter[name+":"+access] ||
+                    $.propAdapter["@default:"+access] )(node, name, value)
+            }
+        },
+        attr: function(node, name, value){
+            if($["@bind"] in node){
+                if ( typeof node.getAttribute === "undefined" ) {
+                    return $.prop( node, name, value );
+                }
+                //这里只剩下元素节点
+                var noxml = !$.isXML( node ), type = "@w3c", isBool
+                if( noxml ){
+                    name = name.toLowerCase();
+                    var prop = $.propMap[ name ] || name
+                    if( !support.attrInnateName ){
+                        type = "@ie"
+                    }
+                    isBool = typeof node[ prop ] == "boolean" //判定是否为布尔属性
+                }
+                //移除操作
+                if(noxml){
+                    if (value === null || value === false && isBool ){
+                        return $.removeAttr(node, name )
+                    }
+                }else if( value === null ) {
+                    return node.removeAttribute(name)
+                }
+                //读写操作
+                var access = value === void 0 ? "get" : "set"
+                if( isBool ){
+                    type = "@bool"; name = prop;
+                }
+                return ( noxml  && $.attrAdapter[ name+":"+access ] ||
+                    $.attrAdapter[ type +":"+access] )(node, name, value)
+            }
         },
         //只能用于HTML,元素节点的内建不能删除（chrome真的能删除，会引发灾难性后果），使用默认值覆盖
         removeProp: function( node, name ) {
@@ -293,7 +233,6 @@ define("attr",["$support","$node"], function( support ){
                 return ret;
             }
         },
-
         attrAdapter: {
             "@w3c:get": function( node, name ){
                 var ret =  node.getAttribute( name ) ;
@@ -327,10 +266,8 @@ define("attr",["$support","$node"], function( support ){
                 }
                 attr.value = value + "" ;
             }
-
         }
     });
-    // $.attrAdapter["tabindex:get"] =  $.propAdapter["tabIndex:get"]
     "Attr,Prop".replace($.rword, function( method ){
         $.fn[ method.toLowerCase() ] = function( name, value ) {
             return $.access( this, name, value, $[ method.toLowerCase() ] );
@@ -341,11 +278,6 @@ define("attr",["$support","$node"], function( support ){
             });
         }
     });
-
-    if(!support.attrInnateName){
-        valAdapter["button:get"] =  $.attrAdapter["@ie:get"]
-        valAdapter["button:set"] =  $.attrAdapter["@ie:set"]
-    }
     //========================propAdapter 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
@@ -366,10 +298,9 @@ define("attr",["$support","$node"], function( support ){
         }
     }
     if ( !support.attrInnateValue ) {
-        // https://github.com/kissyteam/kissy/issues/198
         // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
-        //大IE6-8如果一个A标签，它里面包含@值，并且没任何元素节点，那么它里面的文本会变成链接值
-        $.attrAdapter[ "href:set" ] = $.propAdapter[ "href:set" ] = function( node, name, value ) {
+        //在IE6-8如果一个A标签，它里面包含@值，并且没任何元素节点，那么它里面的文本会变成链接值
+        $.propAdapter[ "href:set" ] =  $.attrAdapter[ "href:set" ] = function( node, name, value ) {
             var b
             if(node.tagName == "A" && node.innerText.indexOf("@") > 0
                 && !node.children.length){
@@ -416,7 +347,67 @@ define("attr",["$support","$node"], function( support ){
             node.style.cssText = value + "";
         }
     }
-
+    //========================valAdapter 的相关修正==========================
+    var valAdapter = {
+        "option:get":  function( node ) {
+            var val = node.attributes.value;
+            //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
+            return !val || val.specified ? node.value : node.text;
+        },
+        "select:get": function( node ,value, getter) {
+            var option,  options = node.options,
+            index = node.selectedIndex,
+            one = node.type === "select-one" || index < 0,
+            values = one ? null : [],
+            max = one ? index + 1 : options.length,
+            i = index < 0 ? max :  one ? index : 0;
+            for ( ; i < max; i++ ) {
+                option = options[ i ];
+                //旧式IE在reset后不会改变selected，需要改用i === index判定
+                //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
+                //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
+                if ( ( option.selected || i === index ) &&
+                    (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) &&
+                    (!option.parentNode.disabled || !$.type( option.parentNode, "OPTGROUP" )) ) {
+                    value = getter( option );
+                    if ( one ) {
+                        return value;
+                    }
+                    //收集所有selected值组成数组返回
+                    values.push( value );
+                }
+            }
+            return values;
+        },
+        "select:set": function( node, name, values, getter ) {
+            $.slice(node.options).forEach(function( el ){
+                el.selected = !!~values.indexOf( getter(el) );
+            });
+            if ( !values.length ) {
+                node.selectedIndex = -1;
+            }
+        }
+    }
+    //checkbox的value默认为on，唯有chrome 返回空字符串
+    if ( !support.checkOn ) {
+        "radio,checkbox".replace( $.rword, function( name ) {
+            valAdapter[ name + ":get" ] = function( node ) {
+                return node.getAttribute("value") === null ? "on" : node.value;
+            }
+        });
+    }
+    //处理单选框，复选框在设值后checked的值
+    "radio,checkbox".replace( $.rword, function( name ) {
+        valAdapter[ name + ":set" ] = function( node, name, value) {
+            if ( Array.isArray( value ) ) {
+                return node.checked = !!~value.indexOf(node.value ) ;
+            }
+        }
+    });
+    if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
+        valAdapter["button:get"] =  $.attrAdapter["@ie:get"]
+        valAdapter["button:set"] =  $.attrAdapter["@ie:set"]
+    }
 });
 
 /*
@@ -430,18 +421,6 @@ define("attr",["$support","$node"], function( support ){
 2011.10.22 FIX boolaAdapter.set方法
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
-// attrAdapter移除
-//            "value:get": function( node, name ) {
-//                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
-//                    return node.innerText
-//                }
-//                return name in node ? node.value: void 0;
-//            },
-//            "value:set": function( node, name, value ) {
-//                if(node.nodeName ==="BUTTON" && !support.attrInnateName){
-//                    return node.innerText = value +""
-//                }
-//                node.value = value+"";
-//            }
+2012.11.6 升级v2
  */
 
