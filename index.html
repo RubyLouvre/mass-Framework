@@ -3,7 +3,7 @@
     <head>
         <title>如何区分属性与特性 by  司徒正美</title>
 　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-       <style>
+        <style>
             div{
                 border:1px solid green;
                 width:200px;
@@ -12,21 +12,40 @@
             }
         </style>
         <script src="mass.js"></script>
-       
+
 　　    <script>
       
-              //  document.expando = false;
-              $.require("ready,node,attr",function(){
-                 // document.getElementById("aaa").href= 'http://docs.kissyui.com';
-   //   $.log( $("input").attr("value") )
-      $.log( $("input").attr("value") )
-//$("a").attr("href","http://docs.kissyui.com")
-              })
+            //  document.expando = false;
+            $.require("ready,node,attr",function(){
+                    var checkbox2 = $('#test-20110810-checkbox');
+                checkbox2.attr('checked', "checked");
+
+                $.log( checkbox2.attr( 'checked') )
+                $.log( checkbox2.prop( 'checked') )
+
+            })
         </script>
 
 　　  </head>
 　　  <body>
-        <input type="text" id="test-input" readonly='' maxlength="20" value="hello"/>
+        <script type="text/javascript" charset="utf-8">
+            window.onload = function(){
+              
+               
+            }
+        </script>
+    </head>
+
+    <button value="正确的值" id="bb" tabindex="iii" tabIndex="iiie">
+        <span style="color:red;">错误的值</span>
+    </button>
+    <form>
+        <label id="eee">
+            <input >
+        </label>
+                    <input type="checkbox" id="test-20110810-checkbox"/>test checked
+
+    </form>
     
 　　  </body>
 

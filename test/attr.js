@@ -147,10 +147,12 @@ define(["$attr","$spec"],function(){
                 select.removeAttr("tabindex");
                 a = $("<a/>");
                 expect( a.attr("tabindex") ).eq(undefined);
+                expect( a.prop("tabindex") ).eq(0);
                 a = $("<a href=# />");
-                expect( a.attr("tabindex") ).eq(undefined);
+                expect( a.prop("tabindex") ).eq(0);
                 a = $("<a href=# tabindex=2 />");
-                expect( a.attr("tabindex") ).eq(2);
+                expect( a.attr("tabindex") ).eq("2");
+                expect( a.prop("tabindex") ).eq(2);
                 var email = $("#email",idoc)
                 email.attr("href", "http://www.dangdang.com/") 
                 expect( email.text() ).eq("fuckie@fuckie");
@@ -159,6 +161,9 @@ define(["$attr","$spec"],function(){
                 var form = $.tag("form xx='zz' action='http://www.taobao.com'  name='form_name'  title='form_title'  onsubmit='return false;'",
                     $.tag("input name='xx' value='yy'"));
                 form = $(form+"")
+                //非a, area, button, input, object, select, textarea元素没有显式设定tabIndex,返回-1
+                expect( form.prop("tabindex") ).eq(-1);
+                 
                 expect( form.attr("action") ).eq("http://www.taobao.com");
                 expect( form.attr( "onsubmit") ).eq("return false;");
                 expect( form.attr( "name") ).eq("form_name");

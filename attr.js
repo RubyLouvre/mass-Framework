@@ -168,14 +168,7 @@ define("attr",["$support","$node"], function( support ){
             }
         }
     }
-    if(!support.attrInnateName){
-        valAdapter["button:get"] = function( node ) {
-            return node.innerText
-        }
-        valAdapter["button:set"] = function( node, name, value ) {
-            node.innerText = value
-        }
-    }
+
   
     //checkbox的value默认为on，唯有chrome 返回空字符串
     if ( !support.checkOn ) {
@@ -230,9 +223,8 @@ define("attr",["$support","$node"], function( support ){
             }
             //读写操作
             var access = value === void 0 ? "get" : "set"
-            if(isBool && access == "get"){
-                type = "@bool";
-                name = prop
+            if( isBool ){
+                type = "@bool"; name = prop
             }
             return ( noxml  && $.attrAdapter[ name+":"+access ] ||
                 $.attrAdapter[ type +":"+access] )(node, name, value)
@@ -293,11 +285,12 @@ define("attr",["$support","$node"], function( support ){
                 node[ name ] = value;
             },
             "tabIndex:get": function( node ) {
-                // http://fluidproject.org/blog/2008/01/09/getting-setting-and-removing-tabindex-values-with-javascript/
-                var attributeNode = node.getAttributeNode( "tabIndex" );
-                return attributeNode && attributeNode.specified ?
-                parseInt( attributeNode.value, 10 )  :
-                rfocusable.test(node.nodeName) || rclickable.test(node.nodeName) && node.href  ? 0 : void 0;
+                //http://www.cnblogs.com/rubylouvre/archive/2009/12/07/1618182.html
+                var ret = node.tabIndex;
+                if( ret === 0 ){//-1给那些不该拥有它的元素，0是默认分配给那些表单元素与链接
+                    ret = /^(a|area|button|input|object|select|textarea)$/i.test(node.nodeName) ? 0 : -1
+                }
+                return ret;
             }
         },
 
@@ -313,26 +306,20 @@ define("attr",["$support","$node"], function( support ){
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
                 return node[ name ] ? name.toLowerCase() : void 0 
             },
-            "@ie:get": function( node, name ){
-                //http://rommelsantor.com/clog/2012/03/12/fixing-the-ie7-submit-value/
-               //  $.log(node.nodeName)
-                 //  $.log(node.value)
-                var ret = node.getAttributeNode( name );
-                if(ret){
-                    if(ret.expando ){
-                       return ret.specified ? ret.value : undefined
-                    }else{
-                       return ret.value
-                    }
-                }else{
-                    return undefined
-                }
-                
-//                return ret && ( fixSpecified[ name ] ? ret.value !== "" : ret.specified ) ?
-//                ret.value :   undefined;
+            "@bool:set": function(node, name){
+                //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
+                node.setAttribute( name, name.toLowerCase() )
+                node[ name ]  = true;
             },
-            "@ie:set": function( node, name, value ){
-               
+            "@ie:get": function( node, name ){
+                var str = node.outerHTML.replace(node.innerHTML, "")
+                var re = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g, obj = {}, t;
+                while (t = re.exec(str)) { //属性值只有双引号与无引号的情况
+                    obj[ t[1].toLowerCase() ] = t[2] ? t[2].charAt(0) == '"' ? t[2].slice(1, -1) : t[2] : ""
+                }
+                return obj[ name ];
+            },
+            "@ie:set": function( node, name, value ){  
                 var attr = node.getAttributeNode( name );
                 if ( !attr ) {//不存在就创建一个同名的特性节点
                     attr = node.ownerDocument.createAttribute( name );
@@ -343,7 +330,7 @@ define("attr",["$support","$node"], function( support ){
 
         }
     });
-    $.attrAdapter["tabindex:get"] =  $.propAdapter["tabIndex:get"]
+    // $.attrAdapter["tabindex:get"] =  $.propAdapter["tabIndex:get"]
     "Attr,Prop".replace($.rword, function( method ){
         $.fn[ method.toLowerCase() ] = function( name, value ) {
             return $.access( this, name, value, $[ method.toLowerCase() ] );
@@ -355,7 +342,10 @@ define("attr",["$support","$node"], function( support ){
         }
     });
 
-  
+    if(!support.attrInnateName){
+        valAdapter["button:get"] =  $.attrAdapter["@ie:get"]
+        valAdapter["button:set"] =  $.attrAdapter["@ie:set"]
+    }
     //========================propAdapter 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
@@ -381,7 +371,7 @@ define("attr",["$support","$node"], function( support ){
         //大IE6-8如果一个A标签，它里面包含@值，并且没任何元素节点，那么它里面的文本会变成链接值
         $.attrAdapter[ "href:set" ] = $.propAdapter[ "href:set" ] = function( node, name, value ) {
             var b
-            if(node.tagName == "A" && node.innerText.indexOf("@") > 0 
+            if(node.tagName == "A" && node.innerText.indexOf("@") > 0
                 && !node.children.length){
                 b = node.ownerDocument.createElement('b');
                 b.style.display = 'none';
@@ -453,5 +443,5 @@ define("attr",["$support","$node"], function( support ){
 //                }
 //                node.value = value+"";
 //            }
-*/
+ */
 
