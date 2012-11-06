@@ -6,7 +6,7 @@ define(["$attr","$spec"],function(){
                 var idoc = iframe.contents()[0];
                 //shortcuts
                 var get = function(ee){
-                // $.log(ee.selector+"   :   "+ee.length)
+                    $.log(ee.selector+"   :   "+ee.length)
                 }
                 var foo = $('#foo',idoc),
                 a = $('#foo a',idoc),
@@ -40,15 +40,15 @@ define(["$attr","$spec"],function(){
                 // 测试自定义属性的获取
                 expect( a.attr("no-exist") ).eq(undefined)
                 // 测试自定义属性的获取
-                expect( input.attr("readonly") ).eq("");
-                expect( $("#checkbox1",idoc).attr("checked") ).eq(undefined);
-                expect( $("#checkbox2",idoc).attr("checked") ).eq("");
-                expect( $("#checkbox3",idoc).attr("checked") ).eq("yes");
-                expect( $("#checkbox4",idoc).attr("checked") ).eq("checked");
+                expect( input.attr("readonly") ).eq("readonly");
+                expect( $("#checked1",idoc).attr("checked") ).eq(undefined);
+                expect( $("#checked2",idoc).attr("checked") ).eq("checked");
+                expect( $("#checked3",idoc).attr("checked") ).eq("checked");
+                expect( $("#checked4",idoc).attr("checked") ).eq("checked");
                 expect( radio.attr('checked') ).eq(undefined);
                 expect( input.attr( 'value') ).eq('hello');
                 expect( $.type(a.attr("style")) ).eq("String");
-                expect( opt.attr("selected") ).eq("");
+                expect( opt.attr("selected") ).eq("selected");
                 expect( opt.prop("selected") ).eq(true);
                 expect( a.attr( 'data-test') ).eq('test');
 
@@ -148,7 +148,7 @@ define(["$attr","$spec"],function(){
                 a = $("<a/>");
                 expect( a.attr("tabindex") ).eq(undefined);
                 a = $("<a href=# />");
-                expect( a.attr("tabindex") ).eq(0);
+                expect( a.attr("tabindex") ).eq(undefined);
                 a = $("<a href=# tabindex=2 />");
                 expect( a.attr("tabindex") ).eq(2);
 
@@ -170,6 +170,9 @@ define(["$attr","$spec"],function(){
                 expect( d.prop( 'checked') ).eq(true);
                 // undefined property
                 expect( d.prop( 'checked2') ).eq(undefined);
+                //测试移除contenteditable属性，但又不会影响其内容
+                var contenteditable = $("#removeAttr",idoc).removeAttr("contenteditable")
+                expect( contenteditable[0].innerHTML ).eq("AAA");
                 iframe.remove();
             }
         })

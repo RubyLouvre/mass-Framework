@@ -14,37 +14,46 @@
         </style>
 　　    <script>
       
-            //  document.expando = false;
+              //  document.expando = false;
               $.require("ready,node,attr",function(){
-                  var el = document.getElementById("checked1");
-                  var node = el.attributes
-                  for(var i = 0, n; n = node[i++];){
-                      if(n.expando){
-                          console.log (n.name + " = " + n.value);
-                      }
-                  }
-                  console.log(el.getAttribute("checked",2))
-                ///  console.log(el.parentNode.innerHTML+"!!!!!!!!!")
-                  // $("div").removeAttr("contenteditable")
-                  $.log( $("#checked3").attr("checked") );
+                  var node = document.getElementsByTagName("form")[0];
+                   console.log(   node.getAttributeNode("id") == null )
+                // console.log(   node.getAttributeNode("id").specified  )
+                
+                   $.log( $("form")[0].outerHTML)
+                //   $.log( node.attributes["Test"].value)
+                  //  $.log( node.attributes["test"].value)
+                    $.log( $("form").attr("class"))
+                  /*    $.log( $("#checked1").attr("checked") )
+                    $.log( $("#checked2").attr("checked") )
+                    $.log( $("#checked3").attr("checked") )
+                    $.log( $("#checked4").attr("checked") )*/
+
               })
         </script>
 
 　　  </head>
 　　  <body>
         <div contenteditable>aaa</div>
-        <div>
-            <span id="oSpan" unselectable="on">This text should not be selectable.</span>
-        </div>
+        <table>
+            <tr><td>1</td><td></td></tr>
+        </table>
 
-　　   <form action="" id="Form" class="aa bb cc" style="border:1px solid red" method="get" autocomplete="on">
-
-            <input type="checkbox" id="checked1" >
+　　   <form action="" Test="aaa" class="aa bb cc" style="border:1px solid red" method="get" autocomplete="on">
+            <select id="test-select3" multiple autocomplete="off">
+                <option selected>1</option>
+                <option selected>2</option>
+                <option>3</option>
+            </select>
+            <input type="checkbox" id="checked1" readonly="" >
             <input type="checkbox" id="checked2" checked >
+
             <input type="checkbox" id="checked3" checked="yes">
-            <input type="checkbox" id="checked4" checked="checked" xxx="bbb">
+            <input type="checkbox" id="checked4" checked="checked">
+            <input type="checkbox" id="checked5" checked='' >
             <button name="xxx" type="submit">xxxx</button>
             <input type="submit" value="提交">
+            <textarea rows="2" cols="2">testtesttest</textarea>
         </form>
 　　  </body>
 

@@ -102,9 +102,12 @@ define("attr",["$support","$node"], function( support ){
             var el = this[0], getter = valAdapter[ "option:get" ];
             if ( !arguments.length ) {//读操作
                 if ( el && el.nodeType == 1 ) {
+                    console.log(getValType(el))
                     //处理select-multiple, select-one,option,button
-                    var ret =  (valAdapter[ getValType(el)+":get" ] ||
-                        $.propAdapter[ "@xml:get" ])( el, "value", getter );
+                    var fn =  (valAdapter[ getValType(el)+":get" ] ||
+                        $.propAdapter[ "@default:get" ])
+                    //   console.log(fn+"")
+                    var ret = fn( el, "value", getter );
                     return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
                 }
                 return void 0;
@@ -122,7 +125,7 @@ define("attr",["$support","$node"], function( support ){
             return this.each(function( el ) {//写操作
                 if ( el.nodeType == 1 ) {
                     (valAdapter[ getValType(el)+":set" ] ||
-                        $.propAdapter[ "@xml:set" ])( el, "value", item , getter );
+                        $.propAdapter[ "@default:set" ])( el, "value", item , getter );
                 }
             });
         }
@@ -215,11 +218,11 @@ define("attr",["$support","$node"], function( support ){
             var noxml = !$.isXML( node ), type = "@w3c", isBool
             if( noxml ){
                 name = name.toLowerCase();
-                if(!support.attrInnateName){
-                      name = $.propMap[ name ] || name;
-                      type = "@ie"
+                var prop = $.propMap[ name ] || name
+                if( !support.attrInnateName ){
+                    type = "@ie"
                 }     
-                isBool = typeof node[name] == "boolean" 
+                isBool = typeof node[ prop ] == "boolean" //判定是否为布尔属性
             }
             //移除操作
             if(noxml){
@@ -231,8 +234,10 @@ define("attr",["$support","$node"], function( support ){
             }
             //读写操作
             var access = value === void 0 ? "get" : "set"
-            if(isBool && access == "get")
+            if(isBool && access == "get"){
                 type = "@bool"
+                name = prop
+            }
             return ( noxml  && $.attrAdapter[ name+":"+access ] ||
                 $.attrAdapter[ type +":"+access] )(node, name, value)
         }
@@ -245,6 +250,11 @@ define("attr",["$support","$node"], function( support ){
         }
         return cacheProp[name] = document.createElement(node.tagName)[prop]
     }
+    var  fixSpecified = {
+        name: true,
+        id: true,
+        coords: true
+    };
     $.mix({
         propMap:{//属性名映射
             "accept-charset": "acceptCharset",
@@ -308,15 +318,13 @@ define("attr",["$support","$node"], function( support ){
                 node.setAttribute( name, "" + value )
             },
             "@bool:get": function(node, name){
-                 return node[ name ] ? name.toLowerCase() : void 0 
+                //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
+                return node[ name ] ? name.toLowerCase() : void 0 
             },
             "@ie:get": function( node, name ){
-                var str = node.outerHTML.replace(node.innerHTML, "")
-                var re = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g, obj = {}, t;
-                while (t = re.exec(str)) { //属性值只有双引号与无引号的情况
-                    obj[ t[1].toLowerCase() ] = t[2] ? t[2].charAt(0) == '"' ? t[2].slice(1, -1) : t[2] : "";
-                }
-                return obj[ name ];
+                var ret = node.getAttributeNode( name );
+                return ret && ( fixSpecified[ name ] ? ret.value !== "" : ret.specified ) ?
+                ret.value :   undefined;
             },
             "@ie:set": function( node, name, value ){
                 var attr = node.getAttributeNode( name );
@@ -340,6 +348,7 @@ define("attr",["$support","$node"], function( support ){
             }
         }
     });
+    $.attrAdapter["tabindex:get"] =  $.propAdapter["tabIndex:get"]
     "Attr,Prop".replace($.rword, function( method ){
         $.fn[ method.toLowerCase() ] = function( name, value ) {
             return $.access( this, name, value, $[ method.toLowerCase() ] );
@@ -406,7 +415,7 @@ define("attr",["$support","$node"], function( support ){
         //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
         //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
         "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
-            attrAdapter[ method + ":get" ] =  function( node,name ) {
+            attrAdapter[ method.toLowerCase() + ":get" ] =  function( node,name ) {
                 var ret = node.getAttribute( name, 2 );
                 return ret === null ? void 0 : ret;
             }
