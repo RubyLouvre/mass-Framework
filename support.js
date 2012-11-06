@@ -16,12 +16,12 @@ define("support", function(){
         //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
         insertTbody: !div[TAGS]("tbody").length,
         // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
-        checkOn :  input.value === "on",
+        checkOn : input.value === "on",
         //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
         optSelected: !!opt.selected,
-        //IE67无法区分href属性与特性（bug）
+        //IE67，无法取得用户设定的原始href值
         attrInnateHref: a.getAttribute("href") === "/nasami",
-        //IE67,是无法取得是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
+        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
         attrInnateStyle: a.getAttribute("style") !== style,
         //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
         attrInnateName:div.className !== "t",
