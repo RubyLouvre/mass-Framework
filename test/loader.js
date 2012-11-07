@@ -16,10 +16,10 @@ define(["$spec"],function(require, exports, module){
             $.require("$class",function(ret){
                 expect( typeof ret === "object", id).ok();
                 expect( ret !== gexports, id).ok();
-                expect( ret == $.modules[$.core.base+"class.js"].exports, id).ok();
+                expect( ret == $.modules[$.config.base+"class.js"].exports, id).ok();
             });
             $.require( $.core.base + "class", function(ret){
-                expect( ret == $.modules[$.core.base+"class.js"].exports, id).ok();
+                expect( ret == $.modules[$.config.base+"class.js"].exports, id).ok();
             });
             //测试加载同一目录的模块
             $.require( "./test/mmm", function(ret){
