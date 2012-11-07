@@ -17,7 +17,7 @@ define("data", ["$lang"], function(){
             });
             var _table = table;
             //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
-            //我们可能通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+            //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
             if(isEl && !table.parsedAttrs){
                 var attrs = target.attributes;
                 //将HTML5单一的字符串数据转化为mass多元化的数据，并储存起来
