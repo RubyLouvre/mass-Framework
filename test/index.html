@@ -28,6 +28,12 @@
                     location.href = location.href.replace(/[?#].*/, '') +"#"+this.value;
                     location.reload()
                 })
+                if(location.hash.length > 1){
+                    var el = $("option[value="+ location.hash.slice(1)+"]");
+                    if(el.length){
+                        el[0].selected = true;
+                    }
+                }
             })
 
             $.require("ready,$spec,./test/" + test_module, function(){
