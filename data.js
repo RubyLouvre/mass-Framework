@@ -6,11 +6,8 @@ define("data", ["$lang"], function(){
     var remitter = /object|function/, rtype = /[^38]/;
     function innerData( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
         if( $.acceptData(target) ){
-            var id = $.getUid(target), isEl = target.nodeType === 1;
-            if(name === "@uuid"){
-                return id;
-            }
-            var one = typeof name === "string",//取得指定值
+            var id = $.getUid(target), isEl = target.nodeType === 1,
+            one = typeof name === "string",//取得指定值
             database = isEl ? $["@data"]: target,
             table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
                 data:{}
@@ -25,7 +22,7 @@ define("data", ["$lang"], function(){
                     var key = attr.name;
                     if (  key.length > 5 && !key.indexOf( "data-" ) ) {
                         $.parseData(target, key.slice(5), cache, attr.value);
-                    }//camelize
+                    }
                 }
                 table.parsedAttrs = true;
             }
@@ -42,7 +39,7 @@ define("data", ["$lang"], function(){
                 if(name in table){
                     return table[name]
                 }else if(isEl && !pvt){
-                    return $.parseData( target, name, _table );
+                    return $.parseData( target, name, cache );
                 }
             }else{
                 return table
@@ -51,11 +48,11 @@ define("data", ["$lang"], function(){
     }
     function innerRemoveData (target, name, pvt){
         if( $.acceptData(target) ){
-            var id =  $.getUid(target);
-            if (  !id ) {
+            var id = $.getUid(target);
+            if ( !id ) {
                 return;
             }
-            var  clear = 1, ret = typeof name == "string",
+            var clear = 1, ret = typeof name == "string",
             database = target.nodeType === 1  ? $["@data"] : target,
             table = database["@data_"+id],
             cache = table;
@@ -94,7 +91,7 @@ define("data", ["$lang"], function(){
     $.mix( {
         "@data": {},
         acceptData: function( target ) {
-            return target && remitter.test(typeof target) && rtype.test(target.nodeType)
+            return target && remitter.test(typeof target) && rtype.test(target.nodeType);
         },
         data: function( target, name, data ) {  // 读写数据
             return innerData(target, name, data)
