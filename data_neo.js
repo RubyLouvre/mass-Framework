@@ -8,7 +8,7 @@ define("data", ["$lang"], function(){
         if( $.acceptData(target) ){
             var isEl = target.nodeType === 1;
             var table = $["@data"].get( target );
-            if(table){
+            if(!table){
                 table = {
                     data:{}
                 }
