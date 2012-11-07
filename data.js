@@ -15,7 +15,7 @@ define("data", ["$lang"], function(){
             table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
                 data:{}
             });
-            var _table = table;
+            var cache = table;
             //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
             //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
             if(isEl && !table.parsedAttrs){
@@ -24,7 +24,7 @@ define("data", ["$lang"], function(){
                 for ( var i = 0, attr; attr = attrs[i++];) {
                     var key = attr.name;
                     if (  key.length > 5 && !key.indexOf( "data-" ) ) {
-                        $.parseData(target, key.slice(5), _table, attr.value);
+                        $.parseData(target, key.slice(5), cache, attr.value);
                     }//camelize
                 }
                 table.parsedAttrs = true;
