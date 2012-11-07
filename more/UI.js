@@ -1249,32 +1249,81 @@ The values of the [[Prototype]] and [[Class]] internal properties of the global 
 绑定形参 -> 形参赋值 -> 绑定函数 -> 函数赋值 -> ([如果没有arguments绑定] 绑定arguments -> arguments则赋值) -> 绑定变量
 补充两注释:
 
-注1 . Edition5中,对标识符初始化的过程描述,细节上虽然有很大差异.但最终的流程却是统一的, 即 先做形参初始化（包括arguments的初始化）, 然后是函数声明,最后才是变量声明. 优先级也雷同.
-        所谓语义化的考量. 即如下情况:
-         void function(fn){
-               function fn(){};
-               alert(typeof fn)// function.
-          }();
-       即,考虑开发者对函数形参和函数声明语句中的标识符的期待. 这种期待是一种语义上的诉求. 即函数声明.具备最高优先级.
-            
-       但是下面的代码，会很让人诧异:
-       
-          function test(fn){
-               function fn(){}
-               alert(fn );
-          }
-          test(123);
+今天在QW交流群里看到有同学讨论使数组随机化的问题，其中给出的算法很不错，让我想起了之前自己实现过的不怎么“漂亮”的方法。想想我们有时候在繁忙的写业务代码时只是为了实现其功能，并未花太大心思去思考是否有更好的实现方法。
 
-     测试结果:
-          Firefox1.5-   打印 123
-其他浏览器  打印 fn函数的字符串表示
-    
-     仅仅参考这里是无法知道 什么叫做,函数名的初始化过程要在 参数列表对象创建之后. 参考  13.2.1章节 的函数调用的具体步骤可看出:
-         1.  Establish a new execution context using F's FormalParameterList, the passed arguments list, and the this value as described in 10.2.3
-         2.  Evaluate F's FunctionBody.
-      第一步就是创建新的执行环境,并使用该函数被调用时候,调用者提供的参数列表创建形参列表. 然后第二部才是执行函数体内的语句.所以说,局部函数声明,的初始化过程要在形参初始化之后.而形参初始化时,其对应的实参值,就已经被相应的写入到variable object上去了. 所以函数声明时,会覆盖掉形参，而不是形参对应的实参会覆盖函数声明.
+就这个数组问题(随即排序一个数组里的值，返回一个新数组)来说，我以前的实现方法是这样的：
 
-          那么我们可以看出,早期的Firefox对标准理解有错误.其他浏览器都是OK的
 
-注2 . ExpressionNoIn ....etc  都是指语句、或表达式 中不包含 in 运算符的形式. 在注释2中的 VariableDeclarationNoIn 特指 如 for (var o in obj)   语句中 ,var o in obj部分 就属于一个 非NoIn的变量声明表达式..
+function randArr(arr) {
+    var ret = [],
+    obj = {},
+    i = arr.length,
+    l = i,
+    n;
+
+    while (--i >= 0) {
+        n = Math.floor( Math.random() * l );
+        if (obj[n] === void 0) {
+            ret[ret.length] = obj[n] = arr[n];
+        } else {
+            i++;
+        }
+    }
+    return ret;
+}
+
+上面的代码会工作，但并不是一个好的算法，它打算执行“原数组的长度”次循环，每一次循环会随机取一个原数组中的索引，然后判断该索引是否已被取过，如果没有则把该索引的值放入新数组中，如果取过则把自减键 i 自增1（目的是重复该次循环直到取到另一个未取过的索引）。这样的方法的性能是很看人品的，原因相信看到这种思路的同学都已明白了。
+
+现在给出群里那位同学的算法：
+
+
+function randArr(arr) {
+    var ret = [],
+    i = arr.length,
+    n;
+    arr = arr.slice(0);
+
+    while (--i >= 0) {
+        n = Math.floor( Math.random() * i);
+        ret[ret.length] = arr.splice(n, 1)[0];
+    }
+    return ret;
+}
+
+这是一个相当巧妙的算法，在每次循环中取一个随机的索引后，并把它的值从数组中删除，这样，如果后面依然随机取到这个索引，这个索引就已经不再是上一次取到的值了，而且随机数的取值范围会根据数组的长度的减小而减小，这样就能一次性循环一定的次数而得到理想的结果。
+
+还看到了一个改进版的，是考虑到了对数组的删除操作而导致的些许性能问题，运用了JK大的洗牌算法，即把每一次删除操作改为了位置替换操作(取到的该索引的值和当前自减键 i 对应的值进行互换)，这样对整个数组的影响是最小的，还是放代码吧：
+
+
+function randArr(arr) {
+    var ret = [],
+    i = arr.length,
+    n;
+    arr = arr.slice(0);
+
+    while (--i >= 0) {
+        n = Math.floor( Math.random() * i);
+        ret[ret.length] = arr[n];
+        arr[n] = arr[i];
+    }
+    return ret;
+}
+
+最后给出一个“创建值为min~max间的随机数组”的方法,算法原理同上面的差不多：
+
+
+function makeRandArr(min, max) {
+    var ret = [],
+    obj = {},
+    n;
+
+    for (; max >= min; max--) {
+        n = Math.ceil( Math.random() * (max - min) ) + min;
+        ret[ret.length] = obj[n] || n;
+        obj[n] = obj[max] || max;
+    }
+
+    return ret;
+}
+
 
