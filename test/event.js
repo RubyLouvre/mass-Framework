@@ -60,17 +60,21 @@ define(["$event","$spec","$css"],function( ){
                 nobubble = false;
             })
             $("#inner").fire("mouseover")
+            $.log(nobubble+"!")
             expect( nobubble,id ).eq(true);
-            $("#inner").fire("mouseenter")
-            expect( nobubble,id ).eq(true);
-            $("#outer").mouseover(function(){
-                nobubble = 2;
-            })
-            $("#outer").fire("mouseenter")
-            expect( nobubble,id ).eq(false);
             setTimeout(function(){
-                div.remove();
-            },5000)
+                $("#inner").fire("mouseenter")
+                expect( nobubble,id ).eq(true);
+                $("#outer").mouseover(function(){
+                    nobubble = 2;
+                })
+                $("#outer").fire("mouseenter")
+                expect( nobubble,id ).eq(false);
+                setTimeout(function(){
+                    div.remove();
+                },3000)
+            },1000)
+
         },
         "submit": function(id){
             var form =  "<form action='javascript:void 0' onsubmit='window.fired=7' style='border:1px solid red;width:200px;height:200px;float:left;'>"

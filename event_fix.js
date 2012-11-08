@@ -3,7 +3,7 @@
 //==========================================
 define("event_fix", !!document.dispatchEvent, function(){
     $.log("已加载event_fix模块",7)
-    var facade =  {
+    var facade = $.event  =  {
         fire: function( init ){
             //这里的代码仅用于IE678
             var transfer;
@@ -31,6 +31,9 @@ define("event_fix", !!document.dispatchEvent, function(){
                     facade.dispatch( cur, transfer, type );
                     if (cur[ ontype ] && cur[ ontype ].call(cur) === false) {
                         transfer.preventDefault();
+                    }
+                    if(facade.noBubble[type]){
+                        break;
                     }
                     cur = cur.parentNode ||
                     cur.ownerDocument ||
@@ -128,7 +131,6 @@ define("event_fix", !!document.dispatchEvent, function(){
             })
         };
     });
-    return facade;
 })
 
 /*

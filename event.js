@@ -1,12 +1,13 @@
 //=========================================
 // 事件系统 v8
 //==========================================
-define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(node, facade){
+define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(node){
     $.log("已加载event模块v8")
-    var bindTop = !!adapter;//如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
-    facade = facade || {};
-    $.event = facade;
-    var adapter = $.eventAdapter || ($.eventAdapter = {})
+ 
+    var facade = $.event || ($.event = {});
+    var adapter = $.eventAdapter || ($.eventAdapter = {});
+    //如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
+    var bindTop = !adapter.change;
     var rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
     $.eventSupport = function( eventName, el ) {
         el = el || document.createElement("div");
@@ -83,6 +84,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     }
     $.Event = Event;
     $.mix(facade,{
+        noBubble: $.oneObject("load unload focus blur mouseenter mouseleave",1),
         //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
         bind: function( target, hash ){//事件系统三大核心方法之一，绑定事件
@@ -181,6 +183,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         if(desc.times === 0){//如果有次数限制并到用光所有次数，则移除它
                             facade.unbind( ctarget, desc)
                         }
+
                         if ( result !== void 0 ) {
                             event.result = result;
                             if ( result === false ) {
@@ -193,7 +196,9 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                         }
                     }
                 }
-
+                if(facade.noBubble[type]){
+                    event.stopPropagation();//这个参照jQuery的行为办事
+                }
             }
             return fn;
         },
@@ -305,7 +310,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
             }
         }
     })
-    var unbubbleEvents = $.oneObject("load unload focus blur mouseenter mouseleave",1)
+
     if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( type ){
             var bindTarget = $["@bind"] in this, more, event
@@ -325,7 +330,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 var doc = target.ownerDocument || target.document || target || document;
                 if(!event){
                     event = doc.createEvent(eventMap[type] || "CustomEvent");
-                    event.initEvent( type,!unbubbleEvents[type],true, doc.defaultView, 1);//, doc.defaultView
+                    event.initEvent( type,!facade.noBubble[type],true, doc.defaultView, 1);//, doc.defaultView
                 }
                 event.args = [].slice.call( arguments, 1 ) ;
                 event.more = more
