@@ -169,7 +169,7 @@ define("attr",["$support","$node"], function( support ){
                     if( !support.attrInnateName ){
                         type = "@ie"
                     }
-                    isBool = typeof node[ prop ] == "boolean" //判定是否为布尔属性
+                    isBool = typeof node[ prop ] == "boolean" && typeof defaultProp(node,prop) == "boolean"//判定是否为布尔属性
                 }
                 //移除操作
                 if(noxml){

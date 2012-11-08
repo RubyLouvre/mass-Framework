@@ -2,6 +2,7 @@
  * UI库参考
  * 
  */
+lhgdialog 
 http://soulwire.co.uk/coffeephysics/#
 ////http://www.ixueyun.com/community/thread-6248-1-1.html
 //md5

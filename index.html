@@ -17,36 +17,34 @@
       
             //  document.expando = false;
             $.require("ready,node,attr",function(){
-                    var checkbox2 = $('#test-20110810-checkbox');
-                checkbox2.attr('checked', "checked");
-
-                $.log( checkbox2.attr( 'checked') )
-                $.log( checkbox2.prop( 'checked') )
+                var el = $("button")[0]
+                var attrs = el.attributes
+                for(var i =0,attr; attr = attrs[i++];){
+                    if(attr.specified){
+                          console.log(attr.specified +" attr.name "+attr.name )
+                    }
+                  
+                }
 
             })
         </script>
 
 　　  </head>
 　　  <body>
-        <script type="text/javascript" charset="utf-8">
-            window.onload = function(){
-              
-               
-            }
-        </script>
-    </head>
+        
 
-    <button value="正确的值" id="bb" tabindex="iii" tabIndex="iiie">
-        <span style="color:red;">错误的值</span>
-    </button>
-    <form>
-        <label id="eee">
-            <input >
-        </label>
-                    <input type="checkbox" id="test-20110810-checkbox"/>test checked
 
-    </form>
-    
+        <button value="正确的值"  tabindex="iii" tabIndex="iiie">
+            <span style="color:red;">错误的值</span>
+        </button>
+        <form>
+            <label id="eee">
+                <input >
+            </label>
+            <input type="checkbox" id="test-20110810-checkbox"/>test checked
+
+        </form>
+
 　　  </body>
 
 </html>
