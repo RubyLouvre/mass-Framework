@@ -103,7 +103,6 @@ define("attr",["$support","$node"], function( support ){
             var el = this[0], getter = valAdapter[ "option:get" ];
             if ( !arguments.length ) {//读操作
                 if ( el && el.nodeType == 1 ) {
-                    //处理select-multiple, select-one,option,button
                     var ret =  (valAdapter[ getValType(el)+":get" ] ||
                         $.propAdapter[ "@default:get" ])( el, "value", getter );
                     return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
@@ -227,7 +226,7 @@ define("attr",["$support","$node"], function( support ){
             "tabIndex:get": function( node ) {
                 //http://www.cnblogs.com/rubylouvre/archive/2009/12/07/1618182.html
                 var ret = node.tabIndex;
-                if( ret === 0 ){//-1给那些不该拥有它的元素，0是默认分配给那些表单元素与链接
+                if( ret === 0 ){//在标准浏览器下，不显式设置时，表单元素与链接默认为0，普通元素为-1
                     ret = rtabindex.test(node.nodeName) ? 0 : -1
                 }
                 return ret;
@@ -292,14 +291,13 @@ define("attr",["$support","$node"], function( support ){
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.optSelected ) {
         $.propAdapter[ "selected:get" ] = function( node ) {
-            var parent = node
-            for( ;!parent.add; parent.selectedIndex, parent = parent.parentNode){};
+            for( var p = node;typeof p.selectedIndex != "number";p = p.parentNode){}
             return node.selected;
         }
     }
     if ( !support.attrInnateValue ) {
         // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
-        //在IE6-8如果一个A标签，它里面包含@值，并且没任何元素节点，那么它里面的文本会变成链接值
+        //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
         $.propAdapter[ "href:set" ] =  $.attrAdapter[ "href:set" ] = function( node, name, value ) {
             var b
             if(node.tagName == "A" && node.innerText.indexOf("@") > 0

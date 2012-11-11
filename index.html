@@ -11,38 +11,46 @@
                 background:lime;
             }
         </style>
-        <script src="mass.js"></script>
+ <script src="jquery1.82.js"></script>
 
 　　    <script>
-      
-            //  document.expando = false;
-            $.require("ready,node,attr",function(){
-                var el = $("button")[0]
-                var attrs = el.attributes
-                for(var i =0,attr; attr = attrs[i++];){
-                    if(attr.specified){
-                          console.log(attr.specified +" attr.name "+attr.name )
-                    }
-                  
-                }
 
-            })
+     
+          if($.require){
+              //  document.expando = false;
+              $.require("ready,node,attr",function(){
+                  var el = $('form')[0];
+                  var el = document.getElementsByTagName("form")[0]
+                  alert(el.attributes["onclick"].value)
+                  alert(el.getAttribute("action"))
+                  alert(el.getAttribute("id"))
+                  alert(el.getAttribute("name"))
+                  alert(el.getAttribute("length"))
+                  alert(el.getAttribute("xxx"))
+                  alert(el.getAttribute("yyy"))
+              })
+          }else{
+              
+          }
+        window.onload = function(){
+           var el = document.getElementById("bb");
+          alert( el.attributes["title"].specified  )
+        }
         </script>
 
 　　  </head>
 　　  <body>
-        
 
-
-        <button value="正确的值"  tabindex="iii" tabIndex="iiie">
+        <button value="正确的值"  id="bb" tabindex="iii" tabIndex="iiie">
             <span style="color:red;">错误的值</span>
         </button>
-        <form>
-            <label id="eee">
-                <input >
-            </label>
-            <input type="checkbox" id="test-20110810-checkbox"/>test checked
-
+        <form  action="#" >
+            <input id="name" >
+            <input id="action" >
+            <input name="id"  >
+            <input name="length"  >
+            <input id="xxx" >
+            <input id="yyy" >
         </form>
 
 　　  </body>
