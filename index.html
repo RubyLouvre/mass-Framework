@@ -11,59 +11,19 @@
                 background:lime;
             }
         </style>
-        <script src="jquery1.82.js"></script>
+        <script src="mass.js"></script>
 
 　　    <script>
 
      
             if($.require){
                 //  document.expando = false;
-                $.require("ready,node,attr",function(){
-                    var el = $('form')[0];
-                    var el = document.getElementsByTagName("form")[0]
-                    alert(el.attributes["onclick"].value)
-                    alert(el.getAttribute("action"))
-                    alert(el.getAttribute("id"))
-                    alert(el.getAttribute("name"))
-                    alert(el.getAttribute("length"))
-                    alert(el.getAttribute("xxx"))
-                    alert(el.getAttribute("yyy"))
+                $.require("ready,fx",function(){
+               
                 })
             }else{
      
-                var log = function(msg){
-                    window.console && console.log(msg)
-                }
-                function asyncThing1(){
-                    var dfd = $.Deferred();
-                    setTimeout(function(){
-                        log('asyncThing1 seems to be done...');
-                        dfd.resolve('1111');
-                    },1000);
-                    return dfd.promise();
-                }
-                function asyncThing2(){
-                    var dfd = $.Deferred();
-                    setTimeout(function(){
-                        log('asyncThing2 seems to be done...');
-                        dfd.resolve('222');
-                    },1500);
-                    return dfd.promise();
-                }
-                function asyncThing3(){
-                    var dfd = $.Deferred();
-                    setTimeout(function(){
-                        log('asyncThing3 seems to be done...');
-                        dfd.resolve('333');
-                    },2000);
-                    return dfd.promise();
-                }
-     
-                /* do it */
-                $.when( asyncThing1(), asyncThing2(), asyncThing3() ).done(function(res1, res2, res3){
-                    log('all done!');
-                    log(res1 + ', ' + res2 + ', ' + res3);
-                })
+             
             }
      
 
