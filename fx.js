@@ -119,6 +119,9 @@ define("fx", ["$css"],function(){
         _cancelAnimFrame = function(id) {
             window.clearTimeout(id);
         }
+    }else{
+        _reqAnimFrame = window[_reqAnimFrame]
+        _cancelAnimFrame = window[_cancelAnimFrame]
     }
     var Ticker = $.factory({
         inherit: EventDispatcher,
@@ -134,7 +137,7 @@ define("fx", ["$css"],function(){
                 _self.time = (_getTime() - _startTime) / 1000;
                 if (!_fps || _self.time >= _nextTime) {
                     _self.frame++;
-                    _nextTime = _self.time + _gap - (_self.time - _nextTime) - 0.0005;
+                    _nextTime = _self.time + _gap - (_self.time - _nextTime) - 0.0005;//以秒做单位
                     if (_nextTime <= _self.time) {
                         _nextTime = _self.time + 0.001;
                     }
@@ -143,12 +146,12 @@ define("fx", ["$css"],function(){
                 _id = _req( _self.tick );
             };
 
-            this.fps = function(value) {
+            this.fps = function(value) {//帧数
                 if (!arguments.length) {
                     return _fps;
                 }
                 _fps = value;
-                _gap = 1 / (_fps || 60);
+                _gap = 1 / (_fps || 60);//间隙 
                 _nextTime = this.time + _gap;
                 _req = (_fps === 0) ? function(f){} : (!_useRAF || !_reqAnimFrame) ? function(f) {
                     return window.setTimeout( f, (((_nextTime - _self.time) * 1000 + 1) >> 0) || 1);
@@ -168,6 +171,33 @@ define("fx", ["$css"],function(){
             this.fps(fps);
         }
     })
+    var _gsInit
+    var Animation = $.factory({
+        init:function(duration, vars) {
+            this.vars = vars || {};
+            this._duration = this._totalDuration = duration || 0;
+            this._delay = Number(this.vars.delay) || 0;
+            this._timeScale = 1;
+            this._active = (this.vars.immediateRender == true);
+            this.data = this.vars.data;
+            this._reversed = (this.vars.reversed == true);
 
+            if (!_rootTimeline) {
+                return;
+            }
+            if (!_gsInit) {
+                _ticker.tick(); //the first time an animation (tween or timeline) is created, we should refresh the time in order to avoid a gap. The Ticker's initial time that it records might be very early in the load process and the user may have loaded several other large scripts in the mean time, but we want tweens to act as though they started when the page's onload was fired. Also remember that the requestAnimationFrame likely won't be called until the first screen redraw.
+                _gsInit = true;
+            }
+              //时间线
+            var tl = this.vars.useFrames ? _rootFramesTimeline : _rootTimeline;
+            tl.insert(this, tl._time);
+
+            if (this.vars.paused) {
+                this.paused(true);
+            }
+        }
+    }),
+    _ticker = Animation.ticker = new Ticker();
 
 });
