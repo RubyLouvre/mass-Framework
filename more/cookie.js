@@ -3,7 +3,7 @@ define(  ["$lang"], function(){
     var encode = encodeURIComponent;
     var decode = decodeURIComponent;
 
-    // serialize('foo', 'bar', { httpOnly: true })  => "foo=bar; httpOnly"
+    // Cookie.stringify('foo', 'bar', { httpOnly: true })  => "foo=bar; httpOnly"
     //将两个字符串变成一个cookie字段
     var Cookie = {
         stringify:  function(name, val, opts){
