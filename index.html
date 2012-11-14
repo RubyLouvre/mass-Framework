@@ -1,30 +1,18 @@
 <!doctype html>
 <html>
     <head>
-        <title>如何区分属性与特性 by  司徒正美</title>
+        <title>greensock </title>
 　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <style>
-            div{
-                border:1px solid green;
-                width:200px;
-                height:100px;
-                background:lime;
-            }
-        </style>
-        <script src="mass.js"></script>
+
+        <script src="greensock/TweenMax.js"></script>
 
 　　    <script>
 
      
-            if($.require){
-                //  document.expando = false;
-                $.require("ready,fx",function(){
-               
-                })
-            }else{
-     
-             
-            }
+          window.onload = function(){
+              var r = document.getElementById("rusty");
+              TweenMax.to(r, 3, {width:"-=250",ease:Elastic.easeOut, onComplete:function(){console.log("done")}})
+          }
      
 
         </script>
@@ -32,10 +20,7 @@
 　　  </head>
 　　  <body>
 
-        <button value="正确的值"  id="bb" tabindex="iii" tabIndex="iiie">
-            <span style="color:red;">错误的值</span>
-        </button>
-
+        <img src="img.jpg" id="rusty" />
 
 　　  </body>
 
