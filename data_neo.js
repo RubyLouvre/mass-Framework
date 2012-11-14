@@ -43,7 +43,7 @@ define("data", ["$lang"], function(){
             if (  !table ) {
                 return;
             }
-            var  clear = 1, ret = typeof name == "string",  cache = table;
+            var ret = typeof name == "string",  cache = table;
             if ( table && ret ) {
                 if(!pvt){
                     table = table.data
@@ -52,20 +52,8 @@ define("data", ["$lang"], function(){
                     ret = table[ name ];
                     delete table[ name ];
                 }
-                    loop:
-                    for(var key in cache){
-                        if(key == "data"){
-                            for(var i in cache.data){
-                                clear = 0;
-                                break loop;
-                            }
-                        }else{
-                            clear = 0;
-                            break loop;
-                        }
-                    }
             }
-            if(clear){
+            if( JSON.stringify(cache) == '{"data":{}}'){
                 $["@data"]["delete"](target);
             }
             return ret;
@@ -125,7 +113,7 @@ define("data", ["$lang"], function(){
     });
 });
 
-/**
+    /**
 2011.9.27 uniqueID改为uniqueNumber 简化data与removeData
 2011.9.28 添加$._data处理内部数据
 2011.10.21 强化mergeData，可以拷贝事件
@@ -135,5 +123,6 @@ define("data", ["$lang"], function(){
 2012.5.21 抽象出validate私有方法
 2012.9.29 对parseData的数据进行严格的验证后才转换
 2012.11.7 添加这实验性质的模块
-*/
+2012.11.14 使用JSON.stringify代替双层循环检测缓存体是否为空
+     */
 
