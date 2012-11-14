@@ -14,22 +14,22 @@ define("data", ["$lang"], function(){
                 }
                 $["@data"].set(table)
             }
-            var one = typeof name === "string", cache = table;//dataset
-            //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
-            //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+            var getOne = typeof name === "string", cache = table;//dataset
             //私有数据都是直接放到table中，普通数据放到table.data中
             if ( !pvt ) {
                 table = table.data;
             }
             if ( name && typeof name == "object" ) {
                 $.mix( table, name );//写入一组方法
-            }else if(one && data !== void 0){
+            }else if(getOne && data !== void 0){
                 table[ name ] = data;//写入单个方法
             }
-            if(one){
+            if(getOne){
                 if(name in table){
                     return table[name]
                 }else if(isEl && !pvt){
+                    //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                    //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
                     return $.parseData( target, name, cache );
                 }
             }else{
