@@ -36,6 +36,7 @@
         this.def = def;
         var _dep = dep || [],
         _classes = [];
+        //检测依赖列表中有没有包含它需要的父类
         this.check = function(init) {
             var i = _dep.length, cnt = 0, cur;
             while (--i > -1) {
@@ -90,7 +91,7 @@
 
     /*
  * ----------------------------------------------------------------
- *缓动类
+ *缓动类（纯数学游戏，跳过）
  * ----------------------------------------------------------------
  */
     var _baseParams = [0, 0, 1, 1],
@@ -212,6 +213,9 @@
  * Ticker
  * ----------------------------------------------------------------
  */
+   //检测是否支持HTML5的requestAnimationFrame，不过这里的判定不太好
+   //requestAnimationFrame与cancelAnimationFrame不是同时期发明的，需要这两个API都存在，才判定其可用
+
     var _reqAnimFrame = window.requestAnimationFrame,
     _cancelAnimFrame = window.cancelAnimationFrame,
     _getTime = Date.now || function() {
@@ -230,7 +234,7 @@
             window.clearTimeout(id);
         }
     }
-
+//================================
     _class("Ticker", function(fps, useRAF) {
         this.time = 0;
         this.frame = 0;
@@ -239,8 +243,9 @@
         _useRAF = (useRAF !== false),
         _fps, _req, _id, _gap, _nextTime;
         //这里定义了三个特权方法，不用原型方法，就可以节省上溯原型链的时间，并且可以隐藏许多内部变量
+        //这个实现心跳
         this.tick = function() {
-            _self.time = (_getTime() - _startTime) / 1000;//换算为秒
+            _self.time = (_getTime() - _startTime) / 1000;//每次都设置_self.time,换算为秒
             if (!_fps || _self.time >= _nextTime) {//指定好一次渲染的时间，如果超过它帧数递增
                 _self.frame++;
                 _nextTime = _self.time + _gap - (_self.time - _nextTime) - 0.0005;
@@ -251,7 +256,7 @@
             }
             _id = _req( _self.tick );//继续下一次心跳
         };
-
+        //这个用于实现补间动画
         this.fps = function(value) {
             if (!arguments.length) {
                 return _fps;
@@ -303,7 +308,7 @@
             _ticker.tick(); //the first time an animation (tween or timeline) is created, we should refresh the time in order to avoid a gap. The Ticker's initial time that it records might be very early in the load process and the user may have loaded several other large scripts in the mean time, but we want tweens to act as though they started when the page's onload was fired. Also remember that the requestAnimationFrame likely won't be called until the first screen redraw.
             _gsInit = true;
         }
-
+       //补间动画必须运行于时间轴，存在两种时间轴，基于浏览器控制的与人为的
         var tl = this.vars.useFrames ? _rootFramesTimeline : _rootTimeline;
         tl.insert(this, tl._time);
 
@@ -319,7 +324,7 @@
     p._rawPrevTime = -1;
     p._next = p._last = p._onUpdate = p._timeline = p.timeline = null;
     p._paused = false;
-
+    //play, pause, resume, restart其实都是一个中介，里面操作seek， reversed， paused
     p.play = function(from, suppressEvents) {
         if (arguments.length) {
             this.seek(from, suppressEvents);
@@ -359,7 +364,7 @@
         this.reversed(true);
         return this.paused(false);
     };
-
+//这个用于重写
     p.render = function() {
 
     };
@@ -549,7 +554,7 @@
         return this;
     };
 
-    p.paused = function(value) {
+    p.paused = function(value) {//value 为false, true
         if (!arguments.length) {
             return this._paused;
         }
@@ -701,7 +706,8 @@
                     continue;
                 }
                 this._siblings[i] = _register(targ, this, false);
-                if (this._overwrite === 1) if (this._siblings[i].length > 1) {
+                if (this._overwrite === 1) 
+                    if (this._siblings[i].length > 1) {
                     _applyOverwrite(targ, this, null, 1, this._siblings[i]);
                 }
             }

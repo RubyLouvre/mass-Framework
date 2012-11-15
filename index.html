@@ -3,23 +3,24 @@
     <head>
         <title>greensock </title>
 　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-        <script src="greensock/TweenMax.js"></script>
+        <script src="jquery1.82.js"></script>
+        <script src="greensock/TweenLite.js"></script>
 
 　　    <script>
 
      
-          window.onload = function(){
-              var r = document.getElementById("rusty");
-              TweenMax.to(r, 3, {width:"-=250",ease:Elastic.easeOut, onComplete:function(){console.log("done")}})
-          }
+              window.onload = function(){
+                  var r = document.getElementById("rusty");
+              
+                  //  TweenMax.to(r, 3, {width:"-=250",ease:Elastic.easeOut, onComplete:function(){console.log("done")}})
+              }
      
 
         </script>
 
 　　  </head>
 　　  <body>
-
+        <br/><br/><br/><br/>
         <img src="img.jpg" id="rusty" />
 
 　　  </body>

@@ -417,7 +417,71 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             return el.type === "hidden" || $.css( el, "display") === "none" ;
         }
     }
+    var rgetIETransform = /(M11|M12|M21|M22)=[\d\-\.e]+/gi
+    var	rsetIETransform = /progid\:DXImageTransform\.Microsoft\.Matrix\(.+?\)/i
+    var cssTransform = $.cssName("transform")
+    $._getTransform = function(t,  rec) {
+        var tm = t._gsTransform, s;
+        if (cssTransform) {
+            s =  getter(t, cssTransform)
+        } else if (t.currentStyle) {
+            //for older versions of IE, we need to interpret the filter portion that is in the format: progid:DXImageTransform.Microsoft.Matrix(M11=6.123233995736766e-17, M12=-1, M21=1, M22=6.123233995736766e-17, sizingMethod='auto expand') Notice that we need to swap b and c compared to a normal matrix.
+            s = t.currentStyle.filter.match(rgetIETransform);
+            s = (s && s.length === 4) ? s[0].substr(4) + "," + Number(s[2].substr(4)) + "," + Number(s[1].substr(4)) + "," + s[3].substr(4) + "," + (tm ? tm.x : 0) + "," + (tm ? tm.y : 0) : null;
+        }
+        var v = (s || "").replace(/[^\d\-\.e,]/g, "").split(","), 
+        k = (v.length >= 6),
+        a = k ? Number(v[0]) : 1,
+        b = k ? Number(v[1]) : 0,
+        c = k ? Number(v[2]) : 0,
+        d = k ? Number(v[3]) : 1,
+        min = 0.000001,
+        m = rec ? tm || {
+            skewY:0
+        } : {
+            skewY:0
+        },
+        invX = (m.scaleX < 0); //in order to interpret things properly,
+        // we need to know if the user applied a negative scaleX previously so that 
+        // we can adjust the rotation and skewX accordingly. 
+        // Otherwise, if we always interpret a flipped matrix as affecting scaleY and 
+        // the user only wants to tween the scaleX on multiple sequential tweens, 
+        // it would keep the negative scaleY without that being the user's intent.
 
+        m.x = (k ? Number(v[4]) : 0);
+        m.y = (k ? Number(v[5]) : 0);
+        m.scaleX = Math.sqrt(a * a + b * b);
+        m.scaleY = Math.sqrt(d * d + c * c);
+        m.rotation = (a || b) ? Math.atan2(b, a) : m.rotation || 0; 
+        //note: if scaleX is 0, we cannot accurately measure rotation. Same for skewX with a scaleY of 0. 
+        //Therefore, we default to the previously recorded value (or zero if that doesn't exist).
+        m.skewX = (c || d) ? Math.atan2(c, d) + m.rotation : m.skewX || 0;
+        if (Math.abs(m.skewX) > Math.PI / 2 && Math.abs(m.skewX) < Math.PI * 1.5) {
+            if (invX) {
+                m.scaleX *= -1;
+                m.skewX += (m.rotation <= 0) ? Math.PI : -Math.PI;
+                m.rotation += (m.rotation <= 0) ? Math.PI : -Math.PI;
+            } else {
+                m.scaleY *= -1;
+                m.skewX += (m.skewX <= 0) ? Math.PI : -Math.PI;
+            }
+        }
+        //some browsers have a hard time with very small values like 2.4492935982947064e-16 
+        //(notice the "e-" towards the end) and would render the object slightly off. 
+        //So we round to 0 in these cases. The conditional logic here is faster than calling Math.abs().
+        if (m.rotation < min) if (m.rotation > -min) if (a || b) {
+            m.rotation = 0;
+        }
+        if (m.skewX < min) if (m.skewX > -min) if (b || c) {
+            m.skewX = 0;
+        }
+        if (rec) {
+            t._gsTransform = m; //record to the object's _gsTransform which we use so that tweens 
+            //can control individual properties independently (we need all the properties to 
+            //accurately recompose the matrix in the setRatio() method)
+        }
+        return m;
+    }
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
