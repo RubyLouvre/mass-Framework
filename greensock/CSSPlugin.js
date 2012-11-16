@@ -399,14 +399,14 @@
                 copy = s.cssText;
                 start = _getStyles(target, cs);
                 s.cssText = copy + ";" + value;
-                v = _cssDif(start, _getStyles(target));
+                v = _cssDif(start, _getStyles(target));//比较前后的变化
                 if (!_supportsOpacity && _opacityValExp.test(value)) {
                     v.opacity = parseFloat( RegExp.$1 );
                 }
-                value = v;
-                s.cssText = copy;
-            } else if (value.className) {
-                copy = target.className;
+                value = v;//得到最终变化的属性组合
+                s.cssText = copy;//还原
+            } else if (value.className) {//最后这个我不打算支持
+                copy = target.className;//如果传入的一个类名，
                 this._classData = {
                     b:copy, 
                     e:(value.className.charAt(1) !== "=") ? value.className : (value.className.charAt(0) === "+") ? target.className + " " + value.className.substr(2) : target.className.split(value.className.substr(2)).join(""), 
