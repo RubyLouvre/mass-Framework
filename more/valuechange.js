@@ -39,7 +39,7 @@ define("valuechange", ["$event"], function(){
     }
     
     function listen(elem) {
-        unlisten(elem);//keydown keyup是对付键盘输入 mousedown是对象粘贴 focus是对付触摸
+        unlisten(elem);//keydown keyup是对付键盘输入 mousedown是对付粘贴 focus是对付触摸
         "keydown keyup mousedown focus".replace($.rword, function(name){
             $(elem).bind(name+"._valuechange", startTest)
         })
@@ -70,3 +70,12 @@ define("valuechange", ["$event"], function(){
         }
     }
 })
+/*
+ *IE 6-9。然后
+input ok        Firefox Chrome Safari(菜单模式)
+input fail      Safari(自动模式) Opera(非第一次)
+change ok       Firefox Chrome Opera Safari(菜单模式)
+change fail     Safari(自动模式)
+
+>检查自动完成对 input 和 change 的影响，并考虑修复。
+ **/
