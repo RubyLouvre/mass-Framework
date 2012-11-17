@@ -8,8 +8,8 @@ define("data", ["$lang"], function(){
         if( $.acceptData(target) ){
             var id = $.getUid(target), isEl = target.nodeType === 1,
             getOne = typeof name === "string",//取得单个属性
-            database = isEl ? $["@data"]: target,
-            table = database[ "@data_"+id ] || (database[ "@data_"+id ] = {
+            database =  $["@data"],
+            table = database[ id] || (database[ id ] = {
                 data:{}
             });
             var cache = table;
@@ -42,8 +42,8 @@ define("data", ["$lang"], function(){
                 return;
             }
             var clear = 1, ret = typeof name == "string",
-            database = target.nodeType === 1  ? $["@data"] : target,
-            table = database["@data_"+id],
+            database =  $["@data"],
+            table = database[ id ],
             cache = table;
             if ( table && ret ) {
                 if(!pvt){
@@ -68,9 +68,9 @@ define("data", ["$lang"], function(){
             }
             if(clear){
                 try{
-                    delete database["@data_"+id];
+                    delete database[id];
                 }catch(e){
-                    database["@data_"+id] = void 0;
+                    database[id] = void 0;
                 }
             }
             return ret;
