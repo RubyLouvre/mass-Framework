@@ -3,7 +3,7 @@
 //==================================================
 define("data", ["$lang"], function(){
     $.log("已加载data模块",7);
-    var remitter = /object|function/, rtype = /[^38]/;
+    var remitter = /object|function/
     function innerData( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
         if( $.acceptData(target) ){
             var isEl = target.nodeType === 1;
@@ -63,7 +63,7 @@ define("data", ["$lang"], function(){
     $.mix( {
         "@data": new WeakMap(),//FF6+
         acceptData: function( target ) {
-            return target && remitter.test(typeof target) && rtype.test(target.nodeType)
+            return target && remitter.test(typeof target) 
         },
         data: function( target, name, data ) {  // 读写数据
             return innerData(target, name, data)
