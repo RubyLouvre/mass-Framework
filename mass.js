@@ -174,13 +174,13 @@
             }
             return str
         },
-        //用于建立一个从元素到数据的引用，用于数据缓存，事件绑定，元素去重
-        getUid: global.getComputedStyle ? function( obj ){
+        //主要用于建立一个从元素到数据的引用，具体用于数据缓存，事件绑定，元素去重
+        getUid: global.getComputedStyle ? function( obj ){//IE9+,标准浏览器
             return obj.uniqueNumber || ( obj.uniqueNumber = NsVal.uuid++ );
         }: function( obj ){
-            if(obj.nodeType !== 1){
+            if(obj.nodeType !== 1){//如果是普通对象，文档对象，window对象
                 return obj.uniqueNumber || ( obj.uniqueNumber = NsVal.uuid++ );
-            }
+            }//注：旧式IE的XML元素不能通过el.xxx = yyy 设置自定义属性
             var uid = obj.getAttribute("uniqueNumber");
             if ( !uid ){
                 uid = NsVal.uuid++;
