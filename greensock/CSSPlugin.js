@@ -399,7 +399,7 @@
                 copy = s.cssText;
                 start = _getStyles(target, cs);
                 s.cssText = copy + ";" + value;
-                v = _cssDif(start, _getStyles(target));//比较前后的变化
+                v = _cssDif(start, _getStyles(target));//比较前后的变化，得出那些样式已变化，将它的最终值与名字保存到一个对象返回
                 if (!_supportsOpacity && _opacityValExp.test(value)) {
                     v.opacity = parseFloat( RegExp.$1 );
                 }

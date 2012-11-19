@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:html5="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            html5\:section {
+                display: block;
+                padding: .5em;
+                border-left: 3px solid #ddd;
+                color: #999;
+            }
+        </style>
+        <script src="seed.js">
+            
+        </script>
+        <script>
+            window.onload = function(){
+                require("/test1.js", function(obj){
+                      alert(obj.nick)
+                })
+            }
+
+        </script>
+    </head>
+    <body>
+    <html5:section id="aa">aaa<b>bbb</b>ccc</html5:section>
+
+</body>
+</html>
