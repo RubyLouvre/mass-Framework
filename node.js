@@ -306,7 +306,6 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             wrap = translations[ tag ] || translations._default,
             fragment = doc.createDocumentFragment(),
             wrapper = doc.createElement("div"), firstChild;
-            html = wrap[3] ? wrap[3](html) : html
             wrapper.innerHTML = wrap[1] + html + wrap[2];
             var els = wrapper[ TAGS ]("script");
             if( els.length ){//使用innerHTML生成的script节点不会发出请求与执行text属性
@@ -359,31 +358,18 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
     });
     //parseHTML的辅助变量
     var translations  = {
-        option: [ 1, "<select multiple='multiple'>", "</select>" ],
+        area: [ 1, "<map>", "</map>" ],
+        param: [ 1, "<object>", "</object>" ],
+        col: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
         legend: [ 1, "<fieldset>", "</fieldset>" ],
+        option: [ 1, "<select multiple='multiple'>", "</select>" ],
         thead: [ 1, "<table>", "</table>" ],
         tr: [ 2, "<table><tbody>", "</tbody></table>" ],
         td: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
-        col: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
-        area: [ 1, "<map>", "</map>" ],
-        _default: [ 0, "", "" ]
+        //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
+        _default: support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "</div>" ]
     };
 
-    if(!support.createAll ){//IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
-        translations._default = [ 1, "X<div>", "</div>" ]
-        translations.param = [ 1, "X<object>", "</object>" ,function ( elem ) {
-            return elem.replace(/<param([^>]*)>/gi, function( m, s1, offset ) {
-                var name = s1.match( /name=["']([^"']*)["']/i );
-                return name ? ( name[1].length ?
-                    // It has a name attr with a value
-                    "<param" + s1 + ">" :
-                    // It has name attr without a value
-                    "<param" + s1.replace( name[0], "name='_" + offset +  "'" ) + ">" ) :
-                // No name attr
-                "<param name='_" + offset +  "' " + s1 + ">";
-            });
-        }]
-    }
     translations.optgroup = translations.option;
     translations.tbody = translations.tfoot = translations.colgroup = translations.caption = translations.thead;
     translations.th = translations.td;
