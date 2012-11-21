@@ -217,7 +217,7 @@
                             var prevValue = prev[ c ];
                             var currValue = curr[ c ];
                             if( prevValue && prev !== curr ){
-                                throw c + "不能重命名"
+                                throw new Error(c + "不能重命名")
                             }
                             prev[ c ] = currValue;
                         }
@@ -256,17 +256,8 @@
         this.id = id;
         this.exports = {};
         this.parent = parent;
-        var m = Module._load[parent]
-        m && m.children.push(this);
-        this.children = [];
     }
-    Module._load = function( url, parent) {
-        url = Module._resolve( url, parent.id )[0];
-        var module = Module._cache[ url ];
-        if (module) {
-            return module.exports;
-        }
-    };
+
     Module._update = function(id, parent, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
@@ -278,15 +269,7 @@
         module.deps = deps || module.deps || {};
         module.args = args || module.args || [];
     }
-    Module.prototype.require = function(a){
-        var self = this;
-        if(typeof a == "string"){
-            return Module._load(path, self)
-        }
-        return function(path){
-            return Module._load(path, self)
-        }
-    }
+
     Module._resolve = function(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
@@ -328,9 +311,7 @@
 
     var modules = $.modules = Module._cache = {};
     Module._update( "ready" );
-    var rrequire = /[^.]\s*require\s*\(\s*["']([^'"\s]+)["']\s*\)/g;
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
-    var rparams =  /[^\(]*\(([^\)]*)\)[\d\D]*/;//用于取得函数的参数列表
     $.mix({
         //绑定事件(简化版)
         bind: W3C ? function( el, type, fn, phase ){
@@ -384,6 +365,9 @@
         },
         //定义模块
         define: function( parent, deps ){//模块名,依赖列表,模块本身
+            if($._checkCircle(modules[parent].deps, parent)){
+                throw new Error( parent +"模块与之前的某些模块存在循环依赖")
+            }
             var args = arguments;
             if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
                 if( deps ){
@@ -395,12 +379,7 @@
                 [].splice.call( args, 1, 0, [] );
             }
             if(typeof args[2] == "function"){
-                var factroy = args[2].toString()
-                .replace(rcomment,"")
-                .replace(rrequire,function(a,b){
-                    args[1].push(b);//将模块工厂中以node.js方式加载的模块也加载进来
-                    return a;
-                });
+                var factroy = args[2].toString().replace(rcomment,"")
                 if(this.exports && this.id && $.config.storage && !Storage.getItem( this.id) ){
                     Storage.setItem( this.id, factroy);
                     Storage.setItem( this.id+"_deps", args[1]+"");
@@ -413,13 +392,22 @@
                     return ret
                 }
             }
+
             $.require( args[1], args[2], parent ); //0,1,2 --> 1,2,0
         },
+        //检测死链
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
             if( error || !modules[ id ].state ){
-                $.log( (error || modules[ id ].state )+"   "+id, 3);
-                this.log("Failed to load [[ "+id+" ]]"+modules[ id ].state);
+                throw new Error("Failed to load [[ "+id+" ]]"+modules[ id ].state);
+            }
+        },
+        //检测是否存在循环依赖
+        _checkCircle : function( deps, nick ){
+            for(var id in deps){
+                if( deps[id] == "司徒正美" &&( id == nick || $._checkCircle(modules[id].deps, nick))){
+                    return true;
+                }
             }
         },
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
@@ -446,6 +434,7 @@
             }else{
                 var old = Storage.getItem( id+"_version" );
                 if(old && (!v || v > Number(old)) ){
+                    ""
                     Storage.removeItem( id );
                     Storage.removeItem( id+"_deps" )
                     Storage.removeItem( id+"_parent" )
@@ -512,8 +501,7 @@
             Module._update( id, parent );
             var module = $.modules[ id ];
             module.state =  module.state || 1;
-            var fn = Function( "$,module,exports,require,define","return "+ factory )
-            ($, module, module.exports, module.require());
+            var fn = Function( "$","return "+ factory )($);
             $.define( id, deps, fn );
         }
     }
@@ -568,9 +556,8 @@
         module.state = 1
         var last = args.length - 1;
         if( typeof args[ last ] == "function"){
-            //劫持模块工厂,将$, exports, require, module等对象强塞进去
-            args[ last ] =  parent.Function( "$,module,exports,require","return "+ args[ last ] )
-            (Ns, module, module.exports, module.require());//使用curry方法劫持模块自身到require方法里面
+            //劫持模块工厂,将$强塞进去
+            args[ last ] =  parent.Function( "$","return "+ args[ last ] ) (Ns);
         }
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
@@ -581,20 +568,7 @@
             array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
         }
         var module = Object( modules[id] ), ret;
-        var common = {
-            exports: module.exports,
-            require: typeof module.require == "function" ? module.require() : $.noop,
-            module:  module
-        }
-        var match = callback.toString().replace(rparams,"$1").replace(rcomment,"").match($.rword)||[]
-        var a = common[match[0]];
-        var b = common[match[1]];
-        var c = common[match[2]];
-        if( a && b && a != b && b != c  ){//exports, require, module的位置随便
-            ret =  callback.apply(global, [a, b, c]);
-        }else{
-            ret =  callback.apply(global, array);
-        }
+        ret =  callback.apply(global, array);
         module.state = 2;
         if( ret !== void 0 ){
             modules[ id ].exports = ret
@@ -634,44 +608,7 @@
         if( HTML.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
-    var rdebug =  /^(init|constructor|lang|query)$|^is|^[A-Z]/;
-    function debug(obj, name, module, p){
-        var fn = obj[name];
-        if( obj.hasOwnProperty(name) && typeof fn == "function" && !fn["@debug"]){
-            if( rdebug.test( name )){
-                fn["@debug"] = name;
-            }else{
-                var method = obj[name] = function(){
-                    try{
-                        return  method["@debug"].apply(this,arguments)
-                    }catch(e){
-                        $.log( module+"'s "+(p? "$.fn." :"$.")+name+" method error "+e);
-                        throw e;
-                    }
-                }
-                for(var i in fn){
-                    method[i] = fn[i];
-                }
-                method["@debug"] = fn;
-                method.toString = function(){
-                    return fn.toString()
-                }
-                method.valueOf = function(){
-                    return fn.valueOf();
-                }
-            }
-        }
-    }
-    $.debug = function(name){
-        if(!$.config.debug )
-            return
-        for( var i in $){
-            debug($, i, name);
-        }
-        for( i in $.prototype){
-            debug($.prototype, i, name,1);
-        }
-    }
+
     global.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
         "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
         DOC.createElement(tag);
@@ -752,6 +689,7 @@ dom.namespace改为dom["mass"]
 2012.8.27 将$.log.level改到$.config.level中去
 2012.8.28 将最后一行的this改成self
 2012.9.12 添加本地储存的支持
+2012.11.21 升级到v18 去掉CMD支持与$.debug的实现,增加循环依赖的判定
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
