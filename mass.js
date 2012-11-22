@@ -365,7 +365,7 @@
         },
         //定义模块
         define: function( parent, deps ){//模块名,依赖列表,模块本身
-            if($._checkCircle(modules[parent].deps, parent)){
+            if($._checkCycle(modules[parent].deps, parent)){
                 throw new Error( parent +"模块与之前的某些模块存在循环依赖")
             }
             var args = arguments;
@@ -403,9 +403,9 @@
             }
         },
         //检测是否存在循环依赖
-        _checkCircle : function( deps, nick ){
+        _checkCycle : function( deps, nick ){
             for(var id in deps){
-                if( deps[id] == "司徒正美" &&( id == nick || $._checkCircle(modules[id].deps, nick))){
+                if( deps[id] == "司徒正美" &&( id == nick || $._checkCycle(modules[id].deps, nick))){
                     return true;
                 }
             }
