@@ -13,10 +13,33 @@
                 console.log("xxxxxxxxxx")
             })
         </script>
+
+        <style>
+
+            #aaa {
+                background:red;
+                width:200px;
+                height:200px;
+                /*   display:none;*/
+            }
+
+        </style>
+        <script>
+            window.onload = function(){
+                var el = document.getElementById("aaa")
+                setTimeout(function(){
+                    el.style.setProperty("display","", "important")
+                  //  el.hidden = false;
+                    console.log( el.hidden)
+                },1000)
+            }
+        </script>
     </head>
     <body>
-        
-
-      
+        <span id="aaa" hidden="true"  >
+            ffff
+        </span>
+        <p>dddddd</p>
     </body>
 </html>
+

@@ -257,7 +257,6 @@
         this.exports = {};
         this.parent = parent;
     }
-
     Module._update = function(id, parent, factory, state, deps, args){
         var module =  Module._cache[id]
         if( !module){
@@ -269,7 +268,6 @@
         module.deps = deps || module.deps || {};
         module.args = args || module.args || [];
     }
-
     Module._resolve = function(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
@@ -392,7 +390,6 @@
                     return ret
                 }
             }
-
             $.require( args[1], args[2], parent ); //0,1,2 --> 1,2,0
         },
         //检测死链
@@ -428,13 +425,13 @@
                 }
             }
         },
+        //移除指定或所有本地储存中的模块
         erase : function( id, v ){
             if(id == void 0){
                 Storage.clear();
             }else{
                 var old = Storage.getItem( id+"_version" );
                 if(old && (!v || v > Number(old)) ){
-                    ""
                     Storage.removeItem( id );
                     Storage.removeItem( id+"_deps" )
                     Storage.removeItem( id+"_parent" )
@@ -443,6 +440,7 @@
             }
         }
     });
+    //===============================================================
     var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
         Storage = localStorage;
@@ -492,34 +490,9 @@
             }
         }catch(e){}
     }
-    function loadStorage( id ){
-        var factory =  Storage.getItem( id);
-        if(factory && !modules[id]){
-            var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps");
-            deps = deps ?  deps.match( $.rword ) : "";
-            Module._update( id, parent );
-            var module = $.modules[ id ];
-            module.state =  module.state || 1;
-            var fn = Function( "$","return "+ factory )($);
-            $.define( id, deps, fn );
-        }
-    }
 
-    function loadCSS(url){
-        var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var link =  DOC.createElement('link');
-        link.charset = "utf-8"
-        link.rel = 'stylesheet'
-        link.href = url;
-        link.type="text/css"
-        link.id = id
-        HEAD.insertBefore( link, HEAD.firstChild );
-    }
 
-    var loadJS = function( url, parent ){
+    function loadJS( url, parent ){
         Module._update( url, parent );
         var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
         codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.config.nick,
@@ -546,7 +519,32 @@
             iframe = null;
         });
     }
-    var innerDefine = function(  ){
+    function loadStorage( id ){
+        var factory =  Storage.getItem( id);
+        if(factory && !modules[id]){
+            var parent = Storage.getItem(id+"_parent");
+            var deps = Storage.getItem(id+"_deps");
+            deps = deps ?  deps.match( $.rword ) : "";
+            Module._update( id, parent );
+            var module = $.modules[ id ];
+            module.state =  module.state || 1;
+            var fn = Function( "$","return "+ factory )($);
+            $.define( id, deps, fn );
+        }
+    }
+    function loadCSS(url){
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var link =  DOC.createElement('link');
+        link.charset = "utf-8"
+        link.rel = 'stylesheet'
+        link.href = url;
+        link.type="text/css"
+        link.id = id
+        HEAD.insertBefore( link, HEAD.firstChild );
+    }
+    var innerDefine = function(){
         var args = Array.apply([],arguments);
         if(typeof args[0] == "string"){
             args.shift()
@@ -561,11 +559,10 @@
         }
         Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
     }
-
-    
+    //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
     function install( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
-            array.push( modules[ d ].exports );//从returns对象取得依赖列表中的各模块的返回值
+            array.push( modules[ d ].exports );
         }
         var module = Object( modules[id] ), ret;
         ret =  callback.apply(global, array);
@@ -613,11 +610,7 @@
         "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
         DOC.createElement(tag);
     });
-    for(var i in $){
-        if( !$[i].mass && typeof $[i] == "function"){
-            $[i]["@debug"] = i;
-        }
-    }
+
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind( global, "popstate", function(){
         NsKey = DOC.URL.replace(rmakeid,'');
