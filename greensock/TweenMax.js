@@ -2756,6 +2756,7 @@
 
 		//gets called every time the tween updates, passing the new ratio (typically a value between 0 and 1, but not always (for example, if an Elastic.easeOut is used, the value can jump above 1 mid-tween). It will always start and 0 and end at 1.
 		p.setRatio = function(v) {
+                  
 			var pt = this._firstPT,
 				bz = this._bezier,
 				min = 0.000001, val, i, y;

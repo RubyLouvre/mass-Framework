@@ -883,6 +883,7 @@
 
         //gets called every time the tween updates, passing the new ratio (typically a value between 0 and 1, but not always (for example, if an Elastic.easeOut is used, the value can jump above 1 mid-tween). It will always start and 0 and end at 1.
         p.setRatio = function(v) {
+          
             var pt = this._firstPT, 
             bz = this._bezier,
             min = 0.000001, val, i, y;
@@ -932,7 +933,9 @@
                     } else if (val < min) if (val > -min) {
                         val = 0;
                     }
+           
                     if (!pt.type) {
+
                         pt.t[pt.p] = val + pt.sfx;						
                     } else if (pt.type === 1) { //rgb()
                         pt.t[pt.p] = "rgb(" + (val >> 0) + ", " + ((pt.gs + (v * pt.gc)) >> 0) + ", " + ((pt.bs + (v * pt.bc)) >> 0) + ")";
@@ -945,6 +948,7 @@
                         if (pt.r) {
                             y = (y > 0) ? (y + 0.5) >> 0 : (y - 0.5) >> 0; 
                         }
+                 
                         pt.t[pt.p] = val + pt.sfx + " " + y + pt.ysfx;						
                     } else {
                         if (pt.dup) {
@@ -1060,7 +1064,8 @@
                         }
 
                         //at the end or beginning of the tween, if the matrix is normal (1, 0, 0, 1) and opacity is 100 (or doesn't exist), remove the filter to improve browser performance.
-                        if (v === 0 || v === 1) if (a === 1) if (b === 0) if (c === 0) if (d === 1) if (!clip || m.indexOf("Dx=0, Dy=0") !== -1) if (!_opacityExp.test(filters) || parseFloat(RegExp.$1) === 100) {
+                        if (v === 0 || v === 1) if (a === 1)
+                            if (b === 0) if (c === 0) if (d === 1) if (!clip || m.indexOf("Dx=0, Dy=0") !== -1) if (!_opacityExp.test(filters) || parseFloat(RegExp.$1) === 100) {
                             this._style.removeAttribute("filter");
                         }
                     }

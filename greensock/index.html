@@ -3,19 +3,43 @@
     <head>
         <title>greensock </title>
 　　    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="jquery1.82.js"></script>
-        <script src="greensock/TweenLite.js"></script>
+        <script src="../jquery1.83.js"></script>
+        <script src="TweenMax.js"></script>
+        <script src="EasePack.js"></script>
 
 　　    <script>
 
 
-              window.onload = function(){
-                  var r = document.getElementById("rusty");
+          window.onload = function(){
+              var r = document.getElementById("rusty");
 
-                  TweenMax.to(r, 3, {width:"-=250",ease:Elastic.easeOut, onComplete:function(){console.log("done")}})
+              //   TweenMax.to(r, 3, {width:"-=350",height:"-=300",ease:Elastic.easeOut, onComplete:function(){console.log("done")}})
+             
+              function Queue(){   }
+              Queue.prototype = {
+                  add: function(el){
+                      if( this._last ){
+                          this._last =  this._last._next = {
+                              el: el,
+                              _next: null
+                          }
+                      }else{
+                          this._last = this._first = {
+                              el: el,
+                              _next: null
+                          }
+                      }
+                      return this;
+                  }
               }
-
-
+              var q = new Queue
+              q.add("1").add("2").add("3")
+              var pt = q._first;
+              while (pt) {
+                  console.log(pt.el)
+                  pt = pt._next;
+              }
+          }
         </script>
 
 　　  </head>

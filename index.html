@@ -9,37 +9,45 @@
           
         </script>
         <script>
-            $.require("ready,lang,css,event", function(){
-                console.log("xxxxxxxxxx")
-            })
+            $.require("ready,node,css", function(){
+                var node = $("#aaa")[0]
+                var a = $._getTransform(node,true);
+                for(var i in a){
+                    console.log(i+" : "+a[i])
+                }
+                a.rotation = 30 * Math.PI / 180
+                console.log(a)
+                 $._setTransform(node)
+
+            });
+
+    
+
         </script>
 
         <style>
 
             #aaa {
+                position: absolute;
+                top:100px;
+                left:100px;
                 background:red;
-                width:200px;
-                height:200px;
-                /*   display:none;*/
+                width:100px;
+                height:100px;
+
             }
 
         </style>
         <script>
-            window.onload = function(){
-                var el = document.getElementById("aaa")
-                setTimeout(function(){
-                    el.style.setProperty("display","", "important")
-                  //  el.hidden = false;
-                    console.log( el.hidden)
-                },1000)
-            }
+          
+           
         </script>
     </head>
     <body>
-        <span id="aaa" hidden="true"  >
-            ffff
-        </span>
-        <p>dddddd</p>
+        <div id="aaa"  >
+
+        </div>
+
     </body>
 </html>
 

@@ -212,7 +212,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);
-    function parseDisplay( nodeName ) {
+    $.parseDisplay = function ( nodeName ) {
         nodeName = nodeName.toLowerCase();
         if ( !cacheDisplay[ nodeName ] ) {
             $.callSandbox(document.body, function(doc){
@@ -418,16 +418,30 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
     }
     var rgetIETransform = /(M11|M12|M21|M22)=[\d\-\.e]+/gi
-    var	rsetIETransform = /progid\:DXImageTransform\.Microsoft\.Matrix\(.+?\)/i
-    var cssTransform = $.cssName("transform")
-    $._getTransform = function(t,  rec) {
-        var tm = t._gsTransform, s;
+   
+    var cssTransform = $.cssName("transform"),
+    _DEG2RAD = Math.PI / 180,
+    _RAD2DEG = 180 / Math.PI,		
+    _NaNExp = /[^\d\-\.]/g,
+    _parseAngle = function(v, d) {
+        var m = (v.indexOf("rad") === -1) ? _DEG2RAD : 1,
+        r = (v.indexOf("=") === 1);
+        v = Number(v.replace(_NaNExp, "")) * m;
+        return r ? v + d : v;
+    }
+    $._getTransform = function(node,  record) {
+        var tm = $._data(node,"transform"), s;
         if (cssTransform) {
-            s =  getter(t, cssTransform)
-        } else if (t.currentStyle) {
-            //for older versions of IE, we need to interpret the filter portion that is in the format: progid:DXImageTransform.Microsoft.Matrix(M11=6.123233995736766e-17, M12=-1, M21=1, M22=6.123233995736766e-17, sizingMethod='auto expand') Notice that we need to swap b and c compared to a normal matrix.
-            s = t.currentStyle.filter.match(rgetIETransform);
-            s = (s && s.length === 4) ? s[0].substr(4) + "," + Number(s[2].substr(4)) + "," + Number(s[1].substr(4)) + "," + s[3].substr(4) + "," + (tm ? tm.x : 0) + "," + (tm ? tm.y : 0) : null;
+            s =  getter(node, cssTransform);//这里可能返回none
+
+        } else if (node.currentStyle) {
+            //for older versions of IE, we need to interpret the filter portion that is
+            // in the format: progid:DXImageTransform.Microsoft.Matrix(M11=6.123233995736766e-17, M12=-1, M21=1,
+            // M22=6.123233995736766e-17, sizingMethod='auto expand')
+            // Notice that we need to swap b and c compared to a normal matrix.
+            s = node.currentStyle.filter.match(rgetIETransform);
+            s = (s && s.length === 4) ?
+            s[0].substr(4) + "," + Number(s[2].substr(4)) + "," + Number(s[1].substr(4)) + "," + s[3].substr(4) + "," + (tm ? tm.x : 0) + "," + (tm ? tm.y : 0) : null;
         }
         var v = (s || "").replace(/[^\d\-\.e,]/g, "").split(","), 
         k = (v.length >= 6),
@@ -436,7 +450,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         c = k ? Number(v[2]) : 0,
         d = k ? Number(v[3]) : 1,
         min = 0.000001,
-        m = rec ? tm || {
+        m = record ? tm || {
             skewY:0
         } : {
             skewY:0
@@ -475,18 +489,60 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         if (m.skewX < min) if (m.skewX > -min) if (b || c) {
             m.skewX = 0;
         }
-        if (rec) {
-            t._gsTransform = m; //record to the object's _gsTransform which we use so that tweens 
-            //can control individual properties independently (we need all the properties to 
-            //accurately recompose the matrix in the setRatio() method)
+        if (record) {
+            $._data(node,"transform", m)
+        //record to the object's _gsTransform which we use so that tweens
+        //can control individual properties independently (we need all the properties to
+        //accurately recompose the matrix in the setRatio() method)
         }
         return m;
     }
+
+    $._setTransform = function(node){
+        var pt =  $._data(node,"transform"),  min = 0.000001;
+        // to improve speed and reduce size, reuse the pt variable as an alias to the _transform property
+        // if there is no rotation or skew, browsers render the transform faster
+        // if we just feed it the list of transforms like translate() skewX() scale(),
+        // otherwise defining the matrix() values directly is fastest.
+        if (cssTransform && !pt.rotation && !pt.skewX) {
+            node.style[cssTransform] = ((pt.x || pt.y) ? "translate(" + pt.x + "px," + pt.y + "px) " : "") +
+            ((pt.scaleX !== 1 || pt.scaleY !== 1) ? "scale(" + pt.scaleX + "," + pt.scaleY + ")" : "")
+            || "translate(0px,0px)";
+        //we need to default to translate(0px,0px) to work around a Chrome bug
+        //that rears its ugly head when the transform is set to "".
+        } else {
+            var ang = cssTransform ? pt.rotation : -pt.rotation,
+            skew = cssTransform ? ang - pt.skewX : ang + pt.skewX,
+            a = Math.cos(ang)  * pt.scaleX,
+            b = Math.sin(ang)  * pt.scaleX,
+            c = Math.sin(skew) * -pt.scaleY,
+            d = Math.cos(skew) * pt.scaleY
+            //some browsers have a hard time with very small values like 2.4492935982947064e-16 (notice the "e-" towards the end) and would render the object slightly off. So we round to 0 in these cases. The conditional logic here is faster than calling Math.abs().
+            if (a < min) if (a > -min) {
+                a = 0;
+            }
+            if (b < min) if (b > -min) {
+                b = 0;
+            }
+            if (c < min) if (c > -min) {
+                c = 0;
+            }
+            if (d < min) if (d > -min) {
+                d = 0;
+            }
+            if (cssTransform) {
+                node.style[cssTransform] = "matrix(" + a + "," + b + "," + c + "," + d + "," + pt.x + "," + pt.y + ")";
+            }else{
+                $.__setTransform(node, pt, a,b,c,d)
+            }
+        }
+    }
+  
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
 });
-/**
+    /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 2011.9.20 v2
@@ -519,5 +575,5 @@ http://www.zhangxinxu.com/wordpress/2011/11/css3-font-face%E5%85%BC%E5%AE%B9%E6%
 　　
 　　这里的阴影运用得不错
 　　http://www.soleilneon.com/blog/2010/10/add-css3-border-radius-and-box-shadow-to-your-design/
-*/
+     */
 

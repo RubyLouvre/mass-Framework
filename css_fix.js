@@ -116,8 +116,65 @@ define("css_fix", !!top.getComputedStyle, function(){
         var style = node.currentStyle;
         return style.backgroundPositionX +" "+style.backgroundPositionX
     };
+    var	rsetIETransform = /progid\:DXImageTransform\.Microsoft\.Matrix\(.+?\)/i
+    var _margins = ["marginLeft","marginRight","marginTop","marginBottom"]
+    $.__setTransform = function(node, pt, a, b, c, d){
+        var cs = node.currentStyle,min = b; //just for swapping the variables an inverting them (reused "min" to avoid creating another variable in memory). IE's filter matrix uses a non-standard matrix configuration (angle goes the opposite way, and b and c are reversed and inverted)
+        b = -c;
+        c = -min;
+        var filters = cs.filter;
+        node.style.filter = ""; //remove filters so that we can accurately measure offsetWidth/offsetHeight
+        var w = node.offsetWidth,
+        h = node.offsetHeight,
+        clip = (cs.position !== "absolute"),
+        m = "progid:DXImageTransform.Microsoft.Matrix(M11=" + a + ", M12=" + b + ", M21=" + c + ", M22=" + d,
+        ox = pt.x,
+        oy = pt.y,
+        dx, dy;
+        //if transformOrigin is being used, adjust the offset x and y
+        if (pt.ox != null) {
+            dx = ((pt.oxp) ? w * pt.ox * 0.01 : pt.ox) - w / 2;
+            dy = ((pt.oyp) ? h * pt.oy * 0.01 : pt.oy) - h / 2;
+            ox = dx - (dx * a + dy * b) + pt.x;
+            oy = dy - (dx * c + dy * d) + pt.y;
+        }
 
-   
+        if (!clip) {
+            var mult = !"1"[0] ? 1 : -1, //in Internet Explorer 7 and before, the box model is broken,
+            //causing the browser to treat the width/height of the actual rotated filtered image as the width/height of the box itself,
+            // but Microsoft corrected that in IE8. We must use a negative offset in IE8 on the right/bottom
+            prop, dif;
+            dx = pt.ieOffsetX || 0;
+            dy = pt.ieOffsetY || 0;
+            pt.ieOffsetX = Math.round((w - ((a < 0 ? -a : a) * w + (b < 0 ? -b : b) * h)) / 2 + ox);
+            pt.ieOffsetY = Math.round((h - ((d < 0 ? -d : d) * h + (c < 0 ? -c : c) * w)) / 2 + oy);
+            for (var i = 0; i < 4; i++) {
+                prop = _margins[i];
+                //we need to get the current margin in case it is being tweened separately (we want to respect that tween's changes)
+                var tmp = adapter[ "_default:get" ](node, prop);
+                var val = parseFloat(tmp) || 0
+                if (val !== pt[prop]) {
+                    dif = (i < 2) ? -pt.ieOffsetX : -pt.ieOffsetY; //if another tween is controlling a margin, we cannot only apply the difference in the ieOffsets, so we essentially zero-out the dx and dy here in that case. We record the margin(s) later so that we can keep comparing them, making this code very flexible.
+                } else {
+                    dif = (i < 2) ? dx - pt.ieOffsetX : dy - pt.ieOffsetY;
+                }
+                node.style[prop] = (pt[prop] = Math.round( val - dif * ((i === 0 || i === 2) ? 1 : mult) )) + "px";
+            }
+            m += ", sizingMethod='auto expand')";
+        } else {
+            dx = (w / 2),
+            dy = (h / 2);
+            //translate to ensure that transformations occur around the correct origin (default is center).
+            m += ", Dx=" + (dx - (dx * a + dy * b) + ox) + ", Dy=" + (dy - (dx * c + dy * d) + oy) + ")";
+        }
+
+        if (filters.indexOf("DXImageTransform.Microsoft.Matrix(") !== -1) {
+            node.style.filter = filters.replace(rsetIETransform, m);
+        } else {
+            node.style.filter = m + " " + filters; //we must always put the transform/matrix FIRST (before alpha(opacity=xx))
+           //to avoid an IE bug that slices part of the object when rotation is applied with alpha.
+        }
+    }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里

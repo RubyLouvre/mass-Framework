@@ -213,8 +213,8 @@
  * Ticker
  * ----------------------------------------------------------------
  */
-   //检测是否支持HTML5的requestAnimationFrame，不过这里的判定不太好
-   //requestAnimationFrame与cancelAnimationFrame不是同时期发明的，需要这两个API都存在，才判定其可用
+    //检测是否支持HTML5的requestAnimationFrame，不过这里的判定不太好
+    //requestAnimationFrame与cancelAnimationFrame不是同时期发明的，需要这两个API都存在，才判定其可用
 
     var _reqAnimFrame = window.requestAnimationFrame,
     _cancelAnimFrame = window.cancelAnimationFrame,
@@ -234,7 +234,7 @@
             window.clearTimeout(id);
         }
     }
-//================================
+    //================================
     _class("Ticker", function(fps, useRAF) {
         this.time = 0;
         this.frame = 0;
@@ -245,7 +245,7 @@
         //这里定义了三个特权方法，不用原型方法，就可以节省上溯原型链的时间，并且可以隐藏许多内部变量
         //这个实现心跳
         this.tick = function() {
-            _self.time = (_getTime() - _startTime) / 1000;//每次都设置_self.time,换算为秒
+            _self.time = (_getTime() - _startTime) / 1000;//每次都设置_self.time,并越来越大,换算为秒
             if (!_fps || _self.time >= _nextTime) {//指定好一次渲染的时间，如果超过它帧数递增
                 _self.frame++;
                 _nextTime = _self.time + _gap - (_self.time - _nextTime) - 0.0005;
@@ -297,18 +297,24 @@
         this._duration = this._totalDuration = duration || 0;
         this._delay = Number(this.vars.delay) || 0;
         this._timeScale = 1;
-        this._active = (this.vars.immediateRender == true);
+        this._active = (this.vars.immediateRender == true);//立即渲染
         this.data = this.vars.data;
-        this._reversed = (this.vars.reversed == true);
+        this._reversed = (this.vars.reversed == true);//倒退
 
         if (!_rootTimeline) {
             return;
         }
         if (!_gsInit) {
-            _ticker.tick(); //the first time an animation (tween or timeline) is created, we should refresh the time in order to avoid a gap. The Ticker's initial time that it records might be very early in the load process and the user may have loaded several other large scripts in the mean time, but we want tweens to act as though they started when the page's onload was fired. Also remember that the requestAnimationFrame likely won't be called until the first screen redraw.
+            _ticker.tick(); //the first time an animation (tween or timeline) is created,
+            //we should refresh the time in order to avoid a gap.
+            //The Ticker's initial time that it records might be very early in the load process
+            //and the user may have loaded several other large scripts in the mean time,
+            // but we want tweens to act as though they started when the page's onload was fired.
+            // Also remember that the requestAnimationFrame likely
+            //  won't be called until the first screen redraw.
             _gsInit = true;
         }
-       //补间动画必须运行于时间轴，存在两种时间轴，基于浏览器控制的与人为的
+        //补间动画必须运行于时间轴，存在两种时间轴，基于浏览器控制的与人为的
         var tl = this.vars.useFrames ? _rootFramesTimeline : _rootTimeline;
         tl.insert(this, tl._time);
 
@@ -346,7 +352,7 @@
         }
         return this.paused(false);
     };
-
+    // suppressEvents：如果为true,则播放头到达任何位置都不引起onComplete、onUpdate等事件的触发
     p.seek = function(time, suppressEvents) {
         return this.totalTime(Number(time), (suppressEvents != false));
     };
@@ -364,7 +370,7 @@
         this.reversed(true);
         return this.paused(false);
     };
-//这个用于重写
+    //这个用于重写
     p.render = function() {
 
     };
@@ -375,6 +381,7 @@
 
     p._enabled = function (enabled, ignoreTimeline) {
         this._gc = !enabled;
+        //判定是否正在运行
         this._active = (enabled && !this._paused && this._totalTime > 0 && this._totalTime < this._totalDuration);
         if (ignoreTimeline != true) {
             if (enabled && this.timeline == null) {
@@ -708,8 +715,8 @@
                 this._siblings[i] = _register(targ, this, false);
                 if (this._overwrite === 1) 
                     if (this._siblings[i].length > 1) {
-                    _applyOverwrite(targ, this, null, 1, this._siblings[i]);
-                }
+                        _applyOverwrite(targ, this, null, 1, this._siblings[i]);
+                    }
             }
 
         } else {
@@ -1030,6 +1037,8 @@
     };
 
     p.render = function(time, suppressEvents, force) {
+        window.console && console.log("p.render")
+        console.log([time, suppressEvents, force])
         var prevTime = this._time,
         isComplete, callback, pt;
         if (time >= this._duration) {
@@ -1119,6 +1128,7 @@
         }
 
         pt = this._firstPT;
+        console.log(pt)
         while (pt) {
             if (pt.f) {
                 pt.t[pt.p](pt.c * this.ratio + pt.s);
