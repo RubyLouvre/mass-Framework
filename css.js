@@ -3,7 +3,7 @@
 //=========================================
 define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , function(){
     $.log( "已加载css模块" );
-    var adapter = $.cssAdapter || ($.cssAdapter = {})
+    var adapter = $.cssHooks || ($.cssHooks = {})
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
  
@@ -165,10 +165,10 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         clientProp = "client" + name,
         scrollProp = "scroll" + name,
         offsetProp = "offset" + name;
-        $.cssAdapter[ lower+":get" ] = function( node ){
+        $.cssHooks[ lower+":get" ] = function( node ){
             return getWH( node, name, 0 ) + "px";//添加相应适配器
         }
-        $.cssAdapter[ lower+":set" ] = function( node, name, value ){
+        $.cssHooks[ lower+":set" ] = function( node, name, value ){
             var box = $.css(node, "box-sizing");
             node.style[name] = box == "content-box" ? value:
             setWH(node, name, parseFloat(value), box ) + "px";
@@ -418,9 +418,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             });
         };
     });
-    var pseudoAdapter = window.VBArray && $.query && $.query.pseudoAdapter
-    if(pseudoAdapter){
-        pseudoAdapter.hidden = function( el ) {
+    var pseudoHooks = window.VBArray && $.query && $.query.pseudoHooks
+    if(pseudoHooks){
+        pseudoHooks.hidden = function( el ) {
             return el.type === "hidden" || $.css( el, "display") === "none" ;
         }
     }
@@ -435,7 +435,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
 2011.10.10 重构position offset保持这两者行为一致，
 2011.10.15 Fix $.css BUG  添加transform rotate API
 2011.10.21 修正width height的BUG
-2011.11.10 添加top,left到cssAdapter
+2011.11.10 添加top,left到cssHooks
 2011.11.21 _all2deg,_all2rad,_toMatrixArray,_toMatrixObject放到命名空间之下，方便调用，简化transform逻辑
 2012.3.2 getWH现在能获取多重隐藏元素的高宽了
 2012.4.15 对zIndex进行适配,对$.css进行元素节点检测

@@ -21,12 +21,12 @@
             }
         </style>
         <script >
-            $.require("ready,node,css", function(){
+            $.require("ready,node,fx", function(){
                 var node = document.getElementById("aaa");
-            
-              
 
-                $(node).css("rotate",155)
+                $(node).fx(1000,{
+                    rotate:150
+                })
 
             });
 

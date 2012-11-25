@@ -100,11 +100,11 @@ define("attr",["$support","$node"], function( support ){
             return this;
         },
         val : function( item ) {
-            var el = this[0], getter = valAdapter[ "option:get" ];
+            var el = this[0], getter = valHooks[ "option:get" ];
             if ( !arguments.length ) {//读操作
                 if ( el && el.nodeType == 1 ) {
-                    var ret =  (valAdapter[ getValType(el)+":get" ] ||
-                        $.propAdapter[ "@default:get" ])( el, "value", getter );
+                    var ret =  (valHooks[ getValType(el)+":get" ] ||
+                        $.propHooks[ "@default:get" ])( el, "value", getter );
                     return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
                 }
                 return void 0;
@@ -121,8 +121,8 @@ define("attr",["$support","$node"], function( support ){
             }
             return this.each(function( el ) {//写操作
                 if ( el.nodeType == 1 ) {
-                    (valAdapter[ getValType(el)+":set" ] ||
-                        $.propAdapter[ "@default:set" ])( el, "value", item , getter );
+                    (valHooks[ getValType(el)+":set" ] ||
+                        $.propHooks[ "@default:set" ])( el, "value", item , getter );
                 }
             });
         }
@@ -151,8 +151,8 @@ define("attr",["$support","$node"], function( support ){
                     name = $.propMap[ name.toLowerCase() ] || name;
                 }
                 var access = value === void 0 ? "get" : "set"
-                return ($.propAdapter[name+":"+access] ||
-                    $.propAdapter["@default:"+access] )(node, name, value)
+                return ($.propHooks[name+":"+access] ||
+                    $.propHooks["@default:"+access] )(node, name, value)
             }
         },
         attr: function(node, name, value){
@@ -183,8 +183,8 @@ define("attr",["$support","$node"], function( support ){
                 if( isBool ){
                     type = "@bool"; name = prop;
                 }
-                return ( noxml  && $.attrAdapter[ name+":"+access ] ||
-                    $.attrAdapter[ type +":"+access] )(node, name, value)
+                return ( noxml  && $.attrHooks[ name+":"+access ] ||
+                    $.attrHooks[ type +":"+access] )(node, name, value)
             }
         },
         //只能用于HTML,元素节点的内建不能删除（chrome真的能删除，会引发灾难性后果），使用默认值覆盖
@@ -216,7 +216,7 @@ define("attr",["$support","$node"], function( support ){
                 }
             }
         },
-        propAdapter:{
+        propHooks:{
             "@default:get": function( node, name ){
                 return node[ name ]
             },
@@ -232,7 +232,7 @@ define("attr",["$support","$node"], function( support ){
                 return ret;
             }
         },
-        attrAdapter: {
+        attrHooks: {
             "@w3c:get": function( node, name ){
                 var ret =  node.getAttribute( name ) ;
                 return ret === null ? void 0 : ret;
@@ -277,7 +277,7 @@ define("attr",["$support","$node"], function( support ){
             });
         }
     });
-    //========================propAdapter 的相关修正==========================
+    //========================propHooks 的相关修正==========================
     var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
     "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
@@ -290,7 +290,7 @@ define("attr",["$support","$node"], function( support ){
     }
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.optSelected ) {
-        $.propAdapter[ "selected:get" ] = function( node ) {
+        $.propHooks[ "selected:get" ] = function( node ) {
             for( var p = node;typeof p.selectedIndex != "number";p = p.parentNode){}
             return node.selected;
         }
@@ -298,7 +298,7 @@ define("attr",["$support","$node"], function( support ){
     if ( !support.attrInnateValue ) {
         // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
         //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
-        $.propAdapter[ "href:set" ] =  $.attrAdapter[ "href:set" ] = function( node, name, value ) {
+        $.propHooks[ "href:set" ] =  $.attrHooks[ "href:set" ] = function( node, name, value ) {
             var b
             if(node.tagName == "A" && node.innerText.indexOf("@") > 0
                 && !node.children.length){
@@ -313,40 +313,40 @@ define("attr",["$support","$node"], function( support ){
         }
     }
 
-    //========================attrAdapter 的相关修正==========================
-    var attrAdapter = $.attrAdapter
+    //========================attrHooks 的相关修正==========================
+    var attrHooks = $.attrHooks
     if ( !support.attrInnateHref ) {
         //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
         //IE的getAttribute支持第二个参数，可以为 0,1,2,4
         //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
         //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
         "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
-            attrAdapter[ method.toLowerCase() + ":get" ] =  function( node,name ) {
+            attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
                 var ret = node.getAttribute( name, 2 );
                 return ret === null ? void 0 : ret;
             }
         });
         "width,height".replace( $.rword, function( attr ){
-            attrAdapter[attr+":set"] = function(node, name, value){
+            attrHooks[attr+":set"] = function(node, name, value){
                 node.setAttribute( attr, value === "" ? "auto" : value+"");
             }
         });
-        $.propAdapter["href:get"] = function( node, name ) {
+        $.propHooks["href:get"] = function( node, name ) {
             return node.getAttribute( name, 4 );
         };
     }
 
     if ( !support.attrInnateStyle ) {
         //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-        attrAdapter[ "style:get" ] = function( node ) {
+        attrHooks[ "style:get" ] = function( node ) {
             return node.style.cssText.toLowerCase() || undefined ;
         }
-        attrAdapter[ "style:set" ] = function( node, name, value ) {
+        attrHooks[ "style:set" ] = function( node, name, value ) {
             node.style.cssText = value + "";
         }
     }
-    //========================valAdapter 的相关修正==========================
-    var valAdapter = {
+    //========================valHooks 的相关修正==========================
+    var valHooks = {
         "option:get":  function( node ) {
             var val = node.attributes.value;
             //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
@@ -389,22 +389,22 @@ define("attr",["$support","$node"], function( support ){
     //checkbox的value默认为on，唯有chrome 返回空字符串
     if ( !support.checkOn ) {
         "radio,checkbox".replace( $.rword, function( name ) {
-            valAdapter[ name + ":get" ] = function( node ) {
+            valHooks[ name + ":get" ] = function( node ) {
                 return node.getAttribute("value") === null ? "on" : node.value;
             }
         });
     }
     //处理单选框，复选框在设值后checked的值
     "radio,checkbox".replace( $.rword, function( name ) {
-        valAdapter[ name + ":set" ] = function( node, name, value) {
+        valHooks[ name + ":set" ] = function( node, name, value) {
             if ( Array.isArray( value ) ) {
                 return node.checked = !!~value.indexOf(node.value ) ;
             }
         }
     });
     if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
-        valAdapter["button:get"] =  $.attrAdapter["@ie:get"]
-        valAdapter["button:set"] =  $.attrAdapter["@ie:set"]
+        valHooks["button:get"] =  $.attrHooks["@ie:get"]
+        valHooks["button:set"] =  $.attrHooks["@ie:set"]
     }
 });
 
@@ -415,8 +415,8 @@ define("attr",["$support","$node"], function( support ){
 2011.8.5  重构val方法
 2011.8.12 重构replaceClass方法
 2011.10.11 重构attr prop方法
-2011.10.21 FIX valAdapter["select:set"] BUG
-2011.10.22 FIX boolaAdapter.set方法
+2011.10.21 FIX valHooks["select:set"] BUG
+2011.10.22 FIX boolaHooks.set方法
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
 2012.11.6 升级v2
