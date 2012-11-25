@@ -8,25 +8,7 @@
         <script src="mass.js">
           
         </script>
-        <script>
-            $.require("ready,node,css", function(){
-                var node = $("#aaa")[0]
-                var a = $._getTransform(node,true);
-                for(var i in a){
-                    console.log(i+" : "+a[i])
-                }
-                a.rotation = 30 * Math.PI / 180
-                console.log(a)
-                 $._setTransform(node)
-
-            });
-
-    
-
-        </script>
-
         <style>
-
             #aaa {
                 position: absolute;
                 top:100px;
@@ -34,18 +16,30 @@
                 background:red;
                 width:100px;
                 height:100px;
+               
 
             }
-
         </style>
-        <script>
-          
-           
+        <script >
+            $.require("ready,node,css", function(){
+                var node = document.getElementById("aaa");
+            
+              
+
+                $(node).css("rotate",155)
+
+            });
+
+    
+
         </script>
+
+
     </head>
     <body>
-        <div id="aaa"  >
 
+        <div id="aaa"  >
+            AAA
         </div>
 
     </body>

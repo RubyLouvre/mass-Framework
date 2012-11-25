@@ -56,7 +56,17 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return 0;
     }
-
+    var cssTransform = $.cssName("transform");
+    // 总是返回度数
+    adapter[ "rotate:get" ] = function(node){
+        return $._data( node, 'rotate' ) || 0;
+    }
+    if(cssTransform){
+        adapter[ "rotate:set" ] = function(node, name, value){
+            $._data( node, 'rotate',  value );
+            node.style[cssTransform] = 'rotate('+ (value * Math.PI / 180 )+'rad)';
+        }
+    }
     //这里的属性不需要自行添加px
     $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     $.css = function( node, name, value){
@@ -73,7 +83,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 if ( isFinite( value ) && !$.cssNumber[ prop ] ) {
                     value += "px";
                 }
-                ;
                 (adapter[prop+":set"] || adapter[ "_default:set" ])( node, name, value );
             }
         }
@@ -417,126 +426,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             return el.type === "hidden" || $.css( el, "display") === "none" ;
         }
     }
-    var rgetIETransform = /(M11|M12|M21|M22)=[\d\-\.e]+/gi
-   
-    var cssTransform = $.cssName("transform"),
-    _DEG2RAD = Math.PI / 180,
-    _RAD2DEG = 180 / Math.PI,		
-    _NaNExp = /[^\d\-\.]/g,
-    _parseAngle = function(v, d) {
-        var m = (v.indexOf("rad") === -1) ? _DEG2RAD : 1,
-        r = (v.indexOf("=") === 1);
-        v = Number(v.replace(_NaNExp, "")) * m;
-        return r ? v + d : v;
-    }
-    $._getTransform = function(node,  record) {
-        var tm = $._data(node,"transform"), s;
-        if (cssTransform) {
-            s =  getter(node, cssTransform);//这里可能返回none
-
-        } else if (node.currentStyle) {
-            //for older versions of IE, we need to interpret the filter portion that is
-            // in the format: progid:DXImageTransform.Microsoft.Matrix(M11=6.123233995736766e-17, M12=-1, M21=1,
-            // M22=6.123233995736766e-17, sizingMethod='auto expand')
-            // Notice that we need to swap b and c compared to a normal matrix.
-            s = node.currentStyle.filter.match(rgetIETransform);
-            s = (s && s.length === 4) ?
-            s[0].substr(4) + "," + Number(s[2].substr(4)) + "," + Number(s[1].substr(4)) + "," + s[3].substr(4) + "," + (tm ? tm.x : 0) + "," + (tm ? tm.y : 0) : null;
-        }
-        var v = (s || "").replace(/[^\d\-\.e,]/g, "").split(","), 
-        k = (v.length >= 6),
-        a = k ? Number(v[0]) : 1,
-        b = k ? Number(v[1]) : 0,
-        c = k ? Number(v[2]) : 0,
-        d = k ? Number(v[3]) : 1,
-        min = 0.000001,
-        m = record ? tm || {
-            skewY:0
-        } : {
-            skewY:0
-        },
-        invX = (m.scaleX < 0); //in order to interpret things properly,
-        // we need to know if the user applied a negative scaleX previously so that 
-        // we can adjust the rotation and skewX accordingly. 
-        // Otherwise, if we always interpret a flipped matrix as affecting scaleY and 
-        // the user only wants to tween the scaleX on multiple sequential tweens, 
-        // it would keep the negative scaleY without that being the user's intent.
-
-        m.x = (k ? Number(v[4]) : 0);
-        m.y = (k ? Number(v[5]) : 0);
-        m.scaleX = Math.sqrt(a * a + b * b);
-        m.scaleY = Math.sqrt(d * d + c * c);
-        m.rotation = (a || b) ? Math.atan2(b, a) : m.rotation || 0; 
-        //note: if scaleX is 0, we cannot accurately measure rotation. Same for skewX with a scaleY of 0. 
-        //Therefore, we default to the previously recorded value (or zero if that doesn't exist).
-        m.skewX = (c || d) ? Math.atan2(c, d) + m.rotation : m.skewX || 0;
-        if (Math.abs(m.skewX) > Math.PI / 2 && Math.abs(m.skewX) < Math.PI * 1.5) {
-            if (invX) {
-                m.scaleX *= -1;
-                m.skewX += (m.rotation <= 0) ? Math.PI : -Math.PI;
-                m.rotation += (m.rotation <= 0) ? Math.PI : -Math.PI;
-            } else {
-                m.scaleY *= -1;
-                m.skewX += (m.skewX <= 0) ? Math.PI : -Math.PI;
-            }
-        }
-        //some browsers have a hard time with very small values like 2.4492935982947064e-16 
-        //(notice the "e-" towards the end) and would render the object slightly off. 
-        //So we round to 0 in these cases. The conditional logic here is faster than calling Math.abs().
-        if (m.rotation < min) if (m.rotation > -min) if (a || b) {
-            m.rotation = 0;
-        }
-        if (m.skewX < min) if (m.skewX > -min) if (b || c) {
-            m.skewX = 0;
-        }
-        if (record) {
-            $._data(node,"transform", m)
-        //record to the object's _gsTransform which we use so that tweens
-        //can control individual properties independently (we need all the properties to
-        //accurately recompose the matrix in the setRatio() method)
-        }
-        return m;
-    }
-
-    $._setTransform = function(node){
-        var pt =  $._data(node,"transform"),  min = 0.000001;
-        // to improve speed and reduce size, reuse the pt variable as an alias to the _transform property
-        // if there is no rotation or skew, browsers render the transform faster
-        // if we just feed it the list of transforms like translate() skewX() scale(),
-        // otherwise defining the matrix() values directly is fastest.
-        if (cssTransform && !pt.rotation && !pt.skewX) {
-            node.style[cssTransform] = ((pt.x || pt.y) ? "translate(" + pt.x + "px," + pt.y + "px) " : "") +
-            ((pt.scaleX !== 1 || pt.scaleY !== 1) ? "scale(" + pt.scaleX + "," + pt.scaleY + ")" : "")
-            || "translate(0px,0px)";
-        //we need to default to translate(0px,0px) to work around a Chrome bug
-        //that rears its ugly head when the transform is set to "".
-        } else {
-            var ang = cssTransform ? pt.rotation : -pt.rotation,
-            skew = cssTransform ? ang - pt.skewX : ang + pt.skewX,
-            a = Math.cos(ang)  * pt.scaleX,
-            b = Math.sin(ang)  * pt.scaleX,
-            c = Math.sin(skew) * -pt.scaleY,
-            d = Math.cos(skew) * pt.scaleY
-            //some browsers have a hard time with very small values like 2.4492935982947064e-16 (notice the "e-" towards the end) and would render the object slightly off. So we round to 0 in these cases. The conditional logic here is faster than calling Math.abs().
-            if (a < min) if (a > -min) {
-                a = 0;
-            }
-            if (b < min) if (b > -min) {
-                b = 0;
-            }
-            if (c < min) if (c > -min) {
-                c = 0;
-            }
-            if (d < min) if (d > -min) {
-                d = 0;
-            }
-            if (cssTransform) {
-                node.style[cssTransform] = "matrix(" + a + "," + b + "," + c + "," + d + "," + pt.x + "," + pt.y + ")";
-            }else{
-                $.__setTransform(node, pt, a,b,c,d)
-            }
-        }
-    }
   
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
@@ -557,6 +446,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
 2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
 2012.5.10 FIX toFloat BUG
 2012.5.26 重构$.fn.width, $.fn.height,$.fn.innerWidth, $.fn.innerHeight, $.fn.outerWidth, $.fn.outerHeight
+2012.11.25 添加旋转
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 //z-index的最大值（各浏览器）http://hi.baidu.com/flondon/item/a64550ba98a9d3ef4ec7fd77
 http://joeist.com/2012/06/what-is-the-highest-possible-z-index-value/ 这里有更全面的测试
