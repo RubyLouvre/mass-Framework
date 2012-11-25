@@ -496,10 +496,12 @@ define("fx", ["$css"],function(){
         return colorMap.white;
     }
     $.parseColor = color2array
-    $.query.pseudoHooks.animated = function( el ) {
-        for(var i = 0, fxs = $["@queue"], fx; fx = fxs[i++];){
-            if(el == fx.node){
-                return true
+    if($.query && $.query.pseudoHooks){
+        $.query.pseudoHooks.animated = function( el ) {
+            for(var i = 0, fxs = $["@queue"], fx; fx = fxs[i++];){
+                if(el == fx.node){
+                    return true
+                }
             }
         }
     }
