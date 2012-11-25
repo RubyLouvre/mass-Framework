@@ -583,7 +583,7 @@ define("query", function(){
                         filter = ["class", "~=", key];
                         break;
                     case ":"://伪类选择器
-                        tmp = Icarus.pseudoAdapter[key];
+                        tmp = Icarus.pseudoHooks[key];
                         if (match = expr.match(rpseudo)) {
                             expr = RegExp.rightContext;
                             if(!!~key.indexOf("nth")){
@@ -780,7 +780,7 @@ define("query", function(){
             }
         };
     };
-    Icarus.pseudoAdapter = {
+    Icarus.pseudoHooks = {
         root: function (el) {//标准
             return el === (el.ownerDocument || el.document).documentElement;
         },
@@ -916,12 +916,12 @@ define("query", function(){
             return el.type === "hidden" || (!el.offsetWidth && !el.offsetHeight) || (el.currentStyle && el.currentStyle.display === "none") ;
         }
     }
-    Icarus.pseudoAdapter.visible = function(el){
-        return  !Icarus.pseudoAdapter.hidden(el);
+    Icarus.pseudoHooks.visible = function(el){
+        return  !Icarus.pseudoHooks.hidden(el);
     }
 
     "text,radio,checkbox,file,password,submit,image,reset".replace($.rword, function(name){
-        Icarus.pseudoAdapter[name] = function(el){
+        Icarus.pseudoHooks[name] = function(el){
             return (el.getAttribute("type") || el.type) === name;//避开HTML5新增类型导致的BUG，不直接使用el.type === name;
         }
     });
