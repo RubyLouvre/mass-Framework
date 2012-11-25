@@ -82,7 +82,7 @@ define("fx", ["$css"],function(){
     }
     function isHidden( elem ) {
         return elem.sourceIndex === 0 || $.css( elem, "display" ) === "none"
-            || !$.contains( elem.ownerDocument.documentElement, elem );
+        || !$.contains( elem.ownerDocument.documentElement, elem );
     }
     $.fn.fx = function( duration, hash, /*internal*/ p  ){
         if(typeof duration === "number" ){
@@ -454,7 +454,6 @@ define("fx", ["$css"],function(){
             before: beforePuff
         });
     }
-
     var colorMap = {
         "black":[0,0,0],
         "gray":[128,128,128],
@@ -497,7 +496,13 @@ define("fx", ["$css"],function(){
         return colorMap.white;
     }
     $.parseColor = color2array
-
+    $.query.pseudoHooks.animated = function( el ) {
+        for(var i = 0, fxs = $["@queue"], fx; fx = fxs[i++];){
+            if(el == fx.node){
+                return true
+            }
+        }
+    }
 })
 /**
 2011.10.10 改进$.fn.stop
