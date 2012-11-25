@@ -91,7 +91,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     $.fn.css =  function( name, value , neo){
         return $.access( this, name, value, $.css );
     }
-
     var cssPair = {
         Width:['Left', 'Right'],
         Height:['Top', 'Bottom']
@@ -158,8 +157,9 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return val;
     };
+
+    //=========================　处理　width, height, innerWidth, innerHeight, outerWidth, outerHeight　========
     var rmapper = /(\w+)_(\w+)/g
-    //生成width, height, innerWidth, innerHeight, outerWidth, outerHeight这六种原型方法
     "Height,Width".replace( $.rword, function(  name ) {
         var lower = name.toLowerCase(),
         clientProp = "client" + name,
@@ -201,7 +201,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         })
 
     });
-
+    //=========================　处理　show hide toggle　=========================
     var sandbox,sandboxDoc;
     $.callSandbox = function(parent,callback){
         if ( !sandbox ) {
@@ -217,7 +217,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         callback(sandboxDoc);
         parent.removeChild(sandbox);
     }
-
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd","inline");
     var blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p","block");
     $.mix(cacheDisplay ,blocks);
@@ -275,8 +274,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return toggelDisplay( this, typeof state == "boolean" ? state : -1 );
     }
 
-    //=======================================================
-
+    //=========================　处理　offset　=========================
     function setOffset(node, options){
         if(node && node.nodeType == 1 ){
             var position = $.css( node, "position" );
@@ -342,7 +340,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
 
         return pos;
     }
-
+    //=========================　处理　position　=========================
     $.fn.position = function() {//取得元素相对于其offsetParent的坐标
         var offset, offsetParent , node = this[0],
         parentOffset = {//默认的offsetParent相对于视窗的距离
@@ -394,7 +392,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         }
         return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
     }
-
+    //=========================　处理　scrollLeft scrollTop　=========================
     "scrollLeft_pageXOffset,scrollTop_pageYOffset".replace( rmapper, function(_, method, prop ) {
         $.fn[ method ] = function( val ) {
             var node, win, top = method == "scrollTop";
@@ -426,7 +424,6 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             return el.type === "hidden" || $.css( el, "display") === "none" ;
         }
     }
-  
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;

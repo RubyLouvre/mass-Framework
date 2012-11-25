@@ -116,6 +116,7 @@ define("css_fix", !!top.getComputedStyle, function(){
         var style = node.currentStyle;
         return style.backgroundPositionX +" "+style.backgroundPositionX
     };
+    //=========================　处理　rotate　=========================
     var stransform = "DXImageTransform.Microsoft.Matrix";
     adapter.centerOrigin = "margin"
     adapter[ "rotate:set" ] = function(node, name, value){
@@ -130,10 +131,9 @@ define("css_fix", !!top.getComputedStyle, function(){
         matrix.M12 = -sintheta;
         matrix.M21 = sintheta;
         matrix.M22 = costheta;
-        if((name = adapter.centerOrigin)) {
-            node.style[name == 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth/2) + (node.clientWidth/2) + "px";
-            node.style[name == 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight/2) + (node.clientHeight/2) + "px";
-        }
+        name = adapter.centerOrigin;
+        node.style[name == 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth/2) + (node.clientWidth/2) + "px";
+        node.style[name == 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight/2) + (node.clientHeight/2) + "px";
     }
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
