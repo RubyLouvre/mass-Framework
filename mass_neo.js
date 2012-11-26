@@ -244,10 +244,11 @@
         }else{
             parent = parent.substr( 0, parent.lastIndexOf('/') )
             if(/^(\w+)(\d)?:.*/.test(url)){  //如果用户路径包含协议
+                $.log("如果用户路径包含协议")
                 ret = url
             }else {
                 var tmp = url.charAt(0);
-                if( tmp !== "." && tmp != "/"){  //相对于根路径
+                if( tmp !== "." && tmp != "/"){  //相对于根路径(顶级标识)
                     ret = $.config.base + url;
                 }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
                     ret = parent + "/" + url.substr(2);
@@ -258,6 +259,10 @@
                         return "";
                     });
                     ret = arr.join("/")+"/"+tmp;
+                }else if(tmp == "/"){
+                    ret = parent  + url
+                }else{
+                    throw new Error("不符合模块标识规则")
                 }
             }
         }
@@ -303,7 +308,7 @@
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    install( obj.id, obj.args, obj.factory );
+                    fireFactory( obj.id, obj.args, obj.factory );
                     $._checkDeps();
                 }
             }
@@ -337,7 +342,7 @@
     };
     var waitings = [], loading
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-    window.require = function( list, factory, parent ){
+    window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
         args = [],      // 用于依赖列表中的模块的返回值
         dn = 0,         // 需要安装的模块数
@@ -376,7 +381,7 @@
             state: 1
         }
         if( dn === cn ){//如果需要安装的等于已安装好的
-            install( id, args, factory );//装配到框架中
+            fireFactory( id, args, factory );//装配到框架中
             $._checkDeps();
             return
         }
@@ -426,7 +431,7 @@
     }
 
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
-    function install( id, deps, callback ){
+    function fireFactory( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );
         }
