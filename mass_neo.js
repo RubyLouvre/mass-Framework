@@ -4,7 +4,7 @@
     var NsKey = DOC.URL.replace( rmakeid,'')
     var NsVal = global[ NsKey ];//公共命名空间
     var HTML  = DOC.documentElement;
-    var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var HEAD  = DOC.head ;
     var loadings = [];//正在加载中的模块列表
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
@@ -227,8 +227,7 @@
         kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
-
-    })(DOC.getElementsByTagName( "script" ));
+    })(DOC.scripts);
 
     $.noop = $.error = $.debug = function(){};
 
@@ -419,7 +418,6 @@
     });
     //===============================================================
     var Storage = localStorage;
-   
     var rerase = new RegExp('(?:^| )' + $.config.erase + '(?:(?:=([^;]*))|;|$)')
     var match = String(DOC.cookie).match( rerase );
     //读取从后端过来的cookie指令，转换成一个对象，键名为模块的URL，值为版本号（这是一个时间戮）
@@ -478,7 +476,7 @@
         link.href = url;
         link.type="text/css"
         link.id = id
-        HEAD.insertBefore( link, HEAD.firstChild );
+        HEAD.appendChild( link );
     }
     var innerDefine = function(){
         var args = Array.apply([],arguments);
