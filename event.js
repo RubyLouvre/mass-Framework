@@ -115,9 +115,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 if( count == 1 ){
                     var handle = data[type+"_handle"] = facade.curry( desc );     //  一个curry
                     if( !hack.setup || hack.setup( desc ) === false  ) {
-                        if( bindTop && !bindTarget  ){//如果不能绑到当前对象上,尝试绑到window上
-                            target = window;
-                        }
                         //此元素在此事件类型只绑定一个回调
                         $.bind(target, desc.type, handle);
                     }
@@ -288,9 +285,6 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                 findHandlers( events, desc , hash.fn, live ).forEach( function(desc){
                     if( --events[type+"_count"] == 0 ){
                         if( !hack.teardown || hack.teardown( desc ) === false  ) {
-                            if( bindTarget === false && bindTop ){//如果不能绑到当前对象上,尝试绑到window上
-                                target = window;
-                            }
                             var handle = $._data(target, type+"_handle");
                             $.unbind( target, desc.type, handle );
                         }
@@ -314,7 +308,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     if( bindTop ){//事件系统三大核心方法之一，触发事件
         facade.fire = function( type ){
             var bindTarget = $["@bind"] in this, more, event
-            var target = bindTarget ? this : window;
+            var target = this;
             if(typeof type == "string"){
                 more = new Event( type );
             }else if(type && type.preventDefault){
@@ -325,12 +319,15 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
                     more = type;//如果是$.Event实例
                 }
             }
+            if(!bindTarget){
+                return  facade.dispatch(this, more);
+            }
             if( more ){
                 type = more.type;
                 var doc = target.ownerDocument || target.document || target || document;
                 if(!event){
                     event = doc.createEvent(eventMap[type] || "CustomEvent");
-                    event.initEvent( type,!facade.noBubble[type],true, doc.defaultView, 1);//, doc.defaultView
+                    event[event.initCustomEvent ?  "initCustomEvent" : "initEvent"]( type,!facade.noBubble[type],true, 1);
                 }
                 event.args = [].slice.call( arguments, 1 ) ;
                 event.more = more

@@ -16,7 +16,7 @@
                 background:red;
                 width:100px;
                 height:100px;
-               
+
 
             }
         </style>
@@ -27,7 +27,22 @@
                 $(node).fx(1000,{
                     rotate:720
                 })
+                var a = document.getElementById("aaa")
+                var b = document.getElementById("bbb")
+                var c = document.getElementById("ccc")
+                a.addEventListener("cat", function(e) { console.log(e.xxx) })
+                b.addEventListener("cat", function(e) { console.log(e.detail) ;e.stopPropagation(); })
+                c.addEventListener("cat", function(e) { console.log(e.detail) })
+                
+                var  event = document.createEvent( "CustomEvent");
+                //  var event = new CustomEvent("cat", {"detail":{"hazcheeseburger":true}})
 
+                event.initCustomEvent( "cat", false,true,1 );//, doc.defaultView
+                event.xxx = {
+                    aa:"11"
+                }
+                a.dispatchEvent(event);
+              
             });
 
     
@@ -37,9 +52,12 @@
 
     </head>
     <body>
-
-        <div id="aaa"  >
-            AAA
+        <div id="ccc"  > 
+            <div id="bbb"  >
+                <div id="aaa"  >
+                    AAA
+                </div>
+            </div>
         </div>
 
     </body>
