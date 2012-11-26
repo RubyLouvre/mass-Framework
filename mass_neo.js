@@ -236,8 +236,8 @@
     function parseURL(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
-        if( url === "ready"){//特别处理ready标识符
-            return ["ready", "js"];
+        if( /^(mass|ready)$/.test(url)){//特别处理ready标识符
+            return [url, "js"];
         }
         if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url] ){
             ret = $.config.alias[url];
@@ -329,7 +329,11 @@
         HEAD.appendChild(node)
     }
     var modules = $.modules =  {
-        ready:{ }
+        ready:{ },
+        mass: {
+            state: 2,
+            exports: $
+        }
     };
     var waitings = [], loading
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
