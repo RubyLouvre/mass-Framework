@@ -76,7 +76,7 @@ define("event_fix", !!document.dispatchEvent, function(){
             return item.live  ? fn( item.currentTarget, item ) : false;
         }
     }
-    var adapter = $.eventAdapter = {
+    var adapter = $.eventHooks = {
         focus: {
             delegateType: "focusin"
         },

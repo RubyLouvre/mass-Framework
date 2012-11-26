@@ -5,7 +5,7 @@ define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function
     $.log("已加载event模块v8")
  
     var facade = $.event || ($.event = {});
-    var adapter = $.eventAdapter || ($.eventAdapter = {});
+    var adapter = $.eventHooks || ($.eventHooks = {});
     //如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API
     var bindTop = !adapter.change;
     var rhoverHack = /(?:^|\s)hover(\.\S+|)\b/
