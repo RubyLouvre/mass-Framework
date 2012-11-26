@@ -507,7 +507,7 @@
             iframe.src = "javascript:false"
         }
         HEAD.insertBefore( iframe, HEAD.firstChild );
-        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        var doc = iframe.contentDocument || iframe.contentWindow.document;//w3c || ie
         doc.write( codes.join('') );
         doc.close();
         $.bind( iframe, "load", function(){
