@@ -681,8 +681,8 @@ dom.namespace改为dom["mass"]
 2012.8.26 升级到v17
 2012.8.27 将$.log.level改到$.config.level中去
 2012.8.28 将最后一行的this改成self
-2012.9.12 添加本地储存的支持
-2012.11.21 升级到v18 去掉CMD支持与$.debug的实现,增加循环依赖的判定
+2012.9.12 升级到v18 添加本地储存的支持
+2012.11.21 升级到v19 去掉CMD支持与$.debug的实现,增加循环依赖的判定
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
