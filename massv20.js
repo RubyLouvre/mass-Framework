@@ -496,7 +496,7 @@
     }
     //定义模块
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
-    window.define = function( name, deps, factory ){//模块名,依赖列表,模块本身
+    window.define = $.define = function( name, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments);
         if(typeof args[0] == "string"){
             args.shift()
@@ -540,7 +540,7 @@
                 exports: {},
                 state: 1
             };
-            require(deps, Function("return "+ factory ), id) //0,1,2 --> 1,2,0
+            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
         }
     }
     function loadCSS(url){

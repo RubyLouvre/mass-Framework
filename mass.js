@@ -474,7 +474,7 @@
             Module._update( id, parent );
             var module = $.modules[ id ];
             module.state =  module.state || 1;
-            $.define( deps, Function("return "+ factory), id );
+            $.define( deps, Function("return "+ factory)(), id );
         }
     }
     function loadCSS(url){
