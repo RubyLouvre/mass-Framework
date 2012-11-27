@@ -14,7 +14,7 @@ define("ajax",["mass","$flow"], function($){
     rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
-    rurl =  /^([\w\+\.\-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
+    rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
     //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
     //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
     curl = DOC.URL;
