@@ -252,27 +252,12 @@
         class2type[ "[object " + name + "]" ] = name;
     });
 
-    var Module = function (id, parent) {
-        this.id = id;
-        this.exports = {};
-        this.parent = parent;
-    }
-    Module._update = function(id, parent, factory, state, deps, args){
-        var module =  Module._cache[id]
-        if( !module){
-            module = new Module(id, parent || $.config.base);
-            Module._cache[id] = module;
-        }
-        module.callback = factory || $.noop;
-        module.state = state || module.state;
-        module.deps = deps || module.deps || {};
-        module.args = args || module.args || [];
-    }
-    Module._resolve = function(url, parent, ret){
+
+    function parseURL(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
-        if( url === "ready"){//特别处理ready标识符
-            return ["ready", "js"];
+        if( /^(mass|ready)$/.test( url ) ){//特别处理ready标识符
+            return [url, "js"];
         }
         if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url] ){
             ret = $.config.alias[url];
@@ -311,13 +296,29 @@
         return [ret, ext];
     }
 
-    var modules = $.modules = Module._cache = {
+    var modules = $.modules = {
         ready:{},
         mass: {
             state:2,
             exports: $
         }
     };
+    var Module = function (id, parent) {
+        this.id = id;
+        this.exports = {};
+        this.parent = parent;
+    }
+    Module._update = function(id, parent, factory, state, deps, args){
+        var module =  modules[id]
+        if( !module){
+            module = new Module(id, parent || $.config.base);
+            modules[id] = module;
+        }
+        module.callback = factory || $.noop;
+        module.state = state || module.state;
+        module.deps = deps || module.deps || {};
+        module.args = args || module.args || [];
+    }
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     $.mix({
         //绑定事件(简化版)
@@ -342,7 +343,7 @@
             dn = 0,         // 需要安装的模块数
             cn = 0;         // 已安装完的模块数
             String(list).replace( $.rword, function(el){
-                var array = Module._resolve(el, parent || $.config.base ), url = array[0];
+                var array = parseURL(el, parent || $.config.base ), url = array[0];
                 if(array[1] == "js"){
                     dn++
                     //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
@@ -372,36 +373,6 @@
             $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
         },
         //定义模块
-        define: function( parent, deps ){//模块名,依赖列表,模块本身
-            if($._checkCycle(modules[parent].deps, parent)){
-                throw new Error( parent +"模块与之前的某些模块存在循环依赖")
-            }
-            var args = arguments;
-            if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
-                if( deps ){
-                    return;
-                }
-                [].splice.call( args, 1, 1 );
-            }
-            if( args.length === 2 ){//处理只有两个参数的情况,补允依赖列表
-                [].splice.call( args, 1, 0, [] );
-            }
-            if(typeof args[2] == "function"){
-                var factroy = args[2].toString().replace(rcomment,"")
-                if(this.exports && this.id && $.config.storage && !Storage.getItem( this.id) ){
-                    Storage.setItem( this.id, factroy);
-                    Storage.setItem( this.id+"_deps", args[1]+"");
-                    Storage.setItem( this.id+"_parent",  this.parent);
-                    Storage.setItem( this.id+"_version", new Date - 0);
-                }
-            }else{
-                var ret = args[2];
-                args[2] = function(){
-                    return ret
-                }
-            }
-            $.require( args[1], args[2], parent ); //0,1,2 --> 1,2,0
-        },
         //检测死链
         _checkFail : function(  doc, id, error ){
             doc && (doc.ok = 1);
@@ -558,13 +529,10 @@
         if(typeof args[0] == "string"){
             args.shift()
         }
-        args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
+        args.push( nick );  //劫持第一个参数,置换为当前JS文件的URL
         parent.define.apply(parent, args);  //将iframe中的函数转换为父窗口的函数
     }
-    function define(deps, factory, id){
-        if(Ns._checkCycle( Ns.modules[id].deps, id) ){
-            throw new Error( id +"模块与之前的某些模块存在循环依赖")
-        }
+    window.define = function(deps, factory, id){
         var args = Array.apply([],arguments);
         if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
             if( deps ){
@@ -575,35 +543,25 @@
         if( args.length === 2 ){//处理只有两个参数的情况,补允依赖列表
             args.unshift([])
         }
-        if(typeof args[1] == "function"){
-            factory = args[1].toString().replace(rcomment,"")
+        factory = args[1];
+        id = args[2];
+        if($._checkCycle( $.modules[id].deps, id) ){
+            throw new Error( id +"模块与之前的某些模块存在循环依赖")
+        }
+        if(typeof factory == "function"){
             if( $.config.storage && !Storage.getItem( id )){
-                Storage.setItem( id, factory);
+                Storage.setItem( id, factory.toString().replace(rcomment,"") );
                 Storage.setItem( id+"_deps", args[0]+"");
                 Storage.setItem( id+"_parent",  id);
                 Storage.setItem( id+"_version", new Date - 0);
             }
-            args[1] = Function("return" + args[1])
+            args[1] = Function("return " + factory )()
+        }else{
+            throw new Error( id +" 的factory必须是一个函数")
         }
-        $.require.apply( $, args ); //0,1,2
+        $.require.apply( $, args ); //deps, factory, id
     }
-
-//    var innerDefine = function(){
-//        var args = Array.apply([],arguments);
-//        if(typeof args[0] == "string"){
-//            args.shift()
-//        }
-//        args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
-//        var module = Ns.modules[ nick ];
-//        module.state = 1
-//        var last = args.length - 1;
-//        if( typeof args[ last ] == "function"){
-//            //劫持模块工厂,将$强塞进去
-//            args[ last ] =  parent.Function( "$","return "+ args[ last ] ) (Ns);
-//        }
-//        Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
-//    }
-
+    define.amd = modules;
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
     function fireFactory( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {

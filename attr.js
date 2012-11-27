@@ -1,13 +1,14 @@
 //==================================================
-// 属性操作模块 v2
+// 属性操作模块 v3
 //==================================================
-define("attr",["$support","$node"], function( support ){
-    // $.log("已加载attr模块")
+define("attr",["mass","$node"], function( $ ){
+    $.log("已加载attr模块",7)
     var rreturn = /\r/g,
     rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
     rquote = /^['"]/,
     rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
-    rnospaces = /\S+/g
+    rnospaces = /\S+/g,
+    support = $.support
     function getValType( el ){
         var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;

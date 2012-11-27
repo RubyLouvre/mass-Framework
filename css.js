@@ -1,12 +1,11 @@
 //=========================================
 // 样式操作模块 v4 by 司徒正美
 //=========================================
-define( "css", ["mass","$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix")) , function(){
+define( "css", ["mass","$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix")) , function($){
     $.log( "已加载css模块" );
     var adapter = $.cssHooks || ($.cssHooks = {})
     var rrelNum = /^([\-+])=([\-+.\de]+)/
     var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
- 
     adapter["_default:set"] = function( node, name, value){
         node.style[ name ] = value;
     }
