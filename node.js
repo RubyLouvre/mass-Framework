@@ -1,7 +1,7 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define( "node", "mass,$class,$query,$data".split(","),function( $ ){
+define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
     $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
@@ -16,6 +16,7 @@ define( "node", "mass,$class,$query,$data".split(","),function( $ ){
         }
         return document;
     }
+    $.log($.support)
     $.mix( $.mutators ).implement({
         init: function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
@@ -217,7 +218,7 @@ define( "node", "mass,$class,$query,$data".split(","),function( $ ){
         }
     });
    
-    //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-$.support/
+    //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
     var prefixes = ['','-webkit-','-o-','-moz-', 'moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
     var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector 
         c:   "color",

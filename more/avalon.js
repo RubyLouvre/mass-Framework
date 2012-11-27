@@ -1,4 +1,4 @@
-define("avalon",["$attr","$event"], function(){
+define("avalon",["mass","$attr","$event"], function($){
     $.log("已加载avalon v2", 7);
     var BINDING = $.config.bindname || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
     //将一个普通的对象转换为ViewModel,ViewModel里面每个对象都是监控者(监控函数或监控数组)

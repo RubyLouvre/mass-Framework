@@ -1,7 +1,7 @@
 //==================================================
 // 依赖内存的cache by ssddi456
 //==================================================
-define("cache", ["$calss"],function() {
+define("cache", ["mass","$class"],function() {
     function now () {
         return new Date().getTime();
     }
