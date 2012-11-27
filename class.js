@@ -1,7 +1,7 @@
 //=========================================
 // 类工厂模块 by 司徒正美
 //==========================================
-define("class", ["mass,$lang"], function( $ ){
+define("class", ["$lang"], function( $ ){
    $.log("已加载类工厂模块",7)
     var
     unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
@@ -89,6 +89,7 @@ define("class", ["mass,$lang"], function( $ ){
         $.mix( klass, $.mutators ).inherit( parent, init );//添加更多类方法
         return expand( klass, obj ).implement( obj );
     }
+    return $
 });
 /**
  change log:

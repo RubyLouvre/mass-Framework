@@ -752,6 +752,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             return expr ? neo.filter( expr ) : neo;
         };
     });
+    return $;
 });
 
 /**

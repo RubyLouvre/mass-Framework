@@ -1,7 +1,7 @@
 //=========================================
 // 事件系统 v8
 //==========================================
-define("event", ["mass","$node"][top.dispatchEvent ? "valueOf": "cancat" ]("$event_fix"),function($){
+define("event", ["$node"][top.dispatchEvent ? "valueOf": "cancat" ]("$event_fix"),function( $ ){
     $.log("已加载event模块v8")
     var facade = $.event || ($.event = {});
     var adapter = $.eventHooks || ($.eventHooks = {});
@@ -483,6 +483,7 @@ mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera
             delete adapter.mousewheel;
         }
     }catch(e){};
+    return $;
 })
 /**
 2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象

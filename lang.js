@@ -836,7 +836,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         }
     });
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
-    return $.lang;
+    return $
 });
 /**
 changlog:

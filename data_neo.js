@@ -1,7 +1,7 @@
 //==================================================
 // 数据缓存模块(本模块只是用于试验WeakMap与Element.dataset)
 //==================================================
-define("data", ["mass","$lang"], function( $ ){
+define("data", ["$lang"], function( $ ){
     $.log("已加载data模块",7);
     var remitter = /object|function/
     function innerData( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据

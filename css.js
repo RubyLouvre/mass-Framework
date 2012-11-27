@@ -1,7 +1,7 @@
 //=========================================
 // 样式操作模块 v4 by 司徒正美
 //=========================================
-define( "css", ["mass","$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix") , function($){
+define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix") , function($){
     $.log( "已加载css模块" );
     var adapter = $.cssHooks || ($.cssHooks = {})
     var rrelNum = /^([\-+])=([\-+.\de]+)/
@@ -425,7 +425,8 @@ define( "css", ["mass","$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$
     }
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
-    } ;
+    }
+    return $;
 });
 /**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug

@@ -1,7 +1,7 @@
 //==================================================
 // 属性操作模块 v3
 //==================================================
-define("attr",["mass","$node"], function( $ ){
+define("attr",["$node"], function( $ ){
     $.log("已加载attr模块",7)
     var rreturn = /\r/g,
     rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
@@ -407,6 +407,7 @@ define("attr",["mass","$node"], function( $ ){
         valHooks["button:get"] =  $.attrHooks["@ie:get"]
         valHooks["button:set"] =  $.attrHooks["@ie:set"]
     }
+    return $;
 });
 
 /*

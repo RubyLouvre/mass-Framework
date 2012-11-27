@@ -1,7 +1,7 @@
 //=========================================
 // 动画模块v5
 //==========================================
-define("fx", ["mass","$css"],function( $ ){
+define("fx", ["$css"],function( $ ){
     $.log("已加载fx模块",7)
     var types = {
         color:/color/i,
@@ -505,6 +505,7 @@ define("fx", ["mass","$css"],function( $ ){
             }
         }
     }
+    return $;
 })
 /**
 2011.10.10 改进$.fn.stop
