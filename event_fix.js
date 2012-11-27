@@ -65,7 +65,7 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function($){
         }
     }
     //模拟IE678的reset,submit,change的事件代理
-    var rform  = /^(?:textarea|input|select)$/i 
+    var rform  = /^(?:input|select|textarea)$/i
     function changeNotify( event ){
         if( event.type == "change" || event.propertyName == "checked" ){
             facade.fire.call(this,"change")

@@ -324,7 +324,7 @@ define("attr",["$node"], function( $ ){
         "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
             attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
                 var ret = node.getAttribute( name, 2 );
-                return ret === null ? void 0 : ret;
+                return ret == null ? void 0 : ret;
             }
         });
         "width,height".replace( $.rword, function( attr ){
