@@ -534,7 +534,6 @@
             var parent = Storage.getItem(id+"_parent");
             var deps = Storage.getItem(id+"_deps");
             deps = deps ?  deps.match( $.rword ) : "";
-            Module._update( id, parent );
             modules[ id ] ={
                 id: id,
                 parent: parent,

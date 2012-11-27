@@ -318,7 +318,6 @@
             exports: $
         }
     };
-    Module._update( "ready" );
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     $.mix({
         //绑定事件(简化版)
@@ -539,8 +538,7 @@
             Module._update( id, parent );
             var module = $.modules[ id ];
             module.state =  module.state || 1;
-            var fn = Function( "$","return "+ factory )($);
-            $.define( id, deps, fn );
+            $.define( deps, Function("return "+ factory), id );
         }
     }
     function loadCSS(url){
@@ -561,15 +559,51 @@
             args.shift()
         }
         args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
-        var module = Ns.modules[ nick ];
-        module.state = 1
-        var last = args.length - 1;
-        if( typeof args[ last ] == "function"){
-            //劫持模块工厂,将$强塞进去
-            args[ last ] =  parent.Function( "$","return "+ args[ last ] ) (Ns);
-        }
-        Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
+        parent.define.apply(parent, args);  //将iframe中的函数转换为父窗口的函数
     }
+    function define(deps, factory, id){
+        if(Ns._checkCycle( Ns.modules[id].deps, id) ){
+            throw new Error( id +"模块与之前的某些模块存在循环依赖")
+        }
+        var args = Array.apply([],arguments);
+        if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
+            if( deps ){
+                return;
+            }
+            args.shift()
+        }
+        if( args.length === 2 ){//处理只有两个参数的情况,补允依赖列表
+            args.unshift([])
+        }
+        if(typeof args[1] == "function"){
+            factory = args[1].toString().replace(rcomment,"")
+            if( $.config.storage && !Storage.getItem( id )){
+                Storage.setItem( id, factory);
+                Storage.setItem( id+"_deps", args[0]+"");
+                Storage.setItem( id+"_parent",  id);
+                Storage.setItem( id+"_version", new Date - 0);
+            }
+            args[1] = Function("return" + args[1])
+        }
+        $.require.apply( $, args ); //0,1,2
+    }
+
+//    var innerDefine = function(){
+//        var args = Array.apply([],arguments);
+//        if(typeof args[0] == "string"){
+//            args.shift()
+//        }
+//        args.unshift( nick );  //劫持第一个参数,置换为当前JS文件的URL
+//        var module = Ns.modules[ nick ];
+//        module.state = 1
+//        var last = args.length - 1;
+//        if( typeof args[ last ] == "function"){
+//            //劫持模块工厂,将$强塞进去
+//            args[ last ] =  parent.Function( "$","return "+ args[ last ] ) (Ns);
+//        }
+//        Ns.define.apply(module, args);  //将iframe中的函数转换为父窗口的函数
+//    }
+
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
     function fireFactory( id, deps, callback ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
