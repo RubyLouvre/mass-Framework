@@ -304,7 +304,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                 html = html.replace(rcreate,"<br class='fix_create_all'/>$1");//在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec( html ) || ["", ""])[1].toLowerCase(),//取得其标签名
-            wrap = translations[ tag ] || translations._default,
+            wrap = tagHooks[ tag ] || tagHooks._default,
             fragment = doc.createDocumentFragment(),
             wrapper = doc.createElement("div"), firstChild;
             wrapper.innerHTML = wrap[1] + html + wrap[2];
@@ -358,7 +358,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         }
     });
     //parseHTML的辅助变量
-    var translations  = {
+    var tagHooks  = {
         area: [ 1, "<map>", "</map>" ],
         param: [ 1, "<object>", "</object>" ],
         col: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
@@ -371,9 +371,9 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         _default: $.support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "</div>" ]
     };
 
-    translations.optgroup = translations.option;
-    translations.tbody = translations.tfoot = translations.colgroup = translations.caption = translations.thead;
-    translations.th = translations.td;
+    tagHooks.optgroup = tagHooks.option;
+    tagHooks.tbody = tagHooks.tfoot = tagHooks.colgroup = tagHooks.caption = tagHooks.thead;
+    tagHooks.th = tagHooks.td;
     var
     rtbody = /<tbody[^>]*>/i,
     rtagName = /<([\w:]+)/,//取得其tagName
@@ -382,7 +382,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
     types = $.oneObject("text/javascript","text/ecmascript","application/ecmascript","application/javascript","text/vbscript"),
     //需要处理套嵌关系的标签
     rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,adjacent = "insertAdjacentHTML",
-    insertApapter = {
+    insertHooks = {
         prepend: function( el, node ){
             el.insertBefore( node, el.firstChild );
         },
@@ -453,16 +453,16 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         });
         if( item.nodeType ){
             //如果是传入元素节点或文本节点或文档碎片
-            insertAdjacentNode( elems, insertApapter[type], item );
+            insertAdjacentNode( elems, insertHooks[type], item );
         }else if( typeof item === "string" ){
             //如果传入的是字符串片断
             var fragment = $.parseHTML( item, doc ),
             //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
             fast = (type !== "replace") && $.support[ adjacent ] && !rnest.test(item);
-            insertAdjacentHTML( elems, insertApapter[ type ], fragment, fast, insertApapter[ type+"2" ], item ) ;
+            insertAdjacentHTML( elems, insertHooks[ type ], fragment, fast, insertHooks[ type+"2" ], item ) ;
         }else if( item.length ) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
-            insertAdjacentFragment( elems, insertApapter[ type ], item, doc ) ;
+            insertAdjacentFragment( elems, insertHooks[ type ], item, doc ) ;
         }
         return nodes;
     }

@@ -336,42 +336,7 @@
                 el.detachEvent( "on" + type, fn || $.noop );
             }
         },
-        //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-        require: function( list, factory, parent ){
-            var deps = {}, // 用于检测它的依赖是否都为2
-            args = [],      // 用于依赖列表中的模块的返回值
-            dn = 0,         // 需要安装的模块数
-            cn = 0;         // 已安装完的模块数
-            String(list).replace( $.rword, function(el){
-                var array = parseURL(el, parent || $.config.base ), url = array[0];
-                if(array[1] == "js"){
-                    dn++
-                    //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
-                    loadStorage( url )
-                    if( (!modules[ url ])  ){
-                        loadJS( url, parent );
-                    }else if( modules[ url ].state === 2 ){
-                        cn++;
-                    }
-                    if( !deps[ url ] ){
-                        args.push( url );
-                        deps[ url ] = "司徒正美";//去重
-                    }
-                }else if(array[1] === "css"){
-                    loadCSS( url );
-                }
-            });
-            var id = parent || "@cb"+ ( cbi++ ).toString(32);
-            //创建或更新模块的状态
-            Module._update(id, 0, factory, 1, deps, args);
-            if( dn === cn ){//如果需要安装的等于已安装好的
-                fireFactory( id, args, factory );//装配到框架中
-                return $._checkDeps();
-            }
-            //在正常情况下模块只能通过_checkDeps执行
-            loadings.unshift( id );
-            $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
-        },
+      
         //定义模块
         //检测死链
         _checkFail : function(  doc, id, error ){
@@ -532,7 +497,43 @@
         args.push( nick );  //劫持第一个参数,置换为当前JS文件的URL
         parent.define.apply(parent, args);  //将iframe中的函数转换为父窗口的函数
     }
-    window.define = function(deps, factory, id){
+    //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
+    window.require = $.require = function( list, factory, parent ){
+        var deps = {}, // 用于检测它的依赖是否都为2
+        args = [],      // 用于依赖列表中的模块的返回值
+        dn = 0,         // 需要安装的模块数
+        cn = 0;         // 已安装完的模块数
+        String(list).replace( $.rword, function(el){
+            var array = parseURL(el, parent || $.config.base ), url = array[0];
+            if(array[1] == "js"){
+                dn++
+                //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
+                loadStorage( url )
+                if( (!modules[ url ])  ){
+                    loadJS( url, parent );
+                }else if( modules[ url ].state === 2 ){
+                    cn++;
+                }
+                if( !deps[ url ] ){
+                    args.push( url );
+                    deps[ url ] = "司徒正美";//去重
+                }
+            }else if(array[1] === "css"){
+                loadCSS( url );
+            }
+        });
+        var id = parent || "@cb"+ ( cbi++ ).toString(32);
+        //创建或更新模块的状态
+        Module._update(id, 0, factory, 1, deps, args);
+        if( dn === cn ){//如果需要安装的等于已安装好的
+            fireFactory( id, args, factory );//装配到框架中
+            return $._checkDeps();
+        }
+        //在正常情况下模块只能通过_checkDeps执行
+        loadings.unshift( id );
+        $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
+    }
+    window.define = $.define = function(deps, factory, id){
         var args = Array.apply([],arguments);
         if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
             if( deps ){
