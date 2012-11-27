@@ -19,21 +19,14 @@
 
 
             }
-            span{
-                margin:20px;
-                border:1px solid red;
-                padding:14px;
-            }
-            #eee{
-                 border:1px solid green
-            }
+
         </style>
         <script >
             $.require("node,fx", function(){
-               console.log("执行最后的回调")
-               $("#aaa").fx(2000,{
-                   rotate: 720
-               })
+                console.log("执行最后的回调")
+                $("#aaa").fx(2000,{
+                    rotate: 720
+                })
             });
 
         </script>
@@ -48,10 +41,13 @@
                 </div>
             </div>
         </div>
-        <div id="eee">
-            <span>222</span>
-        </div>
-        
+        <input type="text" id="demo" value="aaaaaaa"/>
+        <script type="text/javascript">
+            document.addEventListener('keyup', function(e){
+                alert('keyup')
+            },false);
+        </script>
+
     </body>
 </html>
 

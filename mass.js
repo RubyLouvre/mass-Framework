@@ -270,7 +270,7 @@
                 if( tmp !== "." && tmp != "/"){  //相对于根路径
                     ret = $.config.base + url;
                 }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
-                    ret = parent + "/" + url.substr(2);
+                    ret = parent + url.substr(1);
                 }else if( url.slice(0,2) == ".."){ //相对于父路径
                     var arr = parent.replace(/\/$/,"").split("/");
                     tmp = url.replace(/\.\.\//g,function(){
