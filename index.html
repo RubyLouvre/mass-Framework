@@ -22,8 +22,10 @@
 
         </style>
         <script >
-            $.require("$fx,ready", function(ret){
-                console.log( $.factory )
+            $.require("ready,event,$fx", function(ret){
+                $("#js_test").change(function(){
+                    $.log(this.value)
+                })
                 console.log("执行最后的回调")
                 $("#aaa").fx(2000,{
                     rotate: 720
@@ -42,12 +44,41 @@
                 </div>
             </div>
         </div>
-        <input type="text" id="demo" value="aaaaaaa"/>
-        <script type="text/javascript">
-            document.addEventListener('keyup', function(e){
-                alert('keyup')
-            },false);
-        </script>
+        <select id="js_test">
+            <option value="mass">
+                模块加载模块
+            </option>
+            <option value="loader">
+                模块加载模块2
+            </option>
+            <option value="lang">
+                语言扩展模块
+            </option>
+            <option value="support">
+                特征嗅探模块
+            </option>
+            <option value="class">
+                类工厂模块
+            </option>
+            <option value="flow">
+                操作流
+            </option>
+            <option value="node">
+                节点操作模块
+            </option>
+            <option value="data">
+                数据缓存模块
+            </option>
+            <option value="css">
+                样式操作模块
+            </option>
+            <option value="attr">
+                属性操作模块
+            </option>
+            <option value="event">
+                事件模块
+            </option>
+        </select>
 
     </body>
 </html>
