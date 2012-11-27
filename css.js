@@ -326,7 +326,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
         var box = node.getBoundingClientRect(),win = getWindow(doc),
-        root = doc.documentElemen,
+        root = doc.documentElement,
         clientTop  = root.clientTop  || 0,
         clientLeft = root.clientLeft || 0,
         scrollTop  = win.pageYOffset ||  root.scrollTop  ,

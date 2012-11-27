@@ -1,7 +1,7 @@
 //=========================================
 // 事件系统 v8
 //==========================================
-define("event", ["$node"][top.dispatchEvent ? "valueOf": "cancat" ]("$event_fix"),function( $ ){
+define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"),function( $ ){
     $.log("已加载event模块v8")
     var facade = $.event || ($.event = {});
     var adapter = $.eventHooks || ($.eventHooks = {});

@@ -22,7 +22,7 @@
                 },
                 level: 6
             });
-            $.require("$event",function(){
+            $.require("$event",function($){
                 $("#js_test").change(function(){
                     location.href = location.href.replace(/[?#].*/, '') +"#"+this.value;
                     location.reload()
