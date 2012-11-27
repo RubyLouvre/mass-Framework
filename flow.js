@@ -1,7 +1,7 @@
 //=========================================
 //  操作流模块v2,用于流程控制
 //==========================================
-define("flow",["mass,$class"],function($){
+define("flow",["$class"],function($){
     var uuid_arr =  '0123456789ABCDEFG'.split('');
     var _args = function (root, arr){//对所有结果进行平坦化处理
         for(var i = 0, result = [], el; el = arr[i++];){

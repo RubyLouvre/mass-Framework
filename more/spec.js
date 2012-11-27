@@ -1,7 +1,7 @@
 //==================================================
 // 测试模块v4
 //==================================================
-define( ["$lang"], function(){
+define( ["$lang"], function( $ ){
     $.log("已加载spec v4模块",7);
     var global = this, DOC = global.document;
     //模块为$添加如下方法:
@@ -256,10 +256,10 @@ define( ["$lang"], function(){
                         var parentNode = get(fixtureId).getElementsByTagName("ul")[0];
                         //取得整行expec语句
                         var body = assert.toString().
-                            replace(rbody, '$1').
-                          //  replace(/^\s*|\s*$/g, '').
-                            replace(/</g,"&lt;").
-                            replace(/>/g,"&gt;");
+                        replace(rbody, '$1').
+                        //  replace(/^\s*|\s*$/g, '').
+                        replace(/</g,"&lt;").
+                        replace(/>/g,"&gt;");
                         
                         body = body.split("expect").map(function(segment){
                             return segment.charAt(0) === "(" ? retouch(segment) : segment;
@@ -315,7 +315,7 @@ define( ["$lang"], function(){
     }: function(s){
         return s
     }
-
+    return $;
 });
 //2011.8.9    增加getUnpassExpect函数,用于取得没有通过的expect并显示出来
 //2011.10.26  优化format与quote

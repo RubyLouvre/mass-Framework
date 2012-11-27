@@ -687,7 +687,7 @@ define("ajax",["mass","$flow"], function($){
             }, 16);
         }
     });
-
+    return $;
 });
 /**
 2011.8.31

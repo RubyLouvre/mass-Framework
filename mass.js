@@ -314,7 +314,7 @@
             module = new Module(id, parent || $.config.base);
             modules[id] = module;
         }
-        module.callback = factory || $.noop;
+        module.factory = factory || $.noop;
         module.state = state || module.state;
         module.deps = deps || module.deps || {};
         module.args = args || module.args || [];
@@ -366,7 +366,7 @@
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    fireFactory( obj.id, obj.args, obj.callback );
+                    fireFactory( obj.id, obj.args, obj.factory );
                     $._checkDeps();
                 }
             }
@@ -560,7 +560,7 @@
         }else{
             throw new Error( id +" 的factory必须是一个函数")
         }
-        $.require.apply( $, args ); //deps, factory, id
+        require.apply(null, args ); //deps, factory, id
     }
     define.amd = modules;
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装

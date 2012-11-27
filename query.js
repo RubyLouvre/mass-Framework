@@ -489,7 +489,7 @@ define("query",["mass"], function( $ ){
         }
         return elems;
     }
-     var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
+    var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
 
     $.mix(Icarus, {
         //getAttribute总会返回字符串
@@ -925,7 +925,7 @@ define("query",["mass"], function( $ ){
             return (el.getAttribute("type") || el.type) === name;//避开HTML5新增类型导致的BUG，不直接使用el.type === name;
         }
     });
-       
+    return Icarus
 });
 /**
 2011.10.25重构$.unique

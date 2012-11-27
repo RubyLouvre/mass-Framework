@@ -22,7 +22,8 @@
 
         </style>
         <script >
-            $.require("node,fx", function(){
+            $.require("$fx,ready", function(ret){
+                console.log( $.factory )
                 console.log("执行最后的回调")
                 $("#aaa").fx(2000,{
                     rotate: 720

@@ -1,24 +1,22 @@
-define(["$spec"],function(require, exports, module){
-
-    var gexports = exports
+define(["$spec"],function( spec ){
   
     $.fixture('模块加载模块的加载测试', {
         "加载单个模块":function(id){
             //语言模块会返回一个函数
             $.require("$lang",function(ret){
-                expect(typeof  ret === "function", id).ok();
+                expect(typeof ret.each , id).eq( "function" );
             });
             //特征嗅探模块会返回一个对象，包含所有测试结果
             $.require("$support",function(ret){
-                expect( typeof  ret === "object", id).ok();
+                expect( ret, id).eq( spec );
             });
             //类工厂没有返回值，返回exports对象
             $.require("$class",function(ret){
-                expect( typeof ret === "object", id).ok();
-                expect( ret !== gexports, id).ok();
+                expect( typeof ret.factory , id).eq("function");
+                expect( ret == spec, id).ok();
                 expect( ret == $.modules[$.config.base+"class.js"].exports, id).ok();
             });
-            $.require( $.core.base + "class", function(ret){
+            $.require( $.config.base + "class", function(ret){
                 expect( ret == $.modules[$.config.base+"class.js"].exports, id).ok();
             });
             //测试加载同一目录的模块
@@ -57,10 +55,42 @@ define(["$spec"],function(require, exports, module){
                 expect( ret.eee, id).eq( "eee" );
             });
         },
-        "测试module相关的元信息": function(){
-            expect( /\/test\/loader\.js/i.test(module.id) ).ok()
-            expect( module.parent ).eq( $.core.base )
-            expect( module.args ).eq( $.core.base + "more/spec.js") ;
+        "返回值测试":function(id){
+            //以下几个模块都是返回mass的命名空间对象,与spec模块一样
+            $.require("$lang", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$class", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$support", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$attr", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$css", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$event", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$node", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$fx", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            $.require("$ajax", function(ret){
+                expect( ret, id).eq( spec );
+            });
+            //以下两个模块特殊
+            $.require("$query", function(ret){
+                expect( typeof ret.pseudoHooks, id).eq( "object" );
+            });
+            $.require("$flow", function(ret){
+                expect( typeof new ret().uuid, id).eq( "function" );
+            });
         },
         "死链测试": function(){
             $.require("dead_link",function(){

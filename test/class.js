@@ -1,4 +1,4 @@
-define(["$class","$spec"], function(){
+define( "mass,$class,$spec".split(","), function(){
     $.log("已加载text/class模块",7);
     $.fixture('类工厂模块-class', {
         "$.factory":function(){

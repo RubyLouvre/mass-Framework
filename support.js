@@ -134,8 +134,7 @@ define("support",["mass"], function( $ ){
         body.removeChild( div );
         div =  null;
     });
-    
-    return support;
+    return $;
 });
 /**
 2011.9.7 优化attrProp判定

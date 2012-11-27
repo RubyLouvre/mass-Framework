@@ -132,6 +132,7 @@ define("data", ["$lang"], function( $ ){
             }
         }
     });
+    return $
 });
 
 /**
