@@ -9,7 +9,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
     // JSON RegExp
     rvalidchars = /^[\],:{}\s]*$/,
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-    rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g,
+    rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
