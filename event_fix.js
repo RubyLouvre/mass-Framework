@@ -1,7 +1,7 @@
 //=========================================
 //  事件补丁模块
 //==========================================
-define("event_fix", !!document.dispatchEvent, function(){
+define("event_fix", !!document.dispatchEvent, ["mass"], function($){
     $.log("已加载event_fix模块",7)
     var facade = $.event  =  {
         fire: function( init ){

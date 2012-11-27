@@ -1,9 +1,8 @@
 //=========================================
 // 事件系统 v8
 //==========================================
-define("event", top.dispatchEvent ?  ["$node"] : ["$node","$event_fix"],function(node){
+define("event", ["mass","$node"][top.dispatchEvent ? "valueOf": "cancat" ]("$event_fix"),function($){
     $.log("已加载event模块v8")
- 
     var facade = $.event || ($.event = {});
     var adapter = $.eventHooks || ($.eventHooks = {});
     //如果没有加载event_fix模块,也就没有change分支,也就说明其是支持dispatchEvent API

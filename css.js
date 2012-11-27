@@ -1,7 +1,7 @@
 //=========================================
 // 样式操作模块 v4 by 司徒正美
 //=========================================
-define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , function(){
+define( "css", ["mass","$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix")) , function(){
     $.log( "已加载css模块" );
     var adapter = $.cssHooks || ($.cssHooks = {})
     var rrelNum = /^([\-+])=([\-+.\de]+)/
@@ -120,7 +120,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     var supportBoxSizing = $.cssName("box-sizing")
     adapter[ "boxSizing:get" ] = function( node, name ) {
         return  supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ?
-        "border-box" : "content-box"
+            "border-box" : "content-box"
     }
 
     function setWH(node, name, val, extra){
@@ -171,7 +171,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         $.cssHooks[ lower+":set" ] = function( node, name, value ){
             var box = $.css(node, "box-sizing");
             node.style[name] = box == "content-box" ? value:
-            setWH(node, name, parseFloat(value), box ) + "px";
+                setWH(node, name, parseFloat(value), box ) + "px";
         }
         "inner_1,b_0,outer_2".replace(rmapper,function(a, b, num){
             var method = b == "b" ? lower : b + name;
@@ -187,10 +187,10 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                         //IE 标准模式 : html.scrollHeight> body.scrollHeight
                         //IE 怪异模式 : html.scrollHeight 最大等于可视窗口多一点？
                         return Math.max(
-                            node.body[ scrollProp ], doc[ scrollProp ],
-                            node.body[ offsetProp ], doc[ offsetProp ],
-                            doc[ clientProp ]
-                            );
+                        node.body[ scrollProp ], doc[ scrollProp ],
+                        node.body[ offsetProp ], doc[ offsetProp ],
+                        doc[ clientProp ]
+                    );
                     } else if ( size === void 0 ) {
                         return getWH( node, name, num )
                     } else {
@@ -248,7 +248,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
             status[ index ] = isHidden(elem) 
             if( !values[ index ] ){
                 values[ index ] =  status[index] ? defaultDisplay(elem.nodeName): 
-                getter(elem, "display");
+                    getter(elem, "display");
                 $._data( elem, "olddisplay", values[ index ])
             }
         }
@@ -311,7 +311,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
     $.fn.offset = function(options){//取得第一个元素位于页面的坐标
         if ( arguments.length ) {
             return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
-            this.each(function() {
+                this.each(function() {
                 setOffset( this, options );
             });
         }
@@ -403,15 +403,15 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
                 }
                 win = getWindow( node );//获取第一个元素的scrollTop/scrollLeft
                 return win ? (prop in win) ? win[ prop ] :
-                win.document.documentElement[ method ]  : node[ method ];
+                    win.document.documentElement[ method ]  : node[ method ];
             }
             return this.each(function() {//设置匹配元素的scrollTop/scrollLeft
                 win = getWindow( this );
                 if ( win ) {
                     win.scrollTo(
                         !top ? val : $( win ).scrollLeft(),
-                        top ? val : $( win ).scrollTop()
-                        );
+                    top ? val : $( win ).scrollTop()
+                );
                 } else {
                     this[ method ] = val;
                 }
@@ -428,7 +428,7 @@ define( "css", !!top.getComputedStyle ? ["$node"] : ["$node","$css_fix"] , funct
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     } ;
 });
-    /**
+/**
 2011.9.5将cssName改为隋性函数,修正msTransform Bug
 2011.9.19 添加$.fn.offset width height innerWidth innerHeight outerWidth outerHeight scrollTop scrollLeft offset position
 2011.9.20 v2
@@ -462,5 +462,5 @@ http://www.zhangxinxu.com/wordpress/2011/11/css3-font-face%E5%85%BC%E5%AE%B9%E6%
 　　
 　　这里的阴影运用得不错
 　　http://www.soleilneon.com/blog/2010/10/add-css3-border-radius-and-box-shadow-to-your-design/
-     */
+ */
 

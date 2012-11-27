@@ -1,7 +1,7 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define( "node", ["$lang","$support","$class","$query","$data","ready"],function( lang, support ){
+define( "node", "mass,$lang,$class,$query,$data".split(","),function( $, lang ){
     $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
@@ -138,7 +138,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
                 //接着判断innerHTML属性是否符合标准,不再区分可读与只读
                 //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
                 //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
-                if ( support.innerHTML && (!rcreate.test(value) && !rnest.test(value)) ) {
+                if ( $.support.innerHTML && (!rcreate.test(value) && !rnest.test(value)) ) {
                     try {
                         for ( var i = 0; el = this[ i++ ]; ) {
                             if ( el.nodeType === 1 ) {
@@ -217,7 +217,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         }
     });
    
-    //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
+    //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-$.support/
     var prefixes = ['','-webkit-','-o-','-moz-', 'moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
     var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector 
         c:   "color",
@@ -299,7 +299,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             if( $.commonRange && doc === document && !rcreate.test(html) && !rnest.test(html) ){
                 return $.commonRange.createContextualFragment( html );
             }
-            if( !support.createAll ){//fix IE
+            if( !$.support.createAll ){//fix IE
                 html = html.replace(rcreate,"<br class='fix_create_all'/>$1");//在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec( html ) || ["", ""])[1].toLowerCase(),//取得其标签名
@@ -326,7 +326,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             //移除我们为了符合套嵌关系而添加的标签
             for ( i = wrap[0]; i--;wrapper = wrapper.lastChild ){};
             //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
-            if( !support.insertTbody ){
+            if( !$.support.insertTbody ){
                 var noTbody = !rtbody.test( html ); //矛:html本身就不存在<tbody字样
                 els = wrapper[ TAGS ]( "tbody" );
                 if ( els.length > 0 && noTbody ){//盾：实际上生成的NodeList中存在tbody节点
@@ -336,14 +336,14 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
                     }
                 }
             }
-            if( !support.createAll ){//移除所有补丁
+            if( !$.support.createAll ){//移除所有补丁
                 for( els = wrapper[ TAGS ]( "br" ), i = 0; el = els[ i++ ]; ) {
                     if( el.className && el.className === "fix_create_all" ) {
                         el.parentNode.removeChild(el);
                     }
                 }
             }
-            if( !support.appendChecked ){//IE67没有为它们添加defaultChecked
+            if( !$.support.appendChecked ){//IE67没有为它们添加defaultChecked
                 for( els = wrapper[ TAGS ]( "input" ), i = 0; el = els[ i++ ]; ) {
                     if ( el.type === "checkbox" || el.type === "radio" ) {
                         el.defaultChecked = el.checked;
@@ -367,7 +367,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         tr: [ 2, "<table><tbody>", "</tbody></table>" ],
         td: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
-        _default: support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "</div>" ]
+        _default: $.support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "</div>" ]
     };
 
     translations.optgroup = translations.option;
@@ -377,7 +377,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
     rtbody = /<tbody[^>]*>/i,
     rtagName = /<([\w:]+)/,//取得其tagName
     rxhtml =  /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
-    rcreate = support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
+    rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
     types = $.oneObject("text/javascript","text/ecmascript","application/ecmascript","application/javascript","text/vbscript"),
     //需要处理套嵌关系的标签
     rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,adjacent = "insertAdjacentHTML",
@@ -457,7 +457,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             //如果传入的是字符串片断
             var fragment = $.parseHTML( item, doc ),
             //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
-            fast = (type !== "replace") && support[ adjacent ] && !rnest.test(item);
+            fast = (type !== "replace") && $.support[ adjacent ] && !rnest.test(item);
             insertAdjacentHTML( elems, insertApapter[ type ], fragment, fast, insertApapter[ type+"2" ], item ) ;
         }else if( item.length ) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
@@ -497,13 +497,13 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
         if( node.nodeType === 1 ){
             var bool //!undefined === true;
             //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-            if(!support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
+            if(!$.support.cloneHTML5 && node.outerHTML){//延迟创建检测元素
                 var outerHTML = document.createElement(node.nodeName).outerHTML;
                 bool = outerHTML.indexOf( unknownTag ) // !0 === true;
             }
             //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
             var neo = !bool? shimCloneNode( node.outerHTML, document.documentElement ): node.cloneNode(true), src, neos, i;
-            if(!support.cloneNode ){
+            if(!$.support.cloneNode ){
                 fixNode( neo, node );
                 src = node[ TAGS ]( "*" );
                 neos = neo[ TAGS ]( "*" );
@@ -540,7 +540,7 @@ define( "node", ["$lang","$support","$class","$query","$data","ready"],function(
             //IE6-8无法复制其内部的元素
             if ( nodeName === "object" ) {
                 clone.outerHTML = src.outerHTML;
-                if ( support.cloneHTML5 && (src.innerHTML && !clone.innerHTML.trim() ) ) {
+                if ( $.support.cloneHTML5 && (src.innerHTML && !clone.innerHTML.trim() ) ) {
                     clone.innerHTML = src.innerHTML;
                 }
             } else if ( nodeName === "input" && (src.type === "checkbox" || src.type == "radio") ) {
