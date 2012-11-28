@@ -4,8 +4,8 @@
     <head>
         <title>sample by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-        <script src="mass.js">
+<link rel="stylesheet" type="text/css" href="superfish.css" media="screen">
+        <script src="jquery.js">
           
         </script>
         <style>
@@ -19,14 +19,21 @@
 
 
             }
-
+            p{
+                border:1px solid red;
+            }
+            span{
+                border:1px solid red;
+                padding:10px;
+                margin:10px;
+            }
         </style>
         <script >
             $.require("ready,event,$fx", function(ret){
                 $("#js_test").change(function(){
                     $.log(this.value)
                 })
-                console.log("执行最后的回调")
+            
                 $("#aaa").fx(2000,{
                     rotate: 720
                 })
@@ -37,48 +44,107 @@
 
     </head>
     <body>
-        <div id="ccc"  > 
-            <div id="bbb"  >
-                <div id="aaa"  >
-                    AAA
-                </div>
-            </div>
-        </div>
-        <select id="js_test">
-            <option value="mass">
-                模块加载模块
-            </option>
-            <option value="loader">
-                模块加载模块2
-            </option>
-            <option value="lang">
-                语言扩展模块
-            </option>
-            <option value="support">
-                特征嗅探模块
-            </option>
-            <option value="class">
-                类工厂模块
-            </option>
-            <option value="flow">
-                操作流
-            </option>
-            <option value="node">
-                节点操作模块
-            </option>
-            <option value="data">
-                数据缓存模块
-            </option>
-            <option value="css">
-                样式操作模块
-            </option>
-            <option value="attr">
-                属性操作模块
-            </option>
-            <option value="event">
-                事件模块
-            </option>
-        </select>
+        <ul class="sf-menu">
+            <li class="current">
+                <a href="#a">menu item</a>
+                <ul>
+                    <li>
+                        <a href="#aa">menu item that is quite long</a>
+                    </li>
+                    <li class="current">
+                        <a href="#ab">menu item</a>
+                        <ul>
+                            <li class="current"><a href="#">menu item</a></li>
+                            <li><a href="#aba">menu item</a></li>
+                            <li><a href="#abb">menu item</a></li>
+                            <li><a href="#abc">menu item</a></li>
+                            <li><a href="#abd">menu item</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu item</a>
+            </li>
+            <li>
+                <a href="#">menu item</a>
+                <ul>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">short</a></li>
+                            <li><a href="#">short</a></li>
+                            <li><a href="#">short</a></li>
+                            <li><a href="#">short</a></li>
+                            <li><a href="#">short</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#">menu item</a>
+                        <ul>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                            <li><a href="#">menu item</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">menu item</a>
+            </li>	
+        </ul>
 
     </body>
 </html>

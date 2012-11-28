@@ -307,7 +307,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             wrap = tagHooks[ tag ] || tagHooks._default,
             fragment = doc.createDocumentFragment(),
             wrapper = doc.createElement("div"), firstChild;
-            wrapper.innerHTML = wrap[1] + html + wrap[2];
+            wrapper.innerHTML = wrap[1] + html + (wrap[2] || "");
             var els = wrapper[ TAGS ]("script");
             if( els.length ){//使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script = doc.createElement("script"), neo;
@@ -359,16 +359,16 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
     });
     //parseHTML的辅助变量
     var tagHooks  = {
-        area: [ 1, "<map>", "</map>" ],
-        param: [ 1, "<object>", "</object>" ],
-        col: [ 2, "<table><tbody></tbody><colgroup>", "</colgroup></table>" ],
-        legend: [ 1, "<fieldset>", "</fieldset>" ],
-        option: [ 1, "<select multiple='multiple'>", "</select>" ],
+        area: [ 1, "<map>" ],
+        param: [ 1, "<object>" ],
+        col: [ 2, "<table><tbody></tbody><colgroup>", "</table>" ],
+        legend: [ 1, "<fieldset>" ],
+        option: [ 1, "<select multiple='multiple'>" ],
         thead: [ 1, "<table>", "</table>" ],
-        tr: [ 2, "<table><tbody>", "</tbody></table>" ],
-        td: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
+        tr: [ 2, "<table><tbody>" ],
+        td: [ 3, "<table><tbody><tr>" ],
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
-        _default: $.support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "" ]//div可以不用闭合
+        _default: $.support.createAll ? [ 0, "" ] : [ 1, "X<div>"]//div可以不用闭合
     };
 
     tagHooks.optgroup = tagHooks.option;
