@@ -511,6 +511,7 @@
             args.unshift([])
         }
         args.push(loading)
+        $.log(loading+"!!!!!!!")
         if($._checkCycle(modules[loading].deps, loading)){
             throw new Error( loading +"模块与之前的某些模块存在循环依赖")
         }

@@ -15,6 +15,7 @@
 }
 .sf-menu ul li {
 	width:			100%;/*跟父节点同宽*/
+        display: inline-block;
         
 }
 .sf-menu li:hover {
@@ -30,7 +31,7 @@
 }
 /* sfHover js添加的类名 */
 .sf-menu li:hover ul,
-.sf-menu li.sfHover ul {
+.sf-menu li.sfHover ul{
 	left:			0;
 	top:			2.5em; /* match top ul list item height */
 	z-index:		99;
@@ -79,11 +80,11 @@ ul.sf-menu li li li.sfHover ul {
 }
 .sf-menu li:hover, .sf-menu li.sfHover,
 .sf-menu a:focus, .sf-menu a:hover, .sf-menu a:active {
-	background:		#CFDEFF;
+	background:		red;
 	outline:		0;
 }
 
-/*** 三角形， 这个是用插件通过JS添加的 **/
+/*** 三角形， 这个是用插件通过JS添加的#CFDEFF ***/
 .sf-menu a.sf-with-ul {
 	padding-right: 	2.25em;
 	min-width:		1px; /* trigger IE7 hasLayout so spans position accurately */
