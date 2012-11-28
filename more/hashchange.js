@@ -1,4 +1,4 @@
-define("hashchange", ["$event"], function(){
+define("hashchange", ["$event"], function($){
     $.log("已加载hashchange模块")
 
     var hashchange = 'hashchange',  DOC = document,  documentMode = DOC.documentMode,

@@ -1,4 +1,4 @@
-define("scrollbar", "css",function( ){
+define("scrollbar", ["css"],function( $){
     $.fn.hasScrollBar = function() {
         var node = this[0],ret = false;
         if ((node.clientHeight < node.scrollHeight) || (node.clientWidth < node.scrollWidth)) {

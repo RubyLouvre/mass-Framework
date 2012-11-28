@@ -1,4 +1,4 @@
-define("store", this.JSON && JSON.parse ? ["support"] :["$support","./json2"], function(){
+define("store", this.JSON && JSON.parse ? ["support"] :["$support","./json2"], function($){
     var store = {
         //一些接口(空实现)
         disabled: false,

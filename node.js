@@ -368,7 +368,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         tr: [ 2, "<table><tbody>", "</tbody></table>" ],
         td: [ 3, "<table><tbody><tr>", "</tr></tbody></table>" ],
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
-        _default: $.support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "</div>" ]
+        _default: $.support.createAll ? [ 0, "", "" ] : [ 1, "X<div>", "" ]//div可以不用闭合
     };
 
     tagHooks.optgroup = tagHooks.option;

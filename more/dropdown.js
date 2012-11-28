@@ -1,4 +1,4 @@
-define('dropdown',[ '$css',"./avalon" ], function(){
+define('dropdown',[ '$css',"./avalon" ], function($){
     $.log("已加载dropdown模块",7)
     $.ui = $.ui || {};
     var defaults = {

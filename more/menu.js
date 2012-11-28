@@ -1,4 +1,4 @@
-define("menu",["$node","$event","$attr","$css"],function(){
+define("menu",["$node","$event","$attr","$css"],function($){
 
     var defaults = {
         data:[],
