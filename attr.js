@@ -236,7 +236,7 @@ define("attr",["$node"], function( $ ){
         attrHooks: {
             "@w3c:get": function( node, name ){
                 var ret =  node.getAttribute( name ) ;
-                return ret === null ? void 0 : ret;
+                return ret == null ? void 0 : ret;
             },
             "@w3c:set": function( node, name, value ){
                 node.setAttribute( name, "" + value )
