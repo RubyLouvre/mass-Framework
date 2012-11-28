@@ -4,39 +4,16 @@
     <head>
         <title>sample by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<link rel="stylesheet" type="text/css" href="superfish.css" media="screen">
+        <link rel="stylesheet" type="text/css" href="superfish.css" media="screen">
         <script src="jquery.js">
           
         </script>
-        <style>
-            #aaa {
-                position: absolute;
-                top:100px;
-                left:100px;
-                background:red;
-                width:100px;
-                height:100px;
-
-
-            }
-            p{
-                border:1px solid red;
-            }
-            span{
-                border:1px solid red;
-                padding:10px;
-                margin:10px;
-            }
-        </style>
+        <script src="superfish.js">
+          
+        </script>
         <script >
-            $.require("ready,event,$fx", function(ret){
-                $("#js_test").change(function(){
-                    $.log(this.value)
-                })
-            
-                $("#aaa").fx(2000,{
-                    rotate: 720
-                })
+            jQuery(function(){
+                jQuery('ul.sf-menu').superfish();
             });
 
         </script>
@@ -52,7 +29,7 @@
                         <a href="#aa">menu item that is quite long</a>
                     </li>
                     <li class="current">
-                        <a href="#ab">menu item</a>
+                        <a href="#ab">XXXXX</a>
                         <ul>
                             <li class="current"><a href="#">menu item</a></li>
                             <li><a href="#aba">menu item</a></li>
@@ -64,7 +41,16 @@
                     <li>
                         <a href="#">menu item</a>
                         <ul>
-                            <li><a href="#">menu item</a></li>
+                            <li>
+                                <a href="#">menu item</a>
+                                <ul>
+                                    <li class="current"><a href="#">menu item</a></li>
+                                    <li><a href="#aba">menu item</a></li>
+                                    <li><a href="#abb">menu item</a></li>
+                                    <li><a href="#abc">menu item</a></li>
+                                    <li><a href="#abd">menu item</a></li>
+                                </ul>
+                            </li>
                             <li><a href="#">menu item</a></li>
                             <li><a href="#">menu item</a></li>
                             <li><a href="#">menu item</a></li>
