@@ -285,12 +285,12 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                             elem[ ontype ] = null;
                         }
                         //防止二次trigger，elem.click会再次触发addEventListener中绑定的事件
-                        $.event.triggered = type;
+                        facade.triggered = type;
                         try {
                             //IE6-8在触发隐藏元素的focus/blur事件时会抛出异常
                             elem[ type ]();
                         } catch ( e ) {   }
-                        $.event.triggered = undefined;
+                        facade.triggered = undefined;
 
                         if ( old ) {
                             elem[ ontype ] = old;
@@ -311,7 +311,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             handlers = ( ($._data( this, "events" ) || {} )[ event.type ] || []),
             delegateCount = handlers.delegateCount,
             args = Array.apply([], arguments ),
-            special = eventHooks[ event.type ] || {},
+            hook = eventHooks[ event.type ] || {},
             handlerQueue = [];
 
             // Use the fix-ed $.Event rather than the (read-only) native event
@@ -319,7 +319,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             event.delegateTarget = this;
 
             // Call the preDispatch hook for the mapped type, and let it bail if desired
-            if ( special.preDispatch && special.preDispatch.call( this, event ) === false ) {
+            if ( hook.preDispatch && hook.preDispatch.call( this, event ) === false ) {
                 return;
             }
 
@@ -379,7 +379,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                         event.data = handleObj.data;
                         event.handleObj = handleObj;
 
-                        ret = ( ($.event.special[ handleObj.origType ] || {}).handle || handleObj.handler )
+                        ret = ( (eventHooks[ handleObj.origType ] || {}).handle || handleObj.handler )
                         .apply( matched.elem, args );
 
                         if ( ret !== undefined ) {
@@ -394,19 +394,16 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             }
 
             // Call the postDispatch hook for the mapped type
-            if ( special.postDispatch ) {
-                special.postDispatch.call( this, event );
+            if ( hook.postDispatch ) {
+                hook.postDispatch.call( this, event );
             }
 
             return event.result;
         },
 
-        // Includes some event props shared by KeyEvent and MouseEvent
-        props: "altKey bubbles cancelable ctrlKey currentTarget eventPhase metaKey relatedTarget shiftKey target timeStamp view which".split(" "),
-
 
         fix: function( event ) {
-            if ( event[ $.expando ] ) {
+            if ( event.originalEvent ) {
                 return event;
             }
 
@@ -550,3 +547,5 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
     });
     return $;
 })
+
+
