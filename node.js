@@ -16,7 +16,6 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         }
         return document;
     }
-    $.log($.support)
     $.mix( $.mutators ).implement({
         init: function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
