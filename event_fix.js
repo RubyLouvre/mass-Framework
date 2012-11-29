@@ -3,134 +3,105 @@
 //==========================================
 define("event_fix", !!document.dispatchEvent, ["mass"], function($){
     $.log("已加载event_fix模块",7)
-    var facade = $.event  =  {
-        fire: function( init ){
-            //这里的代码仅用于IE678
-            var transfer;
-            if( typeof init == "string"){
-                transfer = new $.Event(init);
-                init = false;
-            }
-            if( init && typeof init == "object"){
-                if( init instanceof $.Event ){//如果是伪的
-                    transfer = init;
-                }else if( "cancelBubble" in init){
-                    transfer = new $.Event(init.type);
-                    transfer.originalEvent = init
-                }
-            }
-            if(!transfer){
-                throw "fire的第一个参数是必须是事件类或真伪事件对象"
-            }
-            transfer.target = this;
-            transfer.args = [].slice.call(arguments,1) ;
-            var type =  transfer.origType || transfer.type
-            if( $["@bind"] in this ){
-                var cur = this,  ontype = "on" + type;
-                do{//模拟事件冒泡与执行内联事件
-                    facade.dispatch( cur, transfer, type );
-                    if (cur[ ontype ] && cur[ ontype ].call(cur) === false) {
-                        transfer.preventDefault();
-                    }
-                    if(facade.noBubble[type]){
-                        break;
-                    }
-                    cur = cur.parentNode ||
-                    cur.ownerDocument ||
-                    cur === cur.ownerDocument && window;  //在opera 中节点与window都有document属性
-                } while ( cur && !transfer.propagationStopped );
-
-                if ( !transfer.defaultPrevented ) {//如果用户没有阻止普通行为，defaultPrevented
-                    if( !(type === "click" && this.nodeName === "A") ) { //并且事件源不为window，并且是原生事件
-                        if ( ontype && this[ type ] && ((type !== "focus" && type !== "blur") || this.offsetWidth !== 0) &&  !this.eval ) {
-                            var inline = this[ ontype ];
-                            //当我们直接调用元素的click,submit,reset,focus,blur
-                            //会触发其默认行为与内联事件,但IE下会再次触发内联事件与多投事件
-                            this[ ontype ] = null;
-                            facade.type = type
-                            if(type == "click" && /checkbox|radio/.test(this.type)){
-                                this.checked = !this.checked
-                            }
-                            this[ type ]();
-                            facade.type = void 0
-                            this[ ontype ] = inline;
-                        }
-                    }
-
-                }
-
-            }else{//普通对象的自定义事件
-                facade.dispatch(this, transfer);
-            }
-        }
-    }
+  
     //模拟IE678的reset,submit,change的事件代理
-    var rform  = /^(?:input|select|textarea)$/i
-    function changeNotify( event ){
-        if( event.type == "change" || event.propertyName == "checked" ){
-            facade.fire.call(this,"change")
-        }
-    }
-    function delegate( fn ){
-        return function( item ){//用于判定是否要使用代理
-            return item.live  ? fn( item.currentTarget, item ) : false;
-        }
-    }
-    var adapter = $.eventHooks = {
-        focus: {
-            delegateType: "focusin"
-        },
-        blur: {
-            delegateType: "focusout"
-        },
-        change: {//change事件的冒泡情况 IE6-9全灭
-            //详见这里https://github.com/RubyLouvre/mass-Framework/issues/13
-            setup: delegate(function( node, desc ){
-                var subscriber = desc.subscriber || ( desc.subscriber = {}) //用于保存订阅者的UUID
-                desc.__beforeactive__ = $.bind( node, "beforeactivate", function(event) {
-                    var target = event.srcElement;
-                    var tid = $.getUid( target )
-                    //如果发现孩子是表单元素并且没有注册propertychange事件，则为其注册一个，那么它们在变化时就会发过来通知顶层元素
-                    if ( rform.test( target.tagName) && !subscriber[ tid ] ) {
-                        subscriber[ tid ] = target;//将select, checkbox, radio, text, textarea等表单元素注册其上
-                        if(/checkbox|radio/.test(target.type)){
-                            desc.__change__ = $.bind( target, "propertychange", changeNotify.bind(target, event) );
-                        }else{
-                            desc.__change__ = $.bind( target, "change", changeNotify.bind(target, event) );
+    var rformElems  = /^(?:input|select|textarea)$/i
+    $.event = {
+        special: {
+            change: {
+                setup: function() {
+                    if ( rformElems.test( this.nodeName ) ) {
+                        // IE doesn't fire change on a check/radio until blur; trigger it on click
+                        // after a propertychange. Eat the blur-change in special.change.handle.
+                        // This still fires onchange a second time for check/radio after blur.
+                        if ( this.type === "checkbox" || this.type === "radio" ) {
+                            $( this ).bind(  "propertychange._change", function( event ) {
+                                if ( event.originalEvent.propertyName === "checked" ) {
+                                    this._just_changed = true;
+                                }
+                            });
+                            $( this). bind("click._change", function( event ) {
+                                if ( this._just_changed && !event.isTrigger ) {
+                                    this._just_changed = false;
+                                }
+                                // Allow triggered, simulated change events (#11500)
+                                $.event.simulate( "change", this, event, true );
+                            } );
+                        }
+                        return false;
+                    }
+                    // Delegated event; lazy-add a change handler on descendant inputs
+                    $ (this).bind(  "beforeactivate._change", function( e ) {
+                        var elem = e.target;
+                        if ( rformElems.test( elem.nodeName ) && !$._data( elem, "_change_attached" ) ) {
+                            $( elem ).bind( "change._change", function( event ) {
+                                if ( this.parentNode && !event.isSimulated && !event.isTrigger ) {
+                                    $.event.simulate( "change", this.parentNode, event, true );
+                                }
+                                $._data( elem, "_change_attached", true );
+                            })
+                        }
+                    });
+                },
+                handle: function( event ) {
+                    var elem = event.target;
+                    // Swallow native change events from checkbox/radio, we already triggered them above
+                    if ( this !== elem || event.isSimulated || event.isTrigger || (elem.type !== "radio" && elem.type !== "checkbox") ) {
+                        return event.handleObj.handler.apply( this, arguments );
+                    }
+                },
+                teardown: function() {
+                    $.event.remove( this, "._change" );
+                    return !rformElems.test( this.nodeName );
+                }
+            },
+            submit: {
+                setup: function() {
+                    // Only need this for delegated form submit events
+                    if ( this.tagName === "FORM"  ) {
+                        return false;
+                    }
+                    // Lazy-add a submit handler when a descendant form may potentially be submitted
+                    $( this).bind( "click._submit keypress._submit", function( e ) {
+                        // Node name check avoids a VML-related crash in IE (#9807)
+                        var elem = e.target,
+                        form = /input|button/i.test(elem.tagName) ? elem.form : undefined;
+                        if ( form && !$._data( form, "_submit_attached" ) ) {
+                            $.event.bind( form,{
+                                type:      "submit._submit",
+                                callback: function( event ) {
+                                    event._submit_bubble = true;
+                                }
+                            });
+                            $._data( form, "_submit_attached", true );
+                        }
+                    });
+                // return undefined since we don't need an event listener
+                },
+
+                postDispatch: function( event ) {
+                    // If form was submitted by the user, bubble the event up the tree
+                    if ( event._submit_bubble ) {
+                        delete event._submit_bubble;
+                        if ( this.parentNode && !event.isTrigger ) {
+                            jQuery.event.simulate( "submit", this.parentNode, event, true );
                         }
                     }
-                });//如果是事件绑定
-            // node.fireEvent("onbeforeactivate")
-            }),
-            teardown: delegate(function( node, desc ){
-                $.unbind( node, "beforeactive", desc.__beforeactive__ );
-                var els = desc.subscriber ;
-                for(var i in els){
-                    $.unbind( els[i], "propertychange",  desc.__change__) ;
-                    $.unbind( els[i], "change",  desc.__change__);
+                },
+
+                teardown: function() {
+                    // Only need this for delegated form submit events
+                    if ( jQuery.nodeName( this, "form" ) ) {
+                        return false;
+                    }
+
+                    // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
+                    jQuery.event.remove( this, "._submit" );
                 }
-            })
+            }
         }
     }
-    //submit事件的冒泡情况----IE6-9 :form ;FF: document; chrome: window;safari:window;opera:window
-    //同reset事件的冒泡情况----FF与opera能冒泡到document,其他浏览器只能到form
-    "submit,reset".replace( $.rword, function( type ){
-        adapter[ type ] = {
-            setup: delegate(function( node ){
-                $(node).bind( "click._"+type+" keypress._"+type, function( event ) {
-                    var el = event.target;
-                    if( el.form && (adapter[ type ].keyCode[ event.which ] || adapter[ type ].input[  el.type ] ) ){
-                        facade.fire.call(el, type)
-                    }
-                });
-            }),
-            keyCode: $.oneObject(type == "submit" ? "13,108" : "27"),
-            input:  $.oneObject(type == "submit" ? "submit,image" : "reset"),
-            teardown: delegate(function( node ){
-                $( node ).unbind( "._"+type );
-            })
-        };
-    });
+   
 })
 
 /*
@@ -172,4 +143,3 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function($){
     </body>
 </html>
  */
-
