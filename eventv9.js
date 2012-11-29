@@ -7,7 +7,54 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
     var eventHooks = facade.special,
     rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
     rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
-    
+    function Event( src, props ) {
+        if ( !(this instanceof $.Event) ) {
+            return new Event( src, props );
+        }
+        // Event object
+        this.originalEvent = {}
+        if ( src && src.type ) {
+            this.originalEvent = src;
+            this.type = src.type;
+        // Event type
+        } else {
+            this.type = src;
+        }
+        this.defaultPrevented = false;
+        if ( props ) {
+            $.mix( this, props );
+        }
+        this.timeStamp = new Date - 0;
+    };
+    Event.prototype = {
+        toString: function(){
+            return "[object Event]"
+        },
+        preventDefault: function() {
+            this.defaultPrevented = true;
+            var e = this.originalEvent
+            if (e && e.preventDefault ) {
+                e.preventDefault();
+            }// 如果存在returnValue 那么就将它设为false
+            e.returnValue = false;
+            return this;
+        },
+        stopPropagation: function() {
+            var e = this.originalEvent 
+            if (e && e.stopPropagation ) {
+                e.stopPropagation();
+            } 
+            //http://opera.im/kb/userjs/
+            e.cancelBubble = this.propagationStopped = true;
+            return this;
+        },
+        stopImmediatePropagation: function() {
+            this.isImmediatePropagationStopped = true;
+            this.stopPropagation();
+            return this;
+        }
+    }
+    $.Event = Event;
     $.mix(eventHooks,{
         load: {
             // Prevent triggered image.load events from bubbling to window.load
@@ -88,7 +135,6 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                 var handleObj = $.mix({}, hash, {
                     type: type,
                     origType: tns[1],
-                    needsContext: selector && $.expr.match.needsContext.test( selector ),
                     namespace: namespaces.join(".")
                 } );
                 //初始化事件列队
@@ -120,7 +166,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
        
         global: {},
 
-        // Detach an event or set of events from an element
+        //外部的API已经确保types至少为空字符串
         unbind: function( elem, hash ) {
 
             var  elemData = $._data( elem ), events, j, handleObj, origType
@@ -256,7 +302,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             }
 
             //沿着之前铺好的路触发事件
-            for ( i = 0; i < eventPath.length && !event.isPropagationStopped(); i++ ) {
+            for ( i = 0; i < eventPath.length && !event.propagationStopped; i++ ) {
 
                 cur = eventPath[i][0];
                 event.type = eventPath[i][1];
@@ -273,7 +319,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             }
             event.type = type;
             //如果没有阻止默认行为
-            if (  !event.isDefaultPrevented() ) {
+            if (  !event.defaultPrevented ) {
 
                 if ( (!hook._default || hook._default.apply( elem.ownerDocument, data ) === false) &&
                     !(type === "click" &&  elem.nodeName == "A" )  ) {
@@ -303,8 +349,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
         },
 
         dispatch: function( event ) {
-
-            // Make a writable $.Event from the native event object
+            //包裹事件对象，统一事件接口与覆盖原生成属性
             event = $.event.fix( event );
 
             var i, j, cur, ret, selMatch, matched, matches, handleObj, sel,
@@ -313,34 +358,28 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             args = Array.apply([], arguments ),
             hook = eventHooks[ event.type ] || {},
             handlerQueue = [];
-
-            // Use the fix-ed $.Event rather than the (read-only) native event
+            //重置第一个参数
             args[0] = event;
             event.delegateTarget = this;
 
-            // Call the preDispatch hook for the mapped type, and let it bail if desired
+            // 经典的AOP模式
             if ( hook.preDispatch && hook.preDispatch.call( this, event ) === false ) {
                 return;
             }
-
-            // Determine handlers that should run if there are delegated events
-            // Avoid non-left-click bubbling in Firefox (#3861)
+            //如果使用了事件代理，则先执行事件代理的回调
             if ( delegateCount && !(event.button && event.type === "click") ) {
 
                 for ( cur = event.target; cur != this; cur = cur.parentNode || this ) {
-
-                    // Don't process clicks (ONLY) on disabled elements (#6911, #8165, #11382, #11764)
+                    //disabled元素不能触发点击事件
                     if ( cur.disabled !== true || event.type !== "click" ) {
-                        selMatch = {};
+                        selMatch = {};                       
                         matches = [];
                         for ( i = 0; i < delegateCount; i++ ) {
                             handleObj = handlers[ i ];
                             sel = handleObj.selector;
-
-                            if ( selMatch[ sel ] === undefined ) {
-                                selMatch[ sel ] = handleObj.needsContext ?
-                                $( sel, this ).index( cur ) >= 0 :
-                                $.find( sel, this, null, [ cur ] ).length;
+                            //判定目标元素(this)的孩子(cur)是否匹配（sel）
+                            if ( selMatch[ sel ] === void 0 ) {
+                                selMatch[ sel ] =  $( sel, this ).index( cur ) >= 0 
                             }
                             if ( selMatch[ sel ] ) {
                                 matches.push( handleObj );
@@ -365,11 +404,11 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             }
 
             // Run delegates first; they may want to stop propagation beneath us
-            for ( i = 0; i < handlerQueue.length && !event.isPropagationStopped(); i++ ) {
+            for ( i = 0; i < handlerQueue.length && !event.propagationStopped; i++ ) {
                 matched = handlerQueue[ i ];
                 event.currentTarget = matched.elem;
 
-                for ( j = 0; j < matched.matches.length && !event.isImmediatePropagationStopped(); j++ ) {
+                for ( j = 0; j < matched.matches.length && !event.isImmediatePropagationStopped; j++ ) {
                     handleObj = matched.matches[ j ];
 
                     // Triggered event must either 1) have no namespace, or
@@ -381,8 +420,11 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
 
                         ret = ( (eventHooks[ handleObj.origType ] || {}).handle || handleObj.handler )
                         .apply( matched.elem, args );
-
-                        if ( ret !== undefined ) {
+                        handleObj.times--;
+                        if(handleObj.times === 0){//如果有次数限制并到用光所有次数，则移除它
+                            facade.unbind( matched.elem, handleObj)
+                        }
+                        if ( ret !== void 0 ) {
                             event.result = ret;
                             if ( ret === false ) {
                                 event.preventDefault();
@@ -441,7 +483,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             // Piggyback on a donor event to simulate a different one.
             // Fake originalEvent to avoid donor's stopPropagation, but if the
             // simulated event prevents default then we do the same on the donor.
-            var e = $.extend(
+            var e = $.mix(
                 new $.Event(),
                 event,
                 {
@@ -450,12 +492,9 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                     originalEvent: {}
                 }
                 );
-            if ( bubble ) {
-                $.event.trigger( e, null, elem );
-            } else {
-                $.event.dispatch.call( elem, e );
-            }
-            if ( e.isDefaultPrevented() ) {
+
+            facade[bubble ? "trigger" : "dispatch"].call( elem, e );
+            if ( e.defaultPrevented ) {
                 event.preventDefault();
             }
         }
@@ -487,7 +526,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
         fire: function() {
             var args = arguments;
             return this.each(function() {
-                facade.fire.apply(this, args );
+                facade.trigger.apply(this, args );
             });
         }
     });
