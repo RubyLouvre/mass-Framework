@@ -39,7 +39,7 @@ $.event = {
             var  type = tns[1];
             var namespaces = ( tns[2] || "" ).split( "." ).sort();
             // 看需不需要特殊处理
-            var  special = $.event.special[ type ] || {};
+            var special = $.event.special[ type ] || {};
             // 事件代理与事件绑定可以使用不同的冒充事件
             type = ( selector ? special.delegateType : special.bindType ) || type;
             special = $.event.special[ type ] || {};
@@ -90,7 +90,8 @@ $.event = {
         if( !events ) return;
 
         var types = hash.type || "", selector = hash.selector
-        types.replace( $.rword, function( t ){
+        types =  types.match( $.rword ) || []
+       
             tns = rtypenamespace.exec( types[t] ) || [];
             type = origType = tns[1];
             namespaces = tns[2];
