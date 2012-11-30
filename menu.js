@@ -1,4 +1,4 @@
-define("menu", ["node","attr","css","event"], function($){
+define("menu", ["node","attr","css","event","fx"], function($){
 
     $.fn.superfish = function(op){
 
@@ -16,10 +16,18 @@ define("menu", ["node","attr","css","event"], function($){
             var $$ = $(this)
             $$.addClass(o.hoverClass).find("li."+o.hoverClass).removeClass(o.hoverClass)
             $$.siblings().removeClass(o.hoverClass)
-            o.onShow(this)
+            if(o.animation){
+                var fx = o.animation;
+                fx.after = function(){
+                    o.onShow($$[0])       
+                }
+                $$.find(">ul").fx(o.duration,fx)
+            }else{            
+                o.onShow(this)     
+            }
+          
         }).mouseleave(function(){
-            var $$ = $(this)
-            $$.removeClass(o.hoverClass)//.parents( 'li.' +o.hoverClass ).removeClass(o.hoverClass)
+            $(this).removeClass(o.hoverClass)
             o.onHide(this)
         })
 
@@ -30,7 +38,7 @@ define("menu", ["node","attr","css","event"], function($){
     sf.o = [];
     sf.IE7fix = function(){
         var o = sf.op;
-        if ($.browser.msie && $.browser.version > 6 && o.dropShadows && o.animation.opacity!=undefined)
+        if (window.VBArray && window.XMLHttpRequest && o.dropShadows && o.animation.opacity!=undefined)
             this.toggleClass(sf.c.shadowClass+'-off');
     };
     sf.c = {
@@ -42,18 +50,14 @@ define("menu", ["node","attr","css","event"], function($){
     };
     sf.defaults = {
         hoverClass	: 'sfHover',
-        pathClass	: 'overideThisToUse',
-        pathLevels	: 1,
         delay		: 300,
         animation	: {
             opacity:'show'
         },
-        speed		: 'normal',
+        duration	:700,
         autoArrows	: true,
-        dropShadows : true,
+        dropShadows     : true,
         disableHI	: false,		// true disables hoverIntent detection
-        onInit		: function(){}, // callback functions
-        onBeforeShow: function(){},
         onShow		: function(){},
         onHide		: function(){}
     };

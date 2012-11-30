@@ -57,7 +57,7 @@ define("css_fix", !!top.getComputedStyle,["mass"], function( $ ){
     //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
     adapter[ "opacity:set" ] = function( node, name, value ){
         var currentStyle = node.currentStyle, style = node.style;
-        if(isFinite(value)){//"xxx" * 100 = NaN
+        if(!isFinite(value)){//"xxx" * 100 = NaN
             return
         }
         value = (value > 0.999) ? 100: (value < 0.001) ? 0 : value * 100;
