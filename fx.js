@@ -132,7 +132,7 @@ define("fx", ["$css"],function( $ ){
     $.fx.scroll =  function(el, prop){//getter
         return el[ prop ];
     }
-    var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record,duration");
+    var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record,duration,method,node,positive,negative");
     var Animation = {
         noop: function(){},
         type: function (attr){//  用于取得适配器的类型
@@ -254,7 +254,6 @@ define("fx", ["$css"],function( $ ){
                         parts = [0, 0]
                     }
                 }
-
                 from = parts[0];
                 to = parts[1];
                 if( from +"" === to +"" ){//不处理初止值都一样的样式与属性
