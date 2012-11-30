@@ -399,7 +399,7 @@
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
-                a = String(a).replace(rstoragekey, function(w){
+                a = "_"+String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
                 })
                 var result = fn( a, b );
@@ -467,7 +467,7 @@
     }
     function loadStorage( id ){
         var factory =  Storage.getItem( id);
-        if(factory && !modules[id]){
+        if( $.config.storage && factory && !modules[id]){
             var parent = Storage.getItem(id+"_parent");
             var deps = Storage.getItem(id+"_deps");
             deps = deps ?  deps.match( $.rword ) : "";

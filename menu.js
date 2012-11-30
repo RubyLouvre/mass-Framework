@@ -1,11 +1,11 @@
-//define("menu", ["node","attr","css","event"], function($){
-;(function($){
+define("menu", ["node","attr","css","event"], function($){
+
     $.fn.superfish = function(op){
 
         var sf = $.fn.superfish,  c = sf.c,
         $arrow = '<span class="'+c.arrowClass+'"> &#187;</span>'
-        var o = $.extend({},sf.defaults,op);
-        //    var o = $.Object.merge({}, sf.defaults,op || {});
+   
+        var o = $.Object.merge({}, sf.defaults,op || {});
         this.addClass(c.menuClass).find('li:has(ul)').each(function() {
             if (o.autoArrows) {
                 $('>a:first-child',this).addClass(c.anchorClass).append($arrow);
@@ -16,9 +16,11 @@
             var $$ = $(this)
             $$.addClass(o.hoverClass).find("li."+o.hoverClass).removeClass(o.hoverClass)
             $$.siblings().removeClass(o.hoverClass)
+            o.onShow(this)
         }).mouseleave(function(){
             var $$ = $(this)
             $$.removeClass(o.hoverClass)//.parents( 'li.' +o.hoverClass ).removeClass(o.hoverClass)
+            o.onHide(this)
         })
 
        
@@ -57,4 +59,4 @@
     };
 
     return $;
-})(jQuery)
+})

@@ -370,8 +370,8 @@
     //===============================================================
     var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
-        Storage = localStorage;
-    }else if( HTML.addBehavior){
+        Storage = localStorage; 
+    }else  if( HTML.addBehavior){
         HTML.addBehavior('#default#userData');
         HTML.save("massdata");
         //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
@@ -380,9 +380,9 @@
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
-                a = String(a).replace(rstoragekey, function(w){
+                a = "_" + String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
-                })
+                });
                 var result = fn( a, b );
                 HTML.save("massdata");
                 return result
@@ -511,7 +511,6 @@
             args.unshift([])
         }
         args.push(loading)
-        $.log(loading+"!!!!!!!")
         if($._checkCycle(modules[loading].deps, loading)){
             throw new Error( loading +"模块与之前的某些模块存在循环依赖")
         }
@@ -523,15 +522,15 @@
             Storage.setItem( loading+"_version", new Date - 0);
         }
         require.apply(null, args); //0,1,2 --> 1,2,0
-        $.log(args)
+
         if(loading = waitings.shift()){
             loadJS()
         }
     }
     define.amd = modules
     function loadStorage( id ){
-        var factory =  Storage.getItem( id);
-        if(factory && !modules[id]){
+        var factory =  Storage.getItem( id );
+        if( $.config.storage && factory && !modules[id]){
             var parent = Storage.getItem(id+"_parent");
             var deps = Storage.getItem(id+"_deps");
             deps = deps ?  deps.match( $.rword ) : "";

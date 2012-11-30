@@ -1,5 +1,5 @@
 
-define("event", ["$node"],function( $ ){//[top.dispatchEvent ? "valueOf": "concat" ]("$event_fix")
+define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"),function( $ ){
     $.log("已加载event模块v9");
     var facade = $.event || ($.event = {
         special: {}
@@ -123,7 +123,7 @@ define("event", ["$node"],function( $ ){//[top.dispatchEvent ? "valueOf": "conca
             types      = hash.type,               //原有的事件类型,可能是复数个
             selector   = hash.selector,           //是否使用事件代理
             handler    = hash.handler;            //回调函数
-            $.log(hash)
+    
             if ( elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler || !elemData  ) {
                 return;
             }
