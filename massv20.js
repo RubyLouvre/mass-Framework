@@ -380,7 +380,7 @@
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
-                a = "_" + String(a).replace(rstoragekey, function(w){
+                a = String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
                 });
                 var result = fn( a, b );
@@ -449,7 +449,7 @@
         args = [],      // 用于依赖列表中的模块的返回值
         dn = 0,         // 需要安装的模块数
         cn = 0,        // 已安装完的模块数
-        id = parent || "@cb"+ ( cbi++ ).toString(32);
+        id = parent || "cb"+ ( cbi++ ).toString(32);
         parent = parent || $.config.base
         String(list).replace( $.rword, function(el){
             var array = parseURL(el, parent ),  url = array[0];
@@ -498,7 +498,7 @@
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments);
-        if(typeof args[0] == "string"){
+        if(typeof id == "string"){
             args.shift()
         }
         if( typeof args[0] === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块

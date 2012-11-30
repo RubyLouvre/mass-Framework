@@ -399,7 +399,7 @@
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
-                a = "_"+String(a).replace(rstoragekey, function(w){
+                a = String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
                 })
                 var result = fn( a, b );
@@ -522,7 +522,7 @@
                 loadCSS( url );
             }
         });
-        var id = parent || "@cb"+ ( cbi++ ).toString(32);
+        var id = parent || "cb"+ ( cbi++ ).toString(32);
         //创建或更新模块的状态
         Module._update(id, 0, factory, 1, deps, args);
         if( dn === cn ){//如果需要安装的等于已安装好的
