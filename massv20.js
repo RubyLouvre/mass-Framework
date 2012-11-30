@@ -333,7 +333,7 @@
                 //如果deps是空对象或者其依赖的模块的状态都是2
                 if( obj.state != 2){
                     loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    fireFactory( obj.id, obj.args, obj.callback );
+                    fireFactory( obj.id, obj.args, obj.factory );
                     $._checkDeps();
                 }
             }
@@ -423,7 +423,7 @@
         var node = document.createElement("script");
         node.onload = node.onreadystatechange = function(){
             if(/loaded|complete|undefined/i.test(this.readyState) ){
-                if( $._checkFail(node, true) ){
+                if( $._checkFail(node) ){
                     $.log("已成功加载 "+node.src, 7);
                 }
             }
@@ -557,12 +557,12 @@
         HEAD.insertBefore( link, HEAD.firstChild );
     }
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
-    function fireFactory( id, deps, callback ){
+    function fireFactory( id, deps, factory ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );
         }
         var module = Object( modules[id] ), ret;
-        ret =  callback.apply(global, array);
+        ret =  factory.apply(global, array);
         module.state = 2;
         if( ret !== void 0 ){
             modules[ id ].exports = ret
@@ -706,4 +706,3 @@ https://github.com/aralejs
 http://y.duowan.com/resources/js/jsFrame/demo/index.html
 https://github.com/etaoux/brix
  */
-

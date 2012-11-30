@@ -431,12 +431,12 @@
     }
 
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
-    function fireFactory( id, deps, callback ){
+    function fireFactory( id, deps, factory ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );
         }
         var module = Object( modules[id] ), ret;
-        ret =  callback.apply(global, array);
+        ret =  factory.apply(global, array);
         module.state = 2;
         if( ret !== void 0 ){
             modules[ id ].exports = ret
