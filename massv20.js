@@ -496,7 +496,7 @@
     }
     //定义模块
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
-    window.define = $.define = function( name, deps, factory ){//模块名,依赖列表,模块本身
+    window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments);
         if(typeof args[0] == "string"){
             args.shift()
@@ -514,15 +514,14 @@
         if($._checkCycle(modules[loading].deps, loading)){
             throw new Error( loading +"模块与之前的某些模块存在循环依赖")
         }
-        var factroy = args[1].toString().replace(rcomment,"")
+        factory = args[1].toString().replace(rcomment,"")
         if( $.config.storage && !Storage.getItem( loading ) ){
-            Storage.setItem( loading, factroy);
+            Storage.setItem( loading, factory);
             Storage.setItem( loading+"_deps", args[0]+"");
             Storage.setItem( loading+"_parent",  loading);
             Storage.setItem( loading+"_version", new Date - 0);
         }
         require.apply(null, args); //0,1,2 --> 1,2,0
-
         if(loading = waitings.shift()){
             loadJS()
         }
