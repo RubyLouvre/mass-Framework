@@ -419,23 +419,21 @@ void function( global, DOC ){
         if(DOC.currentScript){
             return DOC.currentScript.src
         }
-        var scripts = HEAD.getElementsByTagName('script')
-        for (var i = 0; i < scripts.length; i++) {
-            var script = scripts[i]
-            if (script.readyState === 'interactive') {
-                interactiveScript = script
-                return script.src
+        var nodes = DOC.getElementsByTagName("script")
+        for (var i = 0, node; node = nodes[i++];) {
+            if (node.readyState === 'interactive') {
+                return node.src
             }
         }
     }
     function loadJS( url ){
-        var node = document.createElement("script");
+        var node = DOC.createElement("script");
         node.onload = node.onreadystatechange = function(){
             if(/loaded|complete|undefined/i.test(this.readyState) ){
                 var factory = stack.pop() ;
                 factory &&  factory.delay(node.src)
                 if( $._checkFail(node) ){
-                   $.log("已成功加载 "+node.src, 7);
+                    $.log("已成功加载 "+node.src, 7);
                 }
             }
         }
@@ -443,7 +441,7 @@ void function( global, DOC ){
             $._checkFail(node, true)
         }
         node.src = url 
-      //  $.log("正准备加载 "+node.src, 7)
+        $.log("正准备加载 "+node.src, 7)
         HEAD.insertBefore(node, HEAD.firstChild)
     }
     var modules = $.modules =  {
@@ -506,7 +504,7 @@ void function( global, DOC ){
     window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments), _id
         if(typeof id == "string"){
-          _id = args.shift()
+            _id = args.shift()
         }
         if( typeof args[0] === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
             if( args[0] ){
@@ -517,17 +515,16 @@ void function( global, DOC ){
         if(typeof args[0] == "function"){
             args.unshift([])
         }
-
-        id = getCurrentScript() 
+        id = getCurrentScript()
+        factory = args[1];
         factory.id = _id;//用于调试
         factory.delay = function( id ){
             args.push(id)
             if($._checkCycle(modules[id].deps, id)){
                 throw new Error( id +"模块与之前的某些模块存在循环依赖")
             }
-            factory = args[1].toString().replace(rcomment,"")
             if( $.config.storage && !Storage.getItem( id ) ){
-                Storage.setItem( id, factory);
+                Storage.setItem( id, factory.toString().replace(rcomment,""));
                 Storage.setItem( id+"_deps", args[0]+"");
                 Storage.setItem( id+"_parent",  id);
                 Storage.setItem( id+"_version", new Date - 0);

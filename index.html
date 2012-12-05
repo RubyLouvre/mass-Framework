@@ -8,15 +8,12 @@
         <script >
             require("menu,ready",function($){
                 var a = $.modules;
-                console.log("00000000000000000")
                 for(var url in a){
-                    var obj = a[url].factory
+                    var obj = a[url].factory; 
                     if(obj){
-                        console.log(obj.id +"  "+url)
+                        $.log(obj.id +"  "+url)
                     }
-                 
                 }
-               $('ul.sf-menu').superfish();
             });
         </script>
 
