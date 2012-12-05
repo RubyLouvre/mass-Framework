@@ -230,7 +230,7 @@ void function( global, DOC ){
         }
     });
     (function(scripts, cur){
-        cur = DOC.currentScript || scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
+        cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
         var a = cur.getAttribute("debug");
@@ -421,15 +421,16 @@ void function( global, DOC ){
         }
         var nodes = DOC.getElementsByTagName("script")
         for (var i = 0, node; node = nodes[i++];) {
-            if (node.readyState === 'interactive') {
-                return node.src
+            if (!node.pass && node.readyState === 'interactive') {
+                return  node.pass = node.src;
             }
         }
     }
     function loadJS( url ){
-        var node = DOC.createElement("script");
+        var node = DOC.createElement("script")
         node.onload = node.onreadystatechange = function(){
-            if(/loaded|complete|undefined/i.test(this.readyState) ){
+            if(/loaded|complete|undefined/i.test(node.readyState) ){
+                node.onload = node.onreadystatechange = null;//IE9-10, opera同时支持onload，onreadystatechange，防止它们同时执行
                 var factory = stack.pop() ;
                 factory &&  factory.delay(node.src)
                 if( $._checkFail(node) ){
