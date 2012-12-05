@@ -4,18 +4,20 @@
         <title>sample by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" type="text/css" href="mm_menu.css" media="screen">
-        <script src="massv20.js">
-        
-        </script>
-<!--        <script src="menu.js">
-        
-        </script>-->
+        <script src="mass.js">  </script>
         <script >
-            require("event, node, attr,menu",function($){
-                console.log("1111111111")
-                $('ul.sf-menu').superfish();
+            require("menu,ready",function($){
+                var a = $.modules;
+                console.log("00000000000000000")
+                for(var url in a){
+                    var obj = a[url].factory
+                    if(obj){
+                        console.log(obj.id +"  "+url)
+                    }
+                 
+                }
+               $('ul.sf-menu').superfish();
             });
-        
         </script>
 
 

@@ -1,4 +1,4 @@
-+ function( global, DOC ){
+void function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace( rmakeid,'')
@@ -415,19 +415,10 @@
     }
 
     //============================加载系统===========================
-    var currentScript, interactiveScript;
     function getCurrentScript(){
-        if(document.currentScript){
-            return document.currentScript.src
+        if(DOC.currentScript){
+            return DOC.currentScript.src
         }
-        if (currentScript) {
-            return currentScript
-        }
-        if (interactiveScript &&
-            interactiveScript.readyState === 'interactive') {
-            return interactiveScript.src
-        }
-
         var scripts = HEAD.getElementsByTagName('script')
         for (var i = 0; i < scripts.length; i++) {
             var script = scripts[i]
@@ -441,18 +432,19 @@
         var node = document.createElement("script");
         node.onload = node.onreadystatechange = function(){
             if(/loaded|complete|undefined/i.test(this.readyState) ){
+                var factory = stack.pop() ;
+                factory &&  factory.delay(node.src)
                 if( $._checkFail(node) ){
-                    $.log("已成功加载 "+node.src, 7);
+                   $.log("已成功加载 "+node.src, 7);
                 }
             }
         }
         node.onerror = function(){
             $._checkFail(node, true)
         }
-        node.src = currentScript = url 
-        $.log("正准备加载 "+node.src, 7)
+        node.src = url 
+      //  $.log("正准备加载 "+node.src, 7)
         HEAD.insertBefore(node, HEAD.firstChild)
-        currentScript = 0;
     }
     var modules = $.modules =  {
         ready:{ },
@@ -462,6 +454,7 @@
         }
     };
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
+    var stack = []
     window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
         args = [],      // 用于依赖列表中的模块的返回值
@@ -511,9 +504,9 @@
     //定义模块
     var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
-        var args = Array.apply([],arguments);
+        var args = Array.apply([],arguments), _id
         if(typeof id == "string"){
-            args.shift()
+          _id = args.shift()
         }
         if( typeof args[0] === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
             if( args[0] ){
@@ -524,19 +517,30 @@
         if(typeof args[0] == "function"){
             args.unshift([])
         }
-        id = getCurrentScript();
-        args.push(id)
-        if($._checkCycle(modules[id].deps, id)){
-            throw new Error( id +"模块与之前的某些模块存在循环依赖")
+
+        id = getCurrentScript() 
+        factory.id = _id;//用于调试
+        factory.delay = function( id ){
+            args.push(id)
+            if($._checkCycle(modules[id].deps, id)){
+                throw new Error( id +"模块与之前的某些模块存在循环依赖")
+            }
+            factory = args[1].toString().replace(rcomment,"")
+            if( $.config.storage && !Storage.getItem( id ) ){
+                Storage.setItem( id, factory);
+                Storage.setItem( id+"_deps", args[0]+"");
+                Storage.setItem( id+"_parent",  id);
+                Storage.setItem( id+"_version", new Date - 0);
+            }
+            require.apply(null, args); //0,1,2 --> 1,2,0
         }
-        factory = args[1].toString().replace(rcomment,"")
-        if( $.config.storage && !Storage.getItem( id ) ){
-            Storage.setItem( id, factory);
-            Storage.setItem( id+"_deps", args[0]+"");
-            Storage.setItem( id+"_parent",  id);
-            Storage.setItem( id+"_version", new Date - 0);
+        if(id ){
+            factory.delay(id,args)
+        }else{//先进先出
+            stack.push( factory )
         }
-        require.apply(null, args); //0,1,2 --> 1,2,0
+
+       
     }
     define.amd = modules
     function loadStorage( id ){
