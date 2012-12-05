@@ -379,7 +379,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                 return;
             }
             //收集阶段
-            //如果使用了事件代理，则先执行事件代理的回调
+            //如果使用了事件代理，则先执行事件代理的回调, FF的右键会触发点击事件，与标签不符
             if ( delegateCount && !(event.button && event.type === "click") ) {
                 for ( cur = event.target; cur != this; cur = cur.parentNode || this ) {
                     //disabled元素不能触发点击事件

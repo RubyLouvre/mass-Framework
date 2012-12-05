@@ -230,7 +230,7 @@
         }
     });
     (function(scripts, cur){
-        cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
+        cur = DOC.currentScript || scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
         url = url.replace(/[?#].*/, '');
         var a = cur.getAttribute("debug");
@@ -246,17 +246,16 @@
 
     })(DOC.getElementsByTagName( "script" ));
 
-    $.noop = $.error = $.debug = function(){};
+    $.noop = $.error = function(){};
 
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
         class2type[ "[object " + name + "]" ] = name;
     });
 
-
     function parseURL(url, parent, ret){
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
-        if( /^(mass|ready)$/.test( url ) ){//特别处理ready标识符
+        if( /^(mass|ready)$/.test(url)){//特别处理ready标识符
             return [url, "js"];
         }
         if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url] ){
@@ -296,30 +295,7 @@
         return [ret, ext];
     }
 
-    var modules = $.modules = {
-        ready:{},
-        mass: {
-            state:2,
-            exports: $
-        }
-    };
-    var Module = function (id, parent) {
-        this.id = id;
-        this.exports = {};
-        this.parent = parent;
-    }
-    Module._update = function(id, parent, factory, state, deps, args){
-        var module =  modules[id]
-        if( !module){
-            module = new Module(id, parent || $.config.base);
-            modules[id] = module;
-        }
-        module.factory = factory || $.noop;
-        module.state = state || module.state;
-        module.deps = deps || module.deps || {};
-        module.args = args || module.args || [];
-    }
-    var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
+  
     $.mix({
         //绑定事件(简化版)
         bind: W3C ? function( el, type, fn, phase ){
@@ -334,15 +310,6 @@
         } : function( el, type, fn ){
             if ( el.detachEvent ) {
                 el.detachEvent( "on" + type, fn || $.noop );
-            }
-        },
-      
-        //定义模块
-        //检测死链
-        _checkFail : function(  doc, id, error ){
-            doc && (doc.ok = 1);
-            if( error || !modules[ id ].state ){
-                throw new Error("Failed to load [[ "+id+" ]]"+modules[ id ].state);
             }
         },
         //检测是否存在循环依赖
@@ -371,6 +338,16 @@
                 }
             }
         },
+        _checkFail : function( node, error ){
+            var id = node.src
+            if( error || !modules[ id ].state ){
+                node.onload = node.onreadystatechange = node.onerror = null
+                HEAD.removeChild(node)
+                $.log("加载 "+ id +" 失败", 7);
+            }else{
+                return true;
+            }
+        },
         //移除指定或所有本地储存中的模块
         erase : function( id, v ){
             if(id == void 0){
@@ -389,8 +366,8 @@
     //===============================================================
     var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
-        Storage = localStorage;
-    }else if( HTML.addBehavior){
+        Storage = localStorage; 
+    }else  if( HTML.addBehavior){
         HTML.addBehavior('#default#userData');
         HTML.save("massdata");
         //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
@@ -401,7 +378,7 @@
                 HTML.load("massdata");
                 a = String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
-                })
+                });
                 var result = fn( a, b );
                 HTML.save("massdata");
                 return result
@@ -437,44 +414,144 @@
         }catch(e){}
     }
 
-
-    function loadJS( url, parent ){
-        Module._update( url, parent );
-        var iframe = DOC.createElement("iframe"),//IE9的onload经常抽疯,IE10 untest
-        codes = ['<script>var nick ="', url, '", $ = {}, Ns = parent.', $.config.nick,
-        '; $.define = ', innerDefine, ';var define = $.define;<\/script><script src="',url,'" ',
-        (DOC.uniqueID ? 'onreadystatechange="' : 'onload="'),
-        "if(/loaded|complete|undefined/i.test(this.readyState) ){  Ns._checkDeps(); ",
-        'Ns._checkFail(self.document, nick);}',
-        '" onerror="Ns._checkFail(self.document, nick, true);" ><\/script>' ];
-        iframe.style.display = "none";//opera在11.64已经修复了onerror BUG
-        //http://www.tech126.com/https-iframe/ http://www.ajaxbbs.net/post/webFront/https-iframe-warning.html
-        if( !"1"[0] ){//IE6 iframe在https协议下没有的指定src会弹安全警告框
-            iframe.src = "javascript:false"
+    //============================加载系统===========================
+    var currentScript, interactiveScript;
+    function getCurrentScript(){
+        if(document.currentScript){
+            return document.currentScript.src
         }
-        HEAD.insertBefore( iframe, HEAD.firstChild );
-        var doc = iframe.contentDocument || iframe.contentWindow.document;//w3c || ie
-        doc.write( codes.join('') );
-        doc.close();
-        $.bind( iframe, "load", function(){
-            if( global.opera && doc.ok != 1 ){//ok写在$._checkFail里面
-                $._checkFail(doc, url, true );//模拟opera的script onerror
+        if (currentScript) {
+            return currentScript
+        }
+        if (interactiveScript &&
+            interactiveScript.readyState === 'interactive') {
+            return interactiveScript.src
+        }
+
+        var scripts = HEAD.getElementsByTagName('script')
+        for (var i = 0; i < scripts.length; i++) {
+            var script = scripts[i]
+            if (script.readyState === 'interactive') {
+                interactiveScript = script
+                return script.src
             }
-            doc.write( "<body/>" );//清空内容
-            HEAD.removeChild( iframe );//移除iframe
-            iframe = null;
-        });
+        }
     }
+    function loadJS( url ){
+        var node = document.createElement("script");
+        node.onload = node.onreadystatechange = function(){
+            if(/loaded|complete|undefined/i.test(this.readyState) ){
+                if( $._checkFail(node) ){
+                    $.log("已成功加载 "+node.src, 7);
+                }
+            }
+        }
+        node.onerror = function(){
+            $._checkFail(node, true)
+        }
+        node.src = currentScript = url 
+        $.log("正准备加载 "+node.src, 7)
+        HEAD.insertBefore(node, HEAD.firstChild)
+        currentScript = 0;
+    }
+    var modules = $.modules =  {
+        ready:{ },
+        mass: {
+            state: 2,
+            exports: $
+        }
+    };
+    //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
+    window.require = $.require = function( list, factory, parent ){
+        var deps = {},  // 用于检测它的依赖是否都为2
+        args = [],      // 用于依赖列表中的模块的返回值
+        dn = 0,         // 需要安装的模块数
+        cn = 0,         // 已安装完的模块数
+        id = parent || "cb"+ ( cbi++ ).toString(32);
+        parent = parent || $.config.base
+        String(list).replace( $.rword, function(el){
+            var array = parseURL(el, parent ),  url = array[0];
+            if(array[1] == "js"){
+                dn++
+                loadStorage( id )
+                if( !modules[ url ]  ){
+                    modules[ url ] = {
+                        id: url,
+                        parent: parent,
+                        exports: {}
+                    };
+                    loadJS( url );
+                }else if( modules[ url ].state === 2 ){
+                    cn++;
+                }
+                if( !deps[ url ] ){
+                    args.push( url );
+                    deps[ url ] = "司徒正美";//去重
+                }
+            }else if(array[1] === "css"){
+                loadCSS( url );
+            }
+        });
+        //创建或更新模块的状态
+        modules[id] = {
+            id: id,
+            factory: factory,
+            deps: deps,
+            args: args,
+            state: 1
+        }
+        if( dn === cn ){//如果需要安装的等于已安装好的
+            fireFactory( id, args, factory );//装配到框架中
+            $._checkDeps();
+            return
+        }
+        //在正常情况下模块只能通过_checkDeps执行
+        loadings.unshift( id );
+    }
+    //定义模块
+    var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
+    window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
+        var args = Array.apply([],arguments);
+        if(typeof id == "string"){
+            args.shift()
+        }
+        if( typeof args[0] === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
+            if( args[0] ){
+                return;
+            }
+            args.shift()
+        }
+        if(typeof args[0] == "function"){
+            args.unshift([])
+        }
+        id = getCurrentScript();
+        args.push(id)
+        if($._checkCycle(modules[id].deps, id)){
+            throw new Error( id +"模块与之前的某些模块存在循环依赖")
+        }
+        factory = args[1].toString().replace(rcomment,"")
+        if( $.config.storage && !Storage.getItem( id ) ){
+            Storage.setItem( id, factory);
+            Storage.setItem( id+"_deps", args[0]+"");
+            Storage.setItem( id+"_parent",  id);
+            Storage.setItem( id+"_version", new Date - 0);
+        }
+        require.apply(null, args); //0,1,2 --> 1,2,0
+    }
+    define.amd = modules
     function loadStorage( id ){
-        var factory =  Storage.getItem( id);
+        var factory =  Storage.getItem( id );
         if( $.config.storage && factory && !modules[id]){
             var parent = Storage.getItem(id+"_parent");
             var deps = Storage.getItem(id+"_deps");
             deps = deps ?  deps.match( $.rword ) : "";
-            Module._update( id, parent );
-            var module = $.modules[ id ];
-            module.state =  module.state || 1;
-            $.define( deps, Function("return "+ factory)(), id );
+            modules[ id ] ={
+                id: id,
+                parent: parent,
+                exports: {},
+                state: 1
+            };
+            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
         }
     }
     function loadCSS(url){
@@ -489,87 +566,13 @@
         link.id = id
         HEAD.insertBefore( link, HEAD.firstChild );
     }
-    var innerDefine = function(){
-        var args = Array.apply([],arguments);
-        if(typeof args[0] == "string"){
-            args.shift()
-        }
-        args.push( nick );  //劫持第一个参数,置换为当前JS文件的URL
-        parent.define.apply(parent, args);  //将iframe中的函数转换为父窗口的函数
-    }
-    //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-    window.require = $.require = function( list, factory, parent ){
-        var deps = {}, // 用于检测它的依赖是否都为2
-        args = [],      // 用于依赖列表中的模块的返回值
-        dn = 0,         // 需要安装的模块数
-        cn = 0;         // 已安装完的模块数
-        String(list).replace( $.rword, function(el){
-            var array = parseURL(el, parent || $.config.base ), url = array[0];
-            if(array[1] == "js"){
-                dn++
-                //如果没有注册，则先尝试通过本地获取，如果本地不存在或不支持，则才会出请求
-                loadStorage( url )
-                if( (!modules[ url ])  ){
-                    loadJS( url, parent );
-                }else if( modules[ url ].state === 2 ){
-                    cn++;
-                }
-                if( !deps[ url ] ){
-                    args.push( url );
-                    deps[ url ] = "司徒正美";//去重
-                }
-            }else if(array[1] === "css"){
-                loadCSS( url );
-            }
-        });
-        var id = parent || "cb"+ ( cbi++ ).toString(32);
-        //创建或更新模块的状态
-        Module._update(id, 0, factory, 1, deps, args);
-        if( dn === cn ){//如果需要安装的等于已安装好的
-            fireFactory( id, args, factory );//装配到框架中
-            return $._checkDeps();
-        }
-        //在正常情况下模块只能通过_checkDeps执行
-        loadings.unshift( id );
-        $._checkDeps();//FIX opera BUG。opera在内部解析时修改执行顺序，导致没有执行最后的回调
-    }
-    window.define = $.define = function(deps, factory, id){
-        var args = Array.apply([],arguments);
-        if( typeof deps === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
-            if( deps ){
-                return;
-            }
-            args.shift()
-        }
-        if( args.length === 2 ){//处理只有两个参数的情况,补允依赖列表
-            args.unshift([])
-        }
-        factory = args[1];
-        id = args[2];
-        if($._checkCycle( $.modules[id].deps, id) ){
-            throw new Error( id +"模块与之前的某些模块存在循环依赖")
-        }
-        if(typeof factory == "function"){
-            if( $.config.storage && !Storage.getItem( id )){
-                Storage.setItem( id, factory.toString().replace(rcomment,"") );
-                Storage.setItem( id+"_deps", args[0]+"");
-                Storage.setItem( id+"_parent",  id);
-                Storage.setItem( id+"_version", new Date - 0);
-            }
-            args[1] = Function("return " + factory )()
-        }else{
-            throw new Error( id +" 的factory必须是一个函数")
-        }
-        require.apply(null, args ); //deps, factory, id
-    }
-    define.amd = modules;
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
-    function fireFactory( id, deps, callback ){
+    function fireFactory( id, deps, factory ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
             array.push( modules[ d ].exports );
         }
         var module = Object( modules[id] ), ret;
-        ret =  callback.apply(global, array);
+        ret =  factory.apply(global, array);
         module.state = 2;
         if( ret !== void 0 ){
             modules[ id ].exports = ret
@@ -687,6 +690,7 @@ dom.namespace改为dom["mass"]
 2012.8.28 将最后一行的this改成self
 2012.9.12 升级到v18 添加本地储存的支持
 2012.11.21 升级到v19 去掉CMD支持与$.debug的实现,增加循环依赖的判定
+2012.12.5 升级到v20，参考requireJS的实现，去掉iframe检测，暴露define与require
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
@@ -713,4 +717,3 @@ https://github.com/aralejs
 http://y.duowan.com/resources/js/jsFrame/demo/index.html
 https://github.com/etaoux/brix
  */
-
