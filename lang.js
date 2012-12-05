@@ -571,12 +571,15 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
             return first;
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
-        // Jonas Raoni Soares Silva http://jsfromhell.com/array/shuffle [v1.0]
-        shuffle: function ( target ) {
-            var j, x, i = target.length;
-            for (; i > 0; j = parseInt(Math.random() * i),
-                x = target[--i], target[i] = target[j], target[j] = x) {};
-            return target;
+        shuffle: function ( arr ) {
+            var ret = [], i = arr.length, n; 
+            arr = arr.slice(0);
+            while (--i >= 0) {
+                n = Math.floor( Math.random() * i);
+                ret[ret.length] = arr[n];
+                arr[n] = arr[i];
+            }
+            return ret;
         },
         //从数组中随机抽选一个元素出来。
         random: function ( target ) {
@@ -596,15 +599,23 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         // 对数组进行去重操作，返回一个没有重复元素的新数组。
         unique: function ( target ) {
-            var result = [];
-                o:for(var i = 0, n = target.length; i < n; i++) {
-                    for(var x = i + 1 ; x < n; x++) {
-                        if(target[x] === target[i])
-                            continue o;
-                    }
-                    result.push(target[i]);
-                }
-            return result;
+            //            var result = [];
+            //                o:for(var i = 0, n = target.length; i < n; i++) {
+            //                    for(var x = i + 1 ; x < n; x++) {
+            //                        if(target[x] === target[i])
+            //                            continue o;
+            //                    }
+            //                    result.push(target[i]);
+            //                }
+            //            return result;
+            var ret = [], n = target.length, i, j;//by abcd
+            for (i = 0; i < n; i++) {
+                for (j = i + 1; j < n; j++)
+                    if (target[i] === target[j])
+                        j = ++i;
+                ret.push(target[i]);
+            }
+            return ret;
         },
         // 过滤数组中的null与undefined，但不影响原数组。
         compact: function ( target ) {
