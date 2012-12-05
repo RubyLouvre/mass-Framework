@@ -3,11 +3,14 @@
     <head>
         <title>sample by 司徒正美</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" type="text/css" href="mm_menu.css" media="screen">
+        <link rel="stylesheet" href="mm-menu.css" />
+        <link rel="stylesheet" href="mm-menu-vertical.css" />
         <script src="mass.js">  </script>
         <script >
             require("menu,ready",function($){
-                $(".sf-menu").superfish();
+                $(".mmm").menu({
+                    vertical:true
+                });
             });
         </script>
 
@@ -15,7 +18,7 @@
 
     </head>
     <body>
-        <ul class="sf-menu">
+        <ul class="mmm">
             <li class="current">
                 <a href="#a">menu item</a>
                 <ul>

@@ -1,17 +1,17 @@
 define("menu", ["node","attr","css","event","fx"], function($){
 
-    $.fn.superfish = function(op){
-
-        var sf = $.fn.superfish,  c = sf.c,
-        $arrow = '<span class="'+c.arrowClass+'"> &#187;</span>'
-   
-        var o = $.Object.merge({}, sf.defaults,op || {});
+    $.fn.menu = function(op){
+        var ui = $.fn.menu,  c = ui.c, id,
+        $arrow = '<span class="'+c.arrowClass+'"> &#187;</span>',
+        o = $.Object.merge({}, ui.defaults,op || {});
         this.addClass(c.menuClass).find('li:has(ul)').each(function() {
             if (o.autoArrows) {
                 $('>a:first-child',this).addClass(c.anchorClass).append($arrow);
             }
-        })
-        var id 
+        });
+        if(o.vertical){
+            this.addClass(o.verticalClass);
+        }
         this.find("li").mouseenter(function(){
             var $$ = $(this);
             clearTimeout(id);
@@ -28,30 +28,25 @@ define("menu", ["node","attr","css","event","fx"], function($){
         })
 
     };
-
-    var sf = $.fn.superfish;
-    sf.o = [];
-    sf.IE7fix = function(){
-        var o = sf.op;
-        if (window.VBArray && window.XMLHttpRequest && o.dropShadows && o.animation.opacity!=undefined)
-            this.toggleClass(sf.c.shadowClass+'-off');
-    };
-    sf.c = {
-        bcClass     : 'sf-breadcrumb',
-        menuClass   : 'sf-js-enabled',
-        anchorClass : 'sf-with-ul',
-        arrowClass  : 'sf-sub-indicator',
-        shadowClass : 'sf-shadow'
-    };
-    sf.defaults = {
-        hoverClass	: 'sfHover',
-        delay		: 500,
-        autoArrows	: true,
-        dropShadows     : true,
-        disableHI	: false,		// true disables hoverIntent detection
-        onShow		: function(){},
-        onHide		: function(){}
-    };
+    $.mix( $.fn.menu,{
+        c: {
+            bcClass     : 'ui-breadcrumb',
+            menuClass   : 'js-menu',
+            anchorClass : 'js-with-ul',
+            arrowClass  : 'js-sub-indicator',
+            shadowClass : 'js-menu-shadow'
+        },
+        defaults: {
+            hoverClass	: 'js-menu-hover',
+            verticalClass   : "js-menu-vertical",
+            delay		: 500,
+            autoArrows	: true,
+            dropShadows     : true,
+            disableHI	: false,		// true disables hoverIntent detection
+            onShow	       : function(){},
+            onHide	       : function(){}
+        }
+    })
 
     return $;
 })
