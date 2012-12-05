@@ -122,13 +122,13 @@ void function( global, DOC ){
             if( result.charAt(0) === "#" ){//兼容旧式浏览器与处理个别情况,如window.opera
                 //利用IE678 window == document为true,document == window竟然为false的神奇特性
                 if( obj == obj.document && obj.document != obj ){
-                    result = 'Window'; //返回构造器名字
+                    result = "Window"; //返回构造器名字
                 }else if( obj.nodeType === 9 ) {
-                    result = 'Document';//返回构造器名字
+                    result = "Document";//返回构造器名字
                 }else if( obj.callee ){
-                    result = 'Arguments';//返回构造器名字
+                    result = "Arguments";//返回构造器名字
                 }else if( isFinite( obj.length ) && obj.item ){
-                    result = 'NodeList'; //处理节点集合
+                    result = "NodeList"; //处理节点集合
                 }else{
                     result = toString.call( obj ).slice( 8, -1 );
                 }
@@ -151,7 +151,7 @@ void function( global, DOC ){
         //6 INFO 更一般化的通知
         //7 DEBUG 调试消息
         log: function (str){
-            var  show = true, page = false
+            var show = true, page = false
             for(var i = 1 ; i < arguments.length; i++){
                 var el = arguments[i]
                 if(typeof el == "number"){
@@ -163,10 +163,10 @@ void function( global, DOC ){
             if(show){
                 if( page === true ){
                     $.require( "ready", function(){
-                        var div =  DOC.createElement("pre");
+                        var div =  DOC.createElement( "pre" );
                         div.className = "mass_sys_log";
                         div.innerHTML = str +"";//确保为字符串
-                        DOC.body.appendChild(div)
+                        DOC.body.appendChild(div);
                     });
                 }else if( global.console ){
                     global.console.log( str );
@@ -211,7 +211,7 @@ void function( global, DOC ){
                     continue
                 var prev = kernel[ p ];
                 var curr = settings[ p ];
-                if (prev && p === 'alias') {
+                if (prev && p === "alias") {
                     for (var c in curr) {
                         if (curr.hasOwnProperty( c )) {
                             var prevValue = prev[ c ];
@@ -230,15 +230,15 @@ void function( global, DOC ){
         }
     });
     (function(scripts, cur){
-        cur = scripts[ scripts.length - 1 ];//FF下可以使用DOC.currentScript
-        var url = cur.hasAttribute ?  cur.src : cur.getAttribute( 'src', 4 );
-        url = url.replace(/[?#].*/, '');
+        cur = scripts[ scripts.length - 1 ];
+        var url = cur.hasAttribute ?  cur.src : cur.getAttribute( "src", 4 );
+        url = url.replace(/[?#].*/, "");
         var a = cur.getAttribute("debug");
         var b = cur.getAttribute("storage");
         var kernel = $.config;
-        kernel.debug = a == 'true' || a == '1';
-        kernel.storage = b == 'true' || b == '1';
-        kernel.base = url.substr( 0, url.lastIndexOf('/') ) +"/";
+        kernel.debug = a == "true" || a == "1";
+        kernel.storage = b == "true"|| b == "1";
+        kernel.base = url.substr( 0, url.lastIndexOf("/") ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
@@ -285,7 +285,7 @@ void function( global, DOC ){
             }
         }
         var ext = "js";
-        tmp = ret.replace(/[?#].*/, '');
+        tmp = ret.replace(/[?#].*/, "");
         if(/\.(\w+)$/.test( tmp )){
             ext = RegExp.$1;
         }
@@ -356,14 +356,14 @@ void function( global, DOC ){
                 var old = Storage.getItem( id+"_version" );
                 if(old && (!v || v > Number(old)) ){
                     Storage.removeItem( id );
-                    Storage.removeItem( id+"_deps" )
-                    Storage.removeItem( id+"_parent" )
-                    Storage.removeItem( id+"_version" )
+                    Storage.removeItem( id+"_deps" );
+                    Storage.removeItem( id+"_parent" );
+                    Storage.removeItem( id+"_version" );
                 }
             }
         }
     });
-    //===============================================================
+    //================================localStorage===============================
     var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
         Storage = localStorage; 
@@ -372,7 +372,7 @@ void function( global, DOC ){
         HTML.save("massdata");
         //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
         //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
-        var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g")
+        var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g");
         function curry(fn) {
             return function(a, b) {
                 HTML.load("massdata");
@@ -402,7 +402,7 @@ void function( global, DOC ){
             }
         }
     }
-    var rerase = new RegExp('(?:^| )' + $.config.erase + '(?:(?:=([^;]*))|;|$)')
+    var rerase = new RegExp("(?:^| )" + $.config.erase + "(?:(?:=([^;]*))|;|$)")
     var match = String(DOC.cookie).match( rerase );
     //读取从后端过来的cookie指令，转换成一个对象，键名为模块的URL，值为版本号（这是一个时间戮）
     if(match && match[1]){
@@ -421,7 +421,7 @@ void function( global, DOC ){
         }
         var nodes = DOC.getElementsByTagName("script")
         for (var i = 0, node; node = nodes[i++];) {
-            if (!node.pass && node.readyState === 'interactive') {
+            if (!node.pass && node.readyState === "interactive") {
                 return  node.pass = node.src;
             }
         }
@@ -505,7 +505,7 @@ void function( global, DOC ){
     window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments), _id
         if(typeof id == "string"){
-            _id = args.shift()
+            _id = args.shift();
         }
         if( typeof args[0] === "boolean" ){//用于文件合并, 在标准浏览器中跳过补丁模块
             if( args[0] ){
@@ -514,13 +514,13 @@ void function( global, DOC ){
             args.shift()
         }
         if(typeof args[0] == "function"){
-            args.unshift([])
+            args.unshift([]);
         }
-        id = getCurrentScript()
+        id = getCurrentScript();
         factory = args[1];
         factory.id = _id;//用于调试
         factory.delay = function( id ){
-            args.push(id)
+            args.push( id );
             if($._checkCycle(modules[id].deps, id)){
                 throw new Error( id +"模块与之前的某些模块存在循环依赖")
             }
@@ -560,12 +560,12 @@ void function( global, DOC ){
         var id = url.replace(rmakeid,"");
         if (DOC.getElementById(id))
             return
-        var link =  DOC.createElement('link');
-        link.charset = "utf-8"
-        link.rel = 'stylesheet'
-        link.href = url;
-        link.type="text/css"
-        link.id = id
+        var link     =  DOC.createElement("link");
+        link.charset = "utf-8";
+        link.rel     = "stylesheet";
+        link.href    = url;
+        link.type    = "text/css";
+        link.id      = id;
         HEAD.insertBefore( link, HEAD.firstChild );
     }
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
@@ -582,12 +582,12 @@ void function( global, DOC ){
         return ret;
     }
     all.replace($.rword,function(a){
-        $.config.alias[ "$"+a ] = $.config.base + a + ".js"
+        $.config.alias[ "$"+a ] = $.config.base + a + ".js";
     });
     //domReady机制
     var readyFn, ready =  W3C ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
-        modules[ "ready" ].state = 2;
+        modules.ready.state = 2;
         $._checkDeps();
         if( readyFn ){
             $.unbind( DOC, ready, readyFn );
@@ -622,7 +622,7 @@ void function( global, DOC ){
 
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind( global, "popstate", function(){
-        NsKey = DOC.URL.replace(rmakeid,'');
+        NsKey = DOC.URL.replace(rmakeid,"");
         $.exports();
     });
     $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
