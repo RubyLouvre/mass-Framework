@@ -339,9 +339,9 @@ void function( global, DOC ){
             }
         },
         _checkFail : function( node, error ){
-            var id = node.src
+            var id = node.src;
+            node.onload = node.onreadystatechange = node.onerror = null;
             if( error || !modules[ id ].state ){
-                node.onload = node.onreadystatechange = node.onerror = null
                 HEAD.removeChild(node)
                 $.log("加载 "+ id +" 失败", 7);
             }else{
@@ -430,7 +430,8 @@ void function( global, DOC ){
         var node = DOC.createElement("script")
         node.onload = node.onreadystatechange = function(){
             if(/loaded|complete|undefined/i.test(node.readyState) ){
-                node.onload = node.onreadystatechange = null;//IE9-10, opera同时支持onload，onreadystatechange，防止它们同时执行
+                //mass Framework会在_checkFail把它上面的回调清掉
+                //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
                 var factory = stack.pop() ;
                 factory &&  factory.delay(node.src)
                 if( $._checkFail(node) ){
