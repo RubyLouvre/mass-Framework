@@ -1,7 +1,7 @@
 void function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
-    var NsKey = DOC.URL.replace( rmakeid,'')
+    var NsKey = DOC.URL.replace( rmakeid,"")
     var NsVal = global[ NsKey ];//公共命名空间
     var W3C   = DOC.dispatchEvent //w3c事件模型
     var HTML  = DOC.documentElement;

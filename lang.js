@@ -12,7 +12,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
-    str_body = (global.open + '').replace(/open/g, '');
+    str_body = (global.open + '').replace(/open/g, "");
 
     $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
@@ -32,8 +32,8 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         //判定method是否为obj的原生方法，如$.isNative(global,"JSON")
         isNative: function(obj, method) {
-            var m = obj ? obj[method] : false, r = new RegExp(method, 'g');
-            return !!(m && typeof m != 'string' && str_body === (m + '').replace(r, ''));
+            var m = obj ? obj[method] : false, r = new RegExp(method, "g");
+            return !!(m && typeof m != "string" && str_body === (m + "").replace(r, ""));
         },
         /**
          * 是否为空对象
@@ -73,7 +73,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         format: function(str, object){
             var array = $.slice(arguments,1);
             return str.replace(rformat, function(match, name){
-                if (match.charAt(0) == '\\')
+                if (match.charAt(0) == "\\")
                     return match.slice(1);
                 var index = Number(name)
                 if(index >=0 )
@@ -97,9 +97,9 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
             var chain = function(start, content, xml){
                 var html = arguments.callee.html;
                 start && html.push("<",start,">");
-                content = ''+(content||'');
+                content = ""+(content||"");
                 content && html.push(content);
-                var end = start.split(' ')[0];//取得结束标签
+                var end = start.split(" ")[0];//取得结束标签
                 if(end && (xml || !rnoclose.test(end))){
                     html.push("</",end,">");
                 }
@@ -150,8 +150,8 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
                         return '\\t';
                 }
                 a = a.charCodeAt(0).toString(16);
-                while (a.length < 4) a = '0' + a;
-                return '\\u' + a;
+                while (a.length < 4) a = "0" + a;
+                return "\\u" + a;
             }) + '"';
         },
         //查看对象或数组的内部构造
@@ -453,13 +453,13 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
         truncate: function(target, length, truncation) {
             length = length || 30;
-            truncation = truncation === void(0) ? '...' : truncation;
+            truncation = truncation === void(0) ? "..." : truncation;
             return target.length > length ?
             target.slice(0, length - truncation.length) + truncation : String(target);
         },
         //转换为驼峰风格
         camelize: function(target){
-            if (target.indexOf('-') < 0 && target.indexOf('_') < 0) {
+            if (target.indexOf("-") < 0 && target.indexOf("_") < 0) {
                 return target;//提前判断，提高getStyle等的效率
             }
             return target.replace(/[-_][^-_]/g, function (match) {
@@ -468,7 +468,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         //转换为下划线风格
         underscored: function(target) {
-            return target.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/\-/g, '_').toLowerCase();
+            return target.replace(/([a-z\d])([A-Z]+)/g, "$1_$2").replace(/\-/g, "_").toLowerCase();
         },
         //首字母大写
         capitalize: function(target){
@@ -476,7 +476,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
         stripTags: function (target) {
-            return String(target ||"").replace(/<[^>]+>/g, '');
+            return String(target || "").replace(/<[^>]+>/g, "");
         },
         //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
         stripScripts: function(target){
@@ -484,17 +484,17 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
         escapeHTML:  function (target) {
-            return target.replace(/&/g,'&amp;')
-            .replace(/</g,'&lt;')
-            .replace(/>/g,'&gt;')
+            return target.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
         },
         //还原为可被文档解析的HTML标签
         unescapeHTML: function (target) {
             return  target.replace(/&quot;/g,'"')
-            .replace(/&lt;/g,'<')
-            .replace(/&gt;/g,'>')
+            .replace(/&lt;/g,"<")
+            .replace(/&gt;/g,">")
             .replace(/&amp;/g, "&") //处理转义的中文和实体字符
             .replace(/&#([\d]+);/g, function($0, $1){
                 return String.fromCharCode(parseInt($1, 10));
@@ -504,7 +504,7 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         //http://stevenlevithan.com/regex/xregexp/
         //将字符串安全格式化为正则表达式的源码
         escapeRegExp: function( target ){
-            return (target+"").replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+            return (target+"").replace(/([-.*+?^${}()|[\]\/\\])/g, "\\$1");
         },
         //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
         //在左边补上一些字符,默认为0
@@ -527,8 +527,8 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题*/
         wbr: function (target) {
             return String(target)
-            .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, '$&<wbr>')
-            .replace(/><wbr>/g, '>');
+            .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, "$&<wbr>")
+            .replace(/><wbr>/g, ">");
         }
     });
 
