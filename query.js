@@ -2,7 +2,6 @@
 // 选择器模块 v5 开发代号Icarus
 //==========================================
 define("query",["mass"], function( $ ){
-    $.log("已加载选择器模块",7)
     var global = this, DOC = global.document;
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.

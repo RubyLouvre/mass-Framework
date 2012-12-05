@@ -1,6 +1,5 @@
 
 define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"),function( $ ){
-    $.log("已加载event模块v9");
     var facade = $.event || ($.event = {
         special: {}
     });

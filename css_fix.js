@@ -2,7 +2,6 @@
 //  样式补丁模块
 //==========================================
 define("css_fix", !!top.getComputedStyle,["mass"], function( $ ){
-    $.log("已加载css_fix模块");
     var adapter = $.cssHooks = {},
     ie8 = !!top.XDomainRequest,
     rfilters = /[\w\:\.]+\([^)]+\)/g,

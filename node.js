@@ -2,7 +2,6 @@
 // 节点操作模块
 //==================================================
 define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
-    $.log("已加载node模块",7);
     var rtag = /^[a-zA-Z]+$/, TAGS = "getElementsByTagName"
     function getDoc(){
         for( var i  = 0 , el; i < arguments.length; i++ ){

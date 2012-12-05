@@ -7,13 +7,7 @@
         <script src="mass.js">  </script>
         <script >
             require("menu,ready",function($){
-                var a = $.modules;
-                for(var url in a){
-                    var obj = a[url].factory; 
-                    if(obj){
-                        $.log(obj.id +"  "+url)
-                    }
-                }
+                $(".sf-menu").superfish();
             });
         </script>
 

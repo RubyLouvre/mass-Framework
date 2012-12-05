@@ -3,7 +3,6 @@
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
 define("ajax",["mass","$flow"], function($){
-    $.log("已加载ajax模块", 7);
     var global = this,
     DOC = global.document,
     r20 = /%20/g,

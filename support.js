@@ -2,7 +2,6 @@
 // 特征嗅探模块 by 司徒正美
 //==========================================
 define("support",["mass"], function( $ ){
-    $.log("已加载特征嗅探模块",7);
     var DOC = document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
     div.setAttribute("className", "t");
     div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+

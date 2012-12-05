@@ -2,7 +2,6 @@
 // 动画模块v5
 //==========================================
 define("fx", ["$css"],function( $ ){
-    $.log("已加载fx模块",7)
     var types = {
         color:/color/i,
         scroll:/scroll/i
