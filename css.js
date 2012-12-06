@@ -177,7 +177,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
                 num = b == "outer" && value === true ? 3 : num;
                 return $.access( this, num, value, function( node, num, size ) {
                     if ( $.type( node,"Window" ) ) {//取得窗口尺寸,IE9后可以用node.innerWidth /innerHeight代替
-                        return node.documentElement[ clientProp ] ;
+                        return  node["inner"+ name] || node.document.documentElement[ clientProp ] ;
                     }
                     if ( node.nodeType === 9 ) {//取得页面尺寸
                         var doc = node.documentElement;
