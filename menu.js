@@ -12,7 +12,7 @@ define("menu", ["node","attr","css","event","fx"], function($){
             var li = doc.createElement("li");
             ul.appendChild(li);
             var a = doc.createElement("a");
-            a.href = isObj ? el.href : "#"
+            a.href = isObj ? el.href || "#" : "#"
             li.appendChild(a);
             a.innerHTML = item;
             if( $.isArray( el.sub) && el.sub.length ){
@@ -91,10 +91,28 @@ define("menu", ["node","attr","css","event","fx"], function($){
                 });
             })
         }
+//        _scrollIntoView: function( item ) {
+//		var borderTop, paddingTop, offset, scroll, elementHeight, itemHeight;
+//		if ( this._hasScroll() ) {
+//			borderTop = parseFloat( $.css( this.activeMenu[0], "borderTopWidth" ) ) || 0;
+//			paddingTop = parseFloat( $.css( this.activeMenu[0], "paddingTop" ) ) || 0;
+//			offset = item.offset().top - this.activeMenu.offset().top - borderTop - paddingTop;
+//			scroll = this.activeMenu.scrollTop();
+//			elementHeight = this.activeMenu.height();
+//			itemHeight = item.height();
+//
+//			if ( offset < 0 ) {
+//				this.activeMenu.scrollTop( scroll + offset );
+//			} else if ( offset + itemHeight > elementHeight ) {
+//				this.activeMenu.scrollTop( scroll + offset - elementHeight + itemHeight );
+//			}
+//		}
+//	},
         self.find("li").mouseenter(function(){
             var $$ = $(this);
             $$.addClass(o.hoverClass).find("li."+o.hoverClass).removeClass(o.hoverClass)
             $$.siblings().removeClass(o.hoverClass);
+            this.parentNode.scrollIntoView(false);
             o.onShow(this)     
         }).mouseleave(function(){
             clearTimeout(id);
