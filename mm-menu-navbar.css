@@ -1,0 +1,93 @@
+
+/*** adding the class mm-navbar in addition to mm-menu creates an all-horizontal nav-bar menu ***/
+.js-navbar {
+	background:		#BDD2FF;
+	height:			2.5em;
+	padding-bottom:	2.5em;
+	position:		relative;
+}
+.js-navbar li {
+	background:		#AABDE6;
+	position:		static;
+}
+.js-navbar a {
+	border-top:		none;
+}
+.js-navbar li ul {
+	width:			44em; /*IE6 soils itself without this*/
+}
+.js-navbar li li {
+	background:		#BDD2FF;
+	position:		relative;
+}
+.js-navbar li li ul {
+	width:			13em;
+}
+.js-navbar li li li {
+	width:			100%;
+}
+.js-navbar ul li {
+	width:			auto;
+	float:			left;
+}
+.js-navbar a, .js-navbar a:visited {
+	border:			none;
+}
+.js-navbar li.current {
+	background:		#BDD2FF;
+}
+.js-navbar li:hover,
+.js-navbar li.js-menu-hover,
+.js-navbar li li.current,
+.js-navbar a:focus, .js-navbar a:hover, .js-navbar a:active {
+	background:		#BDD2FF;
+}
+.js-navbar ul li:hover,
+.js-navbar ul li.js-menu-hover,
+ul.js-navbar ul li:hover li,
+ul.js-navbar ul li.js-menu-hover li,
+.js-navbar ul a:focus, .js-navbar ul a:hover, .js-navbar ul a:active {
+	background:		#D1DFFF;
+}
+ul.js-navbar li li li:hover,
+ul.js-navbar li li li.js-menu-hover,
+.js-navbar li li.current li.current,
+.js-navbar ul li li a:focus, .js-navbar ul li li a:hover, .js-navbar ul li li a:active {
+	background:		#E6EEFF;
+}
+ul.js-navbar .current ul,
+ul.js-navbar ul li:hover ul,
+ul.js-navbar ul li.js-menu-hover ul {
+	left:			0;
+	top:			2.5em; /* match top ul list item height */
+}
+ul.js-navbar .current ul ul {
+	top: 			-999em;
+}
+
+.js-navbar li li.current > a {
+	font-weight:	bold;
+}
+
+/*** point all arrows down ***/
+/* point right for anchors in subs */
+.js-navbar ul .js-sub-indicator { background-position: -10px -100px; }
+.js-navbar ul a > .js-sub-indicator { background-position: 0 -100px; }
+/* apply hovers to modern browsers */
+.js-navbar ul a:focus > .js-sub-indicator,
+.js-navbar ul a:hover > .js-sub-indicator,
+.js-navbar ul a:active > .js-sub-indicator,
+.js-navbar ul li:hover > a > .js-sub-indicator,
+.js-navbar ul li.js-menu-hover > a > .js-sub-indicator {
+	background-position: -10px -100px; /* arrow hovers for modern browsers*/
+}
+
+/*** remove shadow on first submenu ***/
+.js-navbar > li > ul {
+	background: transparent;
+	padding: 0;
+	-moz-border-radius-bottomleft: 0;
+	-moz-border-radius-topright: 0;
+	-webkit-border-top-right-radius: 0;
+	-webkit-border-bottom-left-radius: 0;
+}
