@@ -35,6 +35,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             if ( typeof expr === "string" ) {
                 doc = this.ownerDocument = !context ? document : getDoc( context, context[0] );
                 var scope = context || doc;
+                expr = expr.trim();
                 if ( expr.charAt(0) === "<" && expr.charAt( expr.length - 1 ) === ">" && expr.length >= 3 ) {
                     nodes = $.parseHTML( expr, doc );//分支5: 动态生成新节点
                     nodes = nodes.childNodes
