@@ -4,12 +4,15 @@ define("menu", ["node","attr","css","event","fx"], function($){
     function addMenu(array, parent, doc){
         var ul = doc.createElement("ul");
         parent.appendChild(ul);
+        
         array.forEach(function( el ){
-            var item = typeof el == "string" ? el : el.item;
+            var isObj = typeof el == "object" && el;
+            var item = isObj ? el.item : el 
+            item = item == null ? "" : item +""
             var li = doc.createElement("li");
             ul.appendChild(li);
             var a = doc.createElement("a");
-            a.href = el.href || "#"
+            a.href = isObj ? el.href : "#"
             li.appendChild(a);
             a.innerHTML = item;
             if( $.isArray( el.sub) && el.sub.length ){
@@ -19,27 +22,26 @@ define("menu", ["node","attr","css","event","fx"], function($){
     }
 
     $.fn.menu = function(op){
-        var ui = $.fn.menu,  c = ui.c, id,
+        var ui = $.fn.menu,  c = ui.c, id, self = this,
         $arrow = '<span class="'+c.arrowClass+'"> &#187;</span>',
         o = $.Object.merge({}, ui.defaults,op || {});
-        var self = this;
-        if($.isArray(o.data) && o.data.length ){
+
+        if($.isArray(o.data) && o.data.length ){//根据用户内容生成结构
             var doc = this.ownerDocument || document;
             this.each(function(){
                 addMenu(o.data, this, doc)
             });
-            self = this.find(">ul")
+            self = this.find(">ul");
         } 
         self.addClass(c.menuClass).find('li:has(ul)').each(function() {
             if (o.autoArrows) {
                 $('>a:first-child',this).addClass(c.anchorClass).append($arrow);
             }
         });
-    
-        if(o.vertical){
+        if(o.vertical){//垂直菜单
             self.addClass(o.verticalClass);
         }
-        if(o.flexible){
+        if(o.flexible){//自适应菜单的宽度
             var cssOpt = {
                 'float' : 'none',
                 width	: 'auto'
@@ -121,7 +123,7 @@ define("menu", ["node","attr","css","event","fx"], function($){
             onShow	: function(){},
             onHide	: function(){},
             minWidth	       : 9,		// 单位为em
-            maxWidth	       : 25,		//  单位为em
+            maxWidth	       : 25,		// 单位为em
             extraWidth	       : 0		// 额外超出多少宽度
         }
     })

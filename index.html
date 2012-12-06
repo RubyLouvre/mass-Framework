@@ -9,19 +9,35 @@
         <script src="mass_merge.js">  </script>
         <script>
             require("menu,ready",function($){
-                $("#sample4>ul").menu({
-                    //    vertical:true
-                });
-                $(".mmm").menu({
+                $("#sample1>ul").menu({  });
+                $("#sample2>ul").menu({
                     vertical:true
                 });
-                $("#sample5>ul").menu({
+                $("#sample3>ul").menu();
+                $("#sample4>ul").menu({
                     flexible: true,
                     minWidth:    12,   // minimum width of sub-menus in em units 
                     maxWidth:    27,   // maximum width of sub-menus in em units 
                     extraWidth:  1  
                 });
-                
+                $("#example5").menu({
+                    data:[
+                        "aaa",
+                        {
+                            item:"bbb",
+                            sub:[
+                                "11111","2222","3333","4444"
+                            ]
+                        },
+                        "ccc",
+                        {
+                            item:"dddd",
+                            sub:[
+                                "菜单1","菜单2","菜单3",{ item: "菜单4", sub:[ "第三层1", "第三层2"]}
+                            ]
+                        }
+                    ]
+                })
              
             });
         </script>
@@ -40,8 +56,8 @@
 
     </head>
     <body>
-        <div>
-            <ul class="mmm" style="display:none;">
+        <div id="sample1" style="height:200px;">
+            <ul>
                 <li >
                     <a href="#a">menu item</a>
                     <ul>
@@ -155,9 +171,125 @@
                 </li>
             </ul>
         </div>
-        <div id="sample4" >
-            <h2>The result:</h2>
-            <ul id="sample-menu-4" class="js-navbar">
+        <br clear="both"/>
+        <div id="sample2" style="height:200px;">
+            <ul>
+                <li >
+                    <a href="#a">menu item</a>
+                    <ul>
+                        <li>
+                            <a href="#aa">menu item that is quite long</a>
+                        </li>
+                        <li >
+                            <a href="#ab">XXXXX</a>
+                            <ul>
+                                <li ><a href="#">menu item</a></li>
+                                <li><a href="#aba">menu item</a></li>
+                                <li><a href="#abb">menu item</a></li>
+                                <li><a href="#abc">menu item</a></li>
+                                <li><a href="#abd">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li>
+                                    <a href="#">menu item</a>
+                                    <ul>
+                                        <li ><a href="#">menu item</a></li>
+                                        <li><a href="#aba">4444444</a></li>
+                                        <li><a href="#aba">4444444</a></li>
+                                        <li><a href="#aba">4444444</a></li>
+
+                                        <li><a href="#abd">4444444</a></li>
+                                        <li><a href="#abd">4444444</a></li>
+                                        <li><a href="#abd">4444444</a></li>
+                                    </ul>
+                                </li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">menu item</a>
+                </li>
+                <li>
+                    <a href="#">menu item</a>
+                    <ul>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#">menu item</a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">menu item</a>
+                </li>
+            </ul>
+        </div>
+        <br clear="both"/>
+        <div id="sample3" style="height:200px;">
+            <ul class="js-navbar">
                 <li>
                     <a class="js-with-ul" href="#">long menu item<span class="js-sub-indicator"> &#187;</span></a>
                     <ul>
@@ -229,112 +361,111 @@
                 </li>
             </ul>
         </div>
-        <div>
-            <div id="sample5" class="sampleTabContent">
-                <h2>The result:</h2>
-                <ul id="sample-menu-5" class="js-menu">
-                    <li >
-                        <a class="js-with-ul" href="#a">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                        <ul>
-                            <li>
-                                <a href="#aa">menu item that is quite long</a>
-                            </li>
-                            <li >
-                                <a class="js-with-ul" href="#ab">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li ><a href="#">这个子菜单会变得比上面的所有菜单更长！！！</a></li>
-                                    <li><a href="#aba">menu item</a></li>
-                                    <li><a href="#abb">menu item</a></li>
-                                    <li><a href="#abc">menu item</a></li>
-                                    <li><a href="#abd">menu item</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">menu item</a>
-                    </li>
-                    <li>
-                        <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                        <ul>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">short</a></li>
-                                    <li><a href="#">short</a></li>
-                                    <li><a href="#">short</a></li>
-                                    <li><a href="#">short</a></li>
-                                    <li><a href="#">short</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                </ul>
-                            </li>
-                            <li>
-                                <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
-                                <ul>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                    <li><a href="#">menu item</a></li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>
-                        <a href="#">menu item</a>
-                    </li>	
-                </ul>
-            </div>
+
+        <div id="sample4" style="height:200px;">
+            <ul class="js-menu">
+                <li >
+                    <a class="js-with-ul" href="#a">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                    <ul>
+                        <li>
+                            <a href="#aa">menu item that is quite long</a>
+                        </li>
+                        <li >
+                            <a class="js-with-ul" href="#ab">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li ><a href="#">这个子菜单会变得比上面的所有菜单更长！！！</a></li>
+                                <li><a href="#aba">menu item</a></li>
+                                <li><a href="#abb">menu item</a></li>
+                                <li><a href="#abc">menu item</a></li>
+                                <li><a href="#abd">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">menu item</a>
+                </li>
+                <li>
+                    <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                    <ul>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                                <li><a href="#">short</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a class="js-with-ul" href="#">menu item<span class="js-sub-indicator"> &#187;</span></a>
+                            <ul>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                                <li><a href="#">menu item</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">menu item</a>
+                </li>	
+            </ul>
         </div>
+        <div id="example5" style="height:300px;background: pink;"></div>
     </body>
 </html>
 
