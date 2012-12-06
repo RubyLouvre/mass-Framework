@@ -123,6 +123,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
 
     function setWH(node, name, val, extra){
         var which = cssPair[name]
+        console.log(which)
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
