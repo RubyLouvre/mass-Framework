@@ -118,7 +118,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     var supportBoxSizing = $.cssName("box-sizing")
     adapter[ "boxSizing:get" ] = function( node, name ) {
         return  supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ?
-            "border-box" : "content-box"
+        "border-box" : "content-box"
     }
 
     function setWH(node, name, val, extra){
@@ -166,10 +166,10 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         $.cssHooks[ lower+":get" ] = function( node ){
             return getWH( node, name, 0 ) + "px";//添加相应适配器
         }
-        $.cssHooks[ lower+":set" ] = function( node, name, value ){
-            var box = $.css(node, "box-sizing");
-            node.style[name] = box == "content-box" ? value:
-                setWH(node, name, parseFloat(value), box ) + "px";
+        $.cssHooks[ lower+":set" ] = function( node, nick, value ){
+            var box = $.css(node, "box-sizing");//nick防止与外面name冲突
+            node.style[ nick ] = box == "content-box" ? value:
+            setWH(node, name, parseFloat(value), box ) + "px";
         }
         "inner_1,b_0,outer_2".replace(rmapper,function(a, b, num){
             var method = b == "b" ? lower : b + name;
@@ -185,10 +185,10 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
                         //IE 标准模式 : html.scrollHeight> body.scrollHeight
                         //IE 怪异模式 : html.scrollHeight 最大等于可视窗口多一点？
                         return Math.max(
-                        node.body[ scrollProp ], doc[ scrollProp ],
-                        node.body[ offsetProp ], doc[ offsetProp ],
-                        doc[ clientProp ]
-                    );
+                            node.body[ scrollProp ], doc[ scrollProp ],
+                            node.body[ offsetProp ], doc[ offsetProp ],
+                            doc[ clientProp ]
+                            );
                     } else if ( size === void 0 ) {
                         return getWH( node, name, num )
                     } else {
@@ -246,7 +246,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             status[ index ] = isHidden(elem) 
             if( !values[ index ] ){
                 values[ index ] =  status[index] ? defaultDisplay(elem.nodeName): 
-                    getter(elem, "display");
+                getter(elem, "display");
                 $._data( elem, "olddisplay", values[ index ])
             }
         }
@@ -309,7 +309,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     $.fn.offset = function(options){//取得第一个元素位于页面的坐标
         if ( arguments.length ) {
             return (!options || ( !isFinite(options.top) && !isFinite(options.left) ) ) ?  this :
-                this.each(function() {
+            this.each(function() {
                 setOffset( this, options );
             });
         }
@@ -401,15 +401,15 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
                 }
                 win = getWindow( node );//获取第一个元素的scrollTop/scrollLeft
                 return win ? (prop in win) ? win[ prop ] :
-                    win.document.documentElement[ method ]  : node[ method ];
+                win.document.documentElement[ method ]  : node[ method ];
             }
             return this.each(function() {//设置匹配元素的scrollTop/scrollLeft
                 win = getWindow( this );
                 if ( win ) {
                     win.scrollTo(
                         !top ? val : $( win ).scrollLeft(),
-                    top ? val : $( win ).scrollTop()
-                );
+                        top ? val : $( win ).scrollTop()
+                        );
                 } else {
                     this[ method ] = val;
                 }
