@@ -23,7 +23,7 @@ void function( global, DOC ){
         "NaN"                     : "NaN"     ,
         "undefined"               : "Undefined"
     }
-    var toString = class2type.toString;
+    var toString = class2type.toString, basepath
     function $( expr, context ){//新版本的基石
         if( $.type( expr,"Function" ) ){ //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return  $.require( all+",ready", expr );
@@ -239,14 +239,13 @@ void function( global, DOC ){
         var kernel = $.config;
         kernel.debug = a == "true" || a == "1";
         kernel.storage = b == "true"|| b == "1";
-        kernel.base = url.substr( 0, url.lastIndexOf("/") ) +"/";
+        basepath =  kernel.base = url.substr( 0, url.lastIndexOf("/") ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
 
     })(DOC.getElementsByTagName( "script" ));
-
     $.noop = $.error = function(){};
 
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace( $.rword, function( name ){
@@ -268,7 +267,7 @@ void function( global, DOC ){
             }else {
                 var tmp = url.charAt(0);
                 if( tmp !== "." && tmp != "/"){  //相对于根路径
-                    ret = $.config.base + url;
+                    ret = basepath + url;
                 }else if(url.slice(0,2) == "./"){ //相对于兄弟路径
                     ret = parent + url.substr(1);
                 }else if( url.slice(0,2) == ".."){ //相对于父路径
@@ -463,7 +462,7 @@ void function( global, DOC ){
         dn = 0,         // 需要安装的模块数
         cn = 0,         // 已安装完的模块数
         id = parent || "cb"+ ( cbi++ ).toString(32);
-        parent = parent || $.config.base
+        parent = parent || basepath
         String(list).replace( $.rword, function(el){
             var array = parseURL(el, parent ),  url = array[0];
             if(array[1] == "js"){
@@ -519,7 +518,7 @@ void function( global, DOC ){
         if(typeof args[0] == "function"){
             args.unshift([]);
         }
-        id = getCurrentScript();
+        id = modules[id] && modules[id].state == 2 ? _id : getCurrentScript();
         factory = args[1];
         factory.id = _id;//用于调试
         factory.delay = function( id ){
@@ -542,7 +541,7 @@ void function( global, DOC ){
             stack.push( factory )
         }
     }
-    define.amd = modules
+    $.require.amd = modules
     function loadStorage( id ){
         var factory =  Storage.getItem( id );
         if( $.config.storage && factory && !modules[id]){
@@ -584,7 +583,7 @@ void function( global, DOC ){
         return ret;
     }
     all.replace($.rword,function(a){
-        $.config.alias[ "$"+a ] = $.config.base + a + ".js";
+        $.config.alias[ "$"+a ] = basepath + a + ".js";
     });
     //domReady机制
     var readyFn, ready =  W3C ? "DOMContentLoaded" : "readystatechange" ;
