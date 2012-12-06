@@ -7,6 +7,7 @@ void function( global, DOC ){
     var HTML  = DOC.documentElement;
     var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
     var loadings = [];//正在加载中的模块列表
+    var stack = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
@@ -70,11 +71,11 @@ void function( global, DOC ){
     }
 
     mix( $, {//为此版本的命名空间对象添加成员
-        html: HTML,
-        head: HEAD,
-        mix: mix,
+        html:  HTML,
+        head:  HEAD,
+        mix:   mix,
         rword: /[^, ]+/g,
-        mass: mass,//大家都爱用类库的名字储存版本号，我也跟风了
+        mass:  mass,//大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": W3C ? "addEventListener" : "attachEvent",
         //将内部对象挂到window下，此时可重命名，实现多库共存  name String 新的命名空间
         exports: function( name ) {
@@ -294,7 +295,6 @@ void function( global, DOC ){
         }
         return [ret, ext];
     }
-
   
     $.mix({
         //绑定事件(简化版)
@@ -310,42 +310,6 @@ void function( global, DOC ){
         } : function( el, type, fn ){
             if ( el.detachEvent ) {
                 el.detachEvent( "on" + type, fn || $.noop );
-            }
-        },
-        //检测是否存在循环依赖
-        _checkCycle : function( deps, nick ){
-            for(var id in deps){
-                if( deps[id] == "司徒正美" &&( id == nick || $._checkCycle(modules[id].deps, nick))){
-                    return true;
-                }
-            }
-        },
-        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
-        _checkDeps: function (){
-            loop:
-            for ( var i = loadings.length, id; id = loadings[ --i ]; ) {
-                var obj = modules[ id ], deps = obj.deps;
-                for( var key in deps ){
-                    if( deps.hasOwnProperty( key ) && modules[ key ].state != 2 ){
-                        continue loop;
-                    }
-                }
-                //如果deps是空对象或者其依赖的模块的状态都是2
-                if( obj.state != 2){
-                    loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
-                    fireFactory( obj.id, obj.args, obj.factory );
-                    $._checkDeps();
-                }
-            }
-        },
-        _checkFail : function( node, error ){
-            var id = node.src;
-            node.onload = node.onreadystatechange = node.onerror = null;
-            if( error || !modules[ id ].state ){
-                HEAD.removeChild(node)
-                $.log("加载 "+ id +" 失败", 7);
-            }else{
-                return true;
             }
         },
         //移除指定或所有本地储存中的模块
@@ -415,6 +379,13 @@ void function( global, DOC ){
     }
 
     //============================加载系统===========================
+    var modules = $.modules =  {
+        ready:{ },
+        mass: {
+            state: 2,
+            exports: $
+        }
+    };
     function getCurrentScript(){
         if(DOC.currentScript){
             return DOC.currentScript.src
@@ -426,6 +397,44 @@ void function( global, DOC ){
             }
         }
     }
+    //检测是否存在循环依赖
+    function checkCycle( deps, nick ){
+        for(var id in deps){
+            if( deps[id] == "司徒正美" &&( id == nick || checkCycle(modules[id].deps, nick))){
+                return true;
+            }
+        }
+    }
+    //检测此JS模块的依赖是否都已安装完毕,是则安装自身
+    function checkDeps(){
+        loop:
+        for ( var i = loadings.length, id; id = loadings[ --i ]; ) {
+            var obj = modules[ id ], deps = obj.deps;
+            for( var key in deps ){
+                if( deps.hasOwnProperty( key ) && modules[ key ].state != 2 ){
+                    continue loop;
+                }
+            }
+            //如果deps是空对象或者其依赖的模块的状态都是2
+            if( obj.state != 2){
+                loadings.splice( i, 1 );//必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
+                fireFactory( obj.id, obj.args, obj.factory );
+                checkDeps();
+            }
+        }
+    }
+    function checkFail( node, error ){
+        var id = node.src;
+        node.onload = node.onreadystatechange = node.onerror = null;
+        if( error || !modules[ id ].state ){
+            if(error){//注意，在标准浏览器下通过!modules[ id ].state检测可能不精确，这时移出节点会出错
+                HEAD.removeChild(node)
+            }
+            $.log("加载 "+ id +" 失败", 7);
+        }else{
+            return true;
+        }
+    }
     function loadJS( url ){
         var node = DOC.createElement("script")
         node.onload = node.onreadystatechange = function(){
@@ -434,27 +443,20 @@ void function( global, DOC ){
                 //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
                 var factory = stack.pop() ;
                 factory &&  factory.delay(node.src)
-                if( $._checkFail(node) ){
+                if( checkFail(node) ){
                     $.log("已成功加载 "+node.src, 7);
                 }
             }
         }
         node.onerror = function(){
-            $._checkFail(node, true)
+            checkFail(node, true)
         }
         node.src = url 
         $.log("正准备加载 "+node.src, 7)
         HEAD.insertBefore(node, HEAD.firstChild)
     }
-    var modules = $.modules =  {
-        ready:{ },
-        mass: {
-            state: 2,
-            exports: $
-        }
-    };
+ 
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
-    var stack = []
     window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
         args = [],      // 用于依赖列表中的模块的返回值
@@ -495,7 +497,7 @@ void function( global, DOC ){
         }
         if( dn === cn ){//如果需要安装的等于已安装好的
             fireFactory( id, args, factory );//装配到框架中
-            $._checkDeps();
+            checkDeps();
             return
         }
         //在正常情况下模块只能通过_checkDeps执行
@@ -522,7 +524,7 @@ void function( global, DOC ){
         factory.id = _id;//用于调试
         factory.delay = function( id ){
             args.push( id );
-            if($._checkCycle(modules[id].deps, id)){
+            if( checkCycle(modules[id].deps, id)){
                 throw new Error( id +"模块与之前的某些模块存在循环依赖")
             }
             if( $.config.storage && !Storage.getItem( id ) ){
@@ -531,6 +533,7 @@ void function( global, DOC ){
                 Storage.setItem( id+"_parent",  id);
                 Storage.setItem( id+"_version", new Date - 0);
             }
+            delete factory.delay;//释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
         }
         if(id ){
@@ -538,8 +541,6 @@ void function( global, DOC ){
         }else{//先进先出
             stack.push( factory )
         }
-
-       
     }
     define.amd = modules
     function loadStorage( id ){
@@ -589,7 +590,7 @@ void function( global, DOC ){
     var readyFn, ready =  W3C ? "DOMContentLoaded" : "readystatechange" ;
     function fireReady(){
         modules.ready.state = 2;
-        $._checkDeps();
+        checkDeps();
         if( readyFn ){
             $.unbind( DOC, ready, readyFn );
         }
