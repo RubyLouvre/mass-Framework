@@ -195,22 +195,19 @@ define( "lang_fix", !!Array.isArray, function(){
     var substr = String.prototype.substr;
     if('ab'.substr(-1) != 'b'){
         String.prototype.substr = function(start, length){
-            return (start < 0) ? substr.call( this, Math.max(this.length + start, 0), length)
-            : substr.call( this,start, length);
+            start =  start < 0 ? Math.max(this.length + start, 0) : start;
+            return substr.call( this, start,length);
         }
     }
 //    var testString = "0123456789";
-//
 //    alert(testString.substr(2));
 //    // Output: 23456789
-//
 //    alert(testString.substr(2, 5));
 //    // Output: 23456
-//
 //    alert(testString.substr(-3));
-//    // Output: 789
+//    // Output: 789 IE:0123456789
 //    alert(testString.substr(-5, 2));
-//// Output: 56
+//// Output: 56  IE:01
 });
 /**
 2011.7.26 添加Object.getPrototypeOf方法

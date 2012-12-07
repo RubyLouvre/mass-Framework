@@ -6,12 +6,27 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <script>
-            require("fxv6", function(a, $){
-          //    $.log($.cssName("requestAnimationFrame",window))
-            })
+            var substr = String.prototype.substr;
+            if('ab'.substr(-1) != 'b'){
+                String.prototype.substr = function(start, length){
+                    start =  start < 0 ? Math.max(this.length + start, 0) : start;
+                    return substr.call( this, start,length);
+                }
+            }
+            var testString = "0123456789";
+
+            alert(testString.substr(2));
+            // Output: 23456789
+
+            alert(testString.substr(2, 5));
+            // Output: 23456
+
+            alert(testString.substr(-3));
+            // Output: 789
+            alert(testString.substr(-5, 2));
         </script>
         <style>
-          
+
 
         </style>
     </head>
