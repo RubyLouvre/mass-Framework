@@ -6,23 +6,8 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <script>
-            require("events, event", function(EventTarget, $){
-                var a = new EventTarget;
-                a.addEventListener("click", function(e){
-                    $.log(e)
-                })
-                a.addEventListener("click", function(e){
-                    $.log("高优先级")
-                }, 2)
-                a.addEventListener("click", function(e){
-                    $.log("这是第三个回调")
-                });
-                a.addEventListener("click", function(e, a, b, c){
-                    $.log(a )
-                    $.log(b )
-                    $.log(c )
-                });
-                a.dispatchEvent("click",1,2,3)
+            require("fxv6,node", function(a, $){
+          //    $.log($.cssName("requestAnimationFrame",window))
             })
         </script>
         <style>

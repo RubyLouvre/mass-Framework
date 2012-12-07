@@ -218,8 +218,8 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
     });
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
-    var prefixes = ['','-webkit-','-o-','-moz-', 'moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
-    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector 
+    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', 'WebKit-', 'moz-',"webkit-",'ms-', '-khtml-' ]
+    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
         c:   "color",
         h:   "height",
         o:   "opacity",
