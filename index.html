@@ -2,50 +2,36 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>ejs by 司徒正美</title>
+        <title>EventTarget by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <script src="mass_merge.js">  </script>
-
-    </head>
-    <body>
-        <script type="tmpl" id="table_tmpl">
-            <&= title() &>
-            <table border=1 width="80%">
-                <&- for(var i=0,tl = @trs.length,tr;i<tl;i++){  -&>
-                    <&- tr = @trs[i]; -&>
-                    <tr>
-                        <td><&= tr.name;; &></td> <td><&= tr.age; &></td> <td><&= tr.sex || "男" &></td>
-                    </tr>
-                    <& } &>
-            </table>
-            <&# 怎么可能不支持图片 &>
-            <img src="<&= @href &>">
-        </script>
-        <div id="ejsv10"></div>
+        <script src="mass.js">  </script>
         <script>
-           
-           require("ejs,node,ready", function($){
-                var trs = [
-                    {name:"隐形杀手",age:29,sex:"男"},
-                    {name:"索拉",age:22,sex:"男"},
-                    {name:"fesyo",age:23,sex:"女"},
-                    {name:"恋妖壶",age:18,sex:"男"},
-                    {name:"竜崎",age:25,sex:"男"},
-                    {name:"你不懂的",age:30,sex:"女"}
-                ]
- 
-                var html = $.ejs("#table_tmpl",{
-                    trs: trs,
-                    href: "http://images.cnblogs.com/cnblogs_com/rubylouvre/202906/o_type4.jpg"
-                },{
-                    title: function(){
-                        return "<p>这是使用视图helper输出的代码片断</p>"
-                    }
-                    
+            require("events, event", function(EventTarget, $){
+                var a = new EventTarget;
+                a.addEventListener("click", function(e){
+                    $.log(e)
+                })
+                a.addEventListener("click", function(e){
+                    $.log("高优先级")
+                }, 2)
+                a.addEventListener("click", function(e){
+                    $.log("这是第三个回调")
                 });
-                $("#ejsv10").html(html)
- 
+                a.addEventListener("click", function(e, a, b, c){
+                    $.log(a )
+                    $.log(b )
+                    $.log(c )
+                });
+                a.dispatchEvent("click",1,2,3)
             })
         </script>
+        <style>
+          
+
+        </style>
+    </head>
+    <body>
+
+
     </body>
 </html>

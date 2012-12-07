@@ -399,7 +399,7 @@ void function( global, DOC ){
     //检测是否存在循环依赖
     function checkCycle( deps, nick ){
         for(var id in deps){
-            if( deps[id] == "司徒正美" &&( id == nick || checkCycle(modules[id].deps, nick))){
+            if( deps[id] == "司徒正美" && modules[id].state != 2 &&( id == nick || checkCycle(modules[id].deps, nick))){
                 return true;
             }
         }
@@ -426,9 +426,10 @@ void function( global, DOC ){
         var id = node.src;
         node.onload = node.onreadystatechange = node.onerror = null;
         if( error || !modules[ id ].state ){
-            if(error){//注意，在标准浏览器下通过!modules[ id ].state检测可能不精确，这时移出节点会出错
+            //注意，在IE通过!modules[ id ].state检测可能不精确，这时立即移除节点会出错
+            setTimeout(function(){
                 HEAD.removeChild(node)
-            }
+            }, error ? 0 : 1000 );
             $.log("加载 "+ id +" 失败", 7);
         }else{
             return true;
@@ -454,7 +455,33 @@ void function( global, DOC ){
         $.log("正准备加载 "+node.src, 7)
         HEAD.insertBefore(node, HEAD.firstChild)
     }
- 
+    function loadStorage( id ){
+        var factory =  Storage.getItem( id );
+        if( $.config.storage && factory && !modules[id]){
+            var parent = Storage.getItem(id+"_parent");
+            var deps = Storage.getItem(id+"_deps");
+            deps = deps ?  deps.match( $.rword ) : "";
+            modules[ id ] ={
+                id: id,
+                parent: parent,
+                exports: {},
+                state: 1
+            };
+            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
+        }
+    }
+    function loadCSS(url){
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var link     =  DOC.createElement("link");
+        link.charset = "utf-8";
+        link.rel     = "stylesheet";
+        link.href    = url;
+        link.type    = "text/css";
+        link.id      = id;
+        HEAD.insertBefore( link, HEAD.firstChild );
+    }
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
     window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
@@ -542,33 +569,7 @@ void function( global, DOC ){
         }
     }
     $.require.amd = modules
-    function loadStorage( id ){
-        var factory =  Storage.getItem( id );
-        if( $.config.storage && factory && !modules[id]){
-            var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps");
-            deps = deps ?  deps.match( $.rword ) : "";
-            modules[ id ] ={
-                id: id,
-                parent: parent,
-                exports: {},
-                state: 1
-            };
-            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
-        }
-    }
-    function loadCSS(url){
-        var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var link     =  DOC.createElement("link");
-        link.charset = "utf-8";
-        link.rel     = "stylesheet";
-        link.href    = url;
-        link.type    = "text/css";
-        link.id      = id;
-        HEAD.insertBefore( link, HEAD.firstChild );
-    }
+    
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
     function fireFactory( id, deps, factory ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
