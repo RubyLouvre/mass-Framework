@@ -190,7 +190,27 @@ define( "lang_fix", !!Array.isArray, function(){
             return fixed;
         };    
     }
-
+    //  string.substr(start, length)参考 start
+    //  要抽取的子串的起始下标。如果是一个负数，那么该参数声明从字符串的尾部开始算起的位置。也就是说，-1指定字符串中的最后一个字符，-2指倒数第二个字符，以此类推。
+    var substr = String.prototype.substr;
+    if('ab'.substr(-1) != 'b'){
+        String.prototype.substr = function(start, length){
+            return (start < 0) ? substr.call( this, Math.max(this.length + start, 0), length)
+            : substr.call( this,start, length);
+        }
+    }
+//    var testString = "0123456789";
+//
+//    alert(testString.substr(2));
+//    // Output: 23456789
+//
+//    alert(testString.substr(2, 5));
+//    // Output: 23456
+//
+//    alert(testString.substr(-3));
+//    // Output: 789
+//    alert(testString.substr(-5, 2));
+//// Output: 56
 });
 /**
 2011.7.26 添加Object.getPrototypeOf方法
