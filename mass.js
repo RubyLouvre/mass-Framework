@@ -280,7 +280,7 @@ void function( global, DOC ){
                 }else if(tmp == "/"){
                     ret = parent  + url
                 }else{
-                    throw new Error("不符合模块标识规则")
+                    throw new Error("不符合模块标识规则: "+url)
                 }
             }
         }
