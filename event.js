@@ -535,6 +535,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             return this.on( types, selector, fn, times);
         },
         live: function( types, fn, times ) {
+            $.log( "$.fn.live() is deprecated" )
             $( this.ownerDocument ).on( types, this.selector, fn, times );
             return this;
         },
@@ -545,6 +546,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             return arguments.length == 1 ? this.off( selector, "**" ) : this.off( types, fn, selector );
         },
         die: function( types, fn ) {
+            $.log( "$.fn.live() is die" )
             $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
             return this;
         },
