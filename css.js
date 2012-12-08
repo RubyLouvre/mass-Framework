@@ -123,7 +123,6 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
 
     function setWH(node, name, val, extra){
         var which = cssPair[name]
-        console.log(which)
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -232,9 +231,9 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     }
     
     function isHidden( elem) {
-        return getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
+        return elem.sourceIndex === 0 || getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
     }
-
+    $._isHidden = isHidden;
     function toggelDisplay( nodes, show ) {
         var elem,  values = [], status = [], index = 0, length = nodes.length;
         //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
