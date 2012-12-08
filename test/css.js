@@ -1,4 +1,4 @@
-define("../more/random,$spec,$node,$css,ready".split(","),function(random){
+define("../more/random,$node,$spec,$css,ready".split(","),function(random, $){
 
     $.fixture("样式模块-css",{
         "$.css":function(id){
@@ -164,13 +164,10 @@ define("../more/random,$spec,$node,$css,ready".split(","),function(random){
             expect( array[5] ).near( "59.53", 0.001 );
         },
 
-        "$.scrollbarWidth": function() {
-            expect( $.scrollbarWidth() ).log()
-        },
         "$.css(el,left)": function(){
 
             var node = $("<div style='position:absolute;'/>").appendTo("body");
-            expect( node.css("left") ).eq((node[0].offsetLeft - document.documentElement.clientLeft) + "px");
+            expect( node.css("left") ).eq("auto");
             expect( node.offset() ).log();
             expect( node.css("left") ).log();
             node.remove();

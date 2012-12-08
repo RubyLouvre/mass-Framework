@@ -6,11 +6,60 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <script>
-            require("fx,ready", function( $ ){
-                $("#aaa").hide(2000, function(){
-                    $(this).show(1500).fx({rotate: 1440},3000,{queue: true})
+            require("deferred", function(  ){
+                var  log = $.log
+                /*
+                $.Deferred(function(){
+                    log(1)
+                }).wait(1000).done(function(){
+                    log(2)
+                }).wait(1000).done(function(){
+                    log(3)
+                }).wait(1000).done(function(){
+                    log(4)
+                }).resolve()
+                 */
+                /*
+                $.Deferred(function () {
+                    log(1111111111)//11111111111
+                }).
+                    done(function () {
+                    throw "error!";//发生错误
+                }).
+                    fail(function (e) {//这个回调函数不执行
+                    log(e+"222222")
+                    return 2222222
+                }).
+                    fail(function(e){//直到 遇上我们自定义的负向回调
+                    log(e+'333333')//error!333333
+                    return 333333333
+                }).
+                    done(function (c) {//回到正向列队中
+                    log(c)//33333333
+                }).
+                    resolve()
+                 */
+                $.Deferred.paiallel([function(){
+                        log("司徒正美")
+                        return 11
+                    },function(i){
+                        log("上官莉绮")
+                        return 12
+                    },function(i){
+                        log("朝沐金风")
+                        return 13
+                    }]).done(function(d){
+                    log(arguments)
+                }).resolve(10)
+                var d = $.Deferred;
+                var index =0
+                d.loop(10, function(i){
+                    log(i);
+  
+                    return d.wait(500)
                 });
-                $("#bbb").puff(2000, function(){})
+
+
             })
         </script>
         <style>
