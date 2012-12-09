@@ -45,7 +45,7 @@ define("hashchange", ["$event"], function($){
             }
         }
         var last_hash = getHash(), history_hash, hash = "#";
-        $.eventAdapter[ hashchange ] = {
+        $.event.special[ hashchange ] = {
             setup: function(desc) {
                 $.require("ready", function(){
                     if (!iframe) {
@@ -84,7 +84,7 @@ define("hashchange", ["$event"], function($){
             }
         };
     }
-
+return $
 })
 
 

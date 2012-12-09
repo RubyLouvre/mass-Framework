@@ -1,4 +1,4 @@
-define("valuechange", ["$event"], function(){
+define("valuechange", ["$event"], function( $ ){
     var DATA = "valuechangeData";
     var ID  = "valuechangeID"
     var interval = 50;
@@ -56,7 +56,7 @@ define("valuechange", ["$event"], function(){
     $.fn.valuechange = function(callback){
          return callback?  this.bind( "valuechange", callback ) : this.fire( "valuechange" );
     }
-    $.eventAdapter.valuechange = {
+    $.event.special.valuechange = {
         setup: function(desc){
             var elem = desc.currentTarget, nodeName = elem.tagName;
             if (nodeName == 'INPUT' || nodeName == 'TEXTAREA') {
@@ -69,6 +69,7 @@ define("valuechange", ["$event"], function(){
             return false
         }
     }
+	return $
 })
 /*
  *IE 6-9。然后
