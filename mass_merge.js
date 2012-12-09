@@ -259,7 +259,7 @@ void function( global, DOC ){
                 }else if(tmp == "/"){
                     ret = parent  + url
                 }else{
-                    throw new Error("不符合模块标识规则")
+                    throw new Error("不符合模块标识规则: "+url)
                 }
             }
         }
@@ -378,7 +378,7 @@ void function( global, DOC ){
     //检测是否存在循环依赖
     function checkCycle( deps, nick ){
         for(var id in deps){
-            if( deps[id] == "司徒正美" &&( id == nick || checkCycle(modules[id].deps, nick))){
+            if( deps[id] == "司徒正美" && modules[id].state != 2 &&( id == nick || checkCycle(modules[id].deps, nick))){
                 return true;
             }
         }
@@ -405,9 +405,10 @@ void function( global, DOC ){
         var id = node.src;
         node.onload = node.onreadystatechange = node.onerror = null;
         if( error || !modules[ id ].state ){
-            if(error){//注意，在标准浏览器下通过!modules[ id ].state检测可能不精确，这时移出节点会出错
+            //注意，在IE通过!modules[ id ].state检测可能不精确，这时立即移除节点会出错
+            setTimeout(function(){
                 HEAD.removeChild(node)
-            }
+            }, error ? 0 : 1000 );
             $.log("加载 "+ id +" 失败", 7);
         }else{
             return true;
@@ -433,7 +434,33 @@ void function( global, DOC ){
         $.log("正准备加载 "+node.src, 7)
         HEAD.insertBefore(node, HEAD.firstChild)
     }
- 
+    function loadStorage( id ){
+        var factory =  Storage.getItem( id );
+        if( $.config.storage && factory && !modules[id]){
+            var parent = Storage.getItem(id+"_parent");
+            var deps = Storage.getItem(id+"_deps");
+            deps = deps ?  deps.match( $.rword ) : "";
+            modules[ id ] ={
+                id: id,
+                parent: parent,
+                exports: {},
+                state: 1
+            };
+            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
+        }
+    }
+    function loadCSS(url){
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var link     =  DOC.createElement("link");
+        link.charset = "utf-8";
+        link.rel     = "stylesheet";
+        link.href    = url;
+        link.type    = "text/css";
+        link.id      = id;
+        HEAD.insertBefore( link, HEAD.firstChild );
+    }
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
     window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
@@ -521,33 +548,7 @@ void function( global, DOC ){
         }
     }
     $.require.amd = modules
-    function loadStorage( id ){
-        var factory =  Storage.getItem( id );
-        if( $.config.storage && factory && !modules[id]){
-            var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps");
-            deps = deps ?  deps.match( $.rword ) : "";
-            modules[ id ] ={
-                id: id,
-                parent: parent,
-                exports: {},
-                state: 1
-            };
-            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
-        }
-    }
-    function loadCSS(url){
-        var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var link     =  DOC.createElement("link");
-        link.charset = "utf-8";
-        link.rel     = "stylesheet";
-        link.href    = url;
-        link.type    = "text/css";
-        link.id      = id;
-        HEAD.insertBefore( link, HEAD.firstChild );
-    }
+    
     //从returns对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
     function fireFactory( id, deps, factory ){
         for ( var i = 0, array = [], d; d = deps[i++]; ) {
@@ -775,75 +776,57 @@ define( "lang_fix", !!Array.isArray, function(){
             return this.setFullYear(year );//+ 1900
         };
     }
-
-    
-    var nativeSplit = String.prototype.split,
-    compliantExecNpcg = /()??/.exec("")[1] === void 0, // NPCG: nonparticipating capturing group
-    fix = function (str, separator, limit) {
-        // If `separator` is not a regex, use `nativeSplit`
-        if (Object.prototype.toString.call(separator) !== "[object RegExp]") {
-            return nativeSplit.call(str, separator, limit);
-        }
-        var output = [],
-        flags = (separator.ignoreCase ? "i" : "") +
-        (separator.multiline  ? "m" : "") +
-        (separator.extended   ? "x" : "") + // Proposed for ES6
-        (separator.sticky     ? "y" : ""), // Firefox 3+
-        lastLastIndex = 0,
-        // Make `global` and avoid `lastIndex` issues by working with a copy
-        separator = new RegExp(separator.source, flags + "g"),
-        separator2, match, lastIndex, lastLength;
-        str += ""; // Type-convert
-        if (!compliantExecNpcg) {
-            // Doesn't need flags gy, but they don't hurt
-            separator2 = new RegExp("^" + separator.source + "$(?!\\s)", flags);
-        }
-        
-        limit = limit === void 0 ?
-        -1 >>> 0 : // Math.pow(2, 32) - 1
-        limit >>> 0; // ToUint32(limit)
-        while (match = separator.exec(str)) {
-            // `separator.lastIndex` is not reliable cross-browser
-            lastIndex = match.index + match[0].length;
-            if (lastIndex > lastLastIndex) {
-                output.push(str.slice(lastLastIndex, match.index));
-                // Fix browsers whose `exec` methods don't consistently return `undefined` for
-                // nonparticipating capturing groups
-                if (!compliantExecNpcg && match.length > 1) {
-                    match[0].replace(separator2, function () {
-                        for (var i = 1; i < arguments.length - 2; i++) {
-                            if (arguments[i] === void 0) {
-                                match[i] = void 0;
-                            }
-                        }
-                    });
-                }
-                if (match.length > 1 && match.index < str.length) {
-                    Array.prototype.push.apply(output, match.slice(1));
-                }
-                lastLength = match[0].length;
-                lastLastIndex = lastIndex;
-                if (output.length >= limit) {
-                    break;
+    //http://www.cnblogs.com/tilfon/archive/2012/11/11/2765189.html
+    if ('a~b'.split(/(~)/).length !== 3){
+        String.prototype.split = function(reg){
+            if (!reg.global) {
+                reg = new RegExp(reg.source, 'g' + (reg.ignoreCase ? 'i' : ''));
+            }
+            var m, str = '', arr = [];
+            var i, len = this.length;
+            for (i = 0; i < len; i++)  {
+                str += this.charAt(i);
+                m = str.match(reg);
+                if (m)  {
+                    arr.push(str.replace(m[0], ''));
+                    arr.push(m[0]);
+                    str = '';
                 }
             }
-            if (separator.lastIndex === match.index) {
-                separator.lastIndex++; // Avoid an infinite loop
-            }
+            if (str != '') arr.push(str);
+            return arr;
         }
-        if (lastLastIndex === str.length) {
-            if (lastLength || !separator.test("")) {
-                output.push("");
-            }
-        } else {
-            output.push(str.slice(lastLastIndex));
+    }
+    //http://stackoverflow.com/questions/10470810/javascript-tofixed-bug-in-ie6
+    if (0.9.toFixed(0) !== '1') {
+        Number.prototype.toFixed = function(n) {
+            var power = Math.pow(10, n);
+            var fixed = (Math.round(this * power) / power).toString();
+            if(n == 0) return fixed;
+            if(fixed.indexOf('.') < 0) fixed += '.';
+            var padding = n + 1 - (fixed.length - fixed.indexOf('.'));
+            for(var i = 0; i < padding; i++) fixed += '0';
+            return fixed;
+        };    
+    }
+    //  string.substr(start, length)参考 start
+    //  要抽取的子串的起始下标。如果是一个负数，那么该参数声明从字符串的尾部开始算起的位置。也就是说，-1指定字符串中的最后一个字符，-2指倒数第二个字符，以此类推。
+    var substr = String.prototype.substr;
+    if('ab'.substr(-1) != 'b'){
+        String.prototype.substr = function(start, length){
+            start =  start < 0 ? Math.max(this.length + start, 0) : start;
+            return substr.call( this, start,length);
         }
-        return output.length > limit ? output.slice(0, limit) : output;
-    };
-    // For convenience
-    String.prototype.split = function (separator, limit) {
-        return fix(this, separator, limit);
-    };
+    }
+//    var testString = "0123456789";
+//    alert(testString.substr(2));
+//    // Output: 23456789
+//    alert(testString.substr(2, 5));
+//    // Output: 23456
+//    alert(testString.substr(-3));
+//    // Output: 789 IE:0123456789
+//    alert(testString.substr(-5, 2));
+//// Output: 56  IE:01
 });
 
 
@@ -3434,8 +3417,8 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
     });
    
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
-    var prefixes = ['','-webkit-','-o-','-moz-', 'moz-', '-ms-', 'WebKit-','ms-', '-khtml-' ]
-    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector 
+    var prefixes = ['','-webkit-','-o-','-moz-', '-ms-', 'WebKit-', 'moz-',"webkit-",'ms-', '-khtml-' ]
+    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
         c:   "color",
         h:   "height",
         o:   "opacity",
@@ -4644,7 +4627,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     }
 
     function setWH(node, name, val, extra){
-        var which = cssPair[name];
+        var which = cssPair[name]
         which.forEach(function(direction){
             if(extra < 1)
                 val -= parseFloat(getter(node, 'padding' + direction)) || 0;
@@ -4753,9 +4736,9 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     }
     
     function isHidden( elem) {
-        return getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
+        return elem.sourceIndex === 0 || getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
     }
-
+    $._isHidden = isHidden;
     function toggelDisplay( nodes, show ) {
         var elem,  values = [], status = [], index = 0, length = nodes.length;
         //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
@@ -5633,6 +5616,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             return this.on( types, selector, fn, times);
         },
         live: function( types, fn, times ) {
+            $.log( "$.fn.live() is deprecated" )
             $( this.ownerDocument ).on( types, this.selector, fn, times );
             return this;
         },
@@ -5643,6 +5627,7 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
             return arguments.length == 1 ? this.off( selector, "**" ) : this.off( types, fn, selector );
         },
         die: function( types, fn ) {
+            $.log( "$.fn.live() is die" )
             $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
             return this;
         },
@@ -6446,15 +6431,15 @@ define("ajax",["mass","$flow"], function($){
 
 
 //=========================================
-// 动画模块v5
+// 动画模块v6
 //==========================================
 define("fx", ["$css"],function( $ ){
     var types = {
         color:/color/i,
         scroll:/scroll/i
     },
-    rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
-
+    rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
+    timeline =  $.timeline = []//时间轴
     $.mix({//缓动公式
         easing : {
             linear: function( pos ) {
@@ -6464,52 +6449,24 @@ define("fx", ["$css"],function( $ ){
                 return (-Math.cos(pos*Math.PI)/2) + 0.5;
             }
         },
-        fps: 30,
-        "@queue": [],//主列队
-        //由于构建更高级的基于元素节点的复合动画
-        fx: function ( nodes, duration, hash, effects ){
-            nodes = nodes.mass ? nodes : $(nodes);
-            var props =  hash || duration ;
-            props = typeof props === "object" ? props : {}
-
-            if(typeof duration === "function"){// fx(obj fn)
-                hash = duration;               // fx(obj, 500, fn)
-                duration = 500;
-            }
-            if(typeof hash === "function"){   //  fx(obj, num, fn)
-                props.after = hash;           //  fx(obj, num, {after: fn})
-            }
-            if( effects ){
-                for(var i in effects){
-                    if(typeof effects[i] === "function"){
-                        var old = props[i];
-                        props[i] = function(node, fx ){
-                            effects[i].call(node, node, fx);
-                            if(typeof old === "function"){
-                                old.call(node, node, fx);
-                            }
-                        }
-                    }else{
-                        props[i] = effects[i]
-                    }
-                }
-            }
-            return nodes.fx(duration || 500, props);
-        }
+        fps: 30
     })
     //用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
     function tick(fx){
-        var gotoQueue = true;
-        for(var i = 0, el; el = $["@queue"][i++];){
-            if(el.node == fx.node){//★★★第一步
-                el.positive.push(fx);//子列队
-                gotoQueue = false
-                break;
+        if(fx.queue){ //让同一个元素的动画一个接一个执行
+            var gotoQueue = true;
+            for(var i = timeline.length, el; el = timeline[--i];){
+                if(el.node == fx.node){//★★★第一步
+                    el.positive.push(fx);//子列队
+                    gotoQueue = false
+                    break;
+                }
             }
-        }
-        if(gotoQueue){//★★★第二步
-            fx.positive = fx.positive || [];
-            $["@queue"].unshift( fx );
+            if(gotoQueue){//★★★第二步
+                timeline.unshift( fx );
+            }
+        }else{
+            timeline.push( fx )
         }
         if (tick.id === null) {
             tick.id = setInterval( nextTick, 1000/ $.fps );//原始的setInterval id并执行动画
@@ -6518,46 +6475,79 @@ define("fx", ["$css"],function( $ ){
     tick.id = null;
     //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
     function nextTick() {
-        var fxs = $["@queue"], i = fxs.length;
+        var i = timeline.length;
         while(--i >= 0){
-            if ( !(fxs[i].node && animate(fxs[i], i)) ) {
-                fxs.splice(i, 1);
+            if ( !(timeline[i].node && animate(timeline[i], i)) ) {
+                timeline.splice(i, 1);
             }
         }
-        fxs.length || (clearInterval( tick.id), tick.id = null);
+        timeline.length || (clearInterval( tick.id ), tick.id = null);
     }
-    function isHidden( elem ) {
-        return elem.sourceIndex === 0 || $.css( elem, "display" ) === "none"
-        || !$.contains( elem.ownerDocument.documentElement, elem );
-    }
-    $.fn.fx = function( duration, hash, /*internal*/ p  ){
-        if(typeof duration === "number" ){
-            hash = hash || {};
-            for( var name in hash){
+
+    var effect = $.fn.fx = function( props, /*internal*/ p  ){
+        var opts = resetArguments.apply(null, arguments);
+        if( (props = opts.props) ){
+            var ease = opts.specialEasing;
+            for( var name in props){
                 p = $.cssName(name) || name;
                 if( name != p ){
-                    hash[ p ] = hash[ name ];//收集用于渐变的属性
-                    delete hash[ name ];
+                    props[ p ] = props[ name ];//收集用于渐变的属性
+                    ease[ p ] = ease[ name ];
+                    delete ease[ name ];
+                    delete props[ name ];
                 }
             }
-            if(typeof hash.easing !== "function"){//转换easing属性为缓动公式
-                var easing = (hash.easing || "swing").toLowerCase() ;
-                hash.easing = $.easing[ easing ] || $.easing.swing;
-            }
-            for(var i = 0, node; node = this[i++];){
-                var fx = {};
-                $.mix(fx, hash)
-                fx.method = "noop"
-                fx.duration = duration
-                fx.node = node;
-                tick( fx );
-            }
-            return this;
-        }else{
-            throw "First argument must be number "
+        }
+        for(var i = 0, node; node = this[i++];){
+            var fx = {};
+            $.mix(fx, opts)
+            fx.method = "noop"
+            fx.positive = []
+            fx.node = node;
+            tick( fx );
+        }
+        return this;
+    }
+    $.fn.animate = effect;
+    //.animate( properties [, duration] [, easing] [, complete] )
+    //.animate( properties, options )
+    function addOptions(opts, p){
+        switch( $.type( p ) ){
+            case "Object":
+                delete  p.props;
+                $.mix(opts, p);
+                break;
+            case "Number":
+                opts.duration = p;
+                break;
+            case "String":
+                opts.easing   = p;
+                break;
+            case "Function":
+                opts.complete = p;
+                break;
         }
     }
-    $.fx.updateHooks = {
+    function resetArguments( properties ) {
+        if(isFinite(properties)){
+            return {
+                duration: properties
+            }
+        }
+        var opts = {
+            props: properties
+        }
+        //如果第二参数是对象
+        for(var i = 1; i < arguments.length; i++){
+            addOptions (opts, arguments[i]);
+        }
+        opts.duration  = typeof opts.duration == "number" ? opts.duration : 700;
+        opts.queue =  !!(opts.queue == null || opts.queue);//默认使用列队
+        opts.specialEasing = opts.specialEasing || {}
+        return opts;
+    };
+
+    effect.updateHooks = {
         _default: function(node, per, end, obj){
             $.css(node, obj.name, (end ? obj.to :  obj.from + obj.easing(per) * (obj.to - obj.from)  ) + obj.unit)
         },
@@ -6569,17 +6559,28 @@ define("fx", ["$css"],function( $ ){
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
     }
-    $.fx.parseHooks = {
+    effect.parseHooks = {
         color:function(node, from, to){
             return [ color2array(from), color2array(to) ]
         }
     }
-    $.fx._default = $.css,//getter
-    $.fx.scroll =  function(el, prop){//getter
+    effect._default = $.css,//getter
+    effect.scroll =  function(el, prop){//getter
         return el[ prop ];
     }
-    var keyworks = $.oneObject("orig,overflow,before,frame,after,easing,revert,record,duration,method,node,positive,negative");
     var Animation = {
+        fx: function ( nodes, properties, args  ){
+            //由于构建更高级的基于元素节点的复合动画
+            var options = {}
+            for(var i = 1; i < args.length; i++){
+                addOptions (options, args[i]);
+            }
+            "before,after".replace(/\w+/g, function(call){
+                options[ call ] = properties[ call ] ;
+                delete properties[ call ];
+            });
+            return nodes.fx(properties, options);
+        },
         noop: function(){},
         type: function (attr){//  用于取得适配器的类型
             for(var i in types){
@@ -6593,14 +6594,14 @@ define("fx", ["$css"],function( $ ){
         //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
         //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
         show: function(node, fx){
-            if(node.nodeType == 1 && isHidden(node)) {
+            if(node.nodeType == 1 && $._isHidden(node)) {
                 var display =  $._data(node, "olddisplay");
                 if(!display || display == "none"){
                     display = $.parseDisplay(node.nodeName)
                     $._data(node, "olddisplay", display);
                 }
                 node.style.display = display;
-                if(fx && ("width" in fx || "height" in fx)){//如果是缩放操作
+                if("width" in  fx.props || "height" in  fx.props  ){//如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
                     if ( display === "inline" && $.css( node, "float" ) === "none" ) {
                         if ( !$.support.inlineBlockNeedsLayout ) {//w3c
@@ -6618,49 +6619,40 @@ define("fx", ["$css"],function( $ ){
             }
         },
         hide: function(node, fx){
-            if(node.nodeType == 1 && !isHidden(node)){
+            if(node.nodeType == 1 && !$._isHidden(node)){
                 var display = $.css( node, "display" ), s = node.style;
                 if ( display !== "none" && !$._data( node, "olddisplay" ) ) {
                     $._data( node, "olddisplay", display );
                 }
-                if( fx ){//缩小
-                    if("width" in fx || "height" in fx){//如果是缩放操作
-                        //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
-                        fx.overflow = [ s.overflow, s.overflowX, s.overflowY ];
-                        s.overflow = "hidden";
-                    }
-                    var after = fx.after;
-                    fx.after = function( node, fx ){
-                        s.display = "none";
-                        if ( fx.overflow != null && !$.support.keepSize  ) {
-                            [ "", "X", "Y" ].forEach(function (postfix,index) {
-                                s[ "overflow" + postfix ] = fx.overflow[index]
-                            });
-                        }
-                        if(typeof after == "function"){
-                            after.call( node, node, fx );
-                        }
-                    };
-                }else{
-                    s.display = "none";
+                if("width" in fx.props || "height" in fx.props ){//如果是缩放操作
+                    //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
+                    fx.overflow = [ s.overflow, s.overflowX, s.overflowY ];
+                    s.overflow = "hidden";
                 }
+                fx.after = function( node, fx ){
+                    s.display = "none";
+                    if ( fx.overflow != null && !$.support.keepSize  ) {
+                        [ "", "X", "Y" ].forEach(function (postfix,index) {
+                            s[ "overflow" + postfix ] = fx.overflow[index]
+                        });
+                    }
+                };
             }
         },
         toggle: function( node ){
-            $[ isHidden(node) ? "show" : "hide" ]( node );
+            $[ $._isHidden(node) ? "show" : "hide" ]( node );
         },
         //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
         create: function (node, fx, index ){
-            var to, parts, unit, op, props = [], revertProps = [],orig = {},
-            hidden = isHidden(node) , parser
-            for(var name in fx){
-                if(!fx.hasOwnProperty(name) ||  keyworks[name]){
+            var to, parts, unit, op, parser, props = [], revertProps = [], orig = {},
+            hidden = $._isHidden(node) , ease = fx.specialEasing, hash = fx.props, easing = fx.easing //公共缓动公式
+            for(var name in hash){
+                if(!hash.hasOwnProperty(name) ){
                     continue
                 }
-                var val = fx[name] //取得结束值
-                var easing = fx.easing;//公共缓动公式
+                var val = hash[name] //取得结束值
                 var type = Animation.type(name);//取得类型
-                var from = ($.fx[ type ] || $.fx._default)(node, name);//取得起始值
+                var from = (effect[ type ] || effect._default)(node, name);//取得起始值
                 //用于分解属性包中的样式或属性,变成可以计算的因子
                 if( val === "show" || (val === "toggle" && hidden)){
                     val = $._data(node,"old"+name) || from;
@@ -6671,13 +6663,8 @@ define("fx", ["$css"],function( $ ){
                     orig[name] = $._data(node,"old"+name, from );
                     fx.method = "hide";
                     val = 0;
-                }else if($.isArray( val )){// array
-                    parts = val;
-                    val = parts[0];//取得第一个值
-                    easing = typeof parts[1] == "function" ? parts[1]: easing;//取得第二个值或默认值
                 }
-
-                if((parser = $.fx.parseHooks[ type ])){
+                if((parser = effect.parseHooks[ type ])){
                     parts = parser(node, from, val );
                 }else{
                     from = !from || from == "auto" ? 0 : parseFloat(from)//确保from为数字
@@ -6710,7 +6697,7 @@ define("fx", ["$css"],function( $ ){
                     from: from ,
                     to: to,
                     type: type,
-                    easing: easing,
+                    easing: $.easing[ String(ease[name] || easing).toLowerCase() ] || $.easing.swing,
                     unit: unit
                 }
                 props.push( prop );
@@ -6728,7 +6715,7 @@ define("fx", ["$css"],function( $ ){
                 }
                 fx2.record = fx2.revert = void 0
                 fx2.props = revertProps;
-                var el = $["@queue"][ index ];
+                var el = $.timeline[ index ];
                 el.negative = el.negative || [];
                 el.negative.push(fx2);//添加已存负向列队中
             }
@@ -6741,20 +6728,19 @@ define("fx", ["$css"],function( $ ){
         if(!fx.startTime){//第一帧
             mix = fx.before;//位于动画的最前面
             mix && ( mix.call( node, node, fx ), fx.before = 0 );
-            if(!fx.props){//from这个值必须在此个时间点才能侦察正确
-                Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
-            }
+            //from这个值必须在此个时间点才能侦察正确
+            Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
             Animation[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
         }else{
             var per = (now - fx.startTime) / fx.duration;
             var end = fx.gotoEnd || per >= 1;
-            var hooks = $.fx.updateHooks
+            var hooks = effect.updateHooks
             // 处理渐变
             for(var i = 0, obj; obj = fx.props[i++];){
                 ;(hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
-            if( (mix = fx.frame ) && !end ){
+            if( (mix = fx.step ) && !end ){
                 mix.call(node, node, fx ) ;
             }
             if ( end ) {//最后一帧
@@ -6765,6 +6751,8 @@ define("fx", ["$css"],function( $ ){
                 }
                 mix = fx.after;//执行动画完成后的回调
                 mix && mix.call( node, node, fx ) ;
+                mix = fx.complete;//执行动画完成后的回调
+                mix && mix.call( node, node, fx ) ;
                 if( fx.revert && fx.negative.length){
                     Array.prototype.unshift.apply( fx.positive, fx.negative.reverse());
                     fx.negative = []; // 清空负向列队
@@ -6773,7 +6761,7 @@ define("fx", ["$css"],function( $ ){
                 if ( !neo ) {
                     return false;
                 }
-                $["@queue"][ index ] = neo;
+                timeline[ index ] = neo;
                 neo.positive = fx.positive;
                 neo.negative = fx.negative;
             }
@@ -6789,9 +6777,8 @@ define("fx", ["$css"],function( $ ){
         clearQueue = clearQueue ? "1" : ""
         gotoEnd  = gotoEnd  ? "1" : "0"
         var stopCode = parseInt( clearQueue+gotoEnd ,2 );//返回0 1 2 3
-        var array = $["@queue"];
         return this.each(function(node){
-            for(var i = 0, fx ; fx = array[i];i++){
+            for(var i = 0, fx ; fx = timeline[i];i++){
                 if(fx.node === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:  //中断当前动画，继续下一个动画
@@ -6809,7 +6796,7 @@ define("fx", ["$css"],function( $ ){
                             Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
                             fx.negative = []; // 清空负向列队
                             for(var j =0; fx = fx.positive[j++]; ){
-                                fx.before = fx.after = fx.frame = $.noop
+                                fx.before = fx.after = fx.step = $.noop
                                 fx.gotoEnd = true;//立即完成该元素的所有动画
                             }
                             break;
@@ -6826,7 +6813,7 @@ define("fx", ["$css"],function( $ ){
         fxAttrs.concat.apply([], fxAttrs.slice(0,num)).forEach(function(name) {
             obj[ name ] = type;
             if(~name.indexOf("margin")){
-                $.fx.updateHooks[name] = function(node, per, end, obj){
+                effect.updateHooks[name] = function(node, per, end, obj){
                     var val = (end ? obj.to :  obj.from + ( obj.from - obj.to) * obj.easing(per) ) ;
                     node.style[name] = Math.max(val,0) + obj.unit;
                 }
@@ -6851,53 +6838,49 @@ define("fx", ["$css"],function( $ ){
     }
 
     Object.keys(effects).forEach(function( method ){
-        $.fn[ method ] = function( duration, hash ){
-            return $.fx( this, duration, hash, effects[method] );
+        $.fn[ method ] = function(){
+            return Animation.fx( this, effects[method], arguments );
         }
     });
 
     [ "toggle", "show", "hide" ].forEach(function(  name, i ) {
         var pre = $.fn[ name ];
-        $.fn[ name ] = function( duration, hash ) {
+        $.fn[ name ] = function() {
             if(!arguments.length ){
                 return  pre.call(this)
             }else{
-                return $.fx( this, duration, hash, genFx( name , 3) );
+                return  Animation.fx( this, genFx( name , 3), arguments );
             }
         };
     });
 
     function beforePuff( node, fx ) {
         var position = $.css(node,"position"),
-        width = $.css(node,"width"),
+        width =  $.css(node,"width"),
         height = $.css(node,"height"),
-        left = $.css(node,"left"),
-        top = $.css(node,"top");
+        left =   $.css(node,"left"),
+        top =    $.css(node,"top");
         node.style.position = "relative";
-        $.mix(fx, {
+        $.mix(fx.props, {
             width: "*=1.5",
             height: "*=1.5",
             opacity: "hide",
             left: "-=" + parseInt(width) * 0.25,
             top: "-=" + parseInt(height) * 0.25
         });
-        var after = fx.after;
         fx.after = function( node, fx ){
             node.style.position = position;
             node.style.width = width;
             node.style.height = height;
             node.style.left = left;
             node.style.top = top;
-            if(typeof after === "function"){
-                after.call( node, node, fx );
-            }
         }
     }
     //扩大1.5倍并淡去
-    $.fn.puff = function(duration, hash) {
-        return $.fx( this, duration, hash, {
+    $.fn.puff = function() {
+        return Animation.fx( this, {
             before: beforePuff
-        });
+        }, arguments );
     }
     var colorMap = {
         "black":[0,0,0],
@@ -6943,7 +6926,7 @@ define("fx", ["$css"],function( $ ){
     $.parseColor = color2array
     if($.query && $.query.pseudoHooks){
         $.query.pseudoHooks.animated = function( el ) {
-            for(var i = 0, fxs = $["@queue"], fx; fx = fxs[i++];){
+            for(var i = 0, fx; fx = timeline[i++];){
                 if(el == fx.node){
                     return true
                 }

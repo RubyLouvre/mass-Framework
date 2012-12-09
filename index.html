@@ -6,8 +6,9 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <script>
-            require("deferred", function(  ){
+            require("deferred,fx", function(  ){
                 var  log = $.log
+                $("#aaa").show(1000,{revert:1})
                 /*
                 $.Deferred(function(){
                     log(1)
@@ -38,7 +39,7 @@
                     log(c)//33333333
                 }).
                     resolve()
-                 */
+               
                 $.Deferred.paiallel([function(){
                         log("司徒正美")
                         return 11
@@ -58,7 +59,7 @@
   
                     return d.wait(500)
                 });
-
+  */
 
             })
         </script>
@@ -67,8 +68,10 @@
                 width:100px;
                 height:100px;
                 background:lightgreen;
+                  display:none;
             }
             #bbb{
+                display:none;
                 background: red;
             }
         </style>

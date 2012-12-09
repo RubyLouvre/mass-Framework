@@ -58,7 +58,7 @@ define("deferred", ["mass","lang"], function( $ ){
         return this;
     }
     Deferred.prototype = {
-        init:function(fn){//初始化,建立两个列队
+        init: function(fn){//初始化,建立两个列队
             this._firing = [];
             this._fired = [];
             if(typeof fn === "function")
@@ -82,16 +82,16 @@ define("deferred", ["mass","lang"], function( $ ){
         reject: function(){//执行负向列队
             return fire(this, "ng", this.before(arguments));
         },
-        abort:function(){//中止列队
+        abort: function(){//中止列队
             (this.onabort || ok)();
             return this;
         },
-        //每次执行用户回调函数前都执行此函数,返回一个数组
-        before:function(args,result){
+        //如果回调有返回值,那么就不再用原来的参数
+        before: function(args,result){
             return result == void 0 ? args : [result]
         },
         //并行操作,并把所有的子线程的结果作为主线程的下一个操作的参数
-        paiallel : function (fns) {
+        paiallel: function (fns) {
             var self = get(this),
             obj = {
                 ok: ok,
@@ -132,7 +132,7 @@ define("deferred", ["mass","lang"], function( $ ){
             return self
         },
         //处理相近的迭代操作
-        loop : function (obj, fn, result) {
+        loop: function (obj, fn, result) {
             obj = {
                 begin : obj.begin || 0,
                 end   : (typeof obj.end == "number") ? obj.end : obj - 1,
