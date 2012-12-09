@@ -301,7 +301,7 @@ define("fx", ["$css"],function( $ ){
         }
     }
     function animate( fx, index ) {
-        var node = fx.node, now =  +new Date, mix;
+        var node = fx.node, now =  +new Date;
         if(!fx.startTime){//第一帧
             callback(fx, node, "before");//动画开始前的预操作
             Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队

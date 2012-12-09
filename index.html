@@ -2,14 +2,13 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title>EventTarget by 司徒正美</title>
+        <title>Deferred by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <script>
-            require("deferred,fx", function(  ){
+            require("deferred", function(  ){
                 var  log = $.log
-                $("#aaa").show(1000,{revert:1})
-                /*
+
                 $.Deferred(function(){
                     log(1)
                 }).wait(1000).done(function(){
@@ -19,8 +18,7 @@
                 }).wait(1000).done(function(){
                     log(4)
                 }).resolve()
-                 */
-                /*
+   
                 $.Deferred(function () {
                     log(1111111111)//11111111111
                 }).
@@ -51,33 +49,16 @@
                         return 13
                     }]).done(function(d){
                     log(arguments)
-                }).resolve(10)
-                var d = $.Deferred;
-                var index =0
-                d.loop(10, function(i){
+                }).resolve(10);
+
+                var d = $.Deferred.loop(10, function(i){
                     log(i);
-  
                     return d.wait(500)
                 });
-  */
-
             })
         </script>
-        <style>
-            #aaa,#bbb{
-                width:100px;
-                height:100px;
-                background:lightgreen;
-                  display:none;
-            }
-            #bbb{
-                display:none;
-                background: red;
-            }
-        </style>
+
     </head>
     <body>
-        <div id="aaa"></div>
-        <div id="bbb"></div>
     </body>
 </html>
