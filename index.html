@@ -1,64 +1,82 @@
 
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <title>mass.scrollIntoView.js Demo</title>
+
+        <style>
+            /* mini reset */
+            html,body,div,span,article,aside,header,hgroup,menu,nav,ul,section,h1,h2 { margin:0; padding:0; border:0; outline:0; font-size:100%; vertical-align:baseline; background:transparent }
+            body { line-height:1 }
+            article,aside,footer,header,hgroup,menu,nav,section { display:block }
+            nav>ul { list-style:none }
+
+            /* page specific */
+            h2 { font-size: 90% }
+            aside { position: fixed; width: 190px; margin: 10px;}
+            aside>nav,nav>ul { margin-top: 10px; }
+            section { position: absolute; left: 190px; right:0; height:356px; overflow-y:scroll }
+            section>div { height:100px; background: #eee; border: 1px solid #999 }
+        </style>
+
         <title>Deferred by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
-        <script>
-            require("deferred", function(  ){
-                var  log = $.log
-
-                $.Deferred(function(){
-                    log(1)
-                }).wait(1000).done(function(){
-                    log(2)
-                }).wait(1000).done(function(){
-                    log(3)
-                }).wait(1000).done(function(){
-                    log(4)
-                }).resolve()
-   
-                $.Deferred(function () {
-                    log(1111111111)//11111111111
-                }).
-                    done(function () {
-                    throw "error!";//发生错误
-                }).
-                    fail(function (e) {//这个回调函数不执行
-                    log(e+"222222")
-                    return 2222222
-                }).
-                    fail(function(e){//直到 遇上我们自定义的负向回调
-                    log(e+'333333')//error!333333
-                    return 333333333
-                }).
-                    done(function (c) {//回到正向列队中
-                    log(c)//33333333
-                }).
-                    resolve()
-               
-                $.Deferred.paiallel([function(){
-                        log("司徒正美")
-                        return 11
-                    },function(i){
-                        log("上官莉绮")
-                        return 12
-                    },function(i){
-                        log("朝沐金风")
-                        return 13
-                    }]).done(function(d){
-                    log(arguments)
-                }).resolve(10);
-
-                var d = $.Deferred.loop(10, function(i){
-                    log(i);
-                    return d.wait(500)
-                });
-            })
-        </script>
-
     </head>
     <body>
-    </body>
+
+    <aside>
+        <hgroup>
+            <h1>jquery.scrollIntoView.js</h1>
+            <h2><a href="https://github.com/Arwid/jQuery.scrollIntoView">@github/arwid</a></h2>
+        </hgroup>
+        <nav>
+            <input id="anim" type="checkbox" checked>animate</input>
+            <ul>
+                <li><a href="#A">Show A</a></li>
+                <li><a href="#B">Show B</a></li>
+                <li><a href="#C">Show C</a></li>
+                <li><a href="#D">Show D</a></li>
+                <li><a href="#E">Show E</a></li>
+                <li><a href="#F">Show F</a></li>
+                <li><a href="#B,#C">Show B&C</a></li>
+                <li><a href="#C,#D">Show C&D</a></li>
+                <li><a href="#D,#E">Show D&E</a></li>
+                <li><a href="#B,#C,#D">Show B&C&D</a></li>
+                <li><a href="#C,#D,#E">Show C&D&E</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <section>
+        <div id="A">A</div>
+        <div id="B">B</div>
+        <div id="C">C</div>
+        <div id="D">D</div>
+        <div id="E">E</div>
+        <div id="F">F</div>
+    </section>
+
+
+    <script>
+        //main script
+        require("scrollIntoView,ready",function(){
+
+            $('a[href^="#"]').click(function(e) {
+                e.preventDefault();
+
+                var href = $(this).attr('href');
+
+                // scroll into view
+                $(href).scrollIntoView(!!$("#anim").attr("checked"));
+
+                // some sort of highlight
+                $('section>div:not("'+href+'")').animate({opacity:0.3},10);
+                $(href).animate({opacity:1},100);
+            });
+
+        });
+    </script>
+</body>
 </html>
