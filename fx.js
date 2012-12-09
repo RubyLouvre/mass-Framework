@@ -147,7 +147,6 @@ define("fx", ["$css"],function( $ ){
                 options[ call ] = properties[ call ] ;
                 delete properties[ call ];
             });
-            console.log(options)
             return nodes.fx(properties, options);
         },
         noop: function(){},
@@ -271,7 +270,6 @@ define("fx", ["$css"],function( $ ){
                         unit: unit
                     }
                     props.push( prop );
-            
                     revertProps.push($.mix({}, prop,{
                         to: from,
                         from: to
@@ -295,14 +293,17 @@ define("fx", ["$css"],function( $ ){
             }
         }
     }
-    //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, frame, after），
+    //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, step, after, complete），
     //并在动画结束后，从子列队选取下一个动画实例取替自身
+    function callback(fx, node, name){
+        if( fx[name] ){
+            fx[name].call( node, node, fx );
+        }
+    }
     function animate( fx, index ) {
         var node = fx.node, now =  +new Date, mix;
         if(!fx.startTime){//第一帧
-            mix = fx.before;//位于动画的最前面
-            mix && ( mix.call( node, node, fx ), fx.before = 0 );
-            //from这个值必须在此个时间点才能侦察正确
+            callback(fx, node, "before");//动画开始前的预操作
             Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
             Animation[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
@@ -314,19 +315,14 @@ define("fx", ["$css"],function( $ ){
             for(var i = 0, obj; obj = fx.props[i++];){
                 ;(hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
-            if( (mix = fx.step ) && !end ){
-                mix.call(node, node, fx ) ;
-            }
             if ( end ) {//最后一帧
                 if(fx.method == "hide"){
                     for(var i in fx.orig){//还原为初始状态
                         $.css( node, i, fx.orig[i] );
                     }
                 }
-                mix = fx.after;//执行动画完成后的回调
-                mix && mix.call( node, node, fx ) ;
-                mix = fx.complete;//执行动画完成后的回调
-                mix && mix.call( node, node, fx ) ;
+                callback(fx, node, "after");//动画结束后执行的一些收尾工作
+                callback(fx, node, "complete");//执行用户回调
                 if( fx.revert && fx.negative.length){
                     Array.prototype.unshift.apply( fx.positive, fx.negative.reverse());
                     fx.negative = []; // 清空负向列队
@@ -338,6 +334,8 @@ define("fx", ["$css"],function( $ ){
                 timeline[ index ] = neo;
                 neo.positive = fx.positive;
                 neo.negative = fx.negative;
+            }else{
+                callback(fx, node, "step");//每执行一帧调用的回调
             }
         }
         return true;
@@ -356,7 +354,7 @@ define("fx", ["$css"],function( $ ){
                 if(fx.node === node){
                     switch(stopCode){//如果此时调用了stop方法
                         case 0:  //中断当前动画，继续下一个动画
-                            fx.update = fx.after = fx.frame = $.noop
+                            fx.update = fx.step = $.noop
                             fx.revert && fx.negative.shift();
                             fx.gotoEnd = true;
                             break;
