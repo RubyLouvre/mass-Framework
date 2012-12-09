@@ -12,7 +12,7 @@ define("avalon",["mass","$attr","$event"], function($){
         }
         for(var p in data) {
             if(data.hasOwnProperty(p) && p !== "commands") {
-                convertToAccessors(p, data[p], model);
+                convertToAccessor(p, data[p], model);
             }
         }
         return model;
@@ -57,11 +57,11 @@ define("avalon",["mass","$attr","$event"], function($){
     $.View = function(model, node){
         node = node || document.body;
         //开始在其自身与孩子中绑定
-        return setBindingsToElementAndChildren.call( node, model );
+        return setBindingsToElements.call( node, model );
     }
     //我们根据用户提供的最初普通对象的键值，选用不同的方式转换成各种监控函数或监控数组
     var err = new Error("只能是字符串，数值，布尔，Null，Undefined，函数以及纯净的对象")
-    function convertToAccessors( key, val, model ){
+    function convertToAccessor( key, val, model ){
         switch( $.type( val )){
             case "Null":
             case "Undefined":
@@ -75,7 +75,7 @@ define("avalon",["mass","$attr","$event"], function($){
             case "Array"://组合访问器
                 var models = model[key] || (model[key] = []);
                 return convertToCollectionAccessor( val, models );
-            case "Object":
+            case "Object"://转换为子VM
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
                         return convertToCombiningAccessor( key, val, model, "setget");
@@ -136,7 +136,7 @@ define("avalon",["mass","$attr","$event"], function($){
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
-    function convertToCombiningAccessor( key, val,host, type){
+    function convertToCombiningAccessor( key, val, host, type){
         var getter, setter//构建一个至少拥有getter,scope属性的对象
         if(type == "get"){//getter必然存在
             getter = val;
@@ -190,22 +190,21 @@ define("avalon",["mass","$attr","$event"], function($){
                 }
                 bridge[ expando ] = accessor;
             }
-            var callback, val;
-            console.log(val)
+            var _accessor, val;
             try{
                 val = Function(names, "return "+ str).apply(null, values );
             }catch(e){
                 return  $.log(e, 3)
             }
-            if(typeof val == "function" ){ //&& isFinite( val.$uuid ) 如果返回值也是个域
-                callback = val; //这里的域为它所依赖的域
-                val = callback();//如果是监控体
+            if(typeof val == "function" ){ //如果我们得到的是一个访问器
+                _accessor = val;
+                val = _accessor();//那么我们尝试取得它的值
             }
             if( !accessor.$uuid ){
                 delete bridge[ expando ];
                 accessor.$uuid = ++uuid;
                 //第四个参数供流程绑定使用
-                binding.init && binding.init(node, val, callback, accessor);
+                binding.init && binding.init(node, val, _accessor, accessor);
             }
             var method = arguments[0], args = arguments[1]
             if( typeof binding[method] == "function" ){
@@ -216,9 +215,8 @@ define("avalon",["mass","$attr","$event"], function($){
                 }
             }
             //只有执行到这里才知道要不要中断往下渲染
-            console.log(val)
-            binding.update(node,val , accessor, model, names, values);
-            return accessor.$val = val;
+            binding.update(node, val, accessor, model, names, values);
+            return accessor.$val =  key +":"+ str   //val;
         }
         return completeAccessor( "interacted" ,accessor, node);
     }
@@ -228,7 +226,6 @@ define("avalon",["mass","$attr","$event"], function($){
     $.ViewBindings = {
         text: {
             update:  function( node, val ){
-                console.log(val)
                 val = val == null ? "" : val+""
                 if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
                     node.firstChild.data = val;
@@ -245,24 +242,24 @@ define("avalon",["mass","$attr","$event"], function($){
                     });
                 }
             },
-            update:  function( node, val ){
+            update: function( node, val ){
                 node.value = val;
             }
         },
         html: {
-            update:  function( node, val ){
+            update: function( node, val ){
                 $( node ).html( val );
             },
             stopBindings: true
         },
         //通过display样式控制显隐
         display: {
-            update:  function( node, val ){
+            update: function( node, val ){
                 node.style.display = val ? "" : "none";
             }
         },
         enable: {
-            update:  function( node, val ){
+            update: function( node, val ){
                 if (val && node.disabled)
                     node.removeAttribute("disabled");
                 else if ((!val) && (!node.disabled))
@@ -270,7 +267,7 @@ define("avalon",["mass","$attr","$event"], function($){
             }
         },
         style: {
-            update:  function( node, val ){
+            update: function( node, val ){
                 var style = node.style, styleName;
                 for (var name in val) {
                     styleName = $.cssName(name, style) || name;
@@ -279,7 +276,7 @@ define("avalon",["mass","$attr","$event"], function($){
             }
         },
         "class": {
-            update:  function( node, val ){
+            update: function( node, val ){
                 if (typeof val == "object") {
                     for (var className in val) {
                         var shouldHaveClass = val[className];
@@ -292,14 +289,14 @@ define("avalon",["mass","$attr","$event"], function($){
             }
         } ,
         attr: {
-            update:  function( node, val ){
+            update: function( node, val ){
                 for (var name in val) {
                     $.attr(node, name, val[ name ] );
                 }
             }
         },
         checked: {
-            init:  function( node, val, accessor ){
+            init: function( node, val, accessor ){
                 if(typeof accessor !== "function"){
                     throw new Error("check的值必须是一个Feild")
                 }
@@ -307,7 +304,7 @@ define("avalon",["mass","$attr","$event"], function($){
                     accessor(node.checked);
                 });
             },
-            update:function( node, val ){
+            update: function( node, val ){
                 if ( node.type == "checkbox" ) {
                     if (Array.isArray( val )) {
                         node.checked = val.indexOf(node.value) >= 0;
@@ -322,12 +319,13 @@ define("avalon",["mass","$attr","$event"], function($){
         template: {
             //它暂时只供内部使用
             update: function( node, val, callback, model, names, values){
+                //code对应 1 if,  0  unless,2  with -1 foreach
                 var transfer = callback(), code = transfer[0], accessor = transfer[1];
-                var fragment = accessor.fragments[0];         //取得原始模板
+                var fragment = accessor.fragments[0];      //取得原始模板
                 if( code > 0 ){                            //处理with if 绑定
-                    fragment.recover();                    //将Watch所引用着的节点移出DOM树
+                    fragment.recover();                    //将它所引用着的节点移出DOM树
                     var elems = getChildren( fragment );   //取得它们当中的元素节点
-                    node.appendChild( fragment );          //将Watch所引用着的节点放回DOM树
+                    node.appendChild( fragment );          //再放回DOM树
                     if( elems.length ){
                         if( code == 2 ){                    //处理with 绑定
                             model = transfer[2]
@@ -339,7 +337,7 @@ define("avalon",["mass","$attr","$event"], function($){
                 }
                 if( code < 0  && val ){                    //处理foreach 绑定
                     var fragments = accessor.fragments, models = val;
-                    if(!models.length){
+                    if(!models.length){                    //如果对应集合为空,那么视图中的节点要移出DOM树
                         fragments[0].recover();
                         return
                     }
@@ -362,6 +360,7 @@ define("avalon",["mass","$attr","$event"], function($){
     //if unless with foreach四种bindings都是基于template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewBindings[ type ] = {
+            //node, 子访问器的返回值, 子访问器(位于VM), 父访问器(分解元素bind属性得到DOMAccessor)
             init: function(node, _, _, accessor){
                 node.normalize();                  //合并文本节点数
                 var fragment = node.ownerDocument.createDocumentFragment(), el
@@ -373,16 +372,16 @@ define("avalon",["mass","$attr","$event"], function($){
                 accessor.cloneFragment = function( dom, unshift ){ //改造文档碎片并放入数组
                     dom = dom || accessor.fragment.cloneNode(true);
                     var add = unshift == true ? "unshift" : "push"
-                    accessor.fragments[add]( patchFragment(dom) );
+                    accessor.fragments[add]( patchFragment(dom) );//fragments用于foreach,with等循环生成子节点的绑定中
                     return dom;
                 }
                 var clone = accessor.cloneFragment();  //先改造一翻,方便在update时调用recover方法
                 node.appendChild( clone );          //将文档碎片中的节点放回DOM树
             },
-            update : function(node, val, accessor, model, names, values){
+            update: function(node, val, accessor, model, names, values){
                 $.ViewBindings['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2
-                        case "if":
+                        case "if"://因为if/unless绑定总是对应一个布尔值
                             return [ !!val - 0, accessor];//1 if
                         case "unless":
                             return [!val - 0, accessor]; //0  unless
@@ -396,7 +395,7 @@ define("avalon",["mass","$attr","$event"], function($){
             stopBindings: true
         }
     });
-    //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
+    //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序,它们在convertToDomAccessor方法中被调用
     var foreach = $.ViewBindings.foreach;
     foreach.start = function( accessor, models, fragments, method, args ){
         if(!Array.isArray(models)){
@@ -412,7 +411,7 @@ define("avalon",["mass","$attr","$event"], function($){
             models = array
         }
         for(var i = 1; i < models.length; i++ ){
-            accessor.cloneFragment();
+            accessor.cloneFragment();//将文档碎片复制到与模型集合的个数一致
         }
         return models
     };
@@ -434,15 +433,15 @@ define("avalon",["mass","$attr","$event"], function($){
             accessor.cloneFragment(0, true)
         }
         for( index = 0; index < models.length; index++ ){
-            models[index].$key = index
+            models[index].$key = index;//重排集合元素的$key
         }
     }
     // shift pop ok
     foreach.shift = function( accessor, models, fragments, method, args ){
-        var fragment = fragments[method]()
-        fragment.recover();
+        var fragment = fragments[method]();//取得需要移出的文档碎片
+        fragment.recover() = null;//让它收集其子节点,然后一同被销毁
         for(var index = 0; index < models.length; index++ ){
-            models[index].$key = index
+            models[index].$key = index;//重排集合元素的$key
         }
     }
     foreach.pop = foreach.shift;
@@ -530,23 +529,30 @@ define("avalon",["mass","$attr","$event"], function($){
             key = array[i]
             val = array[i+1];
             binding = $.ViewBindings[ key ];
-
             if( binding ){
-                if( binding.stopBindings ){
+                //如果这个绑定器明确指出不能继续往子节点进行绑定,或者是foreach绑定器,但此元素没有子节点,则不让它绑定了
+                if(binding.stopBindings || key == "foreach" && Array.isArray(model[key]) && !model[key].length ){
                     continueBindings = false;
-                }
-                if(key == "foreach" && Array.isArray(model[key]) && !model[key].length ){
-                    continueBindings = false;
-                //  continue
                 }
                 convertToDomAccessor(node, names, values, key, val, binding, model);
             }
         }
         return continueBindings;
     }
+
+    //取得元素的所有子元素节点
+    function getChildren( node ){
+        var elems = [] ,ri = 0;
+        for (node = node.firstChild; node; node = node.nextSibling){
+            if (node.nodeType === 1){
+                elems[ri++] = node;
+            }
+        }
+        return elems;
+    }
     //在元素及其后代中将数据隐藏与viewModel关联在一起
     //参数分别为model, pnames, pvalues
-    function setBindingsToElementAndChildren(){
+    function setBindingsToElements(){
         if ( this.nodeType === 1  ){
             var continueBindings = true;
             if( hasBindings( this ) ){
@@ -560,8 +566,8 @@ define("avalon",["mass","$attr","$event"], function($){
     }
     //参数分别为model, pnames, pvalues
     function setBindingsToChildren( ){
-        for(var i = 0, n = this.length; i < n ; i++){
-            setBindingsToElementAndChildren.apply( this[i], arguments );
+        for(var i = 0, el; el = this[i++];){
+            setBindingsToElements.apply(el, arguments );
         }
     }
     //通知此监控函数或数组的所有直接依赖者更新自身
@@ -580,16 +586,7 @@ define("avalon",["mass","$attr","$event"], function($){
         var str = node.getAttribute( BINDING );
         return typeof str === "string" && str.indexOf(":") > 1
     }
-    //取得元素的所有子元素节点
-    function getChildren( node ){
-        var elems = [] ,ri = 0;
-        for (node = node.firstChild; node; node = node.nextSibling){
-            if (node.nodeType === 1){
-                elems[ri++] = node;
-            }
-        }
-        return elems;
-    }
+
 
     //============================================================
     // 将bindings变成一个对象或一个数组 by 司徒正美

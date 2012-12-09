@@ -6,22 +6,33 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <script>
-            $.config.level = 5;
+            $.config.level = 6;
             $.require("ready,./more/avalon", function() {
                
                 var model = $.ViewModel({
                     price: 24.95,
                     priceRating: function() {
                         return this.price() > 50 ? "有点贵" : "比较便宜";
+                    },
+                    city: "London",
+                    coords: {
+                        latitude: 51.5001524,
+                        longitude: -0.1262362
                     }
                 });
                 $.View(model);
-            });
+
+            })
 
         </script>
     </head>
     <body>
-      这东西 <span bind="text: priceRating"></span>。
+     <!--   这东西 <span bind="text: priceRating"></span>。-->
+        <h1 bind="text: city"> </h1>
+        <p bind="with: coords">
+            Latitude: <span bind="text: latitude"> </span>,
+            Longitude: <span bind="text: longitude"> </span>
+        </p>
 
-</body>
+    </body>
 </html>
