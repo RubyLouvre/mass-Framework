@@ -1,26 +1,29 @@
 define("avalon",["mass","$attr","$event"], function($){
     $.log("已加载avalon v2", 7);
+    //http://rivetsjs.com/#rivets
     var BINDING = $.config.bindname || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
-    //将一个普通的对象转换为ViewModel,ViewModel里面每个对象都是监控者(监控函数或监控数组)
+    //将一个普通的对象转换为ViewModel,ViewModel都是对原来数据进行持续监控与读写的访问器
     $.ViewModel = function(data, model){
-        model = model || {};
+        model = model || {
+            commands: {}
+        };
         if(Array.isArray(data)){
-            return listWatch(data);
+            return convertToCollectionAccessor(data);
         }
         for(var p in data) {
-            if(data.hasOwnProperty(p)) {
-                addWatchs(p, data[p], model);
+            if(data.hasOwnProperty(p) && p !== "commands") {
+                convertToAccessors(p, data[p], model);
             }
         }
         return model;
     }
-    //监控数组,listWatch,它实质上就是一个数组,不过它的许多方法都被覆写了,
-    //以便与DOM实现同步在您添加、删除、移动、刷新或替换数组中的项目时触发对应元素的局部刷新
+    //集合访问器，这是一个特别的数组对象， 用于一组数据进行监控与操作，当它的顺序或个数发生变化时，
+    //它会同步到DOM对应的元素集合中去，因此有关这个数组用于添加，删除，排序的方法都被重写了
     //我们可以在页面通过foreach绑定此对象
-    function listWatch(array, models){
+    function convertToCollectionAccessor(array, models){
         models = models || [];
         for(var index = 0; index < array.length; index++){
-            var f =  addWatchs(index, array[index], models);
+            var f =  changeToAccessors(index, array[index], models);
             f.$value = f.$value || f;
         }
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
@@ -28,8 +31,8 @@ define("avalon",["mass","$attr","$event"], function($){
             models[ method ] = function(){
                 nativeMethod.apply( models, arguments)
                 var Watchs = models["$"+expando];
-                for(var i = 0, Watch; Watch = Watchs[i++];){
-                    Watch(method, arguments);
+                for(var i = 0, accessor; accessor = Watchs[i++];){
+                    accessor(method, arguments);
                 }
             }
         });
@@ -58,26 +61,27 @@ define("avalon",["mass","$attr","$event"], function($){
     }
     //我们根据用户提供的最初普通对象的键值，选用不同的方式转换成各种监控函数或监控数组
     var err = new Error("只能是字符串，数值，布尔，Null，Undefined，函数以及纯净的对象")
-    function addWatchs( key, val, model ){
+    function convertToAccessors( key, val, model ){
         switch( $.type( val )){
             case "Null":
             case "Undefined":
             case "String":
+            case "NaN":
             case "Number":
-            case "Boolean":
-                return atomWatch( key, val, model );
-            case "Function":
-                return depsWatch( key, val, model, "get");
-            case "Array":
+            case "Boolean"://属性访问器
+                return convertToPropertyAccessor( key, val, model );
+            case "Function"://组合访问器
+                return convertToCombiningAccessor( key, val, model, "get");
+            case "Array"://组合访问器
                 var models = model[key] || (model[key] = []);
-                return listWatch( val, models );
+                return convertToCollectionAccessor( val, models );
             case "Object":
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        return  depsWatch( key, val, model, "setget");
+                        return convertToCombiningAccessor( key, val, model, "setget");
                     }else{
                         var object = model[key] || (model[key] = {});
-                        $.ViewModel( val,object );
+                        $.ViewModel( val, object );
                         object.$value = function(){
                             return object
                         }
@@ -91,33 +95,48 @@ define("avalon",["mass","$attr","$event"], function($){
                 throw err
         }
     }
-
-    //atomWatch，原子监控者，它是最简单的监控函数，是指在ViewModel定义时，键值为基础类型的个体
-    //它们是位于双向依赖链的最底层。不需要依赖于其他Watch！
-    function atomWatch( key, val, host ){
-        function Watch( neo ){
-            if( bridge[ expando ] ){ //收集依赖于它的depsWatch,以便它的值改变时,通它们更新自身
-                $.Array.ensure( Watch.$deps, bridge[ expando ] );
+    //为访问器添加更多必须的方法或属性，让其真正可用！必要将它绑到VM中！
+    function completeAccessor( key, accessor, host ){
+        //收集依赖于它的访问器或绑定器，,以便它的值改变时,通知它们更新自身
+        accessor.toString = accessor.valueOf = function(){
+            if( bridge[ expando ] ){
+                $.Array.ensure( accessor.$deps, bridge[ expando ] );
+            }
+            return accessor.$val
+        }
+        if(!host.nodeType){
+            accessor.$key = key;
+            host[ key ] = accessor;
+        }
+        accessor.$deps = [];
+        accessor();
+        return accessor;
+    }
+    //属性访问器，它是最简单的可读写访问器，位于双向依赖链的最底层，不依赖于其他访问器就能计算到自己的返回值
+    function convertToPropertyAccessor( key, val, host ){
+        function accessor( neo ){
+            if( bridge[ expando ] ){ //收集依赖于它的访问器或绑定器，,以便它的值改变时,通知它们更新自身
+                $.Array.ensure( accessor.$deps, bridge[ expando ] );
             }
             if( arguments.length ){//在传参不等于已有值时,才更新自已,并通知其的依赖
-                if( Watch.$val !== neo ){
-                    Watch.$val = neo;
-                    updateDeps( Watch );
+                if( accessor.$val !== neo ){
+                    accessor.$val = neo;
+                    updateDeps( accessor );
                 }
             }
-            return Watch.$val;
+            return accessor.$val;
         }
-        Watch.$val = val;
-        Watch.$uuid = ++uuid
-        return addWatch( key, Watch, host );
+        accessor.$val = val;
+        accessor.$uuid = ++uuid
+        return completeAccessor( key, accessor, host );
     }
 
-    //depsWatch，依赖监控者，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
-    //它们是位于双向绑定链的中间层，需要依赖于其他atomWatch或depsWatch的返回值计算自己的value。
+    //convertToCombiningAccessor，组合访问器，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
+    //它们是位于双向绑定链的中间层，需要依赖于其他属性访问器或组合访问的返回值计算自己的返回值。
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
-    function depsWatch( key, val,host, type){
+    function convertToCombiningAccessor( key, val,host, type){
         var getter, setter//构建一个至少拥有getter,scope属性的对象
         if(type == "get"){//getter必然存在
             getter = val;
@@ -126,10 +145,10 @@ define("avalon",["mass","$attr","$event"], function($){
             setter = val.setter;
             host = val.scope || host;
         }
-        function Watch( neo ){
+        function accessor( neo ){
             if( bridge[ expando ] ){
                 //收集依赖于它的depsWatch与bindWatch,以便它的值改变时,通知它们更新自身
-                $.Array.ensure( Watch.$deps, bridge[ expando ] );
+                $.Array.ensure( accessor.$deps, bridge[ expando ] );
             }
             var change = false;
             if( arguments.length ){//写入新值
@@ -137,10 +156,10 @@ define("avalon",["mass","$attr","$event"], function($){
                     setter.apply( host, arguments );
                 }
             }else{
-                if( !("$val" in Watch) ){
-                    if( !Watch.$uuid ){
-                        bridge[ expando ] = Watch;
-                        Watch.$uuid = ++uuid;
+                if( !("$val" in accessor) ){
+                    if( !accessor.$uuid ){
+                        bridge[ expando ] = accessor;
+                        accessor.$uuid = ++uuid;
                     }
                     neo = getter.call( host );
                     change = true;
@@ -148,30 +167,31 @@ define("avalon",["mass","$attr","$event"], function($){
                 }
             }
             //放到这里是为了当是最底层的域的值发出改变后,当前域跟着改变,然后再触发更高层的域
-            if( change && (Watch.$val !== neo) ){
-                Watch.$val = neo;
+            if( change && (accessor.$val !== neo) ){
+                accessor.$val = neo;
                 //通知此域的所有直接依赖者更新自身
-                updateDeps( Watch );
+                updateDeps( accessor );
             }
-            return Watch.$val;
+            return accessor.$val;
         }
-        return addWatch( key, Watch, host );
+        return completeAccessor( key, accessor, host );
     }
-    //bindWatch，绑定监控者，用于DOM树或节点打交道的Watch，它们仅在用户调用了$.View(viewmodel, node )，
-    //把写在元素节点上的bind属性的分解出来之时生成的。
+    //DOM访问器，直接与DOM树中的节点打交道的访问器，是实现双向绑定的关键。
+    //它们仅在用户调用了$.View(viewmodel, node )方法，才根据用户写在元素节点上的bind属性生成出来。
     //names values 包含上一级的键名与值
-    function bindWatch (node, names, values, key, str, binding, model ){
-        function Watch( neo ){
-            if( !Watch.$uuid ){ //只有在第一次执行它时才进入此分支
+    function convertToDomAccessor (node, names, values, key, str, binding, model ){
+        function accessor( neo ){
+            if( !accessor.$uuid ){ //只有在第一次执行它时才进入此分支
                 if( key == "foreach" ){
                     var arr = model[str]
                     var p = arr["$"+expando] || ( arr[ "$"+ expando] =  [] );
-                    $.Array.ensure( p ,Watch);
+                    $.Array.ensure( p ,accessor);
                     arguments = ["start"];
                 }
-                bridge[ expando ] = Watch;
+                bridge[ expando ] = accessor;
             }
             var callback, val;
+            console.log(val)
             try{
                 val = Function(names, "return "+ str).apply(null, values );
             }catch(e){
@@ -181,25 +201,26 @@ define("avalon",["mass","$attr","$event"], function($){
                 callback = val; //这里的域为它所依赖的域
                 val = callback();//如果是监控体
             }
-            if( !Watch.$uuid ){
+            if( !accessor.$uuid ){
                 delete bridge[ expando ];
-                Watch.$uuid = ++uuid;
+                accessor.$uuid = ++uuid;
                 //第四个参数供流程绑定使用
-                binding.init && binding.init(node, val, callback, Watch);
+                binding.init && binding.init(node, val, callback, accessor);
             }
             var method = arguments[0], args = arguments[1]
             if( typeof binding[method] == "function" ){
                 //处理foreach.start, sort, reserve, unshift, shift, pop, push....
-                var ret = binding[method]( Watch, val, Watch.fragments, method, args );
+                var ret = binding[method]( accessor, val, accessor.fragments, method, args );
                 if(ret){
                     val = ret;
                 }
             }
             //只有执行到这里才知道要不要中断往下渲染
-            binding.update(node, val, Watch, model, names, values);
-            return Watch.$val = val;
+            console.log(val)
+            binding.update(node,val , accessor, model, names, values);
+            return accessor.$val = val;
         }
-        return addWatch( "interacted" ,Watch, node);
+        return completeAccessor( "interacted" ,accessor, node);
     }
     //执行绑定在元素标签内的各种指令
     //MVVM不代表什么很炫的视觉效果之类的，它只是组织你代码的一种方式。有方便后期维护，松耦合等等优点而已
@@ -207,6 +228,7 @@ define("avalon",["mass","$attr","$event"], function($){
     $.ViewBindings = {
         text: {
             update:  function( node, val ){
+                console.log(val)
                 val = val == null ? "" : val+""
                 if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
                     node.firstChild.data = val;
@@ -216,10 +238,10 @@ define("avalon",["mass","$attr","$event"], function($){
             }
         },
         value:{
-            init: function(node, val, Watch){
+            init: function(node, val, accessor){
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
                     $(node).on("input",function(){
-                        Watch(node.value)
+                        accessor(node.value)
                     });
                 }
             },
@@ -277,12 +299,12 @@ define("avalon",["mass","$attr","$event"], function($){
             }
         },
         checked: {
-            init:  function( node, val, Watch ){
-                if(typeof Watch !== "function"){
+            init:  function( node, val, accessor ){
+                if(typeof accessor !== "function"){
                     throw new Error("check的值必须是一个Feild")
                 }
                 $(node).bind("change",function(){
-                    Watch(node.checked);
+                    accessor(node.checked);
                 });
             },
             update:function( node, val ){
@@ -300,8 +322,8 @@ define("avalon",["mass","$attr","$event"], function($){
         template: {
             //它暂时只供内部使用
             update: function( node, val, callback, model, names, values){
-                var transfer = callback(), code = transfer[0], Watch = transfer[1];
-                var fragment = Watch.fragments[0];         //取得原始模板
+                var transfer = callback(), code = transfer[0], accessor = transfer[1];
+                var fragment = accessor.fragments[0];         //取得原始模板
                 if( code > 0 ){                            //处理with if 绑定
                     fragment.recover();                    //将Watch所引用着的节点移出DOM树
                     var elems = getChildren( fragment );   //取得它们当中的元素节点
@@ -316,10 +338,10 @@ define("avalon",["mass","$attr","$event"], function($){
                     fragment.recover();
                 }
                 if( code < 0  && val ){                    //处理foreach 绑定
-                    var fragments = Watch.fragments, models = val;
+                    var fragments = accessor.fragments, models = val;
                     if(!models.length){
-                         fragments[0].recover();
-                         return
+                        fragments[0].recover();
+                        return
                     }
                     for( var i = 0, el ; el = fragments[i]; i++){
                         el.recover();                      //先回收，以防在unshift时，新添加的节点就插入在后面
@@ -340,34 +362,34 @@ define("avalon",["mass","$attr","$event"], function($){
     //if unless with foreach四种bindings都是基于template bindings
     "if,unless,with,foreach,case".replace($.rword, function( type ){
         $.ViewBindings[ type ] = {
-            init: function(node, _, _, Watch){
+            init: function(node, _, _, accessor){
                 node.normalize();                  //合并文本节点数
                 var fragment = node.ownerDocument.createDocumentFragment(), el
                 while((el = node.firstChild)){
                     fragment.appendChild(el);     //将node中的所有节点移出DOM树
                 }
-                Watch.fragments = [];             //添加一个数组属性,用于储存经过改造的文档碎片
-                Watch.fragment = fragment;         //最初的文档碎片,用于克隆
-                Watch.cloneFragment = function( dom, unshift ){ //改造文档碎片并放入数组
-                    dom = dom || Watch.fragment.cloneNode(true);
+                accessor.fragments = [];             //添加一个数组属性,用于储存经过改造的文档碎片
+                accessor.fragment = fragment;         //最初的文档碎片,用于克隆
+                accessor.cloneFragment = function( dom, unshift ){ //改造文档碎片并放入数组
+                    dom = dom || accessor.fragment.cloneNode(true);
                     var add = unshift == true ? "unshift" : "push"
-                    Watch.fragments[add]( patchFragment(dom) );
+                    accessor.fragments[add]( patchFragment(dom) );
                     return dom;
                 }
-                var clone = Watch.cloneFragment();  //先改造一翻,方便在update时调用recover方法
+                var clone = accessor.cloneFragment();  //先改造一翻,方便在update时调用recover方法
                 node.appendChild( clone );          //将文档碎片中的节点放回DOM树
             },
-            update : function(node, val, Watch, model, names, values){
+            update : function(node, val, accessor, model, names, values){
                 $.ViewBindings['template']['update'](node, val, function(){
                     switch(type){//返回结果可能为 -1 0 1 2
                         case "if":
-                            return [ !!val - 0, Watch];//1 if
+                            return [ !!val - 0, accessor];//1 if
                         case "unless":
-                            return [!val - 0, Watch]; //0  unless
+                            return [!val - 0, accessor]; //0  unless
                         case "with":
-                            return [2, Watch, val];   //2  with
+                            return [2, accessor, val];   //2  with
                         default:
-                            return [-1, Watch];       //-1 foreach
+                            return [-1, accessor];       //-1 foreach
                     }
                 }, model, names, values);
             },
@@ -376,7 +398,7 @@ define("avalon",["mass","$attr","$event"], function($){
     });
     //foreach绑定拥有大量的子方法,用于同步数据的增删改查与排序
     var foreach = $.ViewBindings.foreach;
-    foreach.start = function( Watch, models, fragments, method, args ){
+    foreach.start = function( accessor, models, fragments, method, args ){
         if(!Array.isArray(models)){
             var array = []
             for(var key in models){
@@ -390,33 +412,33 @@ define("avalon",["mass","$attr","$event"], function($){
             models = array
         }
         for(var i = 1; i < models.length; i++ ){
-            Watch.cloneFragment();
+            accessor.cloneFragment();
         }
         return models
     };
     //push ok
-    foreach.push = function( Watch, models, fragments, method, args ){
+    foreach.push = function( accessor, models, fragments, method, args ){
         var l = fragments.length
         for(var index = 0; index < args.length; index++ ){
             var n = index + l;
-            var f =  addWatchs(n, models[n], models);
+            var f =  changeToAccessors(n, models[n], models);
             f.$value = f;
-            Watch.cloneFragment()
+            accessor.cloneFragment()
         }
     }
     //unshift ok
-    foreach.unshift = function( Watch, models, fragments, method, args ){
+    foreach.unshift = function( accessor, models, fragments, method, args ){
         for(var index = 0; index < args.length; index++ ){
-            var f =  addWatchs(index, models[index], models);
+            var f =  changeToAccessors(index, models[index], models);
             f.$value = f;
-            Watch.cloneFragment(0, true)
+            accessor.cloneFragment(0, true)
         }
         for( index = 0; index < models.length; index++ ){
             models[index].$key = index
         }
     }
     // shift pop ok
-    foreach.shift = function( Watch, models, fragments, method, args ){
+    foreach.shift = function( accessor, models, fragments, method, args ){
         var fragment = fragments[method]()
         fragment.recover();
         for(var index = 0; index < models.length; index++ ){
@@ -424,7 +446,7 @@ define("avalon",["mass","$attr","$event"], function($){
         }
     }
     foreach.pop = foreach.shift;
-    foreach.splice = function( Watch, models, fragments, method, args ){
+    foreach.splice = function( accessor, models, fragments, method, args ){
         var start = args[0], n = args.length - 2;
         var removes = fragments.splice(start, args[1]);
         //移除对应的文档碎片
@@ -434,11 +456,11 @@ define("avalon",["mass","$attr","$event"], function($){
         for(i = 0; i < n; i++ ){
             //将新数据封装成域
             var index = start + i
-            var f =  addWatchs(index, models[ index ], models);
+            var f =  changeToAccessors(index, models[ index ], models);
             f.$value = f;
             //为这些新数据创建对应的文档碎片
-            var dom = Watch.fragment.cloneNode(true);
-            Watch.fragments.splice(index, 0, patchFragment(dom) );
+            var dom = accessor.fragment.cloneNode(true);
+            accessor.fragments.splice(index, 0, patchFragment(dom) );
         }
         for( index = start+n; index < models.length; index++ ){
             models[index].$key = index
@@ -476,9 +498,9 @@ define("avalon",["mass","$attr","$event"], function($){
         return $._data(this[0], "$model")
     }
     $.fn.$value = function(){
-        var watch = $(this).model()
-        if(typeof watch == "function"){
-            return watch();
+        var accessor = $(this).model()
+        if(typeof accessor == "function"){
+            return accessor();
         }
     }
     //取得标签内的属性绑定，然后构建成bindWatch，并与ViewModel关联在一块
@@ -508,15 +530,16 @@ define("avalon",["mass","$attr","$event"], function($){
             key = array[i]
             val = array[i+1];
             binding = $.ViewBindings[ key ];
+
             if( binding ){
                 if( binding.stopBindings ){
                     continueBindings = false;
                 }
                 if(key == "foreach" && Array.isArray(model[key]) && !model[key].length ){
                     continueBindings = false;
-                  //  continue
+                //  continue
                 }
-                bindWatch(node, names, values, key, val, binding, model);
+                convertToDomAccessor(node, names, values, key, val, binding, model);
             }
         }
         return continueBindings;
@@ -542,8 +565,8 @@ define("avalon",["mass","$attr","$event"], function($){
         }
     }
     //通知此监控函数或数组的所有直接依赖者更新自身
-    function updateDeps(Watch){
-        var list = Watch.$deps || [] ;
+    function updateDeps(accessor){
+        var list = accessor.$deps || [] ;
         if( list.length ){
             var safelist = list.concat();
             for(var i = 0, el; el = safelist[i++];){
@@ -567,23 +590,7 @@ define("avalon",["mass","$attr","$event"], function($){
         }
         return elems;
     }
-    //为监控函数添加更多必须的方法或属性
-    function addWatch( key, Watch, host ){
-        //收集依赖于它的depsWatch与bindWatch,以便它的值改变时,通知它们更新自身
-        Watch.toString = Watch.valueOf = function(){
-            if( bridge[ expando ] ){
-                $.Array.ensure( Watch.$deps, bridge[ expando ] );
-            }
-            return Watch.$val
-        }
-        if(!host.nodeType){
-            Watch.$key = key;
-            host[ key ] = Watch;
-        }
-        Watch.$deps = [];
-        Watch();
-        return Watch;
-    }
+
     //============================================================
     // 将bindings变成一个对象或一个数组 by 司徒正美
     //============================================================
