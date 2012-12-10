@@ -1,7 +1,8 @@
 define("avalon",["mass","$attr","$event"], function($){
     $.log("已加载avalon v2", 7);
     //http://rivetsjs.com/#rivets
-    var BINDING = $.config.bindname || "bind", bridge = {}, uuid = 0, expando = new Date - 0;
+    var BINDING = $.config.bindname || "bind",  bridge = {}, //用于收集依赖
+    uuid = 0, expando = new Date - 0;
     //将一个普通的对象转换为ViewModel,ViewModel都是对原来数据进行持续监控与读写的访问器
     $.ViewModel = function(data, model){
         model = model || {
@@ -30,8 +31,8 @@ define("avalon",["mass","$attr","$event"], function($){
             var nativeMethod = models[ method ];
             models[ method ] = function(){
                 nativeMethod.apply( models, arguments)
-                var Watchs = models["$"+expando];
-                for(var i = 0, accessor; accessor = Watchs[i++];){
+                var accessors = models["$"+expando];
+                for(var i = 0, accessor; accessor = accessors[i++];){
                     accessor(method, arguments);
                 }
             }
@@ -503,7 +504,7 @@ define("avalon",["mass","$attr","$event"], function($){
         }
     }
     //取得标签内的属性绑定，然后构建成bindWatch，并与ViewModel关联在一块
-    function setBindingsToElement( model, pnames, pvalues ){
+    function setBindingsToElement( model, pnames, pvalues ){    
         var node = this;
         pnames = pnames || [];
         pvalues = pvalues || [];
