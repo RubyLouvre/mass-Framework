@@ -6,27 +6,80 @@
             Demo by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
-
+        <style>
+            .my-class{
+                color: yellow;
+                background:orange;
+            }
+            .your-class {
+                line-height:3;
+                width:200px;
+            }
+            .his-class{
+                text-indent:2em;
+                font-size:14px;
+            }
+            .enabled{
+                width:200px;
+                height:50px;
+                display:block;
+                background:green;
+            }
+        </style>
 
         <script>
             $.config.level = 6
             require("ready,mvvm", function() {
                 var model = $.applyBindings({
-                    array: [1, 2, 6, 4]
+                    array: [1, 2, 6, 4],
+                    user: {
+                        display: '编号',
+                        name: 'id',
+                        align: 'left',
+                        width: 600,
+                        minWidth: 60
+                    },
+                    content: "司徒正美",
+                    price: 24.95,
+                    priceRating: function() {
+                        return this.price() > 50 ? "有点贵" : "比较便宜";
+                    },
+                    item:{
+                        enabled: true,
+                        title:"这相当于toggleClass"
+                    },
+                    classes: { "my-class": true,"your-class": false, "his-class": true }
+
                 });
-      
-    
+                setTimeout(function() {
+
+                    model.price(62)
+                }, 1000)
+
+ 
             })
 
         </script>
     </head>
     <body>
-        <ul data-each-item="array" >
-            <li data-text="item"></li>
-        </ul>
-        <ul data-each-item-index="array" >
-            <li data-text="index"></li>
-        </ul>
+        <div data-class="classes">
+            同时加上三个类名
+        </div>
+
+        <!--        <ul data-each-item="array" >
+                    <li data-text="item"></li>
+                </ul>
+                <ul data-each-item-index="array" >
+                    <li data-text="index"></li>
+                </ul>-->
+        <!--        <input data-value="content"><br/>
+                <input data-value="content">-->
+        这东西 <span data-text="priceRating"></span>。
+        <span  data-class-enabled="item.enabled" data-text="item.title"></span>
+        <!--        <dl data-each-value-key="user">
+                    <dt data-text="value">dt</dt>
+                    <dd data-text="key">dd </dd>
+                </dl>-->
 
     </body>
 </html>
