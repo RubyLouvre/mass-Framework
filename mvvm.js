@@ -37,10 +37,17 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             names = match[0],
             callback = match[1];
             names = names.split(".");
+            console.log(accessor)
             for(var k = 0, name; name = names[k++];){
-                if( name in accessor){//accessor[name]可能为零
-                    accessor = accessor[name];
+                try{
+                    if( name in accessor){//accessor[name]可能为零
+                        accessor = accessor[name];
+                    }
+                }catch(e){
+                    console.log(e);
+                    console.log(accessor)
                 }
+               
             }
             if(accessor === void 0){//accessor可能为零
                 continue
@@ -147,7 +154,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         }
                     }
                 }else {
-                    $node[ val ? "addClass" : "removeClass"]( arguments[5][0] )
+                    $node.toggleClass( arguments[5][0] || val )
                 }
             }
         },
@@ -203,9 +210,17 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     fragment.recover();                    //将它所引用着的节点移出DOM树
                     var elems = getChildren( fragment );   //取得它们当中的元素节点
                     node.appendChild( fragment );          //再放回DOM树
+
                     if( elems.length ){
                         if( code == 2 ){                    //处理with 绑定
-                            model = val
+                            var fn = function(){}
+                            fn.prototype = model;
+                            model = new fn;
+                            for(var name in val){
+                                if(val.hasOwnProperty(name)){
+                                    model[name] = val[name]
+                                }
+                            }
                         }
                         return setBindingsToChildren( elems, model )
                     }
@@ -244,6 +259,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             stopBindings: true
         }
     }
+    $.ViewBindings.disable = {
+        update: function( node, val ){
+            $.ViewBindings.enable.update(node, !val);
+        }
+    }
     //if unless with each四种bindings都是基于template bindings
     "if,unless,with,each".replace($.rword, function( type ){
         $.ViewBindings[ type ] = {
@@ -275,6 +295,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         case "with":
                             return  2;       //2  with
                         default:
+                            $.log("============each===========")
                             return -1;       //-1 each
                     }
                 })(), args );
@@ -530,7 +551,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         //收集依赖于它的访问器或绑定器，,以便它的值改变时,通知它们更新自身
         accessor.toString = accessor.valueOf = function(){
             if( bridge[ expando ] ){
-                console.log("toString")
                 $.Array.ensure( accessor.$deps, bridge[ expando ] );
             }
             return accessor.$val

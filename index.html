@@ -13,14 +13,14 @@
             }
             .your-class {
                 line-height:3;
-                width:200px;
+                width:440px;
             }
             .his-class{
                 text-indent:2em;
                 font-size:14px;
             }
             .enabled{
-                width:200px;
+                width:400px;
                 height:50px;
                 display:block;
                 background:green;
@@ -31,7 +31,7 @@
             $.config.level = 6
             require("ready,mvvm", function() {
                 var model = $.applyBindings({
-                    array: [1, 2, 6, 4],
+                    array: ["<strong>aaa</strong>", "bbb", "<em>ccc</em>", "ddd"],
                     user: {
                         display: '编号',
                         name: 'id',
@@ -39,6 +39,7 @@
                         width: 600,
                         minWidth: 60
                     },
+
                     content: "司徒正美",
                     price: 24.95,
                     priceRating: function() {
@@ -46,40 +47,51 @@
                     },
                     item:{
                         enabled: true,
+                        readonly:true,
                         title:"这相当于toggleClass"
                     },
-                    classes: { "my-class": true,"your-class": false, "his-class": true }
-
+                    show: 1,
+                    classes: { "my-class": true,"your-class": false, "his-class": true },
+                    coords: {
+                        latitude:  51.5001524,
+                        longitude: -0.1262362
+                    }
                 });
                 setTimeout(function() {
-
                     model.price(62)
                 }, 1000)
 
- 
             })
 
         </script>
     </head>
     <body>
         <div data-class="classes">
-            同时加上三个类名
+            测试class绑定,可以同时操作多个类名,classes为一个对象
         </div>
+        <div data-class-enabled="enabled.item">
+            测试class绑定,每次只添加或移除一个类名,操作类名为data-class-后的值
+        </div>
+        <div data-if="show">
+            <p>测试基于数组的each绑定,可以在data-each-后添加你想要的参数，分别指代元素与索引值</p>
+            <ul data-each-item-index="array" >
+                <li><span data-html="item"></span>:<span data-text="index"></span></li>
+            </ul>
+        </div>
+        <dl data-each-value-key="user">
+            <dt data-text="value">测试基于对象的each绑定</dt>
+            <dd data-text="key">可以在data-each-后添加你想要的参数，分别指代键值与键名 </dd>
+        </dl>
+        <p data-with="coords">
+            Latitude: <span data-text="latitude">测试with绑定 </span>,
+            Longitude: <span data-text="longitude">测试with绑定 </span>
+        </p>
 
-        <!--        <ul data-each-item="array" >
-                    <li data-text="item"></li>
-                </ul>
-                <ul data-each-item-index="array" >
-                    <li data-text="index"></li>
-                </ul>-->
-        <!--        <input data-value="content"><br/>
-                <input data-value="content">-->
-        这东西 <span data-text="priceRating"></span>。
+        <input data-value="content"><br/>
+        <input data-value="content">测试value绑定及联动功能
+        这东西 <span data-text="priceRating">测试组合访问器，它是拥有M中两个属性访问器构成</span>。
         <span  data-class-enabled="item.enabled" data-text="item.title"></span>
-        <!--        <dl data-each-value-key="user">
-                    <dt data-text="value">dt</dt>
-                    <dd data-text="key">dd </dd>
-                </dl>-->
 
+        <input data-attr-readonly="item.readonly">测试attr绑定
     </body>
 </html>
