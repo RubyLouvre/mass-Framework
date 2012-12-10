@@ -157,27 +157,6 @@ define( "lang_fix", !!Array.isArray, function(){
             return this.setFullYear(year );//+ 1900
         };
     }
-    //http://www.cnblogs.com/tilfon/archive/2012/11/11/2765189.html
-    if ('a~b'.split(/(~)/).length !== 3){
-        String.prototype.split = function(reg){
-            if (!reg.global) {
-                reg = new RegExp(reg.source, 'g' + (reg.ignoreCase ? 'i' : ''));
-            }
-            var m, str = '', arr = [];
-            var i, len = this.length;
-            for (i = 0; i < len; i++)  {
-                str += this.charAt(i);
-                m = str.match(reg);
-                if (m)  {
-                    arr.push(str.replace(m[0], ''));
-                    arr.push(m[0]);
-                    str = '';
-                }
-            }
-            if (str != '') arr.push(str);
-            return arr;
-        }
-    }
     //http://stackoverflow.com/questions/10470810/javascript-tofixed-bug-in-ie6
     if (0.9.toFixed(0) !== '1') {
         Number.prototype.toFixed = function(n) {
