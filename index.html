@@ -2,37 +2,31 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>MVVM Demo by 司徒正美</title>
+        <title>这里的标题是可变长度，所以要求 下面的内容始终贴着标题左边对齐，而标题自身相对容器居中
+            Demo by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
-        <script>
-            $.config.level = 9;
-            $.require("ready,./more/avalon", function() {
-               
-                var model = $.ViewModel({
-                    price: 24.95,
-                    priceRating: function() {
-                        return this.price() > 50 ? "有点贵" : "比较便宜";
-                    },
-                    city: "London",
-                    coords: {
-                        latitude: 51.5001524,
-                        longitude: -0.1262362
-                    }
-                });
-                $.View(model);
 
+
+        <script>
+            $.config.level = 6
+            require("ready,mvvm", function() {
+                var model = $.applyBindings({
+                    array: [1, 2, 6, 4]
+                });
+      
+    
             })
 
         </script>
     </head>
     <body>
-     <!--   这东西 <span bind="text: priceRating"></span>。-->
-        <h1 bind="text: city"> </h1>
-        <p bind="with: coords">
-            Latitude: <span bind="text: latitude"> </span>,
-            Longitude: <span bind="text: longitude"> </span>
-        </p>
+        <ul data-each-item="array" >
+            <li data-text="item"></li>
+        </ul>
+        <ul data-each-item-index="array" >
+            <li data-text="index"></li>
+        </ul>
 
     </body>
 </html>
