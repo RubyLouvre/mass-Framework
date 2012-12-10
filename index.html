@@ -9,35 +9,21 @@
 
 
         <script>
-            require("ready,./more/avalon", function() {
-                var model = $.ViewModel({
-                    array: [1, 2, 3, 4],
-                    user: {
-                        display: '编号',
-                        name: 'id',
-                        align: 'left',
-                        width: 600,
-                        minWidth: 60
-                    }
+            require("ready,mvvm", function() {
+                var model = $.applyBindings({
+                    array: [1, 2, 3, 4]
                 });
-                $.View(model);
-                setTimeout(function() {
-                    model.array.splice(1, 2, "a", "b", "c")
-                }, 1000)
+      
+    
             })
 
         </script>
     </head>
     <body>
-        <ul bind="foreach: array" >
-            <li bind="text:$value"></li>
+        <ul bind-each-item="array" >
+            <li></li>
         </ul>
-        <dl bind="foreach: user">
-            <dt bind="text:$key">dt
-            </dt>
-            <dd bind="text:$value">dd
-            </dd>
-        </dl>
+
 
     </body>
 </html>
