@@ -1,5 +1,4 @@
 define("avalon",["mass","$attr","$event"], function($){
-    $.log("已加载avalon v2", 7);
     //http://rivetsjs.com/#rivets
     var BINDING = $.config.bindname || "bind",  bridge = {}, //用于收集依赖
     uuid = 0, expando = new Date - 0;
@@ -24,7 +23,7 @@ define("avalon",["mass","$attr","$event"], function($){
     function convertToCollectionAccessor(array, models){
         models = models || [];
         for(var index = 0; index < array.length; index++){
-            var f =  changeToAccessors(index, array[index], models);
+            var f =  convertToAccessor(index, array[index], models);
             f.$value = f.$value || f;
         }
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
@@ -421,7 +420,7 @@ define("avalon",["mass","$attr","$event"], function($){
         var l = fragments.length
         for(var index = 0; index < args.length; index++ ){
             var n = index + l;
-            var f =  changeToAccessors(n, models[n], models);
+            var f =  convertToAccessor(n, models[n], models);
             f.$value = f;
             accessor.cloneFragment()
         }
@@ -429,7 +428,7 @@ define("avalon",["mass","$attr","$event"], function($){
     //unshift ok
     foreach.unshift = function( accessor, models, fragments, method, args ){
         for(var index = 0; index < args.length; index++ ){
-            var f =  changeToAccessors(index, models[index], models);
+            var f =  convertToAccessor(index, models[index], models);
             f.$value = f;
             accessor.cloneFragment(0, true)
         }
@@ -456,7 +455,7 @@ define("avalon",["mass","$attr","$event"], function($){
         for(i = 0; i < n; i++ ){
             //将新数据封装成域
             var index = start + i
-            var f =  changeToAccessors(index, models[ index ], models);
+            var f =  convertToAccessor(index, models[ index ], models);
             f.$value = f;
             //为这些新数据创建对应的文档碎片
             var dom = accessor.fragment.cloneNode(true);
