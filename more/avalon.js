@@ -184,6 +184,7 @@ define("avalon",["mass","$attr","$event"], function($){
             if( !accessor.$uuid ){ //只有在第一次执行它时才进入此分支
                 if( key == "foreach" ){
                     var arr = model[str]
+                    console.log(arr)
                     var p = arr["$"+expando] || ( arr[ "$"+ expando] =  [] );
                     $.Array.ensure( p ,accessor);
                     arguments = ["start"];
