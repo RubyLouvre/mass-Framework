@@ -1,6 +1,7 @@
 define("mvvm","$event,$css,$attr".split(","), function($){
     //http://rivetsjs.com/#rivets
-    var BINDING = $.config.bindname || "data"
+    var BINDING = $.config.bindname || "data", 
+    bridge = {},  uuid = 0, expando = new Date - 0, subscribers = "$" + expando
     $.applyBindings = function(  model, node ){
         node = node || document.body;
         model = convertToViewModel( model );
@@ -33,9 +34,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             var  match = bind[1].split(/\s*:\s*/),
             accessor = model,
-            names = match[0],
-            callback = match[1];
+            names = match[0];
             names = names.split(".");
+            if( match[1] && accessor.$actions ){
+                var callback = accessor.$actions[match[1]];
+            }
             for(var k = 0, name; name = names[k++];){
                 if( name in accessor){//accessor[name]可能为零
                     accessor = accessor[name];
@@ -105,9 +108,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             return false;
         }
     }
-    //通知此监控函数或数组的所有直接依赖者更新自身
-    function updateDeps(accessor){
-        var list = accessor.$deps || [] ;
+    //通知此访问器或监控数组的所有直接订阅者更新自身
+    function updateSubscribers( accessor ){
+        var list = accessor[ subscribers ] || [] ;
         if( list.length ){
             var safelist = list.concat();
             for(var i = 0, el; el = safelist[i++];){
@@ -117,16 +120,19 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
 
-
-    function convertToViewModel(data, model){
-        model = model || {}
-        if(Array.isArray(data)){
-            return convertToCollectionAccessor(data);
+    function ViewModel(){}
+    function convertToViewModel(data, parent){
+        if(data instanceof ViewModel){
+            return data;
         }
+        var model = parent || new ViewModel;
         for(var p in data) {
-            if(data.hasOwnProperty(p) && p !== "commands") {
+            if(data.hasOwnProperty(p) && p !== "$actions"){
                 convertToAccessor(p, data[p], model);
             }
+        }
+        if(!parent ){
+            model.$actions = data.$actions || {};
         }
         return model;
     }
@@ -163,13 +169,13 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 throw err;
         }
     }
-    var bridge = {},  uuid = 0, expando = new Date - 0;
+
     //为访问器添加更多必须的方法或属性，让其真正可用！必要将它绑到VM中！
     function completeAccessor( key, accessor, host ){
         //收集依赖于它的访问器或绑定器，,以便它的值改变时,通知它们更新自身
-        accessor.toString = accessor.valueOf = function(){
+        accessor.toString = function(){
             if( bridge[ expando ] ){
-                $.Array.ensure( accessor.$deps, bridge[ expando ] );
+                $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
             }
             return accessor.$val
         }
@@ -177,7 +183,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             accessor.$key = key;
             host[ key ] = accessor;
         }
-        accessor.$deps = [];
+        accessor[ subscribers ]  = [];
         accessor();
         return accessor;
     }
@@ -186,12 +192,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     function convertToPropertyAccessor( key, val, host ){
         function accessor( neo ){
             if( bridge[ expando ] ){ //收集依赖于它的访问器或绑定器，,以便它的值改变时,通知它们更新自身
-                $.Array.ensure( accessor.$deps, bridge[ expando ] );
+                $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
             }
             if( arguments.length ){//在传参不等于已有值时,才更新自已,并通知其的依赖
                 if( accessor.$val !== neo ){
                     accessor.$val = neo;
-                    updateDeps( accessor );
+                    updateSubscribers( accessor );
                 }
             }
             return accessor.$val;
@@ -216,8 +222,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         function accessor( neo ){
             if( bridge[ expando ] ){
-                //收集依赖于它的depsWatch与bindWatch,以便它的值改变时,通知它们更新自身
-                $.Array.ensure( accessor.$deps, bridge[ expando ] );
+                //收集订阅了它的访问器,以便它的值改变时,通知它们更新自身
+                $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
             }
             var change = false;
             if( arguments.length ){//写入新值
@@ -239,7 +245,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             if( change && (accessor.$val !== neo) ){
                 accessor.$val = neo;
                 //通知此域的所有直接依赖者更新自身
-                updateDeps( accessor );
+                updateSubscribers( accessor );
             }
             return accessor.$val;
         }
@@ -258,7 +264,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             var nativeMethod = accessor[ method ];
             accessor[ method ] = function(){
                 nativeMethod.apply( accessor, arguments)
-                var visitors =  accessor.$deps;
+                var visitors =  accessor[ subscribers ];
                 for(var i = 0, visitor; visitor = visitors[i++];){
                     visitor(method, arguments);
                 }
@@ -274,12 +280,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             var index = array.indexOf(item);
             accessor.removeAt(index);
         }
-        accessor.$deps = accessor.$deps || [];
+        accessor[ subscribers ] = accessor[ subscribers ] || [];
         accessor.toString =  function(){
             if( bridge[ expando ] ){
-                $.Array.ensure( accessor.$deps, bridge[ expando ] );
+                $.Array.ensure( accessor[ subscribers ], bridge[ expando ] );
             }
-            return [].slice.call(accessor) +""
+            return Array.apply([], accessor) +"";
         }
         return accessor;
     }
@@ -336,7 +342,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     array.push( value );
                 }
             }
-            models = array
+            models = array;
         }
         for(var i = 1; i < models.length; i++ ){
             accessor.cloneFragment();//将文档碎片复制到与模型集合的个数一致
@@ -349,7 +355,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         for(var index = 0; index < args.length; index++ ){
             var n = index + l;
             convertToAccessor(n, models[n], models);
-            accessor.cloneFragment()
+            accessor.cloneFragment();
         }
     }
     //unshift ok
@@ -395,9 +401,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //MVVM不代表什么很炫的视觉效果之类的，它只是组织你代码的一种方式。有方便后期维护，松耦合等等优点而已
     var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
     var Bindings = $.ViewModel.bindings  = {
-        text: {
+        text: {//替换文本
             update:  function( node, val ){
-                val = val == null ? "" : val+""
+                val = val == null ? "" : val + "";
                 if(node.childNodes.length === 1 && node.firstChild.nodeType == 3){
                     node.firstChild.data = val;
                 }else{
@@ -405,15 +411,35 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }
             }
         },
+        html: {//设置innerHTML
+            update: function( node, val ){
+                $( node ).html( val );
+            },
+            stopBindings: true
+        },
+        value:{
+            init: function(node, val, accessor){
+                if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
+                    $(node).on("input",function(){
+                        accessor(node.value);
+                    });
+                }
+            },
+            update: function( node, val ){
+                node.value = val;
+            }
+        },
         "class": {//相当于toggleClass
             update:  function( node, val ){
                 var $node = $(node), type = typeof val
                 if(val && type == "object"){
                     for(var cls in val){
-                        if(val[cls]()){
-                            $node.addClass(cls)
-                        }else{
-                            $node.removeClass(cls)
+                        if( val.hasOwnProperty(cls)){
+                            if( val[cls]() ){
+                                $node.addClass(cls)
+                            }else{
+                                $node.removeClass(cls)
+                            }
                         }
                     }
                 }else {
@@ -421,36 +447,40 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }
             }
         },
-        attr: {
+        attr: {//添加属性
             update: function( node, val ){
                 var  type = typeof val
                 if(val && type == "object"){
                     for (var name in val) {
-                        $.attr(node, name, val[ name ]() );
+                        if(val.hasOwnProperty( name )){
+                            $.attr(node, name, val[ name ]() );
+                        }
                     }
                 }else{
                     $.attr(node, arguments[5][0], val );
                 }
             }
         },
-        css: {
+        css: {//添加样式
             update: function( node, val ){
                 var  type = typeof val
                 if(val && type == "object"){
                     for (var name in val) {
-                        $.css(node, name, val[ name ]() );
+                        if(val.hasOwnProperty( name )){
+                            $.css(node, name, val[ name ]() );
+                        }
                     }
                 }else{
                     $.css(node, arguments[5][0], val );
                 }
             }
         },
-        display: {
+        display: {//根据传入值决定是显示还是隐藏
             update: function( node, val ){
                 $(node).toggle( !!val )
             }
         },
-        enable: {
+        enable: {//让表单元素处于可用或不可用状态
             update: function( node, val ){
                 if (val && node.disabled)
                     node.removeAttribute("disabled");
@@ -458,13 +488,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     node.disabled = true;
             }
         },
-        disable: {
+        disable: {//同上
             update: function( node, val ){
                 Bindings.enable.update(node, !val);
             }
         },
-
-        options:{
+        options:{//为select标签添加一组子项目
             init: function(node, val, visitor, accessor){
                 accessor.fragment = node.ownerDocument.createDocumentFragment()
                 accessor.fragments = [];             //添加一个数组属性,用于储存经过改造的文档碎片
@@ -498,26 +527,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
 
         },
-        html: {
-            update: function( node, val ){
-                $( node ).html( val );
-            },
-            stopBindings: true
-        },
-        value:{
-            init: function(node, val, accessor){
-                if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
-                    $(node).on("input",function(){
-                        accessor(node.value);
-                    });
-                }
-            },
-            update: function( node, val ){
-                node.value = val;
-            }
-        },
+ 
         template: {
-            //它暂时只供内部使用
+            //它暂时只供内部使用，是实现if unless with each这四种流程绑定的关键
             update: function( node, val, accessor, model, code, args){
                 //code对应 1 if,  0  unless,2  with -1 each
                 var fragment = accessor.fragments[0];      //取得原始模板
@@ -574,7 +586,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
     
-    //if unless with each四种bindings都是基于template bindings
     "if,unless,with,each".replace($.rword, function( type ){
         Bindings[ type ] = {
             //node, 子访问器的返回值, 子访问器(位于VM), 父访问器(分解元素bind属性得到DOMAccessor)

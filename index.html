@@ -31,6 +31,11 @@
             $.config.level = 6
             require("ready,mvvm", function() {
                 var model = $.applyBindings({
+                    $actions: {
+                        removeClass:function(){
+                            console.log("removeClass")
+                        }
+                    },
                     array: ["<strong>aaa</strong>", "bbb", "<em>ccc</em>", "ddd"],
                     user: {
                         display: '编号',
@@ -58,6 +63,7 @@
                     },
                     availableCountries : [{text:'France'}, 'Germany',{text:"Singapore",selected:true},'Spain','Japan']
                 });
+                console.log(model)
                 setTimeout(function() {
                     model.price(62)
                     model.availableCountries.splice(1,2)
@@ -74,7 +80,7 @@
     <body id="aaa">
         <p>你打算移民到哪个国家？</p>
         <select data-options="availableCountries" size="5" multiple="true"></select>
-        <div data-class="classes">
+        <div data-class="classes:removeClass">
             测试class绑定,可以同时操作多个类名,classes为一个对象
         </div>
         <div data-class-enabled="enabled.item">
