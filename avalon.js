@@ -1,19 +1,23 @@
+//=========================================
+// MVVM模块v3 by 司徒正美
+//=========================================
 define("mvvm","$event,$css,$attr".split(","), function($){
-    //http://rivetsjs.com/#rivets
+
     var BINDING = $.config.bindname || "data", 
     bridge = {},  uuid = 0, expando = new Date - 0, subscribers = "$" + expando
-    //VM是一个由访问器与监控数组与回调组成的对象
+    //VM是一个由访问器与监控数组与命令组成的对象
     //访问器是用于监控M中的某个字段读写两用的函数，
     //当然有更高级的访问器，它是建立在多个访问器或字段上，依赖它们的结果计算出自己的值，像
     //fullName不存在于M中，它由lastName, firstName这个两个字段组成
     //监控数组是一组访问器的集合，可能对应DOM树中一片节点，当它重排序，增删都能如实反映到页面上
-    //回调是用于对字段进行再加工，验证，它们也可以作为事件绑定的回调
+    //命令是用于对字段进行再加工，验证，它们也可以作为事件绑定的回调
     $.applyBindings = function(  model, node ){
         node = node || document.body;
         model = convertToViewModel( model );
         setBindingsToElements (node, model)
         return model
     }
+    //遍历DOM树，进行绑定转换，转换成DomAccessor，完成双向绑定链
     function setBindingsToElements (node, model){
         if ( node.nodeType === 1  ){
             var continueBindings = true;
@@ -28,7 +32,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
 
-    //取得目标路径下的访问器与回调
+    //取得目标路径下的访问器与命令
     function getTarget (names, accessor, fn, args){
         if( names ){
             if( args && args[0] === Bindings.on   ){
@@ -47,9 +51,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         }
     }
-    //在写框架时，最担心的事是——这些api设计得合理吗？使用者们能以多低的成本理解我的设计意图？
-    //我的设计是在帮助他们，还是在限制他们？在保持功能不变的情况下，学习成本还能进一步降低吗？
-    //对于写框架，我有种敬畏心理，感激愿意使用你框架的人，要为易用性、灵活性和健壮性负责，这是很大的挑战。
+    //取得元素的数据绑定，转换为DomAccessor
     function setBindingsToElement( node, model, bindings ){
         var continueBindings = true;
         for(var i = 0, bind; bind = bindings[i++];){
@@ -60,10 +62,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             var match = bind[1].split(/\s*\|\s*/),
             accessor = getTarget( match[0], model ),
-            callback = getTarget( match[1], model, true, args );
+            command = getTarget( match[1], model, true, args );
             if(accessor === void 0){//accessor可能为零
                 continue
             }
+            //移除数据绑定，防止被二次解析
+            node.removeAttribute(bind[0]);
             var binding = args.shift();
             //如果该绑定指明不能往下绑,比如html, text会请空原节点的内部
             //或者是foreach绑定,但它又没有子元素作为它的动态模板就中止往下绑
@@ -73,11 +77,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             //将VM中的访问器与元素节点绑定在一起,具体做法是将数据隐藏抽象成第三种访问器----DOM访问器
             //DOM访问器通过绑定器操作属性访问器与组合访问器的值渲染页面,
             //而VM通过属性访问器与组合访问器驱动DOM访问器操作DOM
-            convertToDomAccessor(node, binding, accessor, model, callback, args);
+            convertToDomAccessor(node, binding, accessor, model, command, args);
         }
         return continueBindings;
     }
-    //参数分别为model, pnames, pvalues
+    //遍历同一元素的子元素，进行绑定转换
     function setBindingsToChildren( elems, model ){
         for(var i = 0, el; el = elems[i++];){
             setBindingsToElements(el, model );
@@ -114,6 +118,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         return ret
     }
+    //转得符合要求的特性节点的值，替换框架自带的绑定器
     function parseBinding( str ){
         var array = str.slice(BINDING.length + 1).split("-") ;
         var binding = Bindings[ array[0] ];
@@ -305,7 +310,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //DOM访问器，直接与DOM树中的节点打交道的访问器，是实现双向绑定的关键。
     //它们仅在用户调用了$.View(viewmodel, node )方法，才根据用户写在元素节点上的bind属性生成出来。
     //names values 包含上一级的键名与值
-    function convertToDomAccessor (node, binding, visitor, model, callback, args ){
+    function convertToDomAccessor (node, binding, visitor, model, command, args ){
         function accessor( method ){
             if( !accessor.$uuid ){ //只有在第一次执行它时才进入此分支
                 if( Array.isArray(  visitor ) || binding == Bindings.each ){
@@ -315,20 +320,19 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             var val;
             String(visitor);//强制获取依赖
-            
             if(typeof visitor == "function" && visitor.$uuid){
-                val = visitor()
+                val = visitor();
             }else{
                 val = visitor
             }
-            if(typeof callback == "function"){
-                val = callback(val)
+            if(typeof command == "function"){
+                val = command(val)
             }
             if( !accessor.$uuid ){
                 delete bridge[ expando ];
                 accessor.$uuid = ++uuid;
                 //第四个参数供流程绑定使用
-                binding.init && binding.init(node, val, visitor, accessor, callback, args);
+                binding.init && binding.init(node, val, visitor, accessor, command, args);
             }
             method = arguments[0];
             if(  convertToCollectionAccessor[method] ){
@@ -339,7 +343,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }
             }
             //只有执行到这里才知道要不要中断往下渲染
-            binding.update && binding.update(node, val, accessor, model, callback, args);
+            binding.update && binding.update(node, val, accessor, model, command, args);
             return  accessor.$val = val
         }
         return completeAccessor( "interacted" ,accessor, node);
@@ -438,8 +442,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         value:{
             init: function(node, val, accessor){
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
-                    $(node).on("input",function(){
-                        accessor(node.value);
+                    var timeoutID
+                    console.log("xxxxxxxxxxx")
+                    $(node).on("mouseenter",function(){
+                        timeoutID = setInterval(function(){
+                            accessor(node.value);
+                        },50)
+                    });
+                    $(node).on("mouseleave",function(){
+                        timeoutID = clearInterval(timeoutID);
                     });
                 }
             },
@@ -548,10 +559,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         }
                     }
                     accessor.fragments.push(option)
-                    //这里要注意的add()函数的第二个参数，该参数为before，可以指定选项插到哪个选项之前，
-                    //如果为null则插到最后。如果不指定这个参数在IE系不会有问题，FF下会报错，
-                    //提示Not enough arguments,参数不足，所以最好传个null先。
-                    option && node.add(option, null);
+                    option && node.add(option);
                 });
                 node.style.display = display
             }
