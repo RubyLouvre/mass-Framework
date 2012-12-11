@@ -49,6 +49,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         }
     }
+    //减少对选择器的依赖，将数据与操作绑定在坚固的支点上。
+    //在jQuery时代，ID是我们命中元素最可靠的基点，以此为起点八爪鱼般处理周遭的节点。
+    //行为层上，我们可以通过事件绑定，几乎可以用根据代理一切事件。
+    //在MVVM中，数据绑定与元素是一体的，因此绝没有片差。处理交互上，事件以命令的新身份登场，
+    //回调被集合管理，状态被收笼于VM中，不再为如何组织代码现搔首，所有都有章而循，新手接力也易上手
     //取得元素的数据绑定，转换为DomAccessor
     function setBindingsToElement( node, model, bindings ){
         var continueBindings = true;
@@ -57,7 +62,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             var args = parseBinding(bind[0]);
             if(!args){
                 continue
-            }
+            }//通过binding, 我们可以实现数据的传递; 通过command, 我们可以实现操作的调用
             var match = bind[1].split(/\s*\|\s*/),
             accessor = getTarget( match[0], model ),
             command = getTarget( match[1], model, true, args );
@@ -443,12 +448,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         value:{
             init: function(node, timeoutID, accessor){
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
-                    $(node).on("mouseenter",function(){
+                    $(node).on("mouseenter focus",function(){
                         timeoutID = setInterval(function(){
                             accessor(node.value);
                         },50)
                     });
-                    $(node).on("mouseleave",function(){
+                    $(node).on("mouseleave blur",function(){
                         clearInterval(timeoutID);
                     });
                 }
