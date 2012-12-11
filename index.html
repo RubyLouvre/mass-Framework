@@ -31,10 +31,9 @@
             $.config.level = 6
             require("ready,mvvm", function() {
                 var model = $.applyBindings({
-                    $actions: {
-                        removeClass:function(){
-                            console.log("removeClass")
-                        }
+                    log: function(a){
+                        console.log(a)
+                        return a 
                     },
                     array: ["<strong>aaa</strong>", "bbb", "<em>ccc</em>", "ddd"],
                     user: {
@@ -47,8 +46,13 @@
 
                     content: "司徒正美",
                     price: 24.95,
-                    priceRating: function() {
-                        return this.price() > 50 ? "有点贵" : "比较便宜";
+                    priceRating: {
+                        getter: function(){
+                            return this.price() > 50 ? "有点贵" : "比较便宜";
+                        },
+                        setter: function(){
+                            
+                        }
                     },
                     item:{
                         enabled: true,
@@ -63,7 +67,7 @@
                     },
                     availableCountries : [{text:'France'}, 'Germany',{text:"Singapore",selected:true},'Spain','Japan']
                 });
-                console.log(model)
+ 
                 setTimeout(function() {
                     model.price(62)
                     model.availableCountries.splice(1,2)
@@ -80,7 +84,7 @@
     <body id="aaa">
         <p>你打算移民到哪个国家？</p>
         <select data-options="availableCountries" size="5" multiple="true"></select>
-        <div data-class="classes:removeClass">
+        <div data-class="classes:log">
             测试class绑定,可以同时操作多个类名,classes为一个对象
         </div>
         <div data-class-enabled="enabled.item">
@@ -102,7 +106,7 @@
         </p>
 
         <input data-value="content"><br/>
-        <input data-value="content">测试value绑定及联动功能
+        <input data-value="content">测试value绑定及联动功能<span data-text="content"></span>
         <p>这东西 <span data-text="priceRating">测试组合访问器，它是拥有M中两个属性访问器构成</span>。</p>
 
         <input data-attr-readonly="item.readonly">测试attr绑定

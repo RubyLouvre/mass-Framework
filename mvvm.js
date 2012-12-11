@@ -21,6 +21,26 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         }
     }
+
+    //取得目标路径下的访问器与回调
+    function getTarget (names, accessor, fn){
+        if( names  ){
+            names = names.split(".");
+            for(var k = 0, name; name = names[k++];){
+                if( name in accessor){//accessor[name]可能为零
+                    accessor = accessor[name];
+                    break;
+                }
+            }
+            //必须是普通函数，不能是访问器
+            if(fn && (typeof accessor != "function" || accessor.$uuid ) ){
+                accessor = void 0;
+            }
+            return accessor;
+        }else{
+            return void 0
+        }
+    }
     //在写框架时，最担心的事是——这些api设计得合理吗？使用者们能以多低的成本理解我的设计意图？
     //我的设计是在帮助他们，还是在限制他们？在保持功能不变的情况下，学习成本还能进一步降低吗？
     //对于写框架，我有种敬畏心理，感激愿意使用你框架的人，要为易用性、灵活性和健壮性负责，这是很大的挑战。
@@ -32,18 +52,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             if(!args){
                 continue
             }
-            var  match = bind[1].split(/\s*:\s*/),
-            accessor = model,
-            names = match[0];
-            names = names.split(".");
-            if( match[1] && accessor.$actions ){
-                var callback = accessor.$actions[match[1]];
-            }
-            for(var k = 0, name; name = names[k++];){
-                if( name in accessor){//accessor[name]可能为零
-                    accessor = accessor[name];
-                }
-            }
+            var match = bind[1].split(/\s*:\s*/),
+            accessor = getTarget(match[0], model ),
+            callback = getTarget(match[1], model, true )
             if(accessor === void 0){//accessor可能为零
                 continue
             }
@@ -87,7 +98,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         return fragment;
     }
 
-    //  var rbindValue = /^[\w$]+(?:\.[\w$]+)*(?:\s*:\s*[\w$]+)?$/
     var rbindValue =   /^[\w$]+(?:(?:\s*:\s*|\.)[\w$]+)*$/
     function getBindings( node ){
         var ret = []
@@ -127,12 +137,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         var model = parent || new ViewModel;
         for(var p in data) {
-            if(data.hasOwnProperty(p) && p !== "$actions"){
+            if(data.hasOwnProperty(p)){
                 convertToAccessor(p, data[p], model);
             }
-        }
-        if(!parent ){
-            model.$actions = data.$actions || {};
         }
         return model;
     }
@@ -147,8 +154,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             case "Number":
             case "Boolean"://属性访问器
                 return convertToPropertyAccessor( key, val, model );
-            case "Function"://组合访问器
-                return convertToCombiningAccessor( key, val, model, "get");
+            case "Function"://回调
+                return  model[key] = val; 
             case "Array"://组合访问器
                 var models = model[key] || (model[key] = []);
                 return convertToCollectionAccessor( val, models );
@@ -302,10 +309,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             var val;
             String(visitor);//强制获取依赖
-            if(typeof visitor == "function"){
+            
+            if(typeof visitor == "function" && visitor.$uuid){
                 val = visitor()
             }else{
                 val = visitor
+            }
+            if(typeof callback == "function"){
+                val = callback(val)
             }
             if( !accessor.$uuid ){
                 delete bridge[ expando ];
@@ -435,7 +446,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 if(val && type == "object"){
                     for(var cls in val){
                         if( val.hasOwnProperty(cls)){
-                            if( val[cls]() ){
+                            var check = typeof val[cls] == "function" ? val[cls]() : val[cls];
+                            if( check ){
                                 $node.addClass(cls)
                             }else{
                                 $node.removeClass(cls)
