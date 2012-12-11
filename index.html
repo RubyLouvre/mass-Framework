@@ -69,34 +69,33 @@
         </script>
     </head>
     <body id="aaa">
-        <p>Choose some countries you'd like to visit:</p>
+        <p>你打算移民到哪个国家？</p>
         <select data-options="availableCountries" size="5" multiple="true"></select>
-        <!--        <div data-class="classes">
-                    测试class绑定,可以同时操作多个类名,classes为一个对象
-                </div>
-                <div data-class-enabled="enabled.item">
-                    测试class绑定,每次只添加或移除一个类名,操作类名为data-class-后的值
-                </div>
-                <div data-if="show">
-                    <p>测试基于数组的each绑定,可以在data-each-后添加你想要的参数，分别指代元素与索引值</p>
-                    <ul data-each-item-index="array" >
-                        <li><span data-html="item"></span>:<span data-text="index"></span></li>
-                    </ul>
-                </div>
-                <dl data-each-value-key="user">
-                    <dt data-text="value">测试基于对象的each绑定</dt>
-                    <dd data-text="key">可以在data-each-后添加你想要的参数，分别指代键值与键名 </dd>
-                </dl>
-                <p data-with="coords">
-                    Latitude: <span data-text="latitude">测试with绑定 </span>,
-                    Longitude: <span data-text="longitude">测试with绑定 </span>
-                </p>
-        
-                <input data-value="content"><br/>
-                <input data-value="content">测试value绑定及联动功能
-                这东西 <span data-text="priceRating">测试组合访问器，它是拥有M中两个属性访问器构成</span>。
-                <span  data-class-enabled="item.enabled" data-text="item.title"></span>
-        
-                <input data-attr-readonly="item.readonly">测试attr绑定-->
+        <div data-class="classes">
+            测试class绑定,可以同时操作多个类名,classes为一个对象
+        </div>
+        <div data-class-enabled="enabled.item">
+            测试class绑定,每次只添加或移除一个类名,操作类名为data-class-后的值
+        </div>
+        <div data-if="show">
+            <p>测试基于数组的each绑定,可以在data-each-后添加你想要的参数，分别指代元素与索引值</p>
+            <ul data-each-item-index="array" >
+                <li><span data-html="item"></span>:<span data-text="index"></span></li>
+            </ul>
+        </div>
+        <dl data-each-value-key="user">
+            <dt data-text="value">测试基于对象的each绑定</dt>
+            <dd data-text="key">可以在data-each-后添加你想要的参数，分别指代键值与键名 </dd>
+        </dl>
+        <p data-with="coords">
+            Latitude: <span data-text="latitude">测试with绑定 </span>,
+            Longitude: <span data-text="longitude">测试with绑定 </span>
+        </p>
+
+        <input data-value="content"><br/>
+        <input data-value="content">测试value绑定及联动功能
+        <p>这东西 <span data-text="priceRating">测试组合访问器，它是拥有M中两个属性访问器构成</span>。</p>
+
+        <input data-attr-readonly="item.readonly">测试attr绑定
     </body>
 </html>

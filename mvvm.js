@@ -98,7 +98,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 //第四个参数供流程绑定使用
                 binding.init && binding.init(node, val, visitor, accessor, callback, args);
             }
-            if(  Array.isArray(  visitor ) && visitor[method] ){
+            method = arguments[0];
+           
+            if(  Array.isArray(  visitor ) && convertToCombiningAccessor[method] ){
                 //处理foreach.start, sort, reserve, unshift, shift, pop, push....
                 var ret = convertToCombiningAccessor[method]( accessor, val, accessor.fragments, method, arguments[1] );
                 if( ret ){
