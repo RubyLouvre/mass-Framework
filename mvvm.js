@@ -503,7 +503,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             init: function(node, callback, type, selector, _, args){
                 type = args[0];
                 selector = args[1];
-                console.log(args)
                 if(selector){
                     $(node).on(type, selector, callback);
                 }else{
