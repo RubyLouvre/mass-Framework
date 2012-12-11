@@ -129,7 +129,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //执行绑定在元素标签内的各种指令
     //MVVM不代表什么很炫的视觉效果之类的，它只是组织你代码的一种方式。有方便后期维护，松耦合等等优点而已
     var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
-    $.ViewBindings  = {
+    var Bindings = $.ViewBindings  = {
         text: {
             update:  function( node, val ){
                 val = val == null ? "" : val+""
@@ -168,6 +168,18 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }
             }
         },
+        css: {
+            update: function( node, val ){
+                var  type = typeof val
+                if(val && type == "object"){
+                    for (var name in val) {
+                        $.css(node, name, val[ name ] );
+                    }
+                }else{
+                    $.css(node, arguments[5][0], val );
+                }
+            }
+        },
         display: {
             update: function( node, val ){
                 $(node).toggle( !!val )
@@ -181,11 +193,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     node.disabled = true;
             }
         },
-        hasfocus: {
+        disable: {
             update: function( node, val ){
-
+                Bindings.enable.update(node, !val);
             }
         },
+
         options:{
             update: function( node, val ){
                 var display = node.style.display;
@@ -288,11 +301,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             stopBindings: true
         }
     }
-    $.ViewBindings.disable = {
-        update: function( node, val ){
-            $.ViewBindings.enable.update(node, !val);
-        }
-    }
+    
     //if unless with each四种bindings都是基于template bindings
     "if,unless,with,each".replace($.rword, function( type ){
         $.ViewBindings[ type ] = {
