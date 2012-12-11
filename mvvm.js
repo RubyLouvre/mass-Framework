@@ -29,22 +29,23 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     }
 
     //取得目标路径下的访问器与回调
-    function getTarget (names, accessor, fn){
+    function getTarget (names, accessor, fn, args){
         if( names ){
-            names = names.split(".");
-            for(var k = 0, name; name = names[k++];){
-                if( name in accessor){//accessor[name]可能为零
-                    accessor = accessor[name];
-                    break;
+            if( args && args[0] === Bindings.on   ){
+                args[1] = names; 
+            }else {
+                names = names.split(".");
+                for(var k = 0, name; name = names[k++];){
+                    if( name in accessor){//accessor[name]可能为零
+                        accessor = accessor[name];
+                        //break;
+                    }
                 }
+                if(fn && (typeof accessor != "function" || accessor.$uuid ) ){
+                    return  //必须是普通函数，不能是访问器
+                }
+                return accessor;
             }
-            //必须是普通函数，不能是访问器
-            if(fn && (typeof accessor != "function" || accessor.$uuid ) ){
-                accessor = void 0;
-            }
-            return accessor;
-        }else{
-            return void 0
         }
     }
     //在写框架时，最担心的事是——这些api设计得合理吗？使用者们能以多低的成本理解我的设计意图？
@@ -58,9 +59,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             if(!args){
                 continue
             }
-            var match = bind[1].split(/\s*:\s*/),
-            accessor = getTarget(match[0], model ),
-            callback = getTarget(match[1], model, true )
+            var match = bind[1].split(/\s*\|\s*/),
+            accessor = getTarget( match[0], model ),
+            callback = getTarget( match[1], model, true, args );
+            console.log(accessor)
+              console.log(callback)
             if(accessor === void 0){//accessor可能为零
                 continue
             }
@@ -104,7 +107,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         return fragment;
     }
 
-    var rbindValue =   /^[\w$]+(?:(?:\s*:\s*|\.)[\w$]+)*$/
+    var rbindValue =  /\W+/
     function getBindings( node ){
         var ret = []
         for ( var j = 0, attr; attr = node.attributes[ j++ ]; ){
@@ -500,9 +503,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         },
         on: {
-            init: function(node, val, visitor, accessor, callback, args){
-                var type = args[0]
-                $(node).on(type, val)
+            init: function(node, callback, type, selector, _, args){
+                type = args[0];
+                selector = args[1];
+                if(selector){
+                    $(node).on(type, selector, callback);
+                }else{
+                    $(node).on(type, callback);
+                }
             }
         },
         enable: {//让表单元素处于可用或不可用状态
