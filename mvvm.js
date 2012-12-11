@@ -2,6 +2,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //http://rivetsjs.com/#rivets
     var BINDING = $.config.bindname || "data", 
     bridge = {},  uuid = 0, expando = new Date - 0, subscribers = "$" + expando
+    //VM是一个由访问器与监控数组与回调组成的对象
+    //访问器是用于监控M中的某个字段读写两用的函数，
+    //当然有更高级的访问器，它是建立在多个访问器或字段上，依赖它们的结果计算出自己的值，像
+    //fullName不存在于M中，它由lastName, firstName这个两个字段组成
+    //监控数组是一组访问器的集合，可能对应DOM树中一片节点，当它重排序，增删都能如实反映到页面上
+    //回调是用于对字段进行再加工，验证，它们也可以作为事件绑定的回调
     $.applyBindings = function(  model, node ){
         node = node || document.body;
         model = convertToViewModel( model );
@@ -24,7 +30,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
 
     //取得目标路径下的访问器与回调
     function getTarget (names, accessor, fn){
-        if( names  ){
+        if( names ){
             names = names.split(".");
             for(var k = 0, name; name = names[k++];){
                 if( name in accessor){//accessor[name]可能为零
@@ -302,7 +308,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     function convertToDomAccessor (node, binding, visitor, model, callback, args ){
         function accessor( method ){
             if( !accessor.$uuid ){ //只有在第一次执行它时才进入此分支
-                if( Array.isArray(  visitor) ){
+                if( Array.isArray(  visitor ) || binding == Bindings.each ){
                     arguments = ["start"];
                 }
                 bridge[ expando ] = accessor;
@@ -325,7 +331,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 binding.init && binding.init(node, val, visitor, accessor, callback, args);
             }
             method = arguments[0];
-            if(  Array.isArray(  visitor ) && convertToCollectionAccessor[method] ){
+            if(  convertToCollectionAccessor[method] ){
                 //处理foreach.start, sort, reserve, unshift, shift, pop, push....
                 var ret = convertToCollectionAccessor[method]( accessor, val, accessor.fragments, method, arguments[1] );
                 if( ret ){
@@ -333,7 +339,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }
             }
             //只有执行到这里才知道要不要中断往下渲染
-            binding.update(node, val, accessor, model, callback, args);
+            binding.update && binding.update(node, val, accessor, model, callback, args);
             return  accessor.$val = val
         }
         return completeAccessor( "interacted" ,accessor, node);
@@ -344,6 +350,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     var collection = convertToCollectionAccessor
     collection.start = function( accessor, models, fragments, method, args ){
         if(!Array.isArray(models)){
+            $.log("处理对象的for in循环")
             var array = [];//处理对象的for in循环
             array.$isObj = true;
             for(var key in models){
@@ -490,6 +497,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         display: {//根据传入值决定是显示还是隐藏
             update: function( node, val ){
                 $(node).toggle( !!val )
+            }
+        },
+        on: {
+            init: function(node, val, visitor, accessor, callback, args){
+                var type = args[0]
+                $(node).on(type, val)
             }
         },
         enable: {//让表单元素处于可用或不可用状态
