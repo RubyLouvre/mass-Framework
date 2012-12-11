@@ -142,7 +142,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                     try {
                         for ( var i = 0; el = this[ i++ ]; ) {
                             if ( el.nodeType === 1 ) {
-                                $.slice( el[TAGS]("*") ).each( cleanNode );
+                                $.slice( el[TAGS]("*") ).forEach( cleanNode );
                                 el.innerHTML = value;
                             }
                         }
