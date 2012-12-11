@@ -27,7 +27,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     function setBindingsToElement( node, model, bindings ){
         var continueBindings = true;
         for(var i = 0, bind; bind = bindings[i++];){
-            //取得MVVM的绑定处理器与额外参数,如data-on-click,绑定处理器为$.ViewBindings.on, 参数为"click"
+            //取得MVVM的绑定器与用户参数,如data-on-click,绑定处理器为$.ViewBindings.on, 参数为"click"
             var args = parseBinding(bind[0]);
             if(!args){
                 continue
@@ -37,25 +37,23 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             names = match[0],
             callback = match[1];
             names = names.split(".");
-            console.log(accessor)
             for(var k = 0, name; name = names[k++];){
-                try{
-                    if( name in accessor){//accessor[name]可能为零
-                        accessor = accessor[name];
-                    }
-                }catch(e){
-                    console.log(e);
-                    console.log(accessor)
+                if( name in accessor){//accessor[name]可能为零
+                    accessor = accessor[name];
                 }
-               
             }
             if(accessor === void 0){//accessor可能为零
                 continue
             }
             var binding = args.shift();
+            //如果该绑定指明不能往下绑,比如html, text会请空原节点的内部
+            //或者是foreach绑定,但它又没有子元素作为它的动态模板就中止往下绑
             if(binding.stopBindings || binding == $.ViewBindings.each && Array.isArray(accessor) && !accessor.length ){
                 continueBindings = false;
             }
+            //将VM中的访问器与元素节点绑定在一起,具体做法是将数据隐藏抽象成第三种访问器----DOM访问器
+            //DOM访问器通过绑定器操作属性访问器与组合访问器的值渲染页面,
+            //而VM通过属性访问器与组合访问器驱动DOM访问器操作DOM
             convertToDomAccessor(node, binding, accessor, model, callback, args);
         }
         return continueBindings;
@@ -183,6 +181,37 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     node.disabled = true;
             }
         },
+        hasfocus: {
+            update: function( node, val ){
+
+            }
+        },
+        options:{
+            update: function( node, val ){
+                var display = node.style.display;
+                //http://lives.iteye.com/blog/966217
+                val.forEach(function(el){
+                    var option;
+                    if(typeof el == "function"){
+                        option = new Option(el(), el());
+                    }else if(typeof el == "object"){
+                        var text = el.text()
+                        option = new Option( text, el.value ? el.value() : text );
+                        for(var i in el){
+                            if(el.hasOwnProperty(i) && i !== "text" && i !== "value"){
+                                option[i] = typeof i =="function" ? el[i]() : el[i]
+                            }
+                        }
+                    }
+                    //这里要注意的add()函数的第二个参数，该参数为before，可以指定选项插到哪个选项之前，
+                    //如果为null则插到最后。如果不指定这个参数在IE系不会有问题，FF下会报错，
+                    //提示Not enough arguments,参数不足，所以最好传个null先。
+                    option && node.add(option, null);
+                });
+                node.style.display = display
+            }
+
+        },
         html: {
             update: function( node, val ){
                 $( node ).html( val );
@@ -193,7 +222,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             init: function(node, val, accessor){
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
                     $(node).on("input",function(){
-                        accessor(node.value)
+                        accessor(node.value);
                     });
                 }
             },
@@ -249,10 +278,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                                     m[args[1]] = val.$isObj ? a.$key : b;//index
                                 }
                             }else{
-                                m = model
+                                m = model;
                             }
                             setBindingsToChildren( elems, m );
-                        })(val[i], i)
+                        })(val[i], i);
                     }
                 }
             },

@@ -55,7 +55,8 @@
                     coords: {
                         latitude:  51.5001524,
                         longitude: -0.1262362
-                    }
+                    },
+                    availableCountries : [{text:'France'}, 'Germany',{text:"Singapore",selected:true},'Spain','Japan']
                 });
                 setTimeout(function() {
                     model.price(62)
@@ -66,6 +67,8 @@
         </script>
     </head>
     <body>
+        <p>Choose some countries you'd like to visit:</p>
+        <select data-options="availableCountries" size="5" multiple="true"></select>
         <div data-class="classes">
             测试class绑定,可以同时操作多个类名,classes为一个对象
         </div>
