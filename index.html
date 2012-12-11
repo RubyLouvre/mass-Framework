@@ -38,6 +38,9 @@
                     click: function(e){
                         alert(this.className)
                     },
+                    getText: function(){
+                        alert(this.innerHTML)
+                    },
                     array: ["<strong>aaa</strong>", "bbb", "<em>ccc</em>", "ddd"],
                     user: {
                         display: '编号',
@@ -85,17 +88,17 @@
         </script>
     </head>
     <body id="aaa">
-       <p>你打算移民到哪个国家？</p>
+        <p>你打算移民到哪个国家？</p>
         <select data-options="availableCountries" size="5" multiple="true"></select>
         <div data-class="classes | log">
             测试class绑定,可以同时操作多个类名,classes为一个对象
         </div>
-        <div data-class-enabled="enabled.item" data-on-click="click" >
+        <div data-class-enabled="enabled.item"  >
             测试class绑定,每次只添加或移除一个类名,操作类名为data-class-后的值
         </div>
         <div data-if="show">
             <p>测试基于数组的each绑定,可以在data-each-后添加你想要的参数，分别指代元素与索引值</p>
-            <ul data-each-item-index="array" >
+            <ul data-each-item-index="array" data-on-click="getText | li" >
                 <li><span data-html="item" ></span>:<span data-text="index"></span></li>
             </ul>
         </div>
@@ -103,7 +106,7 @@
             <dt data-text="value" >测试基于对象的each绑定</dt>
             <dd data-text="key">可以在data-each-后添加你想要的参数，分别指代键值与键名 </dd>
         </dl>
-       <p data-with="coords">
+        <p data-with="coords">
             Latitude: <span data-text="latitude">测试with绑定 </span>,
             Longitude: <span data-text="longitude">测试with绑定 </span>
         </p>

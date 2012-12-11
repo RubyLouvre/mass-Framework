@@ -32,13 +32,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     function getTarget (names, accessor, fn, args){
         if( names ){
             if( args && args[0] === Bindings.on   ){
-                args[1] = names; 
+                args[2] = names;
             }else {
                 names = names.split(".");
                 for(var k = 0, name; name = names[k++];){
                     if( name in accessor){//accessor[name]可能为零
                         accessor = accessor[name];
-                        //break;
                     }
                 }
                 if(fn && (typeof accessor != "function" || accessor.$uuid ) ){
@@ -62,8 +61,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             var match = bind[1].split(/\s*\|\s*/),
             accessor = getTarget( match[0], model ),
             callback = getTarget( match[1], model, true, args );
-            console.log(accessor)
-              console.log(callback)
             if(accessor === void 0){//accessor可能为零
                 continue
             }
@@ -107,7 +104,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         return fragment;
     }
 
-    var rbindValue =  /\W+/
+    var rbindValue = /^[\w$]+(?:(?:\s*\|\s*|\.)[\W\w]+)*$/
     function getBindings( node ){
         var ret = []
         for ( var j = 0, attr; attr = node.attributes[ j++ ]; ){
@@ -506,6 +503,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             init: function(node, callback, type, selector, _, args){
                 type = args[0];
                 selector = args[1];
+                console.log(args)
                 if(selector){
                     $(node).on(type, selector, callback);
                 }else{
