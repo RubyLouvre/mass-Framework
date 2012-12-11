@@ -1,10 +1,9 @@
 define("mvvm","$event,$css,$attr".split(","), function($){
-    var source = {} //http://rivetsjs.com/#rivets
-    BINDING = $.config.bindname || "data",
+    //http://rivetsjs.com/#rivets
+    var BINDING = $.config.bindname || "data"
     $.applyBindings = function(  model, node ){
         node = node || document.body;
         model = $.ViewModel( model );
-
         setBindingsToElements (node, model)
         return model
     }
@@ -79,11 +78,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //它们仅在用户调用了$.View(viewmodel, node )方法，才根据用户写在元素节点上的bind属性生成出来。
     //names values 包含上一级的键名与值
     function convertToDomAccessor (node, binding, visitor, model, callback, args ){
-        function accessor( neo ){
+        function accessor( method ){
             if( !accessor.$uuid ){ //只有在第一次执行它时才进入此分支
-                if( binding == $.ViewBindings.each ){
-                    var p = visitor["$"+expando] || ( visitor[ "$"+ expando] =  [] );
-                    $.Array.ensure( p ,accessor);
+                if( Array.isArray(  visitor) ){
                     arguments = ["start"];
                 }
                 bridge[ expando ] = accessor;
@@ -101,18 +98,16 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 //第四个参数供流程绑定使用
                 binding.init && binding.init(node, val, visitor, accessor, callback, args);
             }
-            var method = arguments[0], more = arguments[1]
-            if( typeof binding[method] == "function" ){
+            if(  Array.isArray(  visitor ) && visitor[method] ){
                 //处理foreach.start, sort, reserve, unshift, shift, pop, push....
-                var ret = binding[method]( accessor, val, accessor.fragments, method, more );
+                var ret = convertToCombiningAccessor[method]( accessor, val, accessor.fragments, method, arguments[1] );
                 if( ret ){
                     val = ret;
                 }
             }
             //只有执行到这里才知道要不要中断往下渲染
-            accessor.$val = val
             binding.update(node, val, accessor, model, callback, args);
-            return val  //val;
+            return  accessor.$val = val
         }
         return completeAccessor( "interacted" ,accessor, node);
     }
@@ -200,8 +195,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         },
 
         options:{
-            update: function( node, val ){
+            init: function(node, val, visit, accessor){
+                accessor.fragment = node.ownerDocument.createDocumentFragment()
+                accessor.fragments = [];             //添加一个数组属性,用于储存经过改造的文档碎片
+                accessor.cloneFragment = function( ){  }
+            },
+            update: function( node, val, accessor ){
                 var display = node.style.display;
+                node.innerHTML = ""
+                accessor.fragments = []
                 //http://lives.iteye.com/blog/966217
                 val.forEach(function(el){
                     var option;
@@ -216,6 +218,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                             }
                         }
                     }
+                    accessor.fragments.push(option)
                     //这里要注意的add()函数的第二个参数，该参数为before，可以指定选项插到哪个选项之前，
                     //如果为null则插到最后。如果不指定这个参数在IE系不会有问题，FF下会报错，
                     //提示Not enough arguments,参数不足，所以最好传个null先。
@@ -252,7 +255,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     fragment.recover();                    //将它所引用着的节点移出DOM树
                     var elems = getChildren( fragment );   //取得它们当中的元素节点
                     node.appendChild( fragment );          //再放回DOM树
-
                     if( elems.length ){
                         if( code == 2 ){                    //处理with 绑定
                             var fn = function(){}
@@ -304,7 +306,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     
     //if unless with each四种bindings都是基于template bindings
     "if,unless,with,each".replace($.rword, function( type ){
-        $.ViewBindings[ type ] = {
+        Bindings[ type ] = {
             //node, 子访问器的返回值, 子访问器(位于VM), 父访问器(分解元素bind属性得到DOMAccessor)
             init: function(node, val, visit, accessor){
                 node.normalize();                  //合并文本节点数
@@ -333,7 +335,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         case "with":
                             return  2;       //2  with
                         default:
-                            $.log("============each===========")
                             return -1;       //-1 each
                     }
                 })(), args );
@@ -343,14 +344,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     });
     //data-each-item?-index?
     //each绑定拥有大量的子方法,用于同步数据的增删改查与排序,它们在convertToDomAccessor方法中被调用
-    var each = $.ViewBindings.each;
-    each.start = function( accessor, models, fragments, method, args ){
+    var collection = convertToCombiningAccessor
+    collection.start = function( accessor, models, fragments, method, args ){
         if(!Array.isArray(models)){
             var array = [];//处理对象的for in循环
             array.$isObj = true;
             for(var key in models){
                 //通过这里模拟数组行为
-                if(models.hasOwnProperty(key)  && (key != "$"+expando)){
+                if(models.hasOwnProperty(key)  && key.indexOf("$")!= 0){
                     var value = models[key];
                     array.push( value );
                 }
@@ -363,7 +364,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         return models
     };
     //push ok
-    each.push = function( accessor, models, fragments, method, args ){
+    collection.push = function( accessor, models, fragments, method, args ){
         var l = fragments.length
         for(var index = 0; index < args.length; index++ ){
             var n = index + l;
@@ -372,7 +373,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
     //unshift ok
-    each.unshift = function( accessor, models, fragments, method, args ){
+    collection.unshift = function( accessor, models, fragments, method, args ){
         for(var index = 0; index < args.length; index++ ){
             convertToAccessor(index, models[index], models);
             accessor.cloneFragment(0, true)
@@ -382,20 +383,20 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
     // shift pop ok
-    each.shift = function( accessor, models, fragments, method, args ){
+    collection.shift = function( accessor, models, fragments, method, args ){
         var fragment = fragments[method]();//取得需要移出的文档碎片
-        fragment.recover() = null;//让它收集其子节点,然后一同被销毁
+        fragment.recover && fragment.recover();//让它收集其子节点,然后一同被销毁
         for(var index = 0; index < models.length; index++ ){
             models[index].$key = index;//重排集合元素的$key
         }
     }
-    each.pop = each.shift;
-    each.splice = function( accessor, models, fragments, method, args ){
+    collection.pop = collection.shift;
+    collection.splice = function( accessor, models, fragments, method, args ){
         var start = args[0], n = args.length - 2;
         var removes = fragments.splice(start, args[1]);
         //移除对应的文档碎片
-        for(var i = 0; i < removes.length; i++){
-            removes[i].recover();
+        for(var i = 0, el; el = removes[i++];){
+            el.recover && el.recover ();
         }
         for(i = 0; i < n; i++ ){
             //将新数据封装成域
@@ -500,32 +501,39 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //集合访问器，这是一个特别的数组对象， 用于一组数据进行监控与操作，当它的顺序或个数发生变化时，
     //它会同步到DOM对应的元素集合中去，因此有关这个数组用于添加，删除，排序的方法都被重写了
     //我们可以在页面通过each绑定此对象
-    function convertToCollectionAccessor(array, models){
-        models = models || [];
+    function convertToCollectionAccessor(array, accessor){
+        accessor = accessor || [];
         for(var index = 0; index < array.length; index++){
-            convertToAccessor(index, array[index], models);
+            convertToAccessor(index, array[index], accessor);
         }
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
-            var nativeMethod = models[ method ];
-            models[ method ] = function(){
-                nativeMethod.apply( models, arguments)
-                var accessors = models["$"+expando];
-                for(var i = 0, accessor; accessor = accessors[i++];){
-                    accessor(method, arguments);
+            var nativeMethod = accessor[ method ];
+            accessor[ method ] = function(){
+                nativeMethod.apply( accessor, arguments)
+                var visitors =  accessor.$deps;
+                for(var i = 0, visitor; visitor = visitors[i++];){
+                    visitor(method, arguments);
                 }
             }
         });
-        models.removeAt = function(index){//移除指定索引上的元素
-            models.splice(index, 1);
+        accessor.removeAt = function(index){//移除指定索引上的元素
+            accessor.splice(index, 1);
         }
-        models.remove = function(item){//移除第一个等于给定值的元素
-            var array = models.map(function(el){
+        accessor.remove = function(item){//移除第一个等于给定值的元素
+            var array = accessor.map(function(el){
                 return el();
             })
             var index = array.indexOf(item);
-            models.removeAt(index);
+            accessor.removeAt(index);
         }
-        return models;
+        accessor.$deps = accessor.$deps || [];
+        accessor.toString =  function(){
+            if( bridge[ expando ] ){
+                $.Array.ensure( accessor.$deps, bridge[ expando ] );
+            }
+            return [].slice.call(accessor) +""
+        }
+        return accessor;
     }
     
     //convertToCombiningAccessor，组合访问器，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
