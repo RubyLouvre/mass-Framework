@@ -2,14 +2,12 @@
 // MVVM模块v3 by 司徒正美
 //=========================================
 define("mvvm","$event,$css,$attr".split(","), function($){
-
     var BINDING = $.config.bindname || "data", 
     bridge = {},  uuid = 0, expando = new Date - 0, subscribers = "$" + expando
-    //VM是一个由访问器与监控数组与命令组成的对象
-    //访问器是用于监控M中的某个字段读写两用的函数，
+    //ViewModel是一个由访问器与命令组成的对象
+    //访问器是用于监控Model中的某个字段读写两用的函数，
     //当然有更高级的访问器，它是建立在多个访问器或字段上，依赖它们的结果计算出自己的值，像
     //fullName不存在于M中，它由lastName, firstName这个两个字段组成
-    //监控数组是一组访问器的集合，可能对应DOM树中一片节点，当它重排序，增删都能如实反映到页面上
     //命令是用于对字段进行再加工，验证，它们也可以作为事件绑定的回调
     $.applyBindings = function(  model, node ){
         node = node || document.body;
@@ -140,7 +138,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         }
     }
-
+    //双向绑定链 ：
+    //属性访问器  ┓
+    //组合访问器　┫→ 绑定器 ← DOM访问器 ← 数据绑定
+    //集合访问器　┛
     function ViewModel(){}
     function convertToViewModel(data, parent){
         if(data instanceof ViewModel){
@@ -209,7 +210,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //属性访问器，它是最简单的可读写访问器，位于双向依赖链的最底层，不依赖于其他访问器就能计算到自己的返回值
     function convertToPropertyAccessor( key, val, host ){
         function accessor( neo ){
-            if( bridge[ expando ] ){ //收集依赖于它的访问器或绑定器，,以便它的值改变时,通知它们更新自身
+            if( bridge[ expando ] ){ //收集依赖于它的访问器，,以便它的值改变时,通知它们更新自身
                 $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
             }
             if( arguments.length ){//在传参不等于已有值时,才更新自已,并通知其的依赖
@@ -225,7 +226,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         return completeAccessor( key, accessor, host );
     }
     //convertToCombiningAccessor，组合访问器，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
-    //它们是位于双向绑定链的中间层，需要依赖于其他属性访问器或组合访问的返回值计算自己的返回值。
+    //它们是位于双向绑定链的中间层，需要依赖于其他属性访问器或组合访问器的返回值计算自己的返回值。
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
@@ -440,17 +441,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             stopBindings: true
         },
         value:{
-            init: function(node, val, accessor){
+            init: function(node, timeoutID, accessor){
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
-                    var timeoutID
-                    console.log("xxxxxxxxxxx")
                     $(node).on("mouseenter",function(){
                         timeoutID = setInterval(function(){
                             accessor(node.value);
                         },50)
                     });
                     $(node).on("mouseleave",function(){
-                        timeoutID = clearInterval(timeoutID);
+                        clearInterval(timeoutID);
                     });
                 }
             },
@@ -466,14 +465,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         if( val.hasOwnProperty(cls)){
                             var check = typeof val[cls] == "function" ? val[cls]() : val[cls];
                             if( check ){
-                                $node.addClass(cls)
+                                $node.addClass(cls);
                             }else{
-                                $node.removeClass(cls)
+                                $node.removeClass(cls);
                             }
                         }
                     }
                 }else {
-                    $node.toggleClass( arguments[5][0] || val )
+                    $node.toggleClass( arguments[5][0] || val );
                 }
             }
         },
@@ -537,12 +536,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         options:{//为select标签添加一组子项目
             init: function(node, val, visitor, accessor){
                 accessor.fragment = node.ownerDocument.createDocumentFragment()
-                accessor.fragments = [];             //添加一个数组属性,用于储存经过改造的文档碎片
-                accessor.cloneFragment = function( ){  }
+                accessor.fragments = []; //添加一个数组属性,用于储存经过改造的文档碎片
+                accessor.cloneFragment = $.noop;
             },
             update: function( node, val, accessor ){
                 var display = node.style.display;
-                node.innerHTML = ""
+                node.innerHTML = "";
                 accessor.fragments = []
                 //http://lives.iteye.com/blog/966217
                 val.forEach(function(el){
@@ -561,7 +560,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     accessor.fragments.push(option)
                     option && node.add(option);
                 });
-                node.style.display = display
+                node.style.display = display;
             }
 
         },
@@ -653,9 +652,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         case "unless":
                             return  !val - 0; //0  unless
                         case "with":
-                            return  2;       //2  with
+                            return  2;        //2  with
                         default:
-                            return -1;       //-1 each
+                            return -1;        //-1 each
                     }
                 })(), args );
             },
