@@ -51,7 +51,7 @@
                         title:"这相当于toggleClass"
                     },
                     show: 1,
-                    classes: { "my-class": true,"your-class": false, "his-class": true },
+                    classes: { "my-class": true,"your-class": true, "his-class": true },
                     coords: {
                         latitude:  51.5001524,
                         longitude: -0.1262362
@@ -61,7 +61,10 @@
                 setTimeout(function() {
                     model.price(62)
                     model.availableCountries.splice(1,2)
-                    model.availableCountries.push("222")
+                    model.availableCountries.push("台湾")
+                    model.availableCountries.unshift({
+                        text:"澳大利亚",selected:true
+                    })
                 }, 1000)
 
             })
