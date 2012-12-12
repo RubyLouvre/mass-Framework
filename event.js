@@ -581,16 +581,16 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
                         if(!rtypes.test(hash.type)){
-                            throw "事件类型格式不正确"
+                            throw new Error("事件类型格式不正确")
                         }
                     }
                 }
             }
             if(!hash.type){
-                throw "必须指明事件类型"
+                throw new Error("必须指明事件类型")
             }
             if(method === "on" && !hash.handler ){
-                throw "必须指明事件回调"
+                throw new Error("必须指明事件回调")
             }
             hash.times = hash.times > 0  ? hash.times : Infinity;
             return this.each(function() {
