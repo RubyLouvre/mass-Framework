@@ -171,8 +171,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             case "Function"://回调
                 return  model[key] = val; 
             case "Array"://组合访问器
-                var models = model[key] || (model[key] = []);
-                return convertToCollectionAccessor( val, models );
+                return  model[key] = convertToCollectionAccessor( val );
             case "Object"://转换为子VM
                 if($.isPlainObject( val )){
                     if( $.isFunction( val.setter || val.getter ) && Object.keys(val).length <= 3  ){
@@ -277,41 +276,40 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         for(var index = 0; index < array.length; index++){
             convertToAccessor(index, array[index], accessor);
         }
+        accessor.$uuid = ++uuid;
+        accessor[ subscribers ] = accessor[ subscribers ] || [];
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
             var nativeMethod = accessor[ method ];
             accessor[ method ] = function(){
-                nativeMethod.apply( accessor, arguments)
-                var visitors =  accessor[ subscribers ];
+                nativeMethod.apply( this, arguments)
+                var visitors =  this[ subscribers ];
                 for(var i = 0, visitor; visitor = visitors[i++];){
                     visitor(method, arguments);
                 }
-                updateSubscribers(accessor)
+                updateSubscribers(this)
             }
         });
         accessor.clear = function(){
             while(accessor.length){
                 accessor.shift()
             }
-
         }
         accessor.removeAt = function(index){//移除指定索引上的元素
-            accessor.splice(index, 1);
+            this.splice(index, 1);
         }
         accessor.remove = function(item){//移除第一个等于给定值的元素
-            var array = accessor.map(function(el){
-           
-                return typeof el == "function" ? el() : el
-            })
-            var index = array.indexOf(item);
-            accessor.removeAt(index);
-        }
-        accessor[ subscribers ] = accessor[ subscribers ] || [];
-        accessor.toString = accessor.valueOf = function(){
-            if( bridge[ expando ] ){
-                $.Array.ensure( accessor[ subscribers ], bridge[ expando ] );
+            var index = this.indexOf(item);
+            if(index !== -1){
+                this.removeAt(index);
             }
-            return Array.apply([], accessor) +"";
         }
+        accessor.toString = function(){
+            if( bridge[ expando ] ){
+                $.Array.ensure( this[ subscribers ], bridge[ expando ] );
+            }
+            return Array.apply([], this) +"";
+        }
+        console.log(accessor)
         return accessor;
     }
     //DOM访问器，直接与DOM树中的节点打交道的访问器，是实现双向绑定的关键。
