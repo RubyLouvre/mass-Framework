@@ -670,5 +670,22 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     
     return $;
 })
-
+//2012.8.31 完成 v1
+//https://github.com/RubyLouvre/mass-Framework/commit/708e203a0e274b69729d08de8fe1cde2722520d2
+//2012.9.22 完成 v2 90%代码重写，使用新的思路收集依赖完成双向绑定链
+//2012.12.11 完成 v3 50% 代码重写 数据绑定部分焕然一新，属性名得到绑定器，
+//属性值以|为界，前一部分得访问器或命令或表达式，其中访问器或命令可以通过.号深层遍历VM得到
+//实现事件绑定与代理，添加options绑定，相当于ko的options与selectedOptions这两个绑定器
+//value绑定是双向的，结合事件与定时器实现。
 //IE9的兼容性问题 http://msdn.microsoft.com/zh-tw/ie/gg712396.aspx
+
+ //人家花了那么多心思与时间做出来的东西,你以为是小学生写记叙文啊,一目了然....
+
+//+    /* JS UI Component 最终还是通过 HTML 来描述界面，当 js object 的数据发生变化或者执行某个动作时
+//+    需要通知到对应的html，使其发生相应变化。于是js object 需要得到他在页面上对应的html的句柄，
+//+    通常做法，是在创建html的时候将createElement返回的句柄保存在js object 内部的某个变量中，
+//+    或者赋值给html eLement一个唯一的ID，js object 根据这个ID来找到对应的HTML Element。同样，
+//+    当htm elementl的事件（例如onclick）要通知到相对应的 js object 或者回调js object的某个
+//+    方法或属性时，也需要得到该js object的一个引用。我的意思是建立一种统一的规则，js object
+//+    和他相对应的 html 能通过这种规则互相访问到对方。 建立这个关联以后，实现js object和
+//+    对应 html 的数据邦定和数据同步等问题就简单多了
