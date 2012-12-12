@@ -50,10 +50,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
     //减少对选择器的依赖，将数据与操作绑定在坚固的支点上。
-    //在jQuery时代，ID是我们命中元素最可靠的基点，以此为起点八爪鱼般处理周遭的节点。
-    //行为层上，我们可以通过事件绑定，几乎可以用根据代理一切事件。
-    //在MVVM中，数据绑定与元素是一体的，因此绝没有片差。处理交互上，事件以命令的新身份登场，
-    //回调被集合管理，状态被收笼于VM中，不再为如何组织代码现搔首，所有都有章而循，新手接力也易上手
     //取得元素的数据绑定，转换为DomAccessor
     function setBindingsToElement( node, model, bindings ){
         var continueBindings = true;
@@ -66,6 +62,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             var match = bind[1].split(/\s*\|\s*/),
             accessor = getTarget( match[0], model ),
             command = getTarget( match[1], model, true, args );
+            // $.log(accessor, 7)
             if(accessor === void 0){//accessor可能为零
                 continue
             }
@@ -178,8 +175,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 return convertToCollectionAccessor( val, models );
             case "Object"://转换为子VM
                 if($.isPlainObject( val )){
-                    if( $.isFunction( val.setter ) && $.isFunction( val.getter )){
-                        return convertToCombiningAccessor( key, val, model, "setget");
+                    if( $.isFunction( val.setter || val.getter ) && Object.keys(val).length <= 3  ){
+                        return convertToCombiningAccessor( key, val, model );
                     }else{
                         var object = model[key] || (model[key] = {} );
                         convertToViewModel( val, object );
@@ -235,15 +232,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
-    function convertToCombiningAccessor( key, val, host, type){
-        var getter, setter//构建一个至少拥有getter,scope属性的对象
-        if(type == "get"){//getter必然存在
-            getter = val;
-        }else if(type == "setget"){
-            getter = val.getter;
-            setter = val.setter;
-            host = val.scope || host;
-        }
+    function convertToCombiningAccessor( key, val, host){
+        var //构建一个至少拥有getter,scope属性的对象
+        getter = val.getter,
+        setter = val.setter;
+        host = val.scope || host;
         function accessor( neo ){
             if( bridge[ expando ] ){
                 //收集订阅了它的访问器,以便它的值改变时,通知它们更新自身
@@ -292,8 +285,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 for(var i = 0, visitor; visitor = visitors[i++];){
                     visitor(method, arguments);
                 }
+                updateSubscribers(accessor)
             }
         });
+        accessor.clear = function(){
+            while(accessor.length){
+                accessor.shift()
+            }
+
+        }
         accessor.removeAt = function(index){//移除指定索引上的元素
             accessor.splice(index, 1);
         }
@@ -305,7 +305,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             accessor.removeAt(index);
         }
         accessor[ subscribers ] = accessor[ subscribers ] || [];
-        accessor.toString =  function(){
+        accessor.toString = accessor.valueOf = function(){
             if( bridge[ expando ] ){
                 $.Array.ensure( accessor[ subscribers ], bridge[ expando ] );
             }
@@ -332,7 +332,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 val = visitor
             }
             if(typeof command == "function"){
-                val = command(val)
+                val = command(val);
             }
             if( !accessor.$uuid ){
                 delete bridge[ expando ];
@@ -448,14 +448,17 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         value:{
             init: function(node, timeoutID, accessor){
                 if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
-                    $(node).on("mouseenter focus",function(){
-                        timeoutID = setInterval(function(){
-                            accessor(node.value);
-                        },50)
-                    });
-                    $(node).on("mouseleave blur",function(){
-                        clearInterval(timeoutID);
-                    });
+                    if(typeof accessor == "function"){
+                        $(node).on("mouseenter focus",function(){
+                            timeoutID = setInterval(function(){
+                                accessor(node.value);
+                            },50)
+                        });
+                        $(node).on("mouseleave blur",function(){
+                            clearInterval(timeoutID);
+                        });
+                    }
+                  
                 }
             },
             update: function( node, val ){
@@ -511,6 +514,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         },
         display: {//根据传入值决定是显示还是隐藏
             update: function( node, val ){
+                val = typeof val == "function" ? val() : val;
                 $(node).toggle( !!val )
             }
         },
@@ -597,8 +601,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }
                 if( code < 0  && val ){                    //处理each 绑定
                     var fragments = accessor.fragments;
-                    if(!val.length){                    //如果对应集合为空,那么视图中的节点要移出DOM树
-                        fragments[0].recover();
+                    if(!val.length ){                    //如果对应集合为空,那么视图中的节点要移出DOM树
+                        
+                        fragments[0]&&  fragments[0].recover();
                         return
                     }
                     for( var i = 0, el ; el = fragments[i]; i++){

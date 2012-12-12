@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="mass.js">  </script>
+        <script type="text/javascript">
+            $.config.level = 6
+            require("avalon,ready", function($) {
+                var VM = $.ViewModel({
+                    detailsEnabled: false,
+                    enableDetails: function() {
+                        VM.detailsEnabled(true);
+                    },
+                    disableDetails: function() {
+                        VM.detailsEnabled(false);
+                    },
+                    people: [
+                        { firstName: 'Bert', lastName: 'Bertington' },
+                        { firstName: 'Charles', lastName: 'Charlesforth' },
+                        { firstName: 'Denise', lastName: 'Dentiste' }
+                    ],
+                    firstName: "清风", //firstName与lastName是这两个属性不可分割，因此使用原子监控者
+                    lastName: "火羽",
+                    fullName: { //fullName的值是通过firstName与lastName计算出来，依赖于它们，因此使用依赖监控者
+                        setter: function(val) {
+                            var arr = val.split(" ")
+                            this.firstName(arr[0])
+                            this.lastName(arr[1]);
+                        },
+                        getter: function() { //依赖监控者在定义时表现为一个拥有setter,getter的对象或是一个函数
+                            return this.firstName() + " " + this.lastName()
+                        }
+                    }
+                });
+                $.applyBindings(VM)
+            })
+
+        </script> 
+
+
+    </head>
+    <body>
+        <p>
+            firstName: <input data-value="firstName"/>
+        </p>
+        <p>
+            lastName: <input data-value="lastName"/>
+        </p>
+        <p>
+            fullName: <strong data-text="fullName"></strong>
+        </p>
+
+        <div>
+            <div data-on-mouseover="enableDetails" data-on-mouseout="disableDetails" >
+                Mouse over me
+            </div>
+            <div data-display="detailsEnabled">
+                Details
+            </div>
+        </div>
+        <div data-class="classes | log">
+            测试class绑定,可以同时操作多个类名,classes为一个对象
+        </div>
+        <table>
+            <thead>
+                <tr><th>First name</th><th>Last name</th></tr>
+            </thead>
+            <tbody data-each-p="people">
+                <tr>
+                    <td data-text="p.firstName"></td>
+                    <td data-text="p.lastName"></td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

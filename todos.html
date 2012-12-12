@@ -1,0 +1,124 @@
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <link rel="stylesheet" href="todos.css"/>
+        <script src="mass.js">  </script>
+        <script type="text/javascript">
+            $.config.level = 6
+            require("avalon,ready", function($) {
+                var VM = $.ViewModel({
+                    posts: [
+                        //                        {
+                        //                            title:"xxx"
+                        //                        },
+                        //                        {
+                        //                            title:"444"
+                        //                        }
+                    ],
+                    remaining: 0  ,
+                    addPost: function(e){
+                        if(this.value && e.keyCode == 13){
+                            VM.posts.push({
+                                title: this.value
+                            })
+                            this.value = "";
+                        }
+                    },
+                    leftPosts: {
+                        getter: function(){
+                            String(this.posts)
+                            var len = this.posts.length
+                            return "<b>" + len +"</b>" + (len ==1 ?  "item" : "items") +"left"
+                        }
+                    },
+                    removePost: function(){
+                        var index = $("#main .destroy").index(this)
+                        if(index != -1){
+                            VM.posts.removeAt(index)
+                        }
+                    },
+                    clear: function(){
+                        VM.posts.clear();
+                    },
+                    edit: function() {
+                        $(this).addClass("editing").siblings().removeClass("editing")
+                        $(this).find(".edit").focus();
+                    },
+                    show: {
+                        getter: function(){
+                            String(this.posts)
+                            return this.posts.length;
+                        }
+                    },
+                    checkAll: function(){
+                        $(".toggle").attr("checked", this.checked)
+                    },
+                    togglePost: function(){
+                        var len =  VM.posts.length
+                        if(this.checked ){
+                            VM.remaining(len - 1)
+                        }else{
+                            VM.remaining(len + 1)
+                        }
+                
+                        this.parentNode.parentNode.className = this.checked ? "done" :""
+                    }
+                });
+                $.applyBindings(VM)
+              
+            })
+
+        </script> 
+
+    </head>
+    <body>
+        <div id="todoapp">
+
+            <header>
+                <h1>Todos</h1>
+                <input id="new-todo" type="text" placeholder="What needs to be done?" data-on-keypress="addPost">
+            </header>
+
+            <section id="main" data-display="show">
+                <input id="toggle-all" type="checkbox" data-on-click="checkAll">
+                <label for="toggle-all">Mark all as complete</label>
+                <ul id="todo-list" data-each-post="posts">
+                    <li data-on-dblclick="edit">
+                        <div class="view">
+                            <input class="toggle" type="checkbox" data-on-click="togglePost"  />
+                            <label data-text="post.title"></label>
+                            <a class="destroy" data-on-click="removePost"></a>
+                        </div>
+                        <input class="edit" type="text" data-value="post.title" />
+                    </li>
+                </ul>
+            </section>
+
+            <footer data-display="show">
+                <a id="clear-completed" data-on-click="clear">Clear completed</a>
+                <div id="todo-count" data-html="leftPosts">
+
+                </div>
+            </footer>
+
+        </div>
+
+        <div id="instructions">
+            Double-click to edit a todo.
+        </div>
+
+        <div id="credits">
+            Created by
+            <br />
+            <a href="http://jgn.me/">J&eacute;r&ocirc;me Gravel-Niquet</a>.
+            <br />Rewritten by: <a href="http://addyosmani.github.com/todomvc">TodoMVC</a>.
+        </div>
+
+    </body>
+</html>
