@@ -245,7 +245,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             values[ index ] = $._data( elem, "olddisplay" );
             status[ index ] = isHidden(elem) 
             if( !values[ index ] ){
-                values[ index ] =  status[index] ? defaultDisplay(elem.nodeName): 
+                values[ index ] =  status[index] ? $.parseDisplay(elem.nodeName): 
                 getter(elem, "display");
                 $._data( elem, "olddisplay", values[ index ])
             }
@@ -257,6 +257,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
                 continue;
             }
             show = show === -1 ? !status[index] : show
+           
             elem.style.display = show ?  values[ index ] : "none";
         }
         return nodes;
