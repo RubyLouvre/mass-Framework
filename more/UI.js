@@ -1282,3 +1282,685 @@ function makeRandArr(min, max) {
 }
 
 
+是的
+GZhang<otakustay@gmail.com> 15:31:18
+然后在with里面，你用eval弄个函数定义，再用eval弄个函数表达式
+一丝(一淘)(50167214) 15:31:23
+ 我不淹没你，我阉割你
+GZhang<otakustay@gmail.com> 15:31:25
+然后他们的执行结果，这个你很容易构造出来
+GZhang<otakustay@gmail.com> 15:31:34
+所有浏览器，都和标准不一样
+GZhang<otakustay@gmail.com> 15:31:39
+你妹打不开邮箱！
+一丝(一淘)(50167214) 15:31:42
+JS 敞开的说
+winter(shaofeic)<csf178@163.com> 15:31:53
+ 灰酱又威武了
+ 
+GZhang<otakustay@gmail.com> 15:32:21
+只有eval才能让函数表达式延迟出现，只有with和catch能构造出VE和LE不同的情况
+winter(shaofeic)<csf178@163.com> 15:32:43
+ 灰酱试试看catch
+ 
+GZhang<otakustay@gmail.com> 15:33:00
+试了，一个结果
+winter(shaofeic)<csf178@163.com> 15:33:38
+赞哦
+ 
+kennyluck<kennyluckco@gmail.com> 15:33:53
+求解惑，所以規範是哪裡要改，假如要符合實現的話？
+GZhang<otakustay@gmail.com> 15:33:56
+var x = 1;
+try { throw new Error(); }
+catch (x) {
+eval('function a(){alert(x)}')
+eval('var b = function(){alert(x)}')
+}
+a();
+b();
+
+winter(shaofeic)<csf178@163.com> 15:34:39
+好棒 
+GZhang<otakustay@gmail.com> 15:34:45
+13章
+Function Expression的production过程
+Pass in the LexicalEnvironment
+改成
+VariableEnvironment
+一丝(一淘)(50167214) 15:34:58
+真棒！
+GZhang<otakustay@gmail.com> 15:35:00
+哦不是，是Function Definition改，说反了
+GZhang<otakustay@gmail.com> 15:35:19
+13章
+Function Definition的production过程
+Pass in the VariableEnvironment
+改成
+LexicalEnvironment
+winter(shaofeic)<csf178@163.com> 15:35:30
+所以你要给es discuss发信？ 
+GZhang<otakustay@gmail.com> 15:35:54
+我发信想问问，为什么设计上Definition用VE，Expression用LE，出于什么考虑
+qMi(525663423) 15:44:01
+LexicalEnvironment就是那个让我容易走神的词
+qMi(525663423) 15:44:09
+你上次分享的时候，前面我思路都跟得上
+qMi(525663423) 15:44:17
+到这里以后，我就彻底走神了
+GZhang<otakustay@gmail.com> 15:44:29
+这词太高深了，词法……
+GZhang<otakustay@gmail.com> 15:45:41
+行，具体的内容发到中文兴趣小组了
+kennyluck<kennyluckco@gmail.com> 15:53:48
+ 
+kennyluck<kennyluckco@gmail.com> 15:53:58
+努力理解中…
+winter(shaofeic)<csf178@163.com> 16:10:03
+LE和VE缩写比较好
+ 
+winter(shaofeic)<csf178@163.com> 16:10:08
+太长了 
+GZhang<otakustay@gmail.com> 16:10:18
+好吧，果然是缩写好
+winter(shaofeic)<csf178@163.com> 16:10:34
+或者 LexicalE9t 
+winter(shaofeic)<csf178@163.com> 16:10:42
+VariableE9t 
+winter(shaofeic)<csf178@163.com> 16:11:00
+说起来我刚刚入了 a11y.org.cn啊 哈哈哈 
+GZhang<otakustay@gmail.com> 16:11:26
+- -
+Ray.Lei(81783959) 16:13:33
+ally?
+Ray.Lei(81783959) 16:13:38
+这是什么？
+一丝(一淘)(50167214) 16:13:58
+ 
+winter(shaofeic)<csf178@163.com> 16:14:10
+accessbility 
+一丝(一淘)(50167214) 16:14:29
+《中国无障碍联盟》
+winter(shaofeic)<csf178@163.com> 16:14:57
+在黄老师和黄老师的关照下 
+winter(shaofeic)<csf178@163.com> 16:15:17
+我指stone君和梅大大 以及我司的小马大大等人的关注下 
+一丝(一淘)(50167214) 16:15:23
+还有程老湿
+JUSTICE(33841623) 16:11:52
+还有一老师
+winter(shaofeic)<csf178@163.com> 16:15:34
+由一丝等同学努力成立的组织 
+winter(shaofeic)<csf178@163.com> 16:15:44
+还没成立完 
+winter(shaofeic)<csf178@163.com> 16:15:49
+努力成立中 
+winter(shaofeic)<csf178@163.com> 16:15:56
+持续成立中 
+一丝(一淘)(50167214) 16:16:00
+winter 你这是赤裸裸的广告
+winter(shaofeic)<csf178@163.com> 16:16:20
+说回VE和LE的问题 
+winter(shaofeic)<csf178@163.com> 16:16:26
+想想咋普及吧 
+GZhang<otakustay@gmail.com> 16:16:36
+就叫LE和VE啊
+winter(shaofeic)<csf178@163.com> 16:16:46
+还有AO 
+winter(shaofeic)<csf178@163.com> 16:17:01
+完全讲不明白 
+winter(shaofeic)<csf178@163.com> 16:17:02
+确实我从来没讲明白过这俩玩意 
+GZhang<otakustay@gmail.com> 16:17:12
+没讲明白过+1
+教主Franky(449666) 16:19:02
+所以我就说ES3好么.
+教主Franky(449666) 16:19:06
+这部分
+一丝(一淘)(50167214) 16:19:15
+a11y 好容易看成 ally
+kennyluck<kennyluckco@gmail.com> 16:22:39
+GZhang:  15:32:21
+只有eval才能让函数表达式延迟出现，只有with和catch能构造出VE和LE不同的情况
+
+你這是說函數宣告嗎？函數表達式不是本來就會延遲出現？
+所以你的例子我沒弄錯的話，應該是和 
+
+ function test() {
+        var x = 1;
+        var o = { x: 2 };
+        with (o) {
+            eval('function foo() { console.log(x); }');
+            var bar = function() { console.log(x); };
+        }
+        foo();
+        bar();
+    }
+    test();
+
+沒有分別對吧？（學習中，請不要計較）
+教主Franky(449666) 16:28:53
+为啥函数表达式 和 函数定义 来分类的?
+教主Franky(449666) 16:29:08
+不是 函数声明 和 函数表达式  属于两种函数定义的方式么?
+GZhang<otakustay@gmail.com> 16:29:10
+对，没区别
+kennyluck<kennyluckco@gmail.com> 16:29:09
+s/請不要計較/請指點/
+GZhang<otakustay@gmail.com> 16:29:24
+好吧，教主你是叫函数声明的
+GZhang<otakustay@gmail.com> 16:29:27
+我是叫它函数定义的- -
+教主Franky(449666) 16:29:33
+不对啊 
+GZhang<otakustay@gmail.com> 16:29:44
+function definition嘛，定义……
+教主Franky(449666) 16:29:53
+function definition  是某章节标题吧?
+GZhang<otakustay@gmail.com> 16:30:17
+好吧，TMD我脑子坏掉了
+GZhang<otakustay@gmail.com> 16:30:21
+那东西叫function declaration
+教主Franky(449666) 16:31:38
+ 额 
+kennyluck<kennyluckco@gmail.com> 16:32:05
+嗯，反正我終於比較了解這個神奇的問題了… 雖然我也不懂 VE/LE…
+树残由尔□(180669793) 16:32:23
+好牛
+GZhang<otakustay@gmail.com> 16:33:25
+教主也看看这问题？
+教主Franky(449666) 16:33:45
+嗯 看看
+GZhang<otakustay@gmail.com> 16:34:13
+我就发中文兴趣小组了，其实对平时开发完全没影响就是觉得有趣
+教主Franky(449666) 16:35:38
+我去看下你说的
+bird(jzoo)<zjcli@vip.qq.com> 16:37:28
+灰哥 920用的怎么样 还想要wp手机
+GZhang<otakustay@gmail.com> 16:37:44
+很不错，应用不多，你要是想玩游戏啥的就放弃
+GZhang<otakustay@gmail.com> 16:37:52
+另外会死机，会重启，有很多奇怪的小问题
+bird(jzoo)<zjcli@vip.qq.com> 16:37:57
+。。
+bird(jzoo)<zjcli@vip.qq.com> 16:38:09
+好稀罕metro的界面
+GZhang<otakustay@gmail.com> 16:38:18
+确实，非常舒服
+摸掰心晴大大(79194034) 16:38:25
+我觉得VE和LE的区别 可能就是LE是需要另外解析的
+bird(jzoo)<zjcli@vip.qq.com> 16:38:32
+简单 
+GZhang<otakustay@gmail.com> 16:38:45
+为啥LE需要解析……
+GZhang<otakustay@gmail.com> 16:38:55
+不都是从EC里拿么- -
+教主Franky(449666) 16:39:10
+hotmail打不开呢. 等会吧 擦
+摸掰心晴大大(79194034) 16:39:16
+我没读过规范 只是猜测。。
+GZhang<otakustay@gmail.com> 16:39:23
+你用outlook.com打开会更快- -
+abcd(1730956117) 16:40:48
+不懂ve、le
+Hodor(331492653) 16:40:46
+winter大，你的ecmascript.cn有一些小错漏
+bird(jzoo)<zjcli@vip.qq.com> 16:40:56
+今天刚看到nokia 920 宣传片， 照相功能是亮点
+GZhang<otakustay@gmail.com> 16:41:14
+照相在白天是准2流水平，在晚上是超1流水平，你做好心理准备
+abcd(1730956117) 16:41:24
+哈哈
+bird(jzoo)<zjcli@vip.qq.com> 16:41:34
+这是为啥
+bird(jzoo)<zjcli@vip.qq.com> 16:43:27
+灰哥居然用黄色啊 口味好重的样子~~ 
+GZhang<otakustay@gmail.com> 16:43:48
+亮骚啊
+bird(jzoo)<zjcli@vip.qq.com> 16:44:00
++1 
+GZhang<otakustay@gmail.com> 16:44:14
+920的镜头强在2.0的大光圈和防抖所以晚上进光亮大，但白天大家都不担心进光量的时候，2.0就拖累画质了
+bird(jzoo)<zjcli@vip.qq.com> 16:44:21
+坐等降价
+bird(jzoo)<zjcli@vip.qq.com> 16:45:06
+你在哪里买的 能给我看看吗
+bird(jzoo)<zjcli@vip.qq.com> 16:45:12
+链接
+GZhang<otakustay@gmail.com> 16:46:16
+http://item.taobao.com/item.htm?spm=a1z09.5.0.43.TnNH7d&id=17335199141
+AKI(470378842) 16:53:56
+- -之前看过一个评测。。。还好吧
+AKI(470378842) 16:54:09
+夜间确实很nb
+GZhang<otakustay@gmail.com> 16:54:37
+夜间是条龙，白天是只虫
+GZhang<otakustay@gmail.com> 16:54:52
+以上来自一个玩了5年单反的人的亲身体验
+bird(jzoo)<zjcli@vip.qq.com> 16:55:27
+ 
+教主Franky(449666) 16:58:41
+看完了
+教主Franky(449666) 16:58:43
+在`with`语句里面，会有一个新的**LexicalEnvironment**产生（是个object environment），而**VariableEnvironment**保持不变，这个新的**LexicalEnvironment**就叫它`innerEnv`。
+教主Franky(449666) 16:58:49
+这个说法有待商榷吧
+教主Franky(449666) 16:59:14
+ eval里会创建 新的词法环境 只有严格模式啊>?
+GZhang<otakustay@gmail.com> 16:59:42
+with会创建啊，和eval无关
+教主Franky(449666) 16:59:43
+额 我看漏了 说的是with
+教主Franky(449666) 16:59:45
+shit
+教主Franky(449666) 16:59:48
+我继续
+GZhang<otakustay@gmail.com> 16:59:50
+eval只会共享外层的……
+摸掰心晴大大(79194034) 17:01:18
+我看到的解释是这个
+摸掰心晴大大(79194034) 17:03:30
+会产生新scope的就认为是LexicalEnvironment @Frank 大大？
+bird(jzoo)<zjcli@vip.qq.com> 17:04:20
+我认为LE = copy（VE） 不过with，catch会改变LE吧
+GZhang<otakustay@gmail.com> 17:04:29
+不一定，也有可能是VariableEnvironment，比如进一个函数的时候……
+GZhang<otakustay@gmail.com> 17:04:34
+LE = reference(VE)，不是copy
+bird(jzoo)<zjcli@vip.qq.com> 17:04:42
+嗯 对
+bird(jzoo)<zjcli@vip.qq.com> 17:04:54
+咦
+bird(jzoo)<zjcli@vip.qq.com> 17:05:19
+既然是引用，岂不是LE 变了 VE也变？
+GZhang<otakustay@gmail.com> 17:05:35
+no
+GZhang<otakustay@gmail.com> 17:05:48
+var a = {};
+var b  =a;
+a = 3;
+b不会变
+winter(shaofeic)<csf178@163.com> 17:05:56
+LE和VE有可能有 共同的"核" 
+winter(shaofeic)<csf178@163.com> 17:06:08
+通常它们公用VO为自己的核 
+winter(shaofeic)<csf178@163.com> 17:06:27
+但是with里面 LE的"核"变了 
+winter(shaofeic)<csf178@163.com> 17:06:30
+不再是VO了 
+bird(jzoo)<zjcli@vip.qq.com> 17:07:20
+。。 还真是
+教主Franky(449666) 17:08:33
+看完了
+教主Franky(449666) 17:08:38
+似乎标准没错啊
+教主Franky(449666) 17:09:39
+with创建一个新的词法环境, 这个此法环境又使用一个新的 对象环境记录 
+教主Franky(449666) 17:10:05
+然后都是2 不是对的么?
+GZhang<otakustay@gmail.com> 17:10:43
+with有了一个新的词法环境
+GZhang<otakustay@gmail.com> 17:11:14
+然后问题就在于，函数声明用的是外层的变量环境，函数表达式用的是外层的词法环境
+那么理论上，这2个函数的[[Scope]]是不一样的，取到的x也应该不一样
+是这样的么？
+教主Franky(449666) 17:12:19
+哦 我终于懂了你的意思
+教主Franky(449666) 17:12:28
+我去翻下原文
+摸掰心晴大大(79194034) 17:16:58
+var foo = "abc";
+    with({ foo: "bar" }) {
+       function f() {
+           console.log(foo);
+       }
+       f();
+    }
+这个例子吧？
+摸掰心晴大大(79194034) 17:17:29
+看到说spidermonkey返还bar，V8返回abc
+摸掰心晴大大(79194034) 17:17:39
+V8更接近规范
+GZhang<otakustay@gmail.com> 17:17:42
+这个例子没用，因为函数声明会被提前，所以肯定返回'abc'才对
+GZhang<otakustay@gmail.com> 17:17:55
+FF是BUG（他自己说是feature），叫conditional function declaration
+教主Franky(449666) 17:18:47
+看完了
+教主Franky(449666) 17:19:18
+FF 不用看的
+bird(jzoo)<zjcli@vip.qq.com> 17:19:26
+var a = 10;
+ 
+// FD
+function foo() {
+  console.log(a);
+}
+ 
+with ({a: 20}) {
+ 
+  // FE
+  var bar = function () {
+    console.log(a);
+  };
+ 
+  foo(); // 10 VE
+  bar(); // 20 LE
+ 
+}
+ 
+foo(); // 10
+bar(); // 20
+教主Franky(449666) 17:19:26
+他多了一个语法 所以不考虑
+教主Franky(449666) 17:19:37
+阿灰你的问题我完全 catch到了
+GZhang<otakustay@gmail.com> 17:19:53
+这个问题描述应该是正确的吧……我想了N久
+abcd(1730956117) 17:20:03
+纠结这个干嘛，就是说不清的东西
+GZhang<otakustay@gmail.com> 17:20:06
+别说得我的问题是个Error一样catch住啊- -
+教主Franky(449666) 17:20:26
+我觉得这个问题 应该在于 with 没说 它的变量环境是同自己新造的 词法环境  还是用它外层的?
+abcd(1730956117) 17:20:54
+var foo = "abc";
+    with({ foo: "bar" }) {
+       function f() {
+           console.log(foo);
+       }
+       f();
+    }
+GZhang<otakustay@gmail.com> 17:20:58
+with显然用外层的啊，不然var就不能在entering function code的时候扫描了……
+abcd(1730956117) 17:21:02
+这个照ecma标准看，是语法错误
+GZhang<otakustay@gmail.com> 17:21:16
+怎么就是语法错误了……
+abcd(1730956117) 17:21:29
+with块内出现了函数声明
+abcd(1730956117) 17:21:36
+只允许语句
+教主Franky(449666) 17:22:14
+啥时候有这条规定的?
+教主Franky(449666) 17:22:22
+我咋没看到过.
+GZhang<otakustay@gmail.com> 17:22:21
+ 
+教主Franky(449666) 17:22:44
+完全没问题啊
+教主Franky(449666) 17:22:54
+它是一个 block statement 里面出现啥都行啊
+GZhang<otakustay@gmail.com> 17:23:26
+ 
+abcd(1730956117) 17:23:25
+ 
+GZhang<otakustay@gmail.com> 17:23:31
+ 
+abcd(1730956117) 17:23:56
+ 
+GZhang<otakustay@gmail.com> 17:23:57
+除非你说block里面不能有function存在
+abcd(1730956117) 17:24:27
+ 
+教主Franky(449666) 17:24:35
+...
+GZhang<otakustay@gmail.com> 17:24:57
+但是statement里也不包含function expression，何解呢
+winter(shaofeic)<csf178@163.com> 17:25:18
+灰酱你这个就不对了 
+winter(shaofeic)<csf178@163.com> 17:25:32
+问题在eval的代码可没说不能包含声明啊 
+winter(shaofeic)<csf178@163.com> 17:25:45
+eval的意思 不是"原地执行代码" 
+GZhang<otakustay@gmail.com> 17:25:45
+嗯，eval肯定可以
+哦 这样啊  
+winter(shaofeic)<csf178@163.com> 17:26:21
+好吧  
+abcd(1730956117) 17:26:26
+？ 
+winter(shaofeic)<csf178@163.com> 17:26:28
+话题变了 我没注意 囧  
+教主Franky(449666) 17:26:30
+乱套了啊 
+GZhang<otakustay@gmail.com> 17:26:32
+关于if之类的里面出现函数声明是不是符合语法 
+GZhang<otakustay@gmail.com> 17:26:36
+我现在也觉得似乎不符合 
+winter(shaofeic)<csf178@163.com> 17:26:37
+abcd的代码是语法错误  
+abcd(1730956117) 17:26:49
+虽然浏览器都允许 
+winter(shaofeic)<csf178@163.com> 17:26:50
+但是因为IE这个傻鸟浏览器支持了  
+abcd(1730956117) 17:26:53
+但不符合ecma 
+winter(shaofeic)<csf178@163.com> 17:27:01
+所以大家都不得不抄来  
+abcd(1730956117) 17:27:05
+这种sb写法，不要用 
+winter(shaofeic)<csf178@163.com> 17:27:19
+嗯 +1  
+GZhang<otakustay@gmail.com> 17:27:58
+不要用是一方面，但这个群似乎可以在实践之外，标准层面来谈谈问题？ 
+教主Franky(449666) 17:28:08
+嗯 abcd 是对的 
+abcd(1730956117) 17:28:10
+这个不标准 
+教主Franky(449666) 17:28:22
+根据产生式来看 确实  with 里不能出现函数声明.. 
+GZhang<otakustay@gmail.com> 17:28:36
+但是用eval放在那，也不能出现吗？ 
+GZhang<otakustay@gmail.com> 17:28:45
+用eval又不可能搞成语法错误来 
+abcd(1730956117) 17:28:49
+eval，就不好说了 
+教主Franky(449666) 17:28:53
+eval 肯定没问题啊 
+abcd(1730956117) 17:28:54
+但是很怪 
+GZhang<otakustay@gmail.com> 17:29:00
+嗯，超怪 
+教主Franky(449666) 17:29:01
+eval里面出现啥都可以的 
+GZhang<otakustay@gmail.com> 17:29:05
+我觉得这种怪问题很有趣啊 
+教主Franky(449666) 17:29:09
+因为它是单独 词法 语法分析的 
+教主Franky(449666) 17:29:16
+所以和你的问题不冲突吧 
+教主Franky(449666) 17:29:18
+和你的问题 
+教主Franky(449666) 17:29:25
+你的问题 我catch到了 
+GZhang<otakustay@gmail.com> 17:29:40
+嗯 
+教主Franky(449666) 17:29:40
+但是建议把邮件里函数声明改成表达式 
+GZhang<otakustay@gmail.com> 17:29:48
+邮件已经发了TQT 
+教主Franky(449666) 17:29:48
+额 擦 说错了 我也糊涂了 
+教主Franky(449666) 17:29:55
+吧函数定义改成函数声明... 
+教主Franky(449666) 17:29:56
+嗯 
+GZhang<otakustay@gmail.com> 17:30:19
+教主怎么看这问题，浏览器全错还是标准没必要这么搞？ 
+教主Franky(449666) 17:30:33
+你的问题我没法回答. 
+教主Franky(449666) 17:30:42
+我们只能根据直觉去看哪个更合理 
+abcd(1730956117) 17:31:07
+有问题的地方多了，没必要去碰 
+GZhang<otakustay@gmail.com> 17:31:19
+嗯，我的直觉是浏览器的实现很正常…… 
+GZhang<otakustay@gmail.com> 17:31:35
+而且利于优化，比如词法环境的扁平化 
+GZhang<otakustay@gmail.com> 17:31:53
+要是特么扁平完了，碰到个函数定义还得展开来把上级的挖出来…… 
+教主Franky(449666) 17:32:38
+这里浏览器实现的很一致的话, 我有怀疑我们哪里理解有误差 
+abcd(1730956117) 17:32:59
+不用eval、with、Function，才能扁平化 
+教主Franky(449666) 17:33:08
+我一直很讨厌 ES5的这部分内容 就是因为有些情况我不确定我理解的是正确的  太绕了 
+教主Franky(449666) 17:33:48
+抽根烟, 容我三思 
+GZhang<otakustay@gmail.com> 17:34:16
+确实要三思- -用ES3解释一次也行，但还是这问题 
+教主Franky(449666) 17:39:25
+ES3 解释不了的 
+教主Franky(449666) 17:39:34
+它关于这个细节的定义是空白的 
+bird(jzoo)<zjcli@vip.qq.com> 17:39:36
+插一句啊 你们说的扁平化是个啥子意思呀 
+abcd(1730956117) 17:40:29
+非扁平化，就是每一个函数内的变量都有个表，执行到一个函数的时候，会从内向外挨个找。 
+abcd(1730956117) 17:40:51
+如果扁平化，每一个环境的变量都可以在一个列表里找到 
+abcd(1730956117) 17:40:53
+不用分层了 
+教主Franky(449666) 17:41:19
+ 就是不用作用于链查找了 
+教主Franky(449666) 17:41:52
+扁平化是优化, 但是ES 并不是这样定义的.它需要你去查找责任连. 但是 又额外的说. 这部分 你可以自己看着办 并不一定非要这样实现的样子 
+教主Franky(449666) 17:42:03
+我刚才在想的是 
+bird(jzoo)<zjcli@vip.qq.com> 17:42:06
+哦 那何时需要扁平化呢 是谁操心的呢 
+abcd(1730956117) 17:42:23
+不写js引擎，不需要关心 
+bird(jzoo)<zjcli@vip.qq.com> 17:42:30
+哦  
+with(expression) {
+    var a = 1;  
+}
+如果 statement里不允许 varStatement 的话 就说得通了 
+教主Franky(449666) 17:42:47
+但是 却是支持的
+教主Franky(449666) 17:42:51
+这就傻逼了
+abcd(1730956117) 17:43:07
+var在里面和外面，是一样的
+abcd(1730956117) 17:43:20
+with(expr)a=1; var a; 一样
+教主Franky(449666) 17:43:33
+就像阿灰说的.  with 里的 变量声明要在 with 所在执行环境 进行初始化绑定. 必然要用到 变量环境
+abcd(1730956117) 17:43:53
+变量，只是声明下，在这个函数内存在
+abcd(1730956117) 17:44:03
+就这一个作用
+教主Franky(449666) 17:44:09
+这就导致  with statement内不必须 沿用 其变量对象 而不是新建一个
+教主Franky(449666) 17:44:53
+所以 可以确定 eval 内的  变量环境 和 词法环境是两个不同的的东西了
+教主Franky(449666) 17:45:03
+所以可以确定 是ECMAScript 的bug 了
+abcd(1730956117) 17:45:17
+eval，相当于 画中画
+abcd(1730956117) 17:45:33
+这个肯定比较乱。 我也没管过
+教主Franky(449666) 17:45:44
+阿灰 给 es 写信吧 可以写了
+GZhang<otakustay@gmail.com> 17:45:48
+eval是个神器
+abcd(1730956117) 17:46:00
+我没怎么纠结过eval、with
+abcd(1730956117) 17:46:08
+用的时候没有不正常过
+GZhang<otakustay@gmail.com> 17:46:15
+我也没有不正常过啊
+树残由尔□(180669793) 17:46:17
+with 不是不建议用么
+abcd(1730956117) 17:46:22
+知道可能呢存在的坑不去踩
+GZhang<otakustay@gmail.com> 17:46:26
+我竟然能在正常用了这么久后，想出个不正常的案例，我太TM牛了……
+树残由尔□(180669793) 17:46:43
+还可以这么夸自己的
+GZhang<otakustay@gmail.com> 17:46:43
+什么with不建议，eval不要用，都是对新手说的
+树残由尔□(180669793) 17:46:45
+牛逼
+树残由尔□(180669793) 17:46:50
+哦
+树残由尔□(180669793) 17:46:57
+我是新手
+winter(shaofeic)<csf178@163.com> 17:47:12
+灰酱威武 
+bird(jzoo)<zjcli@vip.qq.com> 17:51:30
+哈哈  
+树残由尔□(180669793) 17:51:51
+灰大 收我为徒吧
+小黄鱼--上海(510876239) 17:54:23
+灰大，计子黑你
+GZhang<otakustay@gmail.com> 17:54:31
+黑吧，我受了
+小黄鱼--上海(510876239) 17:54:44
+ 
+教主Franky(449666) 17:56:39
+一个好消息是..Opear12 的结果是俩1 
+教主Franky(449666) 17:56:51
+这算是惊喜么
+教主Franky(449666) 17:57:56
+这个消息 阿灰一定高兴了 ...
+winter(shaofeic)<csf178@163.com> 17:58:03
+我只是引述了灰酱的话罢了 
+GZhang<otakustay@gmail.com> 17:58:09
+太TM惊喜了！
+教主Franky(449666) 17:58:22
+Safair6 也是 俩2 
+教主Franky(449666) 17:58:27
+IE10 你看了没有?
+教主Franky(449666) 17:59:58
+IE10 也是俩2
+GZhang<otakustay@gmail.com> 17:59:58
+两2
+GZhang<otakustay@gmail.com> 18:00:17
+这世界怎么这么2呢
+教主Franky(449666) 18:00:36
+主要是我们没法确认是我们读错了 还是 浏览器都不按标准实现
+教主Franky(449666) 18:00:45
+因为实际上有更2的事情浏览器都会实现错误
+教主Franky(449666) 18:00:55
+我们担心的是 为啥浏览器实现的这么一致.
+GZhang<otakustay@gmail.com> 18:01:40
+嗯，所以最好es-discuss那个邮件能发出去
+教主Franky(449666) 18:04:46
+问问看吧
+kennyluck<kennyluckco@gmail.com> 18:05:21
+Franky:  17:28:09
+嗯 abcd 是对的
+abcd:  17:28:10
+这个不标准
+
+但是在 ES6 好像就標準了：
+
+ 
+ 
+winter(shaofeic)<csf178@163.com> 18:06:56
+ES6啊 不好说呢 
+winter(shaofeic)<csf178@163.com> 18:07:06
+ES6现在还非常不稳定呢 
+kennyluck<kennyluckco@gmail.com> 18:07:57
+至少要給規範找錯的話，看新標準比較好吧。不然也有人會說：「不想改 5.1」之類的。
+教主Franky(449666) 18:09:44
+嗯 不想改5.1 这种理由我们以前遇到过了吧… 无敌的理由
+kennyluck<kennyluckco@gmail.com> 18:12:30
+主要是大家都在關注 ES6 啊，要改也是改 ES6，為什麼要去挑戰某些標準組織不想改舊版本標準的程序？
+教主Franky(449666) 18:13:22
+我们来讨论个话题 
+教主Franky(449666) 18:13:36
+什么情况下 词法环境会改变?
+教主Franky(449666) 18:20:58
+??? 人呢 ...
+一丝(一淘)(50167214) 18:21:05
+恭喜你们 讨论一下午 es
+一丝(一淘)(50167214) 18:21:08
+ 
+树残由尔□(180669793) 18:21:19
+一丝
+树残由尔□(180669793) 18:21:29
+=== es

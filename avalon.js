@@ -299,7 +299,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         accessor.remove = function(item){//移除第一个等于给定值的元素
             var array = accessor.map(function(el){
-                return el();
+           
+                return typeof el == "function" ? el() : el
             })
             var index = array.indexOf(item);
             accessor.removeAt(index);

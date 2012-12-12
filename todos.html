@@ -13,15 +13,8 @@ and open the template in the editor.
             $.config.level = 6
             require("avalon,ready", function($) {
                 var VM = $.ViewModel({
-                    posts: [
-                        //                        {
-                        //                            title:"xxx"
-                        //                        },
-                        //                        {
-                        //                            title:"444"
-                        //                        }
-                    ],
-                    remaining: 0  ,
+                    posts: [   ],
+         
                     addPost: function(e){
                         if(this.value && e.keyCode == 13){
                             VM.posts.push({
@@ -30,6 +23,7 @@ and open the template in the editor.
                             this.value = "";
                         }
                     },
+                   
                     leftPosts: {
                         getter: function(){
                             String(this.posts)
@@ -44,7 +38,10 @@ and open the template in the editor.
                         }
                     },
                     clear: function(){
-                        VM.posts.clear();
+                        for(var i = 0,el; el = VM.done[i++];){
+                            VM.posts.remove(el)
+                        }
+                      //  VM.done.clear();
                     },
                     edit: function() {
                         $(this).addClass("editing").siblings().removeClass("editing")
@@ -59,17 +56,19 @@ and open the template in the editor.
                     checkAll: function(){
                         $(".toggle").attr("checked", this.checked)
                     },
-                    togglePost: function(){
-                        var len =  VM.posts.length
+                    togglePost: function(){        
+                        var data = VM.posts[$("#main .toggle").index(this)];
+                        console.log(data)
                         if(this.checked ){
-                            VM.remaining(len - 1)
+                            VM.done.push(data)
                         }else{
-                            VM.remaining(len + 1)
+                            $.Array.remove( VM.done, data)
                         }
-                
                         this.parentNode.parentNode.className = this.checked ? "done" :""
                     }
                 });
+                VM.done = []
+                
                 $.applyBindings(VM)
               
             })
