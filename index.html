@@ -2,8 +2,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>这里的标题是可变长度，所以要求 下面的内容始终贴着标题左边对齐，而标题自身相对容器居中
-            Demo by 司徒正美</title>
+        <title>MVVM Demo by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <script src="mass.js">  </script>
         <style>
@@ -13,11 +12,17 @@
         <script>
             $.config.level = 6
             require("ready,avalon", function() {
+                $.log("2222222222222222222")
                 var VM = $.applyBindings({
                     user:{
                         name:"司徒正美",
                         title:"xxx"
                     },
+                    firstName: "xxx",
+                    lastName: "yyy",
+                    fullName: $.computed(function (){
+                        return this.firstName() +" "+ this.lastName()
+                    },["firstName","lastName"]),
                     list:[{
                             title:"aaa"
                         },
@@ -55,12 +60,21 @@
                 //                },1000)
             })
 
+
+
+
+
         </script>
     </head>
     <body id="aaa">
         <ul data-each-item="list">
             <li data-text="item.title">aaaa</li>
         </ul>
+        <div>
+            <input data-value="firstName">
+            <input data-value="lastName">
+            <span data-text="fullName"></span>
+        </div>
         <!--        <div data-each-key-value="user">
                     <p><span data-text="key"></span><span data-text="value"></span></p>
                 </div>-->

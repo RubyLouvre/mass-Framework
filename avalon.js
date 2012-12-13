@@ -31,7 +31,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     }
 
     //取得目标路径下的访问器与命令
-    function getTarget (names, accessor, fn, args){
+    function getItemByPath (names, accessor, fn, args){
         if( names ){
             if( args && args[0] === Bindings.on   ){
                 args[2] = names;
@@ -59,9 +59,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             if(!args){
                 continue
             }//通过binding, 我们可以实现数据的传递; 通过command, 我们可以实现操作的调用
-            var match = bind[1].split(/\s*\|\s*/),
-            accessor = getTarget( match[0], model ),
-            command = getTarget( match[1], model, true, args );
+            var path = bind[1].split(/\s*\|\s*/),
+            accessor = getItemByPath( path[0], model ),
+            command = getItemByPath( path[1], model, true, args );
             // $.log(accessor, 7)
             if(accessor === void 0){//accessor可能为零
                 continue
@@ -125,8 +125,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         if( list.length ){
             var safelist = list.concat();
             for(var i = 0, el; el = safelist[i++];){
-                delete el.$val;
-                el() //强制重新计算自身
+                if(typeof el == "function"){
+                    delete el.$val;
+                    el() //强制重新计算自身
+                }
             }
         }
     }
@@ -159,18 +161,21 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             case "Boolean"://属性访问器
                 return convertToPropertyAccessor( key, val, model );
             case "Function"://回调
+                if(val[expando] === expando){
+                    convertToCombiningAccessor( key, val, model )
+                    return 
+                }
+                
                 return  model[key] = val; 
             case "Array"://组合访问器
                 return  model[key] = convertToCollectionAccessor( val );
             case "Object"://转换为子VM
                 if($.isPlainObject( val )){
-                    if( $.isFunction( val.setter || val.getter ) && Object.keys(val).length <= 3  ){
-                        return convertToCombiningAccessor( key, val, model );
-                    }else{
-                        var object = model[key] || (model[key] = {} );
-                        convertToViewModel( val, object );
-                        return object
-                    }
+
+                    var object = model[key] || (model[key] = {} );
+                    convertToViewModel( val, object );
+                    return object
+  
                 }else{
                     throw err;
                 }
@@ -221,33 +226,29 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         accessor.$uuid = ++uuid;
         return completeAccessor( key, accessor, host );
     }
-    //convertToCombiningAccessor，组合访问器，是指在ViewModel定义时，值为类型为函数，或为一个拥有setter、getter函数的对象。
+    //convertToCombiningAccessor，组合访问器，是它在定义需要通过$.computed帮助生成。
     //它们是位于双向绑定链的中间层，需要依赖于其他属性访问器或组合访问器的返回值计算自己的返回值。
     //当顶层的VM改变了,通知底层的改变
     //当底层的VM改变了,通知顶层的改变
     //当中间层的VM改变,通知两端的改变
-    function convertToCombiningAccessor( key, val, host){
-        var //构建一个至少拥有getter,scope属性的对象
-        getter = val.getter,
-        setter = val.setter;
-        host = val.scope || host;
+
+    
+    function convertToCombiningAccessor( key, curry, host){
+        var args = curry(), fn = args[0], deps = args[1] || [], scope = args[2] || host;
         function accessor( neo ){
-            if( bridge[ expando ] ){
-                //收集订阅了它的访问器,以便它的值改变时,通知它们更新自身
+            if( bridge[ expando ] ){ //收集依赖于它的访问器，,以便它的值改变时,通知它们更新自身
                 $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
             }
-            var change = false;
+            var change = false
             if( arguments.length ){//写入新值
-                if( setter ){
-                    setter.apply( host, arguments );
-                }
+                fn.apply( scope, arguments );
             }else{
                 if( !("$val" in accessor) ){
                     if( !accessor.$uuid ){
                         bridge[ expando ] = accessor;
                         accessor.$uuid = ++uuid;
                     }
-                    neo = getter.call( host );
+                    neo = fn.call( scope );
                     change = true;
                     delete bridge[ expando ];
                 }
@@ -260,7 +261,23 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             return accessor.$val;
         }
+        for(var i = 0, el; el = deps[i++]; ){
+            var item = getItemByPath(el, scope);
+            if(item && item.$uuid){
+                $.Array.ensure( item[ subscribers ] , accessor );
+            }
+        }
         return completeAccessor( key, accessor, host );
+           
+    }
+    
+    $.computed = function(fn, deps, scope){
+        var args = arguments;
+        function computed(){
+            return args;
+        }
+        computed[expando] = expando;
+        return computed
     }
 
     //集合访问器，这是一个特别的数组对象， 用于一组数据进行监控与操作，当它的顺序或个数发生变化时，
@@ -356,7 +373,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         node.nodes = $.slice( node.childNodes );
         return node
     }
-    function recoverReferences(node){
+    function recoverReferences(node){//将这个动态模板所引用的节点全部移出DOM树
         if( node && Array.isArray(node.nodes)){
             for(var i = 0, el; el = node.nodes[i++];){
                 node.appendChild(el)
@@ -423,7 +440,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             recoverReferences( el );
         }
         for(i = 0; i < n; i++ ){//如果它又添加了一些新数据，将这些新数据转换成accessor
-            //将新数据封装成域
             var index = start + i
             convertToAccessor(index, models[ index ], models);
             //为这些新数据创建对应的文档碎片
@@ -533,7 +549,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     $(node).on(type, selector, callback);
                 }else{
                     $.bind(node, type, callback)
-                   // $(node).on(type, callback);
+                // $(node).on(type, callback);
                 }
             }
         },
@@ -557,18 +573,16 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 accessor.addTemplate = $.noop;
             },
             update: function( node, val, accessor ){
-                var display = node.style.display;
                 node.innerHTML = "";
                 accessor.templates = []
-                //http://lives.iteye.com/blog/966217
                 val.forEach(function(el){
                     var option;
                     if(typeof el == "function"){
-                        option = new Option(el(), el());
+                        option = new Option(el(), el());//使用Option兼容性最好
                     }else if(typeof el == "object"){
                         var text = el.text()
                         option = new Option( text, el.value ? el.value() : text );
-                        for(var i in el){
+                        for(var i in el){//其他属性一律当作自定义属性进行添加
                             if(el.hasOwnProperty(i) && i !== "text" && i !== "value"){
                                 option[i] = typeof i =="function" ? el[i]() : el[i]
                             }
@@ -577,7 +591,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     accessor.templates.push(option)
                     option && node.add(option);
                 });
-                node.style.display = display;
             }
 
         },
