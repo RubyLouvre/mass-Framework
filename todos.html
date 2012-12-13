@@ -12,7 +12,8 @@ and open the template in the editor.
         <script type="text/javascript">
             $.config.level = 6
             require("avalon,ready", function($) {
-                var VM = $.ViewModel({
+
+                var VM = $.MVVM.convert({
                     posts: [],
                     addPost: function(e){
                         if(this.value && e.keyCode == 13){
@@ -22,11 +23,11 @@ and open the template in the editor.
                             this.value = "";
                         }
                     },
-                    leftPosts: $.computed( function(){
+                    leftPosts: $.MVVM.compute( function(){
                         var len = this.posts.length -   $(".toggle:checked").length
                         return "<b>" + len +"</b>" + (len ==1 ?  "item" : "items") +"left"
                     },["posts"]),
-                    donePosts:  $.computed( function(){
+                    donePosts:  $.MVVM.compute( function(){
                         return  $(".toggle:checked").length
                     },["posts"]),
                     removePost: function(){
@@ -50,7 +51,7 @@ and open the template in the editor.
                         $(this).addClass("editing").siblings().removeClass("editing")
                         $(this).find(".edit").focus();
                     },
-                    show: $.computed( function(){
+                    show: $.MVVM.compute( function(){
                         return this.posts.length;
                     },["posts"]),
                     blur: function(){
@@ -63,18 +64,15 @@ and open the template in the editor.
                         }
                     },
                     togglePost: function(){
-                        delete VM.leftPosts.$val;
-                        VM.leftPosts()
-                        delete VM.donePosts.$val;
-                        VM.donePosts()
+                        $.MVVM.notify(VM, "leftPosts")
+                        $.MVVM.notify(VM, "donePosts")
                         this.parentNode.parentNode.className = this.checked ? "done" :""
                     }
           
                 });
-             
-                 $.applyBindings(VM);
+                console.log(VM)
+                $.MVVM.render(VM);
 
-              
             })
 
         </script> 
