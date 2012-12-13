@@ -776,27 +776,6 @@ define( "lang_fix", !!Array.isArray, function(){
             return this.setFullYear(year );//+ 1900
         };
     }
-    //http://www.cnblogs.com/tilfon/archive/2012/11/11/2765189.html
-    if ('a~b'.split(/(~)/).length !== 3){
-        String.prototype.split = function(reg){
-            if (!reg.global) {
-                reg = new RegExp(reg.source, 'g' + (reg.ignoreCase ? 'i' : ''));
-            }
-            var m, str = '', arr = [];
-            var i, len = this.length;
-            for (i = 0; i < len; i++)  {
-                str += this.charAt(i);
-                m = str.match(reg);
-                if (m)  {
-                    arr.push(str.replace(m[0], ''));
-                    arr.push(m[0]);
-                    str = '';
-                }
-            }
-            if (str != '') arr.push(str);
-            return arr;
-        }
-    }
     //http://stackoverflow.com/questions/10470810/javascript-tofixed-bug-in-ie6
     if (0.9.toFixed(0) !== '1') {
         Number.prototype.toFixed = function(n) {
@@ -3341,7 +3320,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                     try {
                         for ( var i = 0; el = this[ i++ ]; ) {
                             if ( el.nodeType === 1 ) {
-                                $.slice( el[TAGS]("*") ).each( cleanNode );
+                                $.slice( el[TAGS]("*") ).forEach( cleanNode );
                                 el.innerHTML = value;
                             }
                         }
@@ -4750,7 +4729,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             values[ index ] = $._data( elem, "olddisplay" );
             status[ index ] = isHidden(elem) 
             if( !values[ index ] ){
-                values[ index ] =  status[index] ? defaultDisplay(elem.nodeName): 
+                values[ index ] =  status[index] ? $.parseDisplay(elem.nodeName): 
                 getter(elem, "display");
                 $._data( elem, "olddisplay", values[ index ])
             }
@@ -4762,6 +4741,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
                 continue;
             }
             show = show === -1 ? !status[index] : show
+           
             elem.style.display = show ?  values[ index ] : "none";
         }
         return nodes;
@@ -5662,16 +5642,16 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                     }else{
                         hash.type = el.trim();//只能为字母数字-_.空格
                         if(!rtypes.test(hash.type)){
-                            throw "事件类型格式不正确"
+                            throw new Error("事件类型格式不正确")
                         }
                     }
                 }
             }
             if(!hash.type){
-                throw "必须指明事件类型"
+                throw new Error("必须指明事件类型")
             }
             if(method === "on" && !hash.handler ){
-                throw "必须指明事件回调"
+                throw new Error("必须指明事件回调")
             }
             hash.times = hash.times > 0  ? hash.times : Infinity;
             return this.each(function() {
@@ -6431,7 +6411,7 @@ define("ajax",["mass","$flow"], function($){
 
 
 //=========================================
-// 动画模块v6
+// 动画模块 v6
 //==========================================
 define("fx", ["$css"],function( $ ){
     var types = {
@@ -6733,7 +6713,7 @@ define("fx", ["$css"],function( $ ){
         }
     }
     function animate( fx, index ) {
-        var node = fx.node, now =  +new Date, mix;
+        var node = fx.node, now =  +new Date;
         if(!fx.startTime){//第一帧
             callback(fx, node, "before");//动画开始前的预操作
             Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队

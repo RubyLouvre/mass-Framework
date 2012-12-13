@@ -99,9 +99,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     }
     var rbindValue = /^[\w$]+(?:(?:\s*\|\s*|\.)[\W\w]+)*$/
     function getBindings( node ){
-        var ret = []
+        var ret = []//&& rbindValue.test(attr.value)
         for ( var j = 0, attr; attr = node.attributes[ j++ ]; ){
-            if( attr.name.indexOf(BINDING+"-") == 0 && rbindValue.test(attr.value)){
+            
+            if( attr.name.indexOf(BINDING+"-") == 0 ){
                 ret.push( [attr.name, attr.value.trim()] )
             }
         }
@@ -188,11 +189,16 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             return accessor.$val
         }
-        if(!host.nodeType){
+        if(!host.nodeType ){
             accessor.$key = key;
-            host[ key ] = accessor;
+            if(Array.isArray(host)){
+                $.log("这是数组"+key)
+            }else{
+                host[ key ] = accessor;
+            }
+         
         }
-        accessor[ subscribers ]  = [];
+        accessor[ subscribers ]  = accessor[ subscribers ] || [];
         accessor();
         return accessor;
     }
@@ -270,7 +276,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
             var nativeMethod = accessor[ method ];
             accessor[ method ] = function(){
-                nativeMethod.apply( this, arguments)
+                nativeMethod.apply( this, arguments);
                 var visitors =  this[ subscribers ];
                 for(var i = 0, visitor; visitor = visitors[i++];){
                     visitor(method, arguments);
@@ -344,19 +350,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         return completeAccessor( "interacted" ,accessor, node);
     }
-    function resetKeys(models){
-        for( var index = 0; index < models.length; index++ ){
-            models[index].$key = index;//重排集合元素的$key
-        }
-    }
+
     //对文档碎片进行改造，通过nodes属性取得所有子节点的引用，以方便把它们一并移出DOM树或插入DOM树
     function gatherReferences( node ){
         node.nodes = $.slice( node.childNodes );
         return node
     }
     function recoverReferences(node){
-        if(Array.isArray(node)){
-            for(var i = 0, el; el = node[i++];){
+        if( node && Array.isArray(node.nodes)){
+            for(var i = 0, el; el = node.nodes[i++];){
                 node.appendChild(el)
             }
         }
@@ -368,15 +370,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     collection.start = function( accessor, array ){
         if(!Array.isArray(array)){
             $.log("处理对象的for in循环")
-            var array = [];//处理对象的for in循环
-            array.$isObj = true;
+            var tmp = [];//处理对象的for in循环
+            tmp.$isObj = true;
             for(var key in array){
                 //通过这里模拟数组行为
                 if(array.hasOwnProperty(key)  && key.indexOf("$")!= 0){
-                    array.push( array[key] );
+                    tmp.push( array[key] );
                 }
             }
-            array = array;
+            array = tmp;
         }
         for(var i = 1; i < array.length; i++ ){
             accessor.addTemplate();//将文档碎片复制到与集合访问器的个数一致
@@ -385,11 +387,13 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     };
     //push ok
     collection.push = function( accessor, models, templates, method, args ){
-        var l = templates.length
-        for(var index = 0; index < args.length; index++ ){
-            var n = index + l;
-            convertToAccessor(n, models[n], models);
-            accessor.addTemplate();
+        var len = args.length, start = models.length - len;
+        for(var i = 0; i < len; i++ ){
+            var index = start + i
+            convertToAccessor(index, models[index], models);
+            if(!templates[index]){//确保集合个数与模板个数相同
+                accessor.addTemplate( );
+            }
         }
     }
     //unshift ok
@@ -398,13 +402,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             convertToAccessor(index, models[index], models);
             accessor.addTemplate( true )
         }
-        resetKeys(models); //重排集合元素的$key
     }
     // shift pop ok
     collection.shift = function( accessor, models, templates, method, args ){
-        var fragment = templates[method]();//取得需要移出的文档碎片
-        fragment && recoverReferences(fragment); //让它收集其子节点,然后一同被销毁
-        resetKeys(models); //重排集合元素的$key
+        var template = templates[method]();//取得需要移出的文档碎片
+        recoverReferences(template); //让它收集其子节点,然后一同被销毁
     }
     collection.pop = collection.shift;
     collection.clear = function(accessor, models, templates, method, args){
@@ -417,19 +419,16 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         var start = args[0], n = args.length - 2;
         var removes = templates.splice(start, args[1]);
         //移除对应的文档碎片
-        for(var i = 0, el; el = removes[i++];){
+        for(var i = 0, el; el = removes[i++];){//移除无用的模板
             recoverReferences( el );
         }
-        for(i = 0; i < n; i++ ){
+        for(i = 0; i < n; i++ ){//如果它又添加了一些新数据，将这些新数据转换成accessor
             //将新数据封装成域
             var index = start + i
             convertToAccessor(index, models[ index ], models);
             //为这些新数据创建对应的文档碎片
             var dom = accessor.primaryTemplate.cloneNode(true);
             accessor.templates.splice(index, 0, gatherReferences(dom) );
-        }
-        for( index = start+n; index < models.length; index++ ){
-            models[index].$key = index
         }
     }
 
@@ -533,7 +532,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 if(selector){
                     $(node).on(type, selector, callback);
                 }else{
-                    $(node).on(type, callback);
+                    $.bind(node, type, callback)
+                   // $(node).on(type, callback);
                 }
             }
         },
@@ -586,11 +586,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             //它暂时只供内部使用，是实现if unless with each这四种流程绑定的关键
             update: function( node, val, accessor, model, code, args){
                 //code对应 1 if,  0  unless,2  with -1 each
-                var fragment = accessor.templates[0];      //取得原始模板
+                var template = accessor.templates[0];      //取得原始模板
                 if( code > 0 ){                            //处理with if 绑定
-                    recoveReferences(fragment);            //将它所引用着的节点移出DOM树
-                    var elems = getChildren( fragment );   //取得它们当中的元素节点
-                    node.appendChild( fragment );          //再放回DOM树
+                    recoverReferences(template);            //将它所引用着的节点移出DOM树
+                    var elems = getChildren( template );   //取得它们当中的元素节点
+                    node.appendChild( template );          //再放回DOM树
                     if( elems.length ){
                         if( code == 2 ){                    //处理with 绑定
                             var fn = function(){}
@@ -605,16 +605,15 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         return setBindingsToChildren( elems, model )
                     }
                 }else if( code === 0 ){                    //处理unless 绑定
-                    recoveReferences(fragment);
+                    recoverReferences(template);
                 }
                 if( code < 0  && val ){                    //处理each 绑定
                     var templates = accessor.templates;
-                    if(!val.length ){                    //如果对应集合为空,那么视图中的节点要移出DOM树
-                        recoveReferences(fragment[0]);
-                        return
+                    if(!val.length && templates.length ){                    //如果对应集合为空,那么视图中的节点要移出DOM树
+                        return recoverReferences( templates[0]);
                     }
                     for( var i = 0, el ; el = templates[i]; i++){
-                        recoveReferences( el );      //先回收，以防在unshift时，新添加的节点就插入在后面
+                        recoverReferences( el );      //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
                         node.appendChild( el );            //继续往元素的子节点绑定数据
                         (function(a, b){
