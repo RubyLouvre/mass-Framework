@@ -97,17 +97,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         return elems;
     }
-    //对文档碎片进行改造，通过nodes属性取得所有子节点的引用，以方便把它们一并移出DOM树或插入DOM树
-    function patchFragment( fragment ){
-        fragment.nodes = $.slice( fragment.childNodes );
-        fragment.recover = function(){
-            this.nodes.forEach(function( el ){
-                this.appendChild(el)
-            },this);
-        }
-        return fragment;
-    }
-
     var rbindValue = /^[\w$]+(?:(?:\s*\|\s*|\.)[\W\w]+)*$/
     function getBindings( node ){
         var ret = []
@@ -290,9 +279,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         });
         accessor.clear = function(){
-            while(accessor.length){
-                accessor.shift()
+            accessor = [];
+            var visitors =  this[ subscribers ] || [];
+            for(var i = 0, visitor; visitor = visitors[i++];){
+                visitor("clear", []);
             }
+            updateSubscribers(this)
         }
         accessor.removeAt = function(index){//移除指定索引上的元素
             this.splice(index, 1);
@@ -309,7 +301,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             return Array.apply([], this) +"";
         }
-        console.log(accessor)
         return accessor;
     }
     //DOM访问器，直接与DOM树中的节点打交道的访问器，是实现双向绑定的关键。
@@ -342,7 +333,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             method = arguments[0];
             if(  convertToCollectionAccessor[method] ){
                 //处理foreach.start, sort, reserve, unshift, shift, pop, push....
-                var ret = convertToCollectionAccessor[method]( accessor, val, accessor.fragments, method, arguments[1] );
+                var ret = convertToCollectionAccessor[method]( accessor, val, accessor.templates, method, arguments[1] );
                 if( ret ){
                     val = ret;
                 }
@@ -353,71 +344,89 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         return completeAccessor( "interacted" ,accessor, node);
     }
-
+    function resetKeys(models){
+        for( var index = 0; index < models.length; index++ ){
+            models[index].$key = index;//重排集合元素的$key
+        }
+    }
+    //对文档碎片进行改造，通过nodes属性取得所有子节点的引用，以方便把它们一并移出DOM树或插入DOM树
+    function gatherReferences( node ){
+        node.nodes = $.slice( node.childNodes );
+        return node
+    }
+    function recoverReferences(node){
+        if(Array.isArray(node)){
+            for(var i = 0, el; el = node[i++];){
+                node.appendChild(el)
+            }
+        }
+        return node
+    }
     //data-each-item?-index?
     //each绑定拥有大量的子方法,用于同步数据的增删改查与排序,它们在convertToCollectionAccessor方法中被调用
     var collection = convertToCollectionAccessor
-    collection.start = function( accessor, models, fragments, method, args ){
-        if(!Array.isArray(models)){
+    collection.start = function( accessor, array ){
+        if(!Array.isArray(array)){
             $.log("处理对象的for in循环")
             var array = [];//处理对象的for in循环
             array.$isObj = true;
-            for(var key in models){
+            for(var key in array){
                 //通过这里模拟数组行为
-                if(models.hasOwnProperty(key)  && key.indexOf("$")!= 0){
-                    var value = models[key];
-                    array.push( value );
+                if(array.hasOwnProperty(key)  && key.indexOf("$")!= 0){
+                    array.push( array[key] );
                 }
             }
-            models = array;
+            array = array;
         }
-        for(var i = 1; i < models.length; i++ ){
-            accessor.cloneFragment();//将文档碎片复制到与模型集合的个数一致
+        for(var i = 1; i < array.length; i++ ){
+            accessor.addTemplate();//将文档碎片复制到与集合访问器的个数一致
         }
-        return models
+        return array
     };
     //push ok
-    collection.push = function( accessor, models, fragments, method, args ){
-        var l = fragments.length
+    collection.push = function( accessor, models, templates, method, args ){
+        var l = templates.length
         for(var index = 0; index < args.length; index++ ){
             var n = index + l;
             convertToAccessor(n, models[n], models);
-            accessor.cloneFragment();
+            accessor.addTemplate();
         }
     }
     //unshift ok
-    collection.unshift = function( accessor, models, fragments, method, args ){
+    collection.unshift = function( accessor, models, templates, method, args ){
         for(var index = 0; index < args.length; index++ ){
             convertToAccessor(index, models[index], models);
-            accessor.cloneFragment(0, true)
+            accessor.addTemplate( true )
         }
-        for( index = 0; index < models.length; index++ ){
-            models[index].$key = index;//重排集合元素的$key
-        }
+        resetKeys(models); //重排集合元素的$key
     }
     // shift pop ok
-    collection.shift = function( accessor, models, fragments, method, args ){
-        var fragment = fragments[method]();//取得需要移出的文档碎片
-        fragment.recover && fragment.recover();//让它收集其子节点,然后一同被销毁
-        for(var index = 0; index < models.length; index++ ){
-            models[index].$key = index;//重排集合元素的$key
-        }
+    collection.shift = function( accessor, models, templates, method, args ){
+        var fragment = templates[method]();//取得需要移出的文档碎片
+        fragment && recoverReferences(fragment); //让它收集其子节点,然后一同被销毁
+        resetKeys(models); //重排集合元素的$key
     }
     collection.pop = collection.shift;
-    collection.splice = function( accessor, models, fragments, method, args ){
+    collection.clear = function(accessor, models, templates, method, args){
+        for(var i = 0, el; el = templates[i++];){
+            recoverReferences( el );
+        }
+        accessor.templates = [];
+    }
+    collection.splice = function( accessor, models, templates, method, args ){
         var start = args[0], n = args.length - 2;
-        var removes = fragments.splice(start, args[1]);
+        var removes = templates.splice(start, args[1]);
         //移除对应的文档碎片
         for(var i = 0, el; el = removes[i++];){
-            el.recover && el.recover ();
+            recoverReferences( el );
         }
         for(i = 0; i < n; i++ ){
             //将新数据封装成域
             var index = start + i
             convertToAccessor(index, models[ index ], models);
             //为这些新数据创建对应的文档碎片
-            var dom = accessor.fragment.cloneNode(true);
-            accessor.fragments.splice(index, 0, patchFragment(dom) );
+            var dom = accessor.primaryTemplate.cloneNode(true);
+            accessor.templates.splice(index, 0, gatherReferences(dom) );
         }
         for( index = start+n; index < models.length; index++ ){
             models[index].$key = index
@@ -543,14 +552,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         },
         options:{//为select标签添加一组子项目
             init: function(node, val, visitor, accessor){
-                accessor.fragment = node.ownerDocument.createDocumentFragment()
-                accessor.fragments = []; //添加一个数组属性,用于储存经过改造的文档碎片
-                accessor.cloneFragment = $.noop;
+                accessor.primaryTemplate = node.ownerDocument.createDocumentFragment()
+                accessor.templates = []; //添加一个数组属性,用于储存经过改造的文档碎片
+                accessor.addTemplate = $.noop;
             },
             update: function( node, val, accessor ){
                 var display = node.style.display;
                 node.innerHTML = "";
-                accessor.fragments = []
+                accessor.templates = []
                 //http://lives.iteye.com/blog/966217
                 val.forEach(function(el){
                     var option;
@@ -565,7 +574,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                             }
                         }
                     }
-                    accessor.fragments.push(option)
+                    accessor.templates.push(option)
                     option && node.add(option);
                 });
                 node.style.display = display;
@@ -577,9 +586,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             //它暂时只供内部使用，是实现if unless with each这四种流程绑定的关键
             update: function( node, val, accessor, model, code, args){
                 //code对应 1 if,  0  unless,2  with -1 each
-                var fragment = accessor.fragments[0];      //取得原始模板
+                var fragment = accessor.templates[0];      //取得原始模板
                 if( code > 0 ){                            //处理with if 绑定
-                    fragment.recover();                    //将它所引用着的节点移出DOM树
+                    recoveReferences(fragment);            //将它所引用着的节点移出DOM树
                     var elems = getChildren( fragment );   //取得它们当中的元素节点
                     node.appendChild( fragment );          //再放回DOM树
                     if( elems.length ){
@@ -596,17 +605,16 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         return setBindingsToChildren( elems, model )
                     }
                 }else if( code === 0 ){                    //处理unless 绑定
-                    fragment.recover();
+                    recoveReferences(fragment);
                 }
                 if( code < 0  && val ){                    //处理each 绑定
-                    var fragments = accessor.fragments;
+                    var templates = accessor.templates;
                     if(!val.length ){                    //如果对应集合为空,那么视图中的节点要移出DOM树
-                        
-                        fragments[0]&&  fragments[0].recover();
+                        recoveReferences(fragment[0]);
                         return
                     }
-                    for( var i = 0, el ; el = fragments[i]; i++){
-                        el.recover();                      //先回收，以防在unshift时，新添加的节点就插入在后面
+                    for( var i = 0, el ; el = templates[i]; i++){
+                        recoveReferences( el );      //先回收，以防在unshift时，新添加的节点就插入在后面
                         elems = getChildren( el );
                         node.appendChild( el );            //继续往元素的子节点绑定数据
                         (function(a, b){
@@ -637,21 +645,24 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             //node, 子访问器的返回值, 子访问器(位于VM), 父访问器(分解元素bind属性得到DOMAccessor)
             init: function(node, val, accessor, model){
                 accessor = model
+                //开始编写模板
                 node.normalize();                  //合并文本节点数
-                var fragment = node.ownerDocument.createDocumentFragment(), el
+                var template = node.ownerDocument.createDocumentFragment(), el
                 while((el = node.firstChild)){
-                    fragment.appendChild(el);     //将node中的所有节点移出DOM树
+                    template.appendChild(el);     //将node中的所有节点移出DOM树
                 }
-                accessor.fragments = [];             //添加一个数组属性,用于储存经过改造的文档碎片
-                accessor.fragment = fragment;         //最初的文档碎片,用于克隆
-                accessor.cloneFragment = function( dom, unshift ){ //改造文档碎片并放入数组
-                    dom = dom || accessor.fragment.cloneNode(true);
-                    var add = unshift == true ? "unshift" : "push"
-                    accessor.fragments[add]( patchFragment(dom) );//fragments用于each,with等循环生成子节点的绑定中
-                    return dom;
+                accessor.primaryTemplate = template; //原始模板，仅用于复制
+                //模板编写完成
+                accessor.templates = [];              //添加一个数组属性,放置与集合访问器同等数量的模板
+                accessor.addTemplate = function( unshift ){ //改造文档碎片并放入数组
+                    var template = this.primaryTemplate.cloneNode(true);
+                    var method = unshift == true ? "unshift" : "push"
+                    //gatherReferences为新生的节点添加了个nodes数组，用于保存它的子节点的引用
+                    this.templates[ method ]( gatherReferences( template ) );
+                    return template;
                 }
-                var clone = accessor.cloneFragment();  //先改造一翻,方便在update时调用recover方法
-                node.appendChild( clone );          //将文档碎片中的节点放回DOM树
+                template = accessor.addTemplate();  //先改造一翻,方便在update时调用recover方法
+                node.appendChild( template );          //将文档碎片中的节点放回DOM树
             },
             update: function(node, val, accessor, model, code, args){
                 Bindings['template']['update'](node, val, accessor, model,  (function(){
