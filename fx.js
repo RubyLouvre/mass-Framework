@@ -419,7 +419,7 @@ define("fx", ["$css"],function( $ ){
         var pre = $.fn[ name ];
         $.fn[ name ] = function(a) {
             if(!arguments.length || typeof a == "boolean" ){
-                return  pre.call(this)
+                return  pre.apply(this, arguments)
             }else{
                 return  Animation.fx( this, genFx( name , 3), arguments );
             }
