@@ -22,20 +22,16 @@ and open the template in the editor.
                             this.value = "";
                         }
                     },
-                    leftPosts: {
-                        getter: function(){
-                            String(this.posts);//当posts变动时通知leftPosts
-                            var len = this.posts.length -     $(".toggle:checked").length
-                            return "<b>" + len +"</b>" + (len ==1 ?  "item" : "items") +"left"
-                        }
-                    },
-                    donePosts: {
-                        getter: function(){
-                            String(this.posts);//当posts变动时通知leftPosts
-                            $.log("donePosts")
-                            return  $(".toggle:checked").length
-                        }
-                    },
+                    leftPosts: $.computed( function(){
+                        // String(this.posts);//当posts变动时通知leftPosts
+                        var len = this.posts.length -     $(".toggle:checked").length
+                        return "<b>" + len +"</b>" + (len ==1 ?  "item" : "items") +"left"
+                    },["posts"]),
+                    donePosts:  $.computed( function(){
+                        String(this.posts);//当posts变动时通知leftPosts
+                        $.log("donePosts")
+                        return  $(".toggle:checked").length
+                    },["posts"]),
                     removePost: function(){
                         var index = $("#main .destroy").index(this)
                         if(index != -1){
@@ -57,12 +53,9 @@ and open the template in the editor.
                         $(this).addClass("editing").siblings().removeClass("editing")
                         $(this).find(".edit").focus();
                     },
-                    show: {
-                        getter: function(){
-                            String(this.posts)
-                            return this.posts.length;
-                        }
-                    },
+                    show: $.computed( function(){
+                        return this.posts.length;
+                    },["posts"]),
                     blur: function(){
                         console.log("blur")
                         $(this).parents(".editing").removeClass("editing")
@@ -80,6 +73,7 @@ and open the template in the editor.
                         VM.donePosts()
                         this.parentNode.parentNode.className = this.checked ? "done" :""
                     }
+          
                 });
              
                 var e = $.applyBindings(VM);
