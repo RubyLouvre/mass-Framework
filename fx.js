@@ -417,8 +417,8 @@ define("fx", ["$css"],function( $ ){
 
     [ "toggle", "show", "hide" ].forEach(function(  name, i ) {
         var pre = $.fn[ name ];
-        $.fn[ name ] = function() {
-            if(!arguments.length ){
+        $.fn[ name ] = function(a) {
+            if(!arguments.length || typeof a == "boolean" ){
                 return  pre.call(this)
             }else{
                 return  Animation.fx( this, genFx( name , 3), arguments );
