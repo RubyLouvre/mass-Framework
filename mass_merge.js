@@ -5702,17 +5702,17 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
         "focusin_focus,focusout_blur".replace(rmapper, function(_,orig, fix){
             var attaches = 0,
             handler = function( event ) {
-                facade.simulate( fix, event.target, facade.fix( event ), true );
+                facade.simulate( orig, event.target, facade.fix( event ), true );
             };
-            eventHooks[ fix ] = {
+            eventHooks[ orig ] = {
                 setup: function() {
                     if ( attaches++ === 0 ) {
-                        document.addEventListener( orig, handler, true );
+                        document.addEventListener( fix, handler, true );
                     }
                 },
                 teardown: function() {
                     if ( --attaches === 0 ) {
-                        document.removeEventListener( orig, handler, true );
+                        document.removeEventListener( fix, handler, true );
                     }
                 }
             };
@@ -6829,9 +6829,9 @@ define("fx", ["$css"],function( $ ){
 
     [ "toggle", "show", "hide" ].forEach(function(  name, i ) {
         var pre = $.fn[ name ];
-        $.fn[ name ] = function() {
-            if(!arguments.length ){
-                return  pre.call(this)
+        $.fn[ name ] = function(a) {
+            if(!arguments.length || typeof a == "boolean" ){
+                return  pre.apply(this, arguments)
             }else{
                 return  Animation.fx( this, genFx( name , 3), arguments );
             }

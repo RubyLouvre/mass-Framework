@@ -8,7 +8,7 @@ and open the template in the editor.
         <title>MVVM</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <link rel="stylesheet" href="todos.css"/>
-        <script src="mass.js">  </script>
+        <script src="mass_merge.js">  </script>
         <script type="text/javascript">
             $.config.level = 6
             require("avalon,ready", function($) {
@@ -23,13 +23,10 @@ and open the template in the editor.
                         }
                     },
                     leftPosts: $.computed( function(){
-                        // String(this.posts);//当posts变动时通知leftPosts
-                        var len = this.posts.length -     $(".toggle:checked").length
+                        var len = this.posts.length -   $(".toggle:checked").length
                         return "<b>" + len +"</b>" + (len ==1 ?  "item" : "items") +"left"
                     },["posts"]),
                     donePosts:  $.computed( function(){
-                        String(this.posts);//当posts变动时通知leftPosts
-                        $.log("donePosts")
                         return  $(".toggle:checked").length
                     },["posts"]),
                     removePost: function(){
@@ -57,7 +54,6 @@ and open the template in the editor.
                         return this.posts.length;
                     },["posts"]),
                     blur: function(){
-                        console.log("blur")
                         $(this).parents(".editing").removeClass("editing")
                     },
                     checkAll: function(){
@@ -66,7 +62,7 @@ and open the template in the editor.
                             VM.togglePost.call(el);
                         }
                     },
-                    togglePost: function(){        
+                    togglePost: function(){
                         delete VM.leftPosts.$val;
                         VM.leftPosts()
                         delete VM.donePosts.$val;
@@ -76,7 +72,7 @@ and open the template in the editor.
           
                 });
              
-                var e = $.applyBindings(VM);
+                 $.applyBindings(VM);
 
               
             })

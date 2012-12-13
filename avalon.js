@@ -203,8 +203,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
          
         }
-        accessor[ subscribers ]  = accessor[ subscribers ] || [];
-        accessor();
+        if(!accessor[ subscribers ]){
+            accessor[ subscribers ]  =  [];
+            accessor();
+        }
         return accessor;
     }
     
@@ -236,7 +238,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     function convertToCombiningAccessor( key, curry, host){
         var args = curry(), fn = args[0], deps = args[1] || [], scope = args[2] || host;
         function accessor( neo ){
-            if( bridge[ expando ] ){ //收集依赖于它的访问器，,以便它的值改变时,通知它们更新自身
+            if( bridge[ expando ] ){ //收集它的订阅者，以便它的值改变时,通知它们更新自身
                 $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
             }
             var change = false
@@ -253,10 +255,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     delete bridge[ expando ];
                 }
             }
-            //放到这里是为了当是最底层的域的值发出改变后,当前域跟着改变,然后再触发更高层的域
+            //放到这里是为了当是最底层的accessor的值发出改变后,当前accessor跟着改变,然后再触发更高层的accessor
             if( change && (accessor.$val !== neo) ){
                 accessor.$val = neo;
-                //通知此域的所有直接依赖者更新自身
+                //通知此accessor的所有订阅者更新自身
                 updateSubscribers( accessor );
             }
             return accessor.$val;
@@ -327,8 +329,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         return accessor;
     }
     //DOM访问器，直接与DOM树中的节点打交道的访问器，是实现双向绑定的关键。
-    //它们仅在用户调用了$.View(viewmodel, node )方法，才根据用户写在元素节点上的bind属性生成出来。
-    //names values 包含上一级的键名与值
+    //它们仅在用户调用了$.applyBindings(model, node )方法，才根据用户写在元素节点上的bind属性生成出来。
     function convertToDomAccessor (node, binding, visitor, model, command, args ){
         function accessor( method ){
             if( !accessor.$uuid ){ //只有在第一次执行它时才进入此分支
@@ -339,7 +340,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             var val;
             String(visitor);//强制获取依赖
-            if(typeof visitor == "function" && visitor.$uuid){
+            if(typeof visitor == "function" && visitor.$uuid && binding != Bindings.on ){
                 val = visitor();
             }else{
                 val = visitor
@@ -381,12 +382,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         return node
     }
-    //data-each-item?-index?
     //each绑定拥有大量的子方法,用于同步数据的增删改查与排序,它们在convertToCollectionAccessor方法中被调用
     var collection = convertToCollectionAccessor
     collection.start = function( accessor, array ){
         if(!Array.isArray(array)){
-            $.log("处理对象的for in循环")
             var tmp = [];//处理对象的for in循环
             tmp.$isObj = true;
             for(var key in array){
@@ -542,14 +541,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         },
         on: {
-            init: function(node, callback, type, selector, _, args){
+            init: function(node, val, callback, type, selector, args){
                 type = args[0];
                 selector = args[1];
                 if(selector){
                     $(node).on(type, selector, callback);
                 }else{
-                    $.bind(node, type, callback)
-                // $(node).on(type, callback);
+                    //   $.bind(node, type, callback)
+                    $(node).on(type, callback);
                 }
             }
         },
