@@ -472,6 +472,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     if(typeof accessor == "function"){
                         $(node).on("mouseenter focus",function(){
                             timeoutID = setInterval(function(){
+                             //   console.log(node.value)
                                 accessor(node.value);
                             },50)
                         });
