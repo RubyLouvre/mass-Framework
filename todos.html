@@ -12,8 +12,8 @@ and open the template in the editor.
         <script type="text/javascript">
             $.config.level = 6
             require("avalon,ready", function($) {
-
-                var VM = $.MVVM.convert({
+                  var $$ = $.MVVM
+                var VM = $$.toViewModel({
                     posts: [],
                     addPost: function(e){
                         if(this.value && e.keyCode == 13){
@@ -23,11 +23,11 @@ and open the template in the editor.
                             this.value = "";
                         }
                     },
-                    leftPosts: $.MVVM.compute( function(){
-                        var len = this.posts.length -   $(".toggle:checked").length
-                        return "<b>" + len +"</b>" + (len ==1 ?  "item" : "items") +"left"
+                    leftPosts: $$.compute( function(){
+                        var len = this.posts.length -   $(".toggle:checked").length;
+                        return "<b>" + len +"</b>" + (len <= 1 ?  "item" : "items") +" left"
                     },["posts"]),
-                    donePosts:  $.MVVM.compute( function(){
+                    donePosts:  $$.compute( function(){
                         return  $(".toggle:checked").length
                     },["posts"]),
                     removePost: function(){
@@ -51,7 +51,7 @@ and open the template in the editor.
                         $(this).addClass("editing").siblings().removeClass("editing")
                         $(this).find(".edit").focus();
                     },
-                    show: $.MVVM.compute( function(){
+                    show: $$.compute( function(){
                         return this.posts.length;
                     },["posts"]),
                     blur: function(){
@@ -64,14 +64,14 @@ and open the template in the editor.
                         }
                     },
                     togglePost: function(){
-                        $.MVVM.notify(VM, "leftPosts")
-                        $.MVVM.notify(VM, "donePosts")
+                        $$.notify("leftPosts",VM)
+                        $$.notify("donePosts",VM)
                         this.parentNode.parentNode.className = this.checked ? "done" :""
                     }
           
                 });
                 console.log(VM)
-                $.MVVM.render(VM);
+                $$.render(VM);
 
             })
 

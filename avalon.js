@@ -13,19 +13,20 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     //属性访问器  ┓
     //组合访问器　┫→ 绑定器 ← DOM访问器 ← 数据绑定
     //集合访问器　┛
-    function ViewModel(){}
     $.MVVM = {
+        //将页面上的bindings与ViewModel连袂在一起，完成双向绑定链，进成完成MVVM架构的布局
+        //如果model不是ViewModel会转换为ViewModel
         render: function(  model, node ){
             node = node || document.body;
-            model = $.MVVM.convert( model );
+            model = $.MVVM.toViewModel( model );
             setBindingsToElements (node, model)
             return model
         },
-        convert:  function(data, parent){
-            if(data instanceof ViewModel){
-                return data;
-            }
-            var model = parent || new ViewModel;
+        //将一个数值或对象转换为某个ViewModel的属性
+        toAccessor: convertToAccessor,
+        //将一个对象转换为ViewModel
+        toViewModel :  function(data, parent){
+            var model = parent || {};
             for(var p in data) {
                 if(data.hasOwnProperty(p)){
                     convertToAccessor(p, data[p], model);
@@ -33,15 +34,18 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             return model;
         },
-        compute: function(fn, deps, scope){
+        //将一个函数转换为组合访问器，paths是model的其他访问器的路径的集合，
+        //当fn监控的值发生变动时，通知它们更新自身
+        compute: function(fn, paths, model){
             var args = arguments,
             ret = function(){
                 return args;
             }
-            ret[expando] = expando;
+            ret[subscribers] = expando;
             return ret
         },
-        notify: function(model, path){
+        //此方法是用于普通回调里，强制让目标访问器更新自身。
+        notify: function(path, model){
             var fn = getItemByPath(path, model);
             if(typeof fn == "function"){
                 delete fn.$val;
@@ -102,7 +106,6 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             var path = bind[1].split(/\s*\|\s*/),
             accessor = getItemByPath( path[0], model ),
             command = getItemByPath( path[1], model, true, args );
-            // $.log(accessor, 7)
             if(accessor === void 0){//accessor可能为零
                 continue
             }
@@ -180,16 +183,17 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             case "Boolean"://属性访问器
                 return convertToPropertyAccessor( key, val, model );
             case "Function"://回调
-                if(val[expando] === expando){
+                if(val[subscribers] === expando && !val.$type){
                     return convertToCombiningAccessor( key, val, model )
                 }
                 return  model[key] = val; 
             case "Array"://组合访问器
-                return  model[key] = convertToCollectionAccessor( val );
+                var array = val[subscribers] ? val : [];
+                return  model[key] = convertToCollectionAccessor( val, array );
             case "Object"://转换为子VM
                 if($.isPlainObject( val )){
                     var object = model[key] || (model[key] = {} );
-                    $.MVVM.convert( val, object );
+                    $.MVVM.toViewModel( val, object );
                     return object
                 }else{
                     throw err;
@@ -209,11 +213,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         if(!host.nodeType ){
             accessor.$key = key;
-            if(Array.isArray(host)){
-                $.log("这是数组"+key)
-            }else{
-                host[ key ] = accessor;
-            }
+            host[ key ] = accessor;
         }
         if(!accessor[ subscribers ]){
             accessor[ subscribers ]  =  [];
@@ -236,6 +236,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         accessor.$val = val;
         accessor.$type = "accessor";
+        
         return completeAccessor( key, accessor, host );
     }
     //convertToCombiningAccessor，组合访问器，是它在定义需要通过$.computed帮助生成。
@@ -288,39 +289,41 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         for(var index = 0; index < array.length; index++){
             convertToAccessor(index, array[index], accessor);
         }
-        accessor.$type = "collection";
-        accessor[ subscribers ] = accessor[ subscribers ] || [];
-        String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
-            var nativeMethod = accessor[ method ];
-            accessor[ method ] = function(){
-                nativeMethod.apply( this, arguments);
-                var visitors =  this[ subscribers ];
+        if( !accessor[ subscribers ] ){
+            accessor.$type = "collection";
+            accessor[ subscribers ] = [];
+            String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method){
+                var nativeMethod = accessor[ method ];
+                accessor[ method ] = function(){
+                    nativeMethod.apply( this, arguments);
+                    var visitors =  this[ subscribers ];
+                    for(var i = 0, visitor; visitor = visitors[i++];){
+                        visitor(method, arguments);
+                    }
+                    notifySubscribers(this)
+                }
+            });
+            accessor.clear = function(){
+                accessor = [];
+                var visitors =  this[ subscribers ] || [];
                 for(var i = 0, visitor; visitor = visitors[i++];){
-                    visitor(method, arguments);
+                    visitor("clear", []);
                 }
                 notifySubscribers(this)
             }
-        });
-        accessor.clear = function(){
-            accessor = [];
-            var visitors =  this[ subscribers ] || [];
-            for(var i = 0, visitor; visitor = visitors[i++];){
-                visitor("clear", []);
+            accessor.removeAt = function(index){//移除指定索引上的元素
+                this.splice(index, 1);
             }
-            notifySubscribers(this)
-        }
-        accessor.removeAt = function(index){//移除指定索引上的元素
-            this.splice(index, 1);
-        }
-        accessor.remove = function(item){//移除第一个等于给定值的元素
-            var index = this.indexOf(item);
-            if(index !== -1){
-                this.removeAt(index);
+            accessor.remove = function(item){//移除第一个等于给定值的元素
+                var index = this.indexOf(item);
+                if(index !== -1){
+                    this.removeAt(index);
+                }
             }
-        }
-        accessor.toString = function(){
-            collectSubscribers( this );
-            return Array.apply([], this) +"";
+            accessor.toString = function(){
+                collectSubscribers( this );
+                return Array.apply([], this) +"";
+            }
         }
         return accessor;
     }
