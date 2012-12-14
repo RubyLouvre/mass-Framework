@@ -598,15 +598,6 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         // 对数组进行去重操作，返回一个没有重复元素的新数组。
         unique: function ( target ) {
-            //            var result = [];
-            //                o:for(var i = 0, n = target.length; i < n; i++) {
-            //                    for(var x = i + 1 ; x < n; x++) {
-            //                        if(target[x] === target[i])
-            //                            continue o;
-            //                    }
-            //                    result.push(target[i]);
-            //                }
-            //            return result;
             var ret = [], n = target.length, i, j;//by abcd
             for (i = 0; i < n; i++) {
                 for (j = i + 1; j < n; j++)

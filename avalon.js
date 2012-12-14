@@ -716,4 +716,3 @@ define("mvvm","$event,$css,$attr".split(","), function($){
 //http://www.cnblogs.com/pshay/archive/2012/12/13/2813877.html
 //http://books.zkoss.org/wiki/ZK%20Developer's%20Reference/MVVM
 //Ember.js 中文文档 http://44ux.com/blog/2012/08/21/ember-js-doc-cn/
-//Sizzle 各版本中数组去重方法 Sizzle.uniqueSort 的演变 http://44ux.com/blog/2012/10/23/array-duplicate-removal-in-sizzle/
