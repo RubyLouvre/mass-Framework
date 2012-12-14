@@ -3,7 +3,7 @@
 //=========================================
 define("mvvm","$event,$css,$attr".split(","), function($){
     var BINDING = $.config.bindname || "data", 
-    bridge = {},  uuid = 0, expando = new Date - 0, subscribers = "$" + expando
+    bridge = {},  expando = new Date - 0, subscribers = "$" + expando
     //ViewModel是一个由访问器与命令组成的对象
     //访问器是用于监控Model中的某个字段读写两用的函数，
     //当然有更高级的访问器，它是建立在多个访问器或字段上，依赖它们的结果计算出自己的值，像
@@ -342,7 +342,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 val = visitor
             }
             if(typeof command == "function"){
-                val = command(val);
+                val = command(val, node);
             }
             if( !accessor.$type ){
                 delete bridge[ expando ];
@@ -362,7 +362,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             binding.update && binding.update(node, val, accessor, model, command, args);
             return  accessor.$val = val
         }
-        return completeAccessor( "interacted" ,accessor, node);
+        return completeAccessor( "interacted", accessor, node);
     }
 
     //对文档碎片进行改造，通过nodes属性取得所有子节点的引用，以方便把它们一并移出DOM树或插入DOM树
@@ -401,7 +401,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
     collection.push = function( accessor, models, templates, method, args ){
         var len = args.length, start = models.length - len;
         for(var i = 0; i < len; i++ ){
-            var index = start + i
+            var index = start + i;
             convertToAccessor(index, models[index], models);
             if(!templates[index]){//确保集合个数与模板个数相同
                 accessor.addTemplate( );
@@ -711,3 +711,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
 //+    方法或属性时，也需要得到该js object的一个引用。我的意思是建立一种统一的规则，js object
 //+    和他相对应的 html 能通过这种规则互相访问到对方。 建立这个关联以后，实现js object和
 //+    对应 html 的数据邦定和数据同步等问题就简单多了
+//Chosen 是一个支持jquery的select下拉框美化插件，它能让丑陋的、很长的select选择框变的更好看、更方便。不仅如此，
+//它更扩展了select，增加了自动筛选的功能。它可对列表进行分组，同时也可禁用某些选择项。
+//http://www.cnblogs.com/pshay/archive/2012/12/13/2813877.html
+//http://books.zkoss.org/wiki/ZK%20Developer's%20Reference/MVVM
+//Ember.js 中文文档 http://44ux.com/blog/2012/08/21/ember-js-doc-cn/
+//Sizzle 各版本中数组去重方法 Sizzle.uniqueSort 的演变 http://44ux.com/blog/2012/10/23/array-duplicate-removal-in-sizzle/
