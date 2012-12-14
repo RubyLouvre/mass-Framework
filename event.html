@@ -14,6 +14,10 @@
                         { firstName: 'Charles', lastName: 'Charlesforth' },
                         { firstName: 'Denise', lastName: 'Dentiste' }
                     ],
+                    filter: function(val, node){
+                        $.log(val)
+                        return val
+                    },
                     firstName: "清风", //firstName与lastName是这两个属性不可分割，因此使用原子监控者
                     lastName: "火羽",
                     fullName: $.MVVM.compute(function(a){
@@ -45,7 +49,7 @@
             firstName: <input data-value="firstName"/>
         </p>
         <p>
-            lastName: <input data-value="lastName"/>
+            lastName: <input data-value-one="lastName | filter"/>
         </p>
         <p>
             fullName: <input data-value="fullName" />

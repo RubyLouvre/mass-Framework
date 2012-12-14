@@ -467,20 +467,20 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             stopBindings: true
         },
         value:{
-            init: function(node, timeoutID, accessor){
-                if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
-                    if(typeof accessor == "function"){
-                        $(node).on("mouseenter focus",function(){
-                            timeoutID = setInterval(function(){
-                             //   console.log(node.value)
-                                accessor(node.value);
-                            },50)
-                        });
-                        $(node).on("mouseleave blur",function(){
-                            clearInterval(timeoutID);
-                        });
+            init: function(node, timeoutID, accessor, type, selector, args){
+                if(args[0] !== "one"){
+                    if(/input|textarea/i.test(node.nodeName) && inputOne[node.type]){
+                        if(typeof accessor == "function"){
+                            $(node).on("mouseenter focus",function(){
+                                timeoutID = setInterval(function(){
+                                    accessor(node.value);
+                                },50)
+                            });
+                            $(node).on("mouseleave blur",function(){
+                                clearInterval(timeoutID);
+                            });
+                        }
                     }
-                  
                 }
             },
             update: function( node, val ){
