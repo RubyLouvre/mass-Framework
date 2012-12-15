@@ -17,16 +17,12 @@
        
                 var $$ = $.MVVM
                 
-                var VM = $$.render({
+                var VM = $$.toViewModel({
                     user:{
-                        name:"aaaa",
-                        title:"bbbb"
+                        xxxx: "aaaa",
+                        yyyy: "bbbb"
                     },
-                    firstName: "xxx",
-                    lastName: "yyy",
-                    fullName: $$.compute(function (){
-                        return this.firstName() +" "+ this.lastName()
-                    },["firstName","lastName"]),
+                    toggle: true,
                     list:[{
                             title:"aaa"
                         },
@@ -40,31 +36,19 @@
                             title:"ddd"
                         }
                     ]
+
                 });
+                VM.remove = function(e){
+                    if(e){
+                        VM.list.erase(e.target)
+                    }
+                }
+                $$.render(VM)
                 setTimeout(function(){
-                    VM.list.splice(1,3,{title:"ee"})
+                    VM.toggle(false)
                 },500)
-               
-                setTimeout(function(){
-                    VM.list.push({
-                        title:"ddd"
-                    });
-                    $.log("push")
-                },500)
-                setTimeout(function(){
-                    VM.list.splice(1,1,{
-                        title:"eee"
-                    });
-                    $.log(VM.list)
-                },800)
-                setTimeout(function(){
-                    VM.list.unshift({
-                        title:"kkk"
-                    });
-                    $.log("unshift")
-                },1000)
-                
-                console.log( $("input, select, .aaa "))
+
+             
             })
 
 
@@ -74,23 +58,19 @@
 
         </script>
     </head>
-    <body class="aaa">
-        <select id="sel" class="aaa">
-            <option>1111</option>
-            <option>222</option>
-            <option>3333</option>
-        </select>
+    <body>
         <ul data-each-item="list">
-            <li data-text="item.title">aaaa</li>
+            <li data-text="item.title" data-on-click="remove">aaaa</li>
         </ul>
-        <div>
-            <input data-value="firstName" class="aaa">
-            <input data-value="lastName">
-            <span data-text="fullName"></span>
+        <div data-with="user">
+            <p data-text="xxxx"></p>
+            <p data-text="yyyy"></p>
         </div>
-        <div data-each-key-value="user">
-            <p><span data-text="key"></span>    <span data-text="value"></span></p>
+        <div data-if="toggle">
+            这是诸葛亮
         </div>
-
+        <div data-unless="toggle">
+            这是周瑜
+        </div>
     </body>
 </html>

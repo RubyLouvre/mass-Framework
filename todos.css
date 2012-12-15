@@ -36,8 +36,8 @@ body {
 	text-align: center;
 	padding: 0 0 10px 0;
 }
-
-#todoapp input[type="text"] {
+/* #todoapp input[type="text"]  */
+#new-todo, .edit {
 	width: 466px;
 	font-size: 24px;
 	font-family: inherit;

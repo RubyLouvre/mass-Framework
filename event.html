@@ -37,7 +37,6 @@
                 VM.disableDetails = function() {
                     VM.detailsEnabled(false);
                 }
-                $.MVVM.render(VM)
             })
 
         </script> 
@@ -71,7 +70,7 @@
             </tbody>
         </table>
         <div>
-            <div data-on-mouseover="enableDetails" data-on-mouseout="disableDetails" >
+            <div data-on-mouseover="mouseoverShowIt" data-on-mouseout="mouseoverShowIt" >
                 移上去查看详细消息
             </div>
             <div data-display="detailsEnabled">

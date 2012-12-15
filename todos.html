@@ -11,8 +11,9 @@ and open the template in the editor.
         <script src="mass_merge.js">  </script>
         <script type="text/javascript">
             $.config.level = 6
+            
             require("avalon,ready", function($) {
-                  var $$ = $.MVVM
+                var $$ = $.MVVM
                 var VM = $$.toViewModel({
                     posts: [],
                     addPost: function(e){
@@ -24,7 +25,7 @@ and open the template in the editor.
                         }
                     },
                     leftPosts: $$.compute( function(){
-                        var len = this.posts.length -   $(".toggle:checked").length;
+                        var len = this.posts.length -  $(".toggle:checked").length;
                         return "<b>" + len +"</b>" + (len <= 1 ?  "item" : "items") +" left"
                     },["posts"]),
                     donePosts:  $$.compute( function(){
@@ -36,16 +37,18 @@ and open the template in the editor.
                             VM.posts.removeAt(index)
                         }
                     },
+                
                     remove: function(){
                         var array = VM.posts, array2 = []
-                        $(".toggle").each(function(el, i){
-                            if(el.checked){
+                        $(".toggle:checked").each(function(el, i){
+                            array.erase(el)
+                         /*   if(el.checked){
                                 array2.push( array[i])
-                            }
+                            }*/
                         })
-                        array2.forEach(function(el){
+                     /*    array2.forEach(function(el){
                             VM.posts.remove(el)
-                        })
+                        })*/
                     },
                     edit: function() {
                         $(this).addClass("editing").siblings().removeClass("editing")
@@ -66,11 +69,11 @@ and open the template in the editor.
                     togglePost: function(){
                         $$.notify("leftPosts",VM)
                         $$.notify("donePosts",VM)
-                        this.parentNode.parentNode.className = this.checked ? "done" :""
+                        $(this).parents("li").toggleClass( "done" );
                     }
           
                 });
-                console.log(VM)
+            
                 $$.render(VM);
 
             })
@@ -79,8 +82,8 @@ and open the template in the editor.
 
     </head>
     <body>
+        <!--[if IE 6]><center style="display:inline-block;zoom:1;text-align:left;"><!-->
         <div id="todoapp">
-
             <header>
                 <h1>Todos</h1>
                 <input id="new-todo" type="text" placeholder="What needs to be done?" data-on-keypress="addPost">
@@ -107,8 +110,8 @@ and open the template in the editor.
 
                 </div>
             </footer>
-
         </div>
+        <!--[if IE 6]></center><!-->
 
         <div id="instructions">
             Double-click to edit a todo.

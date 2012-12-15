@@ -69,7 +69,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
     //遍历同一元素的子元素，进行绑定转换
-    function setBindingsToChildren( elems, model ){
+    function setBindingsToChildren( elems, model, set ){
         for(var i = 0, el; el = elems[i++];){
             setBindingsToElements(el, model );
         }
@@ -182,10 +182,10 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             case "Number":
             case "Boolean"://属性访问器
                 return convertToPropertyAccessor( key, val, model );
-            case "Function"://回调
+            case "Function"://组合访问器
                 if(val[subscribers] === expando && !val.$type){
                     return convertToCombiningAccessor( key, val, model )
-                }
+                }//一般的回调
                 return  model[key] = val; 
             case "Array"://组合访问器
                 var array = val[subscribers] ? val : [];
@@ -310,6 +310,22 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     visitor("clear", []);
                 }
                 notifySubscribers(this)
+            }
+            function innerErase (el,visitor ){
+                if(el && el.nodeType == 1){
+                    var array = $._data(el, "collection")
+                    if( array != visitor){
+                        var item = $._data(el, "model");
+                        if( item ){
+                            visitor.remove(item)
+                        }else{
+                            innerErase(el.parentNode,visitor )
+                        }
+                    }
+                }
+            }
+            accessor.erase = function( el ){//移除指定索引上的元素
+                innerErase( el, this);
             }
             accessor.removeAt = function(index){//移除指定索引上的元素
                 this.splice(index, 1);
@@ -603,12 +619,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                     var elems = getChildren( template );   //取得它们当中的元素节点
                     node.appendChild( template );          //再放回DOM树
                     if( elems.length ){
-                        if( code == 2 ){                    //处理with 绑定
-                            var fn = function(){}
-                            fn.prototype = model;
-                            model = new fn;
-                            for(var name in val){
-                                if(val.hasOwnProperty(name)){
+                        if( code == 2 ){      //处理with 绑定
+                            var fn = function(){}//随便搞个构造器
+                            fn.prototype = model;//让它继承原来的VM，或VM某一层的对象属性
+                            model = new fn;      //然后得到它的实例
+                            for(var name in val){//然后遍历with的参数对象的键值对，将它们赋给实例。
+                                if(val.hasOwnProperty(name)){//因此访问时会先访问val的第一层值，没有到原型链上找
                                     model[name] = val[name]
                                 }
                             }
@@ -618,7 +634,8 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 }else if( code === 0 ){                    //处理unless 绑定
                     recoverReferences(template);
                 }
-                if( code < 0  && val ){                    //处理each 绑定
+                if( code < 0  && val ){     //处理each 绑定
+                    $._data(node, "collection", val)
                     var templates = accessor.templates;
                     if(!val.length && templates.length ){                    //如果对应集合为空,那么视图中的节点要移出DOM树
                         return recoverReferences( templates[0]);
@@ -628,6 +645,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                         elems = getChildren( el );
                         node.appendChild( el );            //继续往元素的子节点绑定数据
                         (function(a, b){
+                            for(var i = 0, ele; ele = elems[i++];){
+                                $._data(ele, "model", a)
+                            }
                             if(args.length){
                                 var fn = function(){}
                                 fn.prototype = model;
@@ -638,9 +658,11 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                                 if(args[1]){
                                     m[args[1]] = val.$isObj ? a.$key : b;//index
                                 }
+
                             }else{
                                 m = model;
                             }
+            
                             setBindingsToChildren( elems, m );
                         })(val[i], i);
                     }
