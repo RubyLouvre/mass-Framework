@@ -7,7 +7,7 @@ void function( global, DOC ){
     var HTML  = DOC.documentElement;
     var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
     var loadings = [];//正在加载中的模块列表
-    var parsing = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
+    var parsings = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
@@ -443,7 +443,7 @@ void function( global, DOC ){
             if(/loaded|complete|undefined/i.test(node.readyState) ){
                 //mass Framework会在_checkFail把它上面的回调清掉
                 //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
-                var factory = parsing.pop() ;
+                var factory = parsings.pop() ;
                 factory &&  factory.delay(node.src)
                 if( checkFail(node) ){
                     $.log("已成功加载 "+node.src, 7);
@@ -566,7 +566,7 @@ void function( global, DOC ){
         if(id ){
             factory.delay(id,args)
         }else{//先进先出
-            parsing.push( factory )
+            parsings.push( factory )
         }
     }
     $.require.amd = modules
