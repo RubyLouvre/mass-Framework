@@ -7,11 +7,12 @@ void function( global, DOC ){
     var HTML  = DOC.documentElement;
     var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
     var loadings = [];//正在加载中的模块列表
-    var stack = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
+    var parsing = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
     var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+    var moduleClass = "mass" + -(new Date());
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -391,7 +392,7 @@ void function( global, DOC ){
         }
         var nodes = DOC.getElementsByTagName("script")
         for (var i = 0, node; node = nodes[i++];) {
-            if (!node.pass && node.readyState === "interactive") {
+            if (!node.pass && node.className == moduleClass && node.readyState === "interactive") {
                 return  node.pass = node.src;
             }
         }
@@ -437,11 +438,12 @@ void function( global, DOC ){
     }
     function loadJS( url ){
         var node = DOC.createElement("script")
+        node.className = moduleClass;
         node.onload = node.onreadystatechange = function(){
             if(/loaded|complete|undefined/i.test(node.readyState) ){
                 //mass Framework会在_checkFail把它上面的回调清掉
                 //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
-                var factory = stack.pop() ;
+                var factory = parsing.pop() ;
                 factory &&  factory.delay(node.src)
                 if( checkFail(node) ){
                     $.log("已成功加载 "+node.src, 7);
@@ -474,13 +476,11 @@ void function( global, DOC ){
         var id = url.replace(rmakeid,"");
         if (DOC.getElementById(id))
             return
-        var link     =  DOC.createElement("link");
-        link.charset = "utf-8";
-        link.rel     = "stylesheet";
-        link.href    = url;
-        link.type    = "text/css";
-        link.id      = id;
-        HEAD.insertBefore( link, HEAD.firstChild );
+        var node     =  DOC.createElement("link");
+        node.rel     = "stylesheet";
+        node.href    = url;
+        node.id      = id;
+        HEAD.insertBefore( node, HEAD.firstChild );
     }
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
     window.require = $.require = function( list, factory, parent ){
@@ -566,7 +566,7 @@ void function( global, DOC ){
         if(id ){
             factory.delay(id,args)
         }else{//先进先出
-            stack.push( factory )
+            parsing.push( factory )
         }
     }
     $.require.amd = modules
@@ -628,7 +628,6 @@ void function( global, DOC ){
         NsKey = DOC.URL.replace(rmakeid,"");
         $.exports();
     });
-    console.log($.config.nick +  postfix)
     $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
@@ -697,6 +696,7 @@ dom.namespace改为dom["mass"]
 2012.9.12 升级到v18 添加本地储存的支持
 2012.11.21 升级到v19 去掉CMD支持与$.debug的实现,增加循环依赖的判定
 2012.12.5 升级到v20，参考requireJS的实现，去掉iframe检测，暴露define与require
+2012.12.16 精简loadCSS 让getCurrentScript更加安全
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
