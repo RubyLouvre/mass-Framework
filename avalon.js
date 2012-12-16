@@ -2,7 +2,7 @@
 // MVVM模块v3 by 司徒正美
 //=========================================
 define("mvvm","$event,$css,$attr".split(","), function($){
-    var BINDING = $.config.bindname || "data", 
+    var BINDING = $.config.bindname || "data",
     bridge = {},  expando = new Date - 0, subscribers = "$" + expando
     //ViewModel是一个由访问器与命令组成的对象
     //访问器是用于监控Model中的某个字段读写两用的函数，
@@ -24,6 +24,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         },
         //将一个数值或对象转换为某个ViewModel的属性
         toAccessor: convertToAccessor,
+        toJS: toJS,
         //将一个对象转换为ViewModel
         toViewModel :  function(data, parent){
             var model = parent || {};
@@ -172,6 +173,44 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             $.Array.ensure( accessor[ subscribers ] , bridge[ expando ] );
         }
     }
+    function toJS(key, val){
+        switch( $.type( val ) ){
+            case "Null":
+            case "Undefined":
+            case "String":
+            case "NaN":
+            case "Number":
+            case "Boolean"://属性访问器
+                return val
+            case "Function"://组合访问器
+                if(val[subscribers] === expando && val.$type){
+                    return  val()
+                }//一般的回调
+                return  val;
+            case "Array"://组合访问器
+                if(val[subscribers] === expando && val.$type){
+                    var array  = []
+                    for(var i = 0; i < val.length; i++){
+                        array[i] = toJS(val[i])
+                    }
+                    return  array;
+                }
+                return val
+            case "Object"://转换为子VM
+                if($.isPlainObject( val )){
+                    var object = {}
+                    for(var key in val){
+                        if( val.hasOwnProperty(key)){
+                            object[key] = toJS( val );
+                        }
+                    }
+                    return object
+                }
+                return val
+            default:
+                return val;
+        }
+    }
     var err = new Error("只能是字符串，数值，布尔，Null，Undefined，函数以及纯净的对象")
     function convertToAccessor( key, val, model ){
         switch( $.type( val ) ){
@@ -186,7 +225,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                 if(val[subscribers] === expando && !val.$type){
                     return convertToCombiningAccessor( key, val, model )
                 }//一般的回调
-                return  model[key] = val; 
+                return  model[key] = val;
             case "Array"://组合访问器
                 var array = val[subscribers] ? val : [];
                 return  model[key] = convertToCollectionAccessor( val, array );
@@ -221,7 +260,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         return accessor;
     }
-    
+
     //属性访问器，它是最简单的可读写访问器，位于双向依赖链的最底层，不依赖于其他访问器就能计算到自己的返回值
     function convertToPropertyAccessor( key, val, host ){
         function accessor( neo ){
@@ -236,7 +275,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
         accessor.$val = val;
         accessor.$type = "accessor";
-        
+
         return completeAccessor( key, accessor, host );
     }
     //convertToCombiningAccessor，组合访问器，是它在定义需要通过$.computed帮助生成。
@@ -277,9 +316,9 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
         }
         return completeAccessor( key, accessor, host );
-           
+
     }
-   
+
 
     //集合访问器，这是一个特别的数组对象， 用于一组数据进行监控与操作，当它的顺序或个数发生变化时，
     //它会同步到DOM对应的元素集合中去，因此有关这个数组用于添加，删除，排序的方法都被重写了
@@ -435,16 +474,14 @@ define("mvvm","$event,$css,$attr".split(","), function($){
         }
     }
     // shift pop ok
-    collection.shift = function( accessor, models, templates, method, args ){
+    collection.pop = collection.shift = function( accessor, models, templates, method, args ){
         var template = templates[method]();//取得需要移出的文档碎片
         recoverReferences(template); //让它收集其子节点,然后一同被销毁
     }
-    collection.pop = collection.shift;
-    collection.clear = function(accessor, models, templates, method, args){
-        for(var i = 0, el; el = templates[i++];){
-            recoverReferences( el );
-        }
-        accessor.templates = [];
+
+    collection.sort = collection.reverse = function(accessor, models, templates, method, args){
+        var template = templates[method]();//取得需要移出的文档碎片
+        recoverReferences(template); //让它收集其子节点,然后一同被销毁
     }
     collection.splice = function( accessor, models, templates, method, args ){
         var start = args[0], n = args.length - 2;
@@ -461,7 +498,12 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             accessor.templates.splice(index, 0, getReferences(dom) );
         }
     }
-
+    collection.clear = function(accessor, models, templates, method, args){
+        for(var i = 0, el; el = templates[i++];){
+            recoverReferences( el );
+        }
+        accessor.templates = [];
+    }
     //执行绑定在元素标签内的各种指令
     //MVVM不代表什么很炫的视觉效果之类的，它只是组织你代码的一种方式。有方便后期维护，松耦合等等优点而已
     var inputOne = $.oneObject("text,password,textarea,tel,url,search,number,month,email,datetime,week,datetime-local")
@@ -608,7 +650,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
 
         },
- 
+
         template: {
             //它暂时只供内部使用，是实现if unless with each这四种流程绑定的关键
             update: function( node, val, accessor, model, code, args){
@@ -662,7 +704,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
                             }else{
                                 m = model;
                             }
-            
+
                             setBindingsToChildren( elems, m );
                         })(val[i], i);
                     }
@@ -671,7 +713,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             stopBindings: true
         }
     }
-    
+
     "if,unless,with,each".replace($.rword, function( type ){
         Bindings[ type ] = {
             //node, 子访问器的返回值, 子访问器(位于VM), 父访问器(分解元素bind属性得到DOMAccessor)
@@ -713,8 +755,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             stopBindings: true
         }
     });
-    
-    
+
     return $;
 })
 //2012.8.31 完成 v1
@@ -722,6 +763,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
 //2012.9.22 完成 v2 90%代码重写，使用新的思路收集依赖完成双向绑定链
 //2012.12.11 完成 v3 50% 代码重写 数据绑定部分焕然一新，属性名得到绑定器，
 //2012.12.13 把所有公开API放到MVVM二级命名空间上
+//2012.12.15 添加toJS方法，为collection补上sort erase reverse方法
 //属性值以|为界，前一部分得访问器或命令或表达式，其中访问器或命令可以通过.号深层遍历VM得到
 //实现事件绑定与代理，添加options绑定，相当于ko的options与selectedOptions这两个绑定器
 //value绑定是双向的，结合事件与定时器实现。

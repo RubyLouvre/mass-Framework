@@ -544,7 +544,8 @@ void function( global, DOC ){
         }
         if(typeof args[0] == "function"){
             args.unshift([]);
-        }
+        }//上线合并后能直接得到模块ID,否则寻找当前正在解析中的script节点的src作为模块ID
+        //但getCurrentScript方法只对IE6-10,FF4+有效,其他使用onload+delay闭包组合
         id = modules[id] && modules[id].state == 2 ? _id : getCurrentScript();
         factory = args[1];
         factory.id = _id;//用于调试
@@ -627,6 +628,7 @@ void function( global, DOC ){
         NsKey = DOC.URL.replace(rmakeid,"");
         $.exports();
     });
+    console.log($.config.nick +  postfix)
     $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
