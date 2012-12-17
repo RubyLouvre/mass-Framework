@@ -4,8 +4,9 @@ void function( global, DOC ){
     var NsKey = DOC.URL.replace( rmakeid,"")
     var NsVal = global[ NsKey ];//公共命名空间
     var W3C   = DOC.dispatchEvent //w3c事件模型
-    var HTML  = DOC.documentElement;
-    var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var html  = DOC.documentElement;
+    var head  = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var base = head.getElementsByTagName("base")[0];
     var loadings = [];//正在加载中的模块列表
     var parsings = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
@@ -72,8 +73,8 @@ void function( global, DOC ){
     }
 
     mix( $, {//为此版本的命名空间对象添加成员
-        html:  HTML,
-        head:  HEAD,
+        html:  html,
+        head:  head,
         mix:   mix,
         rword: /[^, ]+/g,
         mass:  mass,//大家都爱用类库的名字储存版本号，我也跟风了
@@ -331,37 +332,37 @@ void function( global, DOC ){
     var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
         Storage = localStorage; 
-    }else  if( HTML.addBehavior){
-        HTML.addBehavior('#default#userData');
-        HTML.save("massdata");
+    }else  if( html.addBehavior){
+        html.addBehavior('#default#userData');
+        html.save("massdata");
         //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
         //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
         var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g");
         function curry(fn) {
             return function(a, b) {
-                HTML.load("massdata");
+                html.load("massdata");
                 a = String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
                 });
                 var result = fn( a, b );
-                HTML.save("massdata");
+                html.save("massdata");
                 return result
             }
         }
         Storage = {
             setItem : curry(function(key, val){
-                HTML.setAttribute(key, val);
+                html.setAttribute(key, val);
             }),
             getItem: curry(function(key){
-                return HTML.getAttribute(key);
+                return html.getAttribute(key);
             }),
             removeItem: curry(function(key){
-                HTML.removeAttribute(key);
+                html.removeAttribute(key);
             }),
             clear: function(){
-                var attributes = HTML.XMLDocument.documentElement.attributes
+                var attributes = html.XMLDocument.documentElement.attributes
                 for (var i=0, attr; attr=attributes[i]; i++) {
-                    HTML.removeAttribute(attr.name)
+                    html.removeAttribute(attr.name)
                 }
             }
         }
@@ -429,7 +430,7 @@ void function( global, DOC ){
         if( error || !modules[ id ].state ){
             //注意，在IE通过!modules[ id ].state检测可能不精确，这时立即移除节点会出错
             setTimeout(function(){
-                HEAD.removeChild(node)
+                head.removeChild(node)
             }, error ? 0 : 1000 );
             $.log("加载 "+ id +" 失败", 7);
         }else{
@@ -437,10 +438,10 @@ void function( global, DOC ){
         }
     }
     function loadJS( url ){
-        var node = DOC.createElement("script")
+        var node = DOC.createElement("script")//, IE = node.uniqueID
         node.className = moduleClass;
-        node.onload = node.onreadystatechange = function(){
-            if(/loaded|complete|undefined/i.test(node.readyState) ){
+        node[W3C ? "onload" : "onreadystatechange"] = function(){
+            if(W3C || /loaded|complete/i.test(node.readyState) ){
                 //mass Framework会在_checkFail把它上面的回调清掉
                 //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
                 var factory = parsings.pop() ;
@@ -454,8 +455,12 @@ void function( global, DOC ){
             checkFail(node, true)
         }
         node.src = url 
+        if (base && !XMLHttpRequest ){
+            head.insertBefore(node, base);
+        }else{     
+            head.appendChild(node)
+        }
         $.log("正准备加载 "+node.src, 7)
-        HEAD.insertBefore(node, HEAD.firstChild)
     }
     function loadStorage( id ){
         var factory =  Storage.getItem( id );
@@ -480,7 +485,7 @@ void function( global, DOC ){
         node.rel     = "stylesheet";
         node.href    = url;
         node.id      = id;
-        HEAD.insertBefore( node, HEAD.firstChild );
+        head.insertBefore( node, head.firstChild );
     }
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
     window.require = $.require = function( list, factory, parent ){
@@ -599,7 +604,7 @@ void function( global, DOC ){
     };
     function doScrollCheck() {
         try {
-            HTML.doScroll( "left" ) ;
+            html.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
             setTimeout( doScrollCheck, 31 );
@@ -614,7 +619,7 @@ void function( global, DOC ){
                 fireReady();
             }
         });
-        if( HTML.doScroll && self.eval === parent.eval)
+        if( html.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
 
@@ -697,6 +702,7 @@ dom.namespace改为dom["mass"]
 2012.11.21 升级到v19 去掉CMD支持与$.debug的实现,增加循环依赖的判定
 2012.12.5 升级到v20，参考requireJS的实现，去掉iframe检测，暴露define与require
 2012.12.16 精简loadCSS 让getCurrentScript更加安全
+2012.12.18 升级v21 处理opera readyState BUG 与IE6下的节点插入顺序
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript

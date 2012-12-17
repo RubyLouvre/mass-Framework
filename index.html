@@ -11,50 +11,12 @@
         </style>
 
         <script>
-            $.config.level = 6
 
-
-            require("avalon,ready", function($) {
-
-                var $$ = $.MVVM
-                
-                var VM = $$.toViewModel({
-                    user:{
-                        xxxx: "aaaa",
-                        yyyy: "bbbb"
-                    },
-                    toggle: true,
-                    list:[{
-                            title:"aaa"
-                        },
-                        {
-                            title:"bbb"
-                        },
-                        {
-                            title:"ccc"
-                        },
-                        {
-                            title:"ddd"
-                        }
-                    ]
-
-                });
-                VM.remove = function(e){
-                    if(e){
-                        VM.list.erase(e.target)
-                    }
-                }
-                $$.render(VM)
-                setTimeout(function(){
-                    VM.toggle(false)
-                },500)
-
+        require("fx", function(){
+            console.log("xxxxxxxxxxxxx")
+        })
              
-            })
 
-
-
-        
 
 
         </script>

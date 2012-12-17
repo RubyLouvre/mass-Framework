@@ -523,7 +523,7 @@ define("ajax",["mass","$flow"], function($){
                 script.charset = options.charset;
             }
             //当script的资源非JS文件时,发生的错误不可捕获
-            script.onerror = script.onload = script.onreadystatechange = function(e) {
+            script.onerror = script[script.uniqueID ? "onreadystatechange" : "onload"] = function(e) {
                 e = e || event;
                 self.respond((e.type || "error").toLowerCase()); // firefox onerror 没有 type ?!
             };
