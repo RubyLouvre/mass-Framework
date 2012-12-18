@@ -4,16 +4,16 @@
     <head>
         <title>MVVM Demo by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <script src="http://files.cnblogs.com/rubylouvre/mass.js">  </script>
+        <script src="mass.js">  </script>
         <base>
-        <style>
-
-        </style>
+        <style>#fxbbb{ width:100px;height:100px;background:lightblue;}</style>
 
         <script>
 
             require("fx", function(){
-                console.log("最后的回调")
+                alert("test fx loaded")
+                var node =  $("#fxbbb")
+                node.delay(1000).hide(1000)
             })
              
 
@@ -23,18 +23,6 @@
         </script>
     </head>
     <body>
-        <ul data-each-item="list">
-            <li data-text="item.title" data-on-click="remove">aaaa</li>
-        </ul>
-        <div data-with="user">
-            <p data-text="xxxx"></p>
-            <p data-text="yyyy"></p>
-        </div>
-        <div data-if="toggle">
-            这是诸葛亮
-        </div>
-        <div data-unless="toggle">
-            这是周瑜
-        </div>
+        <div id=fxbbb></div>
     </body>
 </html>
