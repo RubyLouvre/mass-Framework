@@ -304,7 +304,8 @@ define("fx", ["$css"],function( $ ){
         var node = fx.node, now =  +new Date;
         if(!fx.startTime){//第一帧
             callback(fx, node, "before");//动画开始前的预操作
-            Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
+            fx.props && Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
+            fx.props = fx.props || []
             Animation[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
         }else{
