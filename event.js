@@ -474,8 +474,8 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                 if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
                     var doc = event.target.ownerDocument || document;
                     var box = document.compatMode == "BackCompat" ?  doc.body : doc.documentElement
-                    event.pageX = event.clientX + (box && box.scrollLeft  || 0) - (box && box.clientLeft || 0);
-                    event.pageY = event.clientY + (box && box.scrollTop   || 0) - (box && box.clientTop  || 0);
+                    event.pageX = event.clientX + ( box.scrollLeft >> 0) - ( box.clientLeft >> 0);
+                    event.pageY = event.clientY + ( box.scrollTop >> 0) - ( box.clientTop  >> 0);
                 }
                 //如果不存在relatedTarget属性，为它添加一个
                 if ( !event.relatedTarget && event.fromElement ) {
