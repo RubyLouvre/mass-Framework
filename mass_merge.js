@@ -1,17 +1,22 @@
-void function( global, DOC ){
+;
+;
+;
+(function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace( rmakeid,"")
     var NsVal = global[ NsKey ];//公共命名空间
     var W3C   = DOC.dispatchEvent //w3c事件模型
-    var HTML  = DOC.documentElement;
-    var HEAD  = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var html  = DOC.documentElement;
+    var head  = DOC.head || DOC.getElementsByTagName( "head" )[0]
+    var base = head.getElementsByTagName("base")[0];
     var loadings = [];//正在加载中的模块列表
-    var stack = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
+    var parsings = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
     var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+    var moduleClass = "mass" + -(new Date());
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -66,8 +71,8 @@ void function( global, DOC ){
     }
 
     mix( $, {//为此版本的命名空间对象添加成员
-        html:  HTML,
-        head:  HEAD,
+        html:  html,
+        head:  head,
         mix:   mix,
         rword: /[^, ]+/g,
         mass:  mass,//大家都爱用类库的名字储存版本号，我也跟风了
@@ -309,37 +314,37 @@ void function( global, DOC ){
     var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
     if( global.localStorage){
         Storage = localStorage; 
-    }else  if( HTML.addBehavior){
-        HTML.addBehavior('#default#userData');
-        HTML.save("massdata");
+    }else  if( html.addBehavior){
+        html.addBehavior('#default#userData');
+        html.save("massdata");
         //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
         //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
         var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g");
         function curry(fn) {
             return function(a, b) {
-                HTML.load("massdata");
+                html.load("massdata");
                 a = String(a).replace(rstoragekey, function(w){
                     return w.charCodeAt(0);
                 });
                 var result = fn( a, b );
-                HTML.save("massdata");
+                html.save("massdata");
                 return result
             }
         }
         Storage = {
             setItem : curry(function(key, val){
-                HTML.setAttribute(key, val);
+                html.setAttribute(key, val);
             }),
             getItem: curry(function(key){
-                return HTML.getAttribute(key);
+                return html.getAttribute(key);
             }),
             removeItem: curry(function(key){
-                HTML.removeAttribute(key);
+                html.removeAttribute(key);
             }),
             clear: function(){
-                var attributes = HTML.XMLDocument.documentElement.attributes
+                var attributes = html.XMLDocument.documentElement.attributes
                 for (var i=0, attr; attr=attributes[i]; i++) {
-                    HTML.removeAttribute(attr.name)
+                    html.removeAttribute(attr.name)
                 }
             }
         }
@@ -370,7 +375,7 @@ void function( global, DOC ){
         }
         var nodes = DOC.getElementsByTagName("script")
         for (var i = 0, node; node = nodes[i++];) {
-            if (!node.pass && node.readyState === "interactive") {
+            if (!node.pass && node.className == moduleClass && node.readyState === "interactive") {
                 return  node.pass = node.src;
             }
         }
@@ -407,7 +412,7 @@ void function( global, DOC ){
         if( error || !modules[ id ].state ){
             //注意，在IE通过!modules[ id ].state检测可能不精确，这时立即移除节点会出错
             setTimeout(function(){
-                HEAD.removeChild(node)
+                head.removeChild(node)
             }, error ? 0 : 1000 );
             $.log("加载 "+ id +" 失败", 7);
         }else{
@@ -415,12 +420,12 @@ void function( global, DOC ){
         }
     }
     function loadJS( url ){
-        var node = DOC.createElement("script")
-        node.onload = node.onreadystatechange = function(){
-            if(/loaded|complete|undefined/i.test(node.readyState) ){
-                //mass Framework会在_checkFail把它上面的回调清掉
-                //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
-                var factory = stack.pop() ;
+        var node = DOC.createElement("script")//, IE = node.uniqueID
+        node.className = moduleClass;
+        node[W3C ? "onload" : "onreadystatechange"] = function(){
+            if(W3C || /loaded|complete/i.test(node.readyState) ){
+                //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
+                var factory = parsings.pop() ;
                 factory &&  factory.delay(node.src)
                 if( checkFail(node) ){
                     $.log("已成功加载 "+node.src, 7);
@@ -431,8 +436,22 @@ void function( global, DOC ){
             checkFail(node, true)
         }
         node.src = url 
+        if (base && !XMLHttpRequest ){
+            head.insertBefore(node, base);
+        }else{     
+            head.appendChild(node)
+        }
         $.log("正准备加载 "+node.src, 7)
-        HEAD.insertBefore(node, HEAD.firstChild)
+    }
+    function loadCSS(url){
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var node     =  DOC.createElement("link");
+        node.rel     = "stylesheet";
+        node.href    = url;
+        node.id      = id;
+        head.insertBefore( node, head.firstChild );
     }
     function loadStorage( id ){
         var factory =  Storage.getItem( id );
@@ -449,18 +468,7 @@ void function( global, DOC ){
             require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
         }
     }
-    function loadCSS(url){
-        var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var link     =  DOC.createElement("link");
-        link.charset = "utf-8";
-        link.rel     = "stylesheet";
-        link.href    = url;
-        link.type    = "text/css";
-        link.id      = id;
-        HEAD.insertBefore( link, HEAD.firstChild );
-    }
+
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
     window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
@@ -523,7 +531,8 @@ void function( global, DOC ){
         }
         if(typeof args[0] == "function"){
             args.unshift([]);
-        }
+        }//上线合并后能直接得到模块ID,否则寻找当前正在解析中的script节点的src作为模块ID
+        //但getCurrentScript方法只对IE6-10,FF4+有效,其他使用onload+delay闭包组合
         id = modules[id] && modules[id].state == 2 ? _id : getCurrentScript();
         factory = args[1];
         factory.id = _id;//用于调试
@@ -544,7 +553,7 @@ void function( global, DOC ){
         if(id ){
             factory.delay(id,args)
         }else{//先进先出
-            stack.push( factory )
+            parsings.push( factory )
         }
     }
     $.require.amd = modules
@@ -577,22 +586,30 @@ void function( global, DOC ){
     };
     function doScrollCheck() {
         try {
-            HTML.doScroll( "left" ) ;
+            html.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
             setTimeout( doScrollCheck, 31 );
         }
     };
-
+    //在firefox3.6之前，不存在readyState属性
+    //http://www.cnblogs.com/rubylouvre/archive/2012/12/18/2822912.html
+    if(DOC.readyState == null){
+        DOC.readyState = "loading";
+        var readyState = true;
+    }
     if ( DOC.readyState === "complete" ) {
         fireReady();//如果在domReady之外加载
     }else {
         $.bind( DOC, ready, readyFn = function(){
             if ( W3C || DOC.readyState === "complete" ){
                 fireReady();
+                if(readyState){//IE下不能改写DOC.readyState
+                    DOC.readyState  = "complete";
+                }
             }
         });
-        if( HTML.doScroll && self.eval === parent.eval)
+        if( html.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
 
@@ -1388,15 +1405,6 @@ define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),func
         },
         // 对数组进行去重操作，返回一个没有重复元素的新数组。
         unique: function ( target ) {
-            //            var result = [];
-            //                o:for(var i = 0, n = target.length; i < n; i++) {
-            //                    for(var x = i + 1 ; x < n; x++) {
-            //                        if(target[x] === target[i])
-            //                            continue o;
-            //                    }
-            //                    result.push(target[i]);
-            //                }
-            //            return result;
             var ret = [], n = target.length, i, j;//by abcd
             for (i = 0; i < n; i++) {
                 for (j = i + 1; j < n; j++)
@@ -3983,15 +3991,18 @@ define("attr",["$node"], function( $ ){
             return this;
         },
         //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
-        toggleClass: function( value ){
-            var type = typeof value , classNames = type === "string" && value.match( rnospaces ) || [], className, i;
+        toggleClass: function( value, stateVal ){
+            var type = typeof value , classNames = type === "string" && value.match( rnospaces ) || [], className, i,
+            isBool = typeof stateVal === "boolean";
             return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
-                    var self = $( el );
+                    var self = $( el ),
+                    state = stateVal;
                     if(type == "string" ){
                         while ( (className = classNames[ i++ ]) ) {
-                            self[ self.hasClass( className ) ? "removeClass" : "addClass" ]( className );
+                            state = isBool ? state : !self.hasClass( className );
+                            self[ state ? "addClass" : "removeClass" ]( className );
                         }
                     } else if ( type === "undefined" || type === "boolean" ) {
                         if ( el.className ) {
@@ -4097,7 +4108,8 @@ define("attr",["$node"], function( $ ){
                 //读写操作
                 var access = value === void 0 ? "get" : "set"
                 if( isBool ){
-                    type = "@bool"; name = prop;
+                    type = "@bool";
+                    name = prop;
                 }
                 return ( noxml  && $.attrHooks[ name+":"+access ] ||
                     $.attrHooks[ type +":"+access] )(node, name, value)
@@ -6243,7 +6255,7 @@ define("ajax",["mass","$flow"], function($){
                 script.charset = options.charset;
             }
             //当script的资源非JS文件时,发生的错误不可捕获
-            script.onerror = script.onload = script.onreadystatechange = function(e) {
+            script.onerror = script[script.uniqueID ? "onreadystatechange" : "onload"] = function(e) {
                 e = e || event;
                 self.respond((e.type || "error").toLowerCase()); // firefox onerror 没有 type ?!
             };
@@ -6922,7 +6934,7 @@ define("fx", ["$css"],function( $ ){
 
 
 
-}( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
+})( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
 

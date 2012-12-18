@@ -1,4 +1,7 @@
-void function( global, DOC ){
+;
+;
+;
+(function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace( rmakeid,"")
@@ -442,8 +445,7 @@ void function( global, DOC ){
         node.className = moduleClass;
         node[W3C ? "onload" : "onreadystatechange"] = function(){
             if(W3C || /loaded|complete/i.test(node.readyState) ){
-                //mass Framework会在_checkFail把它上面的回调清掉
-                //因为在IE9-10, opera中，它们同时支持onload，onreadystatechange，以防重复执行factory.delay
+                //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
                 var factory = parsings.pop() ;
                 factory &&  factory.delay(node.src)
                 if( checkFail(node) ){
@@ -462,6 +464,16 @@ void function( global, DOC ){
         }
         $.log("正准备加载 "+node.src, 7)
     }
+    function loadCSS(url){
+        var id = url.replace(rmakeid,"");
+        if (DOC.getElementById(id))
+            return
+        var node     =  DOC.createElement("link");
+        node.rel     = "stylesheet";
+        node.href    = url;
+        node.id      = id;
+        head.insertBefore( node, head.firstChild );
+    }
     function loadStorage( id ){
         var factory =  Storage.getItem( id );
         if( $.config.storage && factory && !modules[id]){
@@ -477,16 +489,7 @@ void function( global, DOC ){
             require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
         }
     }
-    function loadCSS(url){
-        var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var node     =  DOC.createElement("link");
-        node.rel     = "stylesheet";
-        node.href    = url;
-        node.id      = id;
-        head.insertBefore( node, head.firstChild );
-    }
+
     //请求模块（依赖列表,模块工厂,加载失败时触发的回调）
     window.require = $.require = function( list, factory, parent ){
         var deps = {},  // 用于检测它的依赖是否都为2
@@ -610,13 +613,21 @@ void function( global, DOC ){
             setTimeout( doScrollCheck, 31 );
         }
     };
-
+    //在firefox3.6之前，不存在readyState属性
+    //http://www.cnblogs.com/rubylouvre/archive/2012/12/18/2822912.html
+    if(DOC.readyState == null){
+        DOC.readyState = "loading";
+        var readyState = true;
+    }
     if ( DOC.readyState === "complete" ) {
         fireReady();//如果在domReady之外加载
     }else {
         $.bind( DOC, ready, readyFn = function(){
             if ( W3C || DOC.readyState === "complete" ){
                 fireReady();
+                if(readyState){//IE下不能改写DOC.readyState
+                    DOC.readyState  = "complete";
+                }
             }
         });
         if( html.doScroll && self.eval === parent.eval)
@@ -636,7 +647,7 @@ void function( global, DOC ){
     $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
-}( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
+})( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
 /**
