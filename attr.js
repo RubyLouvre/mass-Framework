@@ -67,15 +67,18 @@ define("attr",["$node"], function( $ ){
             return this;
         },
         //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
-        toggleClass: function( value ){
-            var type = typeof value , classNames = type === "string" && value.match( rnospaces ) || [], className, i;
+        toggleClass: function( value, stateVal ){
+            var type = typeof value , classNames = type === "string" && value.match( rnospaces ) || [], className, i,
+            isBool = typeof stateVal === "boolean";
             return this.each(function( el ) {
                 i = 0;
                 if(el.nodeType === 1){
-                    var self = $( el );
+                    var self = $( el ),
+                    state = stateVal;
                     if(type == "string" ){
                         while ( (className = classNames[ i++ ]) ) {
-                            self[ self.hasClass( className ) ? "removeClass" : "addClass" ]( className );
+                            state = isBool ? state : !self.hasClass( className );
+                            self[ state ? "addClass" : "removeClass" ]( className );
                         }
                     } else if ( type === "undefined" || type === "boolean" ) {
                         if ( el.className ) {
@@ -181,7 +184,8 @@ define("attr",["$node"], function( $ ){
                 //读写操作
                 var access = value === void 0 ? "get" : "set"
                 if( isBool ){
-                    type = "@bool"; name = prop;
+                    type = "@bool";
+                    name = prop;
                 }
                 return ( noxml  && $.attrHooks[ name+":"+access ] ||
                     $.attrHooks[ type +":"+access] )(node, name, value)
