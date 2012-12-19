@@ -1,7 +1,7 @@
 window.onerror = function(a, b,c){
     alert(a+" "+c+" "+b)
 }
-;
+
 ;
 (function( global, DOC ){
     var $$ = global.$//保存已有同名变量
@@ -236,9 +236,8 @@ window.onerror = function(a, b,c){
             return this
         }
     });
-    var cur
     (function(scripts){
-        cur = scripts[ scripts.length - 1 ];
+        var cur = scripts[ scripts.length - 1 ];
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( "src", 4 );
         url = url.replace(/[?#].*/, "");
         var a = cur.getAttribute("debug");
@@ -396,9 +395,10 @@ window.onerror = function(a, b,c){
         if(DOC.currentScript){
             return DOC.currentScript.src
         }
-        var nodes = DOC.getElementsByTagName("script")
+        var nodes = head.getElementsByTagName("script")
         for (var i = 0, node; node = nodes[i++];) {
-            if (!node.pass && node.className == moduleClass && node.readyState === "interactive") {
+            if ( node.className == moduleClass && node.readyState === "interactive") {
+                node.className = "";
                 return  node.pass = node.src;
             }
         }
@@ -435,7 +435,7 @@ window.onerror = function(a, b,c){
         if( error || !modules[ id ].state ){
             //注意，在IE通过!modules[ id ].state检测可能不精确，这时立即移除节点会出错
             setTimeout(function(){
-                node.parentNode.removeChild(node)
+                head.removeChild(node)
             }, error ? 0 : 1000 );
             $.log("加载 "+ id +" 失败", 7);
         }else{
@@ -458,9 +458,8 @@ window.onerror = function(a, b,c){
         node.onerror = function(){
             checkFail(node, true)
         }
-        node.src = url
+        node.src = url;
         head.insertBefore(node, head.firstChild)
-      
         $.log("正准备加载 "+node.src, 7)
     }
     function loadCSS(url){
