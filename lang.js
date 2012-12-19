@@ -1,7 +1,7 @@
 //=========================================
 // 类型扩展模块v7 by 司徒正美
 //=========================================
-define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),function($){
+define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
