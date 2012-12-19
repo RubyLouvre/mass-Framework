@@ -1,5 +1,5 @@
 
-define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"),function( $ ){
+define("event", top.dispatchEvent ? ["$node"]: ["$event_fix"],function( $ ){
     var facade = $.event || ($.event = {
         special: {}
     });
