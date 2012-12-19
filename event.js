@@ -1,5 +1,6 @@
 
-define("event", top.dispatchEvent ? ["$node"]: ["$event_fix"],function( $ ){
+define("event",  ["$node"],function( $ ){
+  //top.dispatchEvent ? ["$node"]: ["$event_fix"],
     var facade = $.event || ($.event = {
         special: {}
     });

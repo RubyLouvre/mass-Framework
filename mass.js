@@ -1,4 +1,6 @@
-;
+window.onerror = function(a, b,c){
+    alert(a+" "+c+" "+b)
+}
 ;
 ;
 (function( global, DOC ){
@@ -9,14 +11,13 @@
     var W3C   = DOC.dispatchEvent //w3c事件模型
     var html  = DOC.documentElement;
     var head  = DOC.head || DOC.getElementsByTagName( "head" )[0]
-    var base = head.getElementsByTagName("base")[0];
     var loadings = [];//正在加载中的模块列表
     var parsings = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
     var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
-    var moduleClass = "mass" + -(new Date());
+    var moduleClass = "mass" + (new Date() - 0);
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -235,7 +236,8 @@
             return this
         }
     });
-    (function(scripts, cur){
+    var cur
+    (function(scripts){
         cur = scripts[ scripts.length - 1 ];
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( "src", 4 );
         url = url.replace(/[?#].*/, "");
@@ -433,7 +435,7 @@
         if( error || !modules[ id ].state ){
             //注意，在IE通过!modules[ id ].state检测可能不精确，这时立即移除节点会出错
             setTimeout(function(){
-                head.removeChild(node)
+                node.parentNode.removeChild(node)
             }, error ? 0 : 1000 );
             $.log("加载 "+ id +" 失败", 7);
         }else{
@@ -456,12 +458,9 @@
         node.onerror = function(){
             checkFail(node, true)
         }
-        node.src = url 
-        if (base && !XMLHttpRequest ){
-            head.insertBefore(node, base);
-        }else{     
-            head.appendChild(node)
-        }
+        node.src = url
+        head.insertBefore(node, head.firstChild)
+      
         $.log("正准备加载 "+node.src, 7)
     }
     function loadCSS(url){

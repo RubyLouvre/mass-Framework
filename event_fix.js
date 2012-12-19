@@ -4,6 +4,7 @@
 define("event_fix", !!document.dispatchEvent, ["node"], function( $ ){
     //模拟IE678的reset,submit,change的事件代理
     var rformElems  = /^(?:input|select|textarea)$/i
+    return $;
     $.event = {
         special: {
             change: {
@@ -82,19 +83,19 @@ define("event_fix", !!document.dispatchEvent, ["node"], function( $ ){
                     if ( event._submit_bubble ) {
                         delete event._submit_bubble;
                         if ( this.parentNode && !event.isTrigger ) {
-                            jQuery.event.simulate( "submit", this.parentNode, event, true );
+                            $.event.simulate( "submit", this.parentNode, event, true );
                         }
                     }
                 },
 
                 teardown: function() {
                     // Only need this for delegated form submit events
-                    if ( jQuery.nodeName( this, "form" ) ) {
+                    if (  this.tagName == "FORM" ) {
                         return false;
                     }
 
                     // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
-                    jQuery.event.remove( this, "._submit" );
+                    $.event.remove( this, "._submit" );
                 }
             }
         }
