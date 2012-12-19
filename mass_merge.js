@@ -1,9 +1,5 @@
-window.onerror = function(a, b,c){
-    alert(a+" "+c+" "+b)
-}
 
-;
-(function( global, DOC ){
+;;;(function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace( rmakeid,"")
@@ -17,7 +13,7 @@ window.onerror = function(a, b,c){
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
     var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
-    var moduleClass = "mass" + (new Date() - 0);
+    var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -374,11 +370,10 @@ window.onerror = function(a, b,c){
         if(DOC.currentScript){
             return DOC.currentScript.src
         }
-        var nodes = head.getElementsByTagName("script")
+        var nodes = head.getElementsByTagName("script")//只在head标签中寻找
         for (var i = 0, node; node = nodes[i++];) {
             if ( node.className == moduleClass && node.readyState === "interactive") {
-                node.className = "";
-                return  node.pass = node.src;
+                return  node.className = node.src;
             }
         }
     }
@@ -422,8 +417,8 @@ window.onerror = function(a, b,c){
         }
     }
     function loadJS( url ){
-        var node = DOC.createElement("script")//, IE = node.uniqueID
-        node.className = moduleClass;
+        var node = DOC.createElement("script");
+        node.className = moduleClass;//让getCurrentScript只处理类名为moduleClass的script节点
         node[W3C ? "onload" : "onreadystatechange"] = function(){
             if(W3C || /loaded|complete/i.test(node.readyState) ){
                 //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
@@ -437,9 +432,9 @@ window.onerror = function(a, b,c){
         node.onerror = function(){
             checkFail(node, true)
         }
-        node.src = url;
-        head.insertBefore(node, head.firstChild)
-        $.log("正准备加载 "+node.src, 7)
+        node.src = url;//插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
+        head.insertBefore(node, head.firstChild);//这也避开了IE6下的自闭合base标签引起的BUG
+        $.log("正准备加载 "+node.src, 7)//更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
