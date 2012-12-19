@@ -1,7 +1,7 @@
 //=========================================
 //  语言补丁模块
 //==========================================
-define( "lang_fix", !!Array.isArray, function(){
+define( "lang_fix", !!Array.isArray,["mass"], function($){
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
     P = "prototype",
@@ -178,15 +178,16 @@ define( "lang_fix", !!Array.isArray, function(){
             return substr.call( this, start,length);
         }
     }
-//    var testString = "0123456789";
-//    alert(testString.substr(2));
-//    // Output: 23456789
-//    alert(testString.substr(2, 5));
-//    // Output: 23456
-//    alert(testString.substr(-3));
-//    // Output: 789 IE:0123456789
-//    alert(testString.substr(-5, 2));
-//// Output: 56  IE:01
+    //    var testString = "0123456789";
+    //    alert(testString.substr(2));
+    //    // Output: 23456789
+    //    alert(testString.substr(2, 5));
+    //    // Output: 23456
+    //    alert(testString.substr(-3));
+    //    // Output: 789 IE:0123456789
+    //    alert(testString.substr(-5, 2));
+    //// Output: 56  IE:01
+    return $
 });
 /**
 2011.7.26 添加Object.getPrototypeOf方法
