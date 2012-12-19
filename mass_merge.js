@@ -1,5 +1,7 @@
-;
-;
+window.onerror = function(a, b,c){
+    alert(a+" "+c+" "+b)
+}
+
 ;
 (function( global, DOC ){
     var $$ = global.$//保存已有同名变量
@@ -9,14 +11,13 @@
     var W3C   = DOC.dispatchEvent //w3c事件模型
     var html  = DOC.documentElement;
     var head  = DOC.head || DOC.getElementsByTagName( "head" )[0]
-    var base = head.getElementsByTagName("base")[0];
     var loadings = [];//正在加载中的模块列表
     var parsings = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
     var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
-    var moduleClass = "mass" + -(new Date());
+    var moduleClass = "mass" + (new Date() - 0);
     var class2type = {
         "[object HTMLDocument]"   : "Document",
         "[object HTMLCollection]" : "NodeList",
@@ -214,8 +215,8 @@
             return this
         }
     });
-    (function(scripts, cur){
-        cur = scripts[ scripts.length - 1 ];
+    (function(scripts){
+        var cur = scripts[ scripts.length - 1 ];
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( "src", 4 );
         url = url.replace(/[?#].*/, "");
         var a = cur.getAttribute("debug");
@@ -373,9 +374,10 @@
         if(DOC.currentScript){
             return DOC.currentScript.src
         }
-        var nodes = DOC.getElementsByTagName("script")
+        var nodes = head.getElementsByTagName("script")
         for (var i = 0, node; node = nodes[i++];) {
-            if (!node.pass && node.className == moduleClass && node.readyState === "interactive") {
+            if ( node.className == moduleClass && node.readyState === "interactive") {
+                node.className = "";
                 return  node.pass = node.src;
             }
         }
@@ -435,12 +437,8 @@
         node.onerror = function(){
             checkFail(node, true)
         }
-        node.src = url 
-        if (base && !XMLHttpRequest ){
-            head.insertBefore(node, base);
-        }else{     
-            head.appendChild(node)
-        }
+        node.src = url;
+        head.insertBefore(node, head.firstChild)
         $.log("正准备加载 "+node.src, 7)
     }
     function loadCSS(url){
@@ -637,7 +635,7 @@ var define = function(a){
         })//=========================================
 //  语言补丁模块
 //==========================================
-define( "lang_fix", !!Array.isArray, function(){
+define( "lang_fix", !!Array.isArray,["mass"], function($){
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
     P = "prototype",
@@ -814,22 +812,23 @@ define( "lang_fix", !!Array.isArray, function(){
             return substr.call( this, start,length);
         }
     }
-//    var testString = "0123456789";
-//    alert(testString.substr(2));
-//    // Output: 23456789
-//    alert(testString.substr(2, 5));
-//    // Output: 23456
-//    alert(testString.substr(-3));
-//    // Output: 789 IE:0123456789
-//    alert(testString.substr(-5, 2));
-//// Output: 56  IE:01
+    //    var testString = "0123456789";
+    //    alert(testString.substr(2));
+    //    // Output: 23456789
+    //    alert(testString.substr(2, 5));
+    //    // Output: 23456
+    //    alert(testString.substr(-3));
+    //    // Output: 789 IE:0123456789
+    //    alert(testString.substr(-5, 2));
+    //// Output: 56  IE:01
+    return $
 });
 
 
 //=========================================
 // 类型扩展模块v7 by 司徒正美
 //=========================================
-define("lang", ["mass"][ Array.isArray ? "valueOf" : "concat"]("$lang_fix"),function($){
+define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
     rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
@@ -4933,108 +4932,108 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
 define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
     //模拟IE678的reset,submit,change的事件代理
     var rformElems  = /^(?:input|select|textarea)$/i
-    $.event = {
-        special: {
-            change: {
-                setup: function() {
-                    if ( rformElems.test( this.nodeName ) ) {
-                        // IE doesn't fire change on a check/radio until blur; trigger it on click
-                        // after a propertychange. Eat the blur-change in special.change.handle.
-                        // This still fires onchange a second time for check/radio after blur.
-                        if ( this.type === "checkbox" || this.type === "radio" ) {
-                            $( this ).bind(  "propertychange._change", function( event ) {
-                                if ( event.originalEvent.propertyName === "checked" ) {
-                                    this._just_changed = true;
-                                }
-                            });
-                            $( this). bind("click._change", function( event ) {
-                                if ( this._just_changed && !event.isTrigger ) {
-                                    this._just_changed = false;
-                                }
-                                // Allow triggered, simulated change events (#11500)
-                                $.event.simulate( "change", this, event, true );
-                            } );
-                        }
-                        return false;
-                    }
-                    // Delegated event; lazy-add a change handler on descendant inputs
-                    $ (this).bind(  "beforeactivate._change", function( e ) {
-                        var elem = e.target;
-                        if ( rformElems.test( elem.nodeName ) && !$._data( elem, "_change_attached" ) ) {
-                            $( elem ).bind( "change._change", function( event ) {
-                                if ( this.parentNode && !event.isSimulated && !event.isTrigger ) {
-                                    $.event.simulate( "change", this.parentNode, event, true );
-                                }
-                                $._data( elem, "_change_attached", true );
-                            })
+    var facade = $.event = {
+        special: {}
+    };
+    var special = facade.special
+    special.change =  {
+        setup: function() {
+            if ( rformElems.test( this.nodeName ) ) {
+                // IE doesn't fire change on a check/radio until blur; trigger it on click
+                // after a propertychange. Eat the blur-change in special.change.handle.
+                // This still fires onchange a second time for check/radio after blur.
+                if ( this.type === "checkbox" || this.type === "radio" ) {
+                    $( this ).bind(  "propertychange._change", function( event ) {
+                        if ( event.originalEvent.propertyName === "checked" ) {
+                            this._just_changed = true;
                         }
                     });
-                },
-                handle: function( event ) {
-                    var elem = event.target;
-                    // Swallow native change events from checkbox/radio, we already triggered them above
-                    if ( this !== elem || event.isSimulated || event.isTrigger || (elem.type !== "radio" && elem.type !== "checkbox") ) {
-                        return event.handleObj.handler.apply( this, arguments );
-                    }
-                },
-                teardown: function() {
-                    $.event.remove( this, "._change" );
-                    return !rformElems.test( this.nodeName );
+                    $( this). bind("click._change", function( event ) {
+                        if ( this._just_changed && !event.isTrigger ) {
+                            this._just_changed = false;
+                        }
+                        // Allow triggered, simulated change events (#11500)
+                        facade.simulate( "change", this, event, true );
+                    } );
                 }
-            },
-            submit: {
-                setup: function() {
-                    // Only need this for delegated form submit events
-                    if ( this.tagName === "FORM"  ) {
-                        return false;
-                    }
-                    // Lazy-add a submit handler when a descendant form may potentially be submitted
-                    $( this).bind( "click._submit keypress._submit", function( e ) {
-                        // Node name check avoids a VML-related crash in IE (#9807)
-                        var elem = e.target,
-                        form = /input|button/i.test(elem.tagName) ? elem.form : undefined;
-                        if ( form && !$._data( form, "_submit_attached" ) ) {
-                            $.event.bind( form,{
-                                type:      "submit._submit",
-                                callback: function( event ) {
-                                    event._submit_bubble = true;
-                                }
-                            });
-                            $._data( form, "_submit_attached", true );
+                return false;
+            }
+            // Delegated event; lazy-add a change handler on descendant inputs
+            $ (this).bind(  "beforeactivate._change", function( e ) {
+                var elem = e.target;
+                if ( rformElems.test( elem.nodeName ) && !$._data( elem, "_change_attached" ) ) {
+                    $( elem ).bind( "change._change", function( event ) {
+                        if ( this.parentNode && !event.isSimulated && !event.isTrigger ) {
+                            facade.simulate( "change", this.parentNode, event, true );
+                        }
+                        $._data( elem, "_change_attached", true );
+                    })
+                }
+            });
+        },
+        handle: function( event ) {
+            var elem = event.target;
+            // Swallow native change events from checkbox/radio, we already triggered them above
+            if ( this !== elem || event.isSimulated || event.isTrigger || (elem.type !== "radio" && elem.type !== "checkbox") ) {
+                return event.handleObj.handler.apply( this, arguments );
+            }
+        },
+        teardown: function() {
+            facade.remove( this, "._change" );
+            return !rformElems.test( this.nodeName );
+        }
+    }
+    special.submit = {
+        setup: function() {
+            // Only need this for delegated form submit events
+            if ( this.tagName === "FORM"  ) {
+                return false;
+            }
+            // Lazy-add a submit handler when a descendant form may potentially be submitted
+            $( this).bind( "click._submit keypress._submit", function( e ) {
+                // Node name check avoids a VML-related crash in IE (#9807)
+                var elem = e.target,
+                form = /input|button/i.test(elem.tagName) ? elem.form : undefined;
+                if ( form && !$._data( form, "_submit_attached" ) ) {
+                    facade.bind( form,{
+                        type:      "submit._submit",
+                        callback: function( event ) {
+                            event._submit_bubble = true;
                         }
                     });
-                // return undefined since we don't need an event listener
-                },
+                    $._data( form, "_submit_attached", true );
+                }
+            });
+        // return undefined since we don't need an event listener
+        },
 
-                postDispatch: function( event ) {
-                    // If form was submitted by the user, bubble the event up the tree
-                    if ( event._submit_bubble ) {
-                        delete event._submit_bubble;
-                        if ( this.parentNode && !event.isTrigger ) {
-                            jQuery.event.simulate( "submit", this.parentNode, event, true );
-                        }
-                    }
-                },
-
-                teardown: function() {
-                    // Only need this for delegated form submit events
-                    if ( jQuery.nodeName( this, "form" ) ) {
-                        return false;
-                    }
-
-                    // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
-                    jQuery.event.remove( this, "._submit" );
+        postDispatch: function( event ) {
+            // If form was submitted by the user, bubble the event up the tree
+            if ( event._submit_bubble ) {
+                delete event._submit_bubble;
+                if ( this.parentNode && !event.isTrigger ) {
+                    facade.simulate( "submit", this.parentNode, event, true );
                 }
             }
+        },
+
+        teardown: function() {
+            // Only need this for delegated form submit events
+            if (  this.tagName == "FORM" ) {
+                return false;
+            }
+
+            // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
+            facade.remove( this, "._submit" );
         }
     }
    
 })
 
 /*
- * input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
- * 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
- * 2012.10.18 重构reset, change, submit的事件代理
+* input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
+* 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
+* 2012.10.18 重构reset, change, submit的事件代理
 <!DOCTYPE HTML>
 <html>
     <head>
@@ -5069,10 +5068,10 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
 
     </body>
 </html>
- */
+*/
 
 
-define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"),function( $ ){
+define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function( $ ){
     var facade = $.event || ($.event = {
         special: {}
     });
@@ -5547,8 +5546,8 @@ define("event", ["$node"][top.dispatchEvent ? "valueOf": "concat" ]("$event_fix"
                 if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
                     var doc = event.target.ownerDocument || document;
                     var box = document.compatMode == "BackCompat" ?  doc.body : doc.documentElement
-                    event.pageX = event.clientX + (box && box.scrollLeft  || 0) - (box && box.clientLeft || 0);
-                    event.pageY = event.clientY + (box && box.scrollTop   || 0) - (box && box.clientTop  || 0);
+                    event.pageX = event.clientX + ( box.scrollLeft >> 0) - ( box.clientLeft >> 0);
+                    event.pageY = event.clientY + ( box.scrollTop >> 0) - ( box.clientTop  >> 0);
                 }
                 //如果不存在relatedTarget属性，为它添加一个
                 if ( !event.relatedTarget && event.fromElement ) {
@@ -6728,7 +6727,8 @@ define("fx", ["$css"],function( $ ){
         var node = fx.node, now =  +new Date;
         if(!fx.startTime){//第一帧
             callback(fx, node, "before");//动画开始前的预操作
-            Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
+            fx.props && Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
+            fx.props = fx.props || []
             Animation[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
             fx.startTime = now;
         }else{
