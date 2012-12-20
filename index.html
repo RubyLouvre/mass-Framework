@@ -2,23 +2,44 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>MVVM Demo by 司徒正美</title>
+        <title>bootstrap学习 by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <script src="mass.js">  </script>
-        <base>
-        <style>#fxbbb{ width:100px;height:100px;background:lightblue;}</style>
+
+        <link rel="stylesheet" href="bootstrap.css"/> 
+        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/bootstrap.css"/> 
+        <script src="http://files.cnblogs.com/rubylouvre/jquery1.83.js" > </script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-transition.js"></script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-alert.js"></script>
 
         <script>
-
-            require("fx", function(){
-                $.log("========================")
-                var node =  $("#fxbbb")
-                node.delay(1000).hide(1000)
+            $(function(){
+                //注意：事件要绑定在UI容器上，而不是关闭按钮中
+                $(".alert-block").on("close",function(){
+                    alert("这是关闭前调用的")
+                })
+                $(".alert-block").on("closed",function(){
+                    alert("这是关闭后调用的")
+                })
             })
              
         </script>
     </head>
     <body>
-        <div id=fxbbb></div>
+        <div class="alert fade in">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>Holy guacamole!</strong> Best check yo self, you're not looking too good.
+        </div>
+        <div class="alert alert-success fade in">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <strong>Holy guacamole!</strong> Best check yo self, you're not looking too good.
+        </div>
+        <div class="alert alert-block alert-error fade in">
+            <button type="button" class="close" data-dismiss="alert">×</button>
+            <h4 class="alert-heading">Oh snap! You got an error!</h4>
+            <p>Change this and that and try again. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum.</p>
+            <p>
+                <a class="btn btn-danger" href="#">Take this action</a> <a class="btn" id="close" data-dismiss="alert" href=".alert-block">Or do this</a>
+            </p>
+        </div>
     </body>
 </html>
