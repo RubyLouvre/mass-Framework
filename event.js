@@ -471,9 +471,9 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             }
             event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
             if( /^(?:mouse|contextmenu)|click/.test( event.type ) ){
-                if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
-                    var doc = event.target.ownerDocument || document;
-                    var box = document.compatMode == "BackCompat" ?  doc.body : doc.documentElement
+                if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件 http://www.w3help.org/zh-cn/causes/BX9008
+                    var doc = event.target.ownerDocument || document;//safari与chrome下，滚动条，视窗相关的东西是放在body上
+                    var box = (navigator.vendor || document.compatMode == "BackCompat" )  ?  doc.body : doc.documentElement
                     event.pageX = event.clientX + ( box.scrollLeft >> 0) - ( box.clientLeft >> 0);
                     event.pageY = event.clientY + ( box.scrollTop >> 0) - ( box.clientTop  >> 0);
                 }
