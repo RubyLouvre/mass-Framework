@@ -6,77 +6,52 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" href="bootstrap.css"/> 
-
         <script src="jquery1.83.js" > </script>
         <script src="bootstrap-transition.js"></script>
-        <script src="bootstrap-dropdown.js"></script>
-        <script src="bootstrap-scrollspy.js"></script>
+        <script src="bootstrap-tab.js"></script>
+        <script src="bootstrap-button.js"></script>
+
 
         <script>
             $(function(){
-                //注意：事件要绑定在UI容器上，而不是关闭按钮中
-                $('.dropdown-toggle').dropdown()
+             
             })
              
         </script>
     </head>
     <body>
-        <div id="navbarExample" class="navbar navbar-static">
-            <div class="navbar-inner">
-                <div class="container" style="width: auto;">
-                    <a class="brand" href="#">项目名称</a>
-                    <ul class="nav">
-                        <li class="active"><a href="#fat">红利</a></li>
-                        <li><a href="#mdo">哈芬</a></li>
-                        <li><a href="#ruby">ruby</a></li>
-                        <li class="dropdown">
-                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">党国大事 <b class="caret"></b></a>
-                            <ul class="dropdown-menu">
-                                <li class=""><a href="#one">遛狗</a></li>
-                                <li><a href="#two">失踪</a></li>
-                                <li class="divider"></li>
-                                <li><a href="#three">耳光</a></li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
+        <ul id="tab" class="nav nav-tabs">
+            <li class="active"><a href="#home" data-toggle="tab">首页</a></li>
+            <li><a href="#profile" data-toggle="tab">介绍</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">下拉 <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a href="#dropdown1" data-toggle="tab">智慧</a></li>
+                    <li><a href="#dropdown2" data-toggle="tab">夜壶</a></li>
+                </ul>
+            </li>
+        </ul>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade in active" id="home">
+                <p>
+                    5月6日，北京，一对新人启用直升机接亲。该直升机是欧洲直升机公司系列，机型为AS350B3，该公司北京唯一可承接低空飞行业务的航空公司，此次为首次承接婚礼。据悉，首次空中婚礼总费用为5万元。定价包括飞行时间和申报审批等费用，飞行时间按照1小时3万元计算。
+                </p>
             </div>
-        </div>
-        <div data-spy="scroll" data-target="#navbarExample" data-offset="0" class="scrollspy-example" style="height:180px;width:600px;border:1px solid black;overflow:scroll;">
-            <h4 id="fat">红利</h4>
-            <p>
-                中方向美方承诺提高国有企业红利上缴比例，增加上缴利润的中央国企和省级国企的数量，将国有资本经营预算纳入国家预算体系。还承诺，鼓励包括国有公司在内的上市公司增加红利支付。还承诺在信贷提供、税收优惠和监管政策等方面对各类所有制企业一视同仁。<br><br>
-
-	    美方认为，提高国有企业分红比例带来的收入可用于资助政府的社保和养老开支，从而有可能降低中国人大量储蓄的必要性，让他们提高消费支出，从而达到刺激中国内需的目的。
-            </p>
-            <h4 id="mdo">哈芬</h4>
-            <p>
-	      据估，中国高铁槽道市场约十几亿元，德国哈芬占70%。业内人士称，中铁设计院的铁道图纸，直接指定使用哈芬，而非技术标准。哈芬在德国使用成本高昂的不锈钢，在中国则是碳钢。更有业内人士证实，目前中国高铁用的实为国内生产，原产几乎不足四分之一。（财新）
-            </p>
-            <h4 id="ruby">Ruby开发</h4>
-            <p >
-                我仅仅懂一点ASP.NET进行Web开发的知识。我知道将来必然是Web技术的天下。
-                我的理解，Web开发主流有Java系列、ASP.NET系列，小众一点的有PHP，RoR。 
-                我是被Ruby吸引而学习RoR的，现在看那本《Web开发敏捷之道》第四版，
-                用Aptana Studio作为IDE，我买了个MacBookPro，边学书上的例子，边练习。
-                现在的问题是，按照书上的代码敲进去就能运行，但是不理解其中的含义啊。
-            </p>
-            <h4 id="one">遛狗</h4>
-            <p>
-	      近日，拍摄于四川绵阳街头的一张照片引起热议，一辆在路上行驶的法院警车，车窗里伸出一个宠物狗的脑袋，四处张望。此情景被怀疑是公务人员私用警车带宠物狗兜风。经调查得知，这是我国新近引进的一批特殊品种警犬，为麻痹犯罪分子，故意化妆成宠物狗的样子。
-            </p>
-            <h4 id="two">失踪</h4>
-            <p>
-	      4月25日，19岁的韩耀在云南省昆明市晋宁县晋城镇南门村鑫云冷库附近失踪。家属在寻找时，竟然发现这一区域已先后有8名青少年失踪，其中近一年内就有6人。有一名青年雷玉生就在此地的大街上被人拖进了一面包车，被扔进黑砖窑强迫劳动，后逃离黑砖窑重获自由。
-            </p>
-            <h4 id="three">耳光</h4>
-            <p>
-	      30多岁女人直接吐东西在刚扫过的地上，环卫大姐上去说了两句，结果挨了三巴掌三脚。见到被打的环卫大姐时，她精神不好，坐在凳子上不说话，左脸的伤痕还很显眼，工友在一旁照料她。2012年5月4日，浙江省，杭州市。
-            </p>
-            <p>
-	      尹大姐说：“小孩子都知道不能在街上乱吐。”那女人说：那不就是你们环卫应该做的事情吗？尹大姐说：难道我们环卫工人就低人一等吗？”话音刚落，“啪”“啪”“啪”三个巴掌落在尹大姐脸上。
-            </p>
-
+            <div class="tab-pane fade" id="profile">
+                <p>
+                    法国代表社会党参选的奥朗德今晨在大选中获得胜利，成为法兰西第五共和国第七位总统，法国也在17年之后迎来首位左翼总统。萨科齐在5年任内因政绩不佳引发不满，选前处于民调落后的劣势。萨科齐虽试图打造“危机总统”形象，但终未能实现逆转。奥朗德现年58岁，至今未婚，与社会党前总统选举候选人罗亚尔同居30多年，育有4子女，多年来坚持骑车上下班。对华关系持强硬立场。
+                </p>
+            </div>
+            <div class="tab-pane fade" id="dropdown1">
+                <p>
+                    平壤某鱼肉样板店经理日云硕（音），在去年金正日和金正恩来店视察时，曾目睹这样一幕：金正恩将父亲让进电梯，然后自己嗖嗖地爬上三层楼梯，电梯再次打开时，他立正向父亲致意。日云硕动情地回忆说：“我被他的忠诚与智慧折服了...”
+                </p>
+            </div>
+            <div class="tab-pane fade" id="dropdown2">
+                <p>
+                    不是政府人士，永远不要去做政府的吹鼓手，因为吹鼓手在政府眼里永远只值一个夜壶铜钿，尿急了拿出来用一下，用完了将夜壶放到最角落地方；你吹得越起劲，不仅公众看不起你，政府更看不起你，所以吹鼓手都没有好下场。-----杜月笙
+                </p>
+            </div>
         </div>
     </body>
 </html>
