@@ -6,40 +6,77 @@
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
         <link rel="stylesheet" href="bootstrap.css"/> 
-        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/bootstrap.css"/> 
-        <script src="http://files.cnblogs.com/rubylouvre/jquery1.83.js" > </script>
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-transition.js"></script>
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-alert.js"></script>
+
+        <script src="jquery1.83.js" > </script>
+        <script src="bootstrap-transition.js"></script>
+        <script src="bootstrap-dropdown.js"></script>
+        <script src="bootstrap-scrollspy.js"></script>
 
         <script>
             $(function(){
                 //注意：事件要绑定在UI容器上，而不是关闭按钮中
-                $(".alert-block").on("close",function(){
-                    alert("这是关闭前调用的")
-                })
-                $(".alert-block").on("closed",function(){
-                    alert("这是关闭后调用的")
-                })
+                $('.dropdown-toggle').dropdown()
             })
              
         </script>
     </head>
     <body>
-        <div class="alert fade in">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <strong>Holy guacamole!</strong> Best check yo self, you're not looking too good.
+        <div id="navbarExample" class="navbar navbar-static">
+            <div class="navbar-inner">
+                <div class="container" style="width: auto;">
+                    <a class="brand" href="#">项目名称</a>
+                    <ul class="nav">
+                        <li class="active"><a href="#fat">红利</a></li>
+                        <li><a href="#mdo">哈芬</a></li>
+                        <li><a href="#ruby">ruby</a></li>
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">党国大事 <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li class=""><a href="#one">遛狗</a></li>
+                                <li><a href="#two">失踪</a></li>
+                                <li class="divider"></li>
+                                <li><a href="#three">耳光</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
-        <div class="alert alert-success fade in">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <strong>Holy guacamole!</strong> Best check yo self, you're not looking too good.
-        </div>
-        <div class="alert alert-block alert-error fade in">
-            <button type="button" class="close" data-dismiss="alert">×</button>
-            <h4 class="alert-heading">Oh snap! You got an error!</h4>
-            <p>Change this and that and try again. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum.</p>
+        <div data-spy="scroll" data-target="#navbarExample" data-offset="0" class="scrollspy-example" style="height:180px;width:600px;border:1px solid black;overflow:scroll;">
+            <h4 id="fat">红利</h4>
             <p>
-                <a class="btn btn-danger" href="#">Take this action</a> <a class="btn" id="close" data-dismiss="alert" href=".alert-block">Or do this</a>
+                中方向美方承诺提高国有企业红利上缴比例，增加上缴利润的中央国企和省级国企的数量，将国有资本经营预算纳入国家预算体系。还承诺，鼓励包括国有公司在内的上市公司增加红利支付。还承诺在信贷提供、税收优惠和监管政策等方面对各类所有制企业一视同仁。<br><br>
+
+	    美方认为，提高国有企业分红比例带来的收入可用于资助政府的社保和养老开支，从而有可能降低中国人大量储蓄的必要性，让他们提高消费支出，从而达到刺激中国内需的目的。
             </p>
+            <h4 id="mdo">哈芬</h4>
+            <p>
+	      据估，中国高铁槽道市场约十几亿元，德国哈芬占70%。业内人士称，中铁设计院的铁道图纸，直接指定使用哈芬，而非技术标准。哈芬在德国使用成本高昂的不锈钢，在中国则是碳钢。更有业内人士证实，目前中国高铁用的实为国内生产，原产几乎不足四分之一。（财新）
+            </p>
+            <h4 id="ruby">Ruby开发</h4>
+            <p >
+                我仅仅懂一点ASP.NET进行Web开发的知识。我知道将来必然是Web技术的天下。
+                我的理解，Web开发主流有Java系列、ASP.NET系列，小众一点的有PHP，RoR。 
+                我是被Ruby吸引而学习RoR的，现在看那本《Web开发敏捷之道》第四版，
+                用Aptana Studio作为IDE，我买了个MacBookPro，边学书上的例子，边练习。
+                现在的问题是，按照书上的代码敲进去就能运行，但是不理解其中的含义啊。
+            </p>
+            <h4 id="one">遛狗</h4>
+            <p>
+	      近日，拍摄于四川绵阳街头的一张照片引起热议，一辆在路上行驶的法院警车，车窗里伸出一个宠物狗的脑袋，四处张望。此情景被怀疑是公务人员私用警车带宠物狗兜风。经调查得知，这是我国新近引进的一批特殊品种警犬，为麻痹犯罪分子，故意化妆成宠物狗的样子。
+            </p>
+            <h4 id="two">失踪</h4>
+            <p>
+	      4月25日，19岁的韩耀在云南省昆明市晋宁县晋城镇南门村鑫云冷库附近失踪。家属在寻找时，竟然发现这一区域已先后有8名青少年失踪，其中近一年内就有6人。有一名青年雷玉生就在此地的大街上被人拖进了一面包车，被扔进黑砖窑强迫劳动，后逃离黑砖窑重获自由。
+            </p>
+            <h4 id="three">耳光</h4>
+            <p>
+	      30多岁女人直接吐东西在刚扫过的地上，环卫大姐上去说了两句，结果挨了三巴掌三脚。见到被打的环卫大姐时，她精神不好，坐在凳子上不说话，左脸的伤痕还很显眼，工友在一旁照料她。2012年5月4日，浙江省，杭州市。
+            </p>
+            <p>
+	      尹大姐说：“小孩子都知道不能在街上乱吐。”那女人说：那不就是你们环卫应该做的事情吗？尹大姐说：难道我们环卫工人就低人一等吗？”话音刚落，“啪”“啪”“啪”三个巴掌落在尹大姐脸上。
+            </p>
+
         </div>
     </body>
 </html>
