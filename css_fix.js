@@ -140,3 +140,4 @@ define("css_fix", !!top.getComputedStyle,["mass"], function( $ ){
 //2012.5.9 完美支持CSS3 transform 2D
 //2012.10.25 重构透明度的读写
 //2012.11.25 添加旋转
+//CSS3 学习资料 http://demo.doyoe.com/
