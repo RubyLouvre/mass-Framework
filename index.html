@@ -5,53 +5,53 @@
         <title>bootstrap学习 by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" href="bootstrap.css"/> 
-        <script src="jquery1.83.js" > </script>
-        <script src="bootstrap-transition.js"></script>
-        <script src="bootstrap-tab.js"></script>
-        <script src="bootstrap-button.js"></script>
-
+        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/bootstrap.css"/>
+        <script src="http://files.cnblogs.com/rubylouvre/jquery1.83.js" > </script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-transition.js"></script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-carousel.js"></script>
 
         <script>
-            $(function(){
-             
+            $(function () {
+                var log = function(s){
+                    window.console && console.log(s)
+                }
+                $('.carousel').carousel()
             })
-             
         </script>
     </head>
     <body>
-        <ul id="tab" class="nav nav-tabs">
-            <li class="active"><a href="#home" data-toggle="tab">首页</a></li>
-            <li><a href="#profile" data-toggle="tab">介绍</a></li>
-            <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">下拉 <b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                    <li><a href="#dropdown1" data-toggle="tab">智慧</a></li>
-                    <li><a href="#dropdown2" data-toggle="tab">夜壶</a></li>
-                </ul>
-            </li>
-        </ul>
-        <div id="myTabContent" class="tab-content">
-            <div class="tab-pane fade in active" id="home">
-                <p>
-                    5月6日，北京，一对新人启用直升机接亲。该直升机是欧洲直升机公司系列，机型为AS350B3，该公司北京唯一可承接低空飞行业务的航空公司，此次为首次承接婚礼。据悉，首次空中婚礼总费用为5万元。定价包括飞行时间和申报审批等费用，飞行时间按照1小时3万元计算。
-                </p>
+        <div id="myCarousel" class="carousel slide">
+            <div class="carousel-inner">
+                <div class="item active left">
+                    <img src="http://wrongwaycn.github.com/bootstrap/docs/assets/img/bootstrap-mdo-sfmoma-01.jpg" alt="">
+                    <div class="carousel-caption">
+                        <h4>即使杀光所有报晓的公鸡，天，还是会亮的</h4>
+                        <p>
+		    @shifeike: 昨天是李尚平被枪杀10周年，我发的那条纪念微博，成为我的新浪微博账号最后一条微博。这个2010年1月为反对红中抢笔而注册的微博，两年多时间里发了14538条微博，加上被删除的差不多近200万字，积累了96269条粉丝，自此灰飞烟灭。
+                        </p>
+                    </div>
+                </div>
+                <div class="item next left">
+                    <img src="http://wrongwaycn.github.com/bootstrap/docs/assets/img/bootstrap-mdo-sfmoma-02.jpg" alt="">
+                    <div class="carousel-caption">
+                        <h4>如果人民不欢迎我们，就该我们下台了</h4>
+                        <p>
+		    【胡耀邦语录】①历史是混不过去的。②民主、自由、平等、博爱等观念是人类精神的一大解放。③如果人民不欢迎我们，就该我们下台了。④不懂的不要装懂，不通的不要装通，不服的不要装服。⑤中国的出路是民主和科学。⑥一个精神上、组织上被禁锢被压制的不自由民族怎么可能与其他国家进行自由竞争呢？
+                        </p>
+                    </div>
+                </div>
+                <div class="item">
+                    <img src="http://wrongwaycn.github.com/bootstrap/docs/assets/img/bootstrap-mdo-sfmoma-03.jpg" alt="">
+                    <div class="carousel-caption">
+                        <h4>国家像需要空气一样需要变革</h4>
+                        <p>
+		    据戈尔巴乔夫基金会新闻处通报，俄总统梅德韦杰夫今天向前苏联总统戈尔巴乔夫颁发圣徒安德烈·佩尔沃兹万内勋章。戈尔巴乔夫在受勋时表示感谢，并称很激动。他坦言，对自己做过的事情问心无愧。他强调，他进行改革不是为了赢得敬重和荣誉，而是因为认识到，“国家像需要空气一样需要变革”。他承认犯过错误，并至今还在为这些错误而烦恼。但他认为：“短短几年所走过的路，使专制的过去永远成为了历史。”
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="tab-pane fade" id="profile">
-                <p>
-                    法国代表社会党参选的奥朗德今晨在大选中获得胜利，成为法兰西第五共和国第七位总统，法国也在17年之后迎来首位左翼总统。萨科齐在5年任内因政绩不佳引发不满，选前处于民调落后的劣势。萨科齐虽试图打造“危机总统”形象，但终未能实现逆转。奥朗德现年58岁，至今未婚，与社会党前总统选举候选人罗亚尔同居30多年，育有4子女，多年来坚持骑车上下班。对华关系持强硬立场。
-                </p>
-            </div>
-            <div class="tab-pane fade" id="dropdown1">
-                <p>
-                    平壤某鱼肉样板店经理日云硕（音），在去年金正日和金正恩来店视察时，曾目睹这样一幕：金正恩将父亲让进电梯，然后自己嗖嗖地爬上三层楼梯，电梯再次打开时，他立正向父亲致意。日云硕动情地回忆说：“我被他的忠诚与智慧折服了...”
-                </p>
-            </div>
-            <div class="tab-pane fade" id="dropdown2">
-                <p>
-                    不是政府人士，永远不要去做政府的吹鼓手，因为吹鼓手在政府眼里永远只值一个夜壶铜钿，尿急了拿出来用一下，用完了将夜壶放到最角落地方；你吹得越起劲，不仅公众看不起你，政府更看不起你，所以吹鼓手都没有好下场。-----杜月笙
-                </p>
-            </div>
+            <a class="left carousel-control" href="#myCarousel" data-slide="prev">‹</a>
+            <a class="right carousel-control" href="#myCarousel" data-slide="next">›</a>
         </div>
     </body>
 </html>
