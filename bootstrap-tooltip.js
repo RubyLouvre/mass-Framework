@@ -119,7 +119,7 @@
 
                 actualWidth = $tip[0].offsetWidth
                 actualHeight = $tip[0].offsetHeight
-
+//处理位置
                 switch (inside ? placement.split(' ')[1] : placement) {
                     case 'bottom':
                         tp = {

@@ -5,19 +5,18 @@
         <title>bootstrap学习 by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" href="bootstrap.css"/>
-        <script src="jquery1.83.js" > </script>
-     <script src="bootstrap-transition.js"></script>
-        <script src="bootstrap-tooltip.js"></script>
-
+        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/bootstrap.css"/>
+        <script src="http://files.cnblogs.com/rubylouvre/jquery1.83.js" > </script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-transition.js"></script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-tooltip.js"></script>
+        <script src="bootstrap-popover.js"></script>
+        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-button.js"></script>
         <script >
             $(function () {
                 var log = function(s){
                     window.console && console.log(s)
                 }
-                $('.muted a').tooltip({
-                    placement:"bottom"
-                })
+                $('.well a').popover()
             })
         </script>
         <script>
@@ -25,11 +24,13 @@
         </script>
     </head>
     <body>
-        <div class="tooltip-demo well">
-            <p class="muted" style="margin-bottom: 0;">
-	      “这是我的第一次英文访问,很抱歉它不够严谨,但是我不得不这么做,不只因为采访时间限制，更因为我面对的是卡梅隆，这个人喜爱挑战、从无畏惧，他也希望别人如此，他可以原谅不完美，但他无法接受一个人不去努力接近自己的极限。”
-	      ——<a href="#" rel="tooltip" data-original-title="柴静始终站在离新闻最近的地方，她以她的犀利和敏锐、坚定与坚持，最终历练成为一名优秀的新闻工作者。 ">柴静</a>《看见》专访<a href="#" rel="tooltip" data-original-title="1954年8月16日生于加拿大的著名电影导演，擅长拍摄动作片以及科幻电影。">卡梅隆</a>
-            </p>
+        <br/>
+        <br/>
+        <h3>by 司徒正美</h3>
+        <br/>
+        
+        <div class="well">
+            <a href="#" class="btn btn-danger" rel="popover" data-content="他来自山东，是一名残疾人，因思想独立、指谪政弊而被政府迫害。地方政府和当权政要派专人看管他，调拨专款作为对他的看管费用，他每天都活在别人的监视和囚禁中，其遭遇只能用令人发指来形容。历尽万难，他终于成功逃离了当地，在外国使节的帮助和护送下去到了国外。他，就是孙膑。" data-original-title="他是谁">鼠标经过弹出提示</a>
         </div>
     </body>
 </html>
