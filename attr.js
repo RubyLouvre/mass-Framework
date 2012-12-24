@@ -7,10 +7,20 @@ define("attr",["$node"], function( $ ){
     rquote = /^['"]/,
     rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
     rnospaces = /\S+/g,
+    defaults = {
+        checked: "defaultChecked",
+        selected: "defaultSelected"
+    },
     support = $.support
     function getValType( el ){
         var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
+    }
+    function fixDefault(node, name, value){
+        var _default =  defaults[name];
+        if(_default){
+            node[ _default ] = value;
+        }
     }
     $.implement({
         /**
@@ -217,6 +227,7 @@ define("attr",["$node"], function( $ ){
                 // 确保bool属性的值为bool
                 if ( node[ name ] === true ) {
                     node[ name ] = false;
+                    fixDefault(node, name, false)
                 }
             }
         },
@@ -252,6 +263,7 @@ define("attr",["$node"], function( $ ){
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
                 node.setAttribute( name, name.toLowerCase() )
                 node[ name ]  = true;
+                fixDefault(node, name, true)
             },
             "@ie:get": function( node, name ){
                 var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
@@ -425,5 +437,9 @@ define("attr",["$node"], function( $ ){
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
 2012.11.6 升级v2
+2012.12.24 升级到v3 添加对defaultSelected defaultChecked的处理
+http://nanto.asablo.jp/blog/2005/10/29/123294
+
+http://perl.no-tubo.net/2010/07/01/ie-%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B-setattribute-%E3%82%84-getattribute-%E3%82%84-removeattribute-%E3%81%8C%E3%81%A0%E3%82%81%E3%81%A0%E3%82%81%E3%81%AA%E4%BB%B6/
  */
 
