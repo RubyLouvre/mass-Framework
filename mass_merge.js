@@ -1,5 +1,4 @@
-
-;;;(function( global, DOC ){
+!function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace( rmakeid,"")
@@ -12,7 +11,7 @@
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
-    var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,flow,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]"   : "Document",
@@ -3920,13 +3919,146 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
 });
 
 
+define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
+    $.fixIEAttr = function(valHooks, attrHooks){
+        var rnospaces = /\S+/g,  
+        rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
+        rquote = /^['"]/,
+        defaults = {
+            checked: "defaultChecked",
+            selected: "defaultSelected"
+        }
+        $.fixDefault = function(node, name, value){
+            var _default =  defaults[name];
+            if(_default){
+                node[ _default ] = value;
+            }
+        }
+        if(!("classList" in $.html)){
+            $.fn.addClass = function( item ){
+                if ( typeof item == "string") {
+                    for ( var i = 0, el; el = this[i++]; ) {
+                        if ( el.nodeType === 1 ) {
+                            if ( !el.className ) {
+                                el.className = item;
+                            } else {
+                                var a = (el.className+" "+item).match( rnospaces );
+                                a.sort();
+                                for (var j = a.length - 1; j > 0; --j)
+                                    if (a[j] == a[j - 1])
+                                        a.splice(j, 1);
+                                el.className = a.join(" ");
+                            }
+                        }
+                    }
+                }
+                return this;
+            }  
+            $.fn.removeClass =  function( item ) {
+                if ( (item && typeof item === "string") || item === void 0 ) {
+                    var classNames = ( item || "" ).match( rnospaces ), cl = classNames.length;
+                    for ( var i = 0, node; node = this[ i++ ]; ) {
+                        if ( node.nodeType === 1 && node.className ) {
+                            if ( item ) {//rnospaces = /\S+/
+                                var set = " " + node.className.match( rnospaces ).join(" ") + " ";
+                                for ( var c = 0; c < cl; c++ ) {
+                                    set = set.replace(" " + classNames[c] + " ", " ");
+                                }
+                                node.className = set.slice( 1, set.length - 1 );
+                            } else {
+                                node.className = "";
+                            }
+                        }
+                    }
+                }
+                return this;
+            }
+        }
+
+        attrHooks[ "@ie:get"] = function( node, name ){
+            var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
+            while (k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
+                v = k[2]
+                obj[ k[1].toLowerCase() ] = v ? rquote.test( v ) ? v.slice(1, -1) : v : ""
+            }
+            return obj[ name ];
+        }
+        attrHooks["@ie:set"] = function( node, name, value ){  
+            var attr = node.getAttributeNode( name );
+            if ( !attr ) {//不存在就创建一个同名的特性节点
+                attr = node.ownerDocument.createAttribute( name );
+                node.setAttributeNode( attr );
+            }
+            attr.value = value + "" ;
+        }
+        
+        var support = $.support
+        if ( !support.attrInnateValue ) {
+            // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
+            //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
+            $.propHooks[ "href:set" ] =  attrHooks[ "href:set" ] = function( node, name, value ) {
+                var b
+                if(node.tagName == "A" && node.innerText.indexOf("@") > 0
+                    && !node.children.length){
+                    b = node.ownerDocument.createElement('b');
+                    b.style.display = 'none';
+                    node.appendChild(b);
+                }
+                node.setAttribute(name, value+"");
+                if (b) {
+                    node.removeChild(b);
+                }
+            }
+        }
+        //========================attrHooks 的相关修正==========================
+        if ( !support.attrInnateHref ) {
+            //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
+            //IE的getAttribute支持第二个参数，可以为 0,1,2,4
+            //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
+            //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
+            "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
+                attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
+                    var ret = node.getAttribute( name, 2 );
+                    return ret == null ? void 0 : ret;
+                }
+            });
+            "width,height".replace( $.rword, function( attr ){
+                attrHooks[attr+":set"] = function(node, name, value){
+                    node.setAttribute( attr, value === "" ? "auto" : value+"");
+                }
+            });
+            $.propHooks["href:get"] = function( node, name ) {
+                return node.getAttribute( name, 4 );
+            };
+        }
+        if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
+            $.propMap.enctype = "encoding";
+        }
+        if ( !support.attrInnateStyle ) {
+            //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
+            attrHooks[ "style:get" ] = function( node ) {
+                return node.style.cssText.toLowerCase() || undefined ;
+            }
+            attrHooks[ "style:set" ] = function( node, name, value ) {
+                node.style.cssText = value + "";
+            }
+        }
+        //========================valHooks 的相关修正==========================
+        if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
+            valHooks["button:get"] =  attrHooks["@ie:get"]
+            valHooks["button:set"] =  attrHooks["@ie:set"]
+        }
+        delete $.fixIEAttr;
+    }
+    return $;
+})
+
+
 //==================================================
 // 属性操作模块 v3
 //==================================================
-define("attr",["$node"], function( $ ){
+define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
     var rreturn = /\r/g,
-    rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
-    rquote = /^['"]/,
     rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
     rnospaces = /\S+/g,
     support = $.support
@@ -3934,55 +4066,45 @@ define("attr",["$node"], function( $ ){
         var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
     }
+
     $.implement({
         
         addClass: function( item ){
             if ( typeof item == "string") {
                 for ( var i = 0, el; el = this[i++]; ) {
                     if ( el.nodeType === 1 ) {
-                        if ( !el.className ) {
-                            el.className = item;
-                        } else {
-                            var a = (el.className+" "+item).match( rnospaces );
-                            a.sort();
-                            for (var j = a.length - 1; j > 0; --j)
-                                if (a[j] == a[j - 1])
-                                    a.splice(j, 1);
-                            el.className = a.join(" ");
-                        }
+                        item.replace(rnospaces, function(clazz){
+                            el.classList.add(clazz);
+                        })
                     }
                 }
             }
             return this;
         },
+        //如果不传入类名,则清空所有类名,允许同时删除多个类名
+        removeClass: function( item ) {
+            var removeSome  = item && typeof item === "string",removeAll = item === void 0
+            for ( var i = 0, node; node = this[ i++ ]; ) {
+                if ( node.nodeType === 1 ) {
+                    if(removeSome && node.className){
+                        item.replace(rnospaces, function(clazz){
+                            node.classList.remove(clazz);
+                        })
+                    }else if(removeAll){
+                        node.className = "";
+                    }
+                }
+            }
+            return this;
+        },
+       
         //如果第二个参数为true，要求所有匹配元素都拥有此类名才返回true
         hasClass: function( item, every ) {
             var method = every === true ? "every" : "some",
             rclass = new RegExp('(\\s|^)'+item+'(\\s|$)');//判定多个元素，正则比indexOf快点
             return $.slice(this)[ method ](function( el ){//先转换为数组
-                return "classList" in el ? el.classList.contains( item ):
-                (el.className || "").match(rclass);
+                return  (el.className || "").match(rclass);
             });
-        },
-        //如果不传入类名,则清空所有类名,允许同时删除多个类名
-        removeClass: function( item ) {
-            if ( (item && typeof item === "string") || item === void 0 ) {
-                var classNames = ( item || "" ).match( rnospaces ), cl = classNames.length;
-                for ( var i = 0, node; node = this[ i++ ]; ) {
-                    if ( node.nodeType === 1 && node.className ) {
-                        if ( item ) {//rnospaces = /\S+/
-                            var set = " " + node.className.match( rnospaces ).join(" ") + " ";
-                            for ( var c = 0; c < cl; c++ ) {
-                                set = set.replace(" " + classNames[c] + " ", " ");
-                            }
-                            node.className = set.slice( 1, set.length - 1 );
-                        } else {
-                            node.className = "";
-                        }
-                    }
-                }
-            }
-            return this;
         },
         //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
         toggleClass: function( value, stateVal ){
@@ -4058,6 +4180,7 @@ define("attr",["$node"], function( $ ){
         return cacheProp[name] = document.createElement(node.tagName)[prop]
     }
     $.mix({
+        fixDefault: $.noop,
         propMap:{//属性名映射
             "accept-charset": "acceptCharset",
             "char": "ch",
@@ -4135,6 +4258,7 @@ define("attr",["$node"], function( $ ){
                 // 确保bool属性的值为bool
                 if ( node[ name ] === true ) {
                     node[ name ] = false;
+                    $.fixDefault(node, name, false)
                 }
             }
         },
@@ -4170,23 +4294,9 @@ define("attr",["$node"], function( $ ){
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
                 node.setAttribute( name, name.toLowerCase() )
                 node[ name ]  = true;
-            },
-            "@ie:get": function( node, name ){
-                var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
-                while (k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
-                    v = k[2]
-                    obj[ k[1].toLowerCase() ] = v ? rquote.test( v ) ? v.slice(1, -1) : v : ""
-                }
-                return obj[ name ];
-            },
-            "@ie:set": function( node, name, value ){  
-                var attr = node.getAttributeNode( name );
-                if ( !attr ) {//不存在就创建一个同名的特性节点
-                    attr = node.ownerDocument.createAttribute( name );
-                    node.setAttributeNode( attr );
-                }
-                attr.value = value + "" ;
+                $.fixDefault(node, name, true)
             }
+
         }
     });
     "Attr,Prop".replace($.rword, function( method ){
@@ -4200,71 +4310,18 @@ define("attr",["$node"], function( $ ){
         }
     });
     //========================propHooks 的相关修正==========================
-    var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
     "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
     "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
     prop.replace($.rword, function(name){
-        propMap[name.toLowerCase()] = name;
+        $.propMap[name.toLowerCase()] = name;
     });
-    if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
-        propMap.enctype = "encoding";
-    }
+
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.optSelected ) {
         $.propHooks[ "selected:get" ] = function( node ) {
             for( var p = node;typeof p.selectedIndex != "number";p = p.parentNode){}
             return node.selected;
-        }
-    }
-    if ( !support.attrInnateValue ) {
-        // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
-        //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
-        $.propHooks[ "href:set" ] =  $.attrHooks[ "href:set" ] = function( node, name, value ) {
-            var b
-            if(node.tagName == "A" && node.innerText.indexOf("@") > 0
-                && !node.children.length){
-                b = node.ownerDocument.createElement('b');
-                b.style.display = 'none';
-                node.appendChild(b);
-            }
-            node.setAttribute(name, value+"");
-            if (b) {
-                node.removeChild(b);
-            }
-        }
-    }
-
-    //========================attrHooks 的相关修正==========================
-    var attrHooks = $.attrHooks
-    if ( !support.attrInnateHref ) {
-        //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
-        //IE的getAttribute支持第二个参数，可以为 0,1,2,4
-        //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
-        //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
-        "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
-            attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
-                var ret = node.getAttribute( name, 2 );
-                return ret == null ? void 0 : ret;
-            }
-        });
-        "width,height".replace( $.rword, function( attr ){
-            attrHooks[attr+":set"] = function(node, name, value){
-                node.setAttribute( attr, value === "" ? "auto" : value+"");
-            }
-        });
-        $.propHooks["href:get"] = function( node, name ) {
-            return node.getAttribute( name, 4 );
-        };
-    }
-
-    if ( !support.attrInnateStyle ) {
-        //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-        attrHooks[ "style:get" ] = function( node ) {
-            return node.style.cssText.toLowerCase() || undefined ;
-        }
-        attrHooks[ "style:set" ] = function( node, name, value ) {
-            node.style.cssText = value + "";
         }
     }
     //========================valHooks 的相关修正==========================
@@ -4324,9 +4381,8 @@ define("attr",["$node"], function( $ ){
             }
         }
     });
-    if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
-        valHooks["button:get"] =  $.attrHooks["@ie:get"]
-        valHooks["button:set"] =  $.attrHooks["@ie:set"]
+    if(typeof $.fixIEAttr == "function"){
+        $.fixIEAttr(valHooks, $.attrHooks);
     }
     return $;
 });
@@ -4343,7 +4399,11 @@ define("attr",["$node"], function( $ ){
 2011.10.27 对prop attr val大重构
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
 2012.11.6 升级v2
- */
+2012.12.24 升级到v3 添加对defaultSelected defaultChecked的处理
+http://nanto.asablo.jp/blog/2005/10/29/123294
+
+http://perl.no-tubo.net/2010/07/01/ie-%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B-setattribute-%E3%82%84-getattribute-%E3%82%84-removeattribute-%E3%81%8C%E3%81%A0%E3%82%81%E3%81%A0%E3%82%81%E3%81%AA%E4%BB%B6/
+*/
 
 
 //=========================================
@@ -4488,6 +4548,8 @@ define("css_fix", !!top.getComputedStyle,["mass"], function( $ ){
 //2012.5.9 完美支持CSS3 transform 2D
 //2012.10.25 重构透明度的读写
 //2012.11.25 添加旋转
+//CSS3 学习资料 http://demo.doyoe.com/
+
 //=========================================
 // 样式操作模块 v4 by 司徒正美
 //=========================================
@@ -4816,9 +4878,9 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
         var box = node.getBoundingClientRect(),win = getWindow(doc),
-        root = doc.documentElement,
-        clientTop  = root.clientTop  || 0,
-        clientLeft = root.clientLeft || 0,
+        root = (navigator.vendor || doc.compatMode == "BackCompat" )  ?  doc.body : doc.documentElement,
+        clientTop  = root.clientTop  >> 0,
+        clientLeft = root.clientLeft >> 0,
         scrollTop  = win.pageYOffset ||  root.scrollTop  ,
         scrollLeft = win.pageXOffset ||  root.scrollLeft ;
         // 把滚动距离加到left,top中去。
@@ -5538,9 +5600,9 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             }
             event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
             if( /^(?:mouse|contextmenu)|click/.test( event.type ) ){
-                if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件
-                    var doc = event.target.ownerDocument || document;
-                    var box = document.compatMode == "BackCompat" ?  doc.body : doc.documentElement
+                if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件 http://www.w3help.org/zh-cn/causes/BX9008
+                    var doc = event.target.ownerDocument || document;//safari与chrome下，滚动条，视窗相关的东西是放在body上
+                    var box = (navigator.vendor || document.compatMode == "BackCompat" )  ?  doc.body : doc.documentElement
                     event.pageX = event.clientX + ( box.scrollLeft >> 0) - ( box.clientLeft >> 0);
                     event.pageY = event.clientY + ( box.scrollTop >> 0) - ( box.clientTop  >> 0);
                 }
@@ -6929,7 +6991,7 @@ define("fx", ["$css"],function( $ ){
 
 
 
-})( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
+}( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
 
