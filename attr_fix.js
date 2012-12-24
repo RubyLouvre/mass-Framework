@@ -2,7 +2,17 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
     $.fixIEAttr = function(valHooks){
         var  rnospaces = /\S+/g,  
         rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
-        rquote = /^['"]/
+        rquote = /^['"]/,
+        defaults = {
+            checked: "defaultChecked",
+            selected: "defaultSelected"
+        }
+        $.fixDefault = function(node, name, value){
+            var _default =  defaults[name];
+            if(_default){
+                node[ _default ] = value;
+            }
+        }
         if(!("classList" in document.documentElement)){
             $.fn.addClass = function( item ){
                 if ( typeof item == "string") {

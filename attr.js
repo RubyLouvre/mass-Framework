@@ -5,21 +5,12 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
     var rreturn = /\r/g,
     rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
     rnospaces = /\S+/g,
-    defaults = {
-        checked: "defaultChecked",
-        selected: "defaultSelected"
-    },
     support = $.support
     function getValType( el ){
         var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
     }
-    function fixDefault(node, name, value){
-        var _default =  defaults[name];
-        if(_default){
-            node[ _default ] = value;
-        }
-    }
+
     $.implement({
         /**
          *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
@@ -138,6 +129,7 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
         return cacheProp[name] = document.createElement(node.tagName)[prop]
     }
     $.mix({
+        fixDefault: $.noop,
         propMap:{//属性名映射
             "accept-charset": "acceptCharset",
             "char": "ch",
@@ -215,7 +207,7 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
                 // 确保bool属性的值为bool
                 if ( node[ name ] === true ) {
                     node[ name ] = false;
-                    fixDefault(node, name, false)
+                    $.fixDefault(node, name, false)
                 }
             }
         },
@@ -251,7 +243,7 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
                 node.setAttribute( name, name.toLowerCase() )
                 node[ name ]  = true;
-                fixDefault(node, name, true)
+                $.fixDefault(node, name, true)
             }
 
         }
