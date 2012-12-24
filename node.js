@@ -185,13 +185,16 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             return this;
         }
     });
-    "remove,empty".replace( $.rword, function( method ){
+    "remove,empty,detach".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
-            var isRemove = method === "remove";
+            var isRemove = method !== "empty";
             for ( var i = 0, node; node = this[i++]; ){
                 if(node.nodeType === 1){
                     //移除匹配元素
-                    $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] ).forEach( cleanNode );
+                    var array = $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] )
+                    if(method != "detach"){
+                        array .forEach( cleanNode );
+                    }
                 }
                 if( isRemove ){
                     if ( node.parentNode ) {
