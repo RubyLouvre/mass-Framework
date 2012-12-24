@@ -616,7 +616,7 @@ define("query",["mass"], function( $ ){
                         break
                     default:
                         filter = [key.toLowerCase()];  
-                        if (match = expr.match(rattrib)) {
+                        if ((match = expr.match(rattrib))) {
                             expr = RegExp.rightContext;
                             if (match[1]) {
                                 filter[1] = match[1];//op
@@ -806,7 +806,7 @@ define("query",["mass"], function( $ ){
         "nth-last-of-type": filterPseudoHasExp("lastChild",  "previousSibling", true),//标准
         empty: {//标准
             exec: function (flags, elems) {   
-                var result = [], flag_not = flags.not, check
+                var result = [], flag_not = flags.not;
                 for (var i = 0, ri = 0, elem; elem = elems[i++];) {
                     if(elem.nodeType == 1){
                         if (!elem.firstChild ^ flag_not)
@@ -860,7 +860,7 @@ define("query",["mass"], function( $ ){
         checked:  filterProp("checked", true),//标准
         contains: {
             exec: function (flags, elems, arg) {
-                var res = [], elem = elems[0], fn = flags.xml ? $.getText: getHTMLText,
+                var res = [], fn = flags.xml ? $.getText: getHTMLText,
                 flag_not = flags.not;
                 for (var i = 0, ri = 0, elem; elem = elems[i++]; ){
                     if ((!!~  fn( [elem] ).indexOf(arg)) ^ flag_not)
