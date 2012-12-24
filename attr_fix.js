@@ -1,6 +1,6 @@
 define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
-    $.fixIEAttr = function(valHooks){
-        var  rnospaces = /\S+/g,  
+    $.fixIEAttr = function(valHooks, attrHooks){
+        var rnospaces = /\S+/g,  
         rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
         rquote = /^['"]/,
         defaults = {
@@ -13,7 +13,7 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
                 node[ _default ] = value;
             }
         }
-        if(!("classList" in document.documentElement)){
+        if(!("classList" in $.html)){
             $.fn.addClass = function( item ){
                 if ( typeof item == "string") {
                     for ( var i = 0, el; el = this[i++]; ) {
@@ -54,7 +54,7 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
             }
         }
 
-        $.attrHook[ "@ie:get"] = function( node, name ){
+        attrHooks[ "@ie:get"] = function( node, name ){
             var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
             while (k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
                 v = k[2]
@@ -62,7 +62,7 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
             }
             return obj[ name ];
         }
-        $.attrHook["@ie:set"] = function( node, name, value ){  
+        attrHooks["@ie:set"] = function( node, name, value ){  
             var attr = node.getAttributeNode( name );
             if ( !attr ) {//不存在就创建一个同名的特性节点
                 attr = node.ownerDocument.createAttribute( name );
@@ -75,7 +75,7 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
         if ( !support.attrInnateValue ) {
             // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
             //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
-            $.propHooks[ "href:set" ] =  $.attrHooks[ "href:set" ] = function( node, name, value ) {
+            $.propHooks[ "href:set" ] =  attrHooks[ "href:set" ] = function( node, name, value ) {
                 var b
                 if(node.tagName == "A" && node.innerText.indexOf("@") > 0
                     && !node.children.length){
@@ -90,7 +90,6 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
             }
         }
         //========================attrHooks 的相关修正==========================
-        var attrHooks = $.attrHooks
         if ( !support.attrInnateHref ) {
             //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
             //IE的getAttribute支持第二个参数，可以为 0,1,2,4
@@ -111,7 +110,9 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
                 return node.getAttribute( name, 4 );
             };
         }
-
+        if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
+            $.propMap.enctype = "encoding";
+        }
         if ( !support.attrInnateStyle ) {
             //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
             attrHooks[ "style:get" ] = function( node ) {
@@ -123,9 +124,10 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
         }
         //========================valHooks 的相关修正==========================
         if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
-            valHooks["button:get"] =  $.attrHooks["@ie:get"]
-            valHooks["button:set"] =  $.attrHooks["@ie:set"]
+            valHooks["button:get"] =  attrHooks["@ie:get"]
+            valHooks["button:set"] =  attrHooks["@ie:set"]
         }
+        delete $.fixIEAttr;
     }
     return $;
 })

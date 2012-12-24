@@ -31,11 +31,10 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
         },
         //如果不传入类名,则清空所有类名,允许同时删除多个类名
         removeClass: function( item ) {
-            var removeOne  = item && typeof item === "string"
-            var removeAll = item === void 0
+            var removeSome  = item && typeof item === "string",removeAll = item === void 0
             for ( var i = 0, node; node = this[ i++ ]; ) {
                 if ( node.nodeType === 1 ) {
-                    if(removeOne && node.className){
+                    if(removeSome && node.className){
                         item.replace(rnospaces, function(clazz){
                             node.classList.remove(clazz);
                         })
@@ -259,16 +258,13 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
         }
     });
     //========================propHooks 的相关修正==========================
-    var propMap = $.propMap;
     var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
     "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
     "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
     prop.replace($.rword, function(name){
-        propMap[name.toLowerCase()] = name;
+        $.propMap[name.toLowerCase()] = name;
     });
-    if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
-        propMap.enctype = "encoding";
-    }
+
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if ( !support.optSelected ) {
         $.propHooks[ "selected:get" ] = function( node ) {
@@ -276,56 +272,6 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
             return node.selected;
         }
     }
-    //    if ( !support.attrInnateValue ) {
-    //        // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
-    //        //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
-    //        $.propHooks[ "href:set" ] =  $.attrHooks[ "href:set" ] = function( node, name, value ) {
-    //            var b
-    //            if(node.tagName == "A" && node.innerText.indexOf("@") > 0
-    //                && !node.children.length){
-    //                b = node.ownerDocument.createElement('b');
-    //                b.style.display = 'none';
-    //                node.appendChild(b);
-    //            }
-    //            node.setAttribute(name, value+"");
-    //            if (b) {
-    //                node.removeChild(b);
-    //            }
-    //        }
-    //    }
-
-    //========================attrHooks 的相关修正==========================
-    //    var attrHooks = $.attrHooks
-    //    if ( !support.attrInnateHref ) {
-    //        //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
-    //        //IE的getAttribute支持第二个参数，可以为 0,1,2,4
-    //        //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
-    //        //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
-    //        "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
-    //            attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
-    //                var ret = node.getAttribute( name, 2 );
-    //                return ret == null ? void 0 : ret;
-    //            }
-    //        });
-    //        "width,height".replace( $.rword, function( attr ){
-    //            attrHooks[attr+":set"] = function(node, name, value){
-    //                node.setAttribute( attr, value === "" ? "auto" : value+"");
-    //            }
-    //        });
-    //        $.propHooks["href:get"] = function( node, name ) {
-    //            return node.getAttribute( name, 4 );
-    //        };
-    //    }
-    //
-    //    if ( !support.attrInnateStyle ) {
-    //        //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-    //        attrHooks[ "style:get" ] = function( node ) {
-    //            return node.style.cssText.toLowerCase() || undefined ;
-    //        }
-    //        attrHooks[ "style:set" ] = function( node, name, value ) {
-    //            node.style.cssText = value + "";
-    //        }
-    //    }
     //========================valHooks 的相关修正==========================
     var valHooks = {
         "option:get":  function( node ) {
@@ -383,15 +329,9 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
             }
         }
     });
-    if($.fixIEAttr){
-        $.fixIEAttr(valHooks);
-        delete $.fixIEAttr
+    if(typeof $.fixIEAttr == "function"){
+        $.fixIEAttr(valHooks, $.attrHooks);
     }
-    
-    //    if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
-    //        valHooks["button:get"] =  $.attrHooks["@ie:get"]
-    //        valHooks["button:set"] =  $.attrHooks["@ie:set"]
-    //    }
     return $;
 });
 
