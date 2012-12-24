@@ -1,5 +1,4 @@
-
-;;;(function( global, DOC ){
+!function( global, DOC ){
     var $$ = global.$//保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace( rmakeid,"")
@@ -12,7 +11,7 @@
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
-    var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,flow,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]"   : "Document",
@@ -640,7 +639,7 @@
     $.exports( $.config.nick +  postfix );//防止不同版本的命名空间冲突
 /*combine modules*/
 
-})( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
+}( self, self.document );//为了方便在VS系列实现智能提示,把这里的this改成self或window
 
 
 /**
