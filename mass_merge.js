@@ -11,7 +11,7 @@
     var mass = 1;//当前框架的版本号
     var postfix = "";//用于强制别名
     var cbi = 1e5 ; //用于生成回调函数的名字
-    var all = "lang_fix,lang,support,class,flow,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]"   : "Document",
@@ -820,7 +820,7 @@ define( "lang_fix", !!Array.isArray,["mass"], function($){
 
 
 //=========================================
-// 类型扩展模块v7 by 司徒正美
+// 语言扩展模块v5 by 司徒正美
 //=========================================
 define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     var global = this,
@@ -833,7 +833,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
-    str_body = (global.open + '').replace(/open/g, "");
+    str_body = (global.open + '').replace(/open/g, "")
 
     $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
@@ -1098,7 +1098,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         在一连串调用中，如果我们throttle了一个函数，那么它会减少调用频率，
         会把A调用之后的XXXms间的N个调用忽略掉，
         然后再调用XXXms后的第一个调用，然后再忽略N个*/
-        throttle:  function(delay,action,tail,debounce) {
+        throttle:  function(delay, action, tail, debounce) {
             var last_call = 0, last_exec = 0, timer = null, curr, diff,
             ctx, args, exec = function() {
                 last_exec = Date.now;
@@ -1131,7 +1131,68 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
 
     }, false);
-   
+    var EventTarget = function(target) {
+        $.log("init EventTarget")
+        this._listeners = {};
+        this._eventTarget = target || this;
+    }
+    EventTarget.prototype = {
+        constructor: EventTarget,
+        addEventListener: function(type, callback, scope, priority) {
+            if(isFinite( scope )){
+                priority = scope
+                scope = null;
+            }
+            priority = priority || 0;
+            var list = this._listeners[type],  index = 0, listener, i;
+            if (list == null) {
+                this._listeners[type] = list = [];
+            }
+            i = list.length;
+            while (--i > -1) {
+                listener = list[i];
+                if (listener.callback === callback) {
+                    list.splice(i, 1);
+                } else if (index === 0 && listener.priority < priority) {
+                    index = i + 1;
+                }
+            }
+            list.splice(index, 0, {
+                callback: callback, 
+                scope:    scope, 
+                priority: priority
+            });
+        },
+        removeEventListener: function(type, callback) {
+            var list = this._listeners[type], i;
+            if (list) {
+                i = list.length;
+                while (--i > -1) {
+                    if (list[i].callback === callback) {
+                        list.splice(i, 1);
+                        return;
+                    }
+                }
+            }
+        },
+        dispatchEvent: function(type) {
+            var list = this._listeners[type];
+            if (list) {
+                var target = this._eventTarget,  args = Array.apply([], arguments),i = list.length,  listener
+                while (--i > -1) {
+                    listener = list[i];
+                    target = listener.scope || target;
+                    args[ 0 ] = {
+                        type:  type,
+                        target: target
+                    }
+                    listener.callback.apply(target, args);
+                }
+            }
+        }
+    }
+    $.EventTarget = EventTarget;
+    
     "Array,Function".replace($.rword, function( method ){
         $[ "is"+method ] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+method+"]";
@@ -1145,67 +1206,17 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-    //这只是一个入口
-    $.lang = function(obj, type){
-        return adjust(new Chain, obj, type)
-    }
-    //调整Chain实例的重要属性
-    function adjust(chain, obj, type){
-        type = type || $.type(obj);
-        if( type != "Array" && $.isArrayLike(type) ){
-            obj = $.slice(obj);
-            type = "Array";
-        }
-        chain.target = obj;
-        chain.type = type;
-        return chain
-    }
-    //语言链对象
-    var Chain = function(){ }
-    Chain.prototype = {
-        constructor: Chain,
-        toString: function(){
-            return this.target + "";
-        },
-        value: function(){
-            return this.target;
-        }
-    };
 
-    var retouch = function(method){//函数变换，静态转原型
-        return function(){
-            [].unshift.call(arguments,this)
-            return method.apply(null,arguments)
-        }
-    }
-    var proto = Chain.prototype;
-    //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
+    //构建四个工具方法:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(Type){
-        $[ Type ] = function(ext){
-            var isNative = typeof ext == "string",
-            methods = isNative ? ext.match($.rword) : Object.keys(ext);
-            methods.forEach(function(name){
-                $[ Type ][name] = isNative ? function(obj){
-                    return obj[name].apply(obj,$.slice(arguments,1) );
-                } :  ext[name];
-                proto[name] = function(){
-                    var target = this.target;
-                    if( target == null){
-                        return this;
-                    }else{
-                        if( !(target[name] || $[ this.type ][name]) ){
-                            throw "$."+ this.type + "."+name+" does not exist!"
-                        }
-                        var method = isNative ? target[name] : retouch( $[ this.type ][name] ),
-                        next = this.target = method.apply( target, arguments ),
-                        type = $.type( next );
-                        if( type === this.type){
-                            return this;
-                        }else{
-                            return adjust(this, next, type)
-                        }
-                    }
-                }
+        $[ Type ] = function( pack ){
+            var isNative =  typeof pack == "string" ,
+            //取得方法名
+            methods = isNative ? pack.match($.rword) : Object.keys(pack);
+            methods.forEach(function( method ){
+                $[ Type ][method] = isNative ? function(obj){
+                    return obj[method].apply(obj, $.slice(arguments,1) );
+                } :  pack[method];
             });
         }
     });
@@ -1241,28 +1252,18 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return result;
         },
         
-        byteLen: function(str){
-            for(var i = 0, cnt = 0; i < str.length; i++){
-                var value = str.charCodeAt(i);
-                if(value < 0x080){
-                    cnt += 1
-                }else if(value < 0x0800){
-                    cnt += 2
-                }else{
-                    cnt += 3
-                }
-            }
-            return cnt;
+        byteLen: function ( target ) {
+            return target.replace(/[^\x00-\xff]/g, 'ci').length;
         },
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
-        truncate: function(target, length, truncation) {
+        truncate: function( target, length, truncation ) {
             length = length || 30;
             truncation = truncation === void(0) ? "..." : truncation;
             return target.length > length ?
             target.slice(0, length - truncation.length) + truncation : String(target);
         },
         //转换为驼峰风格
-        camelize: function(target){
+        camelize: function( target ){
             if (target.indexOf("-") < 0 && target.indexOf("_") < 0) {
                 return target;//提前判断，提高getStyle等的效率
             }
@@ -1271,23 +1272,23 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             });
         },
         //转换为下划线风格
-        underscored: function(target) {
+        underscored: function( target ) {
             return target.replace(/([a-z\d])([A-Z]+)/g, "$1_$2").replace(/\-/g, "_").toLowerCase();
         },
         //首字母大写
-        capitalize: function(target){
+        capitalize: function( target ){
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
         //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
-        stripTags: function (target) {
-            return String(target || "").replace(/<[^>]+>/g, "");
+        stripTags: function ( target ) {
+            return target.replace(/<[^>]+>/g, "");
         },
         //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
-        stripScripts: function(target){
-            return String(target ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
+        stripScripts: function( target ){
+            return target.replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
         },
         //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
-        escapeHTML:  function (target) {
+        escapeHTML:  function ( target ) {
             return target.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -1332,16 +1333,6 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     });
 
-    if(global.netscape && global.Blob){//不要使用window前缀
-        $.String.byteLen = function(str){
-            return new Blob([str],{
-                type:"text/css"
-            }).size
-        }
-    }
-    if(global.Buffer && Buffer.byteLength){//不要使用window前缀
-        $.String.byteLen = Buffer.byteLength;
-    }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
@@ -1370,13 +1361,13 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return first;
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
-        shuffle: function ( arr ) {
-            var ret = [], i = arr.length, n; 
-            arr = arr.slice(0);
+        shuffle: function ( target ) {
+            var ret = [], i = target.length, n; 
+            target = target.slice(0);
             while (--i >= 0) {
                 n = Math.floor( Math.random() * i);
-                ret[ret.length] = arr[n];
-                arr[n] = arr[i];
+                ret[ret.length] = target[n];
+                target[n] = target[i];
             }
             return ret;
         },
@@ -1385,7 +1376,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return $.Array.shuffle( target.concat() )[0];
         },
         //对数组进行平坦化处理，返回一个一维的新数组。
-        flatten: function(target) {
+        flatten: function( target ) {
             var result = [],self = $.Array.flatten;
             target.forEach(function(item) {
                 if ( Array.isArray(item)) {
@@ -1526,7 +1517,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift,"+
         "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
-    var NumberExt = {
+    var NumberPack = {
         //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
         limit: function(target, n1, n2){
             var a = [n1, n2].sort();
@@ -1551,9 +1542,9 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     }
     "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".replace($.rword,function(name){
-        NumberExt[name] = Math[name];
+        NumberPack[name] = Math[name];
     });
-    $.Number(NumberExt);
+    $.Number(NumberPack);
     $.Number("toFixed,toExponential,toPrecision,toJSON")
     function cloneOf(item){
         var name = $.type(item);
@@ -1601,7 +1592,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             }, target);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
-        clone: function(target){
+        clone: function( target ){
             var clone = {};
             for (var key in target) {
                 clone[key] = cloneOf(target[key]);
@@ -1609,7 +1600,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return clone;
         },
         //将多个对象合并到第一个参数中或将后两个参数当作键与值加入到第一个参数
-        merge: function(target, k, v){
+        merge: function( target, k, v ){
             var obj, key;
             //为目标对象添加一个键值对
             if (typeof k === "string")
@@ -1639,7 +1630,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
     return $
 });
-
+    
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
@@ -1779,7 +1770,7 @@ define("support",["mass"], function( $ ){
 });
 
 //=========================================
-// 类工厂模块 by 司徒正美
+// 类工厂模块 v11 by 司徒正美
 //==========================================
 define("class", ["$lang"], function( $ ){
     var
@@ -1797,7 +1788,7 @@ define("class", ["$lang"], function( $ ){
         return klass;
     }
 
-    $.mutators = {
+    var hash = {
         inherit : function( parent,init ) {
             var bridge = function() { }
             if( typeof parent == "function"){
@@ -1807,6 +1798,9 @@ define("class", ["$lang"], function( $ ){
                 bridge.prototype = parent.prototype;
                 this.prototype = new bridge ;//继承原型成员
                 this._super = parent;//指定父类
+                if(!this._init){
+                    this._init = [parent]
+                }
             }
             this._init = (this._init || []).concat();
             if( init ){
@@ -1865,257 +1859,12 @@ define("class", ["$lang"], function( $ ){
                 init.apply(this, arguments);
             }
         };
-        $.mix( klass, $.mutators ).inherit( parent, init );//添加更多类方法
+        $.mix( klass, hash ).inherit( parent, init );//添加更多类方法
         return expand( klass, obj ).implement( obj );
     }
+    $.mix($.factory, hash)
     return $
 });
-
-
-//=========================================
-//  操作流模块v2,用于流程控制
-//==========================================
-define("flow",["$class"],function($){
-    var uuid_arr =  '0123456789ABCDEFG'.split('');
-    var _args = function (root, arr){//对所有结果进行平坦化处理
-        for(var i = 0, result = [], el; el = arr[i++];){
-            result.push.apply( result,root[el].ret);
-        }
-        return result;
-    }
-    //   first  last  futue
-    // 0  push   push  push
-    // 1  unshift push  splice(0,-2,1)
-    function add(list, callback, flag){
-        if(flag == "first"){
-            if(list._first)//first回调总是第一个执行
-                throw "已存在first回调"
-            if( callback == list._last)
-                throw "first回调不能同时为last回调"
-            list._first = callback;
-            list.unshift(callback)
-        }else if(flag == "last"){
-            if(list._last)//last回调总是最后一个执行
-                throw "已存在last回调"
-            if( callback == list._first)
-                throw "last回调不能同时为first回调"
-            list.push(callback);
-            list._last = callback;
-        }else if(!list.last){
-            list.push(callback);
-        }else{//添加普通的回调
-            var second = [  list.length - 1 , 0, callback];
-            [].splice.apply(list,second)
-        }
-    }
-    return $.Flow = $.factory({
-        init: function(){
-            this.root = {};//数据共享,但策略自定
-            this.id = this.id || this.uuid()
-        },
-        //https://github.com/louisremi/Math.uuid.js/blob/master/Math.uuid.js
-        uuid: function(){
-            var  uuid = [], r, i = 36;
-            uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
-            uuid[14] = '4';
-            while (i--) {
-                if (!uuid[i]) {
-                    r = Math.random()*16|0;
-                    uuid[i] = uuid_arr[(i == 19) ? (r & 0x3) | 0x8 : r];
-                }
-            }
-            return uuid.join('');
-        },
-        
-        bind: function(names,callback,reload, flag){
-            var root = this.root, deps = {},args = []
-            String(names +"").replace($.rword,function(name){
-                name = "__"+name;//处理toString与valueOf等属性
-                if(!root[name]){
-                    root[name] ={
-                        unfire : [callback],//正在等待解发的回调
-                        fired: [],//已经触发的回调
-                        state : 0
-                    }
-                }else{
-                    add(root[name].unfire, callback, flag)
-                }
-                if(!deps[name]){//去重
-                    args.push(name);
-                    deps[name] = 1;
-                }
-            });
-            callback.deps = deps;
-            callback.args = args;
-            callback.reload = !!reload;//默认每次重新加载
-            return this;
-        },
-        first: function(names,callback,reload){
-            this.first = function(){
-                return this;
-            }
-            return this.bind(names,callback,reload, "first")
-        },
-        last: function(names,callback,reload){
-            this.last = function(){
-                return this;
-            }
-            return this.bind(names,callback,reload, "last")
-        },
-        //用于取回符合条件的回调 opts = {match：正则,names:字符串,fired: 布尔}
-        find: function(names,opts){
-            names = names || {}
-            if(typeof names == "string"){
-                opts = opts || {}
-                opts.names = names;
-            }else{
-                opts = names;
-            }
-            names = opts.names;
-            var fired = !!opts.fired;//是否包含已经fire过的回调
-            var root = this.root, callbacks = [], sorted = [], uniq = {}
-            if(!names){//取得所有回调并去重
-                for(var i in root){
-                    callbacks = callbacks.concat(root[ i ].unfire);
-                    if(fired){
-                        callbacks = callbacks.concat(root[ i ].fired);
-                    }
-                }
-                callbacks = $.Array.unique(callbacks);
-            }else{
-                String(names +"").replace($.rword,function(name){
-                    name = "__"+name;//处理toString与valueOf等属性
-                    if( root[ name ] ){
-                        callbacks = callbacks.concat(root[ name ].unfire);
-                        if(!uniq[ name ]){//去重
-                            sorted.push(name);
-                            uniq[ name ] = 1;
-                        }
-                        if(fired){
-                            callbacks = callbacks.concat(root[ name ].fired);
-                        }
-                    }
-                });
-                callbacks = $.Array.unique(callbacks);
-                sorted = String(sorted.sort());
-                callbacks = callbacks.filter(function(fn){
-                    return String(fn.args.sort()).indexOf(sorted) > -1
-                })
-            }
-            if( $.type( opts.match,"RegExp" ) ){
-                var reg = opts.match;
-                callbacks = callbacks.filter(function(fn){
-                    for(var i = 0, n = fn.args.length; i < n ;i++){
-                        var name = fn.args[i].slice(2);
-                        if( reg.test( name ) ){
-                            return true;
-                        }
-                    }
-                    return false
-                })
-            }
-            return callbacks;
-        },
-        append: function( names, name ){
-            var callback = this.find( names );
-            var root = this.root
-            name = "__"+name;
-            callback.forEach(function(fn){
-                if(!(name in fn.deps)){
-                    fn.deps[name] = 1;
-                    fn.args.push(name);
-                    if(!root[name]){
-                        root[name] = {
-                            unfire : [fn],//正在等待解发的回调
-                            fired: [],//已经触发的回调
-                            state : 0
-                        }
-                    }else {
-                        add(root[name].unfire, fn );
-                    }
-                }
-            });
-            return this;
-        },
-        reduce: function(names,name){
-            var callback = this.find(names)
-            var released = "__"+name
-            callback.forEach(function(fn){
-                delete fn.deps[released];//从fn.args字符串数组中删掉released这个操作标识
-                $.Array.remove(fn.args, released)
-            });
-            return this;
-        },
-        
-        unbind : function(array,fn){
-            var names = [];
-            if(/string|number|object/.test(typeof array) ){
-                (array+"").replace($.rword,function(name){
-                    names.push( "__"+name)
-                });
-            }
-            var removeAll = typeof fn !== "function";
-            for(var i = 0, name ; name = names[i++];){
-                var obj = this.root[name];
-                if(obj && obj.unfire){
-                    obj.state = 1;
-                    obj.unfire = removeAll ?  [] : obj.unfire.filter(function(el){
-                        return fn != el;
-                    });
-                    obj.fired = removeAll ?  [] : obj.fired.filter(function(el){
-                        return fn != el;
-                    });
-                }
-            }
-            return this;
-        },
-
-        fire: function(name, args){
-            var root = this.root, obj = root["__"+name], deps;
-            if(!obj )
-                return this;
-            obj.ret = $.slice(arguments,1);//这个供_args方法调用
-            obj.state = 2;//标识此操作已完成
-            var unfire = obj.unfire,fired = obj.fired;
-                loop:
-                for (var i = unfire.length,repeat, fn; fn = unfire[--i]; ) {
-                    deps = fn.deps;
-                    for(var key in deps){//如果其依赖的其他操作都已完成
-                        if(deps.hasOwnProperty(key) && root[key].state != 2 ){
-                            continue loop;
-                        }
-                    }
-                    unfire.splice(i,1)
-                    fired.push( fn );//从unfire数组中取出 ,放进fired数组中
-                    repeat = true;
-                }
-            if(repeat){ //为了谨慎起见再检测一遍
-                try{
-                    this.fire.apply(this, arguments);
-                }catch(e){
-                    this.fire( "error_" + this.id, e);//如果发生异常，抛出500错误
-                }
-            }else{//执行fired数组中的回调
-                for (i = fired.length; fn = fired[--i]; ) {
-                    if(fn.deps["__"+name]){//只处理相关的
-                        this.name = name;
-                        fn.apply(this, _args(this.root, fn.args ) );
-                        if(fn.reload){//重新加载所有数据
-                            fired.splice(i,1);
-                            unfire.push(fn);
-                            for(key in fn.deps){
-                                root[key].state = 1;
-                            }
-                        }
-                    }
-                }
-            }
-            return this;
-        }
-    });
-//像mashup，这里抓一些数据，那里抓一些数据，看似不相关，但这些数据抓完后最后构成一个新页面。
-});
-
 
 
 //=========================================
@@ -3194,7 +2943,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         }
         return document;
     }
-    $.mix( $.mutators ).implement({
+    $.mix( $.factory ).implement({
         init: function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -3364,13 +3113,16 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             return this;
         }
     });
-    "remove,empty".replace( $.rword, function( method ){
+    "remove,empty,detach".replace( $.rword, function( method ){
         $.fn[ method ] = function(){
-            var isRemove = method === "remove";
+            var isRemove = method !== "empty";
             for ( var i = 0, node; node = this[i++]; ){
                 if(node.nodeType === 1){
                     //移除匹配元素
-                    $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] ).forEach( cleanNode );
+                    var array = $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] )
+                    if(method != "detach"){
+                        array .forEach( cleanNode );
+                    }
                 }
                 if( isRemove ){
                     if ( node.parentNode ) {
@@ -3858,7 +3610,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         return result;
     };
 
-    $.lang({
+    $.each({
         parent: function( el ){
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent: [];
@@ -3901,7 +3653,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             el.contentDocument || el.contentWindow.document :
             $.slice( el.childNodes );
         }
-    }).each(function( method, name ){
+    }, function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
             for(var i = 0, el ; el = this[i++];){//expr只用于Until
@@ -5807,7 +5559,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
 //  数据交互模块
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
-define("ajax",["mass","$flow"], function($){
+define("ajax",["mass","$lang"], function($){
     var global = this,
     DOC = global.document,
     r20 = /%20/g,
@@ -6009,7 +5761,7 @@ define("ajax",["mass","$flow"], function($){
     /*=============================================================================================
     从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,传送器集合,转换器集合
     =============================================================================================*/
-    var ajaxflow = new $.Flow
+    var ajaxflow = new $.EventTarget
     var transports = { }//传送器，我们可以通过XMLHttpRequest, Script, Iframe与后端
     var converters = {   //转换器，返回用户想要做的数据（从原始返回值中提取加工）
         text: function(xhr, text, xml){
@@ -6038,10 +5790,9 @@ define("ajax",["mass","$flow"], function($){
         if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
         }else if( dataType == "jsonp" ){
-
             if( opts.crossDomain ){// opts.crossDomain &&
                 $.log("使用script发出JSONP请求")
-                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
+                ajaxflow.dispatchEvent("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -6061,7 +5812,7 @@ define("ajax",["mass","$flow"], function($){
         }
         "complete success error".replace( $.rword, function(name){
             if(typeof opts[ name ] === "function"){
-                dummyXHR.bind( name, opts[ name ] )
+                dummyXHR.addEventListener( name, opts[ name ] )
                 delete opts[ name ];
             }
         });
@@ -6088,22 +5839,22 @@ define("ajax",["mass","$flow"], function($){
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     
     $.XHR = $.factory({
-        inherit: $.Flow,
+        inherit: $.EventTarget,
         init:function( opts ){
             $.mix(this, {
                 responseData:null,
                 timeoutID:null,
                 responseText:null,
                 responseXML:null,
+                statusText: null,
+                transport: null,
                 responseHeadersString: "",
                 responseHeaders:{},
                 requestHeaders: {},
                 readyState: 0,
                 //internal state
                 state: 0,
-                statusText: null,
-                status: 0,
-                transport: null
+                status: 0
             });
             this.setOptions("options", opts );//创建一个options保存原始参数
         },
@@ -6182,10 +5933,10 @@ define("ajax",["mass","$flow"], function($){
             }
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
 
-            this.fire( eventType, this.responseData, statusText);
-            ajaxflow.fire( eventType );
-            this.fire("complete", this.responseData, statusText);
-            ajaxflow.fire( "complete" );
+            this.dispatchEvent( eventType, this.responseData, statusText);
+            ajaxflow.dispatchEvent( eventType );
+            this.dispatchEvent("complete", this.responseData, statusText);
+            ajaxflow.dispatchEvent( "complete" );
             delete this.transport;
         }
     });
@@ -6351,7 +6102,7 @@ define("ajax",["mass","$flow"], function($){
         delete $[ xhr.jsonp ];
         return json;
     }
-    ajaxflow.bind("start", function(dummyXHR, url, jsonp, jsonpCallback) {
+    ajaxflow.addEventListener("start", function(e, dummyXHR, url, jsonp, jsonpCallback) {
         $.log("jsonp start...");
         var namespace =  DOC.URL.replace(/(#.+|\W)/g,'');
         jsonpCallback = dummyXHR.jsonp = jsonpCallback || "jsonp"+dummyXHR.uuid().replace(/-/g,"");
