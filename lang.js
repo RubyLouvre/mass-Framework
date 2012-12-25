@@ -12,7 +12,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
-    str_body = (global.open + '').replace(/open/g, "");
+    str_body = (global.open + '').replace(/open/g, "")
 
     $.mix({
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
@@ -336,67 +336,17 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-    //这只是一个入口
-    $.lang = function(obj, type){
-        return adjust(new Chain, obj, type)
-    }
-    //调整Chain实例的重要属性
-    function adjust(chain, obj, type){
-        type = type || $.type(obj);
-        if( type != "Array" && $.isArrayLike(type) ){
-            obj = $.slice(obj);
-            type = "Array";
-        }
-        chain.target = obj;
-        chain.type = type;
-        return chain
-    }
-    //语言链对象
-    var Chain = function(){ }
-    Chain.prototype = {
-        constructor: Chain,
-        toString: function(){
-            return this.target + "";
-        },
-        value: function(){
-            return this.target;
-        }
-    };
 
-    var retouch = function(method){//函数变换，静态转原型
-        return function(){
-            [].unshift.call(arguments,this)
-            return method.apply(null,arguments)
-        }
-    }
-    var proto = Chain.prototype;
-    //构建语言链对象的四个重要工具:$.String, $.Array, $.Number, $.Object
+    //构建四个工具方法:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(Type){
-        $[ Type ] = function(ext){
-            var isNative = typeof ext == "string",
-            methods = isNative ? ext.match($.rword) : Object.keys(ext);
-            methods.forEach(function(name){
-                $[ Type ][name] = isNative ? function(obj){
-                    return obj[name].apply(obj,$.slice(arguments,1) );
-                } :  ext[name];
-                proto[name] = function(){
-                    var target = this.target;
-                    if( target == null){
-                        return this;
-                    }else{
-                        if( !(target[name] || $[ this.type ][name]) ){
-                            throw "$."+ this.type + "."+name+" does not exist!"
-                        }
-                        var method = isNative ? target[name] : retouch( $[ this.type ][name] ),
-                        next = this.target = method.apply( target, arguments ),
-                        type = $.type( next );
-                        if( type === this.type){
-                            return this;
-                        }else{
-                            return adjust(this, next, type)
-                        }
-                    }
-                }
+        $[ Type ] = function( pack ){
+            var isNative =  typeof pack == "string" ,
+            //取得方法名
+            methods = isNative ? pack.match($.rword) : Object.keys(pack);
+            methods.forEach(function( method ){
+                $[ Type ][method] = isNative ? function(obj){
+                    return obj[method].apply(obj, $.slice(arguments,1) );
+                } :  pack[method];
             });
         }
     });
@@ -437,28 +387,31 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
          *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
          *随着浏览器普及对二进制的操作，这方法也越来越常用。
          */
-        byteLen: function(str){
-            for(var i = 0, cnt = 0; i < str.length; i++){
-                var value = str.charCodeAt(i);
-                if(value < 0x080){
-                    cnt += 1
-                }else if(value < 0x0800){
-                    cnt += 2
-                }else{
-                    cnt += 3
-                }
-            }
-            return cnt;
+        //        byteLen: function(str){
+        //            for(var i = 0, cnt = 0; i < str.length; i++){
+        //                var value = str.charCodeAt(i);
+        //                if(value < 0x080){
+        //                    cnt += 1
+        //                }else if(value < 0x0800){
+        //                    cnt += 2
+        //                }else{
+        //                    cnt += 3
+        //                }
+        //            }
+        //            return cnt;
+        //        },
+        byteLen: function ( target ) {
+            return target.replace(/[^\x00-\xff]/g, 'ci').length;
         },
         //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
-        truncate: function(target, length, truncation) {
+        truncate: function( target, length, truncation ) {
             length = length || 30;
             truncation = truncation === void(0) ? "..." : truncation;
             return target.length > length ?
             target.slice(0, length - truncation.length) + truncation : String(target);
         },
         //转换为驼峰风格
-        camelize: function(target){
+        camelize: function( target ){
             if (target.indexOf("-") < 0 && target.indexOf("_") < 0) {
                 return target;//提前判断，提高getStyle等的效率
             }
@@ -467,23 +420,23 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             });
         },
         //转换为下划线风格
-        underscored: function(target) {
+        underscored: function( target ) {
             return target.replace(/([a-z\d])([A-Z]+)/g, "$1_$2").replace(/\-/g, "_").toLowerCase();
         },
         //首字母大写
-        capitalize: function(target){
+        capitalize: function( target ){
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
         //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
-        stripTags: function (target) {
-            return String(target || "").replace(/<[^>]+>/g, "");
+        stripTags: function ( target ) {
+            return target.replace(/<[^>]+>/g, "");
         },
         //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
-        stripScripts: function(target){
-            return String(target ||"").replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
+        stripScripts: function( target ){
+            return target.replace(/<script[^>]*>([\S\s]*?)<\/script>/img,'')
         },
         //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
-        escapeHTML:  function (target) {
+        escapeHTML:  function ( target ) {
             return target.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -532,16 +485,6 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     });
 
-    if(global.netscape && global.Blob){//不要使用window前缀
-        $.String.byteLen = function(str){
-            return new Blob([str],{
-                type:"text/css"
-            }).size
-        }
-    }
-    if(global.Buffer && Buffer.byteLength){//不要使用window前缀
-        $.String.byteLen = Buffer.byteLength;
-    }
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
@@ -570,13 +513,13 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return first;
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
-        shuffle: function ( arr ) {
-            var ret = [], i = arr.length, n; 
-            arr = arr.slice(0);
+        shuffle: function ( target ) {
+            var ret = [], i = target.length, n; 
+            target = target.slice(0);
             while (--i >= 0) {
                 n = Math.floor( Math.random() * i);
-                ret[ret.length] = arr[n];
-                arr[n] = arr[i];
+                ret[ret.length] = target[n];
+                target[n] = target[i];
             }
             return ret;
         },
@@ -585,7 +528,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return $.Array.shuffle( target.concat() )[0];
         },
         //对数组进行平坦化处理，返回一个一维的新数组。
-        flatten: function(target) {
+        flatten: function( target ) {
             var result = [],self = $.Array.flatten;
             target.forEach(function(item) {
                 if ( Array.isArray(item)) {
@@ -801,7 +744,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             }, target);
         },
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
-        clone: function(target){
+        clone: function( target ){
             var clone = {};
             for (var key in target) {
                 clone[key] = cloneOf(target[key]);
@@ -809,7 +752,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return clone;
         },
         //将多个对象合并到第一个参数中或将后两个参数当作键与值加入到第一个参数
-        merge: function(target, k, v){
+        merge: function( target, k, v ){
             var obj, key;
             //为目标对象添加一个键值对
             if (typeof k === "string")

@@ -15,7 +15,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         }
         return document;
     }
-    $.mix( $.mutators ).implement({
+    $.mix( $.factory ).implement({
         init: function( expr, context ){
             // 分支1: 处理空白字符串,null,undefined参数
             if ( !expr ) {
@@ -697,7 +697,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         return result;
     };
 
-    $.lang({
+    $.each({
         parent: function( el ){
             var parent = el.parentNode;
             return parent && parent.nodeType !== 11 ? parent: [];
@@ -740,7 +740,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             el.contentDocument || el.contentWindow.document :
             $.slice( el.childNodes );
         }
-    }).each(function( method, name ){
+    }, function( method, name ){
         $.fn[ name ] = function( expr ){
             var nodes = [];
             for(var i = 0, el ; el = this[i++];){//expr只用于Until

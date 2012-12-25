@@ -17,7 +17,7 @@ define("class", ["$lang"], function( $ ){
         return klass;
     }
 
-    $.mutators = {
+    var hash = {
         inherit : function( parent,init ) {
             var bridge = function() { }
             if( typeof parent == "function"){
@@ -85,9 +85,10 @@ define("class", ["$lang"], function( $ ){
                 init.apply(this, arguments);
             }
         };
-        $.mix( klass, $.mutators ).inherit( parent, init );//添加更多类方法
+        $.mix( klass, hash ).inherit( parent, init );//添加更多类方法
         return expand( klass, obj ).implement( obj );
     }
+    $.mix($.factory, hash)
     return $
 });
 /**
