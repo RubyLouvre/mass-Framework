@@ -5,32 +5,132 @@
         <title>bootstrap学习 by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/bootstrap.css"/>
+        <link rel="stylesheet" href="bootstrap.css"/>
+        <link href="http://twitter.github.com/bootstrap/assets/css/bootstrap-responsive.css" rel="stylesheet">
         <script src="http://files.cnblogs.com/rubylouvre/jquery1.83.js" > </script>
         <script src="http://files.cnblogs.com/rubylouvre/bootstrap-transition.js"></script>
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-tooltip.js"></script>
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-popover.js"></script>
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-button.js"></script>
+
+        <script src="bootstrap-affix.js"></script>
         <script >
             $(function () {
                 var log = function(s){
                     window.console && console.log(s)
                 }
-                $('.well a').popover()
             })
         </script>
-        <script>
-       
-        </script>
+        <style type='text/css'>
+
+        </style>
     </head>
     <body>
-        <br/>
-        <br/>
-        <h3>by 司徒正美</h3>
-        <br/>
-        
-        <div class="well">
-            <a href="#" class="btn btn-danger" rel="popover" data-content="他来自山东，是一名残疾人，因思想独立、指谪政弊而被政府迫害。地方政府和当权政要派专人看管他，调拨专款作为对他的看管费用，他每天都活在别人的监视和囚禁中，其遭遇只能用令人发指来形容。历尽万难，他终于成功逃离了当地，在外国使节的帮助和护送下去到了国外。他，就是孙膑。" data-original-title="他是谁">鼠标经过弹出提示</a>
-        </div>
+        <h1>Edit Document Template</h1>
+        <hr/>
+
+        <div class="row-fluid">
+            <div class="span3">
+                <ul class="nav nav-list" data-spy="affix" data-offset-top="40">
+                    <li><a href="#one"><i class="icon-chevron-right"></i> One</a></li>
+                    <li><a href="#two"><i class="icon-chevron-right"></i> Two</a></li>
+                    <li><a href="#three"><i class="icon-chevron-right"></i> Three</a></li>
+                    <li><a href="#four"><i class="icon-chevron-right"></i> Four</a></li>
+                    <li><a href="#five"><i class="icon-chevron-right"></i> Five</a></li>
+                    <li><a href="#six"><i class="icon-chevron-right"></i> Six</a></li>
+                    <li><a href="#seven"><i class="icon-chevron-right"></i> Seven</a></li>
+                </ul>
+
+            </div>
+            <div class="span9">
+                <fieldset id="one">
+                    <legend>one</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset id="two">
+                    <legend>Two</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset id="three">
+                    <legend>three</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset id="four">
+                    <legend>four</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset id="five">
+                    <legend>five</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset id="six">
+                    <legend>six</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+
+                <fieldset id="seven">
+                    <legend>seven</legend>
+                    <div class="fieldset-content">
+                        <p>
+                            "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi
+                            architecto beatae vitae dicta sunt     explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione
+                            voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut
+                            labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi
+                            consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eumfugiat quovoluptas nulla pariatur?"
+                        </p>
+                    </div>
+                </fieldset>
+            </div>
+        </div>​
     </body>
 </html>
