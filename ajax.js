@@ -2,7 +2,7 @@
 //  数据交互模块
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
-define("ajax",["mass","$flow"], function($){
+define("ajax",["mass","$lang"], function($){
     var global = this,
     DOC = global.document,
     r20 = /%20/g,
@@ -214,7 +214,7 @@ define("ajax",["mass","$flow"], function($){
     /*=============================================================================================
     从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,传送器集合,转换器集合
     =============================================================================================*/
-    var ajaxflow = new $.Flow
+    var ajaxflow = new $.EventTarget
     var transports = { }//传送器，我们可以通过XMLHttpRequest, Script, Iframe与后端
     var converters = {   //转换器，返回用户想要做的数据（从原始返回值中提取加工）
         text: function(xhr, text, xml){
@@ -243,10 +243,9 @@ define("ajax",["mass","$flow"], function($){
         if( opts.form && opts.form.nodeType === 1 ){
             dataType = "iframe";
         }else if( dataType == "jsonp" ){
-
             if( opts.crossDomain ){// opts.crossDomain &&
                 $.log("使用script发出JSONP请求")
-                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
+                ajaxflow.dispatchEvent("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -266,7 +265,7 @@ define("ajax",["mass","$flow"], function($){
         }
         "complete success error".replace( $.rword, function(name){
             if(typeof opts[ name ] === "function"){
-                dummyXHR.bind( name, opts[ name ] )
+                dummyXHR.addEventListener( name, opts[ name ] )
                 delete opts[ name ];
             }
         });
@@ -295,22 +294,22 @@ define("ajax",["mass","$flow"], function($){
      * XHR类,用于模拟原生XMLHttpRequest的所有行为
      */
     $.XHR = $.factory({
-        inherit: $.Flow,
+        inherit: $.EventTarget,
         init:function( opts ){
             $.mix(this, {
                 responseData:null,
                 timeoutID:null,
                 responseText:null,
                 responseXML:null,
+                statusText: null,
+                transport: null,
                 responseHeadersString: "",
                 responseHeaders:{},
                 requestHeaders: {},
                 readyState: 0,
                 //internal state
                 state: 0,
-                statusText: null,
-                status: 0,
-                transport: null
+                status: 0
             });
             this.setOptions("options", opts );//创建一个options保存原始参数
         },
@@ -394,10 +393,10 @@ define("ajax",["mass","$flow"], function($){
             }
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
 
-            this.fire( eventType, this.responseData, statusText);
-            ajaxflow.fire( eventType );
-            this.fire("complete", this.responseData, statusText);
-            ajaxflow.fire( "complete" );
+            this.dispatchEvent( eventType, this.responseData, statusText);
+            ajaxflow.dispatchEvent( eventType );
+            this.dispatchEvent("complete", this.responseData, statusText);
+            ajaxflow.dispatchEvent( "complete" );
             delete this.transport;
         }
     });
@@ -563,7 +562,7 @@ define("ajax",["mass","$flow"], function($){
         delete $[ xhr.jsonp ];
         return json;
     }
-    ajaxflow.bind("start", function(dummyXHR, url, jsonp, jsonpCallback) {
+    ajaxflow.addEventListener("start", function(e, dummyXHR, url, jsonp, jsonpCallback) {
         $.log("jsonp start...");
         var namespace =  DOC.URL.replace(/(#.+|\W)/g,'');
         jsonpCallback = dummyXHR.jsonp = jsonpCallback || "jsonp"+dummyXHR.uuid().replace(/-/g,"");

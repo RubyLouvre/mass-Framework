@@ -1,5 +1,5 @@
 //=========================================
-// 类型扩展模块v7 by 司徒正美
+// 语言扩展模块v5 by 司徒正美
 //=========================================
 define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     var global = this,
@@ -289,7 +289,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         在一连串调用中，如果我们throttle了一个函数，那么它会减少调用频率，
         会把A调用之后的XXXms间的N个调用忽略掉，
         然后再调用XXXms后的第一个调用，然后再忽略N个*/
-        throttle:  function(delay,action,tail,debounce) {
+        throttle:  function(delay, action, tail, debounce) {
             var last_call = 0, last_exec = 0, timer = null, curr, diff,
             ctx, args, exec = function() {
                 last_exec = Date.now;
@@ -322,7 +322,68 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
 
     }, false);
-   
+    var EventTarget = function(target) {
+        $.log("init EventTarget")
+        this._listeners = {};
+        this._eventTarget = target || this;
+    }
+    EventTarget.prototype = {
+        constructor: EventTarget,
+        addEventListener: function(type, callback, scope, priority) {
+            if(isFinite( scope )){
+                priority = scope
+                scope = null;
+            }
+            priority = priority || 0;
+            var list = this._listeners[type],  index = 0, listener, i;
+            if (list == null) {
+                this._listeners[type] = list = [];
+            }
+            i = list.length;
+            while (--i > -1) {
+                listener = list[i];
+                if (listener.callback === callback) {
+                    list.splice(i, 1);
+                } else if (index === 0 && listener.priority < priority) {
+                    index = i + 1;
+                }
+            }
+            list.splice(index, 0, {
+                callback: callback, 
+                scope:    scope, 
+                priority: priority
+            });
+        },
+        removeEventListener: function(type, callback) {
+            var list = this._listeners[type], i;
+            if (list) {
+                i = list.length;
+                while (--i > -1) {
+                    if (list[i].callback === callback) {
+                        list.splice(i, 1);
+                        return;
+                    }
+                }
+            }
+        },
+        dispatchEvent: function(type) {
+            var list = this._listeners[type];
+            if (list) {
+                var target = this._eventTarget,  args = Array.apply([], arguments),i = list.length,  listener
+                while (--i > -1) {
+                    listener = list[i];
+                    target = listener.scope || target;
+                    args[ 0 ] = {
+                        type:  type,
+                        target: target
+                    }
+                    listener.callback.apply(target, args);
+                }
+            }
+        }
+    }
+    $.EventTarget = EventTarget;
+    
     "Array,Function".replace($.rword, function( method ){
         $[ "is"+method ] = function(obj){
             return obj && ({}).toString.call(obj) === "[object "+method+"]";
@@ -382,24 +443,11 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return result;
         },
         /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
-         *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
-         *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
-         *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
-         *随着浏览器普及对二进制的操作，这方法也越来越常用。
-         */
-        //        byteLen: function(str){
-        //            for(var i = 0, cnt = 0; i < str.length; i++){
-        //                var value = str.charCodeAt(i);
-        //                if(value < 0x080){
-        //                    cnt += 1
-        //                }else if(value < 0x0800){
-        //                    cnt += 2
-        //                }else{
-        //                    cnt += 3
-        //                }
-        //            }
-        //            return cnt;
-        //        },
+             *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
+             *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
+             *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
+             *随着浏览器普及对二进制的操作，这方法也越来越常用。
+             */
         byteLen: function ( target ) {
             return target.replace(/[^\x00-\xff]/g, 'ci').length;
         },
@@ -669,7 +717,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift,"+
         "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
-    var NumberExt = {
+    var NumberPack = {
         //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
         limit: function(target, n1, n2){
             var a = [n1, n2].sort();
@@ -694,9 +742,9 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     }
     "abs,acos,asin,atan,atan2,ceil,cos,exp,floor,log,pow,sin,sqrt,tan".replace($.rword,function(name){
-        NumberExt[name] = Math[name];
+        NumberPack[name] = Math[name];
     });
-    $.Number(NumberExt);
+    $.Number(NumberPack);
     $.Number("toFixed,toExponential,toPrecision,toJSON")
     function cloneOf(item){
         var name = $.type(item);
@@ -782,7 +830,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
     return $
 });
-/**
+    /**
 changlog:
 2011.7.12 将toArray转移到lang模块下
 2011.7.26 去掉toArray方法,添加globalEval,parseJSON,parseXML方法
@@ -811,7 +859,8 @@ changlog:
 2012.6.29 去掉last first
 2012.7.31 添加$.Array.merge API
 2012.8.15 添加$.Array.ensure, $.Array.inGroupsOf
+2012.12.25 移除语言链对象，添加EventTarget对象 v5
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070
-*/
+     */

@@ -1,5 +1,5 @@
 //=========================================
-// 类工厂模块 by 司徒正美
+// 类工厂模块 v11 by 司徒正美
 //==========================================
 define("class", ["$lang"], function( $ ){
     var
@@ -27,6 +27,9 @@ define("class", ["$lang"], function( $ ){
                 bridge.prototype = parent.prototype;
                 this.prototype = new bridge ;//继承原型成员
                 this._super = parent;//指定父类
+                if(!this._init){
+                    this._init = [parent]
+                }
             }
             this._init = (this._init || []).concat();
             if( init ){
@@ -107,5 +110,6 @@ fix 子类实例不是父类的实例的bug
 2012.2.25 改进setOptions，可以指定在this上扩展还是在this.XXX上扩展
 2012.2.26 重新实现方法链，抛弃arguments.callee.caller   v8
 2012.7.22 v10 大幅简化,去掉defineProperty与方法链
+2012.12.25 去掉mutators 对象，它的方法绑到$.factory上，并且它支持继续用户用其他方法定义的“类” v11
 https://gist.github.com/2990054
 */
