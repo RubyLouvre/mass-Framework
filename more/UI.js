@@ -1940,27 +1940,472 @@ abcd:  17:28:10
 
  
  
-winter(shaofeic)<csf178@163.com> 18:06:56
-ES6啊 不好说呢 
-winter(shaofeic)<csf178@163.com> 18:07:06
-ES6现在还非常不稳定呢 
-kennyluck<kennyluckco@gmail.com> 18:07:57
-至少要給規範找錯的話，看新標準比較好吧。不然也有人會說：「不想改 5.1」之類的。
-教主Franky(449666) 18:09:44
-嗯 不想改5.1 这种理由我们以前遇到过了吧… 无敌的理由
-kennyluck<kennyluckco@gmail.com> 18:12:30
-主要是大家都在關注 ES6 啊，要改也是改 ES6，為什麼要去挑戰某些標準組織不想改舊版本標準的程序？
-教主Franky(449666) 18:13:22
-我们来讨论个话题 
-教主Franky(449666) 18:13:36
-什么情况下 词法环境会改变?
-教主Franky(449666) 18:20:58
-??? 人呢 ...
-一丝(一淘)(50167214) 18:21:05
-恭喜你们 讨论一下午 es
-一丝(一淘)(50167214) 18:21:08
- 
-树残由尔□(180669793) 18:21:19
-一丝
-树残由尔□(180669793) 18:21:29
-=== es
+   <p>捕捉浏览器中的JS运行时错误，主要通过监听window.onerror来实现。但是对于不同的脚本执行方式以及不同的浏览器，能捕获到的信息会有区别。</p>
+
+<p>window.onerror 讲接收3个参数：</p>
+
+<ul>
+<li>
+<code>msg</code>：错误描述，比如：a is not defined</li>
+<li>
+<code>url</code>：出错脚本所在的url</li>
+<li>
+<code>lineNumber</code>：出错脚本的行数</li>
+</ul><p>本文将对不同浏览器和不同的脚本执行方式进行测试，并总结这些区别。</p>
+
+<p>首先对于脚本的执行主要有下面几种：</p>
+
+<ul>
+<li>页面内嵌的<code>&lt;script&gt;</code>，需要执行的代码在<code>&lt;script&gt;</code>标签内</li>
+<li>使用<code>&lt;script src="external.js"&gt;</code>的方式引入外部脚本，脚本为同域地址</li>
+<li>使用<code>&lt;script src="external.js"&gt;</code>的方式引入外部脚本，脚本为不同域地址</li>
+<li>使用<code>&lt;script src="external.js"&gt;</code>的方式引入外部脚本，脚本为本地地址</li>
+<li>使用eval方法来执行脚本</li>
+<li>动态地创建内嵌的<code>&lt;script&gt;</code>并设置其innerHTML为需要执行的代码</li>
+</ul><p>下面列一下各浏览器对与上面集中脚本执行的捕获情况（Markdown对于table的支持不是很好，我是直接在页面上copy HTML进来的，维护可以看下 <a href="https://www.evernote.com/shard/s43/sh/a36fc90e-9f72-43b5-8710-1476340d14ac/1160f515582d297f22f495924ba10d3d">https://www.evernote.com/shard/s43/sh/a36fc90e-9f72-43b5-8710-1476340d14ac/1160f515582d297f22f495924ba10d3d</a> )</p>
+
+<h2>Chrome</h2>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（only Script error）<br>
+</td>
+<td valign="top">✗（only Script error）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（""）<br>
+</td>
+<td valign="top">✗（""）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（0）<br>
+</td>
+<td valign="top">✗（0）<br>
+</td>
+<td valign="top">✓（from code）<br>
+</td>
+<td valign="top">✓（from its code）<br>
+</td>
+</tr>
+</table><h3>Firefox</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（only Script error）<br>
+</td>
+<td valign="top">✗（only Script error）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（file that call this eval）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page））<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（0）<br>
+</td>
+<td valign="top">✗（0）<br>
+</td>
+<td valign="top">✓（position that calls this eval）<br>
+</td>
+<td valign="top">✓（from its code）<br>
+</td>
+</tr>
+</table><h3>Safari</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（only Script error）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（undefined）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（0）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（from code）<br>
+</td>
+<td valign="top">✓（from its code）<br>
+</td>
+</tr>
+</table><h3>Opera</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（only Script error）<br>
+</td>
+<td valign="top">-</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（""）<br>
+</td>
+<td valign="top">-</td>
+<td valign="top">✗（""）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✗（0）<br>
+</td>
+<td valign="top">-</td>
+<td valign="top">✓（from code）<br>
+</td>
+<td valign="top">✓（from its code）<br>
+</td>
+</tr>
+</table><h3>IE9</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（file path that call this eval）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（position that calls this eval）<br>
+</td>
+<td valign="top">✓（from its code）<br>
+</td>
+</tr>
+</table><h3>IE8</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script（not available）</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">-</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（file path that call this eval）<br>
+</td>
+<td valign="top">-</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（position that calls this eval）<br>
+</td>
+<td valign="top">-</td>
+</tr>
+</table><h3>IE7</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script（not available）</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">-</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（file path that call this eval）<br>
+</td>
+<td valign="top">-</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓（position that calls this eval）<br>
+</td>
+<td valign="top">-</td>
+</tr>
+</table><h3>IE6</h3>
+
+<table border="1" width="100%" cellspacing="0" cellpadding="2">
+<tr>
+<td valign="top"><br></td>
+<td valign="top">page script</td>
+<td valign="top">external script ( same origin )</td>
+<td valign="top">external script ( cross domain )</td>
+<td valign="top">external script ( local )</td>
+<td valign="top">eval</td>
+<td valign="top">dynamic page script（not available）</td>
+</tr>
+<tr>
+<td valign="top">msg</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">✓<br>
+</td>
+<td valign="top">-</td>
+</tr>
+<tr>
+<td valign="top">url</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">✓（current page）<br>
+</td>
+<td valign="top">-</td>
+</tr>
+<tr>
+<td valign="top">lineNumber</td>
+<td valign="top">✓（from current page）<br>
+</td>
+<td valign="top">✓（line number start from 1）<br>
+</td>
+<td valign="top">✓（line number start from 1）<br>
+</td>
+<td valign="top">✓（line number start from 1）<br>
+</td>
+<td valign="top">✓（position that calls this eval，line number start from 1）<br>
+</td>
+<td valign="top">-</td>
+</tr>
+</table>
