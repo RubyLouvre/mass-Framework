@@ -3382,14 +3382,29 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
         return nodes;
     }
     $.implement({
-        data: function( key, item, pv ){
+        data: function( key, item ){
+            if ( key === void 0 ) {
+                if ( this.length ) {
+                    var target = this[0], data = $.data( target );
+                    if ( target.nodeType === 1 && !$._data( target, "parsedAttrs" ) ) {
+                        for (var i = 0, attrs = target.attributes, attr ; attr = attrs[i++]; ) {
+                            var name = attr.name;
+                            if ( !name.indexOf( "data-" ) ) {
+                                $.parseData(target, name.slice(5), data, attr.value)
+                            }
+                        }
+                        $._data( target, "parsedAttrs", true );
+                    }
+                }
+                return data;
+            }
             return $.access( this, key, item, function(el){
-                return  $.data( el, key, item,  pv === true  );
+                return  $.data( el, key, item  );
             })
         },
-        removeData: function( key, pv ) {
+        removeData: function( key ) {
             return this.each(function() {
-                $.removeData( this, key, pv );
+                $.removeData( this, key );
             });
         }
     });

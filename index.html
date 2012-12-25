@@ -5,13 +5,14 @@
         <title>bootstrap学习 by 司徒正美</title>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
 
-        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/bootstrap.css"/>
-     
-        <script src="http://files.cnblogs.com/rubylouvre/jquery1.83.js" > </script>
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-transition.js"></script>
 
-        <script src="http://files.cnblogs.com/rubylouvre/bootstrap-typeahead.js"></script>
-  
+
+        <script src="mass.js"></script>
+        <script>
+            require("node,ready", function(){
+                console.log($(".span3").data())
+            })
+        </script>
     </head>
     <body>
         <input type="text" class="span3" style="margin: 0 auto;" data-provide="typeahead" data-items="4" 
