@@ -235,14 +235,11 @@
         var cur = scripts[ scripts.length - 1 ];
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( "src", 4 );
         url = url.replace(/[?#].*/, "");
-        var a = cur.getAttribute("debug");
-        var b = cur.getAttribute("storage");
+        var d = cur.getAttribute("debug");
         var kernel = $.config;
-        kernel.debug = a == "true" || a == "1";
-        kernel.storage = b == "true"|| b == "1";
+        kernel.debug = d == "true" || d == "1";
         basepath =  kernel.base = url.substr( 0, url.lastIndexOf("/") ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
-        kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
 
@@ -311,72 +308,8 @@
             if ( el.detachEvent ) {
                 el.detachEvent( "on" + type, fn || $.noop );
             }
-        },
-        //移除指定或所有本地储存中的模块
-        erase : function( id, v ){
-            if(id == void 0){
-                Storage.clear();
-            }else{
-                var old = Storage.getItem( id+"_version" );
-                if(old && (!v || v > Number(old)) ){
-                    Storage.removeItem( id );
-                    Storage.removeItem( id+"_deps" );
-                    Storage.removeItem( id+"_parent" );
-                    Storage.removeItem( id+"_version" );
-                }
-            }
         }
     });
-    //================================localStorage===============================
-    var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
-    if( global.localStorage){
-        Storage = localStorage; 
-    }else  if( html.addBehavior){
-        html.addBehavior('#default#userData');
-        html.save("massdata");
-        //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
-        //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
-        var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g");
-        function curry(fn) {
-            return function(a, b) {
-                html.load("massdata");
-                a = String(a).replace(rstoragekey, function(w){
-                    return w.charCodeAt(0);
-                });
-                var result = fn( a, b );
-                html.save("massdata");
-                return result
-            }
-        }
-        Storage = {
-            setItem : curry(function(key, val){
-                html.setAttribute(key, val);
-            }),
-            getItem: curry(function(key){
-                return html.getAttribute(key);
-            }),
-            removeItem: curry(function(key){
-                html.removeAttribute(key);
-            }),
-            clear: function(){
-                var attributes = html.XMLDocument.documentElement.attributes
-                for (var i=0, attr; attr=attributes[i]; i++) {
-                    html.removeAttribute(attr.name)
-                }
-            }
-        }
-    }
-    var rerase = new RegExp("(?:^| )" + $.config.erase + "(?:(?:=([^;]*))|;|$)")
-    var match = String(DOC.cookie).match( rerase );
-    //读取从后端过来的cookie指令，转换成一个对象，键名为模块的URL，值为版本号（这是一个时间戮）
-    if(match && match[1]){
-        try{
-            var obj = eval("0,"+match[1]);
-            for(var i in obj){//$.erase会版本号比现在小的模块从本地储存中删掉
-                $.erase(i, obj[i])
-            }
-        }catch(e){}
-    }
 
     //============================加载系统===========================
     var modules = $.modules =  {
@@ -458,27 +391,12 @@
     }
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var node     =  DOC.createElement("link");
-        node.rel     = "stylesheet";
-        node.href    = url;
-        node.id      = id;
-        head.insertBefore( node, head.firstChild );
-    }
-    function loadStorage( id ){
-        var factory =  Storage.getItem( id );
-        if( $.config.storage && factory && !modules[id]){
-            var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps");
-            deps = deps ?  deps.match( $.rword ) : "";
-            modules[ id ] ={
-                id: id,
-                parent: parent,
-                exports: {},
-                state: 1
-            };
-            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
+        if (!DOC.getElementById(id)){
+            var node     =  DOC.createElement("link");
+            node.rel     = "stylesheet";
+            node.href    = url;
+            node.id      = id;
+            head.insertBefore( node, head.firstChild );
         }
     }
 
@@ -530,7 +448,6 @@
         loadings.unshift( id );
     }
     //定义模块
-    var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments), _id
         if(typeof id == "string"){
@@ -553,12 +470,6 @@
             args.push( id );
             if( checkCycle(modules[id].deps, id)){
                 throw new Error( id +"模块与之前的某些模块存在循环依赖")
-            }
-            if( $.config.storage && !Storage.getItem( id ) ){
-                Storage.setItem( id, factory.toString().replace(rcomment,""));
-                Storage.setItem( id+"_deps", args[0]+"");
-                Storage.setItem( id+"_parent",  id);
-                Storage.setItem( id+"_version", new Date - 0);
             }
             delete factory.delay;//释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
@@ -625,9 +536,9 @@
         if( html.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
-
+    //mass.js必须是以硬编码形式写在页面，才能让IE6789支持HTML5新标签
     global.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
+        "header,hgroup,m,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
         DOC.createElement(tag);
     });
 
@@ -706,6 +617,7 @@ dom.namespace改为dom["mass"]
 2012.12.5 升级到v20，参考requireJS的实现，去掉iframe检测，暴露define与require
 2012.12.16 精简loadCSS 让getCurrentScript更加安全
 2012.12.18 升级v21 处理opera readyState BUG 与IE6下的节点插入顺序
+2012.12.26 升级v22 移除本地储存，以后用插件形式实现，新增一个HTML5 m标签的支持
 http://hi.baidu.com/flondon/item/1275210a5a5cf3e4fe240d5c
 检测当前页面是否在iframe中（包含与普通方法的比较）
 http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
