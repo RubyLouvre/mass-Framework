@@ -214,14 +214,11 @@
         var cur = scripts[ scripts.length - 1 ];
         var url = cur.hasAttribute ?  cur.src : cur.getAttribute( "src", 4 );
         url = url.replace(/[?#].*/, "");
-        var a = cur.getAttribute("debug");
-        var b = cur.getAttribute("storage");
+        var d = cur.getAttribute("debug");
         var kernel = $.config;
-        kernel.debug = a == "true" || a == "1";
-        kernel.storage = b == "true"|| b == "1";
+        kernel.debug = d == "true" || d == "1";
         basepath =  kernel.base = url.substr( 0, url.lastIndexOf("/") ) +"/";
         kernel.nick = cur.getAttribute("nick") || "$";
-        kernel.erase = cur.getAttribute("erase") || "erase";
         kernel.alias = {};
         kernel.level = 9;
 
@@ -290,72 +287,8 @@
             if ( el.detachEvent ) {
                 el.detachEvent( "on" + type, fn || $.noop );
             }
-        },
-        //移除指定或所有本地储存中的模块
-        erase : function( id, v ){
-            if(id == void 0){
-                Storage.clear();
-            }else{
-                var old = Storage.getItem( id+"_version" );
-                if(old && (!v || v > Number(old)) ){
-                    Storage.removeItem( id );
-                    Storage.removeItem( id+"_deps" );
-                    Storage.removeItem( id+"_parent" );
-                    Storage.removeItem( id+"_version" );
-                }
-            }
         }
     });
-    //================================localStorage===============================
-    var Storage = $.oneObject("setItem,getItem,removeItem,clear",$.noop);
-    if( global.localStorage){
-        Storage = localStorage; 
-    }else  if( html.addBehavior){
-        html.addBehavior('#default#userData');
-        html.save("massdata");
-        //https://github.com/marcuswestin/store.js/issues/40#issuecomment-4617842
-        //在IE67它对键名非常严格,不能有特殊字符,否则抛throwed an This name may not contain the '~' character: _key-->~<--
-        var rstoragekey = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g");
-        function curry(fn) {
-            return function(a, b) {
-                html.load("massdata");
-                a = String(a).replace(rstoragekey, function(w){
-                    return w.charCodeAt(0);
-                });
-                var result = fn( a, b );
-                html.save("massdata");
-                return result
-            }
-        }
-        Storage = {
-            setItem : curry(function(key, val){
-                html.setAttribute(key, val);
-            }),
-            getItem: curry(function(key){
-                return html.getAttribute(key);
-            }),
-            removeItem: curry(function(key){
-                html.removeAttribute(key);
-            }),
-            clear: function(){
-                var attributes = html.XMLDocument.documentElement.attributes
-                for (var i=0, attr; attr=attributes[i]; i++) {
-                    html.removeAttribute(attr.name)
-                }
-            }
-        }
-    }
-    var rerase = new RegExp("(?:^| )" + $.config.erase + "(?:(?:=([^;]*))|;|$)")
-    var match = String(DOC.cookie).match( rerase );
-    //读取从后端过来的cookie指令，转换成一个对象，键名为模块的URL，值为版本号（这是一个时间戮）
-    if(match && match[1]){
-        try{
-            var obj = eval("0,"+match[1]);
-            for(var i in obj){//$.erase会版本号比现在小的模块从本地储存中删掉
-                $.erase(i, obj[i])
-            }
-        }catch(e){}
-    }
 
     //============================加载系统===========================
     var modules = $.modules =  {
@@ -437,27 +370,12 @@
     }
     function loadCSS(url){
         var id = url.replace(rmakeid,"");
-        if (DOC.getElementById(id))
-            return
-        var node     =  DOC.createElement("link");
-        node.rel     = "stylesheet";
-        node.href    = url;
-        node.id      = id;
-        head.insertBefore( node, head.firstChild );
-    }
-    function loadStorage( id ){
-        var factory =  Storage.getItem( id );
-        if( $.config.storage && factory && !modules[id]){
-            var parent = Storage.getItem(id+"_parent");
-            var deps = Storage.getItem(id+"_deps");
-            deps = deps ?  deps.match( $.rword ) : "";
-            modules[ id ] ={
-                id: id,
-                parent: parent,
-                exports: {},
-                state: 1
-            };
-            require(deps, Function("return "+ factory )(), id) //0,1,2 --> 1,2,0
+        if (!DOC.getElementById(id)){
+            var node     =  DOC.createElement("link");
+            node.rel     = "stylesheet";
+            node.href    = url;
+            node.id      = id;
+            head.insertBefore( node, head.firstChild );
         }
     }
 
@@ -473,7 +391,6 @@
             var array = parseURL(el, parent ),  url = array[0];
             if(array[1] == "js"){
                 dn++
-                loadStorage( id )
                 if( !modules[ url ]  ){
                     modules[ url ] = {
                         id: url,
@@ -509,7 +426,6 @@
         loadings.unshift( id );
     }
     //定义模块
-    var rcomment =  /\/\*(?:[^*]|\*+[^\/*])*\*+\/|\/\/.*/g
     window.define = $.define = function( id, deps, factory ){//模块名,依赖列表,模块本身
         var args = Array.apply([],arguments), _id
         if(typeof id == "string"){
@@ -532,12 +448,6 @@
             args.push( id );
             if( checkCycle(modules[id].deps, id)){
                 throw new Error( id +"模块与之前的某些模块存在循环依赖")
-            }
-            if( $.config.storage && !Storage.getItem( id ) ){
-                Storage.setItem( id, factory.toString().replace(rcomment,""));
-                Storage.setItem( id+"_deps", args[0]+"");
-                Storage.setItem( id+"_parent",  id);
-                Storage.setItem( id+"_version", new Date - 0);
             }
             delete factory.delay;//释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
@@ -604,9 +514,9 @@
         if( html.doScroll && self.eval === parent.eval)
             doScrollCheck();
     }
-
+    //mass.js必须是以硬编码形式写在页面，才能让IE6789支持HTML5新标签
     global.VBArray && ("abbr,article,aside,audio,bdi,canvas,data,datalist,details,figcaption,figure,footer," +
-        "header,hgroup,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
+        "header,hgroup,m,mark,meter,nav,output,progress,section,summary,time,video").replace( $.rword, function( tag ){
         DOC.createElement(tag);
     });
 
@@ -2475,7 +2385,7 @@ define("query",["mass"], function( $ ){
                         break
                     default:
                         filter = [key.toLowerCase()];  
-                        if (match = expr.match(rattrib)) {
+                        if ((match = expr.match(rattrib))) {
                             expr = RegExp.rightContext;
                             if (match[1]) {
                                 filter[1] = match[1];//op
@@ -2665,7 +2575,7 @@ define("query",["mass"], function( $ ){
         "nth-last-of-type": filterPseudoHasExp("lastChild",  "previousSibling", true),//标准
         empty: {//标准
             exec: function (flags, elems) {   
-                var result = [], flag_not = flags.not, check
+                var result = [], flag_not = flags.not;
                 for (var i = 0, ri = 0, elem; elem = elems[i++];) {
                     if(elem.nodeType == 1){
                         if (!elem.firstChild ^ flag_not)
@@ -2719,7 +2629,7 @@ define("query",["mass"], function( $ ){
         checked:  filterProp("checked", true),//标准
         contains: {
             exec: function (flags, elems, arg) {
-                var res = [], elem = elems[0], fn = flags.xml ? $.getText: getHTMLText,
+                var res = [], fn = flags.xml ? $.getText: getHTMLText,
                 flag_not = flags.not;
                 for (var i = 0, ri = 0, elem; elem = elems[i++]; ){
                     if ((!!~  fn( [elem] ).indexOf(arg)) ^ flag_not)
@@ -6316,7 +6226,8 @@ define("fx", ["$css"],function( $ ){
             var fx = {};
             $.mix(fx, opts)
             fx.method = "noop"
-            fx.positive = []
+            fx.positive = [];
+            fx.negative = [];
             fx.node = node;
             tick( fx );
         }
@@ -6534,7 +6445,6 @@ define("fx", ["$css"],function( $ ){
                 fx2.props = fx.revertProps.concat();
                 fx2.revertProps = fx.props.concat();
                 var el = $.timeline[ index ];
-                el.negative = el.negative || [];
                 el.negative.push(fx2);//添加已存负向列队中
             }
         }
