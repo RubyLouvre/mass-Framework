@@ -23,41 +23,7 @@
         </script>
         <script >
             require("fx,event,ready", function($){
-                var html = ""
-                for(var i = 0; i < 20; i++){
-                    var src = i
-                    if(i < 10){
-                        src = "0"+i
-                    }
-                    html += "<img data-index="+i+" src='images/" + src +".jpg'/>"
-                }
-                $("#parent").append(html)
-                var animating = 0
-                $("#parent img").on("mouseover", function(){
-                    if(!animating){
-                        animating = 1;
-                        this.style.zIndex = 10;
-                        var hash = {
-                            width: 100,
-                            height:100
-                        }
-                        if($(this).data("index") > 11){
-                            hash.marginTop = "-=50";
-                        }
-                        $(this).animate(hash,700)
-                    }
-                }).on("mouseout", function(){
-                    if(animating){
-                        $(":animated").stop(true, true)
-                        animating = 0;
-                        this.style.zIndex = 0;
-                        this.style.marginTop = "0px"
-                        $(this).animate( {
-                            width: 50,
-                            height:50
-                        },700)
-                    }
-                })
+        
             })
         </script>
     </head>

@@ -43,7 +43,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             method(obj, name, map[name]);
         }
     }
-    methods($, {
+    $.mix( {
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject: function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
@@ -350,7 +350,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return $.throttle(idle,action,tail,true);
         }
 
-    });
+    }, false);
     var EventTarget = function(target) {
         $.log("init EventTarget")
         this._listeners = {};
@@ -439,25 +439,22 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return result;
         },
         //判定是否以给定字符串开头
-        startsWith: function (s) {
-            return this.indexOf(s) === 0;
+        startsWith: function (str) {
+            return this.indexOf(str) === 0;
         },
         //判定是否以给定字符串结尾
-        endsWith: function (s) {
-            var t = String(s);
-            return this.lastIndexOf(t) === this.length - t.length;
+        endsWith: function (str) {
+            return this.lastIndexOf(str) === this.length - str.length;
         },
         //判断一个字符串是否包含另一个字符
         contains: function (s, position) {
             return ''.indexOf.call(this, s, position>>0) !== -1;
         }
     });
-
     //构建四个工具方法:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(Type){
         $[ Type ] = function( pack ){
-            var isNative =  typeof pack == "string" ,
-            //取得方法名
+            var isNative =  typeof pack == "string" , //取得方法名
             methods = isNative ? pack.match($.rword) : Object.keys(pack);
             methods.forEach(function( method ){
                 $[ Type ][method] = isNative ? function(obj){
@@ -466,7 +463,6 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             });
         }
     });
-
     $.String({
         /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
              *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
@@ -588,7 +584,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         shuffle: function ( target ) {
-            var ret = [], i = target.length, n; 
+            var ret = [], i = target.length, n;
             target = target.slice(0);
             while (--i >= 0) {
                 n = Math.floor( Math.random() * i);
