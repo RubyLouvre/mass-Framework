@@ -744,8 +744,37 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, "")
-
-    $.mix({
+    var defineProperty = Object.defineProperty
+    var method = function(obj, name, method) {
+        if (!obj[name]) {
+            defineProperty(obj, name, {
+                configurable: true,
+                enumerable: false,
+                writable: true,
+                value: method
+            });
+        }
+    }
+    //IE8的Object.defineProperty只对DOM有效
+    if (defineProperty) {
+        try {
+            defineProperty({}, 'a',{
+                get:function(){}
+            });
+        } catch (e) {
+            method = function(obj, name, method) {
+                if (!obj[name]) {
+                    obj[ name ] = method;
+                }
+            }
+        }
+    }
+    function methods(obj, map) {
+        for(var name in map){
+            method(obj, name, map[name]);
+        }
+    }
+    $.mix( {
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject: function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
@@ -1116,43 +1145,10 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
-
-    //构建四个工具方法:$.String, $.Array, $.Number, $.Object
-    "String,Array,Number,Object".replace($.rword, function(Type){
-        $[ Type ] = function( pack ){
-            var isNative =  typeof pack == "string" ,
-            //取得方法名
-            methods = isNative ? pack.match($.rword) : Object.keys(pack);
-            methods.forEach(function( method ){
-                $[ Type ][method] = isNative ? function(obj){
-                    return obj[method].apply(obj, $.slice(arguments,1) );
-                } :  pack[method];
-            });
-        }
-    });
-
-    $.String({
-        //判断一个字符串是否包含另一个字符
-        contains: function(target, str, separator){
-            return separator ?
-            (separator + target + separator).indexOf(separator + str + separator) > -1 :
-            target.indexOf(str) > -1;
-        },
-        //判定是否以给定字符串开头
-        startsWith: function(target, str, ignorecase) {
-            var start_str = target.substr(0, str.length);
-            return ignorecase ? start_str.toLowerCase() === str.toLowerCase() :
-            start_str === str;
-        },
-        //判定是否以给定字符串结尾
-        endsWith: function(target, str, ignorecase) {
-            var end_str = target.substring(target.length - str.length);
-            return ignorecase ? end_str.toLowerCase() === str.toLowerCase() :
-            end_str === str;
-        },
+    methods(String.prototype, {
         //将字符串重复n遍
-        repeat: function(target, n){
-            var result = "";
+        repeat: function (n) {
+            var result = "", target = this;
             while (n > 0) {
                 if (n & 1)
                     result += target;
@@ -1161,6 +1157,32 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             }
             return result;
         },
+        //判定是否以给定字符串开头
+        startsWith: function (str) {
+            return this.indexOf(str) === 0;
+        },
+        //判定是否以给定字符串结尾
+        endsWith: function (str) {
+            return this.lastIndexOf(str) === this.length - str.length;
+        },
+        //判断一个字符串是否包含另一个字符
+        contains: function (s, position) {
+            return ''.indexOf.call(this, s, position>>0) !== -1;
+        }
+    });
+    //构建四个工具方法:$.String, $.Array, $.Number, $.Object
+    "String,Array,Number,Object".replace($.rword, function(Type){
+        $[ Type ] = function( pack ){
+            var isNative =  typeof pack == "string" , //取得方法名
+            methods = isNative ? pack.match($.rword) : Object.keys(pack);
+            methods.forEach(function( method ){
+                $[ Type ][method] = isNative ? function(obj){
+                    return obj[method].apply(obj, $.slice(arguments,1) );
+                } :  pack[method];
+            });
+        }
+    });
+    $.String({
         
         byteLen: function ( target ) {
             return target.replace(/[^\x00-\xff]/g, 'ci').length;
@@ -1243,7 +1265,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     });
 
-    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+"contains,endsWith,startsWith,repeat,",//es6
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         //判定数组是否包含指定目标。
@@ -1272,7 +1294,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         },
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         shuffle: function ( target ) {
-            var ret = [], i = target.length, n; 
+            var ret = [], i = target.length, n;
             target = target.slice(0);
             while (--i >= 0) {
                 n = Math.floor( Math.random() * i);
@@ -1625,20 +1647,7 @@ define("support",["mass"], function( $ ){
         table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
     }catch(e){ };
-    var endNames = {
-        WebkitTransition : "webkitTransitionEnd",
-        MozTransition    : "transitionend" ,
-        OTransition      : "oTransitionEnd otransitionend" ,
-        transition       : "transitionend"
-    }
-    for (var name in endNames){
-        if (div.style[name] !== undefined) {
-            support.transition  = {
-                end: endNames[name]
-            }
-            break
-        }
-    }
+
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
@@ -1699,7 +1708,7 @@ define("class", ["$lang"], function( $ ){
     }
 
     var hash = {
-        inherit : function( parent,init ) {
+        inherit: function( parent,init ) {
             var bridge = function() { }
             if( typeof parent == "function"){
                 for(var i in parent){//继承类成员
@@ -1733,7 +1742,7 @@ define("class", ["$lang"], function( $ ){
             }
             return proto.constructor = this;
         },
-        implement:function(){
+        implement: function(){
             var target = this.prototype, reg = rconst;
             for(var i = 0, module; module = arguments[i++]; ){
                 module = typeof module === "function" ? new module :module;
@@ -2681,7 +2690,7 @@ define("query",["mass"], function( $ ){
             return index ===  num;
         },
         hidden : function( el ) {
-            return el.type === "hidden" || (!el.offsetWidth && !el.offsetHeight) || (el.currentStyle && el.currentStyle.display === "none") ;
+            return  (el.offsetWidth + el.offsetHeight) == 0 || (el.currentStyle || {} ).display != "none";
         }
     }
     Icarus.pseudoHooks.visible = function(el){
@@ -2882,7 +2891,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                 } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
-                return $.Array.merge( this, $.slice( nodes) );
+                return $.Array.merge( this, $.slice( nodes ) );
             }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
                 $.Array.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
@@ -3411,8 +3420,8 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             case "3":
             case "4":
                 return el.nodeValue;
-            case "8":
-                return "<!--"+el.nodeValue+"-->";
+            default :
+                return "";
         }
     }
     function innerHTML( el ){
@@ -3476,7 +3485,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                 uid = $.getUid(node);
                 obj[uid] = 1;
             }
-            return $.slice(this).some(function( el ){
+            return this.valueOf().some(function( el ){
                 return  obj[ $.getUid(el) ];
             });
         },
@@ -4459,12 +4468,12 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         return cacheDisplay[ nodeName ];
     }
     
-    function isHidden( elem) {
+    function isHidden( elem ) {
         return elem.sourceIndex === 0 || getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
     }
     $._isHidden = isHidden;
     function toggelDisplay( nodes, show ) {
-        var elem,  values = [], status = [], index = 0, length = nodes.length;
+        var elem, values = [], status = [], index = 0, length = nodes.length;
         //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
         for ( ; index < length; index++ ) {
             elem = nodes[ index ];
@@ -4485,8 +4494,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             if ( !elem.style ) {
                 continue;
             }
-            show = show === -1 ? !status[index] : show
-           
+            show = show === -1 ? !status[index] : show;
             elem.style.display = show ?  values[ index ] : "none";
         }
         return nodes;
@@ -4646,12 +4654,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             });
         };
     });
-    var pseudoHooks = window.VBArray && $.query && $.query.pseudoHooks
-    if(pseudoHooks){
-        pseudoHooks.hidden = function( el ) {
-            return el.type === "hidden" || $.css( el, "display") === "none" ;
-        }
-    }
+
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     }
