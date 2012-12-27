@@ -44,7 +44,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                 } else{//分支7：进入选择器模块
                     nodes  = $.query( expr, scope );
                 }
-                return $.Array.merge( this, $.slice( nodes) );
+                return $.Array.merge( this, $.slice( nodes ) );
             }else {//分支8：处理数组，节点集合或者mass对象或window对象
                 this.ownerDocument = getDoc( expr[0] );
                 $.Array.merge( this, $.isArrayLike(expr) ?  expr : [ expr ]);
@@ -588,8 +588,8 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             case "3":
             case "4":
                 return el.nodeValue;
-            case "8":
-                return "<!--"+el.nodeValue+"-->";
+            default :
+                return "";
         }
     }
     function innerHTML( el ){
@@ -653,7 +653,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                 uid = $.getUid(node);
                 obj[uid] = 1;
             }
-            return $.slice(this).some(function( el ){
+            return this.valueOf().some(function( el ){
                 return  obj[ $.getUid(el) ];
             });
         },
