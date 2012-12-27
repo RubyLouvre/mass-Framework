@@ -82,20 +82,7 @@ define("support",["mass"], function( $ ){
         table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
         support.insertAdjacentHTML = true;
     }catch(e){ };
-    var endNames = {
-        WebkitTransition : "webkitTransitionEnd",
-        MozTransition    : "transitionend" ,
-        OTransition      : "oTransitionEnd otransitionend" ,
-        transition       : "transitionend"
-    }
-    for (var name in endNames){
-        if (div.style[name] !== undefined) {
-            support.transition  = {
-                end: endNames[name]
-            }
-            break
-        }
-    }
+
     a = select = table = opt = style =  null;
     $.require("ready",function(){
         var body = DOC.body;
@@ -141,4 +128,19 @@ define("support",["mass"], function( $ ){
 2011.9.23增加fastFragment判定
 2012.1.28有些特征嗅探必须连接到DOM树上才能进行
 2012.5.22 精简插入DOM树后的五种检测
+
+    var endNames = {
+        WebkitTransition : "webkitTransitionEnd",
+        MozTransition    : "transitionend" ,
+        OTransition      : "oTransitionEnd otransitionend" ,
+        transition       : "transitionend"
+    }
+    for (var name in endNames){
+        if (div.style[name] !== undefined) {
+            support.transition  = {
+                end: endNames[name]
+            }
+            break
+        }
+    }
 */
