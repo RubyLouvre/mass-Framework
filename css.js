@@ -230,12 +230,12 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         return cacheDisplay[ nodeName ];
     }
     
-    function isHidden( elem) {
+    function isHidden( elem ) {
         return elem.sourceIndex === 0 || getter( elem, "display" ) === "none" || !$.contains( elem.ownerDocument, elem );
     }
     $._isHidden = isHidden;
     function toggelDisplay( nodes, show ) {
-        var elem,  values = [], status = [], index = 0, length = nodes.length;
+        var elem, values = [], status = [], index = 0, length = nodes.length;
         //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
         for ( ; index < length; index++ ) {
             elem = nodes[ index ];
@@ -256,8 +256,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             if ( !elem.style ) {
                 continue;
             }
-            show = show === -1 ? !status[index] : show
-           
+            show = show === -1 ? !status[index] : show;
             elem.style.display = show ?  values[ index ] : "none";
         }
         return nodes;
@@ -417,12 +416,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             });
         };
     });
-    var pseudoHooks = window.VBArray && $.query && $.query.pseudoHooks
-    if(pseudoHooks){
-        pseudoHooks.hidden = function( el ) {
-            return el.type === "hidden" || $.css( el, "display") === "none" ;
-        }
-    }
+
     function getWindow( node ) {
         return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     }
