@@ -412,7 +412,6 @@
             var array = parseURL(el, parent ),  url = array[0];
             if(array[1] == "js"){
                 dn++
-                loadStorage( id )
                 if( !modules[ url ]  ){
                     modules[ url ] = {
                         id: url,
