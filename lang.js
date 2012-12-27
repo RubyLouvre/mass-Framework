@@ -13,8 +13,37 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     runicode = /[\x00-\x1f\x22\\\u007f-\uffff]/g,
     str_eval = global.execScript ? "execScript" : "eval",
     str_body = (global.open + '').replace(/open/g, "")
-
-    $.mix({
+    var defineProperty = Object.defineProperty
+    var method = function(obj, name, method) {
+        if (!obj[name]) {
+            defineProperty(obj, name, {
+                configurable: true,
+                enumerable: false,
+                writable: true,
+                value: method
+            });
+        }
+    }
+    //IE8的Object.defineProperty只对DOM有效
+    if (defineProperty) {
+        try {
+            defineProperty({}, 'a',{
+                get:function(){}
+            });
+        } catch (e) {
+            method = function(obj, name, method) {
+                if (!obj[name]) {
+                    obj[ name ] = method;
+                }
+            }
+        }
+    }
+    function methods(obj, map) {
+        for(var name in map){
+            method(obj, name, map[name]);
+        }
+    }
+    methods($, {
         //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
         isPlainObject: function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
@@ -321,7 +350,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return $.throttle(idle,action,tail,true);
         }
 
-    }, false);
+    });
     var EventTarget = function(target) {
         $.log("init EventTarget")
         this._listeners = {};
@@ -397,6 +426,32 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
+    methods(String.prototype, {
+        //将字符串重复n遍
+        repeat: function (n) {
+            var result = "", target = this;
+            while (n > 0) {
+                if (n & 1)
+                    result += target;
+                target += target;
+                n >>= 1;
+            }
+            return result;
+        },
+        //判定是否以给定字符串开头
+        startsWith: function (s) {
+            return this.indexOf(s) === 0;
+        },
+        //判定是否以给定字符串结尾
+        endsWith: function (s) {
+            var t = String(s);
+            return this.lastIndexOf(t) === this.length - t.length;
+        },
+        //判断一个字符串是否包含另一个字符
+        contains: function (s, position) {
+            return ''.indexOf.call(this, s, position>>0) !== -1;
+        }
+    });
 
     //构建四个工具方法:$.String, $.Array, $.Number, $.Object
     "String,Array,Number,Object".replace($.rword, function(Type){
@@ -413,35 +468,6 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     });
 
     $.String({
-        //判断一个字符串是否包含另一个字符
-        contains: function(target, str, separator){
-            return separator ?
-            (separator + target + separator).indexOf(separator + str + separator) > -1 :
-            target.indexOf(str) > -1;
-        },
-        //判定是否以给定字符串开头
-        startsWith: function(target, str, ignorecase) {
-            var start_str = target.substr(0, str.length);
-            return ignorecase ? start_str.toLowerCase() === str.toLowerCase() :
-            start_str === str;
-        },
-        //判定是否以给定字符串结尾
-        endsWith: function(target, str, ignorecase) {
-            var end_str = target.substring(target.length - str.length);
-            return ignorecase ? end_str.toLowerCase() === str.toLowerCase() :
-            end_str === str;
-        },
-        //将字符串重复n遍
-        repeat: function(target, n){
-            var result = "";
-            while (n > 0) {
-                if (n & 1)
-                    result += target;
-                target += target;
-                n >>= 1;
-            }
-            return result;
-        },
         /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
              *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
              *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
@@ -533,7 +559,7 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     });
 
-    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+"contains,endsWith,startsWith,repeat,",//es6
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         //判定数组是否包含指定目标。
