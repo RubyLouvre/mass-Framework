@@ -2690,7 +2690,7 @@ define("query",["mass"], function( $ ){
             return index ===  num;
         },
         hidden : function( el ) {
-            return  (el.offsetWidth + el.offsetHeight) == 0 || (el.currentStyle || {} ).display != "none";
+            return  (el.offsetWidth + el.offsetHeight) == 0 || (el.currentStyle || {} ).display == "none";
         }
     }
     Icarus.pseudoHooks.visible = function(el){
