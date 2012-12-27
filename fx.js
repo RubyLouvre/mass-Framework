@@ -70,7 +70,8 @@ define("fx", ["$css"],function( $ ){
             var fx = {};
             $.mix(fx, opts)
             fx.method = "noop"
-            fx.positive = []
+            fx.positive = [];
+            fx.negative = [];
             fx.node = node;
             tick( fx );
         }
@@ -288,7 +289,6 @@ define("fx", ["$css"],function( $ ){
                 fx2.props = fx.revertProps.concat();
                 fx2.revertProps = fx.props.concat();
                 var el = $.timeline[ index ];
-                el.negative = el.negative || [];
                 el.negative.push(fx2);//添加已存负向列队中
             }
         }
