@@ -22,16 +22,25 @@
        
         </script>
         <script >
-            require("fx,event,ready", function($){
-        
+            require("fx,css,ready", function($){
+                alert($(window).scrollTop())
             })
         </script>
     </head>
 
     <body>
-        <div id="parent">
 
-        </div>
-
+        <input id="Button1" type="button" value="button"  style=" position:fixed; top:0;"  />
+        <div style=" height:2000px;"></div>
     </body>
+    window.onload = function () {
+    setTimeout(function(){
+    console.log($(window).scrollTop());
+    console.log($(document).scrollTop());
+    },100);
+    }
+    把滚动条拉到中间
+    然后刷新 ie如果不加settimeout获取不到scrolltop
+
+</body>
 </html>

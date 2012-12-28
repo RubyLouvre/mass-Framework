@@ -756,16 +756,14 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     }
     //IE8的Object.defineProperty只对DOM有效
-    if (defineProperty) {
-        try {
-            defineProperty({}, 'a',{
-                get:function(){}
-            });
-        } catch (e) {
-            method = function(obj, name, method) {
-                if (!obj[name]) {
-                    obj[ name ] = method;
-                }
+    try {
+        defineProperty({}, 'a',{
+            get:function(){}
+        });
+    } catch (e) {
+        method = function(obj, name, method) {
+            if (!obj[name]) {
+                obj[ name ] = method;
             }
         }
     }
