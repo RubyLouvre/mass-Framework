@@ -2,101 +2,88 @@
 // 数据缓存模块
 //==================================================
 define("data", ["$lang"], function( $ ){
-    var remitter = /object|function/, rtype = /[^38]/;
-    function innerData( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
-        if( $.acceptData(target) ){
-            var id = $.getUid(target), isEl = target.nodeType === 1,
-            getOne = typeof name === "string",//取得单个属性
-            database =  $["@data"],
-            table = database[ id] || (database[ id ] = {
-                data:{}
-            });
-            var cache = table;
-            //私有数据都是直接放到table中，普通数据放到table.data中
-            if ( !pvt ) {
-                table = table.data;
-            }
-            if ( name && typeof name == "object" ) {
-                $.mix( table, name );//写入一组属性
-            }else if(getOne && data !== void 0){
-                table[ name ] = data;//写入单个属性
-            }
-            if(getOne){
-                if(name in table){
-                    return table[name]
-                }else if(isEl && !pvt){
+    function Data(user) {
+        this.owners = [];
+        this.user = user;
+        this.cache = [];
+    }
+    Data.prototype = {
+        add: function( owner ) {
+            var index = this.owners.push( owner );
+            return (this.cache[ index - 1 ] = {});
+        },
+        access: function( owner, key, value ) {
+            var index = this.owners.indexOf( owner );
+            var cache = index === -1 ?  this.add( owner ) : this.cache[ index ];
+            if(typeof key == "string"){
+                if(value == undefined){//读方法
                     //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
                     //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
-                    return $.parseData( target, name, cache );
-                }
-            }else{
-                return table
-            }
-        }
-    }
-    function innerRemoveData (target, name, pvt){
-        if( $.acceptData(target) ){
-            var id = $.getUid(target);
-            if ( !id ) {
-                return;
-            }
-            var clear = 1, ret = typeof name == "string",
-            database =  $["@data"],
-            table = database[ id ],
-            cache = table;
-            if ( table && ret ) {
-                if(!pvt){
-                    table = table.data
-                }
-                if(table){
-                    ret = table[ name ];
-                    delete table[ name ];
-                }
-                    loop:
-                    for(var key in cache){
-                        if(key == "data"){
-                            for(var i in cache.data){
-                                clear = 0;
-                                break loop;
-                            }
-                        }else{
-                            clear = 0;
-                            break loop;
-                        }
+                    if(this.user && !(key in cache) && owner && owner.nodeType == 1 ){
+                        $.parseData( owner, key, cache );
                     }
-            }
-            if(clear){
-                try{
-                    delete database[id];
-                }catch(e){
-                    database[id] = void 0;
+                    return cache[key];
+                }else{
+                    return cache[key] = value;//写方法
                 }
             }
-            return ret;
+            return key && typeof key == "object" ?  $.mix(cache, value) : cache;
+        },
+        remove: function( owner, key ) {
+            var name,
+            camel = $.String.camelize,
+            index = this.owners.indexOf( owner ),
+            cache = this.cache[ index ];
+            if ( key === undefined ) {
+                cache = {};
+            } else {
+                if ( cache ) {//如果已经存在
+                    if ( !Array.isArray( key ) ) { //如果不是数组
+                        if ( key in cache ) {
+                            name = [ key ];
+                        } else {//尝试驼峰化再求,再不行数组化
+                            name = camel( key );
+                            name = name in cache ? [ name ] : name.match($.rword);
+                        }
+                    } else {//如果是数组
+                        name = key.concat( key.map( camel ) );
+                    }
+                    for (var i =0, l = name.length ; i < l; i++ ) {
+                        delete cache[ name[i] ];
+                    }
+                }
+            }
+            this.cache[ index ] = cache;
+        },
+        hasData: function( owner ) {
+            var index = this.owners.indexOf( owner );
+            if ( index > -1 ) {
+                return !$.isEmptyObject( this.cache[ index ] );
+            }
+            return false;
         }
-    }
-
+    };
+    var user = new Data(true), priv = new Data;
     $.mix( {
-        "@data": {},
-        acceptData: function( target ) {
-            return target && remitter.test(typeof target) && rtype.test(target.nodeType);
+        data: function( elem, name, data ) {
+            return user.access( elem, name, data );
         },
-        data: function( target, name, data ) {  // 读写数据
-            return innerData(target, name, data)
+        removeData: function( elem, name ) {
+            return user.remove( elem, name );
         },
-        _data: function(target,name,data){//仅内部调用
-            return innerData(target, name, data, true)
+        _data: function( elem, name, data ) {
+            return priv.access( elem, name, data );
         },
-        removeData: function(target, name){  //移除数据
-            return innerRemoveData(target, name);
+        _removeData: function( elem, name ) {
+            return priv.remove( elem, name );
         },
-        _removeData: function(target, name){//仅内部调用
-            return innerRemoveData(target, name, true);
+        hasData: function( elem ) {
+            return user.hasData( elem ) || priv.hasData( elem );
         },
-        parseData: function(target, name, table, value){
+        parseData: function(target, name, cache, value){
             var data, key = $.String.camelize(name),_eval
-            if(table && (key in table))
-                return table[key];
+            if(cache && (key in cache))
+                return cache[key];
             if(arguments.length != 4){
                 var attr = "data-" + name.replace( /([A-Z])/g, "-$1" ).toLowerCase();
                 value = target.getAttribute( attr );
@@ -110,8 +97,8 @@ define("data", ["$lang"], function( $ ){
                 } catch( e ) {
                     data = value
                 }
-                if(table){
-                    table[ key ] = data
+                if(cache){
+                    cache[ key ] = data
                 }
             }
             return data;
@@ -119,15 +106,20 @@ define("data", ["$lang"], function( $ ){
         },
         //合并数据
         mergeData: function( cur, src){
-            var oldData  = $._data(src), curData  = $._data(cur), events = oldData .events;
-            if(oldData  && curData ){
+            if( priv.hasData(src) ){
+                var oldData  = priv.access(src), curData = priv.access(cur), events = oldData .events;
                 $.Object.merge( curData , oldData  );
                 if(events){
-                    curData .events = [];
+                    curData.events = [];
                     for (var i = 0, item ; item =  events[i++]; ) {
                         $.event.bind( cur, item );
                     }
                 }
+            }
+            if( user.hasData(src) ){
+                oldData = user.access(src)
+                curData = user.access(cur)
+                $.Object.merge( curData , oldData  );
             }
         }
     });
@@ -142,5 +134,6 @@ define("data", ["$lang"], function( $ ){
 2012.4.5 修正mergeData BUG, 让$.data能获取HTML5 data-*
 2012.5.2 $._db -> $["@data]
 2012.5.21 抽象出validate私有方法
-2012.9.29 对parseData的数据进行严格的验证后才转换
+2012.9.29 对parseData的数据进行严格的验证后才转换  v2
+2012.12.30 使用jquery2.0的新思路,通过存放目标的数组的索引值来关联目标与缓存体 v3
 */
