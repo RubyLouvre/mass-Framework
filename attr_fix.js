@@ -116,7 +116,7 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
         if ( !support.attrInnateStyle ) {
             //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
             attrHooks[ "style:get" ] = function( node ) {
-                return node.style.cssText.toLowerCase() || undefined ;
+                return node.style.cssText || undefined ;
             }
             attrHooks[ "style:set" ] = function( node, name, value ) {
                 node.style.cssText = value + "";
