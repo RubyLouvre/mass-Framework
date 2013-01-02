@@ -182,7 +182,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
         unbind: function( elem, hash ) {
 
             var  elemData = $._data( elem ), events, j, handleObj, origType
-            if( !elemData || !(events = elemData.events )) return;
+            if( !(events = elemData.events )) return;
 
             var types = hash.type || "", selector = hash.selector, handler = hash.handler;
             types.replace( $.rword, function( t ){

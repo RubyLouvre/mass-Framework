@@ -2409,3 +2409,9 @@ abcd:  17:28:10
 <td valign="top">-</td>
 </tr>
 </table>
+教主Franky(449666)  14:53:16
+应该是靠谱的. 至少onload 肯定能干掉. 但是不知道声音是不是也能干掉
+var ifm = document.createElement('iframe');
+ifm.src = 'about:blank';
+document.body.insertBefore(ifm, document.body.lastChild);
+ifm.contentWindow.location.replace('javascript:;');

@@ -70,11 +70,14 @@ define("data", ["$lang"], function( $ ){
     }
 
     $.mix( {
+        hasData: function(owner){
+           return owners.indexOf( owner ) > -1;
+        },
         data: function( target, name, data ) {  // 读写数据
-            return innerData(target, name, data)
+            return innerData(target, name, data);
         },
         _data: function(target,name,data){//仅内部调用
-            return innerData(target, name, data, true)
+            return innerData(target, name, data, true);
         },
         removeData: function(target, name){  //移除数据
             return innerRemoveData(target, name);
@@ -108,7 +111,7 @@ define("data", ["$lang"], function( $ ){
         },
         //合并数据
         mergeData: function( cur, src){
-            if(owners.indexOf( src ) > -1 ){
+            if( $.hasData(cur) ){
                 var oldData  = $._data(src),
                 curData  = $._data(cur),
                 events = oldData .events;
