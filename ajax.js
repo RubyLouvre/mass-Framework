@@ -633,7 +633,7 @@ define("ajax",["mass","$lang"], function($){
             setTimeout(function () {
                 $(iframe).bind("load error",this.respond);
                 form.submit();
-            }, 16);
+            });
         },
 
         respond: function( event  ) {
@@ -682,7 +682,7 @@ define("ajax",["mass","$lang"], function($){
                 // Fix busy state in FF3
                 iframe.parentNode.removeChild(iframe);
                 $.log("iframe.parentNode.removeChild(iframe)")
-            }, 16);
+            });
         }
     });
     return $;

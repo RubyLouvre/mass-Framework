@@ -512,7 +512,7 @@
             html.doScroll( "left" ) ;
             fireReady();
         } catch(e) {
-            setTimeout( doScrollCheck, 31 );
+            setTimeout( doScrollCheck );
         }
     };
     //在firefox3.6之前，不存在readyState属性
