@@ -108,11 +108,13 @@ define("data", ["$lang"], function( $ ){
         },
         //合并数据
         mergeData: function( cur, src){
-            var oldData  = $._data(src), curData  = $._data(cur), events = oldData .events;
-            if(oldData  && curData ){
+            if(owners.indexOf( src ) > -1 ){
+                var oldData  = $._data(src),
+                curData  = $._data(cur),
+                events = oldData .events;
                 $.Object.merge( curData , oldData  );
                 if(events){
-                    curData .events = [];
+                    curData.events = [];
                     for (var i = 0, item ; item =  events[i++]; ) {
                         $.event.bind( cur, item );
                     }
