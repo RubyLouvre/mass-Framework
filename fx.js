@@ -200,7 +200,7 @@ define("fx", ["$css"],function( $ ){
                 }
                 fx.after = function( node, fx ){
                     s.display = "none";
-                    if ( fx.overflow != null && !$.support.keepSize  ) {
+                    if ( fx.overflow != null ) {
                         [ "", "X", "Y" ].forEach(function (postfix,index) {
                             s[ "overflow" + postfix ] = fx.overflow[index]
                         });
