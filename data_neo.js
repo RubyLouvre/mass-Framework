@@ -2,67 +2,61 @@
 // 数据缓存模块(本模块只是用于试验WeakMap与Element.dataset)
 //==================================================
 define("data", ["$lang"], function( $ ){
-    var remitter = /object|function/
-    function innerData( target, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
-        if( $.acceptData(target) ){
-            var isEl = target.nodeType === 1;
-            var table = $["@data"].get( target );
-            if(!table){
-                table = {
-                    data:{}
-                }
-                $["@data"].set(table)
+    var caches = new WeakMap;//FF6+
+    function innerData( owner, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
+        var table = caches.get( owner );
+        if(!table){
+            table = {
+                data:{}
             }
-            var getOne = typeof name === "string", cache = table;//dataset
-            //私有数据都是直接放到table中，普通数据放到table.data中
-            if ( !pvt ) {
-                table = table.data;
+            caches.set(table);
+        }
+        var getOne = typeof name === "string", cache = table;//dataset
+        //私有数据都是直接放到table中，普通数据放到table.data中
+        if ( !pvt ) {
+            table = table.data;
+        }
+        if ( name && typeof name == "object" ) {
+            $.mix( table, name );//写入一组方法
+        }else if(getOne && data !== void 0){
+            table[ name ] = data;//写入单个方法
+        }
+        if(getOne){
+            if(name in table){
+                return table[name]
+            }else if( !pvt && owner && owner.nodeType === 1){
+                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+                return $.parseData( owner, name, cache );
             }
-            if ( name && typeof name == "object" ) {
-                $.mix( table, name );//写入一组方法
-            }else if(getOne && data !== void 0){
-                table[ name ] = data;//写入单个方法
-            }
-            if(getOne){
-                if(name in table){
-                    return table[name]
-                }else if(isEl && !pvt){
-                    //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
-                    //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
-                    return $.parseData( target, name, cache );
-                }
-            }else{
-                return table
-            }
+        }else{
+            return table
         }
     }
-    function innerRemoveData (target, name, pvt){
-        if( $.acceptData(target) ){
-            var table =   $["@data"].get(target);
-            if (  !table ) {
-                return;
-            }
-            var ret = typeof name == "string",  cache = table;
-            if ( table && ret ) {
-                if(!pvt){
-                    table = table.data
-                }
-                if(table){
-                    ret = table[ name ];
-                    delete table[ name ];
-                }
-            }
-            if( JSON.stringify(cache) == '{"data":{}}'){
-                $["@data"]["delete"](target);
-            }
-            return ret;
+    function innerRemoveData( owner, name, pvt ){
+        var table = caches.get(owner);
+        if (  !table ) {
+            return;
         }
+        var ret = typeof name == "string",  cache = table;
+        if ( table && ret ) {
+            if(!pvt){
+                table = table.data
+            }
+            if(table){
+                ret = table[ name ];
+                delete table[ name ];
+            }
+        }
+        if( JSON.stringify(cache) == '{"data":{}}'){
+            $["@data"]["delete"](owner);
+        }
+        return ret;
     }
 
     $.mix( {
-        "@data": new WeakMap(),//FF6+
-        acceptData: function( target ) {
-            return target && remitter.test(typeof target) 
+        hasData: function( target ) {
+            return caches.has(target)
         },
         data: function( target, name, data ) {  // 读写数据
             return innerData(target, name, data)
@@ -98,11 +92,12 @@ define("data", ["$lang"], function( $ ){
         },
         //合并数据
         mergeData: function( cur, src){
-            var oldData  = $._data(src), curData  = $._data(cur), events = oldData .events;
-            if(oldData  && curData ){
-                $.Object.merge( curData , oldData  );
+            if( $.hasData(cur) ){
+                var oldData  = $._data(src),
+                curData  = $._data(cur),
+                events = oldData.events;
                 if(events){
-                    curData .events = [];
+                    curData.events = [];
                     for (var i = 0, item ; item =  events[i++]; ) {
                         $.event.bind( cur, item );
                     }
@@ -123,5 +118,6 @@ define("data", ["$lang"], function( $ ){
 2012.9.29 对parseData的数据进行严格的验证后才转换
 2012.11.7 添加这实验性质的模块
 2012.11.14 使用JSON.stringify代替双层循环检测缓存体是否为空
+2013.1.3 保持与data模块的接口一致
      */
 
