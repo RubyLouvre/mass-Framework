@@ -2,7 +2,7 @@
 // 数据缓存模块
 //==================================================
 define("data", ["$lang"], function( $ ){
-    var owners = [], caches =[]
+    var owners = [], caches =[];
     function  add ( owner ) {
         var index = owners.push( owner );
         return caches[ index - 1 ] = {
@@ -25,45 +25,42 @@ define("data", ["$lang"], function( $ ){
         }
         if(getOne){
             if(name in table){
-                return table[name]
-            }else if(owner && owner.nodeType == 1 && !pvt){
+                return table[name];
+            }else if( !pvt && owner && owner.nodeType == 1 ){
                 //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
                 //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
                 return $.parseData( owner, name, cache );
             }
         }else{
-            return table
+            return table;
         }
     }
-    function innerRemoveData (owner, name, pvt){
+    function innerRemoveData( owner, name, pvt ){
         var index = owners.indexOf( owner );
         if(index > -1 ){
-            var clear = 1, delOne = typeof name == "string",
+            var delOne = typeof name == "string",
             table = caches[ index ], cache = table;
+            function clear(){
+                owners.splice( index, 1 );
+                caches.splice( index, 1 );
+            }
             if ( delOne ) {
                 if(!pvt){
-                    table = table.data
+                    table = table.data;
                 }
                 if(table){
                     delOne = table[ name ];
                     delete table[ name ];
                 }
-                    loop:
-                    for(var key in cache){
-                        if(key == "data"){
-                            for(var i in cache.data){
-                                clear = 0;
-                                break loop;
-                            }
-                        }else{
-                            clear = 0;
-                            break loop;
+                for(var key in cache){
+                    if(key == "data"){
+                        for(var i in cache.data){
+                            return clear();
                         }
+                    }else{
+                        return clear();
                     }
-            }
-            if(clear){
-                owners.splice( index, 1 );
-                caches.splice( index, 1 );
+                }
             }
             return delOne;//返回被移除的数据
         }
@@ -71,7 +68,7 @@ define("data", ["$lang"], function( $ ){
 
     $.mix( {
         hasData: function(owner){
-           return owners.indexOf( owner ) > -1;
+            return owners.indexOf( owner ) > -1;
         },
         data: function( target, name, data ) {  // 读写数据
             return innerData(target, name, data);
@@ -95,15 +92,15 @@ define("data", ["$lang"], function( $ ){
             }
             if ( typeof value === "string") {//转换 /^(?:\{.*\}|null|false|true|NaN)$/
                 if(/^(?:\{.*\}|\[.*\]|null|false|true|NaN)$/.test(value) || +value + "" === value){
-                    _eval = true
+                    _eval = true;
                 }
                 try {
-                    data = _eval ?  eval("0,"+ value ) : value
+                    data = _eval ?  eval("0,"+ value ) : value;
                 } catch( e ) {
-                    data = value
+                    data = value;
                 }
                 if(cache){
-                    cache[ key ] = data
+                    cache[ key ] = data;
                 }
             }
             return data;
