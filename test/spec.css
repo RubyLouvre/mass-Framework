@@ -21,12 +21,26 @@
     padding: 0;
     background: #A9EA00;
 }
-.mass-spec-detail li{
+
+.method-parent{
     margin: 0;
     padding:0;
     border: 2px solid #03c9fa;
     text-indent: 1em;
 }
+
+.method{
+    margin: 1em;
+    position:relative;
+    list-style: decimal inside;
+    text-indent: 0;
+    font-style: normal;
+    background: #F0F8FF;
+    padding: 2px;
+    color:#000;
+    border:2px outset #c0c0c0;
+}
+
 /* 整个测试套件都通过*/
 .mass-asserts-pass{
     background:#a9ea00;
@@ -47,32 +61,15 @@
     color:#fff;
 }
 
-pre kbd{
-    display:inline-block;
-    width:90%;
-    color:#000;
-    text-decoration:none;
-    outline:none;
-/*    position:relative;*/
-}
 
-pre kbd form{
-/*    position:absolute;*/
+.method form{
+    /*    position:absolute;*/
     top:-5em;
     left:0px;
-/*    display:none;*/
+    /*    display:none;*/
 }
 
-.mass-spec-detail pre{
-    margin: 1em;
-    position:relative;
-    text-indent: 0;
-    font-style: normal;
-    background: #F0F8FF;
-    padding: 2px;
-    color:#000;
-    border:2px outset #c0c0c0;
-}
+
 
 .mass-spec-log{
     background: #cc9!important;
@@ -94,6 +91,7 @@ pre kbd form{
     float: left;
 }
 .mass-spec-diff pre{
+
     background: #00cc00;
 }
 /* new clearfix */

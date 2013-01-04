@@ -1,9 +1,12 @@
 //==================================================
-// 测试模块v4
+// 测试模块v5
 //==================================================
 define( ["$lang"], function( $ ){
     $.log("已加载spec v4模块",7);
     var global = this, DOC = global.document;
+    global.onerror = function(){
+        return true;
+    }
     //模块为$添加如下方法:
     // isEqual  fixture
     //在全局命名空间下多添加一个函数 expect
@@ -62,48 +65,33 @@ define( ["$lang"], function( $ ){
             return div.firstChild;
         };
     }();
-    /**
-*expect($.type("string")).eq("String"); ==>
-*<kbd>expect($.type("string")).eq("String");</kbd>
-*/
-    function retouch(str){
-        for(var step = 1, section = 0, i = 1, n = str.length; i < n; i++){
-            if(str.charAt(i) == "("){
-                step++;
-            }else if(str.charAt(i) == ")"){
-                step--;
-                if(!step){
-                    section++;
-                    if(section == 2){
-                        return str.slice(0,i+1) +
-                        str.slice(i+1, i+3).replace(/\s*;?\s*/,";</kbd>\n")+
-                        str.slice(i+3)
-                    }
-                }
-            }
-        }
-        return str;
-    }
-    var Expect = function(actual, id){
+
+    var Expect = function(actual, id, index){
         this.actual = actual;
-        this.node = Expect[id].node;
-        this.count = Expect[id].count++;
+        var node = DOC.createElement("li")
+        this.node = Expect[id].node.appendChild(node);//节点
+        this.index = index;         //当前测试模块的总数
+        this.count = Expect[id].count++;//当前模块的个数
         this.id = id;
     }
     var specTime ;
     $.mix(Expect,{
-        refreshTime : function(){//刷新花费时间
+        refreshTime : function(){//刷新总共花了多少时间跑完测试
             specTime = specTime || get("mass-spec-time");
             var times = parseInt(specTime.title,10) + (new Date - Expect.now);
             specTime.title = times;
             specTime.innerHTML = times
         },
         prototype:{
-            _should: function(method, expected){//上面方法的内部实现,比较真伪,并渲染结果到页面
+            _should: function(method, expected, threshold){//上面方法的内部实现,比较真伪,并渲染结果到页面
                 var actual = this.actual;
                 var bool = false;
-                //每一条expect语句都对应一个KBD标签
-                var  elem = this.node.getElementsByTagName("kbd")[this.count]
+                var length = arguments.length
+                var last = arguments[length - 1];
+                var elem = this.node;
+                if(length > 2 && (typeof last == "string")){
+                    elem.innerHTML = last;
+                }
                 switch(method){
                     case "ok"://布尔真测试
                         bool = actual === true;
@@ -113,12 +101,14 @@ define( ["$lang"], function( $ ){
                         bool = actual === false;
                         expected = false;
                         break;
+                    case "type":
+                        expected = $.type(actual, actual);
+                        break;
                     case "eq"://同一性真测试
                         bool = actual == expected;
                         break;
                     case "near"://判定两个数字是否相近
-                        var threshold = arguments[2] | 0;
-                        return Math.abs(parseFloat(this.actual) - parseFloat(expected)) <= threshold;
+                        return Math.abs(parseFloat(actual) - parseFloat(expected)) <= (threshold | 0);
                         break;
                     case "not"://同一性非测试
                         bool = actual != expected;
@@ -126,7 +116,7 @@ define( ["$lang"], function( $ ){
                     case "same"://判定结果是否与expected相似(用于数组或对象或函数等复合类型)
                         bool = $.isEqual(actual, expected);
                         break
-                    case "has"://判定目标值是否包含prop属性
+                    case "property"://判定目标值是否包含prop属性
                         bool = Object.prototype.hasOwnProperty.call(actual, expected);
                         break;
                     case "match"://判定回调是否返回真
@@ -148,6 +138,7 @@ define( ["$lang"], function( $ ){
                         }
                         break;
                 }
+
                 //修改统计栏的数值
                 var done = get("mass-spec-done");
                 var errors = get("mass-spec-errors");
@@ -174,14 +165,14 @@ define( ["$lang"], function( $ ){
             }
         }
     });
-    "ok, ng, log, eq, near, match, not, has, contains, same".replace( $.rword, function( method ){
-        Expect.prototype[ method ] = function( a, b, c ){
-            return this._should(method, a, b, c)
+    "ok, ng, log, eq, near, match, type, not, property, contains, same".replace( $.rword, function( method ){
+        Expect.prototype[ method ] = function(  ){
+            return this._should.apply(this,[].concat.apply([method], arguments));
         }
     })
     //用于收起或展开详细测试结果
     $.bind(DOC,"click",function(e){
-        var target = e && e.target || event.srcElement;
+        var target = e.target || e.srcElement;
         var el = target.parentNode;
         if(target.tagName === "A" && el.className === "mass-spec-slide"){
             var parent = el.parentNode;
@@ -193,12 +184,24 @@ define( ["$lang"], function( $ ){
         }
     });
     //暴露到全局作用域
+    var ids = {};
     global.expect = function(actual, id){
         id = id || arguments.callee.caller.arguments[0];
-        return new Expect(actual, id);
+        if( id in ids){
+            ids[id] = 0
+        }else{
+            ids[id] ++;
+        }
+        return new Expect(actual, id, ids[id]);
     };
+    //处理掉所有中文
+    function escape(str){
+        return str.replace(/[\u4E00-\u9FA5]/g,function(s){
+            return String.charCodeAt(s)
+        })
+    }
 
-    function firstAppend(){
+    function buildUI(){
         //当DOM树建完之时，开始构筑测试系统的外廓
         var html = ['<div id="mass-spec-result"><p class="mass-spec-summary">',
         '<span id="mass-spec-failures" title="0">0</span>&nbsp;failures&emsp;',
@@ -213,34 +216,40 @@ define( ["$lang"], function( $ ){
         $.log("当DOM树建完之时，开始构筑测试系统的外廓")
         DOC.body.appendChild( parseHTML(html.join("")) );
     }
-    var first_append = false;
-    var str_join = global.netscape ? '\n\t<kbd>expect' : "<kbd>expect"
-    $.fixture = function( title, asserts ) {
-
+    window.describe = $.fixture = function( title, asserts ) {
+        var escaped = escape(title)
         $.require("ready",function(){
             //由$.fixture第一个参数改造而成
-            var fixtureId = "mass-spec-"+title;
-            if( !first_append || !get("mass-spec-cases") ){
-                firstAppend();
-                first_append = true;
+            var describeName = "mass-spec-"+escaped;//title
+            if( !get("mass-spec-cases") ){
+                buildUI();//创建测试界面
             }
-            if(!get(fixtureId)){//在主显示区中添加一个版块
+            if(!get(describeName)){//在主显示区中添加一个版块
                 /** =================每个模块大抵是下面的样子===============
                 <div class="mass-spec-case" id="mass-spec-$.js">
                    <p><a href="javascript:void(0)">JS文件名字</a></p>
                    <ul style="display: none;" class="mass-spec-detail">
                    测试结果
+                         <li id="方法名(即asserts对象里面的每个键名)" class="通过|不通过|出错">
+                            方法名
+                            <ol>
+                               <li>expect语句</li>
+                               <li>expect语句</li>
+                               <li>expect语句</li>
+                               ...
+                            </ol>
+                        </li>
                    </ul>
                 </div>
                 */
                 var html = ['<div id="#{0}" class="mass-spec-case">',
                 '<p class="mass-spec-slide"><a '+(!"1"[0]? 'href="javascript:void(0);"' : "")+'>#{1}</a></p>',
                 '<ul class="mass-spec-detail" style="display:none;"></ul></div>'].join('');
-                get("mass-spec-cases").appendChild( parseHTML( $.format(html, fixtureId, title)) );
+                get("mass-spec-cases").appendChild( parseHTML( $.format(html, describeName, title)) );
 
             }
             //取得对象的所有方法名
-            var names = Object.keys(asserts),rbody = /[^{]*\{([\d\D]*)\}$/, name;
+            var names = Object.keys(asserts),name;
 
             ;(function runTest(){
                 if((name = names.shift())){
@@ -251,46 +260,36 @@ define( ["$lang"], function( $ ){
                         loading.parentNode.removeChild(loading);
                         Expect.removeLoading = 1
                     }
-                    if(!get(methodId)){//对应一个方法
+                    if(!get(methodId)){//对应一个方法,DOM表现为一个DIV元素
                         //取得方法UI元素,它是可以通过其previousSiblingElement来控制展开或折叠
-                        var parentNode = get(fixtureId).getElementsByTagName("ul")[0];
-                        //取得整行expec语句
-                        var body = assert.toString().
-                        replace(rbody, '$1').
-                        //  replace(/^\s*|\s*$/g, '').
-                        replace(/</g,"&lt;").
-                        replace(/>/g,"&gt;");
-                        
-                        body = body.split("expect").map(function(segment){
-                            return segment.charAt(0) === "(" ? retouch(segment) : segment;
-                        }).join(str_join);
-
-                        var node = parseHTML($.format('<li id="#{0}">#{1}<pre>#{2}</pre></li>', methodId, name, uni2hanzi(body)));
+                        var parentNode = get(describeName).getElementsByTagName("ul")[0];
+                        var node = parseHTML($.format('<li class="method-parent" id="#{0}">#{1}<ol class="method"></ol></li>', methodId, name));
                         /** 最后变成以下样子
                         <li id="方法名(即asserts对象里面的每个键名)" class="通过|不通过|出错">
                             方法名
-                            <pre>
-                               <kbd>expect语句</kbd>
-                               <kbd>expect语句</kbd>
-                               <kbd>expect语句</kbd>
+                            <ol>
+                               <li>expect语句</li>
+                               <li>expect语句</li>
+                               <li>expect语句</li>
                                ...
-                            </pre>
+                            </ol>
                         </li>*/
                         parentNode.appendChild(node);
                     }
-                    node = get(methodId);//对应一个LI元素
+                    node = get(methodId).getElementsByTagName("ol")[0];//对应一个OL元素
                     Expect.now = new Date;
-                    var bag = Expect[title+"#"+name] = {
+                    var bag = Expect[escaped+"#"+name] = {
                         node : node,
                         status: "pass",
                         count: 0
                     }
                     try{
-                        assert(title+"#"+name);//执行测试套件
+                        assert(escaped+"#"+name);//执行测试套件
                     }catch(err){
                         $.log("error : "+err.message ,true)
                         bag.status = "error"
-                        var el = node.getElementsByTagName("kbd")[ bag.count + 1];
+                        var lis = node.getElementsByTagName("li")
+                        var el = lis[lis.length - 1]
                         if(el){
                             el.appendChild( parseHTML('<form class="mass-spec-diff"><pre>'+err+'</pre></form>'));
                             el.className = "mass-assert-error";//高亮这一行,变成深红色
@@ -299,22 +298,19 @@ define( ["$lang"], function( $ ){
                         //修正异常栏的数值
                         errors.innerHTML = ++errors.title;
                     }
-                    bag.className = "mass-asserts-" + bag.status;//为整个测试套件着色
+                    if(node.className.indexOf("mass-asserts-") == -1){
+                        node.className += " mass-asserts-" + bag.status;//为整个测试套件着色
+                    }
                     Expect.refreshTime();//更新测试所花的时间
                     //前面必须用window来显式调用,否则会在safari5中
                     //报INVALID_ACCESS_ERR: DOM Exception 15: A parameter or an operation
                     // was not supported by the underlying object.错误
-                    global.setTimeout( runTest, 15 );
+                    global.setTimeout( runTest );
                 }
             })();
         });
     }
-    //此函数是解决FF无法显示函数体内的汉字问题
-    var uni2hanzi = global.netscape ? function(s){
-        return unescape(s.replace(/\\u/g,'%u'));
-    }: function(s){
-        return s
-    }
+
     return $;
 });
 //2011.8.9    增加getUnpassExpect函数,用于取得没有通过的expect并显示出来
@@ -324,3 +320,4 @@ define( ["$lang"], function( $ ){
 //2012.1.28  升级到v3，大大增强错误定位的能力
 //2012.4.30  升级到v4 去掉 Expect.Client,Expect.PASS,Expect.index,Expect.Class等属性
 //2012.7.31 确保测试的主体轮廓被先添加到页面
+//2012.1.4 升级到v5，不再从fn.toString抽取expect语句
