@@ -166,8 +166,9 @@
          *  $.log(str, page, level )
          *  @param {Any} str 用于打印的信息，不是字符串将转换为字符串
          *  @param {Boolean} page ? 是否打印到页面
-         *  @param {Number} level ? 通过它来过滤显示到控制台的日志数量。0为最少，只显示最致命的错误，
-         *          7则连普通的调试消息也打印出来。 显示算法为 level <= $.config.level。
+         *  @param {Number} level ? 通过它来过滤显示到控制台的日志数量。
+         *          0为最少，只显示最致命的错误；7，则连普通的调试消息也打印出来。 
+         *          显示算法为 level <= $.config.level。
          *          这个$.config.level默认为9。下面是level各代表的含义。
          *          0 EMERGENCY 致命错误,框架崩溃
          *          1 ALERT 需要立即采取措施进行修复
