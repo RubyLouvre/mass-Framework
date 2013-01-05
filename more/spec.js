@@ -228,7 +228,9 @@ define(["$lang"], function($) {
     });
     "ok, ng, log, eq, near, match, type, not, property, contains, same".replace($.rword, function(method) {
         Expect.prototype[method] = function() {
-            return this._should.apply(this, [].concat.apply([method], arguments));
+		    var args = Array.apply([], arguments);
+			args.unshift(method);
+            return this._should.apply(this, args);
         }
     })
     //用于收起或展开详细测试结果
