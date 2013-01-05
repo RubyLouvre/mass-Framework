@@ -181,8 +181,7 @@
          *  @api public
          */
         log: function(str, page, level) {
-            var show = true
-            for(var i = 1; i < arguments.length; i++) {
+            for(var i = 1, show = true; i < arguments.length; i++) {
                 level = arguments[i]
                 if(typeof level == "number") {
                     show = level <= $.config.level
@@ -202,7 +201,7 @@
                     global.console.log(str);
                 }
             }
-            return str
+            return str;
         },
         /**
          * 用于建立一个从元素到数据的关联，应用于事件绑定，元素去重
@@ -248,7 +247,7 @@
         config: function(settings) {
             var kernel = $.config;
             for(var p in settings) {
-                if(!settings.hasOwnProperty(p)) continue
+                if(!settings.hasOwnProperty(p)) continue;
                 var prev = kernel[p];
                 var curr = settings[p];
                 if(prev && p === "alias") {
@@ -426,7 +425,7 @@
         node.onload = node.onreadystatechange = node.onerror = null;
         if(error || !modules[id].state) {
             setTimeout(function() {
-                head.removeChild(node)
+                head.removeChild(node);
             });
             $.log("加载 " + id + " 失败", 7);
         } else {
@@ -489,7 +488,7 @@
                 var array = parseURL(el, parent),
                     url = array[0];
                 if(array[1] == "js") {
-                    dn++
+                    dn++;
                     if(!modules[url]) {
                         modules[url] = {
                             id: url,
@@ -518,8 +517,7 @@
         }
         if(dn === cn) { //如果需要安装的等于已安装好的
             fireFactory(id, args, factory); //装配到框架中
-            checkDeps();
-            return
+            return checkDeps();
         }
         //在正常情况下模块只能通过_checkDeps执行
         loadings.unshift(id);
@@ -532,16 +530,15 @@
      * @api public
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = Array.apply([], arguments),
-            _id
+        var args = Array.apply([], arguments);
         if(typeof id == "string") {
-            _id = args.shift();
+            var _id = args.shift();
         }
         if(typeof args[0] === "boolean") { //用于文件合并, 在标准浏览器中跳过补丁模块
             if(args[0]) {
                 return;
             }
-            args.shift()
+            args.shift();
         }
         if(typeof args[0] == "function") {
             args.unshift([]);
@@ -553,18 +550,18 @@
         factory.delay = function(id) {
             args.push(id);
             if(checkCycle(modules[id].deps, id)) {
-                throw new Error(id + "模块与之前的某些模块存在循环依赖")
+                throw new Error(id + "模块与之前的某些模块存在循环依赖");
             }
             delete factory.delay; //释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
         }
         if(id) {
-            factory.delay(id, args)
+            factory.delay(id, args);
         } else { //先进先出
-            parsings.push(factory)
+            parsings.push(factory);
         }
     }
-    $.require.amd = modules
+    $.require.amd = modules;
     /**
      * 请求模块从modules对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
      * @param {String} id  模块ID
