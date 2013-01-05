@@ -1,5 +1,4 @@
-!
-function(global, DOC) {
+!function(global, DOC) {
     var $$ = global.$ //保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace(rmakeid, "")
@@ -381,7 +380,6 @@ function(global, DOC) {
     };
     //取得正在解析的script节点
 
-
     function getCurrentScript() {
         if(DOC.currentScript) {
             return DOC.currentScript.src
@@ -395,7 +393,6 @@ function(global, DOC) {
     }
     //检测是否存在循环依赖
 
-
     function checkCycle(deps, nick) {
         for(var id in deps) {
             if(deps[id] == "司徒正美" && modules[id].state != 2 && (id == nick || checkCycle(modules[id].deps, nick))) {
@@ -404,7 +401,6 @@ function(global, DOC) {
         }
     }
     //检测此JS模块的依赖是否都已安装完毕,是则安装自身
-
 
     function checkDeps() {
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
@@ -425,7 +421,6 @@ function(global, DOC) {
     }
     //检测是否死链
 
-
     function checkFail(node, error) {
         var id = node.src;
         node.onload = node.onreadystatechange = node.onerror = null;
@@ -439,7 +434,6 @@ function(global, DOC) {
         }
     }
     //通过script节点加载目标模块
-
 
     function loadJS(url) {
         var node = DOC.createElement("script");
@@ -463,7 +457,6 @@ function(global, DOC) {
     }
     //通过link节点加载模块需要的CSS文件
 
-
     function loadCSS(url) {
         var id = url.replace(rmakeid, "");
         if(!DOC.getElementById(id)) {
@@ -482,39 +475,39 @@ function(global, DOC) {
      * @api public
      */
     window.require = $.require = function(list, factory, parent) {
+        // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于检测它的依赖是否都为2
-            args = [],
             // 用于依赖列表中的模块的返回值
-            dn = 0,
+            args = [],
             // 需要安装的模块数
-            cn = 0,
+            dn = 0,
             // 已安装完的模块数
-            id = parent || "cb" + (cbi++).toString(32);
-        parent = parent || basepath
-        String(list).replace($.rword, function(el) {
-            var array = parseURL(el, parent),
-                url = array[0];
-            if(array[1] == "js") {
-                dn++
-                if(!modules[url]) {
-                    modules[url] = {
-                        id: url,
-                        parent: parent,
-                        exports: {}
-                    };
-                    loadJS(url);
-                } else if(modules[url].state === 2) {
-                    cn++;
+            cn = 0,
+            id = parent || "cb" + (cbi++).toString(32),
+            parent = parent || basepath
+            String(list).replace($.rword, function(el) {
+                var array = parseURL(el, parent),
+                    url = array[0];
+                if(array[1] == "js") {
+                    dn++
+                    if(!modules[url]) {
+                        modules[url] = {
+                            id: url,
+                            parent: parent,
+                            exports: {}
+                        };
+                        loadJS(url);
+                    } else if(modules[url].state === 2) {
+                        cn++;
+                    }
+                    if(!deps[url]) {
+                        args.push(url);
+                        deps[url] = "司徒正美"; //去重
+                    }
+                } else if(array[1] === "css") {
+                    loadCSS(url);
                 }
-                if(!deps[url]) {
-                    args.push(url);
-                    deps[url] = "司徒正美"; //去重
-                }
-            } else if(array[1] === "css") {
-                loadCSS(url);
-            }
-        });
+            });
         //创建或更新模块的状态
         modules[id] = {
             id: id,
@@ -585,8 +578,7 @@ function(global, DOC) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret;
-        ret = factory.apply(global, array);
+            ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
             modules[id].exports = ret
@@ -650,7 +642,6 @@ function(global, DOC) {
     /*combine modules*/
 
 }(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
-
 /**
  changelog:
  2011.7.11
