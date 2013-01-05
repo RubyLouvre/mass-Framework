@@ -63,12 +63,11 @@ define(["$spec"], function() {
         },
 
         getUid: function() {
-            //$.getUid在正常情况下返回数字
-            expect($.getUid(document.body)).type("Number");
+            expect($.getUid(document.body)).type("Number","$.getUid总会返回数字");
         },
 
         slice: function() {
-            var a = [1, 2, 3, 4, 5, 6, 7]
+            var a = [1, 2, 3, 4, 5, 6, 7];
             expect($.slice(a, 0)).same(a.slice(0), "$.slice(a, 0)");
             expect($.slice(a, 1, 4)).same(a.slice(1, 4), "$.slice(a, 1, 4)");
             expect($.slice(a, -1)).same(a.slice(-1), "$.slice(a, -1)");
