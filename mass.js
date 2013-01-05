@@ -272,6 +272,7 @@
 
     (function(scripts) {
         var cur = scripts[scripts.length - 1];
+		var kernel = $.config;
         var url = cur.hasAttribute ? cur.src : cur.getAttribute("src", 4);
         url = url.replace(/[?#].*/, "");
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
