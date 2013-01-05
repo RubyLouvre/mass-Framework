@@ -26,23 +26,24 @@ define(["$spec"], function() {
         },
 
         isWindow: function() {
+		    //不要使用ok, ng
             var test1 = {};
             test1.window = test1;
             test1.document = document;
             //创建一个对象,拥有环引用的window与document;
-            expect($.isWindow(test1)).ng("一个拥有指向自身的window属性与document属性的原生对象不能通过测试");
+            expect($.isWindow(test1)).eq(false, "一个拥有指向自身的window属性与document属性的原生对象不能通过测试");
             var test2 = {};
             test2.window = window;
             test2.document = document;
             //创建一个对象,拥有window与document;
-            expect($.isWindow(test2)).ng("一个拥有原生window与document引用的原生对象不能通过测试");
+            expect($.isWindow(test2)).eq(false,"一个拥有原生window与document引用的原生对象不能通过测试");
             //测试真正的window对象
-            expect($.isWindow(window)).ok();
+            expect($.isWindow(window)).eq(true,"当前window对象当然返回true");
             var iframe = document.createElement("iframe");
             document.body.appendChild(iframe);
             var iwin = iframe.contentWindow || iframe.contentDocument.parentWindow;
             //检测iframe的window对象
-            expect($.isWindow(iwin)).ok("一个iframe中的window能通过测试");
+            expect($.isWindow(iwin)).eq(true,"一个iframe中的window能通过测试");
             document.body.removeChild(iframe);
 
         },

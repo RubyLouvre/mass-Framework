@@ -142,7 +142,7 @@ define(["$lang"], function($) {
                 var length = arguments.length;
                 var last = arguments[length - 1];
                 var elem = this.node;
-                if(length > 2 && (typeof last == "string")) {
+                if((length > 2 || method == "ok" || method == "ng")&& (typeof last == "string")) {
                     elem.innerHTML = last;
                 }
                 switch(method) {
