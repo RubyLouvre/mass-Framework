@@ -102,19 +102,10 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
             return this.slice( -1 );
         },
         each: function( fn ){
-            for ( var i = 0, n = this.length; i < n; i++ ) {
-                fn.call( this[i], this[i], i );
-            }
-            return this;
+            return $.each(this, fn);
         },
         map: function( fn ) {
-            return this.labor( this.collect( fn ) );
-        },
-        collect: function( fn ){
-            for ( var i = 0, ret = [], n = this.length; i < n; i++ ) {
-                ret.push( fn.call( this[ i ], this[ i ], i ));
-            }
-            return ret
+            return this.labor( $.map(this, fn ) );
         },
         clone: function( dataAndEvents, deepDataAndEvents ) {
             dataAndEvents = dataAndEvents == null ? false : dataAndEvents;
@@ -142,7 +133,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                     try {
                         for ( var i = 0; el = this[ i++ ]; ) {
                             if ( el.nodeType === 1 ) {
-                                $.slice( el[TAGS]("*") ).forEach( cleanNode );
+                                $.each( el[TAGS]("*"), cleanNode );
                                 el.innerHTML = value;
                             }
                         }
@@ -193,7 +184,7 @@ define( "node", "mass,$support,$class,$query,$data".split(","),function( $ ){
                     //移除匹配元素
                     var array = $.slice( node[ TAGS ]("*") ).concat( isRemove ? node : [] )
                     if(method != "detach"){
-                        array .forEach( cleanNode );
+                        array.forEach( cleanNode );
                     }
                 }
                 if( isRemove ){
