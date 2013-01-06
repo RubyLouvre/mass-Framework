@@ -1,10 +1,10 @@
 //=========================================
-// 语言扩展模块v5 by 司徒正美
+// 语言扩展模块v6 by 司徒正美
 //=========================================
 define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
     var global = this,
     rformat = /\\?\#{([^{}]+)\}/gm,
-    rnoclose = /^(area|base|basefont|bgsound|br|col|frame|hr|img|input|isindex|link|meta|param|embed|wbr)$/i,
+  
     // JSON RegExp
     rvalidchars = /^[\],:{}\s]*$/,
     rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
@@ -42,7 +42,11 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
         }
     }
     $.mix( {
-        //判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
+        /**
+         * 判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
+         * @param {Object} obj
+         * @return {Boolean}
+         */
         isPlainObject: function (obj){
             if(!$.type(obj,"Object") || $.isNative(obj, "reload") ){
                 return false;
@@ -57,7 +61,12 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             }
             return true;
         },
-        //判定method是否为obj的原生方法，如$.isNative(global,"JSON")
+        /**
+         * 判定method是否为obj的原生方法，如$.isNative(window,"JSON")
+         * @param {Any} obj 对象
+         * @param {Function} method
+         * @return {Boolean}
+         */
         isNative: function(obj, method) {
             var m = obj ? obj[method] : false, r = new RegExp(method, "g");
             return !!(m && typeof m != "string" && str_body === (m + "").replace(r, ""));
@@ -67,36 +76,82 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
          * @param {Object} obj
          * @return {Boolean}
          */
-        isEmptyObject: function(obj ) {
+        isEmptyObject: function(obj) {
             for ( var i in obj ){
                 return false;
             }
             return true;
         },
-        //限定为Array, Arguments, NodeList与拥有非负整数的length属性的Object对象，视情况添加字符串
-        isArrayLike:  function (obj, str) {//是否包含字符串
+        /**
+         * 是否为类数组（Array, Arguments, NodeList与拥有非负整数的length属性的Object对象）
+         * 如果第二个参数为true,则包含有字符串
+         * @param {Object} obj
+         * @param {Boolean} includeString
+         * @return {Boolean}
+         */
+        isArrayLike:  function (obj, includeString) {//是否包含字符串
             var type = $.type(obj);
-            if(type === "Array" || type === "NodeList" || type === "Arguments" || str && type === "String"){
+            if(type === "Array" || type === "Arguments" || type === "NodeList" ||
+                includeString && type === "String"){
                 return true;
             }
             if( type === "Object" ){
                 var i = obj.length;
-                return i >= 0 &&  parseInt( i ) === i;//非负整数
+                return i >= 0 && parseInt( i ) === i;//非负整数
             }
             return false;
         },
-        //将任意类型都变成数组
-        makeArray: function(obj){
-            if (obj == null) {
-                return [];
+        /**
+         * 取得对象的键值对，依次放进回调中执行,并收集其结果，视第四个参数的真伪表现为可中断的forEach操作或map操作
+         * @param {Object} obj
+         * @param {Function} callback
+         * @param {Any} scope ? 默认为当前遍历的元素或属性值
+         * @param {Boolean} map ? 是否表现为map操作
+         * @return {Object|Array}
+         */
+        each: function( obj, callback, scope, map ) {
+            var value,
+            i = 0,
+            isArray = $.isArraylike( obj ),
+            ret = [];
+            if ( isArray ) {
+                for ( var n = obj.length; i < n; i++ ) {
+                    value = callback.call( scope || obj[ i ], obj[ i ], i );
+                    ret.push(value)
+                    if (!map && value === false ) {
+                        break;
+                    }
+                }
+            } else {
+                for ( i in obj ) {
+                    value = callback.call( scope || obj[ i ], obj[ i ], i );
+                    ret.push(value)
+                    if (!map &&  value === false ) {
+                        break;
+                    }
+                }
             }
-            if($.isArrayLike(obj)){
-                return $.slice( obj )
-            }
-            return [ obj ]
+            return map ? ret : obj;
         },
-        //字符串插值
-        //http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
+        /**
+         * 取得对象的键值对，依次放进回调中执行,并收集其结果，以数组形式返回。
+         * @param {Object} obj
+         * @param {Function} callback
+         * @param {Any} scope ? 默认为当前遍历的元素或属性值
+         * @return {Array}
+         */
+        map: function(obj, fn, scope){
+            return $.each(obj, fn, scope, true)
+        },
+        /**
+         * 字符串插值，有两种插值方法。
+         * 第一种，第二个参数为对象，#{}里面为键名，替换为键值，适用于重叠值够多的情况
+         * 第二种，把第一个参数后的参数视为一个数组，#{}里面为索引值，从零开始，替换为数组元素
+         * http://www.cnblogs.com/rubylouvre/archive/2011/05/02/1972176.html
+         * @param {String}
+         * @param {Object|Any} 插值包或某一个要插的值
+         * @return {String}
+         */
         format: function(str, object){
             var array = $.slice(arguments,1);
             return str.replace(rformat, function(match, name){
@@ -111,42 +166,18 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             });
         },
         /**
-         * 用于拼接多行HTML片断,免去写<与>与结束标签之苦
-         * @param {String} tag 可带属性的开始标签
-         * @param {String} innerHTML 可选
-         * @param {Boolean} xml 可选 默认false,使用HTML模式,需要处理空标签
-         * @example var html = T("P title=aaa",T("span","111111")("strong","22222"))("div",T("div",T("span","两层")))("H1",T("span","33333"))('',"这是纯文本");
-         * console.log(html+"");
-         * @return {Function}
+         * 生成一个整数数组
+         * @param {Number} start ? 默认为0
+         * @param {Number} end ? 默认为0
+         * @param {Number} step ? 默认为1
+         * @return {Array}
          */
-        tag: function (start, content, xml){
-            xml = !!xml
-            var chain = function(start, content, xml){
-                var html = arguments.callee.html;
-                start && html.push("<",start,">");
-                content = ""+(content||"");
-                content && html.push(content);
-                var end = start.split(" ")[0];//取得结束标签
-                if(end && (xml || !rnoclose.test(end))){
-                    html.push("</",end,">");
-                }
-                return chain;
-            }
-            chain.html = [];
-            chain.toString = function(){
-                return this.html.join("");
-            }
-            return chain(start,content,xml);
-        },
-        //用于生成一个数字数组
         range: function(start, end, step) {
             step || (step = 1);
             if (end == null) {
                 end = start || 0;
                 start = 0;
             }
-            // use `Array(length)` so V8 will avoid the slower "dictionary" mode
-            // http://www.youtube.com/watch?v=XAqIpGU8ZZk#t=16m27s
             var index = -1,
             length = Math.max(0, Math.ceil((end - start) / step)),
             result = Array(length);
@@ -157,9 +188,13 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             }
             return result;
         },
-        // 为字符串两端添上双引号,并对内部需要转义的地方进行转义
-        quote:  String.quote || function(s) {
-            return '"' + s.replace( runicode, function(a) {
+        /**
+         * 为字符串两端添上双引号,并对内部需要转义的地方进行转义
+         * @param {String} str 
+         * @return {String}
+         */
+        quote: String.quote || function(str) {
+            return '"' + str.replace( runicode, function(a) {
                 switch (a) {
                     case '"':
                         return '\\"';
@@ -181,7 +216,11 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
                 return "\\u" + a;
             }) + '"';
         },
-        //查看对象或数组的内部构造
+        /**
+         * 查看对象或数组的内部构造
+         * @param {Any} obj 
+         * @return {String}
+         */
         dump: function(obj, indent) {
             indent = indent || "";
             if (obj == null)//处理null,undefined
@@ -220,7 +259,10 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
                     return indent + "[object "+type +"]";
             }
         },
-        //将字符串当作JS代码执行
+        /**
+         * 将字符串当作JS代码执行
+         * @param {String} code 
+         */
         parseJS: function( code ) {
             //IE中，global.eval()和eval()一样只在当前作用域生效。
             //Firefox，Safari，Opera中，直接调用eval()为当前作用域，global.eval()调用为全局作用域。
@@ -230,7 +272,11 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
                 }catch(e){ }
             }
         },
-        //将字符串解析成JSON对象
+        /**
+         * 将字符串解析成JSON对象
+         * @param {String} data
+         * @return {JSON} 
+         */
         parseJSON: function( data ) {
             if ( typeof data === "string" ) {
                 data = data.trim();//IE不会去掉字符串两边的空白
@@ -248,47 +294,25 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
            
             throw "Invalid JSON: " + data ;
         },
-        //将字符串转化为一个XML文档
-        /*
-  "text/html",
-  "text/xml",
-  "application/xml",
-  "application/xhtml+xml",
-  "image/svg+xml"
-<courses>
- <math>
-   <time>1:00pm</time>
- </math>
- <math>
-   <time>3:00pm</time>
- </math>
- <phisic>
-   <time>1:00pm</time>
- </phisic>
- <phisic>
-   <time>3:00pm</time>
- </phisic>
-</courses>
-        loadXML: function (text) {
-   if (typeof ActiveXObject !== "undefined") {
-      // var xmldoc = this.createDocument();
-      // xmldoc.loadXML(text);
-      // return xmldoc;
-
-      text = text.replace(/\r\n/g,"");
-      var xmldoc = new ActiveXObject("Microsoft.XMLDOM");
-      xmldoc.async="false";
-      xmldoc.loadXML(text);
-      return xmldoc;
-    }else if(typeof DOMParser != "undefined") {
-      return (new DOMParser()).parseFromString(text,"text/xml");
-    }else {
-      var url = 'data:text/xml;charset=utf-8,' + encodeURIComponent(text), request = new XMLHttpRequest();
-      request.open("GET", url, false);
-      request.send();
-      return request.responseXML;
-    }
-  }
+        /**
+         * 将字符串解析成XML文档对象
+         * @param {String} data
+         * @return {XML} 
+         * @example
+            <courses>
+             <math>
+               <time>1:00pm</time>
+             </math>
+             <math>
+               <time>3:00pm</time>
+             </math>
+             <phisic>
+               <time>1:00pm</time>
+             </phisic>
+             <phisic>
+               <time>3:00pm</time>
+             </phisic>
+            </courses>
          */
         parseXML: function ( data, xml, tmp ) {
             try {
@@ -309,43 +333,6 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
                 throw "Invalid XML: " + data ;
             }
             return xml;
-        },
-        /*http://oldenburgs.org/playground/autocomplete/
-         http://www.cnblogs.com/ambar/archive/2011/10/08/throttle-and-debounce.html
-         https://gist.github.com/1306893
-        在一连串调用中，如果我们throttle了一个函数，那么它会减少调用频率，
-        会把A调用之后的XXXms间的N个调用忽略掉，
-        然后再调用XXXms后的第一个调用，然后再忽略N个*/
-        throttle:  function(delay, action, tail, debounce) {
-            var last_call = 0, last_exec = 0, timer = null, curr, diff,
-            ctx, args, exec = function() {
-                last_exec = Date.now;
-                action.apply(ctx,args);
-            };
-            return function() {
-                ctx = this, args = arguments,
-                curr = Date.now, diff = curr - (debounce? last_call: last_exec) - delay;
-                clearTimeout(timer);
-                if(debounce){
-                    if(tail){
-                        timer = setTimeout(exec,delay);
-                    }else if(diff >= 0){
-                        exec();
-                    }
-                }else{
-                    if(diff >= 0){
-                        exec();
-                    }else if(tail){
-                        timer = setTimeout(exec,-diff);
-                    }
-                }
-                last_call = curr;
-            }
-        },
-        //是在一连串调用中，按delay把它们分成几组，每组只有开头或结果的那个调用被执行
-        //debounce比throttle执行的次数更少
-        debounce : function(idle,action,tail) {
-            return $.throttle(idle,action,tail,true);
         }
 
     }, false);
@@ -416,11 +403,8 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return obj && ({}).toString.call(obj) === "[object "+method+"]";
         }
     });
-    "each,map".replace($.rword, function( method ){
-        $[ method ] = function(obj, fn, scope){
-            return $[ $.isArrayLike(obj,true) ? "Array" : "Object" ][ method ](obj, fn, scope);
-        }
-    });
+
+
     if(Array.isArray){
         $.isArray = Array.isArray;
     }
@@ -542,17 +526,19 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return num;
         },
         /**
- 为目标字符串添加wbr软换行
-1.支持html标签、属性以及字符实体。<br>
-2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
-3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B" } 解决此问题*/
+         * 为目标字符串添加wbr软换行
+         * 1.支持html标签、属性以及字符实体。<br>
+         * 2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
+         * 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，
+         * 可以在css中加上 wbr:after { content: "\00200B" } 解决此问题
+         */
         wbr: function (target) {
             return String(target)
             .replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, "$&<wbr>")
             .replace(/><wbr>/g, ">");
         }
     });
-
+    
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match,"+"contains,endsWith,startsWith,repeat,",//es6
         "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
@@ -727,16 +713,11 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return groups;
         },
         //可中断的forEach迭代器
-        each: function( target, fn, scope  ){
-            for(var i = 0, n = target.length; i < n; i++){
-                if (fn.call(scope || target[i], target[i], i, target) === false)
-                    break;
-            }
-            return target;
-        }
+        forEach: $.each,
+        map: map
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift,"+
-        "indexOf,lastIndexOf,every,some,forEach,map,filter,reduce,reduceRight")
+        "indexOf,lastIndexOf,every,some,filter,reduce,reduceRight")
     var NumberPack = {
         //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
         limit: function(target, n1, n2){
@@ -796,21 +777,9 @@ define("lang", Array.isArray ? ["mass"]: ["$lang_fix"], function( $ ){
             return result;
         },
         //将参数一的键值都放入回调中执行，如果回调返回false中止遍历
-        each: function(target, fn, scope){
-            var keys = Object.keys(target);
-            for(var i = 0, n = keys.length; i < n; i++){
-                var key = keys[i], value = target[key];
-                if (fn.call(scope || value, value, key, target) === false)
-                    break;
-            }
-            return target;
-        },
+        forEach:  $.each,
         //将参数一的键值都放入回调中执行，收集其结果返回
-        map: function(target, fn, scope){
-            return Object.keys(target).map(function(name){
-                return fn.call(scope, target[name], name, target);
-            }, target);
-        },
+        map:   $.map,
         //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
         clone: function( target ){
             var clone = {};
@@ -880,6 +849,7 @@ changlog:
 2012.7.31 添加$.Array.merge API
 2012.8.15 添加$.Array.ensure, $.Array.inGroupsOf
 2012.12.25 移除语言链对象，添加EventTarget对象 v5
+2013.1.6 移除throttle，debounce,tag等不常用的方法，重构each, map方法
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070
