@@ -715,7 +715,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         },
         //可中断的forEach迭代器
         forEach: $.each,
-        map: map
+        map: $.map
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift," + "indexOf,lastIndexOf,every,some,filter,reduce,reduceRight")
     var NumberPack = {
