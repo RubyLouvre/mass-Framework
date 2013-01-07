@@ -105,18 +105,18 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         /**
          * 取得对象的键值对，依次放进回调中执行,并收集其结果，视第四个参数的真伪表现为可中断的forEach操作或map操作
          * @param {Object} obj
-         * @param {Function} callback
+         * @param {Function} fn
          * @param {Any} scope ? 默认为当前遍历的元素或属性值
          * @param {Boolean} map ? 是否表现为map操作
          * @return {Object|Array}
          */
-        each: function(obj, callback, scope, map) {
+        each: function(obj, fn, scope, map) {
             var value, i = 0,
                 isArray = $.isArrayLike(obj),
                 ret = [];
             if(isArray) {
                 for(var n = obj.length; i < n; i++) {
-                    value = callback.call(scope || obj[i], obj[i], i);
+                    value = fn.call(scope || obj[i], obj[i], i);
                     ret.push(value)
                     if(!map && value === false) {
                         break;
@@ -124,7 +124,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 }
             } else {
                 for(i in obj) {
-                    value = callback.call(scope || obj[i], obj[i], i);
+                    value = fn.call(scope || obj[i], obj[i], i);
                     ret.push(value)
                     if(!map && value === false) {
                         break;
@@ -136,12 +136,28 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         /**
          * 取得对象的键值对，依次放进回调中执行,并收集其结果，以数组形式返回。
          * @param {Object} obj
-         * @param {Function} callback
+         * @param {Function} fn
          * @param {Any} scope ? 默认为当前遍历的元素或属性值
          * @return {Array}
          */
         map: function(obj, fn, scope) {
             return $.each(obj, fn, scope, true)
+        },
+        /**
+         * 过滤数组中不合要求的元素
+         * @param {Object} obj
+         * @param {Function} fn 如果返回true则放进结果集中
+         * @param {Any} scope ? 默认为当前遍历的元素或属性值
+         * @return {Array}
+         */
+        filter: function(obj, fn, scope) {
+            for(var i = 0, n = obj.length, ret = []; i < n; i++) {
+                var val = fn.call(scope, obj[i], i);
+                if(val === true) {
+                    ret[ret.length] = obj[i]
+                }
+            }
+            return ret;
         },
         /**
          * 字符串插值，有两种插值方法。
@@ -383,7 +399,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             var list = this._listeners[type];
             if(list) {
                 var target = this._eventTarget,
-                    args = $.slice( arguments ),
+                    args = $.slice(arguments),
                     i = list.length,
                     listener
                 while(--i > -1) {
