@@ -1,16 +1,19 @@
 //=========================================
 // 类工厂模块 v11 by 司徒正美
 //==========================================
-define("class", ["$lang"], function( $ ){
+define("class", ["$lang"], function($) {
     var
-    unextend = $.oneObject(["_super","prototype", 'extend', 'implement' ]),
-    rconst = /constructor|_init|_super/,
-    classOne = $.oneObject('Object,Array,Function');
-    function expand(klass,props){
-        'extend,implement'.replace( $.rword, function(name){
+    unextend = $.oneObject(["_super", "prototype", 'extend', 'implement']),
+        //不能重写的类成员列表
+        rconst = /constructor|_init|_super/,
+        //不能重写的原型成员列表
+        classOne = $.oneObject('Object,Array,Function');
+
+    function expand(klass, props) {
+        'extend,implement'.replace($.rword, function(name) {
             var modules = props[name];
-            if( classOne[ $.type( modules) ] ){
-                klass[name].apply( klass,[].concat( modules ) );
+            if(classOne[$.type(modules)]) {
+                klass[name].apply(klass, [].concat(modules));
                 delete props[name];
             }
         });
@@ -18,78 +21,82 @@ define("class", ["$lang"], function( $ ){
     }
 
     var hash = {
-        inherit : function( parent,init ) {
-            var bridge = function() { }
-            if( typeof parent == "function"){
-                for(var i in parent){//继承类成员
+        //继承一个父类，并将它放进_init列表中，并添加setOptions原型方法
+        inherit: function(parent, init) {
+            var bridge = function() {}
+            if(typeof parent == "function") {
+                for(var i in parent) { //继承类成员
                     this[i] = parent[i];
                 }
                 bridge.prototype = parent.prototype;
-                this.prototype = new bridge ;//继承原型成员
-                this._super = parent;//指定父类
-                if(!this._init){
+                this.prototype = new bridge; //继承原型成员
+                this._super = parent; //指定父类
+                if(!this._init) {
                     this._init = [parent]
                 }
             }
             this._init = (this._init || []).concat();
-            if( init ){
+            if(init) {
                 this._init.push(init);
             }
-            this.toString = function(){
-                return (init || bridge) + ""
+            this.toString = function() {
+                return(init || bridge) + ""
             }
             var proto = this.prototype;
-            proto.setOptions = function(){
+            proto.setOptions = function() {
                 var first = arguments[0];
-                if( typeof first === "string" ){
-                    first =  this[first] || (this[first] = {});
-                    [].splice.call( arguments, 0, 1, first );
-                }else{
-                    [].unshift.call( arguments,this );
+                if(typeof first === "string") {
+                    first = this[first] || (this[first] = {});
+                    [].splice.call(arguments, 0, 1, first);
+                } else {
+                    [].unshift.call(arguments, this);
                 }
-                $.Object.merge.apply(null,arguments);
+                $.Object.merge.apply(null, arguments);
                 return this;
             }
             return proto.constructor = this;
         },
-        implement:function(){
-            var target = this.prototype, reg = rconst;
-            for(var i = 0, module; module = arguments[i++]; ){
-                module = typeof module === "function" ? new module :module;
-                Object.keys(module).forEach(function(name){
-                    if( !reg.test(name) ){
+        //添加一组原型方法
+        implement: function() {
+            var target = this.prototype,
+                reg = rconst;
+            for(var i = 0, module; module = arguments[i++];) {
+                module = typeof module === "function" ? new module : module;
+                Object.keys(module).forEach(function(name) {
+                    if(!reg.test(name)) {
                         target[name] = module[name];
                     }
-                }, this );
+                }, this);
             }
             return this;
         },
-        extend: function(){//扩展类成员
-            var bridge = {}
-            for(var i = 0, module; module = arguments[i++]; ){
-                $.mix( bridge, module );
+        //添加一组类成员
+        extend: function() {
+            var bridge = {};
+            for(var i = 0, module; module = arguments[i++];) {
+                $.mix(bridge, module);
             }
-            for( var key in bridge ){
-                if( !unextend[key] ){
-                    this[key] =  bridge[key]
+            for(var key in bridge) {
+                if(!unextend[key]) {
+                    this[key] = bridge[key]
                 }
             }
             return this;
         }
     };
-    $.factory = function( obj ){
-        obj = obj || {};
-        var parent = obj.inherit //父类
-        var init = obj.init ;    //构造器
+    $.factory = function(obj) {
+        obj = obj || {}; //父类
+        var parent = obj.inherit,
+            init = obj.init; //构造器
         delete obj.inherit;
         delete obj.init;
-        var klass = function () {
-            for( var i = 0 , init ; init =  klass._init[i++]; ){
-                init.apply(this, arguments);
-            }
-        };
-        $.mix( klass, hash ).inherit( parent, init );//添加更多类方法
-        return expand( klass, obj ).implement( obj );
+        var klass = function() {
+                for(var i = 0, init; init = klass._init[i++];) {
+                    init.apply(this, arguments);
+                }
+            };
+        $.mix(klass, hash).inherit(parent, init); //添加更多类方法
+        return expand(klass, obj).implement(obj);
     }
     $.mix($.factory, hash)
     return $
