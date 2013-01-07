@@ -31,7 +31,7 @@ define(["$spec","$node"],function(){
     var t = $('#test-parent4',idoc2);
     // $.addTestModule2 =$.noop;
     
-    $.fixture("节点模块-node",{
+    describe("node",{
         append: function(){
             //先添加两个类为.test_node的P元素
             $("body",idoc ).append("<p class='test_node'>测试append方法<strong>这是它的内部</strong></p><p class='test_node'>测试append方法<strong>这是它的内部</strong></p><div id='test_text'></div>");

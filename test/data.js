@@ -1,7 +1,7 @@
 define(["$data","$spec"],function(){
 
     var body = document.body
-    $.fixture('数据缓存模块-data', {
+    describe('data', {
         data: function(){
             //使用了data方法的元素或对象都会添加一个叫uniqueNumber的数字属性
             $.data( body,"test1",[1,2,3]);
@@ -13,7 +13,13 @@ define(["$data","$spec"],function(){
             $.data( textNode,"text","text");
             expect($.data( textNode,"test1")).eq( void 0 );
             body.removeChild( textNode );
-
+            
+            var el = $("<div data-aaa=1 data-bbb=2 data-ccc-ddd=3 />").appendTo(body)
+            expect(el.data()).same({
+                aaa:1,
+                bbb:2,
+                cccDdd:3
+            });
             var val = $.data( body,"test2",{
                 aa:"aa",
                 bb:"bb"
@@ -48,6 +54,7 @@ define(["$data","$spec"],function(){
             expect($.data(a)).same($.data(b))
         },
         removeData: function(){
+            $.data( body,"test1",[1,2,3]);
             var val = $.removeData( body,"test1");
             expect(val).same([1,2,3]);
             $.removeData( body );

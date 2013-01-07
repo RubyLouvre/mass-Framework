@@ -40,11 +40,7 @@ define("data", ["$lang"], function( $ ){
         var index = owners.indexOf( owner );
         if(index > -1 ){
             var delOne = typeof name == "string",
-            table = caches[ index ], cache = table;
-            function clear(){
-                owners.splice( index, 1 );
-                caches.splice( index, 1 );
-            }
+            table = caches[ index ], cache = table, clear = 1
             if ( delOne ) {
                 if(!pvt){
                     table = table.data;
@@ -56,17 +52,22 @@ define("data", ["$lang"], function( $ ){
                 for(var key in cache){
                     if(key == "data"){
                         for(var i in cache.data){
-                            return clear();
+                            clear = 0;
+                            break;
                         }
                     }else{
-                        return clear();
+                        clear = 0;
+                        break;
                     }
+                }
+                if(clear){
+                    owners.splice( index, 1 );
+                    caches.splice( index, 1 );
                 }
             }
             return delOne;//返回被移除的数据
         }
     }
-
     $.mix( {
         hasData: function(owner){
             return owners.indexOf( owner ) > -1;
