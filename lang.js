@@ -112,7 +112,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
          */
         each: function(obj, callback, scope, map) {
             var value, i = 0,
-                isArray = $.isArraylike(obj),
+                isArray = $.isArrayLike(obj),
                 ret = [];
             if(isArray) {
                 for(var n = obj.length; i < n; i++) {
