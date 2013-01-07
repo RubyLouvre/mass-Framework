@@ -366,7 +366,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             var i, j, cur, ret, selMatch, matched, matches, handleObj, sel,
             handlers = ( ($._data( this, "events" ) || {} )[ event.type ] || []),
             delegateCount = handlers.delegateCount,
-            args = Array.apply([], arguments ),
+            args = $.slice( arguments ),
             hook = eventHooks[ event.type ] || {},
             handlerQueue = [];
             //重置第一个参数

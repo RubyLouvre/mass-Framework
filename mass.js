@@ -532,7 +532,7 @@
      * @api public
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = Array.apply([], arguments);
+        var args = $.slice( arguments );
         if(typeof id == "string") {
             var _id = args.shift();
         }

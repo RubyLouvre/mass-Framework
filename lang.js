@@ -383,7 +383,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             var list = this._listeners[type];
             if(list) {
                 var target = this._eventTarget,
-                    args = Array.apply([], arguments),
+                    args = $.slice( arguments ),
                     i = list.length,
                     listener
                 while(--i > -1) {

@@ -377,7 +377,7 @@ define("mvvm","$event,$css,$attr".split(","), function($){
             }
             accessor.toString = function(){
                 collectSubscribers( this );
-                return Array.apply([], this) +"";
+                return $.slice( this ) +"";
             }
         }
         return accessor;

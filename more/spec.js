@@ -4,9 +4,9 @@
 define(["$lang"], function($) {
     $.log("已加载spec v4模块", 7);
     var global = this,
-        DOC = global.document,
-        parseDiv = DOC.createElement("div"),
-        timeDiv;
+    DOC = global.document,
+    parseDiv = DOC.createElement("div"),
+    timeDiv;
 
     //吞掉所有报错
     global.onerror = function() {
@@ -48,38 +48,38 @@ define(["$lang"], function($) {
             return false;
         } else {
             switch($.type(a)) {
-            case "String":
-            case "Boolean":
-            case "Number":
-            case "Null":
-            case "Undefined":
-                //处理简单类型的伪对象与字面值相比较的情况,如1 v new Number(1)
-                if(b instanceof a.constructor || a instanceof b.constructor) {
-                    return a == b;
-                }
-                return a === b;
-            case "NaN":
-                return isNaN(b);
-            case "Date":
-                return +a === +b;
-            case "NodeList":
-            case "Arguments":
-            case "Array":
-                var len = a.length;
-                if(len !== b.length) return false;
-                for(var i = 0; i < len; i++) {
-                    if(!isEqual(a[i], b[i])) {
-                        return false;
+                case "String":
+                case "Boolean":
+                case "Number":
+                case "Null":
+                case "Undefined":
+                    //处理简单类型的伪对象与字面值相比较的情况,如1 v new Number(1)
+                    if(b instanceof a.constructor || a instanceof b.constructor) {
+                        return a == b;
                     }
-                }
-                return true;
-            default:
-                for(var key in b) {
-                    if(!isEqual(a[key], b[key])) {
-                        return false;
+                    return a === b;
+                case "NaN":
+                    return isNaN(b);
+                case "Date":
+                    return +a === +b;
+                case "NodeList":
+                case "Arguments":
+                case "Array":
+                    var len = a.length;
+                    if(len !== b.length) return false;
+                    for(var i = 0; i < len; i++) {
+                        if(!isEqual(a[i], b[i])) {
+                            return false;
+                        }
                     }
-                }
-                return true;
+                    return true;
+                default:
+                    for(var key in b) {
+                        if(!isEqual(a[key], b[key])) {
+                            return false;
+                        }
+                    }
+                    return true;
             }
         }
     }
@@ -146,59 +146,59 @@ define(["$lang"], function($) {
                     elem.innerHTML = last;
                 }
                 switch(method) {
-                case "ok":
-                    //布尔真测试
-                    bool = actual === true;
-                    expected = true;
-                    break;
-                case "ng":
-                    //布尔非测试
-                    bool = actual === false;
-                    expected = false;
-                    break;
-                case "type":
-                    bool = $.type(actual, expected);
-                    break;
-                case "eq":
-                    //同一性真测试
-                    bool = actual == expected;
-                    break;
-                case "near":
-                    //判定两个数字是否相近
-                    return Math.abs(parseFloat(actual) - parseFloat(expected)) <= (threshold | 0);
-                    break;
-                case "not":
-                    //同一性非测试
-                    bool = actual != expected;
-                    break;
-                case "same":
-                    //判定结果是否与expected相似(用于数组或对象或函数等复合类型)
-                    bool = isEqual(actual, expected);
-                    break
-                case "property":
-                    //判定目标值是否包含prop属性
-                    bool = Object.prototype.hasOwnProperty.call(actual, expected);
-                    break;
-                case "match":
-                    //判定回调是否返回真
-                    bool = expected(actual);
-                    break;
-                case "contains":
-                    //判定目标值是否包含el这个元素(用于数组或类数组)
-                    for(var i = 0, n = actual.length; i < n; i++) {
-                        if(actual === expected) {
-                            bool = true;
-                            break;
+                    case "ok":
+                        //布尔真测试
+                        bool = actual === true;
+                        expected = true;
+                        break;
+                    case "ng":
+                        //布尔非测试
+                        bool = actual === false;
+                        expected = false;
+                        break;
+                    case "type":
+                        bool = $.type(actual, expected);
+                        break;
+                    case "eq":
+                        //同一性真测试
+                        bool = actual == expected;
+                        break;
+                    case "near":
+                        //判定两个数字是否相近
+                        return Math.abs(parseFloat(actual) - parseFloat(expected)) <= (threshold | 0);
+                        break;
+                    case "not":
+                        //同一性非测试
+                        bool = actual != expected;
+                        break;
+                    case "same":
+                        //判定结果是否与expected相似(用于数组或对象或函数等复合类型)
+                        bool = isEqual(actual, expected);
+                        break
+                    case "property":
+                        //判定目标值是否包含prop属性
+                        bool = Object.prototype.hasOwnProperty.call(actual, expected);
+                        break;
+                    case "match":
+                        //判定回调是否返回真
+                        bool = expected(actual);
+                        break;
+                    case "contains":
+                        //判定目标值是否包含el这个元素(用于数组或类数组)
+                        for(var i = 0, n = actual.length; i < n; i++) {
+                            if(actual === expected) {
+                                bool = true;
+                                break;
+                            }
                         }
-                    }
-                    break;
-                case "log":
-                    bool = "";
-                    if(elem) {
-                        elem.className = "mass-spec-log";
-                        elem.appendChild(parseHTML('<form class="mass-spec-diff"><pre>' + $.dump(actual) + '</pre></form>'));
-                    }
-                    break;
+                        break;
+                    case "log":
+                        bool = "";
+                        if(elem) {
+                            elem.className = "mass-spec-log";
+                            elem.appendChild(parseHTML('<form class="mass-spec-diff"><pre>' + $.dump(actual) + '</pre></form>'));
+                        }
+                        break;
                 }
 
                 //修改统计栏的数值
@@ -228,8 +228,8 @@ define(["$lang"], function($) {
     });
     "ok, ng, log, eq, near, match, type, not, property, contains, same".replace($.rword, function(method) {
         Expect.prototype[method] = function() {
-		    var args = Array.apply([], arguments);
-			args.unshift(method);
+            var args = $.slice(arguments);
+            args.unshift(method);
             return this._should.apply(this, args);
         }
     })
@@ -304,7 +304,7 @@ define(["$lang"], function($) {
             }
             //取得测试对象中的所有方法名
             var methods = Object.keys(asserts),
-                name;
+            name;
 
             function runTest() {
                 if((name = methods.shift())) {

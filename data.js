@@ -35,6 +35,7 @@ define("data", ["$lang"], function( $ ){
             return table;
         }
     }
+    
     function innerRemoveData( owner, name, pvt ){
         var index = owners.indexOf( owner );
         if(index > -1 ){

@@ -1,101 +1,64 @@
-define(["$lang","$spec"],function(  ){
+define(["$lang"],function(  ){
     $.log("已加载text/lang模块");
-    $.fixture("语言扩展模块-lang",{
-        'Object.keys': function() {
+
+    describe("lang",{
+        "Object.keys": function() {
             expect(Object.keys({
                 aa:1,
                 bb:2,
                 cc:3
-            })).same(["aa","bb","cc"]);
+            })).same(["aa","bb","cc"],"返回包含三个元素的数组");
             //测试特殊属性
             var array = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","), testobj = {}
             for(var i = 0, el; el = array[i++];){
                 testobj[el] = i;
             };
-            expect(Object.keys(testobj)).same(array);
+            expect(Object.keys(testobj)).same(array,"测试IE下不能遍历的对象原型属性");
         },
-        "$.makeArray": function(id){
-            var o;
-
-            // 普通对象(无 length 属性)转换为 [obj]
-            o = {
-                a:1
-            };
-            expect($.makeArray(o)[0]).eq(o);
-
-            // string 转换为 [str]
-            expect($.makeArray('test')[0]).eq('test');
-
-            // function 转换为 [fn]
-            o = function(){};
-            expect($.makeArray(o)[0]).eq(o);
-
-            // array-like 对象，转换为数组
-            expect($.makeArray({
-                '0':0,
-                '1':1,
-                length:2
-            }).length).eq(2);
-            expect($.makeArray({
-                '0':0,
-                '1':1,
-                length:2
-            })[1]).eq(1);
-
-            // nodeList 转换为普通数组
-            o = document.getElementsByTagName('body');
-            expect($.makeArray(o).length).eq(1);
-            expect($.makeArray(o)[0]).eq(o[0]);
-            expect('slice' in $.makeArray(o)).eq(true);
-
-            // arguments 转换为普通数组
-            o = arguments;
-            expect($.makeArray(o).length).eq(1);
-
-            // 伪 array-like 对象
-            o = $.makeArray({
-                a:1,
-                b:2,
-                length:2
-            });
-            expect(o.length).eq(2);
-            expect(o[0]).eq(undefined);
-            expect(o[1]).eq(undefined);
-        },
-        "Array#map":function(){
+        map: function(){
             var ret = [1, 2, 3, 4].map(function(a, b) {
                 return a + b;
             });
-            expect(ret).same( [1, 3, 5, 7] );
+            expect(ret).same( [1, 3, 5, 7],"[1, 3, 5, 7]" );
         },
-        "Array#filter":function(){
+        filter: function(){
             var ret = [1, 2, 3, 4, 5, 6, 7, 8].filter(function(a, b) {
                 return a > 4
             });
-            expect(ret).same( [5, 6, 7, 8] );
+            expect(ret).same( [5, 6, 7, 8],"[5, 6, 7, 8]" );
         },
-        "Array#reduce":function(){
+        reduce: function(){
             var ret = [1, 2, 3, 4].reduce(function(a, b) {
                 return a + b;
             }, 10);
-            expect(ret).eq(20);
+            expect(ret).eq(20,"[1, 2, 3, 4] reduce to 10");
         },
-        "Array#reduceRight":function(){
+        reduceRight: function(){
             var flattened = [[0, 1], [2, 3], [4, 5]].reduceRight(function(a, b) {
                 return a.concat(b);
             }, []);
-            expect(flattened).same([4, 5, 2, 3, 0, 1]);
+            expect(flattened).same([4, 5, 2, 3, 0, 1],"[4, 5, 2, 3, 0, 1]");
         },
-        "isDuckType": function(){
-            //测试鸭子类型
-            var a = function(){}
-            a.prototype.toString = function(){
-                return "[object XXX]"
+        some: function(){
+            function isBigEnough(element, index, array) {
+                return (element >= 10);
             }
-            var aa = new a()
-            expect( Object.prototype.toString.call(aa) ).eq("[object Object]")
+            var passed = [2, 5, 8, 1, 4].some(isBigEnough);
+            expect(passed).eq(false, "return false");
+            passed = [12, 5, 8, 1, 4].some(isBigEnough);
+            expect(passed).eq(true, "return true");
         },
-        "$.isArray": function(){
+        every: function(){
+            function isBigEnough(element, index, array) {
+                return (element >= 10);
+            }
+            var passed = [12, 5, 8, 130, 44].every(isBigEnough);
+            expect(passed).eq(false, "return false");
+            passed = [12, 54, 18, 130, 44].every(isBigEnough);
+            expect(passed).eq(true, "return true");
+        },
+
+        "Array.isArray": function(){
             var iframe = document.createElement('iframe');
             iframe.style.display = "none";
             document.body.appendChild(iframe);
@@ -104,30 +67,31 @@ define(["$lang","$spec"],function(  ){
             d.close();
             var xArray = window.xArray
             var arr = new xArray(1,2,3); // [1,2,3]
-            expect( $.isArray(arr) ).ok();
-            expect( $.isArray([]) ).ok();
+            expect( $.isArray(arr) ).eq(true, "iframe中的Array也返回true");
+            expect( $.isArray([]) ).eq(true, "当前window的Array当然返回true");
             document.body.removeChild(iframe);
-            expect( $.isArray(function test(a,b,c){}) ).ng();
-            expect( $.isArray(/test/) ).ng();
-            expect( $.isArray( "test") ).ng();
-            expect( $.isArray(window) ).ng();
+            expect( $.isArray(function test(a,b,c){}) ).eq(false, "函数返回false")
+            expect( $.isArray(/test/) ).eq(false, "正则返回false")
+            expect( $.isArray( "test") ).eq(false, "字符串返回false")
+            expect( $.isArray(window) ).eq(false, "window返回false")
             expect( $.isArray({
                 0: 0,
                 1: 1,
                 2: 2,
                 length: 3,
                 sort: function(){}
-            }) ).ng();
+            }) ).eq(false,"伪装的对象返回false")
         },
-        "String#trim":function(){
-            expect('  test  '.trim() ).eq('test');
+        trim: function(){
+            expect( "  test  ".trim() ).eq("test","去掉两边空白");
+            expect( "ipad\xA0".trim() ).eq("ipad", "nbsp should be trimmed" );
         },
         Date: function(){
-            expect( /^\d+$/.test( Date.now() ) ).ok();
+            expect( /^\d+$/.test( Date.now() ) ).eq(true, "时间戮必须是纯数字");
             var date = new Date("2012/4/29");
-            expect( date.getYear() ).eq( 112 );
+            expect( date.getYear() ).eq( 112, "getYear是从1900算起" );
             date.setYear( 2014 );
-            expect( date.getYear() ).eq( 114 );
+            expect( date.getYear() ).eq( 114, "getYear是从1900算起" );
         },
 
         "$.isPlainObject": function() {
@@ -161,17 +125,17 @@ define(["$lang","$spec"],function(  ){
             expect( $.isArrayLike(document)).ng();
             expect( $.isArrayLike(window)).ng();
             //用于下面的对arguments的判定
-            expect( $.type(arguments)).eq("Arguments");
-            expect( isFinite(arguments.length) ).ok()
-            expect( $.isArrayLike(arguments)).ok();
-            expect( $.isArrayLike(document.links)).ok();
-            expect( $.isArrayLike(document.documentElement.childNodes)).ok();
+            expect( $.type(arguments)).eq("Arguments","判定Arguments类型");
+            expect( isFinite(arguments.length) ).eq(true, "Arguments.length")
+            expect( $.isArrayLike(arguments)).eq(true, "Arguments为类数组");
+            expect( $.isArrayLike(document.links)).eq(true, "document.links为类数组");
+            expect( $.isArrayLike(document.documentElement.childNodes)).eq(true, "html标签的子节点为类数组");
             //自定义对象必须有length,并且为非负正数
             expect( $.isArrayLike({
                 0:"a",
                 1:"b",
                 length:2
-            })).ok();
+            })).eq(true, "拥有length属性的自定义对象为类数组");
 
 
         },
@@ -208,34 +172,24 @@ define(["$lang","$spec"],function(  ){
             expect( ret ).eq( "style.width=((isEnd ? 0 : adapter._default( 200, 200,'linear',per ))|0)+'px';");
 
         },
-        "$.tag":function(){
-            var tag = $.tag
-            var html = tag("h1 title='aaa'","sss")
-            ('a href=#' ,
-                tag("img src='http://www.google.com.hk/images/nav_logo83.png'")
-                ('br')
-                ('' ,"View larger image") );
-            expect(html+"").eq("<h1 title='aaa'>sss</h1><a href=#><img src='http://www.google.com.hk/images/nav_logo83.png'><br>View larger image</a>");
-        },
-        "$.parseXML":function(){
 
+        "$.parseXML":function(){
             var str = "<note><to>Tove</to><from>Jani</from><heading>Reminder</heading><body>Don't forget me this weekend!</body></note>"
-            expect( $.parseXML(str).nodeType).eq(9)//[object XMLDocument]
+            expect( $.parseXML(str).nodeType ).eq(9, "应该返回一个文档对象")//[object XMLDocument]
         },
         "$.String": function(){
             expect( $.String.contains("aaabbbcc", "bbb") ).ok();
             expect( $.String.startsWith('http://index', 'http') ).ok();
             expect( $.String.endsWith('image.gif', '.gif') ).ok();
             expect( $.String.endsWith('image.gif', '.GIF') ).ng();
-            expect( $.String.endsWith('image.gif',".GIF",true) ).ok();
-            expect( $.String.byteLen('司徒正美') ).eq(12);
-            expect( $.lang("this is a test test").truncate(10) ).eq("this is...");
-            expect( $.lang("foo-bar").camelize() ).eq("fooBar");
-            expect( $.lang("boo boo boo").capitalize() ).eq("Boo boo boo");
-            expect( $.lang("fooBar").underscored() ).eq("foo_bar");
-            expect( $.lang("foo-bar").underscored() ).eq("foo_bar");
-            expect( $.lang("foo-bar").capitalize().camelize()).eq("FooBar");
-            expect( $.lang("animals.sheep[1]").escapeRegExp() ).eq("animals\\.sheep\\[1\\]");
+            expect( $.String.byteLen('司徒正美') ).eq(8);
+            expect( $.String.truncate("this is a test test", 10)).eq("this is...");
+            expect( $.String.camelize("foo-bar")).eq("fooBar");
+            expect( $.String.capitalize("boo boo boo") ).eq("Boo boo boo");
+            expect( $.String.underscored("fooBar") ).eq("foo_bar");
+            expect( $.String.underscored("foo-bar") ).eq("foo_bar");
+            expect( $.String.capitalize("foo-bar") ).eq("Foo-bar");
+            expect( $.String.escapeRegExp("animals.sheep[1]") ).eq("animals\\.sheep\\[1\\]");
             expect( $.String.pad(2, 4, "0", 1) ).eq("2000");
             expect( $.String.pad(2, 4, " ") ).eq("   2");
             expect( $.String.repeat("ruby", 2 )).eq("rubyruby");
@@ -255,17 +209,17 @@ define(["$lang","$spec"],function(  ){
                 2:2
             } ];
             //复制一个副本
-            var b = $.lang(a).clone().value();
+            var b = $.Array.clone(a)
             expect( a ).same( b );
             expect( a ).not( b );
-            expect( $.lang(a).contains(2).value() ).ok();
-            expect( $.lang(a).diff([1,2,3]).value() ).same(["aaa",undefined,4,null,{
+            expect( $.Array.contains(a, 2) ).ok();
+            expect( $.Array.diff(a, [1,2,3]) ).same(["aaa",undefined,4,null,{
                 2:2
             }]);
             expect( $.Array.remove(b, 1) ).eq( true );
             expect( $.Array.removeAt(b, 1) ).eq( true );
-            expect( $.lang(a).shuffle().value() ).log();
-            expect( $.lang(a).random().value() ).log();
+            expect( $.Array.shuffle(a) ).log();
+            expect( $.Array.random(a) ).log();
             expect( $.Array.compact( a ).length ).eq( 6 );
             expect( $.Array.union( a, [3,4,5] ).sort() ).same([ 
                 1,
@@ -280,25 +234,25 @@ define(["$lang","$spec"],function(  ){
                 null,
                 undefined]);
             var c = [3,4,6,1,45,9,5,3,4,22,3];
-            expect( $.lang(c).min().value() ).eq(1);
-            expect( $.lang(c).max().value() ).eq(45);
-            expect( $.lang(c).unique().value() ).same( [ 6, 1, 45, 9, 5, 4, 22, 3 ] );
-            expect( $.lang([1, 2, 1, 3, 1, 4]).unique().value() ).same( [2,3,1,4] );
+            expect( $.Array.min(c) ).eq(1);
+            expect( $.Array.max(c) ).eq(45);
+            expect( $.Array.unique(c) ).same( [ 6, 1, 45, 9, 5, 4, 22, 3 ] );
+            expect( $.Array.unique([1, 2, 1, 3, 1, 4]) ).same( [2,3,1,4] );
             //测试平坦化
             var d =[ 'frank', ['bob', 'lisa'], [ 'jill', ['tom', 'sally'] ] ];
-            expect( $.lang(d).flatten().value() ).same( ['frank', 'bob', 'lisa', 'jill', 'tom', 'sally'] );
+            expect( $.Array.flatten(d) ).same( ['frank', 'bob', 'lisa', 'jill', 'tom', 'sally'] );
 
             var e = ['hello', 'world', 'this', 'is', 'nice'];
-            expect( $.lang(e).pluck("length").value() ).same([5, 5, 4, 2, 4]);
-            expect( $.lang(e).sortBy(function(s) {
+            expect( $.Array.pluck(e,"length") ).same([5, 5, 4, 2, 4]);
+            expect( $.Array.sortBy(e, function(s) {
                 return s.length;
-            }).value() ).same( ["is","this","nice","hello","world"] );
+            }) ).same( ["is","this","nice","hello","world"] );
 
-            expect( $.lang( [0, 1, 2, 9] ).diff( [0, 5, 2] ).value() ).same( [1, 9] );
+            expect( $.Array.diff( [0, 1, 2, 9], [0, 5, 2] )).same( [1, 9] );
 
-            var h = $.lang( [1, 2, 3] ).union( [2, 3, 4, 5, 6 ] ).value();//取并集
+            var h = $.Array.union( [1, 2, 3], [2, 3, 4, 5, 6 ] );//取并集
             expect( h ).same( [1, 2, 3, 4, 5, 6 ] );
-            var j = $.lang( [1, 2, 3, "a"] ).intersect( [ 1, "a", 2 ] ).value();//取交集
+            var j = $.Array.intersect( [1, 2, 3, "a"], [ 1, "a", 2 ] );//取交集
             expect( j ).same([1, 2, "a"]);
 
         },
@@ -321,7 +275,7 @@ define(["$lang","$spec"],function(  ){
                 b:"two",
                 c:"three"
             };
-            expect(  $.lang(a).subset(["a","c"]).value() ).same({
+            expect(  $.Object.subset(a, ["a","c"]) ).same({
                 a: 'one',
                 c: 'three'
             });
@@ -331,7 +285,7 @@ define(["$lang","$spec"],function(  ){
                 third: 'Tuesday'
             };
             var b = [];
-            $.lang(a).each(function(value){
+            $.Object.forEach(a, function(value){
                 b.push(value);
             });
             expect( b ).same(["Sunday","Monday","Tuesday"]);
@@ -344,7 +298,7 @@ define(["$lang","$spec"],function(  ){
                 }
             };
 
-            expect(  $.lang(a).clone().value() ).same(a);
+            expect(  $.Object.clone(a) ).same(a);
             var obj1 = {
                 a: 0,
                 b: 1
@@ -357,7 +311,7 @@ define(["$lang","$spec"],function(  ){
                 a: 4,
                 d: 5
             };
-            var merged  = $.lang( obj1 ).merge(obj2, obj3).value();
+            var merged  = $.Object.merge( obj1, obj2, obj3);
             expect( obj1 ).same(merged);
             var nestedObj1 = {
                 a: {
@@ -370,7 +324,7 @@ define(["$lang","$spec"],function(  ){
                     b: 2
                 }
             };
-            var nested  = $.lang( nestedObj1 ).merge(nestedObj2).value();
+            var nested  = $.Object.merge( nestedObj1, nestedObj2);
             expect( nested ).same({
                 a: {
                     b: 2,
@@ -383,7 +337,7 @@ define(["$lang","$spec"],function(  ){
                 b: 2,
                 c: 3
             };
-            expect(  $.lang(a).without("a").value() ).same({
+            expect(  $.Object.without(a, "a") ).same({
                 b:2,
                 c:3
             });
