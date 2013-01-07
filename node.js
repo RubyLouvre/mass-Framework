@@ -415,43 +415,47 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
                 el[adjacent]("afterEnd", html);
             }
         };
-    var insertAdjacentNode = function(elems, fn, item) {
-            for(var i = 0, el; el = elems[i]; i++) { //第一个不用复制，其他要
-                fn(el, i ? cloneNode(item, true, true) : item);
+
+    function insertAdjacentNode(elems, fn, item) {
+        for(var i = 0, el; el = elems[i]; i++) { //第一个不用复制，其他要
+            fn(el, i ? cloneNode(item, true, true) : item);
+        }
+    }
+
+    function insertAdjacentHTML(elems, slowInsert, fragment, fast, fastInsert, html) {
+        for(var i = 0, el; el = elems[i++];) {
+            if(fast) {
+                fastInsert(el, html);
+            } else {
+                slowInsert(el, fragment.cloneNode(true));
             }
         }
-    var insertAdjacentHTML = function(elems, slowInsert, fragment, fast, fastInsert, html) {
-            for(var i = 0, el; el = elems[i++];) {
-                if(fast) {
-                    fastInsert(el, html);
-                } else {
-                    slowInsert(el, fragment.cloneNode(true));
-                }
-            }
+    }
+
+    function insertAdjacentFragment(elems, fn, item, doc) {
+        var fragment = doc.createDocumentFragment();
+        for(var i = 0, el; el = elems[i++];) {
+            fn(el, makeFragment(item, fragment, i > 1));
         }
-    var insertAdjacentFragment = function(elems, fn, item, doc) {
-            var fragment = doc.createDocumentFragment();
-            for(var i = 0, el; el = elems[i++];) {
-                fn(el, makeFragment(item, fragment, i > 1));
-            }
+    }
+
+    function makeFragment(nodes, fragment, bool) {
+        //只有非NodeList的情况下我们才为i递增;
+        var ret = fragment.cloneNode(false),
+            go = !nodes.item;
+        for(var i = 0, node; node = nodes[i]; go && i++) {
+            ret.appendChild(bool && cloneNode(node, true, true) || node);
         }
-    var makeFragment = function(nodes, fragment, bool) {
-            //只有非NodeList的情况下我们才为i递增;
-            var ret = fragment.cloneNode(false),
-                go = !nodes.item;
-            for(var i = 0, node; node = nodes[i]; go && i++) {
-                ret.appendChild(bool && cloneNode(node, true, true) || node);
-            }
-            return ret;
-        }
-        /**
-         * 实现insertAdjacentHTML的增强版
-         * @param {mass}  nodes mass实例
-         * @param {String} type 方法名
-         * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
-         * @param {Document}  doc 执行环境所在的文档
-         * @return {mass} 还是刚才的mass实例
-         */
+        return ret;
+    }
+    /**
+     * 实现insertAdjacentHTML的增强版
+     * @param {mass}  nodes mass实例
+     * @param {String} type 方法名
+     * @param {Any}  item 插入内容或替换内容,可以为HTML字符串片断，元素节点，文本节点，文档碎片或mass对象
+     * @param {Document}  doc 执行环境所在的文档
+     * @return {mass} 还是刚才的mass实例
+     */
 
     function manipulate(nodes, type, item, doc) {
         var elems = $.filter(nodes, function(el) {
@@ -504,13 +508,11 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
     //复制与移除节点时的一些辅助函数
     //======================================================================
 
-
     function cleanNode(node) {
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
     var div = document.createElement("div"); //缓存parser，防止反复创建
-
 
     function shimCloneNode(outerHTML, tree) {
         tree.appendChild(div);
@@ -558,7 +560,6 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         }
     }
     //修正IE下对数据克隆时出现的一系列问题
-
 
     function fixNode(clone, src) {
         if(src.nodeType == 1) {
