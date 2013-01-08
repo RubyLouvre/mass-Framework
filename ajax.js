@@ -200,7 +200,7 @@ define("ajax",["mass","$lang"], function($){
                 return  elem.name && !elem.disabled && ( elem.checked === true || /radio|checkbox/.test(elem.type) )
             }).forEach( function( elem ) {
                 var val = $( elem ).val(), vs;
-                val = $.makeArray[val];
+                val = Array.isArray(val) ? val : [val];
                 val = val.map( function(v) {
                     return v.replace(rCRLF, "\r\n");
                 });
