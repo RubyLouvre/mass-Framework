@@ -65,7 +65,7 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
         var filter = currentStyle.filter || style.filter || "";
         //http://snook.ca/archives/html_and_css/ie-position-fixed-opacity-filter
         //IE78的透明滤镜当其值为100时会让文本模糊不清
-        if(value == 100  ){  //IE78的透明滤镜当其值为100时会让文本模糊不清
+        if( value == 100  ){  //IE78的透明滤镜当其值为100时会让文本模糊不清
             // var str =  "filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color='#FFFFFF')"+
             //   "progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',"+
             //   "M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558)";
@@ -84,7 +84,7 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
         if( alpha ){
             alpha.opacity = value ;
         }else{
-            style.filter  += (filter ? "," : "")+ "alpha(opacity="+ value +")";
+            style.filter = ((filter ? filter+",": "") + "alpha(opacity="+ value +")");
         }
     }
     //=========================　处理　user-select　=========================
@@ -134,6 +134,7 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
         node.style[name == 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth/2) + (node.clientWidth/2) + "px";
         node.style[name == 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight/2) + (node.clientHeight/2) + "px";
     }
+    return $
 });
 //2011.10.21 去掉opacity:setter 的style.visibility处理
 //2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
