@@ -3,28 +3,28 @@
 //=========================================
 define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     var global = this,
-        rformat = /\\?\#{([^{}]+)\}/gm,
-
         // JSON RegExp
         rvalidchars = /^[\],:{}\s]*$/,
         rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
         rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
         rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
         runicode = /[\x00-\x1f"\\\u007f-\uffff]/g,
-        str_eval = global.execScript ? "execScript" : "eval",
-        str_body = (global.open + '').replace(/open/g, "")
-        var defineProperty = Object.defineProperty
-    var method = function(obj, name, method) {
-            if(!obj[name]) {
-                defineProperty(obj, name, {
-                    configurable: true,
-                    enumerable: false,
-                    writable: true,
-                    value: method
-                });
-            }
+        seval = global.execScript ? "execScript" : "eval",
+        rformat = /\\?\#{([^{}]+)\}/gm,
+        sopen = (global.open + '').replace(/open/g, ""),
+        defineProperty = Object.defineProperty
+
+    function method(obj, name, method) {
+        if(!obj[name]) {
+            defineProperty(obj, name, {
+                configurable: true,
+                enumerable: false,
+                writable: true,
+                value: method
+            });
         }
-        //IE8的Object.defineProperty只对DOM有效
+    }
+    //IE8的Object.defineProperty只对DOM有效
     try {
         defineProperty({}, 'a', {
             get: function() {}
@@ -42,7 +42,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             method(obj, name, map[name]);
         }
     }
-    $.mix({
+    var tools = {
         /**
          * 判定是否是一个朴素的javascript对象（Object或JSON），不是DOM对象，不是BOM对象，不是自定义类的实例。
          * @param {Object} obj
@@ -54,7 +54,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             try { //不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
                 for(var key in obj) //只有一个方法是来自其原型立即返回flase
-                if(!({}).hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
+                if(!Object.prototype.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
                     return false
                 }
             } catch(e) {
@@ -71,7 +71,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         isNative: function(obj, method) {
             var m = obj ? obj[method] : false,
                 r = new RegExp(method, "g");
-            return !!(m && typeof m != "string" && str_body === (m + "").replace(r, ""));
+            return !!(m && typeof m != "string" && sopen === (m + "").replace(r, ""));
         },
         /**
          * 是否为空对象
@@ -283,7 +283,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             //Firefox，Safari，Opera中，直接调用eval()为当前作用域，global.eval()调用为全局作用域。
             if(code && /\S/.test(code)) {
                 try {
-                    global[str_eval](code);
+                    global[seval](code);
                 } catch(e) {}
             }
         },
@@ -310,7 +310,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         /**
          * 将字符串解析成XML文档对象
          * @param {String} data
-         * @return {XML} 
+         * @return {XML}
          * @example
             <courses>
              <math>
@@ -347,63 +347,50 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             return xml;
         }
 
-    }, false);
+    }
+    $.mix(tools, false);
     var EventTarget = function(target) {
             $.log("init EventTarget")
-            this._listeners = {};
+            this._events = {};
             this._eventTarget = target || this;
         }
-    EventTarget.prototype = {
+    var fn = EventTarget.prototype = {
         constructor: EventTarget,
-        addEventListener: function(type, callback, scope, priority) {
-            if(isFinite(scope)) {
-                priority = scope
-                scope = null;
-            }
-            priority = priority || 0;
-            var list = this._listeners[type],
-                index = 0,
-                listener, i;
-            if(list == null) {
-                this._listeners[type] = list = [];
-            }
-            i = list.length;
-            while(--i > -1) {
-                listener = list[i];
-                if(listener.callback === callback) {
-                    list.splice(i, 1);
-                } else if(index === 0 && listener.priority < priority) {
-                    index = i + 1;
+        addEventListener: function(type, callback, scope) {
+            var listeners = this._events[type],
+                listener = {
+                    callback: callback,
+                    scope: scope || this._eventTarget
                 }
+            if(listeners) {
+                listeners.push(listener)
+            } else {
+                this._events[type] = [listener]
             }
-            list.splice(index, 0, {
-                callback: callback,
-                scope: scope,
-                priority: priority
-            });
         },
         removeEventListener: function(type, callback) {
-            var list = this._listeners[type],
-                i;
-            if(list) {
-                i = list.length;
+            var n = arguments.length;
+            if(n == 0) {
+                this._events = {};
+            } else if(n == 1) {
+                this._events[type] = [];
+            } else {
+                var listeners = this._events[type] || [];
+                var i = listeners.length;
                 while(--i > -1) {
-                    if(list[i].callback === callback) {
-                        list.splice(i, 1);
-                        return;
+                    if(listeners[i].callback === callback) {
+                        return listeners.splice(i, 1);
                     }
                 }
             }
         },
         dispatchEvent: function(type) {
-            var list = this._listeners[type];
-            if(list) {
+            var listeners = (this._events[type] || []).concat(); //防止影响原数组
+            if(listeners.length) {
                 var target = this._eventTarget,
-                    args = $.slice(arguments),
-                    i = list.length,
-                    listener
-                while(--i > -1) {
-                    listener = list[i];
+                    args = $.slice(arguments);
+                for(var i = 0, n = listeners.length; i < n; i++) {
+                    var listener = listeners[i];
                     target = listener.scope || target;
                     args[0] = {
                         type: type,
@@ -414,6 +401,9 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
         }
     }
+    "bind_addEventListener,unbind_removeEventListener,fire_dispatchEvent".replace(/(\w+)_(\w+)/g, function(_, a, b) {
+        fn[a] = fn[b];
+    });
     $.EventTarget = EventTarget;
 
     "Array,Function".replace($.rword, function(method) {
@@ -871,4 +861,4 @@ changlog:
 键盘控制物体移动 http://www.wushen.biz/move/
 https://github.com/tristen/tablesort
 https://gist.github.com/395070
-     */
+*/
