@@ -5,9 +5,9 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
     var adapter = $.cssHooks = {},
     ie8 = !!top.XDomainRequest,
     rfilters = /[\w\:\.]+\([^)]+\)/g,
-    salpha = "DXImageTransform.Microsoft.Alpha",
     rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
     rposition = /^(top|right|bottom|left)$/,
+    salpha = "DXImageTransform.Microsoft.Alpha",
     border = {
         thin:   ie8 ? '1px' : '2px',
         medium: ie8 ? '3px' : '4px',
@@ -80,7 +80,6 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
         }
         //如果已经设置过透明滤镜可以使用以下便捷方式
         var alpha = node.filters.alpha || node.filters[salpha];
-
         if( alpha ){
             alpha.opacity = value ;
         }else{
@@ -99,11 +98,11 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
         e, i = 0, els = node.getElementsByTagName('*');
         node.setAttribute('unselectable', allow);
         while (( e = els[ i++ ] )) {
-            switch (e.tagName.toLowerCase()) {
-                case 'iframe' :
-                case 'textarea' :
-                case 'input' :
-                case 'select' :
+            switch (e.tagName) {
+                case 'IFRAME' :
+                case 'TEXTAREA' :
+                case 'INPUT' :
+                case 'SELECT' :
                     break;
                 default :
                     e.setAttribute('unselectable', allow);
@@ -111,7 +110,7 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
         }
     };
     //=========================　处理　background-position　=========================
-    adapter[ "backgroundPosition:get" ] = function( node, name, value ) {
+    adapter[ "backgroundPosition:get" ] = function( node ) {
         var style = node.currentStyle;
         return style.backgroundPositionX +" "+style.backgroundPositionX
     };
