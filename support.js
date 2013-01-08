@@ -52,7 +52,7 @@ define("support",["mass"], function( $ ){
         inlineBlock: true,
         //http://w3help.org/zh-cn/causes/RD1002
         //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
-//        keepSize: true,
+        //        keepSize: true,
         //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
         pixelPosition: true,
         transition: false
@@ -75,6 +75,10 @@ define("support",["mass"], function( $ ){
         div.cloneNode(true).fireEvent("onclick");
         div.detachEvent( "onclick", clickFn );
     }
+    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
+    //    div.style.backgroundClip = "content-box";
+    //    div.cloneNode( true ).style.backgroundClip = "";
+    //    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
     var table = div[TAGS]("table")[0]
     try{//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
         table.innerHTML = "<tr><td>1</td></tr>";
@@ -103,9 +107,9 @@ define("support",["mass"], function( $ ){
             div.style.top = "1%";
             support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
         }
-//        div.style.cssText = "width:20px;"
-//        div.innerHTML = "<div style='width:40px;'></div>";
-//        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
+        //        div.style.cssText = "width:20px;"
+        //        div.innerHTML = "<div style='width:40px;'></div>";
+        //        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
         //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
         div.innerHTML = "<a href='#'></a>"
         if(!support.focusin){
