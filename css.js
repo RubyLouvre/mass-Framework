@@ -33,8 +33,8 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                     style.minWidth = minWidth;
                     style.maxWidth = maxWidth;
                 }
-            };
-            return ret === "" ? "auto" : ret;
+            }
+            return ret;
         }
     }
     var getter = adapter["_default:get"]
