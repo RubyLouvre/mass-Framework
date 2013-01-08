@@ -17,29 +17,35 @@
                 display:inline-block;
                 position: relative;
             }
+            .gradient{
+                background-color:#F4F4F4;
+                background:-webkit-gradient(linear,0% 100%,0% 0,from(#FFFFFF),to(#ECECEC));
+                background:-webkit-linear-gradient(top,#FFFFFF,#ECECEC);
+                background:-moz-linear-gradient(top,#FFFFFF,#ECECEC);
+                -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFFFFF, endColorstr=#ECECEC)";
+                background:-ms-linear-gradient(top,#FFFFFF,#ECECEC);
+                background:-o-linear-gradient(top,#FFFFFF,#ECECEC);
+                height: 400px;
+            }
         </style>
-        <script src="jquery1.83.js"> </script>
+        <script src="mass.js"> </script>
         <script>
-            var now = new Date;
-            setTimeout(function(){
-               alert(new Date - now)
-            },0)
+            require("css,ready",function(){
+   
+              //  alert("filter" in document.body.style)
+             //   alert("-ms-filter" in document.body.style)
+              //  alert("-ms-filter" in document.body.currentStyle)
+             $('.aaa')[0].style["-ms-filter"] ="progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFFFFF, endColorstr=#ECECEC)"
+                // alert($('.gradient').css('filter'));
+            })
         </script>
     </head>
 
     <body>
 
-        <input id="Button1" type="button" value="button"  style=" position:fixed; top:0;"  />
-        <div style=" height:2000px;"></div>
+
+        <div class="aaa" style="width:300px;height:100px;">xxxvvvvvvvvvvvvvvvvvv</div>
     </body>
-    window.onload = function () {
-    setTimeout(function(){
-    console.log($(window).scrollTop());
-    console.log($(document).scrollTop());
-    },100);
-    }
-    把滚动条拉到中间
-    然后刷新 ie如果不加settimeout获取不到scrolltop
 
 </body>
 </html>

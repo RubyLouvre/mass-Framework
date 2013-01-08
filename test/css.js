@@ -11,14 +11,14 @@ define("../more/random,$css".split(","),function(random, $){
           
             var isWebkit = !!navigator.vendor;
        
-            expect( node[0].tagName ).eq( "DIV" );
+            expect( node[0].tagName ).eq( "DIV" ,"这是一个DIV元素");
           
             expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px" );
             node.css( 'width',"+=2px" );
             expect( node.css('width') ).eq( document.documentMode < 9 ? "9px" : "10px" );
             expect( node.css('float')).eq('left');
       
-            expect( node.css('position')).eq('static');
+            expect( node.css('position')).eq('static',"position:static");
             if (isWebkit) {
                 expect( node.css( 'backgroundColor' )).eq( 'rgba(0, 0, 0, 0)' );
             } else {
@@ -58,7 +58,7 @@ define("../more/random,$css".split(","),function(random, $){
                 border: '2px solid #ccc'
             });
 
-            expect( node.css('opacity')).near(0.8, "赋值后重新获取opacity",0.02);
+            expect( node.css('opacity')).near(0.8, 0.02, "赋值后重新获取opacity");
             var style = $("<style id='sheet_sheet'>.shadow {\
                 background-color: #47aed7;\
                 -moz-box-shadow: rgba(0, 0, 0, 0.2) 2px 3px 3px;\
@@ -73,19 +73,26 @@ define("../more/random,$css".split(","),function(random, $){
                 'style="height: 80px; ' +
                 'width: 120px; ' +
                 'border:1px solid #ccc;"></div>').appendTo( "body" );
-
             test_filter.css( 'opacity', .5);
 
             if (document.documentMode && document.documentMode < 9) {
                 // 不加入 dom 节点取不到 class 定义的样式
-                expect( test_filter[0].currentStyle.filter ).match(function(value){
+                var filter =  $(".shadow").css("filter")
+                expect( filter ).match(function(value){
                     return /50/.test(value)
-                });
+                }, "测试有没有取得透明滤镜");
+                expect( filter.indexOf("progid") ).eq(0,"测试有没有覆盖原来的滤镜");
+                var filterNumber = 0
+                filter.replace(/\)/g, function(){
+                    filterNumber++;
+                })
+                expect( filterNumber ).eq(3,"总共有3个滤镜");
             }
             node.remove();
             style.remove();
             test_filter.remove();
         },
+
         "$.width/height":function(){
 
             var node = $('<div id="test-div" ' +
