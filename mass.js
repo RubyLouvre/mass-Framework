@@ -88,6 +88,7 @@
         head: head,
         mix: mix,
         rword: /[^, ]+/g,
+        rmapper: /(\w+)_(\w+)/g,
         mass: mass,
         //大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": W3C ? "addEventListener" : "attachEvent",

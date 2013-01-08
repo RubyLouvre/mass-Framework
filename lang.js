@@ -401,7 +401,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
         }
     }
-    "bind_addEventListener,unbind_removeEventListener,fire_dispatchEvent".replace(/(\w+)_(\w+)/g, function(_, a, b) {
+    "bind_addEventListener,unbind_removeEventListener,fire_dispatchEvent".replace($.rmapper, function(_, a, b) {
         fn[a] = fn[b];
     });
     $.EventTarget = EventTarget;

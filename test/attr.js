@@ -1,7 +1,7 @@
 define(["mass","$attr","$spec"],function($){
     var iframe =  $("<iframe id='test_attr' style='display:none;width:0px;height:0px;' src='pages/attr.html' frameBorder=0  />" ).appendTo("body");//
     window.attrTestCall = function(){
-        $.fixture("属性模块-attr",{
+        describe("attr",{
             "$.fn.attr":function(){
                 var idoc = iframe.contents()[0];
                 //shortcuts

@@ -1,5 +1,5 @@
 define(["$event","$spec","$css"],function( ){
-    $.fixture('事件模块-event', {
+    describee('event', {
         "click": function(id){
             var div = $("<div style='width:200px;height:200px;background:red;float:left;'/>")
             .appendTo("body").text("验证click事件");

@@ -1,10 +1,11 @@
 //=========================================
 // 样式操作模块 v4 by 司徒正美
 //=========================================
-define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix") , function($){
-    var adapter = $.cssHooks || ($.cssHooks = {})
-    var rrelNum = /^([\-+])=([\-+.\de]+)/
-    var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i
+define( "css", top.getComputedStyle ? ["$node"] : ["$css_fix"] , function($){
+    var adapter = $.cssHooks || ($.cssHooks = {}),
+    rrelNum = /^([\-+])=([\-+.\de]+)/,
+    rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
+    cssTransform = $.cssName("transform");
     adapter["_default:set"] = function( node, name, value){
         node.style[ name ] = value;
     }
@@ -54,7 +55,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         }
         return 0;
     }
-    var cssTransform = $.cssName("transform");
+ 
     // 总是返回度数
     adapter[ "rotate:get" ] = function(node){
         return $._data( node, 'rotate' ) || 0;
@@ -157,7 +158,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     };
 
     //=========================　处理　width, height, innerWidth, innerHeight, outerWidth, outerHeight　========
-    var rmapper = /(\w+)_(\w+)/g
+
     "Height,Width".replace( $.rword, function(  name ) {
         var lower = name.toLowerCase(),
         clientProp = "client" + name,
@@ -171,7 +172,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
             node.style[ nick ] = box == "content-box" ? value:
             setWH(node, name, parseFloat(value), box ) + "px";
         }
-        "inner_1,b_0,outer_2".replace(rmapper,function(a, b, num){
+        "inner_1,b_0,outer_2".replace($.rmapper, function(a, b, num){
             var method = b == "b" ? lower : b + name;
             $.fn[ method ] = function( value ) {
                 num = b == "outer" && value === true ? 3 : num;
@@ -391,7 +392,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
         return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
     }
     //=========================　处理　scrollLeft scrollTop　=========================
-    "scrollLeft_pageXOffset,scrollTop_pageYOffset".replace( rmapper, function(_, method, prop ) {
+    "scrollLeft_pageXOffset,scrollTop_pageYOffset".replace( $.rmapper, function(_, method, prop ) {
         $.fn[ method ] = function( val ) {
             var node, win, top = method == "scrollTop";
             if ( val === void 0 ) {
@@ -418,7 +419,7 @@ define( "css", ["$node"][ top.getComputedStyle ? "valueOf" : "concat"]("$css_fix
     });
 
     function getWindow( node ) {
-        return $.type(node,"Window") ?   node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
+        return $.type(node,"Window") ?  node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     }
     return $;
 });

@@ -1,7 +1,7 @@
 //=========================================
 //  样式补丁模块
 //==========================================
-define("css_fix", !!top.getComputedStyle,["mass"], function( $ ){
+define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
     var adapter = $.cssHooks = {},
     ie8 = !!top.XDomainRequest,
     rfilters = /[\w\:\.]+\([^)]+\)/g,

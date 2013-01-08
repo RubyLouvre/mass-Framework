@@ -1,6 +1,6 @@
-define("../more/random,$node,$spec,$css,ready".split(","),function(random, $){
+define("../more/random,$css".split(","),function(random, $){
 
-    $.fixture("样式模块-css",{
+    describe("css",{
         "$.css":function(id){
 
             var node = $('<div id="test-div" width="8px" height="5px"' +

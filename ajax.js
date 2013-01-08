@@ -288,10 +288,18 @@ define("ajax",["mass","$lang"], function($){
         }
         return dummyXHR;
     }
-    //new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
+ 
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     /**
      * XHR类,用于模拟原生XMLHttpRequest的所有行为
+     * var ajax = new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
+     * ajax.onreadystatechange = function(){
+     *   if (ajax.readyState==4 && ajax.status==200){
+     *        alert(ajax.responseText)
+     *   }
+     * }
+     * ajax.open("POST", url, true);
+     * ajax.send("key=val&key1=val2");
      */
     $.XHR = $.factory({
         inherit: $.EventTarget,
