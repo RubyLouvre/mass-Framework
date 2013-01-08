@@ -38,6 +38,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         }
     }
     var getter = adapter["_default:get"]
+    function parseNumber(node, name){
+        return parseFloat(getter(node, name)) || 0;
+    }
 
     adapter["zIndex:get"] = function(node) {
             while(node.nodeType !== 9) {
@@ -128,17 +131,17 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     function setWH(node, name, val, extra) {
         var which = cssPair[name]
         which.forEach(function(direction) {
-            if(extra < 1) val -= parseFloat(getter(node, 'padding' + direction)) || 0;
-            if(extra < 2) val -= parseFloat(getter(node, 'border' + direction + 'Width')) || 0;
+            if(extra < 1) val -= parseNumber(node, 'padding' + direction);
+            if(extra < 2) val -= parseNumber(node, 'border' + direction + 'Width');
             if(extra === 3) {
-                val += parseFloat(getter(node, 'margin' + direction)) || 0;
+                val += parseNumber(node, 'margin' + direction);
             }
             if(extra === "padding-box") {
-                val += parseFloat(getter(node, 'padding' + direction)) || 0;
+                val += parseNumber(node, 'padding' + direction);
             }
             if(extra === "border-box") {
-                val += parseFloat(getter(node, 'padding' + direction)) || 0;
-                val += parseFloat(getter(node, 'border' + direction + 'Width')) || 0;
+                val += parseNumber(node, 'padding' + direction);
+                val += parseNumber(node, 'border' + direction + 'Width');
             }
         });
         return val
@@ -364,12 +367,12 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             if(offsetParent[0].tagName !== "HTML") {
                 parentOffset = offsetParent.offset(); //得到它的offsetParent相对于视窗的距离
             }
-            parentOffset.top += parseFloat(getter(offsetParent[0], "borderTopWidth")) || 0;
-            parentOffset.left += parseFloat(getter(offsetParent[0], "borderLeftWidth")) || 0;
+            parentOffset.top += parseNumber(offsetParent[0], "borderTopWidth");
+            parentOffset.left += parseNumber(offsetParent[0], "borderLeftWidth");
         }
         return {
-            top: offset.top - parentOffset.top - (parseFloat(getter(node, "marginTop")) || 0),
-            left: offset.left - parentOffset.left - (parseFloat(getter(node, "marginLeft")) || 0)
+            top: offset.top - parentOffset.top - parseNumber(node, "marginTop"),
+            left: offset.left - parentOffset.left - parseNumber(node, "marginLeft")
         };
     }
     //https://github.com/beviz/jquery-caret-position-getter/blob/master/jquery.caretposition.js
