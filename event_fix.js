@@ -95,7 +95,7 @@ define("event_fix", !! document.dispatchEvent, ["$node"], function($) {
             $(this).bind("click._submit keypress._submit", function(e) {
                 // Node name check avoids a VML-related crash in IE (#9807)
                 var elem = e.target,
-                    form = /input|button/i.test(elem.tagName) ? elem.form : undefined;
+                form = /input|button/i.test(elem.tagName) ? elem.form : undefined;
                 if(form && !$._data(form, "_submit_attached")) {
                     facade.bind(form, {
                         type: "submit._submit",
@@ -106,7 +106,7 @@ define("event_fix", !! document.dispatchEvent, ["$node"], function($) {
                     $._data(form, "_submit_attached", true);
                 }
             });
-            // return undefined since we don't need an event listener
+        // return undefined since we don't need an event listener
         },
 
         postDispatch: function(event) {
@@ -120,16 +120,13 @@ define("event_fix", !! document.dispatchEvent, ["$node"], function($) {
         },
 
         teardown: function() {
-            // Only need this for delegated form submit events
             if(this.tagName == "FORM") {
                 return false;
             }
-
-            // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
             facade.remove(this, "._submit");
         }
     }
-
+    return $;
 })
 
 /*
