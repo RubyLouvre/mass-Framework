@@ -1,4 +1,6 @@
-
+//=========================================
+// 事件系统 v9
+//==========================================
 define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function( $ ){
     var facade = $.event || ($.event = {
         special: {}
@@ -116,17 +118,17 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
     $.mix(facade,{
         //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
-        bind: function( elem, hash ) {
+        add: function( elem, hash ) {
             var  
-            elemData   = $._data( elem ),         //是否能绑定事件
+            elemData   = $._data( elem ),         //取得对应的缓存体
             types      = hash.type,               //原有的事件类型,可能是复数个
             selector   = hash.selector,           //是否使用事件代理
             handler    = hash.handler;            //回调函数
     
-            if ( elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler || !elemData  ) {
+            if ( elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler  ) {
                 return;
             }
-            hash.uuid = $.getUid( handler );       //确保hash.uuid与fn.uuid一致
+            hash.uniqueNumber = $.getUid( handler );       //确保hash.uuid与fn.uuid一致
             var events = elemData.events || (elemData.events = []), eventHandle = elemData.handle;
             if ( !eventHandle ) {
                 elemData.handle = eventHandle = function( e ) {
@@ -149,21 +151,21 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
                     origType: tns[1],
                     namespace: namespaces.join(".")
                 } );
-                //初始化事件列队
-                var handlers = events[ type ];
+           
+                var handlers = events[ type ];     //初始化事件列队
                 if ( !handlers ) {
                     handlers = events[ type ] = [];
                     handlers.delegateCount = 0;
                     if ( !hook.setup || hook.setup.call( elem, namespaces, eventHandle ) === false ) {
                         if($["@bind"] in elem){
-                            $.bind(elem, type,eventHandle,false )
+                            $.bind(elem, type,eventHandle )
                         }
                     }
                 }
                 if ( hook.add ) {
                     hook.add.call( elem, handleObj );
                 }
-                //将要需要代理的事件放于前面
+                //先处理用事件代理的回调，再处理用普通方式绑定的回调
                 if ( selector ) {
                     handlers.splice( handlers.delegateCount++, 0, handleObj );
                 } else {
@@ -179,18 +181,17 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
         global: {},
 
         //外部的API已经确保types至少为空字符串
-        unbind: function( elem, hash ) {
+        remove: function( elem, hash ) {
 
-            var  elemData = $._data( elem ), events, j, handleObj, origType
+            var  elemData = $._data( elem ), events, origType
             if( !(events = elemData.events )) return;
 
             var types = hash.type || "", selector = hash.selector, handler = hash.handler;
             types.replace( $.rword, function( t ){
-                var tns = rtypenamespace.exec( t ) || [];
-                var type = origType = tns[1];
-                var namespaces = tns[2];
-
-                // Unbind all events (on this namespace, if provided) for the element
+                var tns = rtypenamespace.exec( t ) || [],
+                type = origType = tns[1],
+                namespaces = tns[2];
+                //只传入命名空间,不传入事件类型,则尝试遍历所有事件类型
                 if ( !type ) {
                     for ( type in events ) {
                         facade.unbind( elem, $.mix({}, hash, {
@@ -201,21 +202,21 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
                 }
                 var hook = eventHooks[ type ] || {};
                 type = ( selector? hook.delegateType : hook.bindType ) || type;
-                var eventType = events[ type ] || [];
-                var origCount = eventType.length;
+                var handlers = events[ type ] || [];
+                var origCount = handlers.length;
                 namespaces = namespaces ? new RegExp("(^|\\.)" + namespaces.split(".").sort().join("\\.(?:.*\\.|)") + "(\\.|$)") : null;
             
-                for ( j = 0; j < eventType.length; j++ ) {
-                    handleObj = eventType[ j ];
-
+                for ( var j = 0, handleObj; handleObj = handlers[ j++ ]; ) {
+                   // handleObj = handlers[ j ];
+                    //如果事件类型相同，回调相同，命名空间相同，选择器相同则移除此handleObj
                     if ( (  origType === handleObj.origType ) &&
-                        ( !handler || handler.uniqueNumber === handleObj.uuid ) &&
+                        ( !handler || handler.uniqueNumber === handleObj.uniqueNumber ) &&
                         ( !namespaces || namespaces.test( handleObj.namespace ) ) &&
                         ( !selector || selector === handleObj.selector || selector === "**" && handleObj.selector ) ) {
-                        eventType.splice( j--, 1 );
+                        handlers.splice( j--, 1 );
 
                         if ( handleObj.selector ) {
-                            eventType.delegateCount--;
+                            handlers.delegateCount--;
                         }
                         if ( hook.remove ) {
                             hook.remove.call( elem, handleObj );
@@ -223,12 +224,10 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
                     }
                 }
 
-                // Remove generic event handler if we removed something and no more handlers exist
-                // (avoids potential for endless recursion during removal of special event handlers)
-                if ( eventType.length === 0 && origCount !== eventType.length ) {
+                if ( handlers.length === 0 && origCount !== handlers.length ) {
                     if ( !hook.teardown || hook.teardown.call( elem, namespaces, elemData.handle ) === false ) {
                         if($["@bind"] in elem){
-                            $.unbind(elem, type, elemData.handle ,false )
+                            $.unbind(elem, type, elemData.handle )
                         }
                     }
 
@@ -238,7 +237,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
 
             if ( $.isEmptyObject( events ) ) {
                 delete elemData.handle;
-                $._removeData( elem, "events" );
+                $._removeData( elem, "events" );//这里会尝试移除缓存体
             }
         },
 
@@ -289,8 +288,8 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
                 event.target = elem;
             }
             //取得额外的参数
-            var data = [].slice.call( arguments, 1 ) ;
-            data.unshift( event );
+            var data = $.slice( arguments) ;
+            data[0] = event;
             //判定是否需要用到事件冒充
             var hook = eventHooks[ type ] || {};
             if (  hook.trigger && hook.trigger.apply( elem, data ) === false ) {
@@ -335,7 +334,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
 
                 if ( (!hook._default || hook._default.apply( elem.ownerDocument, data ) === false) &&
                     !(type === "click" &&  elem.nodeName == "A" )  ) {
-                    if ( ontype && elem[ type ] && elem.nodeType ) {
+                    if ( ontype && $.isFunction(elem[ type ]) && elem.nodeType ) {
 
                         old = elem[ ontype ];
 
@@ -348,7 +347,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
                             //IE6-8在触发隐藏元素的focus/blur事件时会抛出异常
                             elem[ type ]();
                         } catch ( e ) {   }
-                        facade.triggered = undefined;
+                        delete facade.triggered;
 
                         if ( old ) {
                             elem[ ontype ] = old;
@@ -360,15 +359,19 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             return event.result;
         },
 
-        dispatch: function( event ) {
-            //包裹事件对象，统一事件接口与覆盖原生成属性
-            event = $.event.fix( event );
-            var i, j, cur, ret, selMatch, matched, matches, handleObj, sel,
-            handlers = ( ($._data( this, "events" ) || {} )[ event.type ] || []),
+        dispatch: function( e ) {
+            //如果不存在事件回调就没有必要继续进行下去
+            var eventType = e.type,
+                handlers = ( ($._data( this, "events" ) || {} )[ eventType ] || [])
+            if(!handlers.length){
+                return;
+            }
+            //摒蔽事件对象在各浏览器下的差异性
+            var event = $.event.fix( e ),
             delegateCount = handlers.delegateCount,
             args = $.slice( arguments ),
-            hook = eventHooks[ event.type ] || {},
-            handlerQueue = [];
+            hook = eventHooks[ eventType ] || {},
+            handlerQueue = [], ret, selMatch, matched, matches, handleObj, sel
             //重置第一个参数
             args[0] = event;
             event.delegateTarget = this;
@@ -379,13 +382,13 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             }
             //收集阶段
             //如果使用了事件代理，则先执行事件代理的回调, FF的右键会触发点击事件，与标签不符
-            if ( delegateCount && !(event.button && event.type === "click") ) {
-                for ( cur = event.target; cur != this; cur = cur.parentNode || this ) {
+            if ( delegateCount && !(event.button && eventType === "click") ) {
+                for (var cur = event.target; cur != this; cur = cur.parentNode || this ) {
                     //disabled元素不能触发点击事件
-                    if ( cur.disabled !== true || event.type !== "click" ) {
+                    if ( cur.disabled !== true || eventType !== "click" ) {
                         selMatch = {};                     
                         matches = [];
-                        for ( i = 0; i < delegateCount; i++ ) {
+                        for (var  i = 0; i < delegateCount; i++ ) {
                             handleObj = handlers[ i ];
                             sel = handleObj.selector;
                             //判定目标元素(this)的孩子(cur)是否匹配（sel）
@@ -418,7 +421,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             for ( i = 0; i < handlerQueue.length && !event.propagationStopped; i++ ) {
                 matched = handlerQueue[ i ];
                 event.currentTarget = matched.elem;
-                for ( j = 0; j < matched.matches.length && !event.isImmediatePropagationStopped; j++ ) {
+                for (var j = 0; j < matched.matches.length && !event.isImmediatePropagationStopped; j++ ) {
                     handleObj = matched.matches[ j ];
                     //namespace，.namespace_re属性只出现在trigger方法中
                     if ( !event.namespace || event.namespace_re && event.namespace_re.test( handleObj.namespace ) ) {
@@ -453,7 +456,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             if ( event.originalEvent ) {
                 return event;
             }
-            var  real = event;
+            var real = event;
             event = $.Event( real );
             //复制真实事件对象的成员
             for( var p in real ){
@@ -509,7 +512,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
         },
         simulate: function( type, elem, event, bubble ) {
             var e = $.mix(
-                new $.Event(),
+                new $.Event,
                 event,
                 {
                     type: type,
@@ -523,9 +526,8 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             }
         }
     });
-    facade.add = facade.bind;
-    facade.remove = facade.unbind;
-    var rmapper = /(\w+)_(\w+)/g;
+    facade.bind = facade.add;
+    facade.unbind = facade.remove;
     //以下是用户使用的API
     $.implement({
         hover: function( fnIn, fnOut ) {
@@ -559,7 +561,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
     });
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
     var rtypes = /^[a-z0-9_\-\.\s\,]+$/i
-    "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
+    "on_bind,off_unbind".replace( $.rmapper, function(_,method, mapper){
         $.fn[ method ] = function(types, selector, fn ){
             if ( typeof types === "object" ) {
                 for ( var type in types ) {
@@ -615,7 +617,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
 详见http://www.filehippo.com/pl/download_opera/changelog/9476/
          */
     if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
-        "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, fix){
+        "mouseenter_mouseover,mouseleave_mouseout".replace($.rmapper, function(_, type, fix){
             eventHooks[type] = {
                 delegateType: fix,
                 bindType: fix,
@@ -638,7 +640,7 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
     }
     //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
     if( !$.support.focusin ){
-        "focusin_focus,focusout_blur".replace(rmapper, function(_,orig, fix){
+        "focusin_focus,focusout_blur".replace($.rmapper, function(_,orig, fix){
             var attaches = 0,
             handler = function( event ) {
                 facade.simulate( orig, event.target, facade.fix( event ), true );
@@ -672,4 +674,86 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
     return $;
 })
 
+/**
+2011.8.14 更改隐藏namespace,让自定义对象的回调函数也有事件对象
+2011.9.17 事件发送器增加一个uniqueID属性
+2011.9.21 重构bind与unbind方法 支持命名空间与多事件处理
+2011.9.27 uniqueID改为uniqueNumber 使用$._data存取数据
+2011.9.29 简化bind与unbind
+2011.10.13 emit模块更名dispatcher 模块 升级为v2
+2011.10.23 简化facade.handle与fire
+2011.10.14 强化delegate 让快捷方法等支持fire 修复delegate BUG
+2011.10.21 修复focusin focsuout的事件代理 增加fixAndDispatch处理事件冒充
+2011.11.23 简化rquickIs
+2011.12.20 修正在当前窗口为子窗口元素绑定错误时，在IE678下，事件对象错误的问题
+2011.12.20 修正rhoverHack正则，现在hover可以作为命名空间了
+2012.1.13 dispatcher模块更名target模块 升级为v3
+2012.2.7 重构change，允许change事件可以通过fireEvent("onchange")触发
+2012.2.8 添加mouseenter的分支判定，增强eventSupport
+2012.2.9 完美支持valuechange事件
+2012.4.1 target模块与event模块合并， 并分割出event_fix模块，升级为v4
+2012.4.12 修正触摸屏下的pageX pageY
+2012.5.1 让$.fn.fire支持自定义事件
+2012.5.24 利用customEvent,initCustomEvent, dispatchEvent大大提高性能,升级到v5
+2012.5.26 修正自定义事件target与this的指向
+2012.5.28 Fix quickParse BUG
+2012.5.29 利用Object.defineProperty打破事件对象的封装
+2012.6.6 addEventListenter也能绑定自定义事件, 一些兼容逻辑移到event_fix中去 升级到v6
+2012.8.17 $.EventTarget不再自带uniqueNumber，此属性会在用户第一次调用bind,unbind方法时再为原对象添加此属性
+2012.8.31 移除$.EventTarget,以后所有自定义事件由操作流代劳,升级到v7
+2012.10.18 移除$.fn.toggle,$.event._dispatch,重构focusin,fire,change,submit等实现,升级到v8
+2012.11.2 去掉$.event，隐藏实现细节
+2013.1.9 沿着jQuery的思路重构事件模块
+http://jsbin.com/efalu/7 input例子
+//http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
+ECMAScript Edition3, 5 execution context and scope chain http://user.qzone.qq.com/153720615/blog/1339563690#!app=2&pos=1323177459
+
+	    IE6-9   IE6-9  IE6-9    firefox16  firefox16 firefox16
+            keydown keyup  keypress keydow     keyup     keypress
+区分大小写	 ×	×	√	×	 ×	√
+监听A类功能键	√     √	       √       √        √      √
+监听B类功能键	√     √	       ×       √	√      ×
+获取charCode ×	 ×	  √	  ×	   ×	   ×
+监听tab	   √	 ×	  ×	  √	   √	   √
+　　
+A类功能键是指enter，del，insert，方向。
+B类功能键是指上下翻页，shift，win，alt，ctrl，caps，退格。
+Chrome23，safari5的情况同IE。Opera12的情况与FF相近，但不能获取charCode值是返回undefined，并且只能通过keydown,keyup监听tab键。
+
+http://heroicyang.com/blog/javascript-timers.html
+http://heroicyang.com/blog/javascript-event-loop.html
+http://jquerymobile.com/blog/2012/08/01/announcing-jquery-mobile-1-2-0-alpha/
+ http://hi.baidu.com/flondon/item/59993d95625d19ceb72531a3
+beforeunload 丢失率统计及优化方案
+统计日志打点方案的权衡
+http://www.irideas.com/?p=26
+hammer.js 是一个多点触摸手势库，能够为网页加入Tap、Double Tap、Swipe、Hold、Pinch、Drag等多点触摸事件，
+免去自己监听底层touchstart、touchmove、touchend事件并且写一大堆判断逻辑的痛苦。
+http://eightmedia.github.com/hammer.js/
+// 先要对监听的DOM进行一些初始化
+var hammer = new Hammer(document.getElementById("container"));
+
+// 然后加入相应的回调函数即可
+hammer.ondragstart = function(ev) { };  // 开始拖动
+hammer.ondrag = function(ev) { }; // 拖动中
+hammer.ondragend = function(ev) { }; // 拖动结束
+hammer.onswipe = function(ev) { }; // 滑动
+
+hammer.ontap = function(ev) { }; // 单击
+hammer.ondoubletap = function(ev) { }; //双击
+hammer.onhold = function(ev) { }; // 长按
+
+hammer.ontransformstart = function(ev) { }; // 双指收张开始
+hammer.ontransform = function(ev) { }; // 双指收张中
+hammer.ontransformend = function(ev) { }; // 双指收张结束
+
+hammer.onrelease = function(ev) { }; // 手指离开屏幕
+伸缩布局 — 打开布局天堂之门？
+
+http://dev.oupeng.com/articles/flexbox-basics
+http://www.alloyteam.com/2012/10/common-javascript-design-patterns/
+
+自定义下拉框
+http://odyniec.net/projects/selectlist/
+     */
 
