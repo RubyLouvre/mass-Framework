@@ -10,16 +10,16 @@ define("ajax",["mass","$lang"], function($){
     encode = encodeURIComponent,
     decode = decodeURIComponent,
     rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE的换行符不包含 \r
-    rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
+    rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
     rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
     //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
     //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
-    curl = DOC.URL;
-
+    curl = DOC.URL,
+    segments = rurl.exec( curl.toLowerCase() ) || [],
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
-    var s = ["XMLHttpRequest",
+    s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
     "ActiveXObject('Msxml2.XMLHTTP.3.0')",
     "ActiveXObject('Msxml2.XMLHTTP')",
@@ -36,8 +36,8 @@ define("ajax",["mass","$lang"], function($){
             }
         }catch(e){}
     }
-    var segments = rurl.exec( curl.toLowerCase() ) || [],
-    accepts  = {
+   
+    var accepts  = {
         xml: "application/xml, text/xml",
         html: "text/html",
         text: "text/plain",
@@ -596,7 +596,7 @@ define("ajax",["mass","$lang"], function($){
         data = $.unparam(data);
         var ret = [], d, isArray, vs, i, e;
         for (d in data) {
-            isArray = $.isArray(data[d]);
+            isArray = Array.isArray(data[d]);
             vs = $.makeArray( data[d])
             // 数组和原生一样对待，创建多个同名输入域
             for (i = 0; i < vs.length; i++) {
