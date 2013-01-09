@@ -1,5 +1,5 @@
-define(["$event","$spec","$css"],function( ){
-    describee('event', {
+define(["$event","$css"],function( $ ){
+    describe('event', {
         "click": function(id){
             var div = $("<div style='width:200px;height:200px;background:red;float:left;'/>")
             .appendTo("body").text("验证click事件");
@@ -11,7 +11,8 @@ define(["$event","$spec","$css"],function( ){
                 expect( !!e.originalEvent, id ).eq(false);
                 div.unbind("click")
                 $.unbind(div[0], "click",fn)
-            })
+            });
+
             div.fire("click");//尝试触发事件系统与非事件系统绑定的回调
             div.fire("click");
             //验证不会再进入回调

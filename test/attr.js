@@ -158,8 +158,10 @@ define(["mass","$attr","$spec"],function($){
                 expect( email.text() ).eq("fuckie@fuckie");
 
                 //测试表单的相关属性
-                var form = $.tag("form xx='zz' action='http://www.taobao.com'  name='form_name'  title='form_title'  onsubmit='return false;'",
-                    $.tag("input name='xx' value='yy'"));
+                var form =
+                "<form xx='zz' action='http://www.taobao.com'  name='form_name'  title='form_title'  onsubmit='return false;'>"+
+                "      <input name='xx' value='yy'/>"+
+                "</form>"
                 form = $(form+"")
                 //非a, area, button, input, object, select, textarea元素没有显式设定tabIndex,返回-1
                 expect( form.prop("tabindex") ).eq(-1);

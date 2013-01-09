@@ -1,4 +1,5 @@
-!function(global, DOC) {
+!
+function(global, DOC) {
     var $$ = global.$ //保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace(rmakeid, "")
@@ -168,7 +169,7 @@
          *  @param {Any} str 用于打印的信息，不是字符串将转换为字符串
          *  @param {Boolean} page ? 是否打印到页面
          *  @param {Number} level ? 通过它来过滤显示到控制台的日志数量。
-         *          0为最少，只显示最致命的错误；7，则连普通的调试消息也打印出来。 
+         *          0为最少，只显示最致命的错误；7，则连普通的调试消息也打印出来。
          *          显示算法为 level <= $.config.level。
          *          这个$.config.level默认为9。下面是level各代表的含义。
          *          0 EMERGENCY 致命错误,框架崩溃
@@ -272,10 +273,9 @@
     });
 
     (function(scripts) {
-        var cur = scripts[scripts.length - 1];
-		var kernel = $.config;
-        var url = cur.hasAttribute ? cur.src : cur.getAttribute("src", 4);
-        url = url.replace(/[?#].*/, "");
+        var cur = scripts[scripts.length - 1],
+            url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+            kernel = $.config;
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
@@ -533,7 +533,7 @@
      * @api public
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = $.slice( arguments );
+        var args = $.slice(arguments);
         if(typeof id == "string") {
             var _id = args.shift();
         }

@@ -30,10 +30,12 @@
         </style>
         <script src="mass.js"> </script>
         <script>
-            require("css,ready",function(){
-   
-             var a = {};
-             alert($._data(a))
+            require("event,ready",function(){
+                $(".aaa").bind("click",function(){
+                    console.log("xxxxxxxxxxxxxx")
+                });
+                
+
             })
         </script>
     </head>

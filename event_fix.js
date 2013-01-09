@@ -5,7 +5,25 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
     //模拟IE678的reset,submit,change的事件代理
     var rformElems  = /^(?:input|select|textarea)$/i
     var facade = $.event = {
-        special: {}
+        special: {},
+        fixMouse: function(event){
+            // 处理鼠标事件 http://www.w3help.org/zh-cn/causes/BX9008
+            var doc = event.target.ownerDocument || document;//safari与chrome下，滚动条，视窗相关的东西是放在body上
+            var box = document.compatMode == "BackCompat"  ?  doc.body : doc.documentElement
+            event.pageX = event.clientX + ( box.scrollLeft >> 0) - ( box.clientLeft >> 0);
+            event.pageY = event.clientY + ( box.scrollTop >> 0) - ( box.clientTop  >> 0);
+            //如果不存在relatedTarget属性，为它添加一个
+            if ( !event.relatedTarget && event.fromElement ) {//mouseover mouseout
+                event.relatedTarget = event.fromElement === event.target ? event.toElement : event.fromElement;
+            }
+            //标准浏览判定按下鼠标哪个键，左1中2右3
+            var button = event.button
+            //IE event.button的意义 0：没有键被按下 1：按下左键 2：按下右键 3：左键与右键同时被按下 4：按下中键 5：左键与中键同时被按下 6：中键与右键同时被按下 7：三个键同时被按下
+            event.which  = [0,1,3,0,2,0,0,0][button];//0现在代表没有意义
+        },
+        fixKeyboard: function(event){
+            event.which = event.charCode != null ? event.charCode : event.keyCode;
+        }
     };
     var special = facade.special
     special.change =  {
@@ -106,6 +124,7 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
 * input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
 * 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 * 2012.10.18 重构reset, change, submit的事件代理
+* 2013.1.9 将$.event.fix的一些逻辑分离到event_fix模块,形成fixMouse, fixKeyboard方法
 <!DOCTYPE HTML>
 <html>
     <head>
