@@ -3,7 +3,9 @@
 //==========================================
 define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], function($) {
     var facade = $.event || ($.event = {
+        //对某种事件类型进行特殊处理
         special: {},
+        //对Mouse事件这一大类事件类型的事件对象进行特殊处理
         fixMouse: function(event, real) {
             if(event.type === "mousewheel") { //处理滚轮事件
                 if("wheelDelta" in real) { //统一为±120，其中正数表示为向上滚动，负数表示向下滚动
@@ -41,12 +43,10 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         if(!(this instanceof $.Event)) {
             return new Event(src, props);
         }
-        // Event object
-        this.originalEvent = {}
+        this.originalEvent = {};//保存原生事件对象
         if(src && src.type) {
-            this.originalEvent = src;
+            this.originalEvent = src;//重写
             this.type = src.type;
-        // Event type
         } else {
             this.type = src;
         }
@@ -60,25 +60,24 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         toString: function() {
             return "[object Event]"
         },
-        preventDefault: function() {
+        preventDefault: function() {//阻止默认行为
             this.defaultPrevented = true;
             var e = this.originalEvent
             if(e && e.preventDefault) {
                 e.preventDefault();
-            } // 如果存在returnValue 那么就将它设为false
+            }
             e.returnValue = false;
             return this;
         },
-        stopPropagation: function() {
+        stopPropagation: function() {//阻止事件在DOM树中的传播
             var e = this.originalEvent
             if(e && e.stopPropagation) {
                 e.stopPropagation();
-            }
-            //http://opera.im/kb/userjs/
+            }  //propagationStopped的命名出自 http://opera.im/kb/userjs/
             e.cancelBubble = this.propagationStopped = true;
             return this;
         },
-        stopImmediatePropagation: function() {
+        stopImmediatePropagation: function() {//阻止事件在一个元素的同种事件的回调中传播
             this.isImmediatePropagationStopped = true;
             this.stopPropagation();
             return this;
@@ -86,12 +85,10 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
     }
     $.Event = Event;
     $.mix(eventHooks, {
-        load: {
-            // Prevent triggered image.load events from bubbling to window.load
+        load: {//此事件不能冒泡
             noBubble: true
         },
-        click: {
-            // For checkbox, fire native event so checked state will be right
+        click: {//处理checkbox中的点击事件
             trigger: function() {
                 if(this.nodeName == "INPUT" && this.type === "checkbox" && this.click) {
                     this.click();
@@ -99,11 +96,10 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
                 }
             }
         },
-        focus: {
-            // Fire native event if possible so blur/focus sequence is correct
+        focus: {  //IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
             trigger: function() {
                 if(this !== document.activeElement && this.focus) {
-                    //IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
+                  
                     try {
                         this.focus();
                         return false;
@@ -113,7 +109,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             delegateType: "focusin"
         },
         blur: {
-            trigger: function() {
+            trigger: function() {//blur事件的派发使用原生方法实现
                 if(this === document.activeElement && this.blur) {
                     this.blur();
                     return false;
@@ -134,8 +130,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         //addEventListner API的支持情况:chrome 1+ FF1.6+ IE9+ opera 7+ safari 1+;
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
         add: function(elem, hash) {
-            var
-            elemData = $._data(elem),
+            var elemData = $._data(elem),
             //取得对应的缓存体
             types = hash.type,
             //原有的事件类型,可能是复数个
@@ -195,10 +190,9 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             //防止IE内在泄漏
             elem = null;
         },
-
+        //用于优化事件派发
         global: {},
-
-        //外部的API已经确保types至少为空字符串
+        //移除目标元素绑定的回调
         remove: function(elem, hash) {
             var elemData = $._data(elem),
             events, origType
@@ -257,7 +251,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
                 $._removeData(elem, "events"); //这里会尝试移除缓存体
             }
         },
-
+        //通过传入事件类型或事件对象,触发事件回调,在整个DOM树中执行
         trigger: function(event) {
             var elem = this;
             //跳过文本节点与注释节点，主要是照顾旧式IE
@@ -375,7 +369,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
 
             return event.result;
         },
-
+        //执行用户回调,只在当前元素中执行
         dispatch: function(e) {
             //如果不存在事件回调就没有必要继续进行下去
             var eventType = e.type,
@@ -469,7 +463,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             return event.result;
         },
 
-
+        //修正事件对象,摒蔽差异性
         fix: function(event) {
             if(!event.originalEvent) {
                 var real = event;
@@ -495,21 +489,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
                 }
             }
             return event;
-        },
-        simulate: function(type, elem, event, bubble) {
-            var e = $.mix(
-                new $.Event, event, {
-                    type: type,
-                    isSimulated: true,
-                    originalEvent: {}
-                });
-
-            $.event[bubble ? "trigger" : "dispatch"].call(elem, e);
-            if(e.defaultPrevented) {
-                event.preventDefault();
-            }
-        },
-
+        }
     });
     facade.bind = facade.add;
     facade.unbind = facade.remove;
@@ -624,7 +604,12 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         "focusin_focus,focusout_blur".replace($.rmapper, function(_, orig, fix) {
             var attaches = 0,
             handler = function(event) {
-                facade.simulate(orig, event.target, facade.fix(event), true);
+                event = facade.fix(event);
+                $.mix( event, {
+                    type: orig,
+                    isSimulated: true
+                });
+                facade.trigger.call(event.target, event);
             };
             eventHooks[orig] = {
                 setup: function() {

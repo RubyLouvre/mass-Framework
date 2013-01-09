@@ -26,6 +26,17 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
         }
     };
     var special = facade.special
+    function simulate(type, elem, event) {
+        event = new $.Event(event);
+        $.mix( {
+            type: type,
+            isSimulated: true
+        });
+        $.event.trigger.call(elem, event);
+        if(event.defaultPrevented) {
+            event.preventDefault();
+        }
+    }
     special.change =  {
         setup: function() {
             if ( rformElems.test( this.nodeName ) ) {
@@ -43,7 +54,7 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
                             this._just_changed = false;
                         }
                         // Allow triggered, simulated change events (#11500)
-                        facade.simulate( "change", this, event, true );
+                        simulate( "change", this, event );
                     } );
                 }
                 return false;
@@ -54,7 +65,7 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
                 if ( rformElems.test( elem.nodeName ) && !$._data( elem, "_change_attached" ) ) {
                     $( elem ).bind( "change._change", function( event ) {
                         if ( this.parentNode && !event.isSimulated && !event.isTrigger ) {
-                            facade.simulate( "change", this.parentNode, event, true );
+                            simulate( "change", this.parentNode, event );
                         }
                         $._data( elem, "_change_attached", true );
                     })
@@ -102,7 +113,7 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
             if ( event._submit_bubble ) {
                 delete event._submit_bubble;
                 if ( this.parentNode && !event.isTrigger ) {
-                    facade.simulate( "submit", this.parentNode, event, true );
+                    simulate( "submit", this.parentNode, event );
                 }
             }
         },
