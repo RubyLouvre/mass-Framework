@@ -20,32 +20,32 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             }
         }
     }),
-    eventHooks = facade.special,
-    rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
-    rtypenamespace = /^([^.]*)(?:\.(.+)|)$/,
-    mouseEvents = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,",
-    eventMap = $.oneObject(mouseEvents, "Mouse"),
-    types = mouseEvents + ",keypress,keydown,keyup," + "blur,focus,focusin,focusout," + "abort,error,load,unload,resize,scroll,change,input,select,reset,submit" //input
-    $.eventSupport = function(eventName, el) {
-        el = el || document.createElement("div");
-        eventName = "on" + eventName;
-        var ret = eventName in el;
-        if(el.setAttribute && !ret) {
-            el.setAttribute(eventName, "");
-            ret = typeof el[eventName] === "function";
-            el.removeAttribute(eventName);
-        }
-        el = null;
-        return ret;
-    };
+        eventHooks = facade.special,
+        rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
+        rtypenamespace = /^([^.]*)(?:\.(.+)|)$/,
+        mouseEvents = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,",
+        eventMap = $.oneObject(mouseEvents, "Mouse"),
+        types = mouseEvents + ",keypress,keydown,keyup," + "blur,focus,focusin,focusout," + "abort,error,load,unload,resize,scroll,change,input,select,reset,submit" //input
+        $.eventSupport = function(eventName, el) {
+            el = el || document.createElement("div");
+            eventName = "on" + eventName;
+            var ret = eventName in el;
+            if(el.setAttribute && !ret) {
+                el.setAttribute(eventName, "");
+                ret = typeof el[eventName] === "function";
+                el.removeAttribute(eventName);
+            }
+            el = null;
+            return ret;
+        };
 
     function Event(src, props) {
         if(!(this instanceof $.Event)) {
             return new Event(src, props);
         }
-        this.originalEvent = {};//保存原生事件对象
+        this.originalEvent = {}; //保存原生事件对象
         if(src && src.type) {
-            this.originalEvent = src;//重写
+            this.originalEvent = src; //重写
             this.type = src.type;
         } else {
             this.type = src;
@@ -60,7 +60,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         toString: function() {
             return "[object Event]"
         },
-        preventDefault: function() {//阻止默认行为
+        preventDefault: function() { //阻止默认行为
             this.defaultPrevented = true;
             var e = this.originalEvent
             if(e && e.preventDefault) {
@@ -69,15 +69,15 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             e.returnValue = false;
             return this;
         },
-        stopPropagation: function() {//阻止事件在DOM树中的传播
+        stopPropagation: function() { //阻止事件在DOM树中的传播
             var e = this.originalEvent
             if(e && e.stopPropagation) {
                 e.stopPropagation();
-            }  //propagationStopped的命名出自 http://opera.im/kb/userjs/
+            } //propagationStopped的命名出自 http://opera.im/kb/userjs/
             e.cancelBubble = this.propagationStopped = true;
             return this;
         },
-        stopImmediatePropagation: function() {//阻止事件在一个元素的同种事件的回调中传播
+        stopImmediatePropagation: function() { //阻止事件在一个元素的同种事件的回调中传播
             this.isImmediatePropagationStopped = true;
             this.stopPropagation();
             return this;
@@ -85,10 +85,10 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
     }
     $.Event = Event;
     $.mix(eventHooks, {
-        load: {//此事件不能冒泡
+        load: { //此事件不能冒泡
             noBubble: true
         },
-        click: {//处理checkbox中的点击事件
+        click: { //处理checkbox中的点击事件
             trigger: function() {
                 if(this.nodeName == "INPUT" && this.type === "checkbox" && this.click) {
                     this.click();
@@ -96,10 +96,10 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
                 }
             }
         },
-        focus: {  //IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
+        focus: { //IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
             trigger: function() {
                 if(this !== document.activeElement && this.focus) {
-                  
+
                     try {
                         this.focus();
                         return false;
@@ -109,7 +109,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             delegateType: "focusin"
         },
         blur: {
-            trigger: function() {//blur事件的派发使用原生方法实现
+            trigger: function() { //blur事件的派发使用原生方法实现
                 if(this === document.activeElement && this.blur) {
                     this.blur();
                     return false;
@@ -131,18 +131,18 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
         add: function(elem, hash) {
             var elemData = $._data(elem),
-            //取得对应的缓存体
-            types = hash.type,
-            //原有的事件类型,可能是复数个
-            selector = hash.selector,
-            //是否使用事件代理
-            handler = hash.handler; //回调函数
+                //取得对应的缓存体
+                types = hash.type,
+                //原有的事件类型,可能是复数个
+                selector = hash.selector,
+                //是否使用事件代理
+                handler = hash.handler; //回调函数
             if(elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler) {
                 return;
             }
             hash.uniqueNumber = $.getUid(handler); //确保hash.uuid与fn.uuid一致
             var events = elemData.events || (elemData.events = []),
-            eventHandle = elemData.handle;
+                eventHandle = elemData.handle;
             if(!eventHandle) {
                 elemData.handle = eventHandle = function(e) {
                     return typeof $ !== "undefined" && (!e || facade.triggered !== e.type) ? facade.dispatch.apply(eventHandle.elem, arguments) : void 0;
@@ -152,7 +152,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
 
             types.replace($.rword, function(t) {
                 var tns = rtypenamespace.exec(t) || [],
-                type = tns[1];
+                    type = tns[1];
                 var namespaces = (tns[2] || "").split(".").sort();
                 // 看需不需要特殊处理
                 var hook = eventHooks[type] || {};
@@ -195,16 +195,16 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         //移除目标元素绑定的回调
         remove: function(elem, hash) {
             var elemData = $._data(elem),
-            events, origType
+                events, origType
             if(!(events = elemData.events)) return;
 
             var types = hash.type || "",
-            selector = hash.selector,
-            handler = hash.handler;
+                selector = hash.selector,
+                handler = hash.handler;
             types.replace($.rword, function(t) {
                 var tns = rtypenamespace.exec(t) || [],
-                type = origType = tns[1],
-                namespaces = tns[2];
+                    type = origType = tns[1],
+                    namespaces = tns[2];
                 //只传入命名空间,不传入事件类型,则尝试遍历所有事件类型
                 if(!type) {
                     for(type in events) {
@@ -260,7 +260,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
             }
 
             var i, cur, old, ontype, handle, eventPath, bubbleType, type = event.type || event,
-            namespaces = event.namespace ? event.namespace.split(".") : [];
+                namespaces = event.namespace ? event.namespace.split(".") : [];
 
             // focus/blur morphs to focusin/out; ensure we're not firing them right now
             if(rfocusMorph.test(type + facade.triggered)) {
@@ -308,7 +308,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
 
             //铺设往上冒泡的路径，每小段都包括处理对象与事件类型
             eventPath = [
-            [elem, hook.bindType || type]
+                [elem, hook.bindType || type]
             ];
             if(!hook.noBubble && !$.type(elem, "Window")) {
 
@@ -373,19 +373,19 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
         dispatch: function(e) {
             //如果不存在事件回调就没有必要继续进行下去
             var eventType = e.type,
-            handlers = (($._data(this, "events") || {})[eventType] || [])
-            if(!handlers.length) {
-                return;
-            }
-            //摒蔽事件对象在各浏览器下的差异性
+                handlers = (($._data(this, "events") || {})[eventType] || [])
+                if(!handlers.length) {
+                    return;
+                }
+                //摒蔽事件对象在各浏览器下的差异性
             var event = $.event.fix(e),
-            delegateCount = handlers.delegateCount,
-            args = $.slice(arguments),
-            hook = eventHooks[eventType] || {},
-            handlerQueue = [],
-            ret, selMatch, matched, matches, handleObj, sel
-            //重置第一个参数
-            args[0] = event;
+                delegateCount = handlers.delegateCount,
+                args = $.slice(arguments),
+                hook = eventHooks[eventType] || {},
+                handlerQueue = [],
+                ret, selMatch, matched, matches, handleObj, sel
+                //重置第一个参数
+                args[0] = event;
             event.delegateTarget = this;
 
             // 经典的AOP模式
@@ -585,8 +585,8 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
                 bindType: fix,
                 handle: function(event) {
                     var ret, target = this,
-                    related = event.relatedTarget,
-                    handleObj = event.handleObj;
+                        related = event.relatedTarget,
+                        handleObj = event.handleObj;
                     // For mousenter/leave call the handler if related is outside the target.
                     // NB: No relatedTarget if the mouse left/entered the browser window
                     if(!related || (related !== target && !$.contains(target, related))) {
@@ -603,14 +603,14 @@ define("event", top.dispatchEvent ? ["$node"] : ["$node", "$event_fix"], functio
     if(!$.support.focusin) {
         "focusin_focus,focusout_blur".replace($.rmapper, function(_, orig, fix) {
             var attaches = 0,
-            handler = function(event) {
-                event = facade.fix(event);
-                $.mix( event, {
-                    type: orig,
-                    isSimulated: true
-                });
-                facade.trigger.call(event.target, event);
-            };
+                handler = function(event) {
+                    event = facade.fix(event);
+                    $.mix(event, {
+                        type: orig,
+                        isSimulated: true
+                    });
+                    facade.trigger.call(event.target, event);
+                };
             eventHooks[orig] = {
                 setup: function() {
                     if(attaches++ === 0) {
