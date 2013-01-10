@@ -1,4 +1,5 @@
-!function(global, DOC) {
+!
+function(global, DOC) {
     var $$ = global.$ //保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
     var NsKey = DOC.URL.replace(rmakeid, "")
@@ -11,7 +12,7 @@
     var mass = 1; //当前框架的版本号
     var postfix = ""; //用于强制别名
     var cbi = 1e5; //用于生成回调函数的名字
-    var all = "lang_fix,lang,support,class,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,support,class,interact,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]": "Document",
@@ -25,8 +26,8 @@
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-        basepath
-        
+    basepath
+    
 
     function $(expr, context) { //新版本的基石
         if($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
@@ -54,9 +55,9 @@
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+        i = 1,
+        key, //如果最后参数是布尔，判定是否覆写同名属性
+        ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -91,7 +92,7 @@
         
         slice: function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
+            n = nodes.length;
             if(end === void 0 || typeof end == "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
@@ -177,7 +178,7 @@
                 array = array.match($.rword) || [];
             }
             var result = {},
-                value = val !== void 0 ? val : 1;
+            value = val !== void 0 ? val : 1;
             for(var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -210,10 +211,9 @@
     });
 
     (function(scripts) {
-        var cur = scripts[scripts.length - 1];
-		var kernel = $.config;
-        var url = cur.hasAttribute ? cur.src : cur.getAttribute("src", 4);
-        url = url.replace(/[?#].*/, "");
+        var cur = scripts[scripts.length - 1],
+        url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+        kernel = $.config;
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
@@ -293,7 +293,9 @@
 
     //============================加载系统===========================
     var modules = $.modules = {
-        ready: {},
+        ready: {
+            exports: $
+        },
         mass: {
             state: 2,
             exports: $
@@ -326,7 +328,7 @@
     function checkDeps() {
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
             var obj = modules[id],
-                deps = obj.deps;
+            deps = obj.deps;
             for(var key in deps) {
                 if(deps.hasOwnProperty(key) && modules[key].state != 2) {
                     continue loop;
@@ -392,37 +394,37 @@
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于依赖列表中的模块的返回值
-            args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32),
-            parent = parent || basepath
-            String(list).replace($.rword, function(el) {
-                var array = parseURL(el, parent),
-                    url = array[0];
-                if(array[1] == "js") {
-                    dn++;
-                    if(!modules[url]) {
-                        modules[url] = {
-                            id: url,
-                            parent: parent,
-                            exports: {}
-                        };
-                        loadJS(url);
-                    } else if(modules[url].state === 2) {
-                        cn++;
-                    }
-                    if(!deps[url]) {
-                        args.push(url);
-                        deps[url] = "司徒正美"; //去重
-                    }
-                } else if(array[1] === "css") {
-                    loadCSS(url);
+        // 用于依赖列表中的模块的返回值
+        args = [],
+        // 需要安装的模块数
+        dn = 0,
+        // 已安装完的模块数
+        cn = 0,
+        id = parent || "cb" + (cbi++).toString(32),
+        parent = parent || basepath
+        String(list).replace($.rword, function(el) {
+            var array = parseURL(el, parent),
+            url = array[0];
+            if(array[1] == "js") {
+                dn++;
+                if(!modules[url]) {
+                    modules[url] = {
+                        id: url,
+                        parent: parent,
+                        exports: {}
+                    };
+                    loadJS(url);
+                } else if(modules[url].state === 2) {
+                    cn++;
                 }
-            });
+                if(!deps[url]) {
+                    args.push(url);
+                    deps[url] = "司徒正美"; //去重
+                }
+            } else if(array[1] === "css") {
+                loadCSS(url);
+            }
+        });
         //创建或更新模块的状态
         modules[id] = {
             id: id,
@@ -440,7 +442,7 @@
     }
     
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = $.slice( arguments );
+        var args = $.slice(arguments);
         if(typeof id == "string") {
             var _id = args.shift();
         }
@@ -479,7 +481,7 @@
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+        ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
             modules[id].exports = ret
@@ -539,8 +541,8 @@
         $.exports();
     });
     $.exports($.config.nick + postfix); //防止不同版本的命名空间冲突
-    //============================合并核心模块支持===========================
-    var define = function(a){
+//============================合并核心模块支持===========================
+var define = function(a){
             if(typeof a == "string" && a.indexOf(basepath) == -1 ){
                 arguments[0] = basepath + a +".js"
             }
@@ -1008,62 +1010,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
 
     }
     $.mix(tools, false);
-    var EventTarget = function(target) {
-            $.log("init EventTarget")
-            this._events = {};
-            this._eventTarget = target || this;
-        }
-    var fn = EventTarget.prototype = {
-        constructor: EventTarget,
-        addEventListener: function(type, callback, scope) {
-            var listeners = this._events[type],
-                listener = {
-                    callback: callback,
-                    scope: scope || this._eventTarget
-                }
-            if(listeners) {
-                listeners.push(listener)
-            } else {
-                this._events[type] = [listener]
-            }
-        },
-        removeEventListener: function(type, callback) {
-            var n = arguments.length;
-            if(n == 0) {
-                this._events = {};
-            } else if(n == 1) {
-                this._events[type] = [];
-            } else {
-                var listeners = this._events[type] || [];
-                var i = listeners.length;
-                while(--i > -1) {
-                    if(listeners[i].callback === callback) {
-                        return listeners.splice(i, 1);
-                    }
-                }
-            }
-        },
-        dispatchEvent: function(type) {
-            var listeners = (this._events[type] || []).concat(); //防止影响原数组
-            if(listeners.length) {
-                var target = this._eventTarget,
-                    args = $.slice(arguments);
-                for(var i = 0, n = listeners.length; i < n; i++) {
-                    var listener = listeners[i];
-                    target = listener.scope || target;
-                    args[0] = {
-                        type: type,
-                        target: target
-                    }
-                    listener.callback.apply(target, args);
-                }
-            }
-        }
-    }
-    "bind_addEventListener,unbind_removeEventListener,fire_dispatchEvent".replace($.rmapper, function(_, a, b) {
-        fn[a] = fn[b];
-    });
-    $.EventTarget = EventTarget;
+
 
     "Array,Function".replace($.rword, function(method) {
         $["is" + method] = function(obj) {
@@ -1476,6 +1423,247 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     return $
 });
 
+//=========================================
+// 组件交互模块v1 by 司徒正美
+//=========================================
+define("interact",["$class"], function($){
+    //观察者模式
+    $.Observer = $.factory({
+        init: function(target){
+            $.log("init EventTarget")
+            this._events = {};
+            this._target = target || this;
+        },
+        bind: function(type, callback) {
+            var listeners = this._events[type]
+            if(listeners) {
+                listeners.push(callback)
+            } else {
+                this._events[type] = [callback]
+            }
+            return this;
+        },
+        once: function(type, callback){
+            var self = this;
+            var wrapper = function () {
+                callback.apply(self, arguments);
+                self.unbind(type, wrapper);
+            };
+            this.bind(type, wrapper);
+            return this;
+        },
+        unbind: function(type, callback) {
+            var n = arguments.length;
+            if(n == 0) {
+                this._events = {};
+            } else if(n == 1) {
+                this._events[type] = [];
+            } else {
+                var listeners = this._events[type] || [];
+                var i = listeners.length;
+                while(--i > -1) {
+                    if(listeners[i] === callback) {
+                        return listeners.splice(i, 1);
+                    }
+                }
+            }
+            return this;
+        },
+        fire: function(type) {
+            var listeners = (this._events[type] || []).concat(); //防止影响原数组
+            if(listeners.length) {
+                var target = this._target,
+                args = $.slice(arguments);
+                args[0] = {
+                    type: type,
+                    target: target
+                }
+                for(var i = 0, callback; callback = listeners[i++];) {
+                    callback.apply(target, args);
+                }
+            }
+        }
+    });
+    //用于处理需要通过N个子步骤才能完成的一些操作
+    //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
+    $.Flow = $.factory({
+        inherit: $.Observer,
+        init: function(){
+            this._fired = {};
+        },
+        fire: function (type, args) {
+            var calls = this._events, normal = 2, listeners, ev
+            while (normal--) {
+                ev = normal ? type : last;
+                listeners = calls[ev];
+                if (listeners && listeners.length) {
+                    args = $.slice(arguments, 1)
+                    if(normal){//在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
+                        args.unshift({
+                            type: type,
+                            target: this._target
+                        })
+                    }
+                    for(var i = 0, callback; callback = listeners[i++];) {
+                        //第一次执行目标事件,第二次执行最后的回调
+                        callback.apply(this, args);
+                    }
+                }else{
+                    break;
+                }
+            }
+            return this;
+        },
+        //待所有子步骤都执行过一遍后,执行最后的回调,之后每次都执行最后的回调以局部刷新数据
+        refresh: function () {
+            Array.prototype.push.call(arguments, false);
+            _assign.apply(this, arguments);
+            return this;
+        },
+        //待所有子步骤都执行过一遍后,执行最后的回调,然后清后所有数据,重新开始这过程
+        reload: function () {
+            Array.prototype.push.call(arguments, true);
+            _assign.apply(this, arguments);
+            return this;
+        },
+        //一个子步骤在重复执行N遍后,执行最后的回调
+        repeat: function(type, times, callback){
+            var target = this._target, that = this, ret = []
+            function wrapper(){
+                ret.push.apply(ret, $.slice(arguments, 1));
+                if (--times == 0) {
+                    that.unbind(last, wrapper);
+                    callback.apply(target, ret);
+                }
+            }
+            that.bind(type, wrapper);
+            return this;
+        },
+        done: function (handler) {
+            var that = this;
+            return function (err, data) {
+                if (err) {
+                    return that.fire('error', err);
+                }
+                if (typeof handler === 'string') {
+                    return that.fire(handler, data);
+                }
+                if (arguments.length <= 2) {
+                    return handler(data);
+                }
+                var args = $.slice(arguments, 1);
+                handler.apply(null, args);
+            }
+        },
+        fail: function (callback) {
+            var that = this;
+            that.once('error', function (err) {
+                that.unbind();
+                callback(err);
+            });
+            return this;
+        }
+    })
+
+    $.Flow.create = function (names, callback, errorback) {
+        var that = new $.Flow;
+        var args = names.match($.rword) || [];
+        if(typeof errorback === "function"){
+            that.fail(errorback);
+        }
+        args.push(callback)
+        that.refresh.apply(that, args);
+        return that;
+    };
+    var last = "$" + Date.now();
+    var _assign = function (name, callback, reload) {
+        var flow = this,
+        times = 0,
+        uniq = {},
+        events =  name.match($.rword) ,
+        length = events.length
+        if(!events.length){
+            return this;
+        }
+        function bind(key) {
+            flow.bind(key, function () {
+                flow._fired[key] = $.slice(arguments, 1);
+                if (!uniq[key]) {
+                    uniq[key] = true;
+                    times++;
+                }
+            });
+        }
+        //绑定所有子事件
+        for (var index = 0; index < length; index++) {
+            bind(events[index]);
+        }
+
+        function lastFn(event) {
+            //如果没有达到目标次数, 或事件类型之前没有指定过
+            if (times < length ) {
+                return;
+            }
+            var result = [];
+            for (index = 0; index < length; index++) {
+                result.push.apply(result, flow._fired[events[index]]);
+            }
+            if (reload) {
+                uniq = {};
+                times = 0;
+            }
+            callback.apply(null, result);
+        }
+        flow.bind(last, lastFn);
+    };
+    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
+    //单点发布 自愿收听 单向联接 分散传播
+    $.Twitter = $.factory({
+        init: function(){
+            this.followers = [];
+        },
+        tweet: function(msg){
+            for(var i = 0; i < this.followers.length; i++){
+                var follower = this.followers[i];
+                if(follower.handler){
+                    follower.handler.call(follower.target, msg); //deal
+                }
+            }
+        },
+        follow: function(master, handler){
+            master.followers.push({
+                target:this,
+                handler:handler
+            });
+        }
+    })
+
+})
+//2012.1.10
+//用tabView做一个简单的实验，但是这个不是组件，这个是散的
+//var tab = new Twitter();
+//var view = new Twitter();
+//view.follow(tab, function(msg){
+//	var view = document.getElementById("view").getElementsByTagName("span");
+//	for(var i = 0; i < view.length; i++){
+//		if(i == msg){
+//			view[i].className = "active";
+//		}else{
+//			view[i].className = "";
+//		}
+//	}
+//});
+//
+//var tabContainer = document.getElementById("tab");
+//tabContainer.onclick = function(event){
+//	var evt = event || window.event;
+//	var target = evt.srcElement || evt.target;
+//
+//	if(target != this){
+//		tab.tweet(target.innerHTML-1);
+//	}
+//}
+//;
 //==========================================
 // 特征嗅探模块 by 司徒正美
 //==========================================
@@ -3273,13 +3461,13 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-    var div = document.createElement("div"); //缓存parser，防止反复创建
+    var shim = document.createElement("div"); //缓存parser，防止反复创建
 
     function shimCloneNode(outerHTML, tree) {
-        tree.appendChild(div);
-        div.innerHTML = outerHTML;
-        tree.removeChild(div);
-        return div.firstChild;
+        tree.appendChild(shim);
+        shim.innerHTML = outerHTML;
+        tree.removeChild(shim);
+        return shim.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
 
@@ -3551,52 +3739,53 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
 });
 
 
-define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
-    $.fixIEAttr = function(valHooks, attrHooks){
-        var rnospaces = /\S+/g,  
-        rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
-        rquote = /^['"]/,
-        defaults = {
-            checked: "defaultChecked",
-            selected: "defaultSelected"
-        }
-        $.fixDefault = function(node, name, value){
-            var _default =  defaults[name];
-            if(_default){
-                node[ _default ] = value;
+define("attr_fix", !! top.getComputedStyle, ["$node"], function($) {
+    $.fixIEAttr = function(valHooks, attrHooks) {
+        var rnospaces = /\S+/g,
+            rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
+            rquote = /^['"]/,
+            support = $.support,
+            defaults = {
+                checked: "defaultChecked",
+                selected: "defaultSelected"
+            }
+        $.fixDefault = function(node, name, value) {
+            var _default = defaults[name];
+            if(_default) {
+                node[_default] = value;
             }
         }
-        if(!("classList" in $.html)){
-            $.fn.addClass = function( item ){
-                if ( typeof item == "string") {
-                    for ( var i = 0, el; el = this[i++]; ) {
-                        if ( el.nodeType === 1 ) {
-                            if ( !el.className ) {
+        if(!("classList" in $.html)) {
+            $.fn.addClass = function(item) {
+                if(typeof item == "string") {
+                    for(var i = 0, el; el = this[i++];) {
+                        if(el.nodeType === 1) {
+                            if(!el.className) {
                                 el.className = item;
                             } else {
-                                var a = (el.className+" "+item).match( rnospaces );
+                                var a = (el.className + " " + item).match(rnospaces);
                                 a.sort();
-                                for (var j = a.length - 1; j > 0; --j)
-                                    if (a[j] == a[j - 1])
-                                        a.splice(j, 1);
+                                for(var j = a.length - 1; j > 0; --j)
+                                if(a[j] == a[j - 1]) a.splice(j, 1);
                                 el.className = a.join(" ");
                             }
                         }
                     }
                 }
                 return this;
-            }  
-            $.fn.removeClass =  function( item ) {
-                if ( (item && typeof item === "string") || item === void 0 ) {
-                    var classNames = ( item || "" ).match( rnospaces ), cl = classNames.length;
-                    for ( var i = 0, node; node = this[ i++ ]; ) {
-                        if ( node.nodeType === 1 && node.className ) {
-                            if ( item ) {//rnospaces = /\S+/
-                                var set = " " + node.className.match( rnospaces ).join(" ") + " ";
-                                for ( var c = 0; c < cl; c++ ) {
+            }
+            $.fn.removeClass = function(item) {
+                if((item && typeof item === "string") || item === void 0) {
+                    var classNames = (item || "").match(rnospaces),
+                        cl = classNames.length;
+                    for(var i = 0, node; node = this[i++];) {
+                        if(node.nodeType === 1 && node.className) {
+                            if(item) { //rnospaces = /\S+/
+                                var set = " " + node.className.match(rnospaces).join(" ") + " ";
+                                for(var c = 0; c < cl; c++) {
                                     set = set.replace(" " + classNames[c] + " ", " ");
                                 }
-                                node.className = set.slice( 1, set.length - 1 );
+                                node.className = set.slice(1, set.length - 1);
                             } else {
                                 node.className = "";
                             }
@@ -3607,105 +3796,114 @@ define("attr_fix", !!top.getComputedStyle, ["$node"], function($){
             }
         }
 
-        attrHooks[ "@ie:get"] = function( node, name ){
-            var str = node.outerHTML.replace(node.innerHTML, ""), obj = {}, k, v;
-            while (k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
+        attrHooks["@ie:get"] = function(node, name) {
+            var str = node.outerHTML.replace(node.innerHTML, ""),
+                obj = {},
+                k, v;
+            while(k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
                 v = k[2]
-                obj[ k[1].toLowerCase() ] = v ? rquote.test( v ) ? v.slice(1, -1) : v : ""
+                obj[k[1].toLowerCase()] = v ? rquote.test(v) ? v.slice(1, -1) : v : ""
             }
-            return obj[ name ];
+            return obj[name];
         }
-        attrHooks["@ie:set"] = function( node, name, value ){  
-            var attr = node.getAttributeNode( name );
-            if ( !attr ) {//不存在就创建一个同名的特性节点
-                attr = node.ownerDocument.createAttribute( name );
-                node.setAttributeNode( attr );
+        attrHooks["@ie:set"] = function(node, name, value) {
+            var attr = node.getAttributeNode(name);
+            if(!attr) { //不存在就创建一个同名的特性节点
+                attr = node.ownerDocument.createAttribute(name);
+                node.setAttributeNode(attr);
             }
-            attr.value = value + "" ;
+            attr.value = value + "";
         }
-        
-        var support = $.support
-        if ( !support.attrInnateValue ) {
+
+
+        if(!support.attrInnateValue) {
             // http://gabriel.nagmay.com/2008/11/javascript-href-bug-in-ie/
             //在IE6-8如果一个A标签，它里面包含@字符，并且没任何元素节点，那么它里面的文本会变成链接值
-            $.propHooks[ "href:set" ] =  attrHooks[ "href:set" ] = function( node, name, value ) {
+            $.propHooks["href:set"] = attrHooks["href:set"] = function(node, name, value) {
                 var b
-                if(node.tagName == "A" && node.innerText.indexOf("@") > 0
-                    && !node.children.length){
+                if(node.tagName == "A" && node.innerText.indexOf("@") > 0 && !node.children.length) {
                     b = node.ownerDocument.createElement('b');
                     b.style.display = 'none';
                     node.appendChild(b);
                 }
-                node.setAttribute(name, value+"");
-                if (b) {
+                node.setAttribute(name, value + "");
+                if(b) {
                     node.removeChild(b);
                 }
             }
         }
         //========================attrHooks 的相关修正==========================
-        if ( !support.attrInnateHref ) {
+        if(!support.attrInnateHref) {
             //http://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
             //IE的getAttribute支持第二个参数，可以为 0,1,2,4
             //0 是默认；1 区分属性的大小写；2取出源代码中的原字符串值(注，IE67对动态创建的节点没效),4用于取得完整路径
             //IE 在取 href 的时候默认拿出来的是绝对路径，加参数2得到我们所需要的相对路径。
-            "href,src,width,height,colSpan,rowSpan".replace( $.rword, function( method ) {
-                attrHooks[ method.toLowerCase() + ":get" ] =  function( node,name ) {
-                    var ret = node.getAttribute( name, 2 );
+            "href,src,width,height,colSpan,rowSpan".replace($.rword, function(method) {
+                attrHooks[method.toLowerCase() + ":get"] = function(node, name) {
+                    var ret = node.getAttribute(name, 2);
                     return ret == null ? void 0 : ret;
                 }
             });
-            "width,height".replace( $.rword, function( attr ){
-                attrHooks[attr+":set"] = function(node, name, value){
-                    node.setAttribute( attr, value === "" ? "auto" : value+"");
+            "width,height".replace($.rword, function(attr) {
+                attrHooks[attr + ":set"] = function(node, name, value) {
+                    node.setAttribute(attr, value === "" ? "auto" : value + "");
                 }
             });
-            $.propHooks["href:get"] = function( node, name ) {
-                return node.getAttribute( name, 4 );
+            $.propHooks["href:get"] = function(node, name) {
+                return node.getAttribute(name, 4);
             };
         }
-        if(!document.createElement("form").enctype){//如果不支持enctype， 我们需要用encoding来映射
+        if(!document.createElement("form").enctype) { //如果不支持enctype， 我们需要用encoding来映射
             $.propMap.enctype = "encoding";
         }
-        if ( !support.attrInnateStyle ) {
+        if(!support.attrInnateStyle) {
             //IE67是没有style特性（特性的值的类型为文本），只有el.style（CSSStyleDeclaration）(bug)
-            attrHooks[ "style:get" ] = function( node ) {
-                return node.style.cssText || undefined ;
+            attrHooks["style:get"] = function(node) {
+                return node.style.cssText || undefined;
             }
-            attrHooks[ "style:set" ] = function( node, name, value ) {
+            attrHooks["style:set"] = function(node, name, value) {
                 node.style.cssText = value + "";
             }
         }
         //========================valHooks 的相关修正==========================
-        if(!support.attrInnateName){//IE6-7 button.value错误指向innerText
-            valHooks["button:get"] =  attrHooks["@ie:get"]
-            valHooks["button:set"] =  attrHooks["@ie:set"]
+        if(!support.attrInnateName) { //IE6-7 button.value错误指向innerText
+            valHooks["button:get"] = attrHooks["@ie:get"]
+            valHooks["button:set"] = attrHooks["@ie:set"]
         }
         delete $.fixIEAttr;
     }
     return $;
 })
-
-
 //==================================================
 // 属性操作模块 v3
 //==================================================
-define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
+define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) {
     var rreturn = /\r/g,
-    rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
-    rnospaces = /\S+/g,
-    support = $.support
-    function getValType( el ){
+        rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
+        rnospaces = /\S+/g,
+        support = $.support,
+        cacheProp = {};
+
+    function defaultProp(node, prop) {
+        var name = node.tagName + ":" + prop;
+        if(name in cacheProp) {
+            return cacheProp[name]
+        }
+        return cacheProp[name] = document.createElement(node.tagName)[prop]
+    }
+
+    function getValType(el) {
         var ret = el.tagName.toLowerCase();
         return ret == "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
     }
 
     $.implement({
         
-        addClass: function( item ){
-            if ( typeof item == "string") {
-                for ( var i = 0, el; el = this[i++]; ) {
-                    if ( el.nodeType === 1 ) {
-                        item.replace(rnospaces, function(clazz){
+        addClass: function(item) {
+            if(typeof item == "string") {
+                for(var i = 0, el; el = this[i++];) {
+                    if(el.nodeType === 1) {
+                        item.replace(rnospaces, function(clazz) {
                             el.classList.add(clazz);
                         })
                     }
@@ -3714,106 +3912,101 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
             return this;
         },
         //如果不传入类名,则清空所有类名,允许同时删除多个类名
-        removeClass: function( item ) {
-            var removeSome  = item && typeof item === "string",removeAll = item === void 0
-            for ( var i = 0, node; node = this[ i++ ]; ) {
-                if ( node.nodeType === 1 ) {
-                    if(removeSome && node.className){
-                        item.replace(rnospaces, function(clazz){
+        removeClass: function(item) {
+            var removeSome = item && typeof item === "string",
+                removeAll = item === void 0;
+            for(var i = 0, node; node = this[i++];) {
+                if(node.nodeType === 1) {
+                    if(removeSome && node.className) {
+                        item.replace(rnospaces, function(clazz) {
                             node.classList.remove(clazz);
                         })
-                    }else if(removeAll){
+                    } else if(removeAll) {
                         node.className = "";
                     }
                 }
             }
             return this;
         },
-       
+
         //如果第二个参数为true，要求所有匹配元素都拥有此类名才返回true
-        hasClass: function( item, every ) {
+        hasClass: function(item, every) {
             var method = every === true ? "every" : "some",
-            rclass = new RegExp('(\\s|^)'+item+'(\\s|$)');//判定多个元素，正则比indexOf快点
-            return $.slice(this)[ method ](function( el ){//先转换为数组
-                return  (el.className || "").match(rclass);
+                rclass = new RegExp('(\\s|^)' + item + '(\\s|$)'); //判定多个元素，正则比indexOf快点
+            return $.slice(this)[method](function(el) { //先转换为数组
+                return(el.className || "").match(rclass);
             });
         },
         //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
-        toggleClass: function( value, stateVal ){
-            var type = typeof value , classNames = type === "string" && value.match( rnospaces ) || [], className, i,
-            isBool = typeof stateVal === "boolean";
-            return this.each(function( el ) {
+        toggleClass: function(value, stateVal) {
+            var type = typeof value,
+                classNames = type === "string" && value.match(rnospaces) || [],
+                className, i, isBool = typeof stateVal === "boolean";
+            return this.each(function(el) {
                 i = 0;
-                if(el.nodeType === 1){
-                    var self = $( el ),
-                    state = stateVal;
-                    if(type == "string" ){
-                        while ( (className = classNames[ i++ ]) ) {
-                            state = isBool ? state : !self.hasClass( className );
-                            self[ state ? "addClass" : "removeClass" ]( className );
+                if(el.nodeType === 1) {
+                    var self = $(el),
+                        state = stateVal;
+                    if(type == "string") {
+                        while((className = classNames[i++])) {
+                            state = isBool ? state : !self.hasClass(className);
+                            self[state ? "addClass" : "removeClass"](className);
                         }
-                    } else if ( type === "undefined" || type === "boolean" ) {
-                        if ( el.className ) {
-                            $._data( el, "__className__", el.className );
+                    } else if(type === "undefined" || type === "boolean") {
+                        if(el.className) {
+                            $._data(el, "__className__", el.className);
                         }
-                        el.className = el.className || value === false ? "" : $._data( el, "__className__") || "";
+                        el.className = el.className || value === false ? "" : $._data(el, "__className__") || "";
                     }
                 }
             });
         },
         //如果匹配元素存在类名old则将其置换为类名neo
-        replaceClass: function( old, neo ){
-            for ( var i = 0, node; node = this[ i++ ]; ) {
-                if ( node.nodeType === 1 && node.className ) {
-                    var arr = node.className.match( rnospaces ), arr2 = [];
-                    for ( var j = 0; j < arr.length; j++ ) {
-                        arr2.push( arr[j] == old ? neo : arr[j]);
+        replaceClass: function(old, neo) {
+            for(var i = 0, node; node = this[i++];) {
+                if(node.nodeType === 1 && node.className) {
+                    var arr = node.className.match(rnospaces),
+                        cls = [];
+                    for(var j = 0; j < arr.length; j++) {
+                        cls.push(arr[j] == old ? neo : arr[j]);
                     }
-                    node.className = arr2.join(" ");
+                    node.className = cls.join(" ");
                 }
             }
             return this;
         },
-        val : function( item ) {
-            var el = this[0], getter = valHooks[ "option:get" ];
-            if ( !arguments.length ) {//读操作
-                if ( el && el.nodeType == 1 ) {
-                    var ret =  (valHooks[ getValType(el)+":get" ] ||
-                        $.propHooks[ "@default:get" ])( el, "value", getter );
-                    return  typeof ret === "string" ? ret.replace( rreturn, "" ) : ret == null ? "" : ret;
+        //用于取得表单元素的value值
+        val: function(item) {
+            var el = this[0],
+                getter = valHooks["option:get"];
+            if(!arguments.length) { //读操作
+                if(el && el.nodeType == 1) {
+                    var ret = (valHooks[getValType(el) + ":get"] || $.propHooks["@default:get"])(el, "value", getter);
+                    return typeof ret === "string" ? ret.replace(rreturn, "") : ret == null ? "" : ret;
                 }
                 return void 0;
             }
             //我们确保传参为字符串数组或字符串，null/undefined强制转换为"", number变为字符串
-            if( Array.isArray( item ) ){
-                item = item.map(function (item) {
+            if(Array.isArray(item)) {
+                item = item.map(function(item) {
                     return item == null ? "" : item + "";
                 });
-            }else if( isFinite(item) ){
+            } else if(isFinite(item)) {
                 item += "";
-            }else{
+            } else {
                 item = item || "";
             }
-            return this.each(function( el ) {//写操作
-                if ( el.nodeType == 1 ) {
-                    (valHooks[ getValType(el)+":set" ] ||
-                        $.propHooks[ "@default:set" ])( el, "value", item , getter );
+            return this.each(function(el) { //写操作
+                if(el.nodeType == 1) {
+                    (valHooks[getValType(el) + ":set"] || $.propHooks["@default:set"])(el, "value", item, getter);
                 }
             });
         }
     });
-  
-    var cacheProp = {}
-    function defaultProp(node, prop){
-        var name = node.tagName+":"+prop;
-        if(name in cacheProp){
-            return cacheProp[name]
-        }
-        return cacheProp[name] = document.createElement(node.tagName)[prop]
-    }
+
     $.mix({
         fixDefault: $.noop,
-        propMap:{//属性名映射
+        propMap: { //属性名映射
             "accept-charset": "acceptCharset",
             "char": "ch",
             "charoff": "chOff",
@@ -3821,199 +4014,194 @@ define("attr",!!top.getComputedStyle ? ["$node"] : ["$attr_fix"], function( $ ){
             "for": "htmlFor",
             "http-equiv": "httpEquiv"
         },
-        prop: function(node, name, value){
-            if($["@bind"] in node){
-                if(node.nodeType === 1 && !$.isXML( node )){
-                    name = $.propMap[ name.toLowerCase() ] || name;
+        prop: function(node, name, value) {
+            if($["@bind"] in node) {
+                if(node.nodeType === 1 && !$.isXML(node)) {
+                    name = $.propMap[name.toLowerCase()] || name;
                 }
                 var access = value === void 0 ? "get" : "set"
-                return ($.propHooks[name+":"+access] ||
-                    $.propHooks["@default:"+access] )(node, name, value)
+                return($.propHooks[name + ":" + access] || $.propHooks["@default:" + access])(node, name, value)
             }
         },
-        attr: function(node, name, value){
-            if($["@bind"] in node){
-                if ( typeof node.getAttribute === "undefined" ) {
-                    return $.prop( node, name, value );
+        attr: function(node, name, value) {
+            if($["@bind"] in node) {
+                if(typeof node.getAttribute === "undefined") {
+                    return $.prop(node, name, value);
                 }
                 //这里只剩下元素节点
-                var noxml = !$.isXML( node ), type = "@w3c", isBool
-                if( noxml ){
+                var noxml = !$.isXML(node),
+                    type = "@w3c";
+                if(noxml) {
                     name = name.toLowerCase();
-                    var prop = $.propMap[ name ] || name
-                    if( !support.attrInnateName ){
+                    var prop = $.propMap[name] || name
+                    if(!support.attrInnateName) {
                         type = "@ie"
                     }
-                    isBool = typeof node[ prop ] == "boolean" && typeof defaultProp(node,prop) == "boolean"//判定是否为布尔属性
+                    var isBool = typeof node[prop] == "boolean" && typeof defaultProp(node, prop) == "boolean" //判定是否为布尔属性
                 }
                 //移除操作
-                if(noxml){
-                    if (value === null || value === false && isBool ){
-                        return $.removeAttr(node, name )
+                if(noxml) {
+                    if(value === null || value === false && isBool) {
+                        return $.removeAttr(node, name)
                     }
-                }else if( value === null ) {
+                } else if(value === null) {
                     return node.removeAttribute(name)
                 }
                 //读写操作
                 var access = value === void 0 ? "get" : "set"
-                if( isBool ){
+                if(isBool) {
                     type = "@bool";
                     name = prop;
                 }
-                return ( noxml  && $.attrHooks[ name+":"+access ] ||
-                    $.attrHooks[ type +":"+access] )(node, name, value)
+                return(noxml && $.attrHooks[name + ":" + access] || $.attrHooks[type + ":" + access])(node, name, value)
             }
         },
         //只能用于HTML,元素节点的内建不能删除（chrome真的能删除，会引发灾难性后果），使用默认值覆盖
-        removeProp: function( node, name ) {
-            if(node.nodeType === 1){
-                if(!support.attrInnateName){
-                    name = $.propMap[ name.toLowerCase() ] ||  name;
+        removeProp: function(node, name) {
+            if(node.nodeType === 1) {
+                if(!support.attrInnateName) {
+                    name = $.propMap[name.toLowerCase()] || name;
                 }
                 node[name] = defaultProp(node, name)
-            }else{
+            } else {
                 node[name] = void 0;
             }
         },
         //只能用于HTML
-        removeAttr: function( node, name ) {
-            if(name && node.nodeType === 1){
+        removeAttr: function(node, name) {
+            if(name && node.nodeType === 1) {
                 name = name.toLowerCase();
-                if(!support.attrInnateName){
-                    name = $.propMap[ name ] ||  name;
+                if(!support.attrInnateName) {
+                    name = $.propMap[name] || name;
                 }
                 //小心contentEditable,会把用户编辑的内容清空
-                if(typeof node[ name ] != "boolean"){
-                    node.setAttribute( name, "")
+                if(typeof node[name] != "boolean") {
+                    node.setAttribute(name, "")
                 }
-                node.removeAttribute( name );
+                node.removeAttribute(name);
                 // 确保bool属性的值为bool
-                if ( node[ name ] === true ) {
-                    node[ name ] = false;
-                    $.fixDefault(node, name, false)
+                if(node[name] === true) {
+                    node[name] = false;
+                    $.fixDefault(node, name, false);
                 }
             }
         },
-        propHooks:{
-            "@default:get": function( node, name ){
-                return node[ name ]
+        propHooks: {
+            "@default:get": function(node, name) {
+                return node[name];
             },
-            "@default:set": function(node, name, value){
-                node[ name ] = value;
+            "@default:set": function(node, name, value) {
+                node[name] = value;
             },
-            "tabIndex:get": function( node ) {
+            "tabIndex:get": function(node) {
                 //http://www.cnblogs.com/rubylouvre/archive/2009/12/07/1618182.html
                 var ret = node.tabIndex;
-                if( ret === 0 ){//在标准浏览器下，不显式设置时，表单元素与链接默认为0，普通元素为-1
-                    ret = rtabindex.test(node.nodeName) ? 0 : -1
+                if(ret === 0) { //在标准浏览器下，不显式设置时，表单元素与链接默认为0，普通元素为-1
+                    ret = rtabindex.test(node.nodeName) ? 0 : -1;
                 }
                 return ret;
             }
         },
         attrHooks: {
-            "@w3c:get": function( node, name ){
-                var ret =  node.getAttribute( name ) ;
+            "@w3c:get": function(node, name) {
+                var ret = node.getAttribute(name);
                 return ret == null ? void 0 : ret;
             },
-            "@w3c:set": function( node, name, value ){
-                node.setAttribute( name, "" + value )
+            "@w3c:set": function(node, name, value) {
+                node.setAttribute(name, "" + value)
             },
-            "@bool:get": function(node, name){
+            "@bool:get": function(node, name) {
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
-                return node[ name ] ? name.toLowerCase() : void 0 
+                return node[name] ? name.toLowerCase() : void 0
             },
-            "@bool:set": function(node, name){
+            "@bool:set": function(node, name) {
                 //布尔属性在IE6-8的标签大部字母大写，没有赋值，并且无法通过其他手段获得用户的原始设值
-                node.setAttribute( name, name.toLowerCase() )
-                node[ name ]  = true;
-                $.fixDefault(node, name, true)
+                node.setAttribute(name, name.toLowerCase())
+                node[name] = true;
+                $.fixDefault(node, name, true);
             }
 
         }
     });
-    "Attr,Prop".replace($.rword, function( method ){
-        $.fn[ method.toLowerCase() ] = function( name, value ) {
-            return $.access( this, name, value, $[ method.toLowerCase() ] );
+    "Attr,Prop".replace($.rword, function(method) {
+        $.fn[method.toLowerCase()] = function(name, value) {
+            return $.access(this, name, value, $[method.toLowerCase()]);
         }
-        $.fn[ "remove" + method] = function(name){
+        $.fn["remove" + method] = function(name) {
             return this.each(function() {
-                $["remove" + method]( this, name );
+                $["remove" + method](this, name);
             });
         }
     });
     //========================propHooks 的相关修正==========================
-    var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable,"+
-    "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight,"+
-    "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
-    prop.replace($.rword, function(name){
+    var prop = "accessKey,allowTransparency,bgColor,cellPadding,cellSpacing,codeBase,codeType,colSpan,contentEditable," + "dateTime,defaultChecked,defaultSelected,defaultValue,frameBorder,isMap,longDesc,maxLength,marginWidth,marginHeight," + "noHref,noResize,noShade,readOnly,rowSpan,tabIndex,useMap,vSpace,valueType,vAlign";
+    prop.replace($.rword, function(name) {
         $.propMap[name.toLowerCase()] = name;
     });
 
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
-    if ( !support.optSelected ) {
-        $.propHooks[ "selected:get" ] = function( node ) {
-            for( var p = node;typeof p.selectedIndex != "number";p = p.parentNode){}
+    if(!support.optSelected) {
+        $.propHooks["selected:get"] = function(node) {
+            for(var p = node; typeof p.selectedIndex != "number"; p = p.parentNode) {}
             return node.selected;
         }
     }
     //========================valHooks 的相关修正==========================
     var valHooks = {
-        "option:get":  function( node ) {
+        "option:get": function(node) {
             var val = node.attributes.value;
             //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
             return !val || val.specified ? node.value : node.text;
         },
-        "select:get": function( node ,value, getter) {
-            var option,  options = node.options,
-            index = node.selectedIndex,
-            one = node.type === "select-one" || index < 0,
-            values = one ? null : [],
-            max = one ? index + 1 : options.length,
-            i = index < 0 ? max :  one ? index : 0;
-            for ( ; i < max; i++ ) {
-                option = options[ i ];
+        "select:get": function(node, value, getter) {
+            var option, options = node.options,
+                index = node.selectedIndex,
+                one = node.type === "select-one" || index < 0,
+                values = one ? null : [],
+                max = one ? index + 1 : options.length,
+                i = index < 0 ? max : one ? index : 0;
+            for(; i < max; i++) {
+                option = options[i];
                 //旧式IE在reset后不会改变selected，需要改用i === index判定
                 //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
                 //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
-                if ( ( option.selected || i === index ) &&
-                    (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) &&
-                    (!option.parentNode.disabled || !$.type( option.parentNode, "OPTGROUP" )) ) {
-                    value = getter( option );
-                    if ( one ) {
+                if((option.selected || i === index) && (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) && (!option.parentNode.disabled || !$.type(option.parentNode, "OPTGROUP"))) {
+                    value = getter(option);
+                    if(one) {
                         return value;
                     }
                     //收集所有selected值组成数组返回
-                    values.push( value );
+                    values.push(value);
                 }
             }
             return values;
         },
-        "select:set": function( node, name, values, getter ) {
-            $.slice(node.options).forEach(function( el ){
-                el.selected = !!~values.indexOf( getter(el) );
+        "select:set": function(node, name, values, getter) {
+            $.slice(node.options).forEach(function(el) {
+                el.selected = !! ~values.indexOf(getter(el));
             });
-            if ( !values.length ) {
+            if(!values.length) {
                 node.selectedIndex = -1;
             }
         }
     }
     //checkbox的value默认为on，唯有chrome 返回空字符串
-    if ( !support.checkOn ) {
-        "radio,checkbox".replace( $.rword, function( name ) {
-            valHooks[ name + ":get" ] = function( node ) {
+    if(!support.checkOn) {
+        "radio,checkbox".replace($.rword, function(name) {
+            valHooks[name + ":get"] = function(node) {
                 return node.getAttribute("value") === null ? "on" : node.value;
             }
         });
     }
     //处理单选框，复选框在设值后checked的值
-    "radio,checkbox".replace( $.rword, function( name ) {
-        valHooks[ name + ":set" ] = function( node, name, value) {
-            if ( Array.isArray( value ) ) {
-                return node.checked = !!~value.indexOf(node.value ) ;
+    "radio,checkbox".replace($.rword, function(name) {
+        valHooks[name + ":set"] = function(node, name, value) {
+            if(Array.isArray(value)) {
+                return node.checked = !! ~value.indexOf(node.value);
             }
         }
     });
-    if(typeof $.fixIEAttr == "function"){
+    if(typeof $.fixIEAttr == "function") {
         $.fixIEAttr(valHooks, $.attrHooks);
     }
     return $;
@@ -4036,8 +4224,6 @@ http://nanto.asablo.jp/blog/2005/10/29/123294
 
 http://perl.no-tubo.net/2010/07/01/ie-%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B-setattribute-%E3%82%84-getattribute-%E3%82%84-removeattribute-%E3%81%8C%E3%81%A0%E3%82%81%E3%81%A0%E3%82%81%E3%81%AA%E4%BB%B6/
 */
-
-
 //=========================================
 //  样式补丁模块
 //==========================================
@@ -4604,111 +4790,139 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 //=========================================
 //  事件补丁模块
 //==========================================
-define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
+define("event_fix", !! document.dispatchEvent, ["$node"], function($) {
     //模拟IE678的reset,submit,change的事件代理
-    var rformElems  = /^(?:input|select|textarea)$/i
+    var rformElems = /^(?:input|select|textarea)$/i
     var facade = $.event = {
-        special: {}
+        special: {},
+        fixMouse: function(event) {
+            // 处理鼠标事件 http://www.w3help.org/zh-cn/causes/BX9008
+            var doc = event.target.ownerDocument || document; //safari与chrome下，滚动条，视窗相关的东西是放在body上
+            var box = document.compatMode == "BackCompat" ? doc.body : doc.documentElement
+            event.pageX = event.clientX + (box.scrollLeft >> 0) - (box.clientLeft >> 0);
+            event.pageY = event.clientY + (box.scrollTop >> 0) - (box.clientTop >> 0);
+            //如果不存在relatedTarget属性，为它添加一个
+            if(!event.relatedTarget && event.fromElement) { //mouseover mouseout
+                event.relatedTarget = event.fromElement === event.target ? event.toElement : event.fromElement;
+            }
+            //标准浏览判定按下鼠标哪个键，左1中2右3
+            var button = event.button
+            //IE event.button的意义 0：没有键被按下 1：按下左键 2：按下右键 3：左键与右键同时被按下 4：按下中键 5：左键与中键同时被按下 6：中键与右键同时被按下 7：三个键同时被按下
+            event.which = [0, 1, 3, 0, 2, 0, 0, 0][button]; //0现在代表没有意义
+        },
+        fixKeyboard: function(event) {
+            event.which = event.charCode != null ? event.charCode : event.keyCode;
+        }
     };
     var special = facade.special
-    special.change =  {
+
+    function simulate(type, elem, event) {
+        event = new $.Event(event);
+        $.mix({
+            type: type,
+            isSimulated: true
+        });
+        $.event.trigger.call(elem, event);
+        if(event.defaultPrevented) {
+            event.preventDefault();
+        }
+    }
+    special.change = {
         setup: function() {
-            if ( rformElems.test( this.nodeName ) ) {
+            if(rformElems.test(this.nodeName)) {
                 // IE doesn't fire change on a check/radio until blur; trigger it on click
                 // after a propertychange. Eat the blur-change in special.change.handle.
                 // This still fires onchange a second time for check/radio after blur.
-                if ( this.type === "checkbox" || this.type === "radio" ) {
-                    $( this ).bind(  "propertychange._change", function( event ) {
-                        if ( event.originalEvent.propertyName === "checked" ) {
+                if(this.type === "checkbox" || this.type === "radio") {
+                    $(this).bind("propertychange._change", function(event) {
+                        if(event.originalEvent.propertyName === "checked") {
                             this._just_changed = true;
                         }
                     });
-                    $( this). bind("click._change", function( event ) {
-                        if ( this._just_changed && !event.isTrigger ) {
+                    $(this).bind("click._change", function(event) {
+                        if(this._just_changed && !event.isTrigger) {
                             this._just_changed = false;
                         }
                         // Allow triggered, simulated change events (#11500)
-                        facade.simulate( "change", this, event, true );
-                    } );
+                        simulate("change", this, event);
+                    });
                 }
                 return false;
             }
             // Delegated event; lazy-add a change handler on descendant inputs
-            $ (this).bind(  "beforeactivate._change", function( e ) {
+            $(this).bind("beforeactivate._change", function(e) {
                 var elem = e.target;
-                if ( rformElems.test( elem.nodeName ) && !$._data( elem, "_change_attached" ) ) {
-                    $( elem ).bind( "change._change", function( event ) {
-                        if ( this.parentNode && !event.isSimulated && !event.isTrigger ) {
-                            facade.simulate( "change", this.parentNode, event, true );
+                if(rformElems.test(elem.nodeName) && !$._data(elem, "_change_attached")) {
+                    $(elem).bind("change._change", function(event) {
+                        if(this.parentNode && !event.isSimulated && !event.isTrigger) {
+                            simulate("change", this.parentNode, event);
                         }
-                        $._data( elem, "_change_attached", true );
+                        $._data(elem, "_change_attached", true);
                     })
                 }
             });
         },
-        handle: function( event ) {
+        handle: function(event) {
             var elem = event.target;
             // Swallow native change events from checkbox/radio, we already triggered them above
-            if ( this !== elem || event.isSimulated || event.isTrigger || (elem.type !== "radio" && elem.type !== "checkbox") ) {
-                return event.handleObj.handler.apply( this, arguments );
+            if(this !== elem || event.isSimulated || event.isTrigger || (elem.type !== "radio" && elem.type !== "checkbox")) {
+                return event.handleObj.handler.apply(this, arguments);
             }
         },
         teardown: function() {
-            facade.remove( this, "._change" );
-            return !rformElems.test( this.nodeName );
+            facade.remove(this, "._change");
+            return !rformElems.test(this.nodeName);
         }
     }
     special.submit = {
         setup: function() {
             // Only need this for delegated form submit events
-            if ( this.tagName === "FORM"  ) {
+            if(this.tagName === "FORM") {
                 return false;
             }
             // Lazy-add a submit handler when a descendant form may potentially be submitted
-            $( this).bind( "click._submit keypress._submit", function( e ) {
+            $(this).bind("click._submit keypress._submit", function(e) {
                 // Node name check avoids a VML-related crash in IE (#9807)
                 var elem = e.target,
                 form = /input|button/i.test(elem.tagName) ? elem.form : undefined;
-                if ( form && !$._data( form, "_submit_attached" ) ) {
-                    facade.bind( form,{
-                        type:      "submit._submit",
-                        callback: function( event ) {
+                if(form && !$._data(form, "_submit_attached")) {
+                    facade.bind(form, {
+                        type: "submit._submit",
+                        callback: function(event) {
                             event._submit_bubble = true;
                         }
                     });
-                    $._data( form, "_submit_attached", true );
+                    $._data(form, "_submit_attached", true);
                 }
             });
         // return undefined since we don't need an event listener
         },
 
-        postDispatch: function( event ) {
+        postDispatch: function(event) {
             // If form was submitted by the user, bubble the event up the tree
-            if ( event._submit_bubble ) {
+            if(event._submit_bubble) {
                 delete event._submit_bubble;
-                if ( this.parentNode && !event.isTrigger ) {
-                    facade.simulate( "submit", this.parentNode, event, true );
+                if(this.parentNode && !event.isTrigger) {
+                    simulate("submit", this.parentNode, event);
                 }
             }
         },
 
         teardown: function() {
-            // Only need this for delegated form submit events
-            if (  this.tagName == "FORM" ) {
+            if(this.tagName == "FORM") {
                 return false;
             }
-
-            // Remove delegated handlers; cleanData eventually reaps submit handlers attached above
-            facade.remove( this, "._submit" );
+            facade.remove(this, "._submit");
         }
     }
-   
+    return $;
 })
 
 /*
 * input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
 * 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 * 2012.10.18 重构reset, change, submit的事件代理
+* 2013.1.9 将$.event.fix的一些逻辑分离到event_fix模块,形成fixMouse, fixKeyboard方法
 <!DOCTYPE HTML>
 <html>
     <head>
@@ -4744,107 +4958,119 @@ define("event_fix", !!document.dispatchEvent, ["mass"], function( $ ){
     </body>
 </html>
 */
-
-
-define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function( $ ){
+//=========================================
+// 事件系统 v9
+//==========================================
+define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
     var facade = $.event || ($.event = {
-        special: {}
-    });
-    var eventHooks = facade.special,
-    rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
-    rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
-    $.eventSupport = function( eventName, el ) {
-        el = el || document.createElement("div");
-        eventName = "on" + eventName;
-        var ret = eventName in el;
-        if ( el.setAttribute && !ret ) {
-            el.setAttribute( eventName, "" );
-            ret = typeof el[ eventName ] === "function";
-            el.removeAttribute(eventName);
+        //对某种事件类型进行特殊处理
+        special: {},
+        //对Mouse事件这一大类事件类型的事件对象进行特殊处理
+        fixMouse: function(event, real) {
+            if(event.type === "mousewheel") { //处理滚轮事件
+                if("wheelDelta" in real) { //统一为±120，其中正数表示为向上滚动，负数表示向下滚动
+                    // http://www.w3help.org/zh-cn/causes/SD9015
+                    var delta = real.wheelDelta
+                    //opera 9x系列的滚动方向与IE保持一致，10后修正
+                    if(window.opera && opera.version() < 10) delta = -delta;
+                    event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
+                } else if("detail" in real) {
+                    event.wheelDelta = -real.detail * 40; //修正FF的detail 为更大众化的wheelDelta
+                }
+            }
         }
-        el = null;
-        return ret;
-    };
-    function Event( src, props ) {
-        if ( !(this instanceof $.Event) ) {
-            return new Event( src, props );
+    }),
+        eventHooks = facade.special,
+        rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
+        rtypenamespace = /^([^.]*)(?:\.(.+)|)$/,
+        mouseEvents = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,",
+        eventMap = $.oneObject(mouseEvents, "Mouse"),
+        types = mouseEvents + ",keypress,keydown,keyup," + "blur,focus,focusin,focusout," + "abort,error,load,unload,resize,scroll,change,input,select,reset,submit" //input
+        $.eventSupport = function(eventName, el) {
+            el = el || document.createElement("div");
+            eventName = "on" + eventName;
+            var ret = eventName in el;
+            if(el.setAttribute && !ret) {
+                el.setAttribute(eventName, "");
+                ret = typeof el[eventName] === "function";
+                el.removeAttribute(eventName);
+            }
+            el = null;
+            return ret;
+        };
+
+    function Event(src, props) {
+        if(!(this instanceof $.Event)) {
+            return new Event(src, props);
         }
-        // Event object
-        this.originalEvent = {}
-        if ( src && src.type ) {
-            this.originalEvent = src;
+        this.originalEvent = {}; //保存原生事件对象
+        if(src && src.type) {
+            this.originalEvent = src; //重写
             this.type = src.type;
-        // Event type
         } else {
             this.type = src;
         }
         this.defaultPrevented = false;
-        if ( props ) {
-            $.mix( this, props );
+        if(props) {
+            $.mix(this, props);
         }
         this.timeStamp = new Date - 0;
     };
     Event.prototype = {
-        toString: function(){
+        toString: function() {
             return "[object Event]"
         },
-        preventDefault: function() {
+        preventDefault: function() { //阻止默认行为
             this.defaultPrevented = true;
             var e = this.originalEvent
-            if (e && e.preventDefault ) {
+            if(e && e.preventDefault) {
                 e.preventDefault();
-            }// 如果存在returnValue 那么就将它设为false
+            }
             e.returnValue = false;
             return this;
         },
-        stopPropagation: function() {
-            var e = this.originalEvent 
-            if (e && e.stopPropagation ) {
+        stopPropagation: function() { //阻止事件在DOM树中的传播
+            var e = this.originalEvent
+            if(e && e.stopPropagation) {
                 e.stopPropagation();
-            } 
-            //http://opera.im/kb/userjs/
+            } //propagationStopped的命名出自 http://opera.im/kb/userjs/
             e.cancelBubble = this.propagationStopped = true;
             return this;
         },
-        stopImmediatePropagation: function() {
+        stopImmediatePropagation: function() { //阻止事件在一个元素的同种事件的回调中传播
             this.isImmediatePropagationStopped = true;
             this.stopPropagation();
             return this;
         }
     }
     $.Event = Event;
-    $.mix(eventHooks,{
-        load: {
-            // Prevent triggered image.load events from bubbling to window.load
+    $.mix(eventHooks, {
+        load: { //此事件不能冒泡
             noBubble: true
         },
-        click: {
-            // For checkbox, fire native event so checked state will be right
+        click: { //处理checkbox中的点击事件
             trigger: function() {
-                if ( this.nodeName ==  "INPUT" && this.type === "checkbox" && this.click ) {
+                if(this.nodeName == "INPUT" && this.type === "checkbox" && this.click) {
                     this.click();
                     return false;
                 }
             }
         },
-        focus: {
-            // Fire native event if possible so blur/focus sequence is correct
+        focus: { //IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
             trigger: function() {
-                if ( this !== document.activeElement && this.focus ) {
+                if(this !== document.activeElement && this.focus) {
+
                     try {
                         this.focus();
                         return false;
-                    } catch ( e ) {
-                    // IE<9 dies on focus to hidden element (#1486,#12518)
-                    // If this happens, let .trigger() run the handlers
-                    }
+                    } catch(e) {}
                 }
             },
             delegateType: "focusin"
         },
         blur: {
-            trigger: function() {
-                if ( this === document.activeElement && this.blur ) {
+            trigger: function() { //blur事件的派发使用原生方法实现
+                if(this === document.activeElement && this.blur) {
                     this.blur();
                     return false;
                 }
@@ -4852,167 +5078,163 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             delegateType: "focusout"
         },
         beforeunload: {
-            postDispatch: function( event ) {
-                if ( event.result !== void 0 ) {
+            postDispatch: function(event) {
+                if(event.result !== void 0) {
                     event.originalEvent.returnValue = event.result;
                 }
             }
         }
     });
 
-    $.mix(facade,{
-        //addEventListner API的支持情况:chrome 1+ FF1.6+	IE9+ opera 7+ safari 1+;
+    $.mix(facade, {
+        //addEventListner API的支持情况:chrome 1+ FF1.6+ IE9+ opera 7+ safari 1+;
         //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
-        bind: function( elem, hash ) {
-            var  
-            elemData   = $._data( elem ),         //是否能绑定事件
-            types      = hash.type,               //原有的事件类型,可能是复数个
-            selector   = hash.selector,           //是否使用事件代理
-            handler    = hash.handler;            //回调函数
-    
-            if ( elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler || !elemData  ) {
+        add: function(elem, hash) {
+            var elemData = $._data(elem),
+                //取得对应的缓存体
+                types = hash.type,
+                //原有的事件类型,可能是复数个
+                selector = hash.selector,
+                //是否使用事件代理
+                handler = hash.handler; //回调函数
+            if(elem.nodeType === 3 || elem.nodeType === 8 || !types || !handler) {
                 return;
             }
-            hash.uuid = $.getUid( handler );       //确保hash.uuid与fn.uuid一致
-            var events = elemData.events || (elemData.events = []), eventHandle = elemData.handle;
-            if ( !eventHandle ) {
-                elemData.handle = eventHandle = function( e ) {
-                    return typeof $ !== "undefined" && (!e || facade.triggered !== e.type) ?
-                    facade.dispatch.apply( eventHandle.elem, arguments ) : void 0;
+            hash.uniqueNumber = $.getUid(handler); //确保hash.uuid与fn.uuid一致
+            var events = elemData.events || (elemData.events = []),
+                eventHandle = elemData.handle;
+            if(!eventHandle) {
+                elemData.handle = eventHandle = function(e) {
+                    return typeof $ !== "undefined" && (!e || facade.triggered !== e.type) ? facade.dispatch.apply(eventHandle.elem, arguments) : void 0;
                 };
-                eventHandle.elem = elem;//由于IE的attachEvent回调中的this不指向绑定元素，需要强制缓存它
+                eventHandle.elem = elem; //由于IE的attachEvent回调中的this不指向绑定元素，需要强制缓存它
             }
 
-            types.replace( $.rword, function( t ){
-                var tns = rtypenamespace.exec( t) || [], type = tns[1];
-                var namespaces = ( tns[2] || "" ).split( "." ).sort();
+            types.replace($.rword, function(t) {
+                var tns = rtypenamespace.exec(t) || [],
+                    type = tns[1];
+                var namespaces = (tns[2] || "").split(".").sort();
                 // 看需不需要特殊处理
-                var hook = eventHooks[ type ] || {};
+                var hook = eventHooks[type] || {};
                 // 事件代理与事件绑定可以使用不同的冒充事件
-                type = ( selector ? hook.delegateType : hook.bindType ) || type;
-                hook = eventHooks[ type ] || {};
+                type = (selector ? hook.delegateType : hook.bindType) || type;
+                hook = eventHooks[type] || {};
                 var handleObj = $.mix({}, hash, {
                     type: type,
                     origType: tns[1],
                     namespace: namespaces.join(".")
-                } );
-                //初始化事件列队
-                var handlers = events[ type ];
-                if ( !handlers ) {
-                    handlers = events[ type ] = [];
+                });
+
+                var handlers = events[type]; //初始化事件列队
+                if(!handlers) {
+                    handlers = events[type] = [];
                     handlers.delegateCount = 0;
-                    if ( !hook.setup || hook.setup.call( elem, namespaces, eventHandle ) === false ) {
-                        if($["@bind"] in elem){
-                            $.bind(elem, type,eventHandle,false )
+                    if(!hook.setup || hook.setup.call(elem, namespaces, eventHandle) === false) {
+                        if($["@bind"] in elem) {
+                            $.bind(elem, type, eventHandle)
                         }
                     }
                 }
-                if ( hook.add ) {
-                    hook.add.call( elem, handleObj );
+                if(hook.add) {
+                    hook.add.call(elem, handleObj);
                 }
-                //将要需要代理的事件放于前面
-                if ( selector ) {
-                    handlers.splice( handlers.delegateCount++, 0, handleObj );
+                //先处理用事件代理的回调，再处理用普通方式绑定的回调
+                if(selector) {
+                    handlers.splice(handlers.delegateCount++, 0, handleObj);
                 } else {
-                    handlers.push( handleObj );
+                    handlers.push(handleObj);
                 }
                 //用于优化fire方法
-                facade.global[ type ] = true;
+                facade.global[type] = true;
             })
             //防止IE内在泄漏
             elem = null;
         },
-       
+        //用于优化事件派发
         global: {},
+        //移除目标元素绑定的回调
+        remove: function(elem, hash) {
+            var elemData = $._data(elem),
+                events, origType
+            if(!(events = elemData.events)) return;
 
-        //外部的API已经确保types至少为空字符串
-        unbind: function( elem, hash ) {
-
-            var  elemData = $._data( elem ), events, j, handleObj, origType
-            if( !(events = elemData.events )) return;
-
-            var types = hash.type || "", selector = hash.selector, handler = hash.handler;
-            types.replace( $.rword, function( t ){
-                var tns = rtypenamespace.exec( t ) || [];
-                var type = origType = tns[1];
-                var namespaces = tns[2];
-
-                // Unbind all events (on this namespace, if provided) for the element
-                if ( !type ) {
-                    for ( type in events ) {
-                        facade.unbind( elem, $.mix({}, hash, {
+            var types = hash.type || "",
+                selector = hash.selector,
+                handler = hash.handler;
+            types.replace($.rword, function(t) {
+                var tns = rtypenamespace.exec(t) || [],
+                    type = origType = tns[1],
+                    namespaces = tns[2];
+                //只传入命名空间,不传入事件类型,则尝试遍历所有事件类型
+                if(!type) {
+                    for(type in events) {
+                        facade.unbind(elem, $.mix({}, hash, {
                             type: type + t
-                        }) );
+                        }));
                     }
                     return
                 }
-                var hook = eventHooks[ type ] || {};
-                type = ( selector? hook.delegateType : hook.bindType ) || type;
-                var eventType = events[ type ] || [];
-                var origCount = eventType.length;
+                var hook = eventHooks[type] || {};
+                type = (selector ? hook.delegateType : hook.bindType) || type;
+                var handlers = events[type] || [];
+                var origCount = handlers.length;
                 namespaces = namespaces ? new RegExp("(^|\\.)" + namespaces.split(".").sort().join("\\.(?:.*\\.|)") + "(\\.|$)") : null;
-            
-                for ( j = 0; j < eventType.length; j++ ) {
-                    handleObj = eventType[ j ];
 
-                    if ( (  origType === handleObj.origType ) &&
-                        ( !handler || handler.uniqueNumber === handleObj.uuid ) &&
-                        ( !namespaces || namespaces.test( handleObj.namespace ) ) &&
-                        ( !selector || selector === handleObj.selector || selector === "**" && handleObj.selector ) ) {
-                        eventType.splice( j--, 1 );
+                for(var j = 0, handleObj; j < handlers.length; j++) {
+                    handleObj = handlers[j];
+                    //如果事件类型相同，回调相同，命名空间相同，选择器相同则移除此handleObj
+                    if((origType === handleObj.origType) && (!handler || handler.uniqueNumber === handleObj.uniqueNumber) && (!namespaces || namespaces.test(handleObj.namespace)) && (!selector || selector === handleObj.selector || selector === "**" && handleObj.selector)) {
+                        handlers.splice(j--, 1);
 
-                        if ( handleObj.selector ) {
-                            eventType.delegateCount--;
+                        if(handleObj.selector) {
+                            handlers.delegateCount--;
                         }
-                        if ( hook.remove ) {
-                            hook.remove.call( elem, handleObj );
+                        if(hook.remove) {
+                            hook.remove.call(elem, handleObj);
                         }
                     }
                 }
 
-                // Remove generic event handler if we removed something and no more handlers exist
-                // (avoids potential for endless recursion during removal of special event handlers)
-                if ( eventType.length === 0 && origCount !== eventType.length ) {
-                    if ( !hook.teardown || hook.teardown.call( elem, namespaces, elemData.handle ) === false ) {
-                        if($["@bind"] in elem){
-                            $.unbind(elem, type, elemData.handle ,false )
+                if(handlers.length === 0 && origCount !== handlers.length) {
+                    if(!hook.teardown || hook.teardown.call(elem, namespaces, elemData.handle) === false) {
+                        if($["@bind"] in elem) {
+                            $.unbind(elem, type, elemData.handle)
                         }
                     }
 
-                    delete events[ type ];
+                    delete events[type];
                 }
             })
 
-            if ( $.isEmptyObject( events ) ) {
+            if($.isEmptyObject(events)) {
                 delete elemData.handle;
-                $._removeData( elem, "events" );
+                $._removeData(elem, "events"); //这里会尝试移除缓存体
             }
         },
-
-        trigger: function( event ) {
+        //通过传入事件类型或事件对象,触发事件回调,在整个DOM树中执行
+        trigger: function(event) {
             var elem = this;
             //跳过文本节点与注释节点，主要是照顾旧式IE
-            if ( elem && (elem.nodeType === 3 || elem.nodeType === 8) ) {
+            if(elem && (elem.nodeType === 3 || elem.nodeType === 8)) {
                 return;
             }
 
-            var i, cur, old, ontype, handle, eventPath, bubbleType,
-            type = event.type || event,
-            namespaces = event.namespace ? event.namespace.split(".") : [];
+            var i, cur, old, ontype, handle, eventPath, bubbleType, type = event.type || event,
+                namespaces = event.namespace ? event.namespace.split(".") : [];
 
             // focus/blur morphs to focusin/out; ensure we're not firing them right now
-            if ( rfocusMorph.test( type + facade.triggered ) ) {
+            if(rfocusMorph.test(type + facade.triggered)) {
                 return;
             }
 
-            if ( type.indexOf( "." ) >= 0 ) {
+            if(type.indexOf(".") >= 0) {
                 //分解出命名空间
                 namespaces = type.split(".");
                 type = namespaces.shift();
                 namespaces.sort();
             }
             //如果从来没有绑定过此种事件，也不用继续执行了
-            if ( !elem && !facade.global[ type ] ) {
+            if(!elem && !facade.global[type]) {
                 return;
             }
 
@@ -5021,84 +5243,85 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             // 如果是$.Event实例
             event.originalEvent ? event :
             // Object literal
-            new $.Event( type, event ) :
+            new $.Event(type, event) :
             // Just the event type (string)
-            new $.Event( type );
+            new $.Event(type);
 
             event.type = type;
             event.isTrigger = true;
-            event.namespace = namespaces.join( "." );
-            event.namespace_re = event.namespace? new RegExp("(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)") : null;
-            ontype = type.indexOf( ":" ) < 0 ? "on" + type : "";
+            event.namespace = namespaces.join(".");
+            event.namespace_re = event.namespace ? new RegExp("(^|\\.)" + namespaces.join("\\.(?:.*\\.|)") + "(\\.|$)") : null;
+            ontype = type.indexOf(":") < 0 ? "on" + type : "";
             //清除result，方便重用
             event.result = void 0;
-            if ( !event.target ) {
+            if(!event.target) {
                 event.target = elem;
             }
             //取得额外的参数
-            var data = [].slice.call( arguments, 1 ) ;
-            data.unshift( event );
+            var data = $.slice(arguments);
+            data[0] = event;
             //判定是否需要用到事件冒充
-            var hook = eventHooks[ type ] || {};
-            if (  hook.trigger && hook.trigger.apply( elem, data ) === false ) {
+            var hook = eventHooks[type] || {};
+            if(hook.trigger && hook.trigger.apply(elem, data) === false) {
                 return;
             }
 
             //铺设往上冒泡的路径，每小段都包括处理对象与事件类型
-            eventPath = [[ elem, hook.bindType || type ]];
-            if (  !hook.noBubble && !$.type( elem, "Window" ) ) {
+            eventPath = [
+                [elem, hook.bindType || type]
+            ];
+            if(!hook.noBubble && !$.type(elem, "Window")) {
 
                 bubbleType = hook.delegateType || type;
-                cur = rfocusMorph.test( bubbleType + type ) ? elem : elem.parentNode;
-                for ( old = elem; cur; cur = cur.parentNode ) {
-                    eventPath.push([ cur, bubbleType ]);
+                cur = rfocusMorph.test(bubbleType + type) ? elem : elem.parentNode;
+                for(old = elem; cur; cur = cur.parentNode) {
+                    eventPath.push([cur, bubbleType]);
                     old = cur;
                 }
                 //一直冒泡到window
-                if ( old === (elem.ownerDocument || document) ) {
-                    eventPath.push([ old.defaultView || old.parentWindow || window, bubbleType ]);
+                if(old === (elem.ownerDocument || document)) {
+                    eventPath.push([old.defaultView || old.parentWindow || window, bubbleType]);
                 }
             }
 
             //沿着之前铺好的路触发事件
-            for ( i = 0; i < eventPath.length && !event.propagationStopped; i++ ) {
+            for(i = 0; i < eventPath.length && !event.propagationStopped; i++) {
 
                 cur = eventPath[i][0];
                 event.type = eventPath[i][1];
 
-                handle = ( $._data( cur, "events" ) || {} )[ event.type ] && $._data( cur, "handle" );
-                if ( handle ) {
-                    handle.apply( cur, data );
+                handle = ($._data(cur, "events") || {})[event.type] && $._data(cur, "handle");
+                if(handle) {
+                    handle.apply(cur, data);
                 }
                 //处理直接写在标签中的内联事件或DOM0事件
-                handle = ontype && cur[ ontype ];
-                if ( handle && handle.apply && handle.apply( cur, data ) === false ) {
+                handle = ontype && cur[ontype];
+                if(handle && handle.apply && handle.apply(cur, data) === false) {
                     event.preventDefault();
                 }
             }
             event.type = type;
             //如果没有阻止默认行为
-            if (  !event.defaultPrevented ) {
+            if(!event.defaultPrevented) {
 
-                if ( (!hook._default || hook._default.apply( elem.ownerDocument, data ) === false) &&
-                    !(type === "click" &&  elem.nodeName == "A" )  ) {
-                    if ( ontype && elem[ type ] && elem.nodeType ) {
+                if((!hook._default || hook._default.apply(elem.ownerDocument, data) === false) && !(type === "click" && elem.nodeName == "A")) {
+                    if(ontype && $.isFunction(elem[type]) && elem.nodeType) {
 
-                        old = elem[ ontype ];
+                        old = elem[ontype];
 
-                        if ( old ) {
-                            elem[ ontype ] = null;
+                        if(old) {
+                            elem[ontype] = null;
                         }
                         //防止二次trigger，elem.click会再次触发addEventListener中绑定的事件
                         facade.triggered = type;
                         try {
                             //IE6-8在触发隐藏元素的focus/blur事件时会抛出异常
-                            elem[ type ]();
-                        } catch ( e ) {   }
-                        facade.triggered = undefined;
+                            elem[type]();
+                        } catch(e) {}
+                        delete facade.triggered;
 
-                        if ( old ) {
-                            elem[ ontype ] = old;
+                        if(old) {
+                            elem[ontype] = old;
                         }
                     }
                 }
@@ -5106,44 +5329,49 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
 
             return event.result;
         },
-
-        dispatch: function( event ) {
-            //包裹事件对象，统一事件接口与覆盖原生成属性
-            event = $.event.fix( event );
-            var i, j, cur, ret, selMatch, matched, matches, handleObj, sel,
-            handlers = ( ($._data( this, "events" ) || {} )[ event.type ] || []),
-            delegateCount = handlers.delegateCount,
-            args = $.slice( arguments ),
-            hook = eventHooks[ event.type ] || {},
-            handlerQueue = [];
-            //重置第一个参数
-            args[0] = event;
+        //执行用户回调,只在当前元素中执行
+        dispatch: function(e) {
+            //如果不存在事件回调就没有必要继续进行下去
+            var eventType = e.type,
+                handlers = (($._data(this, "events") || {})[eventType] || [])
+                if(!handlers.length) {
+                    return;
+                }
+                //摒蔽事件对象在各浏览器下的差异性
+            var event = $.event.fix(e),
+                delegateCount = handlers.delegateCount,
+                args = $.slice(arguments),
+                hook = eventHooks[eventType] || {},
+                handlerQueue = [],
+                ret, selMatch, matched, matches, handleObj, sel
+                //重置第一个参数
+                args[0] = event;
             event.delegateTarget = this;
 
             // 经典的AOP模式
-            if ( hook.preDispatch && hook.preDispatch.call( this, event ) === false ) {
+            if(hook.preDispatch && hook.preDispatch.call(this, event) === false) {
                 return;
             }
             //收集阶段
             //如果使用了事件代理，则先执行事件代理的回调, FF的右键会触发点击事件，与标签不符
-            if ( delegateCount && !(event.button && event.type === "click") ) {
-                for ( cur = event.target; cur != this; cur = cur.parentNode || this ) {
+            if(delegateCount && !(event.button && eventType === "click")) {
+                for(var cur = event.target; cur != this; cur = cur.parentNode || this) {
                     //disabled元素不能触发点击事件
-                    if ( cur.disabled !== true || event.type !== "click" ) {
-                        selMatch = {};                     
+                    if(cur.disabled !== true || eventType !== "click") {
+                        selMatch = {};
                         matches = [];
-                        for ( i = 0; i < delegateCount; i++ ) {
-                            handleObj = handlers[ i ];
+                        for(var i = 0; i < delegateCount; i++) {
+                            handleObj = handlers[i];
                             sel = handleObj.selector;
                             //判定目标元素(this)的孩子(cur)是否匹配（sel）
-                            if ( selMatch[ sel ] === void 0 ) {
-                                selMatch[ sel ] =  $( sel, this ).index( cur ) >= 0 
+                            if(selMatch[sel] === void 0) {
+                                selMatch[sel] = $(sel, this).index(cur) >= 0
                             }
-                            if ( selMatch[ sel ] ) {
-                                matches.push( handleObj );
+                            if(selMatch[sel]) {
+                                matches.push(handleObj);
                             }
                         }
-                        if ( matches.length ) {
+                        if(matches.length) {
                             handlerQueue.push({
                                 elem: cur,
                                 matches: matches
@@ -5154,32 +5382,32 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             }
 
             // 这是事件绑定的回调
-            if ( handlers.length > delegateCount ) {
+            if(handlers.length > delegateCount) {
                 handlerQueue.push({
                     elem: this,
-                    matches: handlers.slice( delegateCount )
+                    matches: handlers.slice(delegateCount)
                 });
             }
 
             // 如果没有阻止事件传播，则执行它们
-            for ( i = 0; i < handlerQueue.length && !event.propagationStopped; i++ ) {
-                matched = handlerQueue[ i ];
+            for(i = 0; i < handlerQueue.length && !event.propagationStopped; i++) {
+                matched = handlerQueue[i];
                 event.currentTarget = matched.elem;
-                for ( j = 0; j < matched.matches.length && !event.isImmediatePropagationStopped; j++ ) {
-                    handleObj = matched.matches[ j ];
+                for(var j = 0; j < matched.matches.length && !event.isImmediatePropagationStopped; j++) {
+                    handleObj = matched.matches[j];
                     //namespace，.namespace_re属性只出现在trigger方法中
-                    if ( !event.namespace || event.namespace_re && event.namespace_re.test( handleObj.namespace ) ) {
+                    if(!event.namespace || event.namespace_re && event.namespace_re.test(handleObj.namespace)) {
 
                         event.data = handleObj.data;
                         event.handleObj = handleObj;
-                        ret = ( (eventHooks[ handleObj.origType ] || {}).handle || handleObj.handler ).apply( matched.elem, args );
+                        ret = ((eventHooks[handleObj.origType] || {}).handle || handleObj.handler).apply(matched.elem, args);
                         handleObj.times--;
-                        if(handleObj.times === 0){//如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind( matched.elem, handleObj)
+                        if(handleObj.times === 0) { //如果有次数限制并到用光所有次数，则移除它
+                            facade.unbind(matched.elem, handleObj)
                         }
-                        if ( ret !== void 0 ) {
+                        if(ret !== void 0) {
                             event.result = ret;
-                            if ( ret === false ) {
+                            if(ret === false) {
                                 event.preventDefault();
                                 event.stopPropagation();
                             }
@@ -5188,194 +5416,142 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
                 }
             }
 
-            if ( hook.postDispatch ) {
-                hook.postDispatch.call( this, event );
+            if(hook.postDispatch) {
+                hook.postDispatch.call(this, event);
             }
 
             return event.result;
         },
 
-
-        fix: function( event ) {
-            if ( event.originalEvent ) {
-                return event;
-            }
-            var  real = event;
-            event = $.Event( real );
-            //复制真实事件对象的成员
-            for( var p in real ){
-                if( !(p in event) ){
-                    event[p] = real[p]
-                }
-            }
-            //如果不存在target属性，为它添加一个
-            if ( !event.target ) {
-                event.target = event.srcElement || document;
-            }
-            //safari的事件源对象可能为文本节点，应代入其父节点
-            if ( event.target.nodeType === 3 ) {
-                event.target = event.target.parentNode;
-            }
-            event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
-            if( /^(?:mouse|contextmenu)|click/.test( event.type ) ){
-                if ( event.pageX == null && event.clientX != null ) {  // 处理鼠标事件 http://www.w3help.org/zh-cn/causes/BX9008
-                    var doc = event.target.ownerDocument || document;//safari与chrome下，滚动条，视窗相关的东西是放在body上
-                    var box = (navigator.vendor || document.compatMode == "BackCompat" )  ?  doc.body : doc.documentElement
-                    event.pageX = event.clientX + ( box.scrollLeft >> 0) - ( box.clientLeft >> 0);
-                    event.pageY = event.clientY + ( box.scrollTop >> 0) - ( box.clientTop  >> 0);
-                }
-                //如果不存在relatedTarget属性，为它添加一个
-                if ( !event.relatedTarget && event.fromElement ) {
-                    event.relatedTarget = event.fromElement === event.target ? event.toElement : event.fromElement;
-                }
-                //标准浏览判定按下鼠标哪个键，左1中2右3
-                var button = event.button
-                //IE event.button的意义 0：没有键被按下 1：按下左键 2：按下右键 3：左键与右键同时被按下 4：按下中键 5：左键与中键同时被按下 6：中键与右键同时被按下 7：三个键同时被按下
-                if ( !event.which && isFinite(button) ) {
-                    event.which  = [0,1,3,0,2,0,0,0][button];//0现在代表没有意义
-                }
-                if( event.type === "mousewheel" ){ //处理滚轮事件
-                    if ("wheelDelta" in real){//统一为±120，其中正数表示为向上滚动，负数表示向下滚动
-                        // http://www.w3help.org/zh-cn/causes/SD9015
-                        var delta = real.wheelDelta
-                        //opera 9x系列的滚动方向与IE保持一致，10后修正
-                        if( window.opera && opera.version() < 10 )
-                            delta = -delta;
-                        event.wheelDelta = Math.round(delta); //修正safari的浮点 bug
-                    }else if( "detail" in real ){
-                        event.wheelDelta = -real.detail * 40;//修正FF的detail 为更大众化的wheelDelta
+        //修正事件对象,摒蔽差异性
+        fix: function(event) {
+            if(!event.originalEvent) {
+                var real = event;
+                event = $.Event(real);
+                //复制真实事件对象的成员
+                for(var p in real) {
+                    if(!(p in event)) {
+                        event[p] = real[p]
                     }
                 }
-            }else if ( event.which == null ) {//处理键盘事件
-                event.which = event.charCode != null ? event.charCode : event.keyCode;
-            }else if( window.Touch && event.touches && event.touches[0] ){
-                event.pageX = event.touches[0].pageX//处理触摸事件
-                event.pageY = event.touches[0].pageY
+                //如果不存在target属性，为它添加一个
+                if(!event.target) {
+                    event.target = event.srcElement || document;
+                }
+                //safari的事件源对象可能为文本节点，应代入其父节点
+                if(event.target.nodeType === 3) {
+                    event.target = event.target.parentNode;
+                }
+                event.metaKey = !! event.ctrlKey; // 处理IE678的组合键
+                var callback = facade["fix" + eventMap[event.type]]
+                if(typeof callback == "function") {
+                    callback(event, real)
+                }
             }
             return event;
-        },
-        simulate: function( type, elem, event, bubble ) {
-            var e = $.mix(
-                new $.Event(),
-                event,
-                {
-                    type: type,
-                    isSimulated: true,
-                    originalEvent: {}
-                } );
-
-            $.event[bubble ? "trigger" : "dispatch"].call( elem, e );
-            if ( e.defaultPrevented ) {
-                event.preventDefault();
-            }
         }
     });
-    facade.add = facade.bind;
-    facade.remove = facade.unbind;
-    var rmapper = /(\w+)_(\w+)/g;
+    facade.bind = facade.add;
+    facade.unbind = facade.remove;
     //以下是用户使用的API
     $.implement({
-        hover: function( fnIn, fnOut ) {
-            return this.mouseenter( fnIn ).mouseleave( fnOut || fnIn );
+        hover: function(fnIn, fnOut) {
+            return this.mouseenter(fnIn).mouseleave(fnOut || fnIn);
         },
-        delegate: function( selector, types, fn, times ) {
-            return this.on( types, selector, fn, times);
+        delegate: function(selector, types, fn, times) {
+            return this.on(types, selector, fn, times);
         },
-        live: function( types, fn, times ) {
-            $.log( "$.fn.live() is deprecated" )
-            $( this.ownerDocument ).on( types, this.selector, fn, times );
+        live: function(types, fn, times) {
+            $.log("$.fn.live() is deprecated")
+            $(this.ownerDocument).on(types, this.selector, fn, times);
             return this;
         },
-        one: function( types, fn ) {
-            return this.on( types, fn, 1 );
+        one: function(types, fn) {
+            return this.on(types, fn, 1);
         },
-        undelegate: function(selector, types, fn ) {/*顺序不能乱*/
-            return arguments.length == 1 ? this.off( selector, "**" ) : this.off( types, fn, selector );
+        undelegate: function(selector, types, fn) { /*顺序不能乱*/
+            return arguments.length == 1 ? this.off(selector, "**") : this.off(types, fn, selector);
         },
-        die: function( types, fn ) {
-            $.log( "$.fn.live() is die" )
-            $( this.ownerDocument ).off( types, fn, this.selector || "**", fn );
+        die: function(types, fn) {
+            $.log("$.fn.die() is deprecated")
+            $(this.ownerDocument).off(types, fn, this.selector || "**", fn);
             return this;
         },
         fire: function() {
             var args = arguments;
             return this.each(function() {
-                facade.trigger.apply(this, args );
+                facade.trigger.apply(this, args);
             });
         }
     });
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
     var rtypes = /^[a-z0-9_\-\.\s\,]+$/i
-    "on_bind,off_unbind".replace( rmapper, function(_,method, mapper){
-        $.fn[ method ] = function(types, selector, fn ){
-            if ( typeof types === "object" ) {
-                for ( var type in types ) {
-                    $.fn[ method ](this, type, selector, types[ type ], fn );
+    "on_bind,off_unbind".replace($.rmapper, function(_, method, mapper) {
+        $.fn[method] = function(types, selector, fn) {
+            if(typeof types === "object") {
+                for(var type in types) {
+                    $.fn[method](this, type, selector, types[type], fn);
                 }
                 return this;
             }
             var hash = {};
-            for(var i = 0 ; i < arguments.length; i++ ){
+            for(var i = 0; i < arguments.length; i++) {
                 var el = arguments[i];
-                if(typeof el == "number"){
+                if(typeof el == "number") {
                     hash.times = el;
-                }else if(typeof el == "function"){
+                } else if(typeof el == "function") {
                     hash.handler = el
                 }
-                if(typeof el === "string"){
-                    if(hash.type != null){
+                if(typeof el === "string") {
+                    if(hash.type != null) {
                         hash.selector = el.trim();
-                    }else{
-                        hash.type = el.trim();//只能为字母数字-_.空格
-                        if(!rtypes.test(hash.type)){
+                    } else {
+                        hash.type = el.trim(); //只能为字母数字-_.空格
+                        if(!rtypes.test(hash.type)) {
                             throw new Error("事件类型格式不正确")
                         }
                     }
                 }
             }
-            if(!hash.type){
+            if(!hash.type) {
                 throw new Error("必须指明事件类型")
             }
-            if(method === "on" && !hash.handler ){
+            if(method === "on" && !hash.handler) {
                 throw new Error("必须指明事件回调")
             }
-            hash.times = hash.times > 0  ? hash.times : Infinity;
+            hash.times = hash.times > 0 ? hash.times : Infinity;
             return this.each(function() {
-                facade[ mapper ]( this, hash );
+                facade[mapper](this, hash);
             });
         }
-        $.fn[ mapper ] = function(){// $.fn.bind $.fn.unbind
-            return $.fn[ method ].apply(this, arguments );
+        $.fn[mapper] = function() { // $.fn.bind $.fn.unbind
+            return $.fn[method].apply(this, arguments);
         }
     });
-    var mouseEvents =  "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,"
-    var eventMap = $.oneObject(mouseEvents, "MouseEvents");
-    var types = mouseEvents +",keypress,keydown,keyup," + "blur,focus,focusin,focusout,"+
-    "abort,error,load,unload,resize,scroll,change,input,select,reset,submit"//input
-    types.replace( $.rword, function( type ){//这里产生以事件名命名的快捷方法
-        eventMap[type] = eventMap[type] || (/key/.test(type) ? "KeyboardEvent" : "HTMLEvents")
-        $.fn[ type ] = function( callback ){
-            return callback?  this.bind( type, callback ) : this.fire( type );
+
+    types.replace($.rword, function(type) { //这里产生以事件名命名的快捷方法
+        eventMap[type] = eventMap[type] || (/key/.test(type) ? "Keyboard" : "HTML")
+        $.fn[type] = function(callback) {
+            return callback ? this.bind(type, callback) : this.fire(type);
         }
     });
     /* mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10+都支持它们
 详见http://www.filehippo.com/pl/download_opera/changelog/9476/
          */
-    if( !+"\v1" || !$.eventSupport("mouseenter")){//IE6789不能实现捕获与safari chrome不支持
-        "mouseenter_mouseover,mouseleave_mouseout".replace(rmapper, function(_, type, fix){
+    if(!+"\v1" || !$.eventSupport("mouseenter")) { //IE6789不能实现捕获与safari chrome不支持
+        "mouseenter_mouseover,mouseleave_mouseout".replace($.rmapper, function(_, type, fix) {
             eventHooks[type] = {
                 delegateType: fix,
                 bindType: fix,
-                handle: function( event ) {
-                    var ret,
-                    target = this,
-                    related = event.relatedTarget,
-                    handleObj = event.handleObj;
+                handle: function(event) {
+                    var ret, target = this,
+                        related = event.relatedTarget,
+                        handleObj = event.handleObj;
                     // For mousenter/leave call the handler if related is outside the target.
                     // NB: No relatedTarget if the mouse left/entered the browser window
-                    if ( !related || (related !== target && !$.contains( target, related )) ) {
+                    if(!related || (related !== target && !$.contains(target, related))) {
                         event.type = handleObj.origType;
-                        ret = handleObj.handler.apply( this, arguments );
+                        ret = handleObj.handler.apply(this, arguments);
                         event.type = fix;
                     }
                     return ret;
@@ -5383,49 +5559,53 @@ define("event",  top.dispatchEvent ? ["$node"]: ["$node","$event_fix"],function(
             }
         });
     }
-    //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充
-    if( !$.support.focusin ){
-        "focusin_focus,focusout_blur".replace(rmapper, function(_,orig, fix){
+    //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充,Firefox 17+
+    if(!$.support.focusin) {
+        "focusin_focus,focusout_blur".replace($.rmapper, function(_, orig, fix) {
             var attaches = 0,
-            handler = function( event ) {
-                facade.simulate( orig, event.target, facade.fix( event ), true );
-            };
-            eventHooks[ orig ] = {
+                handler = function(event) {
+                    event = facade.fix(event);
+                    $.mix(event, {
+                        type: orig,
+                        isSimulated: true
+                    });
+                    facade.trigger.call(event.target, event);
+                };
+            eventHooks[orig] = {
                 setup: function() {
-                    if ( attaches++ === 0 ) {
-                        document.addEventListener( fix, handler, true );
+                    if(attaches++ === 0) {
+                        document.addEventListener(fix, handler, true);
                     }
                 },
                 teardown: function() {
-                    if ( --attaches === 0 ) {
-                        document.removeEventListener( fix, handler, true );
+                    if(--attaches === 0) {
+                        document.removeEventListener(fix, handler, true);
                     }
                 }
             };
         });
     }
-    try{
+    try {
         //FF需要用DOMMouseScroll事件模拟mousewheel事件
         document.createEvent("MouseScrollEvents");
         eventHooks.mousewheel = {
-            bindType    : "DOMMouseScroll",
+            bindType: "DOMMouseScroll",
             delegateType: "DOMMouseScroll"
         }
-        if($.eventSupport("mousewheel")){
+        if($.eventSupport("mousewheel")) {
             delete eventHooks.mousewheel;
         }
-    }catch(e){};
-    
+    } catch(e) {};
+
     return $;
 })
-
 
 
 //=========================================
 //  数据交互模块
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
-define("ajax",["mass","$lang"], function($){
+define("ajax",["mass","$interact"], function($){
     var global = this,
     DOC = global.document,
     r20 = /%20/g,
@@ -5433,16 +5613,16 @@ define("ajax",["mass","$lang"], function($){
     encode = encodeURIComponent,
     decode = decodeURIComponent,
     rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg, // IE的换行符不包含 \r
-    rlocalProtocol = /^(?:about|app|app\-storage|.+\-extension|file|res|widget):$/,
+    rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
     rnoContent = /^(?:GET|HEAD)$/,
     rquery = /\?/,
     rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
     //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
     //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
-    curl = DOC.URL;
-
+    curl = DOC.URL,
+    segments = rurl.exec( curl.toLowerCase() ) || [],
     //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
-    var s = ["XMLHttpRequest",
+    s = ["XMLHttpRequest",
     "ActiveXObject('Msxml2.XMLHTTP.6.0')",
     "ActiveXObject('Msxml2.XMLHTTP.3.0')",
     "ActiveXObject('Msxml2.XMLHTTP')",
@@ -5459,8 +5639,8 @@ define("ajax",["mass","$lang"], function($){
             }
         }catch(e){}
     }
-    var segments = rurl.exec( curl.toLowerCase() ) || [],
-    accepts  = {
+   
+    var accepts  = {
         xml: "application/xml, text/xml",
         html: "text/html",
         text: "text/plain",
@@ -5627,7 +5807,7 @@ define("ajax",["mass","$lang"], function($){
     /*=============================================================================================
     从这里开始是数据交互模块的核心,包含一个ajax方法,ajaxflow对象,传送器集合,转换器集合
     =============================================================================================*/
-    var ajaxflow = new $.EventTarget
+    var ajaxflow = new $.Flow
     var transports = { }//传送器，我们可以通过XMLHttpRequest, Script, Iframe与后端
     var converters = {   //转换器，返回用户想要做的数据（从原始返回值中提取加工）
         text: function(xhr, text, xml){
@@ -5658,7 +5838,7 @@ define("ajax",["mass","$lang"], function($){
         }else if( dataType == "jsonp" ){
             if( opts.crossDomain ){// opts.crossDomain &&
                 $.log("使用script发出JSONP请求")
-                ajaxflow.dispatchEvent("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
+                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback);//用于jsonp请求
                 dataType = "script"
             }else{
                 dataType = dummyXHR.options.dataType = "json";
@@ -5705,7 +5885,7 @@ define("ajax",["mass","$lang"], function($){
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     
     $.XHR = $.factory({
-        inherit: $.EventTarget,
+        inherit: $.Flow,
         init:function( opts ){
             $.mix(this, {
                 responseData:null,
@@ -5799,10 +5979,10 @@ define("ajax",["mass","$lang"], function($){
             }
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
 
-            this.dispatchEvent( eventType, this.responseData, statusText);
-            ajaxflow.dispatchEvent( eventType );
-            this.dispatchEvent("complete", this.responseData, statusText);
-            ajaxflow.dispatchEvent( "complete" );
+            this.fire( eventType, this.responseData, statusText);
+            ajaxflow.fire( eventType );
+            this.fire("complete", this.responseData, statusText);
+            ajaxflow.fire( "complete" );
             delete this.transport;
         }
     });
@@ -5968,7 +6148,7 @@ define("ajax",["mass","$lang"], function($){
         delete $[ xhr.jsonp ];
         return json;
     }
-    ajaxflow.addEventListener("start", function(e, dummyXHR, url, jsonp, jsonpCallback) {
+    ajaxflow.bind("start", function(e, dummyXHR, url, jsonp, jsonpCallback) {
         $.log("jsonp start...");
         var namespace =  DOC.URL.replace(/(#.+|\W)/g,'');
         jsonpCallback = dummyXHR.jsonp = jsonpCallback || "jsonp"+dummyXHR.uuid().replace(/-/g,"");
@@ -5994,8 +6174,8 @@ define("ajax",["mass","$lang"], function($){
         data = $.unparam(data);
         var ret = [], d, isArray, vs, i, e;
         for (d in data) {
-            isArray = $.isArray(data[d]);
-            vs = $.makeArray( data[d])
+            isArray = Array.isArray(data[d]);
+            vs = isArray?  data[d]: [data[d]]
             // 数组和原生一样对待，创建多个同名输入域
             for (i = 0; i < vs.length; i++) {
                 e = DOC.createElement("input");
@@ -6098,104 +6278,111 @@ define("ajax",["mass","$lang"], function($){
 //=========================================
 // 动画模块 v6
 //==========================================
-define("fx", ["$css"],function( $ ){
+define("fx", ["$css"], function($) {
     var types = {
-        color:/color/i,
-        scroll:/scroll/i
+        color: /color/i,
+        scroll: /scroll/i
     },
-    rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
-    timeline =  $.timeline = []//时间轴
-    $.mix({//缓动公式
-        easing : {
-            linear: function( pos ) {
-                return pos;
+        rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
+        timeline = $.timeline = [] //时间轴
+        $.mix({ //缓动公式
+            easing: {
+                linear: function(pos) {
+                    return pos;
+                },
+                swing: function(pos) {
+                    return(-Math.cos(pos * Math.PI) / 2) + 0.5;
+                }
             },
-            swing: function( pos ) {
-                return (-Math.cos(pos*Math.PI)/2) + 0.5;
-            }
-        },
-        fps: 30
-    })
-    //用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
-    function tick(fx){
-        if(fx.queue){ //让同一个元素的动画一个接一个执行
+            fps: 30
+        })
+        //用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
+
+
+    function tick(fx) {
+        if(fx.queue) { //让同一个元素的动画一个接一个执行
             var gotoQueue = true;
-            for(var i = timeline.length, el; el = timeline[--i];){
-                if(el.node == fx.node){//★★★第一步
-                    el.positive.push(fx);//子列队
+            for(var i = timeline.length, el; el = timeline[--i];) {
+                if(el.node == fx.node) { //★★★第一步
+                    el.positive.push(fx); //子列队
                     gotoQueue = false
                     break;
                 }
             }
-            if(gotoQueue){//★★★第二步
-                timeline.unshift( fx );
+            if(gotoQueue) { //★★★第二步
+                timeline.unshift(fx);
             }
-        }else{
-            timeline.push( fx )
+        } else {
+            timeline.push(fx)
         }
-        if (tick.id === null) {
-            tick.id = setInterval( nextTick, 1000/ $.fps );//原始的setInterval id并执行动画
+        if(tick.id === null) {
+            tick.id = setInterval(nextTick, 1000 / $.fps); //原始的setInterval id并执行动画
         }
     }
     tick.id = null;
     //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
+
+
     function nextTick() {
         var i = timeline.length;
-        while(--i >= 0){
-            if ( !(timeline[i].node && animate(timeline[i], i)) ) {
+        while(--i >= 0) {
+            if(!(timeline[i].node && animate(timeline[i], i))) {
                 timeline.splice(i, 1);
             }
         }
-        timeline.length || (clearInterval( tick.id ), tick.id = null);
+        timeline.length || (clearInterval(tick.id), tick.id = null);
     }
 
-    var effect = $.fn.fx = function( props, /*internal*/ p  ){
-        var opts = resetArguments.apply(null, arguments);
-        if( (props = opts.props) ){
-            var ease = opts.specialEasing;
-            for( var name in props){
-                p = $.cssName(name) || name;
-                if( name != p ){
-                    props[ p ] = props[ name ];//收集用于渐变的属性
-                    ease[ p ] = ease[ name ];
-                    delete ease[ name ];
-                    delete props[ name ];
+    var effect = $.fn.fx = function(props, /*internal*/ p) {
+            var opts = resetArguments.apply(null, arguments);
+            if((props = opts.props)) {
+                var ease = opts.specialEasing;
+                for(var name in props) {
+                    p = $.cssName(name) || name;
+                    if(name != p) {
+                        props[p] = props[name]; //收集用于渐变的属性
+                        ease[p] = ease[name];
+                        delete ease[name];
+                        delete props[name];
+                    }
                 }
             }
+            for(var i = 0, node; node = this[i++];) {
+                var fx = {};
+                $.mix(fx, opts)
+                fx.method = "noop"
+                fx.positive = [];
+                fx.negative = [];
+                fx.node = node;
+                tick(fx);
+            }
+            return this;
         }
-        for(var i = 0, node; node = this[i++];){
-            var fx = {};
-            $.mix(fx, opts)
-            fx.method = "noop"
-            fx.positive = [];
-            fx.negative = [];
-            fx.node = node;
-            tick( fx );
-        }
-        return this;
-    }
     $.fn.animate = effect;
     //.animate( properties [, duration] [, easing] [, complete] )
     //.animate( properties, options )
-    function addOptions(opts, p){
-        switch( $.type( p ) ){
-            case "Object":
-                delete  p.props;
-                $.mix(opts, p);
-                break;
-            case "Number":
-                opts.duration = p;
-                break;
-            case "String":
-                opts.easing   = p;
-                break;
-            case "Function":
-                opts.complete = p;
-                break;
+
+
+    function addOptions(opts, p) {
+        switch($.type(p)) {
+        case "Object":
+            delete p.props;
+            $.mix(opts, p);
+            break;
+        case "Number":
+            opts.duration = p;
+            break;
+        case "String":
+            opts.easing = p;
+            break;
+        case "Function":
+            opts.complete = p;
+            break;
         }
     }
-    function resetArguments( properties ) {
-        if(isFinite(properties)){
+
+    function resetArguments(properties) {
+        if(isFinite(properties)) {
             return {
                 duration: properties
             }
@@ -6204,53 +6391,53 @@ define("fx", ["$css"],function( $ ){
             props: properties
         }
         //如果第二参数是对象
-        for(var i = 1; i < arguments.length; i++){
-            addOptions (opts, arguments[i]);
+        for(var i = 1; i < arguments.length; i++) {
+            addOptions(opts, arguments[i]);
         }
-        opts.duration  = typeof opts.duration == "number" ? opts.duration : 700;
-        opts.queue =  !!(opts.queue == null || opts.queue);//默认使用列队
+        opts.duration = typeof opts.duration == "number" ? opts.duration : 700;
+        opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
         opts.specialEasing = opts.specialEasing || {}
         return opts;
     };
 
     effect.updateHooks = {
-        _default: function(node, per, end, obj){
-            $.css(node, obj.name, (end ? obj.to :  obj.from + obj.easing(per) * (obj.to - obj.from)  ) + obj.unit)
+        _default: function(node, per, end, obj) {
+            $.css(node, obj.name, (end ? obj.to : obj.from + obj.easing(per) * (obj.to - obj.from)) + obj.unit)
         },
-        color: function(node, per, end, obj){
-            var pos = obj.easing( per ),
-            rgb = end ? obj.to : obj.from.map(function(from, i){
-                return Math.max(Math.min( parseInt( from + (obj.to[i] - from) * pos, 10), 255), 0);
-            });
+        color: function(node, per, end, obj) {
+            var pos = obj.easing(per),
+                rgb = end ? obj.to : obj.from.map(function(from, i) {
+                    return Math.max(Math.min(parseInt(from + (obj.to[i] - from) * pos, 10), 255), 0);
+                });
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
     }
     effect.parseHooks = {
-        color:function(node, from, to){
-            return [ color2array(from), color2array(to) ]
+        color: function(node, from, to) {
+            return [color2array(from), color2array(to)]
         }
     }
-    effect._default = $.css,//getter
-    effect.scroll =  function(el, prop){//getter
-        return el[ prop ];
+    effect._default = $.css, //getter
+    effect.scroll = function(el, prop) { //getter
+        return el[prop];
     }
     var Animation = {
-        fx: function ( nodes, properties, args  ){
+        fx: function(nodes, properties, args) {
             //由于构建更高级的基于元素节点的复合动画
             var options = {}
-            for(var i = 1; i < args.length; i++){
-                addOptions (options, args[i]);
+            for(var i = 1; i < args.length; i++) {
+                addOptions(options, args[i]);
             }
-            "before,after".replace(/\w+/g, function(call){
-                options[ call ] = properties[ call ] ;
-                delete properties[ call ];
+            "before,after".replace($.rword, function(call) {
+                options[call] = properties[call];
+                delete properties[call];
             });
             return nodes.fx(properties, options);
         },
-        noop: function(){},
-        type: function (attr){//  用于取得适配器的类型
-            for(var i in types){
-                if(types[i].test(attr)){
+        noop: function() {},
+        type: function(attr) { //  用于取得适配器的类型
+            for(var i in types) {
+                if(types[i].test(attr)) {
                     return i;
                 }
             }
@@ -6259,23 +6446,23 @@ define("fx", ["$css"],function( $ ){
         //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
         //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
         //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
-        show: function(node, fx){
+        show: function(node, fx) {
             if(node.nodeType == 1 && $._isHidden(node)) {
-                var display =  $._data(node, "olddisplay");
-                if(!display || display == "none"){
+                var display = $._data(node, "olddisplay");
+                if(!display || display == "none") {
                     display = $.parseDisplay(node.nodeName)
                     $._data(node, "olddisplay", display);
                 }
                 node.style.display = display;
-                if("width" in  fx.props || "height" in  fx.props  ){//如果是缩放操作
+                if("width" in fx.props || "height" in fx.props) { //如果是缩放操作
                     //修正内联元素的display为inline-block，以让其可以进行width/height的动画渐变
-                    if ( display === "inline" && $.css( node, "float" ) === "none" ) {
-                        if ( !$.support.inlineBlockNeedsLayout ) {//w3c
+                    if(display === "inline" && $.css(node, "float") === "none") {
+                        if(!$.support.inlineBlockNeedsLayout) { //w3c
                             node.style.display = "inline-block";
-                        } else {//IE
-                            if ( display === "inline" ) {
+                        } else { //IE
+                            if(display === "inline") {
                                 node.style.display = "inline-block";
-                            }else {
+                            } else {
                                 node.style.display = "inline";
                                 node.style.zoom = 1;
                             }
@@ -6284,91 +6471,97 @@ define("fx", ["$css"],function( $ ){
                 }
             }
         },
-        hide: function(node, fx){
-            if(node.nodeType == 1 && !$._isHidden(node)){
-                var display = $.css( node, "display" ), s = node.style;
-                if ( display !== "none" && !$._data( node, "olddisplay" ) ) {
-                    $._data( node, "olddisplay", display );
+        hide: function(node, fx) {
+            if(node.nodeType == 1 && !$._isHidden(node)) {
+                var display = $.css(node, "display"),
+                    s = node.style;
+                if(display !== "none" && !$._data(node, "olddisplay")) {
+                    $._data(node, "olddisplay", display);
                 }
-                if("width" in fx.props || "height" in fx.props ){//如果是缩放操作
+                if("width" in fx.props || "height" in fx.props) { //如果是缩放操作
                     //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
-                    fx.overflow = [ s.overflow, s.overflowX, s.overflowY ];
+                    fx.overflow = [s.overflow, s.overflowX, s.overflowY];
                     s.overflow = "hidden";
                 }
-                fx.after = function( node, fx ){
+                fx.after = function(node, fx) {
                     s.display = "none";
-                    if ( fx.overflow != null ) {
-                        [ "", "X", "Y" ].forEach(function (postfix,index) {
-                            s[ "overflow" + postfix ] = fx.overflow[index]
+                    if(fx.overflow != null) {
+                        ["", "X", "Y"].forEach(function(postfix, index) {
+                            s["overflow" + postfix] = fx.overflow[index]
                         });
                     }
                 };
             }
         },
-        toggle: function( node ){
-            $[ $._isHidden(node) ? "show" : "hide" ]( node );
+        toggle: function(node) {
+            $[$._isHidden(node) ? "show" : "hide"](node);
         },
         //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
-        create: function (node, fx, index ){
-            var to, parts, unit, op, parser, props = [], revertProps = [], orig = {},
-            hidden = $._isHidden(node) , ease = fx.specialEasing, hash = fx.props, easing = fx.easing //公共缓动公式
-            if(!hash.length){
-                for(var name in hash){
-                    if(!hash.hasOwnProperty(name) ){
+        create: function(node, fx, index) {
+            var to, parts, unit, op, parser, props = [],
+                revertProps = [],
+                orig = {},
+                hidden = $._isHidden(node),
+                ease = fx.specialEasing,
+                hash = fx.props,
+                easing = fx.easing //公共缓动公式
+            if(!hash.length) {
+                for(var name in hash) {
+                    if(!hash.hasOwnProperty(name)) {
                         continue
                     }
                     var val = hash[name] //取得结束值
-                    var type = Animation.type(name);//取得类型
-                    var from = (effect[ type ] || effect._default)(node, name);//取得起始值
+                    var type = Animation.type(name); //取得类型
+                    var from = (effect[type] || effect._default)(node, name); //取得起始值
                     //用于分解属性包中的样式或属性,变成可以计算的因子
-                    if( val === "show" || (val === "toggle" && hidden)){
-                        val = $._data(node,"old"+name) || from;
+                    if(val === "show" || (val === "toggle" && hidden)) {
+                        val = $._data(node, "old" + name) || from;
                         fx.method = "show";
                         from = 0;
-                        $.css(node, name, 0 );
-                    }else if(val === "hide" || val === "toggle" ){//hide
-                        orig[name] = $._data(node,"old"+name, from );
+                        $.css(node, name, 0);
+                    } else if(val === "hide" || val === "toggle") { //hide
+                        orig[name] = $._data(node, "old" + name, from);
                         fx.method = "hide";
                         val = 0;
                     }
-                    if((parser = effect.parseHooks[ type ])){
-                        parts = parser(node, from, val );
-                    }else{
-                        from = !from || from == "auto" ? 0 : parseFloat(from)//确保from为数字
-                        if( (parts = rfxnum.exec( val )) ){
-                            to = parseFloat( parts[2] ),//确保to为数字
-                            unit = $.cssNumber[ name ] ? 0 : (parts[3] || "px");
-                            if(parts[1]){
-                                op = parts[1].charAt(0);//操作符
-                                if (unit && unit !== "px" && (op == "+" || op == "-")  ) {
+                    if((parser = effect.parseHooks[type])) {
+                        parts = parser(node, from, val);
+                    } else {
+                        from = !from || from == "auto" ? 0 : parseFloat(from) //确保from为数字
+                        if((parts = rfxnum.exec(val))) {
+                            to = parseFloat(parts[2]), //确保to为数字
+                            unit = $.cssNumber[name] ? 0 : (parts[3] || "px");
+                            if(parts[1]) {
+                                op = parts[1].charAt(0); //操作符
+                                if(unit && unit !== "px" && (op == "+" || op == "-")) {
                                     $.css(node, name, (to || 1) + unit);
-                                    from = ((to || 1) / parseFloat( $.css(node,name) )) * from;
-                                    $.css( node, name, from + unit);
+                                    from = ((to || 1) / parseFloat($.css(node, name))) * from;
+                                    $.css(node, name, from + unit);
                                 }
-                                if(op){//处理+=,-= \= *=
-                                    to = eval(from+op+to);
+                                if(op) { //处理+=,-= \= *=
+                                    to = eval(from + op + to);
                                 }
                             }
                             parts = [from, to]
-                        }else{
+                        } else {
                             parts = [0, 0]
                         }
                     }
                     from = parts[0];
                     to = parts[1];
-                    if( from +"" === to +"" ){//不处理初止值都一样的样式与属性
+                    if(from + "" === to + "") { //不处理初止值都一样的样式与属性
                         continue
                     }
                     var prop = {
                         name: name,
-                        from: from ,
+                        from: from,
                         to: to,
                         type: type,
-                        easing: $.easing[ String(ease[name] || easing).toLowerCase() ] || $.easing.swing,
+                        easing: $.easing[String(ease[name] || easing).toLowerCase()] || $.easing.swing,
                         unit: unit
                     }
-                    props.push( prop );
-                    revertProps.push($.mix({}, prop,{
+                    props.push(prop);
+                    revertProps.push($.mix({}, prop, {
                         to: from,
                         from: to
                     }))
@@ -6377,115 +6570,126 @@ define("fx", ["$css"],function( $ ){
                 fx.revertProps = revertProps;
                 fx.orig = orig;
             }
-            if ( fx.record || fx.revert ) {
-                var fx2 = {};//回滚到最初状态
-                for( name in fx ){
-                    fx2[ name ] = fx[ name ];
+            if(fx.record || fx.revert) {
+                var fx2 = {}; //回滚到最初状态
+                for(name in fx) {
+                    fx2[name] = fx[name];
                 }
                 fx2.record = fx2.revert = void 0
                 fx2.props = fx.revertProps.concat();
                 fx2.revertProps = fx.props.concat();
-                var el = $.timeline[ index ];
-                el.negative.push(fx2);//添加已存负向列队中
+                var el = $.timeline[index];
+                el.negative.push(fx2); //添加已存负向列队中
             }
         }
     }
     //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, step, after, complete），
     //并在动画结束后，从子列队选取下一个动画实例取替自身
-    function callback(fx, node, name){
-        if( fx[name] ){
-            fx[name].call( node, node, fx );
+
+
+    function callback(fx, node, name) {
+        if(fx[name]) {
+            fx[name].call(node, node, fx);
         }
     }
-    function animate( fx, index ) {
-        var node = fx.node, now =  +new Date;
-        if(!fx.startTime){//第一帧
-            callback(fx, node, "before");//动画开始前的预操作
-            fx.props && Animation.create( fx.node, fx, index ); //添加props属性与设置负向列队
+
+    function animate(fx, index) {
+        var node = fx.node,
+            now = +new Date;
+        if(!fx.startTime) { //第一帧
+            callback(fx, node, "before"); //动画开始前的预操作
+            fx.props && Animation.create(fx.node, fx, index); //添加props属性与设置负向列队
             fx.props = fx.props || []
-            Animation[ fx.method ].call(node, node, fx );//这里用于设置node.style.display
+            Animation[fx.method].call(node, node, fx); //这里用于设置node.style.display
             fx.startTime = now;
-        }else{
+        } else {
             var per = (now - fx.startTime) / fx.duration;
             var end = fx.gotoEnd || per >= 1;
             var hooks = effect.updateHooks
             // 处理渐变
-            for(var i = 0, obj; obj = fx.props[i++];){
-                ;(hooks[obj.type] || hooks._default)(node, per, end, obj);
+            for(var i = 0, obj; obj = fx.props[i++];) {;
+                (hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
-            if ( end ) {//最后一帧
-                if(fx.method == "hide"){
-                    for(var i in fx.orig){//还原为初始状态
-                        $.css( node, i, fx.orig[i] );
+            if(end) { //最后一帧
+                if(fx.method == "hide") {
+                    for(var i in fx.orig) { //还原为初始状态
+                        $.css(node, i, fx.orig[i]);
                     }
                 }
-                callback(fx, node, "after");//动画结束后执行的一些收尾工作
-                callback(fx, node, "complete");//执行用户回调
-                if( fx.revert && fx.negative.length){
-                    Array.prototype.unshift.apply( fx.positive, fx.negative.reverse());
+                callback(fx, node, "after"); //动画结束后执行的一些收尾工作
+                callback(fx, node, "complete"); //执行用户回调
+                if(fx.revert && fx.negative.length) {
+                    Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
                     fx.negative = []; // 清空负向列队
                 }
                 var neo = fx.positive.shift();
-                if ( !neo ) {
+                if(!neo) {
                     return false;
                 }
-                timeline[ index ] = neo;
+                timeline[index] = neo;
                 neo.positive = fx.positive;
                 neo.negative = fx.negative;
-            }else{
-                callback(fx, node, "step");//每执行一帧调用的回调
+            } else {
+                callback(fx, node, "step"); //每执行一帧调用的回调
             }
         }
         return true;
     }
-    $.fn.delay = function( ms ){
-        return this.fx( ms );
+    $.fn.delay = function(ms) {
+        return this.fx(ms);
     }
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
-    $.fn.stop = function( clearQueue, gotoEnd  ){
+    $.fn.stop = function(clearQueue, gotoEnd) {
         clearQueue = clearQueue ? "1" : ""
-        gotoEnd  = gotoEnd  ? "1" : "0"
-        var stopCode = parseInt( clearQueue+gotoEnd ,2 );//返回0 1 2 3
-        return this.each(function(node){
-            for(var i = 0, fx ; fx = timeline[i];i++){
-                if(fx.node === node){
-                    switch(stopCode){//如果此时调用了stop方法
-                        case 0:  //中断当前动画，继续下一个动画
-                            fx.update = fx.step = $.noop
-                            fx.revert && fx.negative.shift();
-                            fx.gotoEnd = true;
-                            break;
-                        case 1://立即跳到最后一帧，继续下一个动画
-                            fx.gotoEnd = true;
-                            break;
-                        case 2://清空该元素的所有动画
-                            delete fx.node
-                            break;
-                        case 3:
-                            Array.prototype.unshift.apply( fx.positive,fx.negative.reverse());
-                            fx.negative = []; // 清空负向列队
-                            for(var j =0; fx = fx.positive[j++]; ){
-                                fx.before = fx.after = fx.step = $.noop
-                                fx.gotoEnd = true;//立即完成该元素的所有动画
-                            }
-                            break;
+        gotoEnd = gotoEnd ? "1" : "0"
+        var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
+        return this.each(function(node) {
+            for(var i = 0, fx; fx = timeline[i]; i++) {
+                if(fx.node === node) {
+                    switch(stopCode) { //如果此时调用了stop方法
+                    case 0:
+                        //中断当前动画，继续下一个动画
+                        fx.update = fx.step = $.noop
+                        fx.revert && fx.negative.shift();
+                        fx.gotoEnd = true;
+                        break;
+                    case 1:
+                        //立即跳到最后一帧，继续下一个动画
+                        fx.gotoEnd = true;
+                        break;
+                    case 2:
+                        //清空该元素的所有动画
+                        delete fx.node
+                        break;
+                    case 3:
+                        Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
+                        fx.negative = []; // 清空负向列队
+                        for(var j = 0; fx = fx.positive[j++];) {
+                            fx.before = fx.after = fx.step = $.noop
+                            fx.gotoEnd = true; //立即完成该元素的所有动画
+                        }
+                        break;
                     }
                 }
             }
         });
     }
 
-    var fxAttrs = [ [ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
-    [ "width", "marginLeft", "marginRight", "paddingLeft", "paddingRight" ], ["opacity"]]
-    function genFx( type, num ) {//生成属性包
+    var fxAttrs = [
+        ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
+        ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+        ["opacity"]
+    ]
+
+    function genFx(type, num) { //生成属性包
         var obj = {};
-        fxAttrs.concat.apply([], fxAttrs.slice(0,num)).forEach(function(name) {
-            obj[ name ] = type;
-            if(~name.indexOf("margin")){
-                effect.updateHooks[name] = function(node, per, end, obj){
-                    var val = (end ? obj.to :  obj.from + ( obj.from - obj.to) * obj.easing(per) ) ;
-                    node.style[name] = Math.max(val,0) + obj.unit;
+        fxAttrs.concat.apply([], fxAttrs.slice(0, num)).forEach(function(name) {
+            obj[name] = type;
+            if(~name.indexOf("margin")) {
+                effect.updateHooks[name] = function(node, per, end, obj) {
+                    var val = (end ? obj.to : obj.from + (obj.from - obj.to) * obj.easing(per));
+                    node.style[name] = Math.max(val, 0) + obj.unit;
                 }
             }
         });
@@ -6493,9 +6697,9 @@ define("fx", ["$css"],function( $ ){
     }
 
     var effects = {
-        slideDown: genFx( "show", 1 ),
-        slideUp: genFx( "hide", 1 ),
-        slideToggle: genFx( "toggle", 1 ),
+        slideDown: genFx("show", 1),
+        slideUp: genFx("hide", 1),
+        slideToggle: genFx("toggle", 1),
         fadeIn: {
             opacity: "show"
         },
@@ -6507,29 +6711,29 @@ define("fx", ["$css"],function( $ ){
         }
     }
 
-    Object.keys(effects).forEach(function( method ){
-        $.fn[ method ] = function(){
-            return Animation.fx( this, effects[method], arguments );
+    $.each(effects, function(props, method) {
+        $.fn[method] = function() {
+            return Animation.fx(this, props, arguments);
         }
     });
 
-    [ "toggle", "show", "hide" ].forEach(function(  name, i ) {
-        var pre = $.fn[ name ];
-        $.fn[ name ] = function(a) {
-            if(!arguments.length || typeof a == "boolean" ){
-                return  pre.apply(this, arguments)
-            }else{
-                return  Animation.fx( this, genFx( name , 3), arguments );
+    ["toggle", "show", "hide"].forEach(function(name, i) {
+        var pre = $.fn[name];
+        $.fn[name] = function(a) {
+            if(!arguments.length || typeof a == "boolean") {
+                return pre.apply(this, arguments)
+            } else {
+                return Animation.fx(this, genFx(name, 3), arguments);
             }
         };
     });
 
-    function beforePuff( node, fx ) {
-        var position = $.css(node,"position"),
-        width =  $.css(node,"width"),
-        height = $.css(node,"height"),
-        left =   $.css(node,"left"),
-        top =    $.css(node,"top");
+    function beforePuff(node, fx) {
+        var position = $.css(node, "position"),
+            width = $.css(node, "width"),
+            height = $.css(node, "height"),
+            left = $.css(node, "left"),
+            top = $.css(node, "top");
         node.style.position = "relative";
         $.mix(fx.props, {
             width: "*=1.5",
@@ -6538,7 +6742,7 @@ define("fx", ["$css"],function( $ ){
             left: "-=" + parseInt(width) * 0.25,
             top: "-=" + parseInt(height) * 0.25
         });
-        fx.after = function( node, fx ){
+        fx.after = function(node, fx) {
             node.style.position = position;
             node.style.width = width;
             node.style.height = height;
@@ -6548,56 +6752,58 @@ define("fx", ["$css"],function( $ ){
     }
     //扩大1.5倍并淡去
     $.fn.puff = function() {
-        return Animation.fx( this, {
+        return Animation.fx(this, {
             before: beforePuff
-        }, arguments );
+        }, arguments);
     }
     var colorMap = {
-        "black":[0,0,0],
-        "gray":[128,128,128],
-        "white":[255,255,255],
-        "orange":[255, 165, 0],
-        "red":[255,0,0],
-        "green":[0,128,0],
-        "yellow":[255,255,0],
-        "blue":[0,0,255]
+        "black": [0, 0, 0],
+        "gray": [128, 128, 128],
+        "white": [255, 255, 255],
+        "orange": [255, 165, 0],
+        "red": [255, 0, 0],
+        "green": [0, 128, 0],
+        "yellow": [255, 255, 0],
+        "blue": [0, 0, 255]
     };
+
     function parseColor(color) {
         var value;
-        $.callSandbox( $.html, function(doc){
+        $.callSandbox($.html, function(doc) {
             var range = doc.body.createTextRange();
             doc.body.style.color = color;
             value = range.queryCommandValue("ForeColor");
         });
-        return [value & 0xff, (value & 0xff00) >> 8,  (value & 0xff0000) >> 16];
+        return [value & 0xff, (value & 0xff00) >> 8, (value & 0xff0000) >> 16];
     }
-    function color2array(val) {//将字符串变成数组
-        var color = val.toLowerCase(),ret = [];
-        if (colorMap[color]) {
+
+    function color2array(val) { //将字符串变成数组
+        var color = val.toLowerCase(),
+            ret = [];
+        if(colorMap[color]) {
             return colorMap[color];
         }
-        if (color.indexOf("rgb") == 0) {
+        if(color.indexOf("rgb") == 0) {
             var match = color.match(/(\d+%?)/g),
-            factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
-            return (colorMap[color] = [ parseInt(match[0]) * factor , parseInt(match[1]) * factor, parseInt(match[2]) * factor ]);
-        } else if (color.charAt(0) == '#') {
-            if (color.length == 4)
-                color = color.replace(/([^#])/g, '$1$1');
-            color.replace(/\w{2}/g,function(a){
-                ret.push( parseInt(a, 16))
+                factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
+            return(colorMap[color] = [parseInt(match[0]) * factor, parseInt(match[1]) * factor, parseInt(match[2]) * factor]);
+        } else if(color.charAt(0) == '#') {
+            if(color.length == 4) color = color.replace(/([^#])/g, '$1$1');
+            color.replace(/\w{2}/g, function(a) {
+                ret.push(parseInt(a, 16))
             });
-            return (colorMap[color] = ret);
+            return(colorMap[color] = ret);
         }
-        if(window.VBArray){
-            return (colorMap[color] = parseColor(color));
+        if(window.VBArray) {
+            return(colorMap[color] = parseColor(color));
         }
         return colorMap.white;
     }
     $.parseColor = color2array
-    if($.query && $.query.pseudoHooks){
-        $.query.pseudoHooks.animated = function( el ) {
-            for(var i = 0, fx; fx = timeline[i++];){
-                if(el == fx.node){
+    if($.query && $.query.pseudoHooks) {
+        $.query.pseudoHooks.animated = function(el) {
+            for(var i = 0, fx; fx = timeline[i++];) {
+                if(el == fx.node) {
                     return true
                 }
             }
