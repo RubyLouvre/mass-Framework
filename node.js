@@ -512,13 +512,13 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         node.uniqueNumber && $.removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-    var div = document.createElement("div"); //缓存parser，防止反复创建
+    var shim = document.createElement("div"); //缓存parser，防止反复创建
 
     function shimCloneNode(outerHTML, tree) {
-        tree.appendChild(div);
-        div.innerHTML = outerHTML;
-        tree.removeChild(div);
-        return div.firstChild;
+        tree.appendChild(shim);
+        shim.innerHTML = outerHTML;
+        tree.removeChild(shim);
+        return shim.firstChild;
     }
     var unknownTag = "<?XML:NAMESPACE"
 
