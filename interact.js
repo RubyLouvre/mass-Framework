@@ -60,6 +60,7 @@ define("interact",["$class"], function($){
         }
     });
     //用于处理需要通过N个子步骤才能完成的一些操作
+    //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
     $.Flow = $.factory({
         inherit: $.Observer,
         init: function(){
@@ -190,6 +191,51 @@ define("interact",["$class"], function($){
         }
         flow.bind(last, lastFn);
     };
+    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
+    //单点发布 自愿收听 单向联接 分散传播
+    $.Twitter = $.factory({
+        init: function(){
+            this.followers = [];
+        },
+        tweet: function(msg){
+            for(var i = 0; i < this.followers.length; i++){
+                var follower = this.followers[i];
+                if(follower.handler){
+                    follower.handler.call(follower.target, msg); //deal
+                }
+            }
+        },
+        follow: function(master, handler){
+            master.followers.push({
+                target:this,
+                handler:handler
+            });
+        }
+    })
+
 })
 //2012.1.10
-;
+//用tabView做一个简单的实验，但是这个不是组件，这个是散的
+//var tab = new Twitter();
+//var view = new Twitter();
+//view.follow(tab, function(msg){
+//	var view = document.getElementById("view").getElementsByTagName("span");
+//	for(var i = 0; i < view.length; i++){
+//		if(i == msg){
+//			view[i].className = "active";
+//		}else{
+//			view[i].className = "";
+//		}
+//	}
+//});
+//
+//var tabContainer = document.getElementById("tab");
+//tabContainer.onclick = function(event){
+//	var evt = event || window.event;
+//	var target = evt.srcElement || evt.target;
+//
+//	if(target != this){
+//		tab.tweet(target.innerHTML-1);
+//	}
+//}
+//;
