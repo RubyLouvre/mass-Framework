@@ -402,9 +402,9 @@ define("ajax",["mass","$interact"], function($){
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
 
             this.fire( eventType, this.responseData, statusText);
-            ajaxflow.bind( eventType );
+            ajaxflow.fire( eventType );
             this.fire("complete", this.responseData, statusText);
-            ajaxflow.bind( "complete" );
+            ajaxflow.fire( "complete" );
             delete this.transport;
         }
     });
@@ -597,7 +597,7 @@ define("ajax",["mass","$interact"], function($){
         var ret = [], d, isArray, vs, i, e;
         for (d in data) {
             isArray = Array.isArray(data[d]);
-            vs = $.makeArray( data[d])
+            vs = isArray?  data[d]: [data[d]]
             // 数组和原生一样对待，创建多个同名输入域
             for (i = 0; i < vs.length; i++) {
                 e = DOC.createElement("input");
