@@ -212,7 +212,7 @@ define("interact",["$class"], function($){
             });
         }
     })
-
+    return $;
 })
 //2012.1.10
 //用tabView做一个简单的实验，但是这个不是组件，这个是散的
