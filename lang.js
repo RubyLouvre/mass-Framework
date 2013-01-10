@@ -349,62 +349,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
 
     }
     $.mix(tools, false);
-    var EventTarget = function(target) {
-            $.log("init EventTarget")
-            this._events = {};
-            this._eventTarget = target || this;
-        }
-    var fn = EventTarget.prototype = {
-        constructor: EventTarget,
-        addEventListener: function(type, callback, scope) {
-            var listeners = this._events[type],
-                listener = {
-                    callback: callback,
-                    scope: scope || this._eventTarget
-                }
-            if(listeners) {
-                listeners.push(listener)
-            } else {
-                this._events[type] = [listener]
-            }
-        },
-        removeEventListener: function(type, callback) {
-            var n = arguments.length;
-            if(n == 0) {
-                this._events = {};
-            } else if(n == 1) {
-                this._events[type] = [];
-            } else {
-                var listeners = this._events[type] || [];
-                var i = listeners.length;
-                while(--i > -1) {
-                    if(listeners[i].callback === callback) {
-                        return listeners.splice(i, 1);
-                    }
-                }
-            }
-        },
-        dispatchEvent: function(type) {
-            var listeners = (this._events[type] || []).concat(); //防止影响原数组
-            if(listeners.length) {
-                var target = this._eventTarget,
-                    args = $.slice(arguments);
-                for(var i = 0, n = listeners.length; i < n; i++) {
-                    var listener = listeners[i];
-                    target = listener.scope || target;
-                    args[0] = {
-                        type: type,
-                        target: target
-                    }
-                    listener.callback.apply(target, args);
-                }
-            }
-        }
-    }
-    "bind_addEventListener,unbind_removeEventListener,fire_dispatchEvent".replace($.rmapper, function(_, a, b) {
-        fn[a] = fn[b];
-    });
-    $.EventTarget = EventTarget;
+
 
     "Array,Function".replace($.rword, function(method) {
         $["is" + method] = function(obj) {
