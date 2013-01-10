@@ -1,6 +1,6 @@
 define("interact",["$class"], function($){
     //观察者模式
-    $.EventTarget = $.factroy({
+    $.Observer = $.factory({
         init: function(target){
             $.log("init EventTarget")
             this._events = {};
@@ -57,8 +57,8 @@ define("interact",["$class"], function($){
         }
     });
     
-    $.EventFlow = $.factory({
-        inherit: $.EventTarget,
+    $.Flow = $.factory({
+        inherit: $.Observer,
         init: function(){
             this._fired = {};
         },
@@ -146,8 +146,8 @@ define("interact",["$class"], function($){
         }
     })
 
-    $.EventFlow.create = function (names, callback, errorback) {
-        var that = new $.EventFlow;
+    $.Flow.create = function (names, callback, errorback) {
+        var that = new $.Flow;
         var args = names.match($.rword) || [];
         if(typeof errorback === "function"){
             that.fail(errorback);
@@ -161,7 +161,7 @@ define("interact",["$class"], function($){
         var events = $.slice(arguments),
         isOnce = events.pop(),
         callback = events.pop(),
-        proxy = this,
+        flow = this,
         length = events.length,
         times = 0,
         uniq = {};
@@ -171,9 +171,9 @@ define("interact",["$class"], function($){
         function bind(key) {
            // key = "__"+ key
             var method = isOnce ? "once" : "bind";
-            proxy[method](key, function (data) {
-                proxy._fired[key] = proxy._fired[key] || {};
-                proxy._fired[key].data = data;
+            flow[method](key, function (data) {
+                flow._fired[key] = flow._fired[key] || {};
+                flow._fired[key].data = data;
                 if (!uniq[key]) {
                     uniq[key] = true;
                     times++;
@@ -192,14 +192,14 @@ define("interact",["$class"], function($){
             }
             var data = [];
             for (index = 0; index < length; index++) {
-                data.push(proxy._fired[events[index]].data);
+                data.push(flow._fired[events[index]].data);
             }
             if (isOnce) {
-                proxy.unbind(last, lastFn);
+                flow.unbind(last, lastFn);
             }
             callback.apply(null, data);
         };
-        proxy.bind(last, lastFn);
+        flow.bind(last, lastFn);
     };
 })
 
