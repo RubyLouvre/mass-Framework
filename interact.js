@@ -156,7 +156,7 @@ define("interact",["$class"], function($){
         that.refresh.apply(that, args);
         return that;
     };
-    var last = "$" + $.now();
+    var last = "$" + Date.now();
     var _assign = function () {
         var events = $.slice(arguments),
         isOnce = events.pop(),
