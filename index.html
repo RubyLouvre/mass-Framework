@@ -31,11 +31,24 @@
         <script src="mass.js"> </script>
         <script>
 
-            require("event,ready",function(){
-                $.bind($(".aaa")[0],"click",function(e){
-                    e.type = "ddd";
-                    alert(e.type)
+            require("interact,ready",function(){
+                var a = 0;
+                var target = new $.Observer;
+                target.bind("click", function(){
+                    a++
                 })
+                target.bind("click", function(){
+                    a++
+                })
+                target.bind("click", function(){
+                    a++
+                });
+                target.bind("click", function(){
+                    a++
+                });
+                target.fire("click");
+                target.unbind()
+               alert(a)
 
             })
         </script>
