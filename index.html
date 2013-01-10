@@ -32,23 +32,19 @@
         <script>
 
             require("interact,ready",function(){
-                var a = 0;
-                var target = new $.Observer;
-                target.bind("click", function(){
-                    a++
-                })
-                target.bind("click", function(){
-                    a++
-                })
-                target.bind("click", function(){
-                    a++
-                });
-                target.bind("click", function(){
-                    a++
-                });
-                target.fire("click");
-                target.unbind()
-               alert(a)
+                var flow = new $.Flow;
+                var callback = function(){
+                    console.log(arguments)
+                }
+                flow.repeat("aa",5,callback);
+                var time = 5;
+                var id = setInterval(function(){
+                    console.log("xxxxxxxxxx")
+                    flow.fire("aa",50);
+                    if(--time == 0){
+                        clearInterval(id)
+                    }
+                },20 )
 
             })
         </script>

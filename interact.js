@@ -67,8 +67,8 @@ define("interact",["$class"], function($){
             while (normal--) {
                 ev = normal ? type : last;
                 listeners = calls[ev];
-                if (listeners) {
-                    args = Array.prototype.slice.call(arguments, 1)
+                if (listeners && listeners.length) {
+                    args = $.slice(arguments, 1)
                     if(normal){//在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
                         args.unshift({
                             type: type,
@@ -79,41 +79,35 @@ define("interact",["$class"], function($){
                         //第一次执行目标事件,第二次执行最后的回调
                         callback.apply(this, args);
                     }
+                }else{
+                    break;
                 }
             }
             return this;
         },
         //待所有子步骤都执行过一遍后,执行最后的回调,之后每次都执行最后的回调以局部刷新数据
         refresh: function () {
-            Array.prototype.push.call(arguments, true);
+            Array.prototype.push.call(arguments, false);
             _assign.apply(this, arguments);
             return this;
         },
         //待所有子步骤都执行过一遍后,执行最后的回调,然后清后所有数据,重新开始这过程
         reload: function () {
-            Array.prototype.push.call(arguments, false);
+            Array.prototype.push.call(arguments, true);
             _assign.apply(this, arguments);
             return this;
         },
         //一个子步骤在重复执行N遍后,执行最后的回调
         repeat: function(type, times, callback){
-            if (times === 0) {
-                callback.call(null, []);
-                return this;
-            }
-            var proxy = this,
-            firedData = [],
-            lastFn = function (name, data) {
-                if (name === type) {
-                    times--;
-                    firedData.push(data);
-                    if (times < 1) {
-                        proxy.unbind(last, lastFn);
-                        callback.apply(null, [firedData]);
-                    }
+            var target = this._target, that = this, ret = []
+            function wrapper(){
+                ret.push.apply(ret, $.slice(arguments, 1));
+                if (--times == 0) {
+                    that.unbind(last, wrapper);
+                    callback.apply(target, ret);
                 }
-            };
-            proxy.bind(last, lastFn);
+            }
+            that.bind(type, wrapper);
             return this;
         },
         done: function (handler) {
@@ -132,7 +126,7 @@ define("interact",["$class"], function($){
                 }
 
                 // callback(err, args1, args2, ...)
-                var args = Array.prototype.slice.call(arguments, 1);
+                var args = $.slice(arguments, 1);
                 handler.apply(null, args);
             }
         },
@@ -157,23 +151,18 @@ define("interact",["$class"], function($){
         return that;
     };
     var last = "$" + Date.now();
-    var _assign = function () {
-        var events = $.slice(arguments),
-        isOnce = events.pop(),
-        callback = events.pop(),
-        flow = this,
-        length = events.length,
+    var _assign = function (name, callback, reload) {
+        var flow = this,
         times = 0,
-        uniq = {};
+        uniq = {},
+        events =  name.match($.rword) ,
+        length = events.length
         if(!events.length){
             return this;
         }
         function bind(key) {
-           // key = "__"+ key
-            var method = isOnce ? "once" : "bind";
-            flow[method](key, function (data) {
-                flow._fired[key] = flow._fired[key] || {};
-                flow._fired[key].data = data;
+            flow.bind(key, function () {
+                flow._fired[key] = $.slice(arguments, 1);
                 if (!uniq[key]) {
                     uniq[key] = true;
                     times++;
@@ -187,18 +176,19 @@ define("interact",["$class"], function($){
 
         function lastFn(event) {
             //如果没有达到目标次数, 或事件类型之前没有指定过
-            if (times < length || !uniq[event]) {
+            if (times < length ) {
                 return;
             }
-            var data = [];
+            var result = [];
             for (index = 0; index < length; index++) {
-                data.push(flow._fired[events[index]].data);
+                result.push.apply(result, flow._fired[events[index]]);
             }
-            if (isOnce) {
-                flow.unbind(last, lastFn);
+            if (reload) {
+                uniq = {};
+                times = 0;
             }
-            callback.apply(null, data);
-        };
+            callback.apply(null, result);
+        }
         flow.bind(last, lastFn);
     };
 })

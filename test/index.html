@@ -1,19 +1,19 @@
 <!doctype html>
 <html>
-<head>
-    <title>测试首页</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Cache-Control" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <link rel="stylesheet" type="text/css" href="spec.css" />
-    <script src="../mass.js" type="text/javascript"></script>
-</head>
+    <head>
+        <title>测试首页</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <meta http-equiv="Expires" content="0">
+        <link rel="stylesheet" type="text/css" href="spec.css" />
+        <script src="../mass.js" type="text/javascript"></script>
+    </head>
 
-<body>
-    <h2>单元测试</h2>
-    <script type="text/javascript">
+    <body>
+        <h2>单元测试</h2>
+        <script type="text/javascript">
             var module = String(location.hash  || "mass").replace(/^#/,"");
             $.config({
                 alias:{
@@ -41,18 +41,19 @@
                 });
             })
         </script>
-    <select id="js_test">
-        <option value="mass">模块加载模块</option>
-        <option value="loader">模块加载模块2</option>
-        <option value="lang">语言扩展模块</option>
-        <option value="support">特征嗅探模块</option>
-        <option value="class">类工厂模块</option>
-        <option value="node">节点操作模块</option>
-        <option value="data">数据缓存模块</option>
-        <option value="css">样式操作模块</option>
-        <option value="attr">属性操作模块</option>
-        <option value="event">事件模块</option>
-        <option value="fx">动画模块</option>
-    </select>
-</body>
+        <select id="js_test">
+            <option value="mass">模块加载模块</option>
+            <option value="loader">模块加载模块2</option>
+            <option value="lang">语言扩展模块</option>
+            <option value="interact">组件交互模块</option>
+            <option value="support">特征嗅探模块</option>
+            <option value="class">类工厂模块</option>
+            <option value="node">节点操作模块</option>
+            <option value="data">数据缓存模块</option>
+            <option value="css">样式操作模块</option>
+            <option value="attr">属性操作模块</option>
+            <option value="event">事件模块</option>
+            <option value="fx">动画模块</option>
+        </select>
+    </body>
 </html>

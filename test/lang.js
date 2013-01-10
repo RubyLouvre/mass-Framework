@@ -15,25 +15,7 @@ define(["$lang"],function(  ){
             };
             expect(Object.keys(testobj)).same(array,"测试IE下不能遍历的对象原型属性");
         },
-        eventTarget: function(){
-            var a = 0;
-            var target = new $.EventTarget;
-            target.addEventListener("click", function(){
-                a++
-            })
-            target.addEventListener("click", function(){
-                a++
-            })
-            target.addEventListener("click", function(){
-                a++
-            });
-            target.bind("click", function(){
-                a++
-            });
-            target.fire("click");
-            target.unbind()
-            expect(a).same(4,"测试$.EventTarget");
-        },
+        
         map: function(){
             var ret = [1, 2, 3, 4].map(function(a, b) {
                 return a + b;
