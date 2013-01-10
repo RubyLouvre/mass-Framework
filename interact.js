@@ -1,3 +1,6 @@
+//=========================================
+// 组件交互模块v1 by 司徒正美
+//=========================================
 define("interact",["$class"], function($){
     //观察者模式
     $.Observer = $.factory({
@@ -56,7 +59,7 @@ define("interact",["$class"], function($){
             }
         }
     });
-    
+    //用于处理需要通过N个子步骤才能完成的一些操作
     $.Flow = $.factory({
         inherit: $.Observer,
         init: function(){
@@ -116,16 +119,12 @@ define("interact",["$class"], function($){
                 if (err) {
                     return that.fire('error', err);
                 }
-                // getAsync(query, ep.done('query'));
                 if (typeof handler === 'string') {
                     return that.fire(handler, data);
                 }
-                // speed improve for mostly case: `callback(err, data)`
                 if (arguments.length <= 2) {
                     return handler(data);
                 }
-
-                // callback(err, args1, args2, ...)
                 var args = $.slice(arguments, 1);
                 handler.apply(null, args);
             }
@@ -192,5 +191,5 @@ define("interact",["$class"], function($){
         flow.bind(last, lastFn);
     };
 })
-
+//2012.1.10
 ;
