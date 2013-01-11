@@ -130,7 +130,7 @@ define("fx", ["$css"], function($) {
         color: function(node, per, end, obj) {
             var pos = obj.easing(per),
                 rgb = end ? obj.to : obj.from.map(function(from, i) {
-                    return Math.max(Math.min(parseInt(from + (obj.to[i] - from) * pos, 10), 255), 0);
+                    return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
                 });
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
