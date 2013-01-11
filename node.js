@@ -1,7 +1,7 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
+define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
     var rtag = /^[a-zA-Z]+$/,
     rtagName = /<([\w:]+)/,
     //取得其tagName
@@ -402,9 +402,9 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
     function insertAdjacentHTML(elems, item, fastHandler, handler) {
         for(var i = 0, el; el = elems[i++];) {
             if(item.nodeType) {
-                fastHandler(el, item);
-            } else {
                 handler(el, item.cloneNode(true));
+            } else {
+                fastHandler(el, item);
             }
         }
     }
@@ -443,10 +443,11 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
             insertAdjacentNode(elems, item, handler);
         } else if(typeof item === "string") {
             //如果传入的是字符串片断
-            if(type == "replace"|| rnest.test(item) ){//not fast
+            //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
+            var fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
+            if(!fast){
                 item = $.parseHTML(item, doc)
             }
-            //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
             insertAdjacentHTML(elems, item, insertHooks[type + "2"], handler);
         } else if(item.length) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
