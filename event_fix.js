@@ -129,7 +129,7 @@ define("event_fix", !! document.dispatchEvent, ["$node"], function($) {
     return $;
 })
 
-/*
+/**
 * input事件的支持情况：IE9+，chrome+, gecko2+, opera10+,safari+
 * 2012.5.1 fix delegate BUG将submit与reset这两个适配器合而为一
 * 2012.10.18 重构reset, change, submit的事件代理
