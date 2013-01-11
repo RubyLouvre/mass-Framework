@@ -1743,33 +1743,7 @@ define("interact",["$class"], function($){
     })
     return $;
 })
-/*
-2012.1.10
-用tabView做一个简单的实验，但是这个不是组件，这个是散的
-var tab = new Twitter();
-var view = new Twitter();
-view.follow(tab, function(msg){
-	var view = document.getElementById("view").getElementsByTagName("span");
-	for(var i = 0; i < view.length; i++){
-		if(i == msg){
-			view[i].className = "active";
-		}else{
-			view[i].className = "";
-		}
-	}
-});
 
-var tabContainer = document.getElementById("tab");
-tabContainer.onclick = function(event){
-	var evt = event || window.event;
-	var target = evt.srcElement || evt.target;
-
-	if(target != this){
-		tab.tweet(target.innerHTML-1);
-	}
-}
- * 
- */
 
 //==================================================
 // 数据缓存模块
@@ -3156,6 +3130,7 @@ define("node_fix",!!top.dispatchEvent, ["mass"], function($){
 
     var rtbody = /<tbody[^>]*>/i
     $.fixParseHTML = function(wrapper, html){
+        //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
         if(!$.support.insertTbody) {
             var noTbody = !rtbody.test(html), //矛:html本身就不存在<tbody字样
             els = wrapper["getElementsByTagName"]("tbody");
@@ -3518,7 +3493,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             }
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
-            //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
+            
             $.fixParseHTML(wrapper, html);
 
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
@@ -3655,21 +3630,14 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             });
         }
     });
-    //======================================================================
-    //复制与移除节点时的一些辅助函数
-    //======================================================================
 
+    //移除节点对数据的清除
     function cleanNode(node) {
-        if( $.hasData(node) ){
-            $._removeData(node);
-        }
+        $._removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-
-
-
+    //复制节点时对数据与事件的复制处理
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
-        //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1) {
             var neo = $.fixCloneNode(node), src, neos, i
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
@@ -4353,23 +4321,7 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
     return $;
 });
 
-/*
-2011.8.2
-将prop从attr分离出来
-添加replaceClass方法
-2011.8.5  重构val方法
-2011.8.12 重构replaceClass方法
-2011.10.11 重构attr prop方法
-2011.10.21 FIX valHooks["select:set"] BUG
-2011.10.22 FIX boolaHooks.set方法
-2011.10.27 对prop attr val大重构
-2012.6.23 attr在value为false, null, undefined时进行删除特性操作
-2012.11.6 升级v2
-2012.12.24 升级到v3 添加对defaultSelected defaultChecked的处理
-http://nanto.asablo.jp/blog/2005/10/29/123294
 
-http://perl.no-tubo.net/2010/07/01/ie-%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B-setattribute-%E3%82%84-getattribute-%E3%82%84-removeattribute-%E3%81%8C%E3%81%A0%E3%82%81%E3%81%A0%E3%82%81%E3%81%AA%E4%BB%B6/
-*/
 //=========================================
 //  样式补丁模块
 //==========================================
@@ -4507,12 +4459,8 @@ define("css_fix", !!top.getComputedStyle,["$node"], function( $ ){
     }
     return $
 });
-//2011.10.21 去掉opacity:setter 的style.visibility处理
-//2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
-//2012.5.9 完美支持CSS3 transform 2D
-//2012.10.25 重构透明度的读写
-//2012.11.25 添加旋转
-//CSS3 学习资料 http://demo.doyoe.com/
+
+
 
 //=========================================
 // 样式操作模块 v4 by 司徒正美
