@@ -1,3 +1,6 @@
+//==================================================
+// 节点补丁模块 v1 主要是用于在创建或复制节点时处理IE的一些BUG
+//==================================================
 define("node_fix",!!top.dispatchEvent, ["mass"], function($){
     //修正IE下对数据克隆时出现的一系列问题
     function fixNode(clone, src) {
@@ -86,5 +89,5 @@ define("node_fix",!!top.dispatchEvent, ["mass"], function($){
         }
     }
 })
-
+//2013.1.11
 

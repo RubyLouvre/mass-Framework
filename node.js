@@ -24,6 +24,10 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
         }
         return document;
     }
+    $.fixCloneNode = $.fixCloneNode || function(node){
+        return  node.cloneNode(true)
+    }
+    $.fixParseHTML = $.fixParseHTML || $.noop;
     $.mix($.factory).implement({
         init: function(expr, context) {
             // 分支1: 处理空白字符串,null,undefined参数
@@ -336,7 +340,7 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
             //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
-            $.fixParseHTML(wrapper, html)
+            $.fixParseHTML(wrapper, html);
 
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
                 fragment.appendChild(firstChild);
@@ -389,26 +393,26 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
     tagHooks.optgroup = tagHooks.option;
     tagHooks.tbody = tagHooks.tfoot = tagHooks.colgroup = tagHooks.caption = tagHooks.thead;
     tagHooks.th = tagHooks.td;
-    function insertAdjacentNode(elems, fn, item) {
+    function insertAdjacentNode(elems, item, handler) {
         for(var i = 0, el; el = elems[i]; i++) { //第一个不用复制，其他要
-            fn(el, i ? cloneNode(item, true, true) : item);
+            handler(el, i ? cloneNode(item, true, true) : item);
         }
     }
 
-    function insertAdjacentHTML(elems, slowInsert, fragment, fast, fastInsert, html) {
+    function insertAdjacentHTML(elems, item, fastHandler, handler) {
         for(var i = 0, el; el = elems[i++];) {
-            if(fast) {
-                fastInsert(el, html);
+            if(item.nodeType) {
+                fastHandler(el, item);
             } else {
-                slowInsert(el, fragment.cloneNode(true));
+                handler(el, item.cloneNode(true));
             }
         }
     }
 
-    function insertAdjacentFragment(elems, fn, item, doc) {
+    function insertAdjacentFragment(elems, item, doc, handler) {
         var fragment = doc.createDocumentFragment();
         for(var i = 0, el; el = elems[i++];) {
-            fn(el, makeFragment(item, fragment, i > 1));
+            handler(el, makeFragment(item, fragment, i > 1));
         }
     }
 
@@ -433,19 +437,20 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
     function manipulate(nodes, type, item, doc) {
         var elems = $.filter(nodes, function(el) {
             return el.nodeType === 1; //转换为纯净的元素节点数组
-        });
+        }), handler = insertHooks[type];
         if(item.nodeType) {
             //如果是传入元素节点或文本节点或文档碎片
-            insertAdjacentNode(elems, insertHooks[type], item);
+            insertAdjacentNode(elems, item, handler);
         } else if(typeof item === "string") {
             //如果传入的是字符串片断
-            var fragment = $.parseHTML(item, doc),
+            if(type == "replace"|| rnest.test(item) ){//not fast
+                item = $.parseHTML(item, doc)
+            }
             //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
-            fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
-            insertAdjacentHTML(elems, insertHooks[type], fragment, fast, insertHooks[type + "2"], item);
+            insertAdjacentHTML(elems, item, insertHooks[type + "2"], handler);
         } else if(item.length) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
-            insertAdjacentFragment(elems, insertHooks[type], item, doc);
+            insertAdjacentFragment(elems, item, doc,  handler);
         }
         return nodes;
     }
@@ -488,9 +493,7 @@ define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? 
         node.clearAttributes && node.clearAttributes();
     }
 
-    $.fixCloneNode = $.fixCloneNode || function(node){
-        return  node.cloneNode(true)
-    }
+
 
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
         //   处理IE6-8下复制事件时一系列错误
