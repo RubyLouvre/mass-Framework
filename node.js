@@ -339,7 +339,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             }
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
-            //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
+            
             $.fixParseHTML(wrapper, html);
 
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
@@ -483,21 +483,14 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             });
         }
     });
-    //======================================================================
-    //复制与移除节点时的一些辅助函数
-    //======================================================================
 
+    //移除节点对数据的清除
     function cleanNode(node) {
-        if( $.hasData(node) ){
-            $._removeData(node);
-        }
+        $._removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-
-
-
+    //复制节点时对数据与事件的复制处理
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
-        //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1) {
             var neo = $.fixCloneNode(node), src, neos, i
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据

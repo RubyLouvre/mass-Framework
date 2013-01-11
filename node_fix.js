@@ -60,6 +60,7 @@ define("node_fix",!!top.dispatchEvent, ["mass"], function($){
 
     var rtbody = /<tbody[^>]*>/i
     $.fixParseHTML = function(wrapper, html){
+        //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
         if(!$.support.insertTbody) {
             var noTbody = !rtbody.test(html), //矛:html本身就不存在<tbody字样
             els = wrapper["getElementsByTagName"]("tbody");

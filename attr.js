@@ -335,7 +335,7 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
     return $;
 });
 
-/*
+/**
 2011.8.2
 将prop从attr分离出来
 添加replaceClass方法
