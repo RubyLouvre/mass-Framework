@@ -14,9 +14,6 @@ define("node_fix",!!top.dispatchEvent, ["mass"], function($){
             //IE6-8无法复制其内部的元素
             if(nodeName === "object") {
                 clone.outerHTML = src.outerHTML;
-                if($.support.cloneHTML5 && (src.innerHTML && !clone.innerHTML.trim())) {
-                    clone.innerHTML = src.innerHTML;
-                }
             } else if(nodeName === "input" && (src.type === "checkbox" || src.type == "radio")) {
                 //IE6-8无法复制chechbox的值，在IE6-7中也defaultChecked属性也遗漏了
                 if(src.checked) {
