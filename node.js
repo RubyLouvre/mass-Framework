@@ -1,10 +1,17 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define("node", "mass,$support,$class,$query,$data".split(","), function($) {
+define("node",["$support","$class","$query","$data"].cancat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
     var rtag = /^[a-zA-Z]+$/,
-        TAGS = "getElementsByTagName"
-
+    rtagName = /<([\w:]+)/,
+    //取得其tagName
+    rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
+    rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
+    types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
+    //需要处理套嵌关系的标签
+    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
+    adjacent = "insertAdjacentHTML",
+    TAGS = "getElementsByTagName"
     function getDoc() {
         for(var i = 0, el; i < arguments.length; i++) {
             if(el = arguments[i]) {
@@ -60,8 +67,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         },
         toString: function() {
             var i = this.length,
-                ret = [],
-                getType = $.type;
+            ret = [],
+            getType = $.type;
             while(i--) {
                 ret[i] = getType(this[i]);
             }
@@ -253,7 +260,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
                 return node[matchesAPI](expr);
             } catch(e) {
                 var parent = node.parentNode,
-                    array
+                array
                 if(parent) {
                     array = $.query(expr, node.ownerDocument);
                     return array.indexOf(node) != -1
@@ -303,16 +310,16 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
                 html = html.replace(rcreate, "<br class='fix_create_all'/>$1"); //在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec(html) || ["", ""])[1].toLowerCase(),
-                //取得其标签名
-                wrap = tagHooks[tag] || tagHooks._default,
-                fragment = doc.createDocumentFragment(),
-                wrapper = doc.createElement("div"),
-                firstChild;
+            //取得其标签名
+            wrap = tagHooks[tag] || tagHooks._default,
+            fragment = doc.createDocumentFragment(),
+            wrapper = doc.createElement("div"),
+            firstChild;
             wrapper.innerHTML = wrap[1] + html + (wrap[2] || "");
             var els = wrapper[TAGS]("script");
             if(els.length) { //使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script = doc.createElement("script"),
-                    neo;
+                neo;
                 for(var i = 0, el; el = els[i++];) {
                     if(!el.type || types[el.type]) { //如果script节点的MIME能让其执行脚本
                         neo = script.cloneNode(false); //FF不能省略参数
@@ -329,30 +336,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
             //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
-            if(!$.support.insertTbody) {
-                var noTbody = !rtbody.test(html); //矛:html本身就不存在<tbody字样
-                els = wrapper[TAGS]("tbody");
-                if(els.length > 0 && noTbody) { //盾：实际上生成的NodeList中存在tbody节点
-                    for(i = 0; el = els[i++];) {
-                        if(!el.childNodes.length) //如果是自动插入的里面肯定没有内容
-                        el.parentNode.removeChild(el);
-                    }
-                }
-            }
-            if(!$.support.createAll) { //移除所有补丁
-                for(els = wrapper[TAGS]("br"), i = 0; el = els[i++];) {
-                    if(el.className && el.className === "fix_create_all") {
-                        el.parentNode.removeChild(el);
-                    }
-                }
-            }
-            if(!$.support.appendChecked) { //IE67没有为它们添加defaultChecked
-                for(els = wrapper[TAGS]("input"), i = 0; el = els[i++];) {
-                    if(el.type === "checkbox" || el.type === "radio") {
-                        el.defaultChecked = el.checked;
-                    }
-                }
-            }
+            $.fixParseHTML(wrapper, html)
+
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
                 fragment.appendChild(firstChild);
             }
@@ -371,51 +356,39 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         td: [3, "<table><tbody><tr>"],
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
         _default: $.support.createAll ? [0, ""] : [1, "X<div>"] //div可以不用闭合
+    },
+    insertHooks = {
+        prepend: function(el, node) {
+            el.insertBefore(node, el.firstChild);
+        },
+        append: function(el, node) {
+            el.appendChild(node);
+        },
+        before: function(el, node) {
+            el.parentNode.insertBefore(node, el);
+        },
+        after: function(el, node) {
+            el.parentNode.insertBefore(node, el.nextSibling);
+        },
+        replace: function(el, node) {
+            el.parentNode.replaceChild(node, el);
+        },
+        prepend2: function(el, html) {
+            el[adjacent]("afterBegin", html);
+        },
+        append2: function(el, html) {
+            el[adjacent]("beforeEnd", html);
+        },
+        before2: function(el, html) {
+            el[adjacent]("beforeBegin", html);
+        },
+        after2: function(el, html) {
+            el[adjacent]("afterEnd", html);
+        }
     };
-
     tagHooks.optgroup = tagHooks.option;
     tagHooks.tbody = tagHooks.tfoot = tagHooks.colgroup = tagHooks.caption = tagHooks.thead;
     tagHooks.th = tagHooks.td;
-    var
-    rtbody = /<tbody[^>]*>/i,
-        rtagName = /<([\w:]+)/,
-        //取得其tagName
-        rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
-        rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
-        types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
-        //需要处理套嵌关系的标签
-        rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
-        adjacent = "insertAdjacentHTML",
-        insertHooks = {
-            prepend: function(el, node) {
-                el.insertBefore(node, el.firstChild);
-            },
-            append: function(el, node) {
-                el.appendChild(node);
-            },
-            before: function(el, node) {
-                el.parentNode.insertBefore(node, el);
-            },
-            after: function(el, node) {
-                el.parentNode.insertBefore(node, el.nextSibling);
-            },
-            replace: function(el, node) {
-                el.parentNode.replaceChild(node, el);
-            },
-            prepend2: function(el, html) {
-                el[adjacent]("afterBegin", html);
-            },
-            append2: function(el, html) {
-                el[adjacent]("beforeEnd", html);
-            },
-            before2: function(el, html) {
-                el[adjacent]("beforeBegin", html);
-            },
-            after2: function(el, html) {
-                el[adjacent]("afterEnd", html);
-            }
-        };
-
     function insertAdjacentNode(elems, fn, item) {
         for(var i = 0, el; el = elems[i]; i++) { //第一个不用复制，其他要
             fn(el, i ? cloneNode(item, true, true) : item);
@@ -442,7 +415,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
     function makeFragment(nodes, fragment, bool) {
         //只有非NodeList的情况下我们才为i递增;
         var ret = fragment.cloneNode(false),
-            go = !nodes.item;
+        go = !nodes.item;
         for(var i = 0, node; node = nodes[i]; go && i++) {
             ret.appendChild(bool && cloneNode(node, true, true) || node);
         }
@@ -467,8 +440,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         } else if(typeof item === "string") {
             //如果传入的是字符串片断
             var fragment = $.parseHTML(item, doc),
-                //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
-                fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
+            //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
+            fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
             insertAdjacentHTML(elems, insertHooks[type], fragment, fast, insertHooks[type + "2"], item);
         } else if(item.length) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
@@ -481,7 +454,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
             if(key === void 0) {
                 if(this.length) {
                     var target = this[0],
-                        data = $.data(target);
+                    data = $.data(target);
                     if(target.nodeType === 1 && !$._data(target, "parsedAttrs")) {
                         for(var i = 0, attrs = target.attributes, attr; attr = attrs[i++];) {
                             var name = attr.name;
@@ -509,39 +482,20 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
     //======================================================================
 
     function cleanNode(node) {
-        node.uniqueNumber && $.removeData(node);
+        if( $.hasData(node) ){
+            $._removeData(node);
+        }
         node.clearAttributes && node.clearAttributes();
     }
-    var shim = document.createElement("div"); //缓存parser，防止反复创建
 
-    function shimCloneNode(outerHTML, tree) {
-        tree.appendChild(shim);
-        shim.innerHTML = outerHTML;
-        tree.removeChild(shim);
-        return shim.firstChild;
+    $.fixCloneNode = $.fixCloneNode || function(node){
+        return  node.cloneNode(true)
     }
-    var unknownTag = "<?XML:NAMESPACE"
 
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1) {
-            var bool //!undefined === true;
-            //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-            if(!$.support.cloneHTML5 && node.outerHTML) { //延迟创建检测元素
-                var outerHTML = document.createElement(node.nodeName).outerHTML;
-                bool = outerHTML.indexOf(unknownTag) // !0 === true;
-            }
-            //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
-            var neo = !bool ? shimCloneNode(node.outerHTML, document.documentElement) : node.cloneNode(true),
-                src, neos, i;
-            if(!$.support.cloneNode) {
-                fixNode(neo, node);
-                src = node[TAGS]("*");
-                neos = neo[TAGS]("*");
-                for(i = 0; src[i]; i++) {
-                    fixNode(neos[i], src[i]);
-                }
-            }
+            var neo = $.fixCloneNode(node), src, neos, i
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if(dataAndEvents) {
                 $.mergeData(neo, node);
@@ -559,52 +513,17 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
             return node.cloneNode(true)
         }
     }
-    //修正IE下对数据克隆时出现的一系列问题
-
-    function fixNode(clone, src) {
-        if(src.nodeType == 1) {
-            //只处理元素节点
-            var nodeName = clone.nodeName.toLowerCase();
-            //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
-            clone.clearAttributes();
-            //复制原对象的属性到克隆体中,但不包含原来的事件, ID,  NAME, uniqueNumber
-            clone.mergeAttributes(src, false);
-            //IE6-8无法复制其内部的元素
-            if(nodeName === "object") {
-                clone.outerHTML = src.outerHTML;
-                if($.support.cloneHTML5 && (src.innerHTML && !clone.innerHTML.trim())) {
-                    clone.innerHTML = src.innerHTML;
-                }
-            } else if(nodeName === "input" && (src.type === "checkbox" || src.type == "radio")) {
-                //IE6-8无法复制chechbox的值，在IE6-7中也defaultChecked属性也遗漏了
-                if(src.checked) {
-                    clone.defaultChecked = clone.checked = src.checked;
-                }
-                // 除Chrome外，所有浏览器都会给没有value的checkbox一个默认的value值”on”。
-                if(clone.value !== src.value) {
-                    clone.value = src.value;
-                }
-            } else if(nodeName === "option") {
-                clone.selected = src.defaultSelected; // IE6-8 无法保持选中状态
-            } else if(nodeName === "input" || nodeName === "textarea") {
-                clone.defaultValue = src.defaultValue; // IE6-8 无法保持默认值
-            } else if(nodeName === "script" && clone.text !== src.text) {
-                clone.text = src.text; //IE6-8不能复制script的text属性
-            }
-
-        }
-    }
 
     function outerHTML(el) {
         switch(el.nodeType + "") {
-        case "1":
-        case "9":
-            return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
-        case "3":
-        case "4":
-            return el.nodeValue;
-        default:
-            return "";
+            case "1":
+            case "9":
+                return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
+            case "3":
+            case "4":
+                return el.nodeValue;
+            default:
+                return "";
         }
     }
 
@@ -665,8 +584,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
         is: function(expr) {
             var nodes = $.query(expr, this.ownerDocument),
-                obj = {},
-                uid;
+            obj = {},
+            uid;
             for(var i = 0, node; node = nodes[i++];) {
                 uid = $.getUid(node);
                 obj[uid] = 1;
@@ -717,7 +636,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
 
     function travel(el, prop, expr) {
         var result = [],
-            ri = 0;
+        ri = 0;
         while((el = el[prop])) {
             if(el && el.nodeType === 1) {
                 result[ri++] = el;
