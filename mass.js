@@ -12,7 +12,7 @@ function(global, DOC) {
     var mass = 1; //当前框架的版本号
     var postfix = ""; //用于强制别名
     var cbi = 1e5; //用于生成回调函数的名字
-    var all = "lang_fix,lang,class,interact,support,query,support,data,node_fix,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,class,interact,data,support,query,support,node_fix,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]": "Document",

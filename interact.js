@@ -214,28 +214,30 @@ define("interact",["$class"], function($){
     })
     return $;
 })
-//2012.1.10
-//用tabView做一个简单的实验，但是这个不是组件，这个是散的
-//var tab = new Twitter();
-//var view = new Twitter();
-//view.follow(tab, function(msg){
-//	var view = document.getElementById("view").getElementsByTagName("span");
-//	for(var i = 0; i < view.length; i++){
-//		if(i == msg){
-//			view[i].className = "active";
-//		}else{
-//			view[i].className = "";
-//		}
-//	}
-//});
-//
-//var tabContainer = document.getElementById("tab");
-//tabContainer.onclick = function(event){
-//	var evt = event || window.event;
-//	var target = evt.srcElement || evt.target;
-//
-//	if(target != this){
-//		tab.tweet(target.innerHTML-1);
-//	}
-//}
-//;
+/*
+2012.1.10
+用tabView做一个简单的实验，但是这个不是组件，这个是散的
+var tab = new Twitter();
+var view = new Twitter();
+view.follow(tab, function(msg){
+	var view = document.getElementById("view").getElementsByTagName("span");
+	for(var i = 0; i < view.length; i++){
+		if(i == msg){
+			view[i].className = "active";
+		}else{
+			view[i].className = "";
+		}
+	}
+});
+
+var tabContainer = document.getElementById("tab");
+tabContainer.onclick = function(event){
+	var evt = event || window.event;
+	var target = evt.srcElement || evt.target;
+
+	if(target != this){
+		tab.tweet(target.innerHTML-1);
+	}
+}
+ * 
+ */

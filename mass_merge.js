@@ -12,7 +12,7 @@ function(global, DOC) {
     var mass = 1; //当前框架的版本号
     var postfix = ""; //用于强制别名
     var cbi = 1e5; //用于生成回调函数的名字
-    var all = "lang_fix,lang,support,class,interact,query,data,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
+    var all = "lang_fix,lang,class,interact,data,support,query,support,node_fix,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
     var moduleClass = "mass" + (new Date - 0);
     var class2type = {
         "[object HTMLDocument]": "Document",
@@ -1423,135 +1423,6 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     return $
 });
 
-//==========================================
-// 特征嗅探模块 by 司徒正美
-//==========================================
-define("support",["mass"], function( $ ){
-    var DOC = document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
-    div.setAttribute("className", "t");
-    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
-    '<object><param/></object><table></table><input type="checkbox" checked/>';
-    var a = div[TAGS]("a")[0], style = a.style,
-    select = DOC.createElement("select"),
-    input = div[TAGS]( "input" )[ 0 ],
-    opt = select.appendChild( DOC.createElement("option") );
-    //true为正常，false为不正常
-    var support = $.support = {
-        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
-        insertTbody: !div[TAGS]("tbody").length,
-        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
-        checkOn : input.value === "on",
-        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
-        optSelected: !!opt.selected,
-        //IE67，无法取得用户设定的原始href值
-        attrInnateHref: a.getAttribute("href") === "/nasami",
-        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
-        attrInnateStyle: a.getAttribute("style") !== style,
-        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
-        attrInnateName:div.className !== "t",
-        //IE6-8,对于某些固有属性不会返回用户最初设置的值
-        attrInnateValue: input.getAttribute("checked") == "",
-        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
-        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
-        cssOpacity: style.opacity == "0.25",
-        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
-        cssFloat: !!style.cssFloat,
-        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
-        traverseAll: !!div[TAGS]("param").length,
-        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
-        //IE678不能通过innerHTML生成link,style,script节点（bug）
-        createAll: !!div[TAGS]("link").length,
-        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
-        cloneHTML5: DOC.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
-        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
-        cloneNode: true,
-        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
-        focusin : $["@bind"] === "attachEvent",//IE肯定支持
-        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
-        innerHTML: false,
-        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
-        insertAdjacentHTML: false,
-        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
-        fastFragment: false,
-        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
-        inlineBlock: true,
-        //http://w3help.org/zh-cn/causes/RD1002
-        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
-        //        keepSize: true,
-        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
-        pixelPosition: true,
-        transition: false
-    };
-    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
-    input.checked = true;
-    support.cloneChecked = (input.cloneNode( true ).checked === true);
-    support.appendChecked = input.checked;
-    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
-    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
-    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
-    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
-    select.disabled = true;
-    support.optDisabled = !opt.disabled;
-    var clickFn
-    if ( !div.addEventListener && div.attachEvent && div.fireEvent ) {
-        div.attachEvent("onclick", clickFn = function () {
-            support.cloneNode = false;//w3c的节点复制是不复制事件的
-        });
-        div.cloneNode(true).fireEvent("onclick");
-        div.detachEvent( "onclick", clickFn );
-    }
-    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
-    //    div.style.backgroundClip = "content-box";
-    //    div.cloneNode( true ).style.backgroundClip = "";
-    //    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
-    var table = div[TAGS]("table")[0]
-    try{//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
-        table.innerHTML = "<tr><td>1</td></tr>";
-        support.innerHTML = true;
-        table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
-        support.insertAdjacentHTML = true;
-    }catch(e){ };
-
-    a = select = table = opt = style =  null;
-    $.require("ready",function(){
-        var body = DOC.body;
-        if(!body)//frameset不存在body标签
-            return;
-        try{
-            var range =  DOC.createRange();
-            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
-            support.fastFragment = !!range.createContextualFragment("<a>");
-            $.commonRange = range;
-        }catch(e){ };
-        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
-        body.insertBefore( div, body.firstChild );
-        var ib = '<div style="height:20px;display:inline-block"></div>';
-        div.innerHTML = ib + ib;//div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
-        support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
-        if( window.getComputedStyle ) {
-            div.style.top = "1%";
-            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
-        }
-        //        div.style.cssText = "width:20px;"
-        //        div.innerHTML = "<div style='width:40px;'></div>";
-        //        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
-        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
-        div.innerHTML = "<a href='#'></a>"
-        if(!support.focusin){
-            var a = div.firstChild;
-            a.addEventListener('focusin', function(){
-                support.focusin = true;
-            }, false);
-            a.focus();
-        }
-        div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
-        support.boxModel = div.offsetWidth === 20;
-        body.removeChild( div );
-        div =  null;
-    });
-    return $;
-});
-
 //=========================================
 // 类工厂模块 v11 by 司徒正美
 //==========================================
@@ -1870,33 +1741,309 @@ define("interact",["$class"], function($){
             });
         }
     })
-
+    return $;
 })
-//2012.1.10
-//用tabView做一个简单的实验，但是这个不是组件，这个是散的
-//var tab = new Twitter();
-//var view = new Twitter();
-//view.follow(tab, function(msg){
-//	var view = document.getElementById("view").getElementsByTagName("span");
-//	for(var i = 0; i < view.length; i++){
-//		if(i == msg){
-//			view[i].className = "active";
-//		}else{
-//			view[i].className = "";
-//		}
-//	}
-//});
-//
-//var tabContainer = document.getElementById("tab");
-//tabContainer.onclick = function(event){
-//	var evt = event || window.event;
-//	var target = evt.srcElement || evt.target;
-//
-//	if(target != this){
-//		tab.tweet(target.innerHTML-1);
-//	}
-//}
-//;
+/*
+2012.1.10
+用tabView做一个简单的实验，但是这个不是组件，这个是散的
+var tab = new Twitter();
+var view = new Twitter();
+view.follow(tab, function(msg){
+	var view = document.getElementById("view").getElementsByTagName("span");
+	for(var i = 0; i < view.length; i++){
+		if(i == msg){
+			view[i].className = "active";
+		}else{
+			view[i].className = "";
+		}
+	}
+});
+
+var tabContainer = document.getElementById("tab");
+tabContainer.onclick = function(event){
+	var evt = event || window.event;
+	var target = evt.srcElement || evt.target;
+
+	if(target != this){
+		tab.tweet(target.innerHTML-1);
+	}
+}
+ * 
+ */
+
+//==================================================
+// 数据缓存模块
+//==================================================
+define("data", ["$lang"], function($) {
+    var owners = [],
+        caches = [];
+    
+
+    function add(owner) {
+        var index = owners.push(owner);
+        return caches[index - 1] = {
+            data: {}
+        };
+    }
+    
+
+    function innerData(owner, name, data, pvt) { //IE678不能为文本节点注释节点添加数据
+        var index = owners.indexOf(owner);
+        var table = index === -1 ? add(owner) : caches[index];
+        var getOne = typeof name === "string" //取得单个属性
+        var cache = table;
+        //私有数据都是直接放到table中，普通数据放到table.data中
+        if(!pvt) {
+            table = table.data;
+        }
+        if(name && typeof name == "object") {
+            $.mix(table, name); //写入一组属性
+        } else if(getOne && data !== void 0) {
+            table[name] = data; //写入单个属性
+        }
+        if(getOne) {
+            if(name in table) {
+                return table[name];
+            } else if(!pvt && owner && owner.nodeType == 1) {
+                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+                return $.parseData(owner, name, cache);
+            }
+        } else {
+            return table;
+        }
+    }
+    
+
+    function innerRemoveData(owner, name, pvt) {
+        var index = owners.indexOf(owner);
+        if(index > -1) {
+            var delOne = typeof name == "string",
+                table = caches[index],
+                cache = table,
+                clear = 1
+            if(delOne) {
+                if(!pvt) {
+                    table = table.data;
+                }
+                if(table) {
+                    delOne = table[name];
+                    delete table[name];
+                }
+                for(var key in cache) {
+                    if(key == "data") {
+                        for(var i in cache.data) {
+                            clear = 0;
+                            break;
+                        }
+                    } else {
+                        clear = 0;
+                        break;
+                    }
+                }
+                if(clear) {
+                    owners.splice(index, 1);
+                    caches.splice(index, 1);
+                }
+            }
+            return delOne; //返回被移除的数据
+        }
+    }
+    $.mix({
+        //判定是否关联了数据
+        hasData: function(owner) {
+            return owners.indexOf(owner) > -1;
+        },
+        // 读写用户数据
+        data: function(target, name, data) {
+            return innerData(target, name, data);
+        },
+        //读写内部数据
+        _data: function(target, name, data) {
+            return innerData(target, name, data, true);
+        },
+        //移除用户数据
+        removeData: function(target, name) {
+            return innerRemoveData(target, name);
+        },
+        //移除内部数据
+        _removeData: function(target, name) {
+            return innerRemoveData(target, name, true);
+        },
+        //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
+        parseData: function(target, name, cache, value) {
+            var data, key = $.String.camelize(name),
+                _eval
+            if(cache && (key in cache)) return cache[key];
+            if(arguments.length != 4) {
+                var attr = "data-" + name.replace(/([A-Z])/g, "-$1").toLowerCase();
+                value = target.getAttribute(attr);
+            }
+            if(typeof value === "string") { //转换 /^(?:\{.*\}|null|false|true|NaN)$/
+                if(/^(?:\{.*\}|\[.*\]|null|false|true|NaN)$/.test(value) || +value + "" === value) {
+                    _eval = true;
+                }
+                try {
+                    data = _eval ? eval("0," + value) : value;
+                } catch(e) {
+                    data = value;
+                }
+                if(cache) {
+                    cache[key] = data;
+                }
+            }
+            return data;
+
+        },
+        //合并数据
+        mergeData: function(cur, src) {
+            if($.hasData(cur)) {
+                var oldData = $._data(src),
+                    curData = $._data(cur),
+                    events = oldData.events;
+                $.Object.merge(curData, oldData);
+                if(events) {
+                    curData.events = [];
+                    for(var i = 0, item; item = events[i++];) {
+                        $.event.bind(cur, item);
+                    }
+                }
+            }
+        }
+    });
+    return $
+});
+
+
+//==========================================
+// 特征嗅探模块 by 司徒正美
+//==========================================
+define("support",["mass"], function( $ ){
+    var DOC = document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
+    div.setAttribute("className", "t");
+    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
+    '<object><param/></object><table></table><input type="checkbox" checked/>';
+    var a = div[TAGS]("a")[0], style = a.style,
+    select = DOC.createElement("select"),
+    input = div[TAGS]( "input" )[ 0 ],
+    opt = select.appendChild( DOC.createElement("option") );
+    //true为正常，false为不正常
+    var support = $.support = {
+        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
+        insertTbody: !div[TAGS]("tbody").length,
+        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
+        checkOn : input.value === "on",
+        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
+        optSelected: !!opt.selected,
+        //IE67，无法取得用户设定的原始href值
+        attrInnateHref: a.getAttribute("href") === "/nasami",
+        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
+        attrInnateStyle: a.getAttribute("style") !== style,
+        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
+        attrInnateName:div.className !== "t",
+        //IE6-8,对于某些固有属性不会返回用户最初设置的值
+        attrInnateValue: input.getAttribute("checked") == "",
+        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
+        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
+        cssOpacity: style.opacity == "0.25",
+        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
+        cssFloat: !!style.cssFloat,
+        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
+        traverseAll: !!div[TAGS]("param").length,
+        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
+        //IE678不能通过innerHTML生成link,style,script节点（bug）
+        createAll: !!div[TAGS]("link").length,
+        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
+        cloneHTML5: DOC.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
+        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
+        cloneNode: true,
+        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
+        focusin : $["@bind"] === "attachEvent",//IE肯定支持
+        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
+        innerHTML: false,
+        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
+        insertAdjacentHTML: false,
+        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
+        fastFragment: false,
+        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
+        inlineBlock: true,
+        //http://w3help.org/zh-cn/causes/RD1002
+        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
+        //        keepSize: true,
+        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
+        pixelPosition: true,
+        transition: false
+    };
+    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
+    input.checked = true;
+    support.cloneChecked = (input.cloneNode( true ).checked === true);
+    support.appendChecked = input.checked;
+    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
+    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
+    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
+    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
+    select.disabled = true;
+    support.optDisabled = !opt.disabled;
+    var clickFn
+    if ( !div.addEventListener && div.attachEvent && div.fireEvent ) {
+        div.attachEvent("onclick", clickFn = function () {
+            support.cloneNode = false;//w3c的节点复制是不复制事件的
+        });
+        div.cloneNode(true).fireEvent("onclick");
+        div.detachEvent( "onclick", clickFn );
+    }
+    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
+    //    div.style.backgroundClip = "content-box";
+    //    div.cloneNode( true ).style.backgroundClip = "";
+    //    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
+    var table = div[TAGS]("table")[0]
+    try{//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
+        table.innerHTML = "<tr><td>1</td></tr>";
+        support.innerHTML = true;
+        table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
+        support.insertAdjacentHTML = true;
+    }catch(e){ };
+
+    a = select = table = opt = style =  null;
+    $.require("ready",function(){
+        var body = DOC.body;
+        if(!body)//frameset不存在body标签
+            return;
+        try{
+            var range =  DOC.createRange();
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !!range.createContextualFragment("<a>");
+            $.commonRange = range;
+        }catch(e){ };
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        body.insertBefore( div, body.firstChild );
+        var ib = '<div style="height:20px;display:inline-block"></div>';
+        div.innerHTML = ib + ib;//div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
+        support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
+        if( window.getComputedStyle ) {
+            div.style.top = "1%";
+            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
+        }
+        //        div.style.cssText = "width:20px;"
+        //        div.innerHTML = "<div style='width:40px;'></div>";
+        //        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
+        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
+        div.innerHTML = "<a href='#'></a>"
+        if(!support.focusin){
+            var a = div.firstChild;
+            a.addEventListener('focusin', function(){
+                support.focusin = true;
+            }, false);
+            a.focus();
+        }
+        div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
+        support.boxModel = div.offsetWidth === 20;
+        body.removeChild( div );
+        div =  null;
+    });
+    return $;
+});
+
 //=========================================
 // 选择器模块 v5 开发代号Icarus
 //==========================================
@@ -2818,157 +2965,240 @@ define("query",["mass"], function( $ ){
 
 
 
-//==================================================
-// 数据缓存模块
-//==================================================
-define("data", ["$lang"], function($) {
-    var owners = [],
-        caches = [];
-    
-
-    function add(owner) {
-        var index = owners.push(owner);
-        return caches[index - 1] = {
-            data: {}
-        };
+//==========================================
+// 特征嗅探模块 by 司徒正美
+//==========================================
+define("support",["mass"], function( $ ){
+    var DOC = document, div = DOC.createElement('div'),TAGS = "getElementsByTagName";
+    div.setAttribute("className", "t");
+    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>'+
+    '<object><param/></object><table></table><input type="checkbox" checked/>';
+    var a = div[TAGS]("a")[0], style = a.style,
+    select = DOC.createElement("select"),
+    input = div[TAGS]( "input" )[ 0 ],
+    opt = select.appendChild( DOC.createElement("option") );
+    //true为正常，false为不正常
+    var support = $.support = {
+        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
+        insertTbody: !div[TAGS]("tbody").length,
+        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
+        checkOn : input.value === "on",
+        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
+        optSelected: !!opt.selected,
+        //IE67，无法取得用户设定的原始href值
+        attrInnateHref: a.getAttribute("href") === "/nasami",
+        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
+        attrInnateStyle: a.getAttribute("style") !== style,
+        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
+        attrInnateName:div.className !== "t",
+        //IE6-8,对于某些固有属性不会返回用户最初设置的值
+        attrInnateValue: input.getAttribute("checked") == "",
+        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
+        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
+        cssOpacity: style.opacity == "0.25",
+        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
+        cssFloat: !!style.cssFloat,
+        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
+        traverseAll: !!div[TAGS]("param").length,
+        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
+        //IE678不能通过innerHTML生成link,style,script节点（bug）
+        createAll: !!div[TAGS]("link").length,
+        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
+        cloneHTML5: DOC.createElement("nav").cloneNode( true ).outerHTML !== "<:nav></:nav>",
+        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
+        cloneNode: true,
+        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
+        focusin : $["@bind"] === "attachEvent",//IE肯定支持
+        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
+        innerHTML: false,
+        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
+        insertAdjacentHTML: false,
+        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
+        fastFragment: false,
+        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
+        inlineBlock: true,
+        //http://w3help.org/zh-cn/causes/RD1002
+        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
+        //        keepSize: true,
+        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
+        pixelPosition: true,
+        transition: false
+    };
+    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
+    input.checked = true;
+    support.cloneChecked = (input.cloneNode( true ).checked === true);
+    support.appendChecked = input.checked;
+    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
+    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
+    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
+    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
+    select.disabled = true;
+    support.optDisabled = !opt.disabled;
+    var clickFn
+    if ( !div.addEventListener && div.attachEvent && div.fireEvent ) {
+        div.attachEvent("onclick", clickFn = function () {
+            support.cloneNode = false;//w3c的节点复制是不复制事件的
+        });
+        div.cloneNode(true).fireEvent("onclick");
+        div.detachEvent( "onclick", clickFn );
     }
-    
+    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
+    //    div.style.backgroundClip = "content-box";
+    //    div.cloneNode( true ).style.backgroundClip = "";
+    //    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
+    var table = div[TAGS]("table")[0]
+    try{//检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
+        table.innerHTML = "<tr><td>1</td></tr>";
+        support.innerHTML = true;
+        table.insertAdjacentHTML("afterBegin","<tr><td>2</td></tr>");
+        support.insertAdjacentHTML = true;
+    }catch(e){ };
 
-    function innerData(owner, name, data, pvt) { //IE678不能为文本节点注释节点添加数据
-        var index = owners.indexOf(owner);
-        var table = index === -1 ? add(owner) : caches[index];
-        var getOne = typeof name === "string" //取得单个属性
-        var cache = table;
-        //私有数据都是直接放到table中，普通数据放到table.data中
-        if(!pvt) {
-            table = table.data;
+    a = select = table = opt = style =  null;
+    $.require("ready",function(){
+        var body = DOC.body;
+        if(!body)//frameset不存在body标签
+            return;
+        try{
+            var range =  DOC.createRange();
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !!range.createContextualFragment("<a>");
+            $.commonRange = range;
+        }catch(e){ };
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        body.insertBefore( div, body.firstChild );
+        var ib = '<div style="height:20px;display:inline-block"></div>';
+        div.innerHTML = ib + ib;//div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
+        support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
+        if( window.getComputedStyle ) {
+            div.style.top = "1%";
+            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
         }
-        if(name && typeof name == "object") {
-            $.mix(table, name); //写入一组属性
-        } else if(getOne && data !== void 0) {
-            table[name] = data; //写入单个属性
+        //        div.style.cssText = "width:20px;"
+        //        div.innerHTML = "<div style='width:40px;'></div>";
+        //        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
+        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
+        div.innerHTML = "<a href='#'></a>"
+        if(!support.focusin){
+            var a = div.firstChild;
+            a.addEventListener('focusin', function(){
+                support.focusin = true;
+            }, false);
+            a.focus();
         }
-        if(getOne) {
-            if(name in table) {
-                return table[name];
-            } else if(!pvt && owner && owner.nodeType == 1) {
-                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
-                //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
-                return $.parseData(owner, name, cache);
-            }
-        } else {
-            return table;
-        }
-    }
-    
-
-    function innerRemoveData(owner, name, pvt) {
-        var index = owners.indexOf(owner);
-        if(index > -1) {
-            var delOne = typeof name == "string",
-                table = caches[index],
-                cache = table,
-                clear = 1
-            if(delOne) {
-                if(!pvt) {
-                    table = table.data;
-                }
-                if(table) {
-                    delOne = table[name];
-                    delete table[name];
-                }
-                for(var key in cache) {
-                    if(key == "data") {
-                        for(var i in cache.data) {
-                            clear = 0;
-                            break;
-                        }
-                    } else {
-                        clear = 0;
-                        break;
-                    }
-                }
-                if(clear) {
-                    owners.splice(index, 1);
-                    caches.splice(index, 1);
-                }
-            }
-            return delOne; //返回被移除的数据
-        }
-    }
-    $.mix({
-        //判定是否关联了数据
-        hasData: function(owner) {
-            return owners.indexOf(owner) > -1;
-        },
-        // 读写用户数据
-        data: function(target, name, data) {
-            return innerData(target, name, data);
-        },
-        //读写内部数据
-        _data: function(target, name, data) {
-            return innerData(target, name, data, true);
-        },
-        //移除用户数据
-        removeData: function(target, name) {
-            return innerRemoveData(target, name);
-        },
-        //移除内部数据
-        _removeData: function(target, name) {
-            return innerRemoveData(target, name, true);
-        },
-        //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
-        parseData: function(target, name, cache, value) {
-            var data, key = $.String.camelize(name),
-                _eval
-            if(cache && (key in cache)) return cache[key];
-            if(arguments.length != 4) {
-                var attr = "data-" + name.replace(/([A-Z])/g, "-$1").toLowerCase();
-                value = target.getAttribute(attr);
-            }
-            if(typeof value === "string") { //转换 /^(?:\{.*\}|null|false|true|NaN)$/
-                if(/^(?:\{.*\}|\[.*\]|null|false|true|NaN)$/.test(value) || +value + "" === value) {
-                    _eval = true;
-                }
-                try {
-                    data = _eval ? eval("0," + value) : value;
-                } catch(e) {
-                    data = value;
-                }
-                if(cache) {
-                    cache[key] = data;
-                }
-            }
-            return data;
-
-        },
-        //合并数据
-        mergeData: function(cur, src) {
-            if($.hasData(cur)) {
-                var oldData = $._data(src),
-                    curData = $._data(cur),
-                    events = oldData.events;
-                $.Object.merge(curData, oldData);
-                if(events) {
-                    curData.events = [];
-                    for(var i = 0, item; item = events[i++];) {
-                        $.event.bind(cur, item);
-                    }
-                }
-            }
-        }
+        div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
+        support.boxModel = div.offsetWidth === 20;
+        body.removeChild( div );
+        div =  null;
     });
-    return $
+    return $;
 });
+
+//==================================================
+// 节点补丁模块 v1 主要是用于在创建或复制节点时处理IE的一些BUG
+//==================================================
+define("node_fix",!!top.dispatchEvent, ["mass"], function($){
+    //修正IE下对数据克隆时出现的一系列问题
+    function fixNode(clone, src) {
+        if(src.nodeType == 1) {
+            //只处理元素节点
+            var nodeName = clone.nodeName.toLowerCase();
+            //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
+            clone.clearAttributes();
+            //复制原对象的属性到克隆体中,但不包含原来的事件, ID,  NAME, uniqueNumber
+            clone.mergeAttributes(src, false);
+            //IE6-8无法复制其内部的元素
+            if(nodeName === "object") {
+                clone.outerHTML = src.outerHTML;
+            } else if(nodeName === "input" && (src.type === "checkbox" || src.type == "radio")) {
+                //IE6-8无法复制chechbox的值，在IE6-7中也defaultChecked属性也遗漏了
+                if(src.checked) {
+                    clone.defaultChecked = clone.checked = src.checked;
+                }
+                // 除Chrome外，所有浏览器都会给没有value的checkbox一个默认的value值”on”。
+                if(clone.value !== src.value) {
+                    clone.value = src.value;
+                }
+            } else if(nodeName === "option") {
+                clone.selected = src.defaultSelected; // IE6-8 无法保持选中状态
+            } else if(nodeName === "input" || nodeName === "textarea") {
+                clone.defaultValue = src.defaultValue; // IE6-8 无法保持默认值
+            } else if(nodeName === "script" && clone.text !== src.text) {
+                clone.text = src.text; //IE6-8不能复制script的text属性
+            }
+
+        }
+    }
+    var shim = document.createElement("div"); //缓存parser，防止反复创建
+
+    function shimCloneNode(outerHTML, tree) {
+        tree.appendChild(shim);
+        shim.innerHTML = outerHTML;
+        tree.removeChild(shim);
+        return shim.firstChild;
+    }
+    var unknownTag = "<?XML:NAMESPACE"
+    $.fixCloneNode = function(node){
+        //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
+        if(!$.support.cloneHTML5 && node.outerHTML) { //延迟创建检测元素
+            var outerHTML = document.createElement(node.nodeName).outerHTML;
+            bool = outerHTML.indexOf(unknownTag) // !0 === true;
+        }
+        //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
+        var neo = !bool ? shimCloneNode(node.outerHTML, document.documentElement) : node.cloneNode(true)
+
+        fixNode(neo, node);
+        var src = node[TAGS]("*"), neos = neo[TAGS]("*"),bool
+        for(var i = 0; src[i]; i++) {
+            fixNode(neos[i], src[i]);
+        }
+    }
+
+    var rtbody = /<tbody[^>]*>/i
+    $.fixParseHTML = function(wrapper, html){
+        if(!$.support.insertTbody) {
+            var noTbody = !rtbody.test(html), //矛:html本身就不存在<tbody字样
+            els = wrapper["getElementsByTagName"]("tbody");
+            if(els.length > 0 && noTbody) { //盾：实际上生成的NodeList中存在tbody节点
+                for(var i = 0, el; el = els[i++];) {
+                    if(!el.childNodes.length) //如果是自动插入的里面肯定没有内容
+                        el.parentNode.removeChild(el);
+                }
+            }
+        }
+        if(!$.support.createAll) { //移除所有br补丁
+            for(els = wrapper["getElementsByTagName"]("br"), i = 0; el = els[i++];) {
+                if(el.className && el.className === "fix_create_all") {
+                    el.parentNode.removeChild(el);
+                }
+            }
+        }
+        if(!$.support.appendChecked) { //IE67没有为它们添加defaultChecked
+            for(els = wrapper["getElementsByTagName"]("input"), i = 0; el = els[i++];) {
+                if(el.type === "checkbox" || el.type === "radio") {
+                    el.defaultChecked = el.checked;
+                }
+            }
+        }
+    }
+})
+//2013.1.11
 
 
 //==================================================
 // 节点操作模块
 //==================================================
-define("node", "mass,$support,$class,$query,$data".split(","), function($) {
+define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
     var rtag = /^[a-zA-Z]+$/,
-        TAGS = "getElementsByTagName"
-
+    rtagName = /<([\w:]+)/,
+    //取得其tagName
+    rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
+    rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
+    types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
+    //需要处理套嵌关系的标签
+    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
+    adjacent = "insertAdjacentHTML",
+    TAGS = "getElementsByTagName"
     function getDoc() {
         for(var i = 0, el; i < arguments.length; i++) {
             if(el = arguments[i]) {
@@ -2981,6 +3211,10 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         }
         return document;
     }
+    $.fixCloneNode = $.fixCloneNode || function(node){
+        return  node.cloneNode(true)
+    }
+    $.fixParseHTML = $.fixParseHTML || $.noop;
     $.mix($.factory).implement({
         init: function(expr, context) {
             // 分支1: 处理空白字符串,null,undefined参数
@@ -3024,8 +3258,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         },
         toString: function() {
             var i = this.length,
-                ret = [],
-                getType = $.type;
+            ret = [],
+            getType = $.type;
             while(i--) {
                 ret[i] = getType(this[i]);
             }
@@ -3217,7 +3451,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
                 return node[matchesAPI](expr);
             } catch(e) {
                 var parent = node.parentNode,
-                    array
+                array
                 if(parent) {
                     array = $.query(expr, node.ownerDocument);
                     return array.indexOf(node) != -1
@@ -3259,16 +3493,16 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
                 html = html.replace(rcreate, "<br class='fix_create_all'/>$1"); //在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec(html) || ["", ""])[1].toLowerCase(),
-                //取得其标签名
-                wrap = tagHooks[tag] || tagHooks._default,
-                fragment = doc.createDocumentFragment(),
-                wrapper = doc.createElement("div"),
-                firstChild;
+            //取得其标签名
+            wrap = tagHooks[tag] || tagHooks._default,
+            fragment = doc.createDocumentFragment(),
+            wrapper = doc.createElement("div"),
+            firstChild;
             wrapper.innerHTML = wrap[1] + html + (wrap[2] || "");
             var els = wrapper[TAGS]("script");
             if(els.length) { //使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script = doc.createElement("script"),
-                    neo;
+                neo;
                 for(var i = 0, el; el = els[i++];) {
                     if(!el.type || types[el.type]) { //如果script节点的MIME能让其执行脚本
                         neo = script.cloneNode(false); //FF不能省略参数
@@ -3285,30 +3519,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
             //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
-            if(!$.support.insertTbody) {
-                var noTbody = !rtbody.test(html); //矛:html本身就不存在<tbody字样
-                els = wrapper[TAGS]("tbody");
-                if(els.length > 0 && noTbody) { //盾：实际上生成的NodeList中存在tbody节点
-                    for(i = 0; el = els[i++];) {
-                        if(!el.childNodes.length) //如果是自动插入的里面肯定没有内容
-                        el.parentNode.removeChild(el);
-                    }
-                }
-            }
-            if(!$.support.createAll) { //移除所有补丁
-                for(els = wrapper[TAGS]("br"), i = 0; el = els[i++];) {
-                    if(el.className && el.className === "fix_create_all") {
-                        el.parentNode.removeChild(el);
-                    }
-                }
-            }
-            if(!$.support.appendChecked) { //IE67没有为它们添加defaultChecked
-                for(els = wrapper[TAGS]("input"), i = 0; el = els[i++];) {
-                    if(el.type === "checkbox" || el.type === "radio") {
-                        el.defaultChecked = el.checked;
-                    }
-                }
-            }
+            $.fixParseHTML(wrapper, html);
+
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
                 fragment.appendChild(firstChild);
             }
@@ -3327,78 +3539,66 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         td: [3, "<table><tbody><tr>"],
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
         _default: $.support.createAll ? [0, ""] : [1, "X<div>"] //div可以不用闭合
+    },
+    insertHooks = {
+        prepend: function(el, node) {
+            el.insertBefore(node, el.firstChild);
+        },
+        append: function(el, node) {
+            el.appendChild(node);
+        },
+        before: function(el, node) {
+            el.parentNode.insertBefore(node, el);
+        },
+        after: function(el, node) {
+            el.parentNode.insertBefore(node, el.nextSibling);
+        },
+        replace: function(el, node) {
+            el.parentNode.replaceChild(node, el);
+        },
+        prepend2: function(el, html) {
+            el[adjacent]("afterBegin", html);
+        },
+        append2: function(el, html) {
+            el[adjacent]("beforeEnd", html);
+        },
+        before2: function(el, html) {
+            el[adjacent]("beforeBegin", html);
+        },
+        after2: function(el, html) {
+            el[adjacent]("afterEnd", html);
+        }
     };
-
     tagHooks.optgroup = tagHooks.option;
     tagHooks.tbody = tagHooks.tfoot = tagHooks.colgroup = tagHooks.caption = tagHooks.thead;
     tagHooks.th = tagHooks.td;
-    var
-    rtbody = /<tbody[^>]*>/i,
-        rtagName = /<([\w:]+)/,
-        //取得其tagName
-        rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
-        rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
-        types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
-        //需要处理套嵌关系的标签
-        rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
-        adjacent = "insertAdjacentHTML",
-        insertHooks = {
-            prepend: function(el, node) {
-                el.insertBefore(node, el.firstChild);
-            },
-            append: function(el, node) {
-                el.appendChild(node);
-            },
-            before: function(el, node) {
-                el.parentNode.insertBefore(node, el);
-            },
-            after: function(el, node) {
-                el.parentNode.insertBefore(node, el.nextSibling);
-            },
-            replace: function(el, node) {
-                el.parentNode.replaceChild(node, el);
-            },
-            prepend2: function(el, html) {
-                el[adjacent]("afterBegin", html);
-            },
-            append2: function(el, html) {
-                el[adjacent]("beforeEnd", html);
-            },
-            before2: function(el, html) {
-                el[adjacent]("beforeBegin", html);
-            },
-            after2: function(el, html) {
-                el[adjacent]("afterEnd", html);
-            }
-        };
-
-    function insertAdjacentNode(elems, fn, item) {
+    function insertAdjacentNode(elems, item, handler) {
         for(var i = 0, el; el = elems[i]; i++) { //第一个不用复制，其他要
-            fn(el, i ? cloneNode(item, true, true) : item);
+            handler(el, i ? cloneNode(item, true, true) : item);
         }
     }
 
-    function insertAdjacentHTML(elems, slowInsert, fragment, fast, fastInsert, html) {
+    function insertAdjacentHTML(elems, item, fastHandler, handler) {
         for(var i = 0, el; el = elems[i++];) {
-            if(fast) {
-                fastInsert(el, html);
+            if(item.nodeType) {
+                handler(el, item.cloneNode(true));
             } else {
-                slowInsert(el, fragment.cloneNode(true));
+                fastHandler(el, item);
             }
         }
     }
 
-    function insertAdjacentFragment(elems, fn, item, doc) {
+    function insertAdjacentFragment(elems, item, doc, handler) {
         var fragment = doc.createDocumentFragment();
         for(var i = 0, el; el = elems[i++];) {
-            fn(el, makeFragment(item, fragment, i > 1));
+            handler(el, makeFragment(item, fragment, i > 1));
         }
     }
 
     function makeFragment(nodes, fragment, bool) {
         //只有非NodeList的情况下我们才为i递增;
         var ret = fragment.cloneNode(false),
-            go = !nodes.item;
+        go = !nodes.item;
         for(var i = 0, node; node = nodes[i]; go && i++) {
             ret.appendChild(bool && cloneNode(node, true, true) || node);
         }
@@ -3409,19 +3609,21 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
     function manipulate(nodes, type, item, doc) {
         var elems = $.filter(nodes, function(el) {
             return el.nodeType === 1; //转换为纯净的元素节点数组
-        });
+        }), handler = insertHooks[type];
         if(item.nodeType) {
             //如果是传入元素节点或文本节点或文档碎片
-            insertAdjacentNode(elems, insertHooks[type], item);
+            insertAdjacentNode(elems, item, handler);
         } else if(typeof item === "string") {
             //如果传入的是字符串片断
-            var fragment = $.parseHTML(item, doc),
-                //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
-                fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
-            insertAdjacentHTML(elems, insertHooks[type], fragment, fast, insertHooks[type + "2"], item);
+            //如果方法名不是replace并且完美支持insertAdjacentHTML并且不存在套嵌关系的标签
+            var fast = (type !== "replace") && $.support[adjacent] && !rnest.test(item);
+            if(!fast){
+                item = $.parseHTML(item, doc)
+            }
+            insertAdjacentHTML(elems, item, insertHooks[type + "2"], handler);
         } else if(item.length) {
             //如果传入的是HTMLCollection nodeList mass实例，将转换为文档碎片
-            insertAdjacentFragment(elems, insertHooks[type], item, doc);
+            insertAdjacentFragment(elems, item, doc,  handler);
         }
         return nodes;
     }
@@ -3430,7 +3632,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
             if(key === void 0) {
                 if(this.length) {
                     var target = this[0],
-                        data = $.data(target);
+                    data = $.data(target);
                     if(target.nodeType === 1 && !$._data(target, "parsedAttrs")) {
                         for(var i = 0, attrs = target.attributes, attr; attr = attrs[i++];) {
                             var name = attr.name;
@@ -3458,39 +3660,18 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
     //======================================================================
 
     function cleanNode(node) {
-        node.uniqueNumber && $.removeData(node);
+        if( $.hasData(node) ){
+            $._removeData(node);
+        }
         node.clearAttributes && node.clearAttributes();
     }
-    var shim = document.createElement("div"); //缓存parser，防止反复创建
 
-    function shimCloneNode(outerHTML, tree) {
-        tree.appendChild(shim);
-        shim.innerHTML = outerHTML;
-        tree.removeChild(shim);
-        return shim.firstChild;
-    }
-    var unknownTag = "<?XML:NAMESPACE"
+
 
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
         //   处理IE6-8下复制事件时一系列错误
         if(node.nodeType === 1) {
-            var bool //!undefined === true;
-            //这个判定必须这么长：判定是否能克隆新标签，判定是否为元素节点, 判定是否为新标签
-            if(!$.support.cloneHTML5 && node.outerHTML) { //延迟创建检测元素
-                var outerHTML = document.createElement(node.nodeName).outerHTML;
-                bool = outerHTML.indexOf(unknownTag) // !0 === true;
-            }
-            //各浏览器cloneNode方法的部分实现差异 http://www.cnblogs.com/snandy/archive/2012/05/06/2473936.html
-            var neo = !bool ? shimCloneNode(node.outerHTML, document.documentElement) : node.cloneNode(true),
-                src, neos, i;
-            if(!$.support.cloneNode) {
-                fixNode(neo, node);
-                src = node[TAGS]("*");
-                neos = neo[TAGS]("*");
-                for(i = 0; src[i]; i++) {
-                    fixNode(neos[i], src[i]);
-                }
-            }
+            var neo = $.fixCloneNode(node), src, neos, i
             // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if(dataAndEvents) {
                 $.mergeData(neo, node);
@@ -3508,52 +3689,17 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
             return node.cloneNode(true)
         }
     }
-    //修正IE下对数据克隆时出现的一系列问题
-
-    function fixNode(clone, src) {
-        if(src.nodeType == 1) {
-            //只处理元素节点
-            var nodeName = clone.nodeName.toLowerCase();
-            //clearAttributes方法可以清除元素的所有属性值，如style样式，或者class属性，与attachEvent绑定上去的事件
-            clone.clearAttributes();
-            //复制原对象的属性到克隆体中,但不包含原来的事件, ID,  NAME, uniqueNumber
-            clone.mergeAttributes(src, false);
-            //IE6-8无法复制其内部的元素
-            if(nodeName === "object") {
-                clone.outerHTML = src.outerHTML;
-                if($.support.cloneHTML5 && (src.innerHTML && !clone.innerHTML.trim())) {
-                    clone.innerHTML = src.innerHTML;
-                }
-            } else if(nodeName === "input" && (src.type === "checkbox" || src.type == "radio")) {
-                //IE6-8无法复制chechbox的值，在IE6-7中也defaultChecked属性也遗漏了
-                if(src.checked) {
-                    clone.defaultChecked = clone.checked = src.checked;
-                }
-                // 除Chrome外，所有浏览器都会给没有value的checkbox一个默认的value值”on”。
-                if(clone.value !== src.value) {
-                    clone.value = src.value;
-                }
-            } else if(nodeName === "option") {
-                clone.selected = src.defaultSelected; // IE6-8 无法保持选中状态
-            } else if(nodeName === "input" || nodeName === "textarea") {
-                clone.defaultValue = src.defaultValue; // IE6-8 无法保持默认值
-            } else if(nodeName === "script" && clone.text !== src.text) {
-                clone.text = src.text; //IE6-8不能复制script的text属性
-            }
-
-        }
-    }
 
     function outerHTML(el) {
         switch(el.nodeType + "") {
-        case "1":
-        case "9":
-            return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
-        case "3":
-        case "4":
-            return el.nodeValue;
-        default:
-            return "";
+            case "1":
+            case "9":
+                return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
+            case "3":
+            case "4":
+                return el.nodeValue;
+            default:
+                return "";
         }
     }
 
@@ -3614,8 +3760,8 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
         //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
         is: function(expr) {
             var nodes = $.query(expr, this.ownerDocument),
-                obj = {},
-                uid;
+            obj = {},
+            uid;
             for(var i = 0, node; node = nodes[i++];) {
                 uid = $.getUid(node);
                 obj[uid] = 1;
@@ -3666,7 +3812,7 @@ define("node", "mass,$support,$class,$query,$data".split(","), function($) {
 
     function travel(el, prop, expr) {
         var result = [],
-            ri = 0;
+        ri = 0;
         while((el = el[prop])) {
             if(el && el.nodeType === 1) {
                 result[ri++] = el;
@@ -6407,7 +6553,7 @@ define("fx", ["$css"], function($) {
         color: function(node, per, end, obj) {
             var pos = obj.easing(per),
                 rgb = end ? obj.to : obj.from.map(function(from, i) {
-                    return Math.max(Math.min(parseInt(from + (obj.to[i] - from) * pos, 10), 255), 0);
+                    return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
                 });
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
