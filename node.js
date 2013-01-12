@@ -259,7 +259,8 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     $.mix({
         //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        match: function(node, expr, id) {
+        //判定元素节点是否匹配CSS表达式
+        match: function(node, expr) {
             try {
                 return node[matchesAPI](expr);
             } catch(e) {
