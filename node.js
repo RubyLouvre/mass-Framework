@@ -220,12 +220,20 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         $.fn[method] = function(item) {
             return manipulate(this, method, item, this.ownerDocument);
         }
-        $.fn[method + "To"] = function(item) {
+        $.fn[method + "To"] = function() {
             $(item, this.ownerDocument)[method](this);
             return this;
         }
     });
-
+    //添加对jQuery insertAfter/insertBefore的兼容支持
+    $.fn.insertAfter = function(item){
+        $.log("insertAfter is deprecated, instead of afterTo")
+        return this.afterTo(item);
+    }
+    $.fn.insertBefore = function(item){
+        $.log("insertBefore is deprecated, instead of beforeTo")
+        return this.beforeTo(item);
+    }
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
     var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-', 'WebKit-', 'moz-', "webkit-", 'ms-', '-khtml-']
     var cssMap = { //支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
