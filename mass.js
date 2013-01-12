@@ -329,7 +329,7 @@ function(global, DOC) {
         }
         var ext = "js";
         tmp = ret.replace(/[?#].*/, "");
-        if(/\.(\w+)$/.test(tmp)) {
+        if(/\.(css|js)$/.test(tmp)) {// 处理"http://113.93.55.202/mass.draggable"的情况
             ext = RegExp.$1;
         }
         if(ext != "css" && tmp == ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
