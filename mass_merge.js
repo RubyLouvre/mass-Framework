@@ -261,7 +261,7 @@ function(global, DOC) {
         }
         var ext = "js";
         tmp = ret.replace(/[?#].*/, "");
-        if(/\.(\w+)$/.test(tmp)) {
+        if(/\.(css|js)$/.test(tmp)) {// 处理"http://113.93.55.202/mass.draggable"的情况
             ext = RegExp.$1;
         }
         if(ext != "css" && tmp == ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
@@ -1534,7 +1534,6 @@ define("interact",["$class"], function($){
     //观察者模式
     $.Observer = $.factory({
         init: function(target){
-            $.log("init EventTarget")
             this._events = {};
             this._target = target || this;
         },
@@ -1643,20 +1642,20 @@ define("interact",["$class"], function($){
             that.bind(type, wrapper);
             return this;
         },
-        done: function (handler) {
+        done: function (callback) {
             var that = this;
             return function (err, data) {
                 if (err) {
                     return that.fire('error', err);
                 }
                 if (typeof handler === 'string') {
-                    return that.fire(handler, data);
+                    return that.fire(callback, data);
                 }
                 if (arguments.length <= 2) {
-                    return handler(data);
+                    return callback(data);
                 }
                 var args = $.slice(arguments, 1);
-                handler.apply(null, args);
+                callback.apply(null, args);
             }
         },
         fail: function (callback) {
