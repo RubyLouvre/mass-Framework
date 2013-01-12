@@ -27,7 +27,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
         eventMap = $.oneObject(mouseEvents, "Mouse"),
         types = mouseEvents + ",keypress,keydown,keyup," + "blur,focus,focusin,focusout," + "abort,error,load,unload,resize,scroll,change,input,select,reset,submit" //input
         $.eventSupport = function(eventName, el) {
-            el = el || document.createElement("div");
+            el = el || $.html;//此方法只能检测元素节点对某种事件的支持，并且只能检测一般性的事件，对于像表单事件，需要传入input元素进行检测
             eventName = "on" + eventName;
             var ret = eventName in el;
             if(el.setAttribute && !ret) {
