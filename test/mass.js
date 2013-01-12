@@ -26,7 +26,7 @@ define(["$spec"], function() {
         },
 
         isWindow: function() {
-		    //不要使用ok, ng
+            //不要使用ok, ng
             var test1 = {};
             test1.window = test1;
             test1.document = document;
@@ -105,6 +105,19 @@ define(["$spec"], function() {
                 cc: "cc"
             };
             a.mix = $.mix;
+
+            var d = $.mix({
+                test:"test"
+            },{
+                second:"second"
+            }, {
+                third: "third"
+            })
+            expect(d).same({
+                test:"test",
+                second:"second" ,
+                third:"third"
+            }, "测试同时合并多个对象");
 
             expect(a.mix({
                 aa: "aa",

@@ -6,20 +6,20 @@ define("fx", ["$css"], function($) {
         color: /color/i,
         scroll: /scroll/i
     },
-        rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
-        timeline = $.timeline = [] //时间轴
-        $.mix({ //缓动公式
-            easing: {
-                linear: function(pos) {
-                    return pos;
-                },
-                swing: function(pos) {
-                    return(-Math.cos(pos * Math.PI) / 2) + 0.5;
-                }
+    rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
+    timeline = $.timeline = [] //时间轴
+    $.mix({ //缓动公式
+        easing: {
+            linear: function(pos) {
+                return pos;
             },
-            fps: 30
-        })
-        //用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
+            swing: function(pos) {
+                return(-Math.cos(pos * Math.PI) / 2) + 0.5;
+            }
+        },
+        fps: 30
+    })
+    //用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
 
 
     function tick(fx) {
@@ -57,30 +57,29 @@ define("fx", ["$css"], function($) {
     }
 
     var effect = $.fn.fx = function(props, /*internal*/ p) {
-            var opts = resetArguments.apply(null, arguments);
-            if((props = opts.props)) {
-                var ease = opts.specialEasing;
-                for(var name in props) {
-                    p = $.cssName(name) || name;
-                    if(name != p) {
-                        props[p] = props[name]; //收集用于渐变的属性
-                        ease[p] = ease[name];
-                        delete ease[name];
-                        delete props[name];
-                    }
+        var opts = resetArguments.apply(null, arguments);
+        if((props = opts.props)) {
+            var ease = opts.specialEasing;
+            for(var name in props) {
+                p = $.cssName(name) || name;
+                if(name != p) {
+                    props[p] = props[name]; //收集用于渐变的属性
+                    ease[p] = ease[name];
+                    delete ease[name];
+                    delete props[name];
                 }
             }
-            for(var i = 0, node; node = this[i++];) {
-                var fx = {};
-                $.mix(fx, opts)
-                fx.method = "noop"
-                fx.positive = [];
-                fx.negative = [];
-                fx.node = node;
-                tick(fx);
-            }
-            return this;
         }
+        for(var i = 0, node; node = this[i++];) {
+            tick( $.mix({
+                positive:[],
+                negative:[],
+                method: "noop",
+                node:node
+            }, opts, false));
+        }
+        return this;
+    }
     $.fn.animate = effect;
     //.animate( properties [, duration] [, easing] [, complete] )
     //.animate( properties, options )
@@ -88,19 +87,19 @@ define("fx", ["$css"], function($) {
 
     function addOptions(opts, p) {
         switch($.type(p)) {
-        case "Object":
-            delete p.props;
-            $.mix(opts, p);
-            break;
-        case "Number":
-            opts.duration = p;
-            break;
-        case "String":
-            opts.easing = p;
-            break;
-        case "Function":
-            opts.complete = p;
-            break;
+            case "Object":
+                delete p.props;
+                $.mix(opts, p);
+                break;
+            case "Number":
+                opts.duration = p;
+                break;
+            case "String":
+                opts.easing = p;
+                break;
+            case "Function":
+                opts.complete = p;
+                break;
         }
     }
 
@@ -129,9 +128,9 @@ define("fx", ["$css"], function($) {
         },
         color: function(node, per, end, obj) {
             var pos = obj.easing(per),
-                rgb = end ? obj.to : obj.from.map(function(from, i) {
-                    return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
-                });
+            rgb = end ? obj.to : obj.from.map(function(from, i) {
+                return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
+            });
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
     }
@@ -197,7 +196,7 @@ define("fx", ["$css"], function($) {
         hide: function(node, fx) {
             if(node.nodeType == 1 && !$._isHidden(node)) {
                 var display = $.css(node, "display"),
-                    s = node.style;
+                s = node.style;
                 if(display !== "none" && !$._data(node, "olddisplay")) {
                     $._data(node, "olddisplay", display);
                 }
@@ -222,12 +221,12 @@ define("fx", ["$css"], function($) {
         //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
         create: function(node, fx, index) {
             var to, parts, unit, op, parser, props = [],
-                revertProps = [],
-                orig = {},
-                hidden = $._isHidden(node),
-                ease = fx.specialEasing,
-                hash = fx.props,
-                easing = fx.easing //公共缓动公式
+            revertProps = [],
+            orig = {},
+            hidden = $._isHidden(node),
+            ease = fx.specialEasing,
+            hash = fx.props,
+            easing = fx.easing //公共缓动公式
             if(!hash.length) {
                 for(var name in hash) {
                     if(!hash.hasOwnProperty(name)) {
@@ -318,7 +317,7 @@ define("fx", ["$css"], function($) {
 
     function animate(fx, index) {
         var node = fx.node,
-            now = +new Date;
+        now = +new Date;
         if(!fx.startTime) { //第一帧
             callback(fx, node, "before"); //动画开始前的预操作
             fx.props && Animation.create(fx.node, fx, index); //添加props属性与设置负向列队
@@ -330,7 +329,8 @@ define("fx", ["$css"], function($) {
             var end = fx.gotoEnd || per >= 1;
             var hooks = effect.updateHooks
             // 处理渐变
-            for(var i = 0, obj; obj = fx.props[i++];) {;
+            for(var i = 0, obj; obj = fx.props[i++];) {
+                ;
                 (hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
             if(end) { //最后一帧
@@ -371,28 +371,28 @@ define("fx", ["$css"], function($) {
             for(var i = 0, fx; fx = timeline[i]; i++) {
                 if(fx.node === node) {
                     switch(stopCode) { //如果此时调用了stop方法
-                    case 0:
-                        //中断当前动画，继续下一个动画
-                        fx.update = fx.step = $.noop
-                        fx.revert && fx.negative.shift();
-                        fx.gotoEnd = true;
-                        break;
-                    case 1:
-                        //立即跳到最后一帧，继续下一个动画
-                        fx.gotoEnd = true;
-                        break;
-                    case 2:
-                        //清空该元素的所有动画
-                        delete fx.node
-                        break;
-                    case 3:
-                        Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
-                        fx.negative = []; // 清空负向列队
-                        for(var j = 0; fx = fx.positive[j++];) {
-                            fx.before = fx.after = fx.step = $.noop
-                            fx.gotoEnd = true; //立即完成该元素的所有动画
-                        }
-                        break;
+                        case 0:
+                            //中断当前动画，继续下一个动画
+                            fx.update = fx.step = $.noop
+                            fx.revert && fx.negative.shift();
+                            fx.gotoEnd = true;
+                            break;
+                        case 1:
+                            //立即跳到最后一帧，继续下一个动画
+                            fx.gotoEnd = true;
+                            break;
+                        case 2:
+                            //清空该元素的所有动画
+                            delete fx.node
+                            break;
+                        case 3:
+                            Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
+                            fx.negative = []; // 清空负向列队
+                            for(var j = 0; fx = fx.positive[j++];) {
+                                fx.before = fx.after = fx.step = $.noop
+                                fx.gotoEnd = true; //立即完成该元素的所有动画
+                            }
+                            break;
                     }
                 }
             }
@@ -400,9 +400,9 @@ define("fx", ["$css"], function($) {
     }
 
     var fxAttrs = [
-        ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
-        ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
-        ["opacity"]
+    ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
+    ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+    ["opacity"]
     ]
 
     function genFx(type, num) { //生成属性包
@@ -453,10 +453,10 @@ define("fx", ["$css"], function($) {
 
     function beforePuff(node, fx) {
         var position = $.css(node, "position"),
-            width = $.css(node, "width"),
-            height = $.css(node, "height"),
-            left = $.css(node, "left"),
-            top = $.css(node, "top");
+        width = $.css(node, "width"),
+        height = $.css(node, "height"),
+        left = $.css(node, "left"),
+        top = $.css(node, "top");
         node.style.position = "relative";
         $.mix(fx.props, {
             width: "*=1.5",
@@ -502,13 +502,13 @@ define("fx", ["$css"], function($) {
 
     function color2array(val) { //将字符串变成数组
         var color = val.toLowerCase(),
-            ret = [];
+        ret = [];
         if(colorMap[color]) {
             return colorMap[color];
         }
         if(color.indexOf("rgb") == 0) {
             var match = color.match(/(\d+%?)/g),
-                factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
+            factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
             return(colorMap[color] = [parseInt(match[0]) * factor, parseInt(match[1]) * factor, parseInt(match[2]) * factor]);
         } else if(color.charAt(0) == '#') {
             if(color.length == 4) color = color.replace(/([^#])/g, '$1$1');
