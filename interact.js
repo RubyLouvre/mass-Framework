@@ -5,7 +5,6 @@ define("interact",["$class"], function($){
     //观察者模式
     $.Observer = $.factory({
         init: function(target){
-            $.log("init EventTarget")
             this._events = {};
             this._target = target || this;
         },
