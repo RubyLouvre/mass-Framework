@@ -114,20 +114,20 @@ define("interact",["$class"], function($){
             that.bind(type, wrapper);
             return this;
         },
-        done: function (handler) {
+        done: function (callback) {
             var that = this;
             return function (err, data) {
                 if (err) {
                     return that.fire('error', err);
                 }
                 if (typeof handler === 'string') {
-                    return that.fire(handler, data);
+                    return that.fire(callback, data);
                 }
                 if (arguments.length <= 2) {
-                    return handler(data);
+                    return callback(data);
                 }
                 var args = $.slice(arguments, 1);
-                handler.apply(null, args);
+                callback.apply(null, args);
             }
         },
         fail: function (callback) {
