@@ -36,7 +36,7 @@ define("ajax",["mass","$interact"], function($){
             }
         }catch(e){}
     }
-   
+
     var accepts  = {
         xml: "application/xml, text/xml",
         html: "text/html",
@@ -288,7 +288,7 @@ define("ajax",["mass","$interact"], function($){
         }
         return dummyXHR;
     }
- 
+
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     /**
      * XHR类,用于模拟原生XMLHttpRequest的所有行为
