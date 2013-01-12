@@ -5506,7 +5506,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     event.target = event.target.parentNode;
                 }
                 event.metaKey = !! event.ctrlKey; // 处理IE678的组合键
-                var callback = facade["fix" + eventMap[event.type]]
+                var callback = facade["fix" + $.eventMap[event.type]]
                 if(typeof callback == "function") {
                     callback(event, real)
                 }
