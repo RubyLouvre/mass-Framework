@@ -1,7 +1,6 @@
 define("attr_fix", !! top.getComputedStyle, ["$node"], function($) {
     $.fixIEAttr = function(valHooks, attrHooks) {
-        var rnospaces = /\S+/g,
-            rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
+        var rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
             rquote = /^['"]/,
             support = $.support,
             defaults = {
@@ -12,46 +11,6 @@ define("attr_fix", !! top.getComputedStyle, ["$node"], function($) {
             var _default = defaults[name];
             if(_default) {
                 node[_default] = value;
-            }
-        }
-        if(!("classList" in $.html)) {
-            $.fn.addClass = function(item) {
-                if(typeof item == "string") {
-                    for(var i = 0, el; el = this[i++];) {
-                        if(el.nodeType === 1) {
-                            if(!el.className) {
-                                el.className = item;
-                            } else {
-                                var a = (el.className + " " + item).match(rnospaces);
-                                a.sort();
-                                for(var j = a.length - 1; j > 0; --j)
-                                if(a[j] == a[j - 1]) a.splice(j, 1);
-                                el.className = a.join(" ");
-                            }
-                        }
-                    }
-                }
-                return this;
-            }
-            $.fn.removeClass = function(item) {
-                if((item && typeof item === "string") || item === void 0) {
-                    var classNames = (item || "").match(rnospaces),
-                        cl = classNames.length;
-                    for(var i = 0, node; node = this[i++];) {
-                        if(node.nodeType === 1 && node.className) {
-                            if(item) { //rnospaces = /\S+/
-                                var set = " " + node.className.match(rnospaces).join(" ") + " ";
-                                for(var c = 0; c < cl; c++) {
-                                    set = set.replace(" " + classNames[c] + " ", " ");
-                                }
-                                node.className = set.slice(1, set.length - 1);
-                            } else {
-                                node.className = "";
-                            }
-                        }
-                    }
-                }
-                return this;
             }
         }
 

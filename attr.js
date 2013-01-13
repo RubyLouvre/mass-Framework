@@ -3,10 +3,10 @@
 //==================================================
 define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) {
     var rreturn = /\r/g,
-        rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
-        rnospaces = /\S+/g,
-        support = $.support,
-        cacheProp = {};
+    rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
+    rnospaces = /\S+/g,
+    support = $.support,
+    cacheProp = {};
 
     function defaultProp(node, prop) {
         var name = node.tagName + ":" + prop;
@@ -31,9 +31,15 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
             if(typeof item == "string") {
                 for(var i = 0, el; el = this[i++];) {
                     if(el.nodeType === 1) {
-                        item.replace(rnospaces, function(clazz) {
-                            el.classList.add(clazz);
-                        })
+                        if(!el.className) {
+                            el.className = item;
+                        } else {
+                            var a = (el.className + " " + item).match(rnospaces);
+                            a.sort();
+                            for(var j = a.length - 1; j > 0; --j)
+                                if(a[j] == a[j - 1]) a.splice(j, 1);
+                            el.className = a.join(" ");
+                        }
                     }
                 }
             }
@@ -41,16 +47,20 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
         },
         //如果不传入类名,则清空所有类名,允许同时删除多个类名
         removeClass: function(item) {
-            var removeSome = item && typeof item === "string",
-                removeAll = item === void 0;
-            for(var i = 0, node; node = this[i++];) {
-                if(node.nodeType === 1) {
-                    if(removeSome && node.className) {
-                        item.replace(rnospaces, function(clazz) {
-                            node.classList.remove(clazz);
-                        })
-                    } else if(removeAll) {
-                        node.className = "";
+            if((item && typeof item === "string") || item === void 0) {
+                var classNames = (item || "").match(rnospaces),
+                cl = classNames.length;
+                for(var i = 0, node; node = this[i++];) {
+                    if(node.nodeType === 1 && node.className) {
+                        if(item) { //rnospaces = /\S+/
+                            var set = " " + node.className.match(rnospaces).join(" ") + " ";
+                            for(var c = 0; c < cl; c++) {
+                                set = set.replace(" " + classNames[c] + " ", " ");
+                            }
+                            node.className = set.slice(1, set.length - 1);
+                        } else {
+                            node.className = "";
+                        }
                     }
                 }
             }
@@ -60,7 +70,7 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
         //如果第二个参数为true，要求所有匹配元素都拥有此类名才返回true
         hasClass: function(item, every) {
             var method = every === true ? "every" : "some",
-                rclass = new RegExp('(\\s|^)' + item + '(\\s|$)'); //判定多个元素，正则比indexOf快点
+            rclass = new RegExp('(\\s|^)' + item + '(\\s|$)'); //判定多个元素，正则比indexOf快点
             return $.slice(this)[method](function(el) { //先转换为数组
                 return(el.className || "").match(rclass);
             });
@@ -68,13 +78,13 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
         //如果存在（不存在）就删除（添加）指定的类名。对所有匹配元素进行操作。
         toggleClass: function(value, stateVal) {
             var type = typeof value,
-                classNames = type === "string" && value.match(rnospaces) || [],
-                className, i, isBool = typeof stateVal === "boolean";
+            classNames = type === "string" && value.match(rnospaces) || [],
+            className, i, isBool = typeof stateVal === "boolean";
             return this.each(function(el) {
                 i = 0;
                 if(el.nodeType === 1) {
                     var self = $(el),
-                        state = stateVal;
+                    state = stateVal;
                     if(type == "string") {
                         while((className = classNames[i++])) {
                             state = isBool ? state : !self.hasClass(className);
@@ -94,7 +104,7 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
             for(var i = 0, node; node = this[i++];) {
                 if(node.nodeType === 1 && node.className) {
                     var arr = node.className.match(rnospaces),
-                        cls = [];
+                    cls = [];
                     for(var j = 0; j < arr.length; j++) {
                         cls.push(arr[j] == old ? neo : arr[j]);
                     }
@@ -106,7 +116,7 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
         //用于取得表单元素的value值
         val: function(item) {
             var el = this[0],
-                getter = valHooks["option:get"];
+            getter = valHooks["option:get"];
             if(!arguments.length) { //读操作
                 if(el && el.nodeType == 1) {
                     var ret = (valHooks[getValType(el) + ":get"] || $.propHooks["@default:get"])(el, "value", getter);
@@ -158,7 +168,7 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
                 }
                 //这里只剩下元素节点
                 var noxml = !$.isXML(node),
-                    type = "@w3c";
+                type = "@w3c";
                 if(noxml) {
                     name = name.toLowerCase();
                     var prop = $.propMap[name] || name
@@ -283,11 +293,11 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
         },
         "select:get": function(node, value, getter) {
             var option, options = node.options,
-                index = node.selectedIndex,
-                one = node.type === "select-one" || index < 0,
-                values = one ? null : [],
-                max = one ? index + 1 : options.length,
-                i = index < 0 ? max : one ? index : 0;
+            index = node.selectedIndex,
+            one = node.type === "select-one" || index < 0,
+            values = one ? null : [],
+            max = one ? index + 1 : options.length,
+            i = index < 0 ? max : one ? index : 0;
             for(; i < max; i++) {
                 option = options[i];
                 //旧式IE在reset后不会改变selected，需要改用i === index判定
