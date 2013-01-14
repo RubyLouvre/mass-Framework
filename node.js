@@ -220,7 +220,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
         $.fn[method] = function(item) {
             return manipulate(this, method, item, this.ownerDocument);
         }
-        $.fn[method + "To"] = function() {
+        $.fn[method + "To"] = function(item) {
             $(item, this.ownerDocument)[method](this);
             return this;
         }
@@ -265,7 +265,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     }
     var matchesAPI = cssName("matchesSelector", $.html);
     $.mix({
-        //http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
+        //判定元素是否支持此样式   http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
         //判定元素节点是否匹配CSS表达式
         match: function(node, expr) {
