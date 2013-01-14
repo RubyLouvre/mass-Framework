@@ -32,28 +32,16 @@
         <script>
 
             require("interact,ready",function(){
-                var flow = new $.Flow;
-                var callback = function(){
-                    console.log(arguments)
-                }
-                flow.repeat("aa",5,callback);
-                var time = 5;
-                var id = setInterval(function(){
-                    console.log("xxxxxxxxxx")
-                    flow.fire("aa",50);
-                    if(--time == 0){
-                        clearInterval(id)
-                    }
-                },20 )
-
+               $(".aaa").data("same",{})
+               
             })
         </script>
     </head>
 
     <body>
 
-
-        <div class="aaa" style="width:300px;height:100px;">xxxvvvvvvvvvvvvvvvvvv</div>
+        <div class="aaa" id="aaa" style="width:300px;height:100px;">xxxvvvvvvvvvvvvvvvvvv</div>
+        <div class="aaa" id="bbb"style="width:300px;height:100px;">xxxvvvvvvvvvvvvvvvvvv</div>
     </body>
 
 </body>
