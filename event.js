@@ -403,7 +403,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                         matches = [];
                         for(var i = 0; i < delegateCount; i++) {
                             handleObj = handlers[i];
-                            sel = handleObj.selector;
+                            sel = handleObj.selector + " ";//避免与Ovject.prototype的属性冲突,比如toString, valueOf等
                             //判定目标元素(this)的孩子(cur)是否匹配（sel）
                             if(selMatch[sel] === void 0) {
                                 selMatch[sel] = $(sel, this).index(cur) >= 0
