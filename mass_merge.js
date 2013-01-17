@@ -861,7 +861,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         
         filter: function(obj, fn, scope) {
             for(var i = 0, n = obj.length, ret = []; i < n; i++) {
-                var val = fn.call(scope, obj[i], i);
+                var val = fn.call(scope||obj[i], obj[i], i);
                 if(val === true) {
                     ret[ret.length] = obj[i]
                 }
@@ -5407,7 +5407,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                         matches = [];
                         for(var i = 0; i < delegateCount; i++) {
                             handleObj = handlers[i];
-                            sel = handleObj.selector;
+                            sel = handleObj.selector + " ";//避免与Ovject.prototype的属性冲突,比如toString, valueOf等
                             //判定目标元素(this)的孩子(cur)是否匹配（sel）
                             if(selMatch[sel] === void 0) {
                                 selMatch[sel] = $(sel, this).index(cur) >= 0
@@ -5546,6 +5546,8 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     hash.times = el;
                 } else if(typeof el == "function") {
                     hash.handler = el
+                } else if(typeof el == "object") {
+                    $.mix(hash, el, false);
                 }
                 if(typeof el === "string") {
                     if(hash.type != null) {
