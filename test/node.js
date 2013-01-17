@@ -84,12 +84,16 @@ define(["$spec","$node"],function(){
                 return this;
             });
         },
-        parseHTML: function(){
+        parseHTML: function(id){
             var str = "<h1>My First<strong>Heading</strong></h1><p>My first paragraph.</p><script>document.aa = 'test';</script>";
             var fragment = $.parseHTML(str);
-            expect(fragment.firstChild.nodeName ).eq("H1");
+            expect(fragment.firstChild.nodeName ).eq("H1","使用parseHTML创建 h1 标签成功");
             var style = $("<style>.testtest {width:1px;height:1px;opacity:0.55;filter:alpha(opacity=55); }</style>")//.appendTo("head");
-            expect( style[0].nodeType ).eq(1)
+            expect( style[0].tagName).eq("STYLE", "使用parseHTML创建 style 标签成功");
+            "thead,tbody,tfoot,colgroup,caption,tr,th,td,optgroup,option,legend,area,param".replace($.rword, function(tag){
+                expect($.parseHTML("<"+tag+"/>").firstChild.tagName.toLowerCase(), id).eq(tag, "使用parseHTML创建 "+tag+" 标签成功")
+            })
+
 
         },
         "$.fn.data": function(){

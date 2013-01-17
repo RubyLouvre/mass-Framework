@@ -3170,7 +3170,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
     rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
     types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
     //需要处理套嵌关系的标签
-    rnest = /<(?:td|th|tf|tr|col|opt|leg|cap|area)/,
+    rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
     adjacent = "insertAdjacentHTML",
     TAGS = "getElementsByTagName"
     function getDoc() {
@@ -3501,9 +3501,7 @@ define("node",["$support","$class","$query","$data"].concat(top.dispatchEvent ? 
             }
             //移除我们为了符合套嵌关系而添加的标签
             for(i = wrap[0]; i--; wrapper = wrapper.lastChild) {};
-            
             $.fixParseHTML(wrapper, html);
-
             while(firstChild = wrapper.firstChild) { // 将wrapper上的节点转移到文档碎片上！
                 fragment.appendChild(firstChild);
             }

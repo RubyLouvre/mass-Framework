@@ -17,22 +17,13 @@
                 display:inline-block;
                 position: relative;
             }
-            .gradient{
-                background-color:#F4F4F4;
-                background:-webkit-gradient(linear,0% 100%,0% 0,from(#FFFFFF),to(#ECECEC));
-                background:-webkit-linear-gradient(top,#FFFFFF,#ECECEC);
-                background:-moz-linear-gradient(top,#FFFFFF,#ECECEC);
-                -ms-filter:"progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFFFFF, endColorstr=#ECECEC)";
-                background:-ms-linear-gradient(top,#FFFFFF,#ECECEC);
-                background:-o-linear-gradient(top,#FFFFFF,#ECECEC);
-                height: 400px;
-            }
+   
         </style>
-        <script src="mass_merge.js"> </script>
+        <script src="mass.js"> </script>
         <script>
 
-            require("interact,ready",function(){
-               $(".aaa").data("same",{})
+            require("node,ready",function($){
+              $.parseHTML("<tbody/>")
                
             })
         </script>
