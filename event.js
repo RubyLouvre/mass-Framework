@@ -542,6 +542,8 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     hash.times = el;
                 } else if(typeof el == "function") {
                     hash.handler = el
+                } else if(typeof el == "object") {
+                    $.mix(hash, el, false);
                 }
                 if(typeof el === "string") {
                     if(hash.type != null) {
