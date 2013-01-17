@@ -358,6 +358,35 @@ define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) 
 2012.6.23 attr在value为false, null, undefined时进行删除特性操作
 2012.11.6 升级v2
 2012.12.24 升级到v3 添加对defaultSelected defaultChecked的处理
+ addClass: function(item) {
+            if(typeof item == "string") {
+                for(var i = 0, el; el = this[i++];) {
+                    if(el.nodeType === 1) {
+                        item.replace(rnospaces, function(clazz) {
+                            el.classList.add(clazz);
+                        })
+                    }
+                }
+            }
+            return this;
+        },
+        //如果不传入类名,则清空所有类名,允许同时删除多个类名
+        removeClass: function(item) {
+            var removeSome = item && typeof item === "string",
+                removeAll = item === void 0;
+            for(var i = 0, node; node = this[i++];) {
+                if(node.nodeType === 1) {
+                    if(removeSome && node.className) {
+                        item.replace(rnospaces, function(clazz) {
+                            node.classList.remove(clazz);
+                        })
+                    } else if(removeAll) {
+                        node.className = "";
+                    }
+                }
+            }
+            return this;
+        },
 http://nanto.asablo.jp/blog/2005/10/29/123294
 
 http://perl.no-tubo.net/2010/07/01/ie-%E3%81%AB%E3%81%8A%E3%81%91%E3%82%8B-setattribute-%E3%82%84-getattribute-%E3%82%84-removeattribute-%E3%81%8C%E3%81%A0%E3%82%81%E3%81%A0%E3%82%81%E3%81%AA%E4%BB%B6/
