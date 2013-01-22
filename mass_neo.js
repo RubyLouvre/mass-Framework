@@ -92,19 +92,6 @@ function(global, DOC) {
         //大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": "addEventListener",
         /**
-         * 将内部对象挂到window下，此时可重命名，实现多库共存
-         * @param {String} name
-         * @return {Mass}
-         * @api public
-         */
-        exports: function(name) {
-            $$ && (global.$ = $$); //多库共存
-            name = name || $.config.nick; //取得当前简短的命名空间
-            $.config.nick = name;
-            global[NsKey] = NsVal;
-            return global[name] = this;
-        },
-        /**
          * 数组化
          * @param {ArrayLike} nodes 要处理的类数组对象
          * @param {Number} start 可选。要抽取的片断的起始下标。如果是负数，从后面取起
@@ -258,6 +245,19 @@ function(global, DOC) {
             }
             return this
         },
+        /**
+         * 将内部对象挂到window下，此时可重命名，实现多库共存
+         * @param {String} name
+         * @return {Mass}
+         * @api public
+         */
+        exports: function(name) {
+            $$ && (global.$ = $$); //多库共存
+            name = name || $.config.nick; //取得当前简短的命名空间
+            $.config.nick = name;
+            global[NsKey] = NsVal;
+            return global[name] = this;
+        },
         //一个空函数
         noop: function() {},
         /**
@@ -291,6 +291,16 @@ function(global, DOC) {
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
     });
+    //============================加载系统===========================
+    var modules = $.modules = {
+        ready: {
+            exports: $
+        },
+        mass: {
+            state: 2,
+            exports: $
+        }
+    };
     /**
      * 将模块标识转换为URL
      * @param  {String} url    模块标识
@@ -343,25 +353,13 @@ function(global, DOC) {
     }
 
 
-    //============================加载系统===========================
-    var modules = $.modules = {
-        ready: {
-            exports: $
-        },
-        mass: {
-            state: 2,
-            exports: $
-        }
-    };
-
-
     function getCurrentScript() {
         //取得正在解析的script节点
         if(DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
         //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
-        var stack, e;
+        var stack, e, i, node;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
         } catch(e) {
@@ -370,13 +368,12 @@ function(global, DOC) {
         if(stack) {
             // chrome IE10使用 at, firefox opera 使用 @
             e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
-            while(stack.indexOf(e) !== -1) {
-                stack = stack.substring(stack.indexOf(e) + e.length);
-            }
-            return stack.replace(/:\d+:\d+$/ig, "");
+            i = stack.lastIndexOf(e);
+            var a = stack.slice(i + e.length).replace(/\s\s*$/, "").replace(/(:\d+)?:\d+$/i, "");
+            return a
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
-        for(var i = 0, node; node = nodes[i++];) {
+        for(i = 0; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }

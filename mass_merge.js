@@ -82,14 +82,6 @@ function(global, DOC) {
         //大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": W3C ? "addEventListener" : "attachEvent",
         
-        exports: function(name) {
-            $$ && (global.$ = $$); //多库共存
-            name = name || $.config.nick; //取得当前简短的命名空间
-            $.config.nick = name;
-            global[NsKey] = NsVal;
-            return global[name] = this;
-        },
-        
         slice: W3C ?
         function(nodes, start, end) {
             return parsings.slice.call(nodes, start, end);
@@ -230,6 +222,14 @@ function(global, DOC) {
             }
             return this
         },
+        
+        exports: function(name) {
+            $$ && (global.$ = $$); //多库共存
+            name = name || $.config.nick; //取得当前简短的命名空间
+            $.config.nick = name;
+            global[NsKey] = NsVal;
+            return global[name] = this;
+        },
         //一个空函数
         noop: function() {},
         
@@ -253,6 +253,18 @@ function(global, DOC) {
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
     });
+
+
+    //============================加载系统===========================
+    var modules = $.modules = {
+        ready: {
+            exports: $
+        },
+        mass: {
+            state: 2,
+            exports: $
+        }
+    };
     
 
     function parseURL(url, parent, ret) {
@@ -299,25 +311,13 @@ function(global, DOC) {
     }
 
 
-    //============================加载系统===========================
-    var modules = $.modules = {
-        ready: {
-            exports: $
-        },
-        mass: {
-            state: 2,
-            exports: $
-        }
-    };
-
-
     function getCurrentScript() {
         //取得正在解析的script节点
         if(DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
         //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
-        var stack, e;
+        var stack, e, i, node;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
         } catch(e) {
@@ -326,13 +326,12 @@ function(global, DOC) {
         if(stack) {
             // chrome IE10使用 at, firefox opera 使用 @
             e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
-            while(stack.indexOf(e) !== -1) {
-                stack = stack.substring(stack.indexOf(e) + e.length);
-            }
-            return stack.replace(/:\d+:\d+$/ig, "");
+            i = stack.lastIndexOf(e);
+            var a = stack.slice(i + e.length).replace(/\s\s*$/, "").replace(/(:\d+)?:\d+$/i, "");
+            return a
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
-        for(var i = 0, node; node = nodes[i++];) {
+        for(i = 0; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
