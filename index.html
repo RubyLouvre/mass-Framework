@@ -22,12 +22,8 @@
         <script src="mass.js"> </script>
         <script>
 
-            require("node,attr,ready",function($){
-                var form = document.getElementsByTagName("form")[0];
-                for(var i = 0, el ; el = form[i++];){
-                    console.log(el.checked +" "+el.type)
-                }
-
+            require("node",function($){
+               alert("node")
             })
         </script>
     </head>
