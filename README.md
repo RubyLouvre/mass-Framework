@@ -2,7 +2,7 @@ mass Framework
 ==================
 <h3>mass Framework的贡献者列表(排名不分先后)：</h3>
 <p>abcd(1群) ,Alucelx(1群)， <a href="http://stylechen.com/">带刀</a>(1群)，sapjax(2群) ,教主Franky(2群), 一三一四君(2B群), <a href="https://github.com/riophae">riophae</a>,<br/>
-soom(5群),Hodor(5群)
+soom(5群),Hodor(5群)，小叶(3群，904591031)
  </p>
 <hr/>
 <p>一个模块化，以大模块开发为目标，jQuery式的框架。里面优先应用了大量HTML5新API，估计除了个别手机专属框架外，没有像它如此大范围应用了。这一来可以大大减少框架的体积，二来大幅提高运行效率。<p>
