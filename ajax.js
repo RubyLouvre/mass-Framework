@@ -135,27 +135,25 @@ define("ajax",["mass","$interact"], function($){
             });
         },
         //将一个对象转换为字符串
-        param: function (json, serializeArray) {
+        param: function (json, bracket) {
             if (!$.isPlainObject(json)) {
                 return "";
             }
-            serializeArray = typeof serializeArray == "boolean" ? serializeArray : !0 ;
+            bracket = typeof serializeArray == "boolean" ? bracket : !0 ;
             var buf = [], key, val;
             for (key in json) {
                 if ( json.hasOwnProperty( key )) {
                     val = json[key];
                     key = encode(key);
-                    // val is valid non-array value
-                    if (isValidParamValue(val)) {
+                    if (isValidParamValue(val)) {//只处理基本数据类型,忽略空数组,函数,正则,日期,节点等
                         buf.push(key, "=", encode(val + ""), "&");
-                    }
-                    else if (Array.isArray(val) && val.length) {//不能为空数组
-                        for (var i = 0, len = val.length; i < len; ++i) {
+                    } else if (Array.isArray(val) && val.length) {//不能为空数组
+                        for (var i = 0, n = val.length; i < n; i++) {
                             if (isValidParamValue(val[i])) {
-                                buf.push(key, (serializeArray ? encode("[]") : ""), "=", encode(val[i] + ""), "&");
+                                buf.push(key, (bracket ? encode("[]") : ""), "=", encode(val[i] + ""), "&");
                             }
                         }
-                    }//忽略其他值,如空数组,函数,正则,日期,节点等
+                    }
                 }
             }
             buf.pop();
@@ -194,18 +192,18 @@ define("ajax",["mass","$interact"], function($){
             return query ? json[query] : json;
         },
         serialize: function( form ){//表单元素变字符串
-            var json = []
+            var json = {};
             // 不直接转换form.elements，防止以下情况：   <form > <input name="elements"/><input name="test"/></form>
-            $.slice( form || [] ).filter(function( elem ){
-                return  elem.name && !elem.disabled && ( elem.checked === true || /radio|checkbox/.test(elem.type) )
-            }).forEach( function( elem ) {
-                var val = $( elem ).val(), vs;
+            $.filter( form || [] ,function( el ){
+                return  el.name && !el.disabled && ( el.checked === true || /radio|checkbox/.test(el.type) )
+            }).forEach( function( el ) {
+                var val = $( el ).val(), vs;
                 val = Array.isArray(val) ? val : [val];
                 val = val.map( function(v) {
                     return v.replace(rCRLF, "\r\n");
                 });
                 // 全部搞成数组，防止同名
-                vs = json[ elem.name] = json[ elem.name ] || [];
+                vs = json[ el.name ] || (json[ el.name ] = []);
                 vs.push.apply(vs, val);
             });
             return $.param(json, false);// 名值键值对序列化,数组元素名字前不加 []
