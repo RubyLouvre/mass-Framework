@@ -911,8 +911,8 @@ define("query",["mass"], function( $ ){
         eq: function(index, num){
             return index ===  num;
         },
-        hidden : function( el ) {
-            return  (el.offsetWidth + el.offsetHeight) == 0 || (el.currentStyle || {} ).display == "none";
+        hidden : function( el ) {// Opera <= 12.12 reports offsetWidths and offsetHeights less than zero on some elements
+            return  el.offsetWidth <= 0 || el.offsetHeight <= 0 || (el.currentStyle || {} ).display == "none";
         }
     }
     Icarus.pseudoHooks.visible = function(el){
