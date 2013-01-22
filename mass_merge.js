@@ -26,8 +26,8 @@ function(global, DOC) {
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-        basepath
-        
+    basepath
+    
 
     function $(expr, context) { //新版本的基石
         if($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
@@ -55,9 +55,9 @@ function(global, DOC) {
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+        i = 1,
+        key, //如果最后参数是布尔，判定是否覆写同名属性
+        ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -92,7 +92,7 @@ function(global, DOC) {
         
         slice: function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
+            n = nodes.length;
             if(end === void 0 || typeof end == "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
@@ -178,7 +178,7 @@ function(global, DOC) {
                 array = array.match($.rword) || [];
             }
             var result = {},
-                value = val !== void 0 ? val : 1;
+            value = val !== void 0 ? val : 1;
             for(var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -197,7 +197,7 @@ function(global, DOC) {
                             var prevValue = prev[c];
                             var currValue = curr[c];
                             if(prevValue && prev !== curr) {
-                                throw new Error(c + "不能重命名")
+                                $.error(c + "不能重命名");
                             }
                             prev[c] = currValue;
                         }
@@ -207,20 +207,26 @@ function(global, DOC) {
                 }
             }
             return this
+        },
+
+        noop : function() {},
+        
+        error: function(str, e){
+            throw new (e || Error)(str);
         }
     });
 
     (function(scripts) {
         var cur = scripts[scripts.length - 1],
-            url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
-            kernel = $.config;
+        url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+        kernel = $.config;
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
         kernel.level = 9;
     })(DOC.getElementsByTagName("script"));
 
-    $.noop = $.error = function() {};
+ 
 
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
@@ -255,7 +261,7 @@ function(global, DOC) {
                 } else if(tmp == "/") {
                     ret = parent + url
                 } else {
-                    throw new Error("不符合模块标识规则: " + url)
+                    $.error("不符合模块标识规则: " + url);
                 }
             }
         }
@@ -308,8 +314,8 @@ function(global, DOC) {
         if(DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
-        var stack, e, nodes = head.getElementsByTagName("script"); //只在head标签中寻找
         //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
+        var stack, e;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
         } catch(e) {
@@ -321,14 +327,10 @@ function(global, DOC) {
             while(stack.indexOf(e) !== -1) {
                 stack = stack.substring(stack.indexOf(e) + e.length);
             }
-            stack = stack.replace(/:\d+:\d+$/ig, "");
-            for(var i = 0, node; node = nodes[i++];) {
-                if(node.className == moduleClass && node.src === stack) {
-                    return node.className = node.src;
-                }
-            }
+            return stack.replace(/:\d+:\d+$/ig, "");
         }
-        for(i = 0; node = nodes[i++];) {
+        var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
+        for(var i = 0, node; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
@@ -349,7 +351,7 @@ function(global, DOC) {
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
             var obj = modules[id],
-                deps = obj.deps;
+            deps = obj.deps;
             for(var key in deps) {
                 if(deps.hasOwnProperty(key) && modules[key].state != 2) {
                     continue loop;
@@ -422,17 +424,17 @@ function(global, DOC) {
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于依赖列表中的模块的返回值
-            args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32);
+        // 用于依赖列表中的模块的返回值
+        args = [],
+        // 需要安装的模块数
+        dn = 0,
+        // 已安装完的模块数
+        cn = 0,
+        id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
-                url = array[0];
+            url = array[0];
             if(array[1] == "js") {
                 dn++;
                 if(!modules[url]) {
@@ -490,7 +492,7 @@ function(global, DOC) {
         factory.delay = function(id) {
             args.push(id);
             if(checkCycle(modules[id].deps, id)) {
-                throw new Error(id + "模块与之前的某些模块存在循环依赖");
+                $.error(id + "模块与之前的某些模块存在循环依赖");
             }
             delete factory.delay; //释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
@@ -509,10 +511,10 @@ function(global, DOC) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+        ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
-            modules[id].exports = ret
+            modules[id].exports = ret;
         }
         return ret;
     }
@@ -569,8 +571,8 @@ function(global, DOC) {
         $.exports();
     });
     $.exports($.config.nick + postfix); //防止不同版本的命名空间冲突
-    //============================合并核心模块支持===========================
-    var define = function(a){
+//============================合并核心模块支持===========================
+var define = function(a){
             if(typeof a == "string" && a.indexOf(basepath) == -1 ){
                 arguments[0] = basepath + a +".js"
             }
@@ -778,16 +780,16 @@ define( "lang_fix", !!Array.isArray,["mass"], function($){
 //=========================================
 define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     var global = this,
-        // JSON RegExp
-        rvalidchars = /^[\],:{}\s]*$/,
-        rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-        rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
-        rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
-        runicode = /[\x00-\x1f"\\\u007f-\uffff]/g,
-        seval = global.execScript ? "execScript" : "eval",
-        rformat = /\\?\#{([^{}]+)\}/gm,
-        sopen = (global.open + '').replace(/open/g, ""),
-        defineProperty = Object.defineProperty
+    // JSON RegExp
+    rvalidchars = /^[\],:{}\s]*$/,
+    rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+    rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
+    rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+    runicode = /[\x00-\x1f"\\\u007f-\uffff]/g,
+    seval = global.execScript ? "execScript" : "eval",
+    rformat = /\\?\#{([^{}]+)\}/gm,
+    sopen = (global.open + '').replace(/open/g, ""),
+    defineProperty = Object.defineProperty
 
     function method(obj, name, method) {
         if(!obj[name]) {
@@ -825,9 +827,9 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             try { //不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
                 for(var key in obj) //只有一个方法是来自其原型立即返回flase
-                if(!Object.prototype.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
-                    return false
-                }
+                    if(!Object.prototype.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
+                        return false
+                    }
             } catch(e) {
                 return false;
             }
@@ -836,7 +838,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         
         isNative: function(obj, method) {
             var m = obj ? obj[method] : false,
-                r = new RegExp(method, "g");
+            r = new RegExp(method, "g");
             return !!(m && typeof m != "string" && sopen === (m + "").replace(r, ""));
         },
         
@@ -861,8 +863,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         
         each: function(obj, fn, scope, map) {
             var value, i = 0,
-                isArray = $.isArrayLike(obj),
-                ret = [];
+            isArray = $.isArrayLike(obj),
+            ret = [];
             if(isArray) {
                 for(var n = obj.length; i < n; i++) {
                     value = fn.call(scope || obj[i], obj[i], i);
@@ -915,8 +917,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 start = 0;
             }
             var index = -1,
-                length = Math.max(0, Math.ceil((end - start) / step)),
-                result = Array(length);
+            length = Math.max(0, Math.ceil((end - start) / step)),
+            result = Array(length);
 
             while(++index < length) {
                 result[index] = start;
@@ -929,20 +931,20 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         function(str) {
             return '"' + str.replace(runicode, function(a) {
                 switch(a) {
-                case '"':
-                    return '\\"';
-                case '\\':
-                    return '\\\\';
-                case '\b':
-                    return '\\b';
-                case '\f':
-                    return '\\f';
-                case '\n':
-                    return '\\n';
-                case '\r':
-                    return '\\r';
-                case '\t':
-                    return '\\t';
+                    case '"':
+                        return '\\"';
+                    case '\\':
+                        return '\\\\';
+                    case '\b':
+                        return '\\b';
+                    case '\f':
+                        return '\\f';
+                    case '\n':
+                        return '\\n';
+                    case '\r':
+                        return '\\r';
+                    case '\t':
+                        return '\\t';
                 }
                 a = a.charCodeAt(0).toString(16);
                 while(a.length < 4) a = "0" + a;
@@ -953,40 +955,40 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         dump: function(obj, indent) {
             indent = indent || "";
             if(obj == null) //处理null,undefined
-            return indent + "obj";
+                return indent + "obj";
             if(obj.nodeType === 9) return indent + "[object Document]";
             if(obj.nodeType) return indent + "[object " + (obj.tagName || "Node") + "]";
             var arr = [],
-                type = $.type(obj),
-                self = $.dump,
-                next = indent + "\t";
+            type = $.type(obj),
+            self = $.dump,
+            next = indent + "\t";
             switch(type) {
-            case "Boolean":
-            case "Number":
-            case "NaN":
-            case "RegExp":
-                return indent + obj;
-            case "String":
-                return indent + $.quote(obj);
-            case "Function":
-                return(indent + obj).replace(/\n/g, "\n" + indent);
-            case "Date":
-                return indent + '(new Date(' + obj.valueOf() + '))';
-            case "Window":
-                return indent + "[object " + type + "]";
-            default:
-                if($.isArrayLike(obj)) {
-                    for(var i = 0, n = obj.length; i < n; ++i)
-                    arr.push(self(obj[i], next).replace(/^\s* /g, next));
-                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
-                }
-                if($.isPlainObject(obj)) {
-                    for(i in obj) {
-                        arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
+                case "Boolean":
+                case "Number":
+                case "NaN":
+                case "RegExp":
+                    return indent + obj;
+                case "String":
+                    return indent + $.quote(obj);
+                case "Function":
+                    return(indent + obj).replace(/\n/g, "\n" + indent);
+                case "Date":
+                    return indent + '(new Date(' + obj.valueOf() + '))';
+                case "Window":
+                    return indent + "[object " + type + "]";
+                default:
+                    if($.isArrayLike(obj)) {
+                        for(var i = 0, n = obj.length; i < n; ++i)
+                            arr.push(self(obj[i], next).replace(/^\s* /g, next));
+                        return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
                     }
-                    return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
-                }
-                return indent + "[object " + type + "]";
+                    if($.isPlainObject(obj)) {
+                        for(i in obj) {
+                            arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
+                        }
+                        return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
+                    }
+                    return indent + "[object " + type + "]";
             }
         },
         
@@ -1012,8 +1014,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                     return(new Function("return " + data))();
                 }
             }
-
-            throw "Invalid JSON: " + data;
+            $.error("Invalid JSON: " + data, TypeError);
         },
         
         parseXML: function(data, xml, tmp) {
@@ -1031,7 +1032,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 xml = undefined;
             }
             if(!xml || !xml.documentElement || xml.getElementsByTagName("parsererror").length) {
-                throw "Invalid XML: " + data;
+                $.error("Invalid XML: " + data, TypeError);
             }
             return xml;
         }
@@ -1054,7 +1055,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //将字符串重复n遍
         repeat: function(n) {
             var result = "",
-                target = this;
+            target = this;
             while(n > 0) {
                 if(n & 1) result += target;
                 target += target;
@@ -1079,8 +1080,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     "String,Array,Number,Object".replace($.rword, function(Type) {
         $[Type] = function(pack) {
             var isNative = typeof pack == "string",
-                //取得方法名
-                methods = isNative ? pack.match($.rword) : Object.keys(pack);
+            //取得方法名
+            methods = isNative ? pack.match($.rword) : Object.keys(pack);
             methods.forEach(function(method) {
                 $[Type][method] = isNative ?
                 function(obj) {
@@ -1163,7 +1164,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     });
 
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,", //es6
-    "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
+        "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         //判定数组是否包含指定目标。
         contains: function(target, item) {
@@ -1179,21 +1180,12 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             if(~index) return $.Array.removeAt(target, index);
             return false;
         },
-        //合并参数二到参数一
-        merge: function(first, second) {
-            var i = ~~first.length,
-                j = 0;
-            for(var n = second.length; j < n; j++) {
-                first[i++] = second[j];
-            }
-            first.length = i;
-            return first;
-        },
+
         //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
         shuffle: function(target) {
             var ret = [],
-                i = target.length,
-                n;
+            i = target.length,
+            n;
             target = target.slice(0);
             while(--i >= 0) {
                 n = Math.floor(Math.random() * i);
@@ -1209,7 +1201,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //对数组进行平坦化处理，返回一个一维的新数组。
         flatten: function(target) {
             var result = [],
-                self = $.Array.flatten;
+            self = $.Array.flatten;
             target.forEach(function(item) {
                 if(Array.isArray(item)) {
                     result = result.concat(self(item));
@@ -1219,18 +1211,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             });
             return result;
         },
-        // 对数组进行去重操作，返回一个没有重复元素的新数组。
-        unique: function(target) {
-            var ret = [],
-                n = target.length,
-                i, j; //by abcd
-            for(i = 0; i < n; i++) {
-                for(j = i + 1; j < n; j++)
-                if(target[i] === target[j]) j = ++i;
-                ret.push(target[i]);
-            }
-            return ret;
-        },
+
         // 过滤数组中的null与undefined，但不影响原数组。
         compact: function(target) {
             return target.filter(function(el) {
@@ -1246,7 +1227,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 };
             }).sort(function(left, right) {
                 var a = left.re,
-                    b = right.re;
+                b = right.re;
                 return a < b ? -1 : a > b ? 1 : 0;
             });
             return $.Array.pluck(array, 'el');
@@ -1255,8 +1236,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         groupBy: function(target, val) {
             var result = {};
             var iterator = $.isFunction(val) ? val : function(obj) {
-                    return obj[val];
-                };
+                return obj[val];
+            };
             target.forEach(function(value, index) {
                 var key = iterator(value, index);
                 (result[key] || (result[key] = [])).push(value);
@@ -1266,12 +1247,34 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //取得对象数组的每个元素的指定属性，组成数组返回。
         pluck: function(target, name) {
             var result = [],
-                prop;
+            prop;
             target.forEach(function(item) {
                 prop = item[name];
                 if(prop != null) result.push(prop);
             });
             return result;
+        },
+        // 对数组进行去重操作，返回一个没有重复元素的新数组。
+        unique: function(target) {
+            var ret = [],
+            n = target.length,
+            i, j; //by abcd
+            for(i = 0; i < n; i++) {
+                for(j = i + 1; j < n; j++)
+                    if(target[i] === target[j]) j = ++i;
+                ret.push(target[i]);
+            }
+            return ret;
+        },
+        //合并参数二到参数一
+        merge: function(first, second) {
+            var i = ~~first.length,
+            j = 0;
+            for(var n = second.length; j < n; j++) {
+                first[i++] = second[j];
+            }
+            first.length = i;
+            return first;
         },
         //对两个数组取并集。
         union: function(target, array) {
@@ -1308,7 +1311,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //深拷贝当前数组
         clone: function(target) {
             var i = target.length,
-                result = [];
+            result = [];
             while(i--) result[i] = cloneOf(target[i]);
             return result;
         },
@@ -1323,10 +1326,10 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //但如果第三个参数不为undefine时,我们可以拿它来填空最后一组
         inGroupsOf: function(target, number, fillWith) {
             var t = target.length,
-                n = Math.ceil(t / number),
-                fill = fillWith !== void 0,
-                groups = [],
-                i, j, cur
+            n = Math.ceil(t / number),
+            fill = fillWith !== void 0,
+            groups = [],
+            i, j, cur
             for(i = 0; i < n; i++) {
                 groups[i] = [];
                 for(j = 0; j < number; j++) {
@@ -1358,7 +1361,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //求出距离指定数值最近的那个数
         nearer: function(target, n1, n2) {
             var diff1 = Math.abs(target - n1),
-                diff2 = Math.abs(target - n2);
+            diff2 = Math.abs(target - n2);
             return diff1 < diff2 ? n1 : n2
         },
         //http://www.cnblogs.com/xiao-yao/archive/2012/09/11/2680424.html
@@ -1380,11 +1383,11 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     function cloneOf(item) {
         var name = $.type(item);
         switch(name) {
-        case "Array":
-        case "Object":
-            return $[name].clone(item);
-        default:
-            return item;
+            case "Array":
+            case "Object":
+                return $[name].clone(item);
+            default:
+                return item;
         }
     }
     //使用深拷贝方法将多个对象或数组合并成一个
@@ -1438,7 +1441,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         //去掉与传入参数相同的元素
         without: function(target, array) {
             var result = {},
-                key;
+            key;
             for(key in target) { //相当于构建一个新对象，把不位于传入数组中的元素赋给它
                 if(!~array.indexOf(key)) {
                     result[key] = target[key];
@@ -2648,7 +2651,7 @@ define("query",["mass"], function( $ ){
                             }
                         }
                         else{
-                            throw 'An invalid or illegal string was specified : "'+ key+'"!'
+                           $.error( 'An invalid or illegal string was specified : "'+ key+'"!');
                         }
                         break
                     default:
@@ -5577,16 +5580,16 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     } else {
                         hash.type = el.trim(); //只能为字母数字-_.空格
                         if(!rtypes.test(hash.type)) {
-                            throw new Error("事件类型格式不正确")
+                            $.error("事件类型格式不正确" , TypeError);
                         }
                     }
                 }
             }
             if(!hash.type) {
-                throw new Error("必须指明事件类型")
+                $.error("必须指明事件类型" );
             }
             if(method === "on" && !hash.handler) {
-                throw new Error("必须指明事件回调")
+                $.error("必须指明事件回调" );
             }
             hash.times = hash.times > 0 ? hash.times : Infinity;
             return this.each(function() {
@@ -5676,23 +5679,23 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
 //var reg = /^[^\u4E00-\u9FA5]*$/;
 define("ajax", ["mass", "$interact"], function($) {
     var global = this,
-        DOC = global.document,
-        r20 = /%20/g,
-        rCRLF = /\r?\n/g,
-        encode = encodeURIComponent,
-        decode = decodeURIComponent,
-        rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg,
-        // IE的换行符不包含 \r
-        rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
-        rnoContent = /^(?:GET|HEAD)$/,
-        rquery = /\?/,
-        rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
-        //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
-        //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
-        curl = DOC.URL,
-        segments = rurl.exec(curl.toLowerCase()) || [],
-        //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
-        s = ["XMLHttpRequest", "ActiveXObject('Msxml2.XMLHTTP.6.0')", "ActiveXObject('Msxml2.XMLHTTP.3.0')", "ActiveXObject('Msxml2.XMLHTTP')", "ActiveXObject('Microsoft.XMLHTTP')"];
+    DOC = global.document,
+    r20 = /%20/g,
+    rCRLF = /\r?\n/g,
+    encode = encodeURIComponent,
+    decode = decodeURIComponent,
+    rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg,
+    // IE的换行符不包含 \r
+    rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
+    rnoContent = /^(?:GET|HEAD)$/,
+    rquery = /\?/,
+    rurl = /^([\w.+-]+:)(?:\/\/([^\/?#:]*)(?::(\d+)|)|)/,
+    //在IE下如果重置了document.domain，直接访问window.location会抛错，但用document.URL就ok了
+    //http://www.cnblogs.com/WuQiang/archive/2012/09/21/2697474.html
+    curl = DOC.URL,
+    segments = rurl.exec(curl.toLowerCase()) || [],
+    //http://www.cnblogs.com/rubylouvre/archive/2010/04/20/1716486.html
+    s = ["XMLHttpRequest", "ActiveXObject('Msxml2.XMLHTTP.6.0')", "ActiveXObject('Msxml2.XMLHTTP.3.0')", "ActiveXObject('Msxml2.XMLHTTP')", "ActiveXObject('Microsoft.XMLHTTP')"];
     if(!+"\v1") {
         var v = DOC.documentMode;
         s[0] = v == 8 ? "XDomainRequest" : location.protocol === "file:" ? "!" : s[0]
@@ -5714,12 +5717,12 @@ define("ajax", ["mass", "$interact"], function($) {
         script: "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript",
         "*": ["*/"] + ["*"] //避免被压缩掉
     },
-        defaults = {
-            type: "GET",
-            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
-            async: true,
-            jsonp: "callback"
-        };
+    defaults = {
+        type: "GET",
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+        async: true,
+        jsonp: "callback"
+    };
     //将data转换为字符串，type转换为大写，添加hasContent，crossDomain属性，如果是GET，将参数绑在URL后面
 
 
@@ -5800,7 +5803,7 @@ define("ajax", ["mass", "$interact"], function($) {
             }
             bracket = typeof serializeArray == "boolean" ? bracket : !0;
             var buf = [],
-                key, val;
+            key, val;
             for(key in json) {
                 if(json.hasOwnProperty(key)) {
                     val = json[key];
@@ -5830,8 +5833,8 @@ define("ajax", ["mass", "$interact"], function($) {
             url = url.replace(/^[^?=]*\?/ig, '').split('#')[0]; //去除网址与hash信息
             //考虑到key中可能有特殊符号如“[].”等，而[]却有是否被编码的可能，所以，牺牲效率以求严谨，就算传了key参数，也是全部解析url。
             var pairs = url.split("&"),
-                pair, key, val, i = 0,
-                len = pairs.length;
+            pair, key, val, i = 0,
+            len = pairs.length;
             for(; i < len; ++i) {
                 pair = pairs[i].split("=");
                 key = decode(pair[0]);
@@ -5860,7 +5863,7 @@ define("ajax", ["mass", "$interact"], function($) {
                 return el.name && !el.disabled && (el.checked === true || /radio|checkbox/.test(el.type))
             }).forEach(function(el) {
                 var val = $(el).val(),
-                    vs;
+                vs;
                 val = Array.isArray(val) ? val : [val];
                 val = val.map(function(v) {
                     return v.replace(rCRLF, "\r\n");
@@ -5895,61 +5898,61 @@ define("ajax", ["mass", "$interact"], function($) {
         }
     }
     var ajax = $.ajax = function(opts) {
-            if(!opts || !opts.url) {
-                throw "参数必须为Object并且拥有url属性";
-            }
-            opts = setOptions(opts); //规整化参数对象
-            //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
-            var dummyXHR = new $.XHR(opts),
-                dataType = opts.dataType;
-            if(opts.form && opts.form.nodeType === 1) {
-                dataType = "iframe";
-            } else if(dataType == "jsonp") {
-                if(opts.crossDomain) { // opts.crossDomain &&
-                    $.log("使用script发出JSONP请求")
-                    ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback); //用于jsonp请求
-                    dataType = "script"
-                } else {
-                    dataType = dummyXHR.options.dataType = "json";
-                }
-            }
-            var transportContructor = transports[dataType] || transports._default,
-                transport = new transportContructor();
-            transport.dummyXHR = dummyXHR;
-            dummyXHR.transport = transport;
-            if(opts.contentType) {
-                dummyXHR.setRequestHeader("Content-Type", opts.contentType);
-            }
-            //添加dataType所需要的Accept首部
-            dummyXHR.setRequestHeader("Accept", accepts[dataType] ? accepts[dataType] + ", */*; q=0.01" : accepts["*"]);
-            for(var i in opts.headers) {
-                dummyXHR.setRequestHeader(i, opts.headers[i]);
-            }
-            "complete success error".replace($.rword, function(name) {
-                if(typeof opts[name] === "function") {
-                    dummyXHR.addEventListener(name, opts[name])
-                    delete opts[name];
-                }
-            });
-            dummyXHR.readyState = 1;
-            // 处理超时
-            if(opts.async && opts.timeout > 0) {
-                dummyXHR.timeoutID = setTimeout(function() {
-                    dummyXHR.abort("timeout");
-                }, opts.timeout);
-            }
-            try {
-                dummyXHR.state = 1; //已发送
-                transport.request();
-            } catch(e) {
-                if(dummyXHR.status < 2) {
-                    dummyXHR.dispatch(-1, e);
-                } else {
-                    $.log(e);
-                }
-            }
-            return dummyXHR;
+        if(!opts || !opts.url) {
+            $.error("参数必须为Object并且拥有url属性" );
         }
+        opts = setOptions(opts); //规整化参数对象
+        //创建一个伪XMLHttpRequest,能处理complete,success,error等多投事件
+        var dummyXHR = new $.XHR(opts),
+        dataType = opts.dataType;
+        if(opts.form && opts.form.nodeType === 1) {
+            dataType = "iframe";
+        } else if(dataType == "jsonp") {
+            if(opts.crossDomain) { // opts.crossDomain &&
+                $.log("使用script发出JSONP请求")
+                ajaxflow.fire("start", dummyXHR, opts.url, opts.jsonp, opts.jsonpCallback); //用于jsonp请求
+                dataType = "script"
+            } else {
+                dataType = dummyXHR.options.dataType = "json";
+            }
+        }
+        var transportContructor = transports[dataType] || transports._default,
+        transport = new transportContructor();
+        transport.dummyXHR = dummyXHR;
+        dummyXHR.transport = transport;
+        if(opts.contentType) {
+            dummyXHR.setRequestHeader("Content-Type", opts.contentType);
+        }
+        //添加dataType所需要的Accept首部
+        dummyXHR.setRequestHeader("Accept", accepts[dataType] ? accepts[dataType] + ", */*; q=0.01" : accepts["*"]);
+        for(var i in opts.headers) {
+            dummyXHR.setRequestHeader(i, opts.headers[i]);
+        }
+        "complete success error".replace($.rword, function(name) {
+            if(typeof opts[name] === "function") {
+                dummyXHR.addEventListener(name, opts[name])
+                delete opts[name];
+            }
+        });
+        dummyXHR.readyState = 1;
+        // 处理超时
+        if(opts.async && opts.timeout > 0) {
+            dummyXHR.timeoutID = setTimeout(function() {
+                dummyXHR.abort("timeout");
+            }, opts.timeout);
+        }
+        try {
+            dummyXHR.state = 1; //已发送
+            transport.request();
+        } catch(e) {
+            if(dummyXHR.status < 2) {
+                dummyXHR.dispatch(-1, e);
+            } else {
+                $.log(e);
+            }
+        }
+        return dummyXHR;
+    }
 
     ajax.isLocal = rlocalProtocol.test(segments[1]);
     
@@ -6058,7 +6061,7 @@ define("ajax", ["mass", "$interact"], function($) {
 
     if($.xhr) {
         var nativeXHR = new $.xhr,
-            allowCrossDomain = false;
+        allowCrossDomain = false;
         if("withCredentials" in nativeXHR) {
             allowCrossDomain = true;
         }
@@ -6067,14 +6070,14 @@ define("ajax", ["mass", "$interact"], function($) {
             //发送请求
             request: function() {
                 var dummyXHR = this.dummyXHR,
-                    options = dummyXHR.options,
-                    i;
+                options = dummyXHR.options,
+                i;
                 $.log("XhrTransport.sending.....");
                 if(options.crossDomain && !allowCrossDomain) {
-                    throw "do not allow crossdomain xhr !"
+                    $.error("本浏览器不支持crossdomain xhr")
                 }
                 var nativeXHR = this.nativeXHR = new $.xhr,
-                    self = this;
+                self = this;
                 if(options.username) {
                     nativeXHR.open(options.type, options.url, options.async, options.username, options.password);
                 } else {
@@ -6119,8 +6122,8 @@ define("ajax", ["mass", "$interact"], function($) {
                 // 如果网络问题时访问XHR的属性，在FF会抛异常
                 // http://helpful.knobs-dials.com/index.php/Component_returned_failure_code:_0x80040111_(NS_ERROR_NOT_AVAILABLE)
                 var nativeXHR = this.nativeXHR,
-                    dummyXHR = this.dummyXHR,
-                    detachEvent = false;
+                dummyXHR = this.dummyXHR,
+                detachEvent = false;
                 try {
                     if(abort || nativeXHR.readyState == 4) {
                         detachEvent = true;
@@ -6132,7 +6135,7 @@ define("ajax", ["mass", "$interact"], function($) {
                             }
                         } else {
                             var status = nativeXHR.status,
-                                xml = nativeXHR.responseXML;
+                            xml = nativeXHR.responseXML;
                             dummyXHR.responseHeadersString = nativeXHR.getAllResponseHeaders();
                             // Construct response list
                             if(xml && xml.documentElement /* #4958 */ ) {
@@ -6149,8 +6152,8 @@ define("ajax", ["mass", "$interact"], function($) {
                             //用于处理特殊情况,如果是一个本地请求,只要我们能获取数据就假当它是成功的
                             if(!status && ajax.isLocal && !dummyXHR.options.crossDomain) {
                                 status = dummyXHR.responseText ? 200 : 404;
-                                //IE有时会把204当作为1223
-                                //returning a 204 from a PUT request - IE seems to be handling the 204 from a DELETE request okay.
+                            //IE有时会把204当作为1223
+                            //returning a 204 from a PUT request - IE seems to be handling the 204 from a DELETE request okay.
                             } else if(status === 1223) {
                                 status = 204;
                             }
@@ -6175,10 +6178,10 @@ define("ajax", ["mass", "$interact"], function($) {
     transports.script = $.factory({
         request: function() {
             var self = this,
-                dummyXHR = self.dummyXHR,
-                options = dummyXHR.options,
-                head = $.head,
-                script = self.script = DOC.createElement("script");
+            dummyXHR = self.dummyXHR,
+            options = dummyXHR.options,
+            head = $.head,
+            script = self.script = DOC.createElement("script");
             $.log("ScriptTransport.sending.....");
             if(options.charset) {
                 script.charset = options.charset;
@@ -6194,7 +6197,7 @@ define("ajax", ["mass", "$interact"], function($) {
 
         respond: function(event, isAbort) {
             var node = this.script,
-                dummyXHR = this.dummyXHR;
+            dummyXHR = this.dummyXHR;
             // 防止重复调用,成功后 abort
             if(!node) {
                 return;
@@ -6247,7 +6250,7 @@ define("ajax", ["mass", "$interact"], function($) {
     function addDataToForm(data, form, serializeArray) {
         data = $.unparam(data);
         var ret = [],
-            d, isArray, vs, i, e;
+        d, isArray, vs, i, e;
         for(d in data) {
             isArray = Array.isArray(data[d]);
             vs = isArray ? data[d] : [data[d]]
@@ -6268,18 +6271,18 @@ define("ajax", ["mass", "$interact"], function($) {
     transports.iframe = $.factory({
         request: function() {
             var dummyXHR = this.dummyXHR,
-                options = dummyXHR.options,
-                form = options.form
-                //form.enctype的值
-                //1:application/x-www-form-urlencoded   在发送前编码所有字符（默认）
-                //2:multipart/form-data 不对字符编码。在使用包含文件上传控件的表单时，必须使用该值。
-                //3:text/plain  空格转换为 "+" 加号，但不对特殊字符编码。
-                this.backups = {
-                    target: form.target || "",
-                    action: form.action || "",
-                    enctype: form.enctype,
-                    method: form.method
-                };
+            options = dummyXHR.options,
+            form = options.form
+            //form.enctype的值
+            //1:application/x-www-form-urlencoded   在发送前编码所有字符（默认）
+            //2:multipart/form-data 不对字符编码。在使用包含文件上传控件的表单时，必须使用该值。
+            //3:text/plain  空格转换为 "+" 加号，但不对特殊字符编码。
+            this.backups = {
+                target: form.target || "",
+                action: form.action || "",
+                enctype: form.enctype,
+                method: form.method
+            };
             var iframe = createIframe(dummyXHR, this);
             //必须指定method与enctype，要不在FF报错
             //“表单包含了一个文件输入元素，但是其中缺少 method=POST 以及 enctype=multipart/form-data，所以文件将不会被发送。”
@@ -6299,15 +6302,15 @@ define("ajax", ["mass", "$interact"], function($) {
 
         respond: function(event) {
             var iframe = this,
-                transport = iframe.transport;
+            transport = iframe.transport;
             // 防止重复调用 , 成功后 abort
             if(!transport) {
                 return;
             }
             $.log("transports.iframe respond")
             var form = transport.form,
-                eventType = event.type,
-                dummyXHR = transport.dummyXHR;
+            eventType = event.type,
+            dummyXHR = transport.dummyXHR;
             iframe.transport = undefined;
             if(eventType == "load") {
                 var doc = iframe.contentDocument ? iframe.contentDocument : window.frames[iframe.id].document;
