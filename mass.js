@@ -389,36 +389,32 @@ function(global, DOC) {
         if(DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
-        var nodes = head.getElementsByTagName("script") //只在head标签中寻找
-        for(var i = 0, node; node = nodes[i++];) {
+        var stack, e, nodes = head.getElementsByTagName("script"); //只在head标签中寻找
+        //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
+        try {
+            a.b.c(); //强制报错,以便捕获e.stack
+        } catch(e) {
+            stack = e.stack;
+        }
+        if(stack) {
+            // chrome IE10使用 at, firefox opera 使用 @
+            e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
+            while(stack.indexOf(e) !== -1) {
+                stack = stack.substring(stack.indexOf(e) + e.length);
+            }
+            stack = stack.replace(/:\d+:\d+$/ig, "");
+            for(var i = 0, node; node = nodes[i++];) {
+                if(node.className == moduleClass && node.src === stack) {
+                    return node.className = node.src;
+                }
+            }
+        }
+        for(i = 0; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
         }
-        // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
-        // chrome and firefox4以前的版本
-        var stack;
-        try {
-            // 好吧，这里是让你报错而已，没其他作用
-            a.b.c()
-        } catch(e) {
-            stack = e.stack;
-        }
-        if(!stack) return;
-        // chrome uses at, ff uses @
-        var e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
-        while(stack.indexOf(e) !== -1) {
-            stack = stack.substring(stack.indexOf(e) + e.length);
-        }
-        stack = stack.replace(/:\d+:\d+$/ig, "");
-        for(i = 0; node = nodes[i++];) {
-            if(node.className == moduleClass && node.src === stack) {
-                $.log("stack " + stack, 7)
-                return node.className = node.src;
-            }
-        }
     }
-
 
     function checkCycle(deps, nick) {
         //检测是否存在循环依赖
@@ -482,10 +478,10 @@ function(global, DOC) {
         }
 
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
-        if(window.netscape) {//这也避开了IE6下的自闭合base标签引起的BUG
+        if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
             html.insertBefore(node, head); //在最新的firefox下,如果父节点还没有完成不能插入新节点
         } else {
-            head.insertBefore(node, head.firstChild);//chrome下第二个参数不能为null
+            head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
         }
 
         $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围

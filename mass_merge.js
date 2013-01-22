@@ -2,7 +2,7 @@
 function(global, DOC) {
     var $$ = global.$ //保存已有同名变量
     var rmakeid = /(#.+|\W)/g;
-    var NsKey = DOC.URL.replace(rmakeid, "")
+    var NsKey = DOC.URL.replace(rmakeid, "");
     var NsVal = global[NsKey]; //公共命名空间
     var W3C = DOC.dispatchEvent //w3c事件模型
     var html = DOC.documentElement; //HTML元素
@@ -26,8 +26,8 @@ function(global, DOC) {
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-    basepath
-    
+        basepath
+        
 
     function $(expr, context) { //新版本的基石
         if($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
@@ -55,9 +55,9 @@ function(global, DOC) {
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-        i = 1,
-        key, //如果最后参数是布尔，判定是否覆写同名属性
-        ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+            i = 1,
+            key, //如果最后参数是布尔，判定是否覆写同名属性
+            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -92,7 +92,7 @@ function(global, DOC) {
         
         slice: function(nodes, start, end) {
             var ret = [],
-            n = nodes.length;
+                n = nodes.length;
             if(end === void 0 || typeof end == "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
@@ -178,7 +178,7 @@ function(global, DOC) {
                 array = array.match($.rword) || [];
             }
             var result = {},
-            value = val !== void 0 ? val : 1;
+                value = val !== void 0 ? val : 1;
             for(var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -212,8 +212,8 @@ function(global, DOC) {
 
     (function(scripts) {
         var cur = scripts[scripts.length - 1],
-        url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
-        kernel = $.config;
+            url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+            kernel = $.config;
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
@@ -261,7 +261,7 @@ function(global, DOC) {
         }
         var ext = "js";
         tmp = ret.replace(/[?#].*/, "");
-        if(/\.(css|js)$/.test(tmp)) {// 处理"http://113.93.55.202/mass.draggable"的情况
+        if(/\.(css|js)$/.test(tmp)) { // 处理"http://113.93.55.202/mass.draggable"的情况
             ext = RegExp.$1;
         }
         if(ext != "css" && tmp == ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
@@ -301,34 +301,55 @@ function(global, DOC) {
             exports: $
         }
     };
-    //取得正在解析的script节点
+
 
     function getCurrentScript() {
-        if(DOC.currentScript) {
-            return DOC.currentScript.src
+        //取得正在解析的script节点
+        if(DOC.currentScript) { //firefox 4+
+            return DOC.currentScript.src;
         }
-        var nodes = head.getElementsByTagName("script") //只在head标签中寻找
-        for(var i = 0, node; node = nodes[i++];) {
+        var stack, e, nodes = head.getElementsByTagName("script"); //只在head标签中寻找
+        //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
+        try {
+            a.b.c(); //强制报错,以便捕获e.stack
+        } catch(e) {
+            stack = e.stack;
+        }
+        if(stack) {
+            // chrome IE10使用 at, firefox opera 使用 @
+            e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
+            while(stack.indexOf(e) !== -1) {
+                stack = stack.substring(stack.indexOf(e) + e.length);
+            }
+            stack = stack.replace(/:\d+:\d+$/ig, "");
+            for(var i = 0, node; node = nodes[i++];) {
+                if(node.className == moduleClass && node.src === stack) {
+                    return node.className = node.src;
+                }
+            }
+        }
+        for(i = 0; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
         }
     }
-    //检测是否存在循环依赖
 
     function checkCycle(deps, nick) {
+        //检测是否存在循环依赖
         for(var id in deps) {
             if(deps[id] == "司徒正美" && modules[id].state != 2 && (id == nick || checkCycle(modules[id].deps, nick))) {
                 return true;
             }
         }
     }
-    //检测此JS模块的依赖是否都已安装完毕,是则安装自身
+
 
     function checkDeps() {
+        //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
             var obj = modules[id],
-            deps = obj.deps;
+                deps = obj.deps;
             for(var key in deps) {
                 if(deps.hasOwnProperty(key) && modules[key].state != 2) {
                     continue loop;
@@ -342,23 +363,23 @@ function(global, DOC) {
             }
         }
     }
-    //检测是否死链
 
     function checkFail(node, error) {
+        //检测是否死链
         var id = node.src;
         node.onload = node.onreadystatechange = node.onerror = null;
         if(error || !modules[id].state) {
             setTimeout(function() {
                 head.removeChild(node);
             });
-            $.log("加载 " + id + " 失败", 7);
+            $.log("加载 " + id + " 失败" + error + " " + (!modules[id].state), 7);
         } else {
             return true;
         }
     }
-    //通过script节点加载目标模块
 
     function loadJS(url) {
+        //通过script节点加载目标模块
         var node = DOC.createElement("script");
         node.className = moduleClass; //让getCurrentScript只处理类名为moduleClass的script节点
         node[W3C ? "onload" : "onreadystatechange"] = function() {
@@ -374,13 +395,20 @@ function(global, DOC) {
         node.onerror = function() {
             checkFail(node, true)
         }
+
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
-        head.insertBefore(node, head.firstChild); //这也避开了IE6下的自闭合base标签引起的BUG
+        if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
+            html.insertBefore(node, head); //在最新的firefox下,如果父节点还没有完成不能插入新节点
+        } else {
+            head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
+        }
+
         $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
-    //通过link节点加载模块需要的CSS文件
+
 
     function loadCSS(url) {
+        //通过link节点加载模块需要的CSS文件
         var id = url.replace(rmakeid, "");
         if(!DOC.getElementById(id)) {
             var node = DOC.createElement("link");
@@ -394,17 +422,17 @@ function(global, DOC) {
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-        // 用于依赖列表中的模块的返回值
-        args = [],
-        // 需要安装的模块数
-        dn = 0,
-        // 已安装完的模块数
-        cn = 0,
-        id = parent || "cb" + (cbi++).toString(32),
+            // 用于依赖列表中的模块的返回值
+            args = [],
+            // 需要安装的模块数
+            dn = 0,
+            // 已安装完的模块数
+            cn = 0,
+            id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
-            url = array[0];
+                url = array[0];
             if(array[1] == "js") {
                 dn++;
                 if(!modules[url]) {
@@ -481,7 +509,7 @@ function(global, DOC) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-        ret = factory.apply(global, array);
+            ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
             modules[id].exports = ret
@@ -501,10 +529,10 @@ function(global, DOC) {
             $.unbind(DOC, ready, readyFn);
         }
         fireReady = $.noop; //隋性函数，防止IE9二次调用_checkDeps
-    };
+    }
 
     function doScrollCheck() {
-        try {
+        try { //IE下通过doScrollCheck检测DOM树是否建完
             html.doScroll("left");
             fireReady();
         } catch(e) {
@@ -541,8 +569,8 @@ function(global, DOC) {
         $.exports();
     });
     $.exports($.config.nick + postfix); //防止不同版本的命名空间冲突
-//============================合并核心模块支持===========================
-var define = function(a){
+    //============================合并核心模块支持===========================
+    var define = function(a){
             if(typeof a == "string" && a.indexOf(basepath) == -1 ){
                 arguments[0] = basepath + a +".js"
             }
