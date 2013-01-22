@@ -26,8 +26,8 @@ function(global, DOC) {
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-        basepath
-        /**
+    basepath
+    /**
          * 命名空间
          * @namespace 可变的短命名空间
          * @param  {String|Function} expr  CSS表达式或函数
@@ -67,9 +67,9 @@ function(global, DOC) {
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+        i = 1,
+        key, //如果最后参数是布尔，判定是否覆写同名属性
+        ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -116,7 +116,7 @@ function(global, DOC) {
          */
         slice: function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
+            n = nodes.length;
             if(end === void 0 || typeof end == "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
@@ -236,7 +236,7 @@ function(global, DOC) {
                 array = array.match($.rword) || [];
             }
             var result = {},
-                value = val !== void 0 ? val : 1;
+            value = val !== void 0 ? val : 1;
             for(var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -259,7 +259,7 @@ function(global, DOC) {
                             var prevValue = prev[c];
                             var currValue = curr[c];
                             if(prevValue && prev !== curr) {
-                                throw new Error(c + "不能重命名")
+                                $.error(c + "不能重命名");
                             }
                             prev[c] = currValue;
                         }
@@ -269,20 +269,36 @@ function(global, DOC) {
                 }
             }
             return this
+        },
+
+        noop : function() {},
+        /**
+         * 抛出错误,方便调试
+         * @param {String} str
+         * @param {Error}  e ? 具体的错误对象构造器
+         * EvalError: 错误发生在eval()中
+         * SyntaxError: 语法错误,错误发生在eval()中,因为其它点发生SyntaxError会无法通过解释器
+         * RangeError: 数值超出范围
+         * ReferenceError: 引用不可用
+         * TypeError: 变量类型不是预期的
+         * URIError: 错误发生在encodeURI()或decodeURI()中
+         */
+        error: function(str, e){
+            throw new (e || Error)(str);
         }
     });
 
     (function(scripts) {
         var cur = scripts[scripts.length - 1],
-            url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
-            kernel = $.config;
+        url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+        kernel = $.config;
         basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
         kernel.level = 9;
     })(DOC.getElementsByTagName("script"));
 
-    $.noop = $.error = function() {};
+ 
 
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
@@ -323,7 +339,7 @@ function(global, DOC) {
                 } else if(tmp == "/") {
                     ret = parent + url
                 } else {
-                    throw new Error("不符合模块标识规则: " + url)
+                    $.error("不符合模块标识规则: " + url);
                 }
             }
         }
@@ -389,8 +405,8 @@ function(global, DOC) {
         if(DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
-        var stack, e, nodes = head.getElementsByTagName("script"); //只在head标签中寻找
         //  参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
+        var stack, e;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
         } catch(e) {
@@ -402,14 +418,10 @@ function(global, DOC) {
             while(stack.indexOf(e) !== -1) {
                 stack = stack.substring(stack.indexOf(e) + e.length);
             }
-            stack = stack.replace(/:\d+:\d+$/ig, "");
-            for(var i = 0, node; node = nodes[i++];) {
-                if(node.className == moduleClass && node.src === stack) {
-                    return node.className = node.src;
-                }
-            }
+            return stack.replace(/:\d+:\d+$/ig, "");
         }
-        for(i = 0; node = nodes[i++];) {
+        var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
+        for(var i = 0, node; node = nodes[i++];) {
             if(node.className == moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
@@ -430,7 +442,7 @@ function(global, DOC) {
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
         loop: for(var i = loadings.length, id; id = loadings[--i];) {
             var obj = modules[id],
-                deps = obj.deps;
+            deps = obj.deps;
             for(var key in deps) {
                 if(deps.hasOwnProperty(key) && modules[key].state != 2) {
                     continue loop;
@@ -509,17 +521,17 @@ function(global, DOC) {
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于依赖列表中的模块的返回值
-            args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32);
+        // 用于依赖列表中的模块的返回值
+        args = [],
+        // 需要安装的模块数
+        dn = 0,
+        // 已安装完的模块数
+        cn = 0,
+        id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
-                url = array[0];
+            url = array[0];
             if(array[1] == "js") {
                 dn++;
                 if(!modules[url]) {
@@ -583,7 +595,7 @@ function(global, DOC) {
         factory.delay = function(id) {
             args.push(id);
             if(checkCycle(modules[id].deps, id)) {
-                throw new Error(id + "模块与之前的某些模块存在循环依赖");
+                $.error(id + "模块与之前的某些模块存在循环依赖");
             }
             delete factory.delay; //释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
@@ -608,10 +620,10 @@ function(global, DOC) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+        ret = factory.apply(global, array);
         module.state = 2;
         if(ret !== void 0) {
-            modules[id].exports = ret
+            modules[id].exports = ret;
         }
         return ret;
     }
@@ -668,8 +680,8 @@ function(global, DOC) {
         $.exports();
     });
     $.exports($.config.nick + postfix); //防止不同版本的命名空间冲突
-    //============================合并核心模块支持===========================
-    /*combine modules*/
+//============================合并核心模块支持===========================
+/*combine modules*/
 
 }(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
 /**

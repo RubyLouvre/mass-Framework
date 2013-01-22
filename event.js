@@ -551,16 +551,16 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     } else {
                         hash.type = el.trim(); //只能为字母数字-_.空格
                         if(!rtypes.test(hash.type)) {
-                            throw new Error("事件类型格式不正确")
+                            $.error("事件类型格式不正确" , TypeError);
                         }
                     }
                 }
             }
             if(!hash.type) {
-                throw new Error("必须指明事件类型")
+                $.error("必须指明事件类型" );
             }
             if(method === "on" && !hash.handler) {
-                throw new Error("必须指明事件回调")
+                $.error("必须指明事件回调" );
             }
             hash.times = hash.times > 0 ? hash.times : Infinity;
             return this.each(function() {

@@ -611,7 +611,7 @@ define("query",["mass"], function( $ ){
                             }
                         }
                         else{
-                            throw 'An invalid or illegal string was specified : "'+ key+'"!'
+                           $.error( 'An invalid or illegal string was specified : "'+ key+'"!');
                         }
                         break
                     default:

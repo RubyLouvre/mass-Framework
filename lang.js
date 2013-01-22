@@ -304,8 +304,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                     return(new Function("return " + data))();
                 }
             }
-
-            throw "Invalid JSON: " + data;
+            $.error("Invalid JSON: " + data, TypeError);
         },
         /**
          * 将字符串解析成XML文档对象
@@ -342,7 +341,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 xml = undefined;
             }
             if(!xml || !xml.documentElement || xml.getElementsByTagName("parsererror").length) {
-                throw "Invalid XML: " + data;
+                $.error("Invalid XML: " + data, TypeError);
             }
             return xml;
         }
