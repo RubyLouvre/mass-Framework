@@ -96,6 +96,7 @@ define("data", ["$lang"], function($) {
             return delOne; //返回被移除的数据
         }
     }
+    var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/
     $.mix({
         //判定是否关联了数据
         hasData: function(owner) {
@@ -119,15 +120,14 @@ define("data", ["$lang"], function($) {
         },
         //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
         parseData: function(target, name, cache, value) {
-            var data, key = $.String.camelize(name),
-                _eval
+            var data, _eval, key = $.String.camelize(name);
             if(cache && (key in cache)) return cache[key];
             if(arguments.length != 4) {
                 var attr = "data-" + name.replace(/([A-Z])/g, "-$1").toLowerCase();
                 value = target.getAttribute(attr);
             }
             if(typeof value === "string") { //转换 /^(?:\{.*\}|null|false|true|NaN)$/
-                if(/^(?:\{.*\}|\[.*\]|null|false|true|NaN)$/.test(value) || +value + "" === value) {
+                if(rparse.test(value) || +value + "" === value) {
                     _eval = true;
                 }
                 try {
