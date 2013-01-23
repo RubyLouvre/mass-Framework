@@ -243,8 +243,8 @@ function(global, DOC) {
                 } else if(global.console) {
                     console.log(str);
                 }else if(global.opera){
-            //  opera.postError(str);
-            }
+                    opera.postError(str);
+                }
             }
             return str;
         },
