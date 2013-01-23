@@ -32,6 +32,10 @@ define(["$spec"],function( spec ){
                 $.log("测试./test/loader/bbb")
                 expect( ret.bbb, id).eq( "bbb" );
             });
+            $.require( "./test/loader/aaa.bbb.ccc", function(ret){
+                $.log("测试./test/loader/aaa.bbb.ccc")
+                expect( ret.bbb, id).eq( "aaa.bbb.ccc" );
+            });
         },
         "测试exports模块依赖":function(id){
             //ccc模块与aaa模块是位于同一目录下,并将aaa模块的返回值作为ccc的exports的一个属性

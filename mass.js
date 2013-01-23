@@ -241,8 +241,10 @@ function(global, DOC) {
                         DOC.body.appendChild(div);
                     });
                 } else if(global.console) {
-                    global.console.log(str);
-                }
+                    console.log(str);
+                }else if(global.opera){
+            //  opera.postError(str);
+            }
             }
             return str;
         },
@@ -411,8 +413,12 @@ function(global, DOC) {
         var stack;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
-        } catch(e) {
+        } catch(e) {//safari的错误对象只有line,sourceId,sourceURL
             stack = e.stack;
+            if(!stack && window.opera){
+                //opera 9没有e.stack,但有e.Backtrace,但不能直接取得,需要对e对象转字符串进行抽取
+                stack = (Strin(e).match(/of linked script \S+/g) || []).join(" ");
+            }
         }
         if(stack) {
             /**e.stack最后一行在所有支持的浏览器大致如下:
@@ -420,7 +426,7 @@ function(global, DOC) {
             * at http://113.93.50.63/data.js:4:1
             *firefox17:
             *@http://113.93.50.63/query.js:4
-            *opera12:
+            *opera12:http://www.oldapps.com/opera.php?system=Windows_XP
             *@http://113.93.50.63/data.js:4
             *IE10:
             *  at Global code (http://113.93.50.63/data.js:4:1)
@@ -499,11 +505,11 @@ function(global, DOC) {
         }
 
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
-      //  if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
-     //       html.insertBefore(node, head); //在最新的firefox Nightly下,如果父节点还没有完成不能插入新节点
-     //   } else {
-            head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
-     //   }
+        //  if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
+        //       html.insertBefore(node, head); //在最新的firefox Nightly下,如果父节点还没有完成不能插入新节点
+        //   } else {
+        head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
+        //   }
         $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
 
