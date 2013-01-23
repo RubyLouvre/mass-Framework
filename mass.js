@@ -499,12 +499,11 @@ function(global, DOC) {
         }
 
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
-        if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
-            html.insertBefore(node, head); //在最新的firefox下,如果父节点还没有完成不能插入新节点
-        } else {
+      //  if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
+     //       html.insertBefore(node, head); //在最新的firefox Nightly下,如果父节点还没有完成不能插入新节点
+     //   } else {
             head.insertBefore(node, head.firstChild); //chrome下第二个参数不能为null
-        }
-
+     //   }
         $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
 
