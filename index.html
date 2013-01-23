@@ -22,13 +22,8 @@
         <script src="mass.js"> </script>
         <script>
 
-     var str =       "ReferenceError: a is not defined"+
-    "at getCurrentScript (http://113.93.50.63/mass.js:403:13)"+
-    "at window.define.$.define (http://113.93.50.63/mass.js:585:60)"+
-    "at http://113.93.50.63/data.js:4:1 "
-str.lastIndexOf("at ")
-            require("node",function($){
-               alert("node")
+            require("fx,ready",function($){
+               alert("fx")
             })
         </script>
     </head>
