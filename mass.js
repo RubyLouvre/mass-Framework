@@ -329,7 +329,7 @@ function(global, DOC) {
         var cur = scripts[scripts.length - 1],
         url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
         kernel = $.config;
-        basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
+        basepath = kernel.base = url.substr(0, url.lastIndexOf("/") + 1) ;
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
         kernel.level = 9;
