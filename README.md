@@ -120,3 +120,10 @@ $(function(){
 <p>by 司徒正美 （zhongqincheng）</p>
 <p>2011.11.15</p>
  <a href="http://www.cnblogs.com/rubylouvre/">http://www.cnblogs.com/rubylouvre/</a>
+ <fieldset><legend>如何贡献自己的力量</legend>
+ <p>首先你总得有<fontcolor=red>自己的github帐号</fontcolor>吧，注册一个，非常简单，只需用户名，邮箱，密码，邮箱只是用来找回密码的，不做验证。因此注册后立即能用！</p>
+ <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/1.jpg"/>
+ </fieldset>
+ 
+ 
+ 
