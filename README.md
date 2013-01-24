@@ -120,9 +120,43 @@ $(function(){
 <p>by 司徒正美 （zhongqincheng）</p>
 <p>2011.11.15</p>
  <a href="http://www.cnblogs.com/rubylouvre/">http://www.cnblogs.com/rubylouvre/</a>
- <fieldset><legend>如何贡献自己的力量</legend>
- <p>首先你总得有<fontcolor=red>自己的github帐号</fontcolor>吧，注册一个，非常简单，只需用户名，邮箱，密码，邮箱只是用来找回密码的，不做验证。因此注册后立即能用！</p>
+ <h1>如何贡献自己的力量</h1>
+ <p>首先你总得有<strong>自己的github帐号</strong>吧，注册一个，非常简单，只需用户名，邮箱，密码，邮箱只是用来找回密码的，不做验证。因此注册后立即能用！比如我现在新注册一个叫JsLouvre的示范帐号。</p>
  <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/1.jpg"/>
+ <p>然后搜索我的项目——mass Framework</p>
+ <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/2.jpg"/>
+ <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/3.jpg"/>
+ <p>第一个就是，点击进入项目，然后点上方的Fork按钮，这就拷贝一份我的项目的副本作为<strong>你自己的项目</strong></p>
+ <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/4.jpg"/>
+  <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/5.jpg"/>
+ <p>创建成功！</P>
+ <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/6.jpg"/>
+ <p>接着就是修改代码了，这要在自己发现真的存在漏洞或有什么改进之处才要动手啊！不能想改就改。要通读你要改的那一部分，必要时通读全框架。因此新手们最好找国内高手的框架进行学习，
+ 一来中文注释比较亲切，二来也方便接下来的交流。通常我们在clone git到本地进行修改的，这又涉及另外一些工具与命令的学习。不过，github完全允许你在线上进行修改，提交，合并。</p>
+ <p>比如你发现data模块的注释与mass模块的不一样，要统一合并，将函数外的注释移到里头。（千万不要轻视这工作，jQuery的许多代码贡献者一开始就只能帮JR大神修修注释，在看注释时也了解到不少东西）</p>
+  <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/7.jpg"/>
+    <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/8.jpg"/>
+<p>变成编辑状态，不过不太好用。大家有条件一定要学学如何使用TortoiseGit或Sublime Text 2下载github项目到本地，进行修改，提交，pull request啊！</p>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/9.jpg"/>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/10.jpg"/>
+<p>请认真写下你的修改日志，方便原框架作者查阅。</p>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/11.jpg"/>
+<p>修改成功后的样子：</p>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/12.jpg"/>
+<p>接着下来一步非常重要，就是提交你的修改给原作者。点击上方的pull request按钮！</p>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/13.jpg"/>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/14.jpg"/>
+<p>红色区域为原作者的项目，你要贡献的目标；亮蓝色区域为你的项目；黑色处填写标题与必须描述；点击右下方绿区域的按扭进行提交！</p>
+<hr/>
+<hr/>
+<p>接着下来就是框架作者的事儿了，我会在自己的项目看到你们的提交。万一以后你们有幸被别人贡献代码，也做这活儿。</p>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/15.jpg"/>
+<p>点击中间那个大大的pull request(2)的按钮到另一页面，中间有个被鲜绿色高亮的merge pull request按钮。作者查看你的修改，觉得可以就点它进行合并。</p>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/16.jpg"/>
+<img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/17.jpg"/>
+<p>最后你们就会在原项目上看到自己贡献的代码！</p>
+<hr/>
+<hr/>
  </fieldset>
  
  
