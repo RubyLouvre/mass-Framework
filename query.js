@@ -4,25 +4,33 @@
 define("query",["mass"], function( $ ){
     var global = this, DOC = global.document;
     $.mix({
-        //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
         isXML : function(el){
+            //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
             var doc = el.ownerDocument || el
             return doc.createElement("p").nodeName !== doc.createElement("P").nodeName;
         },
-        // 第一个节点是否包含第二个节点
-        contains:function(a, b){
-            if(a.compareDocumentPosition){
+      
+        contains:function(a, b, itself){
+            // 第一个节点是否包含第二个节点
+            //contains 方法支持情况：chrome+ firefox9+ ie5+, opera9.64+(估计从9.0+),safari5.1.7+
+            if(itself && a == b){
+                return true
+            }
+            if(a.contains){
+                if(a.nodeType === 9 )
+                    return true;
+                return a.contains(b);
+            }else if(a.compareDocumentPosition){
                 return !!(a.compareDocumentPosition(b) & 16);
-            }else if(a.contains){
-                return a !== b && (a.contains ? a.contains(b) : true);
             }
             while ((b = b.parentNode))
                 if (a === b) return true;
             return false;
         },
-        //获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本，
-        //为了让结果在所有浏览器下一致，忽略所有空白节点，因此它非元素的innerText或textContent
+
         getText : function() {
+            //获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本，
+            //为了让结果在所有浏览器下一致，忽略所有空白节点，因此它非元素的innerText或textContent
             return function getText( nodes ) {
                 for ( var i = 0, ret = "",node; node = nodes[i++];  ) {
                     // 对得文本节点与CDATA的内容
@@ -80,7 +88,7 @@ define("query",["mass"], function( $ ){
     var reg_pseudo        = /^\(\s*("([^"]*)"|'([^']*)'|[^\(\)]*(\([^\(\)]*\))?)\s*\)/;
     var reg_attrib      = /^\s*(?:(\S?=)\s*(?:(['"])(.*?)\2|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/
     var reg_attrval  = /\\([0-9a-fA-F]{2,2})/g;
-    var reg_sensitive       = /^(title|id|name|class|for|href|src)$/
+    var reg_sensitive       = /^(title|id|name|class|for|href|src)$/;
     var reg_backslash = /\\/g;
     var reg_tag  = /^((?:[-\w\*]|[^\x00-\xa0]|\\.)+)/;//能使用getElementsByTagName处理的CSS表达式
     if ( trimLeft.test( "\xA0" ) ) {
@@ -147,13 +155,11 @@ define("query",["mass"], function( $ ){
         al = ap.length;
         bl = bp.length;
 
-        // Start walking down the tree looking for a discrepancy
         for ( var i = 0; i < al && i < bl; i++ ) {
             if ( ap[i] !== bp[i] ) {
                 return siblingCheck( ap[i], bp[i] );
             }
         }
-        // We ended someplace up the tree so do a sibling check
         return i === al ?
         siblingCheck( a, bp[i], -1 ) :
         siblingCheck( ap[i], b, 1 );
@@ -171,7 +177,7 @@ define("query",["mass"], function( $ ){
             cur = cur.nextSibling;
         }
         return 1;
-    };
+    }
     var slice = Array.prototype.slice,
     makeArray = function ( nodes, result, flag_multi ) {  
         nodes = slice.call( nodes, 0 );
@@ -611,7 +617,7 @@ define("query",["mass"], function( $ ){
                             }
                         }
                         else{
-                           $.error( 'An invalid or illegal string was specified : "'+ key+'"!');
+                            $.error( 'An invalid or illegal string was specified : "'+ key+'"!');
                         }
                         break
                     default:

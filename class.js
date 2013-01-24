@@ -4,10 +4,10 @@
 define("class", ["$lang"], function($) {
     var
     unextend = $.oneObject(["_super", "prototype", 'extend', 'implement']),
-        //不能重写的类成员列表
-        rconst = /constructor|_init|_super/,
-        //不能重写的原型成员列表
-        classOne = $.oneObject('Object,Array,Function');
+    //不能重写的类成员列表
+    rconst = /constructor|_init|_super/,
+    //不能重写的原型成员列表
+    classOne = $.oneObject('Object,Array,Function');
 
     function expand(klass, props) {
         'extend,implement'.replace($.rword, function(name) {
@@ -21,8 +21,8 @@ define("class", ["$lang"], function($) {
     }
 
     var hash = {
-        //继承一个父类，并将它放进_init列表中，并添加setOptions原型方法
         inherit: function(parent, init) {
+            //继承一个父类，并将它放进_init列表中，并添加setOptions原型方法
             var bridge = function() {}
             if(typeof parent == "function") {
                 for(var i in parent) { //继承类成员
@@ -56,10 +56,10 @@ define("class", ["$lang"], function($) {
             }
             return proto.constructor = this;
         },
-        //添加一组原型方法
         implement: function() {
+            //添加一组原型方法
             var target = this.prototype,
-                reg = rconst;
+            reg = rconst;
             for(var i = 0, module; module = arguments[i++];) {
                 module = typeof module === "function" ? new module : module;
                 Object.keys(module).forEach(function(name) {
@@ -70,8 +70,8 @@ define("class", ["$lang"], function($) {
             }
             return this;
         },
-        //添加一组类成员
         extend: function() {
+            //添加一组类成员
             var bridge = {};
             for(var i = 0, module; module = arguments[i++];) {
                 $.mix(bridge, module);
@@ -87,14 +87,14 @@ define("class", ["$lang"], function($) {
     $.factory = function(obj) {
         obj = obj || {}; //父类
         var parent = obj.inherit,
-            init = obj.init; //构造器
+        init = obj.init; //构造器
         delete obj.inherit;
         delete obj.init;
         var klass = function() {
-                for(var i = 0, init; init = klass._init[i++];) {
-                    init.apply(this, arguments);
-                }
-            };
+            for(var i = 0, init; init = klass._init[i++];) {
+                init.apply(this, arguments);
+            }
+        };
         $.mix(klass, hash).inherit(parent, init); //添加更多类方法
         return expand(klass, obj).implement(obj);
     }
