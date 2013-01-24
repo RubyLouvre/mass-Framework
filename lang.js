@@ -3,16 +3,16 @@
 //=========================================
 define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     var global = this,
-    // JSON RegExp
-    rvalidchars = /^[\],:{}\s]*$/,
-    rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
-    rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
-    rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
-    runicode = /[\x00-\x1f"\\\u007f-\uffff]/g,
-    seval = global.execScript ? "execScript" : "eval",
-    rformat = /\\?\#{([^{}]+)\}/gm,
-    sopen = (global.open + '').replace(/open/g, ""),
-    defineProperty = Object.defineProperty
+        // JSON RegExp
+        rvalidchars = /^[\],:{}\s]*$/,
+        rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g,
+        rvalidtokens = /"[^"\\\r\n]*"|true|false|null|-?(?:\d+\.|)\d+(?:[eE][+-]?\d+|)/g,
+        rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g,
+        runicode = /[\x00-\x1f"\\\u007f-\uffff]/g,
+        seval = global.execScript ? "execScript" : "eval",
+        rformat = /\\?\#{([^{}]+)\}/gm,
+        sopen = (global.open + '').replace(/open/g, ""),
+        defineProperty = Object.defineProperty
 
     function method(obj, name, method) {
         if(!obj[name]) {
@@ -54,9 +54,9 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             try { //不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
                 for(var key in obj) //只有一个方法是来自其原型立即返回flase
-                    if(!Object.prototype.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
-                        return false
-                    }
+                if(!Object.prototype.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
+                    return false
+                }
             } catch(e) {
                 return false;
             }
@@ -70,7 +70,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
          */
         isNative: function(obj, method) {
             var m = obj ? obj[method] : false,
-            r = new RegExp(method, "g");
+                r = new RegExp(method, "g");
             return !!(m && typeof m != "string" && sopen === (m + "").replace(r, ""));
         },
         /**
@@ -112,8 +112,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
          */
         each: function(obj, fn, scope, map) {
             var value, i = 0,
-            isArray = $.isArrayLike(obj),
-            ret = [];
+                isArray = $.isArrayLike(obj),
+                ret = [];
             if(isArray) {
                 for(var n = obj.length; i < n; i++) {
                     value = fn.call(scope || obj[i], obj[i], i);
@@ -152,7 +152,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
          */
         filter: function(obj, fn, scope) {
             for(var i = 0, n = obj.length, ret = []; i < n; i++) {
-                var val = fn.call(scope||obj[i], obj[i], i);
+                var val = fn.call(scope || obj[i], obj[i], i);
                 if(val === true) {
                     ret[ret.length] = obj[i]
                 }
@@ -192,8 +192,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 start = 0;
             }
             var index = -1,
-            length = Math.max(0, Math.ceil((end - start) / step)),
-            result = Array(length);
+                length = Math.max(0, Math.ceil((end - start) / step)),
+                result = Array(length);
 
             while(++index < length) {
                 result[index] = start;
@@ -210,20 +210,20 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         function(str) {
             return '"' + str.replace(runicode, function(a) {
                 switch(a) {
-                    case '"':
-                        return '\\"';
-                    case '\\':
-                        return '\\\\';
-                    case '\b':
-                        return '\\b';
-                    case '\f':
-                        return '\\f';
-                    case '\n':
-                        return '\\n';
-                    case '\r':
-                        return '\\r';
-                    case '\t':
-                        return '\\t';
+                case '"':
+                    return '\\"';
+                case '\\':
+                    return '\\\\';
+                case '\b':
+                    return '\\b';
+                case '\f':
+                    return '\\f';
+                case '\n':
+                    return '\\n';
+                case '\r':
+                    return '\\r';
+                case '\t':
+                    return '\\t';
                 }
                 a = a.charCodeAt(0).toString(16);
                 while(a.length < 4) a = "0" + a;
@@ -238,40 +238,40 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         dump: function(obj, indent) {
             indent = indent || "";
             if(obj == null) //处理null,undefined
-                return indent + "obj";
+            return indent + "obj";
             if(obj.nodeType === 9) return indent + "[object Document]";
             if(obj.nodeType) return indent + "[object " + (obj.tagName || "Node") + "]";
             var arr = [],
-            type = $.type(obj),
-            self = $.dump,
-            next = indent + "\t";
+                type = $.type(obj),
+                self = $.dump,
+                next = indent + "\t";
             switch(type) {
-                case "Boolean":
-                case "Number":
-                case "NaN":
-                case "RegExp":
-                    return indent + obj;
-                case "String":
-                    return indent + $.quote(obj);
-                case "Function":
-                    return(indent + obj).replace(/\n/g, "\n" + indent);
-                case "Date":
-                    return indent + '(new Date(' + obj.valueOf() + '))';
-                case "Window":
-                    return indent + "[object " + type + "]";
-                default:
-                    if($.isArrayLike(obj)) {
-                        for(var i = 0, n = obj.length; i < n; ++i)
-                            arr.push(self(obj[i], next).replace(/^\s* /g, next));
-                        return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
+            case "Boolean":
+            case "Number":
+            case "NaN":
+            case "RegExp":
+                return indent + obj;
+            case "String":
+                return indent + $.quote(obj);
+            case "Function":
+                return(indent + obj).replace(/\n/g, "\n" + indent);
+            case "Date":
+                return indent + '(new Date(' + obj.valueOf() + '))';
+            case "Window":
+                return indent + "[object " + type + "]";
+            default:
+                if($.isArrayLike(obj)) {
+                    for(var i = 0, n = obj.length; i < n; ++i)
+                    arr.push(self(obj[i], next).replace(/^\s* /g, next));
+                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
+                }
+                if($.isPlainObject(obj)) {
+                    for(i in obj) {
+                        arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
                     }
-                    if($.isPlainObject(obj)) {
-                        for(i in obj) {
-                            arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
-                        }
-                        return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
-                    }
-                    return indent + "[object " + type + "]";
+                    return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
+                }
+                return indent + "[object " + type + "]";
             }
         },
         /**
@@ -361,10 +361,11 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         $.isArray = Array.isArray;
     }
     methods(String.prototype, {
-        //将字符串重复n遍
+
         repeat: function(n) {
+            //将字符串重复n遍
             var result = "",
-            target = this;
+                target = this;
             while(n > 0) {
                 if(n & 1) result += target;
                 target += target;
@@ -372,16 +373,19 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             return result;
         },
-        //判定是否以给定字符串开头
+
         startsWith: function(str) {
+            //判定是否以给定字符串开头
             return this.indexOf(str) === 0;
         },
-        //判定是否以给定字符串结尾
+
         endsWith: function(str) {
+            //判定是否以给定字符串结尾
             return this.lastIndexOf(str) === this.length - str.length;
         },
-        //判断一个字符串是否包含另一个字符
+
         contains: function(s, position) {
+            //判断一个字符串是否包含另一个字符
             return ''.indexOf.call(this, s, position >> 0) !== -1;
         }
     });
@@ -389,8 +393,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     "String,Array,Number,Object".replace($.rword, function(Type) {
         $[Type] = function(pack) {
             var isNative = typeof pack == "string",
-            //取得方法名
-            methods = isNative ? pack.match($.rword) : Object.keys(pack);
+                //取得方法名
+                methods = isNative ? pack.match($.rword) : Object.keys(pack);
             methods.forEach(function(method) {
                 $[Type][method] = isNative ?
                 function(obj) {
@@ -400,23 +404,25 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         }
     });
     $.String({
-        /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
-         *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
-         *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
-         *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
-         *随着浏览器普及对二进制的操作，这方法也越来越常用。
-         */
         byteLen: function(target) {
+            /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
+             *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
+             *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
+             *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
+             *随着浏览器普及对二进制的操作，这方法也越来越常用。
+             */
             return target.replace(/[^\x00-\xff]/g, 'ci').length;
         },
-        //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
+
         truncate: function(target, length, truncation) {
+            //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
             length = length || 30;
             truncation = truncation === void(0) ? "..." : truncation;
             return target.length > length ? target.slice(0, length - truncation.length) + truncation : String(target);
         },
-        //转换为驼峰风格
+
         camelize: function(target) {
+            //转换为驼峰风格
             if(target.indexOf("-") < 0 && target.indexOf("_") < 0) {
                 return target; //提前判断，提高getStyle等的效率
             }
@@ -424,42 +430,50 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 return match.charAt(1).toUpperCase();
             });
         },
-        //转换为下划线风格
+
         underscored: function(target) {
+            //转换为下划线风格
             return target.replace(/([a-z\d])([A-Z]+)/g, "$1_$2").replace(/\-/g, "_").toLowerCase();
         },
-        //首字母大写
+
         capitalize: function(target) {
+            //首字母大写
             return target.charAt(0).toUpperCase() + target.substring(1).toLowerCase();
         },
-        //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
+
         stripTags: function(target) {
+            //移除字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了
             return target.replace(/<[^>]+>/g, "");
         },
-        //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
+
         stripScripts: function(target) {
-            return target.replace(/<script[^>]*>([\S\s]*?)<\/script>/img, '')
+            //移除字符串中所有的 script 标签。弥补stripTags方法的缺陷。此方法应在stripTags之前调用。
+            return target.replace(/<script[^>]*>([\S\s]*?)<\/script>/img, '');
         },
-        //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
+
         escapeHTML: function(target) {
+            //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
             return target.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
         },
-        //还原为可被文档解析的HTML标签
+
         unescapeHTML: function(target) {
+            //还原为可被文档解析的HTML标签
             return target.replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&") //处理转义的中文和实体字符
             .replace(/&#([\d]+);/g, function($0, $1) {
                 return String.fromCharCode(parseInt($1, 10));
             });
         },
 
-        //http://stevenlevithan.com/regex/xregexp/
-        //将字符串安全格式化为正则表达式的源码
+
         escapeRegExp: function(target) {
+            //http://stevenlevithan.com/regex/xregexp/
+            //将字符串安全格式化为正则表达式的源码
             return(target + "").replace(/([-.*+?^${}()|[\]\/\\])/g, "\\$1");
         },
-        //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
-        //在左边补上一些字符,默认为0
+
         pad: function(target, n, filling, right, radix) {
+            //http://www.cnblogs.com/rubylouvre/archive/2010/02/09/1666165.html
+            //在左边补上一些字符,默认为0
             var num = target.toString(radix || 10);
             filling = filling || "0";
             while(num.length < n) {
@@ -471,41 +485,46 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             return num;
         },
-        /**
-         * 为目标字符串添加wbr软换行
-         * 1.支持html标签、属性以及字符实体。<br>
-         * 2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
-         * 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，
-         * 可以在css中加上 wbr:after { content: "\00200B" } 解决此问题
-         */
+
         wbr: function(target) {
+            /**
+             * 为目标字符串添加wbr软换行
+             * 1.支持html标签、属性以及字符实体。<br>
+             * 2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
+             * 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，
+             * 可以在css中加上 wbr:after { content: "\00200B" } 解决此问题
+             */
             return String(target).replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, "$&<wbr>").replace(/><wbr>/g, ">");
         }
     });
-
+    //字符串的原生原型方法
     $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,", //es6
-        "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
+    "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
-        //判定数组是否包含指定目标。
+
         contains: function(target, item) {
+            //判定数组是否包含指定目标。
             return !!~target.indexOf(item);
         },
-        //移除数组中指定位置的元素，返回布尔表示成功与否。
+
         removeAt: function(target, index) {
+            //移除数组中指定位置的元素，返回布尔表示成功与否。
             return !!target.splice(index, 1).length
         },
-        //移除数组中第一个匹配传参的那个元素，返回布尔表示成功与否。
+
         remove: function(target, item) {
+            //移除数组中第一个匹配传参的那个元素，返回布尔表示成功与否。
             var index = target.indexOf(item);
             if(~index) return $.Array.removeAt(target, index);
             return false;
         },
 
-        //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
+
         shuffle: function(target) {
+            //对数组进行洗牌。若不想影响原数组，可以先拷贝一份出来操作。
             var ret = [],
-            i = target.length,
-            n;
+                i = target.length,
+                n;
             target = target.slice(0);
             while(--i >= 0) {
                 n = Math.floor(Math.random() * i);
@@ -514,14 +533,16 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             return ret;
         },
-        //从数组中随机抽选一个元素出来。
+
         random: function(target) {
+            //从数组中随机抽选一个元素出来。
             return $.Array.shuffle(target.concat())[0];
         },
-        //对数组进行平坦化处理，返回一个一维的新数组。
+
         flatten: function(target) {
+            //对数组进行平坦化处理，返回一个一维的新数组。
             var result = [],
-            self = $.Array.flatten;
+                self = $.Array.flatten;
             target.forEach(function(item) {
                 if(Array.isArray(item)) {
                     result = result.concat(self(item));
@@ -532,14 +553,16 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             return result;
         },
 
-        // 过滤数组中的null与undefined，但不影响原数组。
+
         compact: function(target) {
+            // 过滤数组中的null与undefined，但不影响原数组。
             return target.filter(function(el) {
                 return el != null;
             });
         },
-        //根据指定条件进行排序，通常用于对象数组。
+
         sortBy: function(target, fn, scope) {
+            //根据指定条件进行排序，通常用于对象数组。
             var array = target.map(function(item, index) {
                 return {
                     el: item,
@@ -547,67 +570,74 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
                 };
             }).sort(function(left, right) {
                 var a = left.re,
-                b = right.re;
+                    b = right.re;
                 return a < b ? -1 : a > b ? 1 : 0;
             });
             return $.Array.pluck(array, 'el');
         },
-        //根据指定条件（如回调或对象的某个属性）进行分组，构成对象返回。
+
         groupBy: function(target, val) {
+            //根据指定条件（如回调或对象的某个属性）进行分组，构成对象返回。
             var result = {};
             var iterator = $.isFunction(val) ? val : function(obj) {
-                return obj[val];
-            };
+                    return obj[val];
+                };
             target.forEach(function(value, index) {
                 var key = iterator(value, index);
                 (result[key] || (result[key] = [])).push(value);
             });
             return result;
         },
-        //取得对象数组的每个元素的指定属性，组成数组返回。
+
         pluck: function(target, name) {
+            //取得对象数组的每个元素的指定属性，组成数组返回。
             var result = [],
-            prop;
+                prop;
             target.forEach(function(item) {
                 prop = item[name];
                 if(prop != null) result.push(prop);
             });
             return result;
         },
-        // 对数组进行去重操作，返回一个没有重复元素的新数组。
+
         unique: function(target) {
+            // 对数组进行去重操作，返回一个没有重复元素的新数组。
             var ret = [],
-            n = target.length,
-            i, j; //by abcd
+                n = target.length,
+                i, j; //by abcd
             for(i = 0; i < n; i++) {
                 for(j = i + 1; j < n; j++)
-                    if(target[i] === target[j]) j = ++i;
+                if(target[i] === target[j]) j = ++i;
                 ret.push(target[i]);
             }
             return ret;
         },
-        //合并参数二到参数一
+
         merge: function(first, second) {
+            //合并参数二到参数一
             var i = ~~first.length,
-            j = 0;
+                j = 0;
             for(var n = second.length; j < n; j++) {
                 first[i++] = second[j];
             }
             first.length = i;
             return first;
         },
-        //对两个数组取并集。
+
         union: function(target, array) {
+            //对两个数组取并集。
             return $.Array.unique($.Array.merge(target, array));
         },
-        //对两个数组取交集
+
         intersect: function(target, array) {
+            //对两个数组取交集
             return target.filter(function(n) {
                 return ~array.indexOf(n);
             });
         },
-        //对两个数组取差集(补集)
+
         diff: function(target, array) {
+            //对两个数组取差集(补集)
             var result = target.slice();
             for(var i = 0; i < result.length; i++) {
                 for(var j = 0; j < array.length; j++) {
@@ -620,36 +650,41 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             return result;
         },
-        //返回数组中的最小值，用于数字数组。
+
         min: function(target) {
+            //返回数组中的最小值，用于数字数组。
             return Math.min.apply(0, target);
         },
-        //返回数组中的最大值，用于数字数组。
+
         max: function(target) {
+            //返回数组中的最大值，用于数字数组。
             return Math.max.apply(0, target);
         },
-        //深拷贝当前数组
+
         clone: function(target) {
+            //深拷贝当前数组
             var i = target.length,
-            result = [];
+                result = [];
             while(i--) result[i] = cloneOf(target[i]);
             return result;
         },
-        //只有当前数组不存在此元素时只添加它
+
         ensure: function(target, el) {
+            //只有当前数组不存在此元素时只添加它
             if(!~target.indexOf(el)) {
                 target.push(el);
             }
             return target;
         },
-        //将数组划分成N个分组，其中小组有number个数，最后一组可能小于number个数,
-        //但如果第三个参数不为undefine时,我们可以拿它来填空最后一组
+
         inGroupsOf: function(target, number, fillWith) {
+            //将数组划分成N个分组，其中小组有number个数，最后一组可能小于number个数,
+            //但如果第三个参数不为undefine时,我们可以拿它来填空最后一组
             var t = target.length,
-            n = Math.ceil(t / number),
-            fill = fillWith !== void 0,
-            groups = [],
-            i, j, cur
+                n = Math.ceil(t / number),
+                fill = fillWith !== void 0,
+                groups = [],
+                i, j, cur
             for(i = 0; i < n; i++) {
                 groups[i] = [];
                 for(j = 0; j < number; j++) {
@@ -671,21 +706,24 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift," + "indexOf,lastIndexOf,every,some,filter,reduce,reduceRight")
     var NumberPack = {
-        //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
+
         limit: function(target, n1, n2) {
+            //确保数值在[n1,n2]闭区间之内,如果超出限界,则置换为离它最近的最大值或最小值
             var a = [n1, n2].sort();
             if(target < a[0]) target = a[0];
             if(target > a[1]) target = a[1];
             return target;
         },
-        //求出距离指定数值最近的那个数
+
         nearer: function(target, n1, n2) {
+            //求出距离指定数值最近的那个数
             var diff1 = Math.abs(target - n1),
-            diff2 = Math.abs(target - n2);
+                diff2 = Math.abs(target - n2);
             return diff1 < diff2 ? n1 : n2
         },
-        //http://www.cnblogs.com/xiao-yao/archive/2012/09/11/2680424.html
+
         round: function(target, base) {
+            //http://www.cnblogs.com/xiao-yao/archive/2012/09/11/2680424.html
             if(base) {
                 base = Math.pow(10, base);
                 return Math.round(target * base) / base;
@@ -703,16 +741,17 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     function cloneOf(item) {
         var name = $.type(item);
         switch(name) {
-            case "Array":
-            case "Object":
-                return $[name].clone(item);
-            default:
-                return item;
+        case "Array":
+        case "Object":
+            return $[name].clone(item);
+        default:
+            return item;
         }
     }
-    //使用深拷贝方法将多个对象或数组合并成一个
+
 
     function mergeOne(source, key, current) {
+        //使用深拷贝方法将多个对象或数组合并成一个
         if($.isPlainObject(source[key])) { //只处理纯JS对象，不处理window与节点
             $.Object.merge(source[key], current);
         } else {
@@ -722,8 +761,9 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
     };
 
     $.Object({
-        //根据传入数组取当前对象相关的键值对组成一个新对象返回
+
         subset: function(target, props) {
+            //根据传入数组取当前对象相关的键值对组成一个新对象返回
             var result = {};
             props.forEach(function(prop) {
                 result[prop] = target[prop];
@@ -734,16 +774,17 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         forEach: $.each,
         //将参数一的键值都放入回调中执行，收集其结果返回
         map: $.map,
-        //进行深拷贝，返回一个新对象，如果是拷贝请使用$.mix
+
         clone: function(target) {
+            //进行深拷贝，返回一个新对象，如果是浅拷贝请使用$.mix
             var clone = {};
             for(var key in target) {
                 clone[key] = cloneOf(target[key]);
             }
             return clone;
         },
-        //将多个对象合并到第一个参数中或将后两个参数当作键与值加入到第一个参数
         merge: function(target, k, v) {
+            //将多个对象合并到第一个参数中或将后两个参数当作键与值加入到第一个参数
             var obj, key;
             //为目标对象添加一个键值对
             if(typeof k === "string") return mergeOne(target, k, v);
@@ -758,10 +799,11 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             }
             return target;
         },
-        //去掉与传入参数相同的元素
+
         without: function(target, array) {
+            //去掉与传入参数相同的元素
             var result = {},
-            key;
+                key;
             for(key in target) { //相当于构建一个新对象，把不位于传入数组中的元素赋给它
                 if(!~array.indexOf(key)) {
                     result[key] = target[key];
