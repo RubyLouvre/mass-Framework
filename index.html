@@ -24,8 +24,8 @@
             require("interact",function($){
                 var flow = new $.Flow;
                 flow.refresh("aaa,bbb,ccc", function(){
-                    $.log(this._fired)
-                    $.log(Array.apply([],arguments))
+                    $.log(this._fired)//Object { aaa=[1], bbb=[1], ccc=[1]}
+                    $.log(Array.apply([],arguments))//[4,5,6]
                 });
                 flow.order("aaa",1);//没有反应
                 flow.order("aaa",2);//出错,它本应该触发bbb,但没有警告,它只要求你重来

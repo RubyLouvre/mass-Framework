@@ -1,10 +1,10 @@
 //=========================================
 // 组件交互模块v1 by 司徒正美
 //=========================================
-define("interact",["$class"], function($){
+define("interact", ["$class"], function($) {
     //观察者模式
     $.Observer = $.factory({
-        init: function(target){
+        init: function(target) {
             this._events = {};
             this._target = target || this;
         },
@@ -17,12 +17,12 @@ define("interact",["$class"], function($){
             }
             return this;
         },
-        once: function(type, callback){
+        once: function(type, callback) {
             var self = this;
-            var wrapper = function () {
-                callback.apply(self, arguments);
-                self.unbind(type, wrapper);
-            };
+            var wrapper = function() {
+                    callback.apply(self, arguments);
+                    self.unbind(type, wrapper);
+                };
             this.bind(type, wrapper);
             return this;
         },
@@ -47,7 +47,7 @@ define("interact",["$class"], function($){
             var listeners = (this._events[type] || []).concat(); //防止影响原数组
             if(listeners.length) {
                 var target = this._target,
-                args = $.slice(arguments);
+                    args = $.slice(arguments);
                 args[0] = {
                     type: type,
                     target: target
@@ -62,22 +62,24 @@ define("interact",["$class"], function($){
     //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
     $.Flow = $.factory({
         inherit: $.Observer,
-        init: function(timeout){
-            this._fired = {};//用于收集fire或order的参数(去掉第一个事件参数)
-            if(typeof timeout == "number"){
-                this.timeout = timeout;//用于order,时间限制
+        init: function(timeout) {
+            this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
+            if(typeof timeout == "number") {
+                this.timeout = timeout; //用于order,时间限制
             }
         },
-        fire: function (type, args) {
-            var calls = this._events, normal = 2, listeners, ev
-            while (normal--) {
+        fire: function(type, args) {
+            var calls = this._events,
+                normal = 2,
+                listeners, ev
+            while(normal--) {
                 ev = normal ? type : last;
                 listeners = calls[ev];
-                if (listeners && listeners.length) {
+                if(listeners && listeners.length) {
                     args = $.slice(arguments, 1)
-                    if(normal){//在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
-                        if(this._events[ev]){
-                            this._fired[ev] =  args.concat();
+                    if(normal) { //在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
+                        if(this._events[ev]) {
+                            this._fired[ev] = args.concat();
                         }
                         args.unshift({
                             type: type,
@@ -88,7 +90,7 @@ define("interact",["$class"], function($){
                         //第一次执行目标事件,第二次执行最后的回调
                         callback.apply(this, args);
                     }
-                }else{
+                } else {
                     break;
                 }
             }
@@ -108,7 +110,7 @@ define("interact",["$class"], function($){
                 flow.fire("ccc",6)//[4,5,6]
             })
          */
-        refresh: function () {
+        refresh: function() {
             Array.prototype.push.call(arguments, false);
             _assign.apply(this, arguments);
             return this;
@@ -127,7 +129,7 @@ define("interact",["$class"], function($){
                 flow.fire("ccc",6)//[4,5,6]
             })
          */
-        reload: function () {
+        reload: function() {
             Array.prototype.push.call(arguments, true);
             _assign.apply(this, arguments);
             return this;
@@ -146,20 +148,21 @@ define("interact",["$class"], function($){
         })
         //如果new $.Flow(4000)在构器器传入timeout,在第一个fire后,过了4秒时间限制还没有全部依次触发完aaa,bbb,ccc
         //也要求你重来
+        // 可以应用于游戏中的QTE http://baike.baidu.com/view/1398321.htm，我们只需要绑定keydown事件，在回调中调用flow.order(e.which);
          */
-        order: function(type){//
-            if(this._events[type]){
+        order: function(type) { //
+            if(this._events[type]) {
                 var cur = this._queue.shift();
-                if(!this.timestamp ){
-                    this.timestamp  = new Date - 0
+                if(!this.timestamp) {
+                    this.timestamp = new Date - 0
                 }
                 var limit = true;
-                if(this.timeout && (new Date - this.timestamp > this.timeout)){
+                if(this.timeout && (new Date - this.timestamp > this.timeout)) {
                     limit = false;
                 }
-                if(type == cur && limit){
-                    this.fire.apply(this,arguments)
-                }else{
+                if(type == cur && limit) {
+                    this.fire.apply(this, arguments)
+                } else {
                     this._queue = this._order.concat();
                     this._fired = {}
                     delete this.timestamp
@@ -180,11 +183,14 @@ define("interact",["$class"], function($){
                 flow.fire("aaa",6)//没反应
             })
          */
-        repeat: function(type, times, callback){
-            var target = this._target, that = this, ret = []
-            function wrapper(){
+        repeat: function(type, times, callback) {
+            var target = this._target,
+                that = this,
+                ret = []
+
+            function wrapper() {
                 ret.push.apply(ret, $.slice(arguments, 1));
-                if (--times == 0) {
+                if(--times == 0) {
                     that.unbind(last, wrapper);
                     callback.apply(target, ret);
                 }
@@ -192,36 +198,36 @@ define("interact",["$class"], function($){
             that.bind(type, wrapper);
             return this;
         },
-        done: function (callback) {
+        done: function(callback) {
             var that = this;
-            return function (err, data) {
-                if (err) {
+            return function(err, data) {
+                if(err) {
                     return that.fire('error', err);
                 }
-                if (typeof handler === 'string') {
+                if(typeof handler === 'string') {
                     return that.fire(callback, data);
                 }
-                if (arguments.length <= 2) {
+                if(arguments.length <= 2) {
                     return callback(data);
                 }
                 var args = $.slice(arguments, 1);
                 callback.apply(null, args);
             }
         },
-        fail: function (callback) {
+        fail: function(callback) {
             var that = this;
-            that.once('error', function (err) {
+            that.once('error', function(err) {
                 that.unbind();
                 callback(err);
             });
             return this;
         }
     })
-    
-    $.Flow.create = function (names, callback, errorback) {
+
+    $.Flow.create = function(names, callback, errorback) {
         var that = new $.Flow;
         var args = names.match($.rword) || [];
-        if(typeof errorback === "function"){
+        if(typeof errorback === "function") {
             that.fail(errorback);
         }
         args.push(callback)
@@ -229,65 +235,66 @@ define("interact",["$class"], function($){
         return that;
     };
     var last = "$" + Date.now();
-    var _assign = function (name, callback, reload) {
-        var flow = this,
-        times = 0,
-        uniq = {},
-        events =  name.match($.rword) ,
-        length = events.length;
-        if(!events.length){
-            return this;
-        }
-        this._queue = events.concat();
-        this._order = events.concat();
-        function bind(key) {
-            flow.bind(key, function () {
-                if (!uniq[key]) {
-                    uniq[key] = true;
-                    times++;
-                }
-            });
-        }
-        //绑定所有子事件
-        for (var index = 0; index < length; index++) {
-            bind(events[index]);
-        }
+    var _assign = function(name, callback, reload) {
+            var flow = this,
+                times = 0,
+                uniq = {},
+                events = name.match($.rword),
+                length = events.length;
+            if(!events.length) {
+                return this;
+            }
+            this._queue = events.concat();
+            this._order = events.concat();
 
-        function lastFn(event) {
-            //如果没有达到目标次数, 或事件类型之前没有指定过
-            if (times < length ) {
-                return;
+            function bind(key) {
+                flow.bind(key, function() {
+                    if(!uniq[key]) {
+                        uniq[key] = true;
+                        times++;
+                    }
+                });
             }
-            var result = [];
-            for (index = 0; index < length; index++) {
-                result.push.apply(result, flow._fired[events[index]]);
+            //绑定所有子事件
+            for(var index = 0; index < length; index++) {
+                bind(events[index]);
             }
-            if (reload) {
-                uniq = {};
-                times = 0;
+
+            function lastFn(event) {
+                //如果没有达到目标次数, 或事件类型之前没有指定过
+                if(times < length) {
+                    return;
+                }
+                var result = [];
+                for(index = 0; index < length; index++) {
+                    result.push.apply(result, flow._fired[events[index]]);
+                }
+                if(reload) {
+                    uniq = {};
+                    times = 0;
+                }
+                callback.apply(flow, result);
             }
-            callback.apply(flow, result);
-        }
-        flow.bind(last, lastFn);
-    };
+            flow.bind(last, lastFn);
+        };
     //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
     //单点发布 自愿收听 单向联接 分散传播
     $.Twitter = $.factory({
-        init: function(){
+        init: function() {
             this.followers = [];
         },
-        tweet: function(msg){
-            for(var i = 0; i < this.followers.length; i++){
+        tweet: function(msg) {
+            for(var i = 0; i < this.followers.length; i++) {
                 var follower = this.followers[i];
-                if(follower.handler){
+                if(follower.handler) {
                     follower.handler.call(follower.target, msg); //deal
                 }
             }
         },
-        follow: function(master, handler){
+        follow: function(master, handler) {
             master.followers.push({
-                target:this,
-                handler:handler
+                target: this,
+                handler: handler
             });
         }
     })
@@ -299,24 +306,24 @@ define("interact",["$class"], function($){
 var tab = new Twitter();
 var view = new Twitter();
 view.follow(tab, function(msg){
-	var view = document.getElementById("view").getElementsByTagName("span");
-	for(var i = 0; i < view.length; i++){
-		if(i == msg){
-			view[i].className = "active";
-		}else{
-			view[i].className = "";
-		}
-	}
+    var view = document.getElementById("view").getElementsByTagName("span");
+    for(var i = 0; i < view.length; i++){
+        if(i == msg){
+            view[i].className = "active";
+        }else{
+            view[i].className = "";
+        }
+    }
 });
 
 var tabContainer = document.getElementById("tab");
 tabContainer.onclick = function(event){
-	var evt = event || window.event;
-	var target = evt.srcElement || evt.target;
+    var evt = event || window.event;
+    var target = evt.srcElement || evt.target;
 
-	if(target != this){
-		tab.tweet(target.innerHTML-1);
-	}
+    if(target != this){
+        tab.tweet(target.innerHTML-1);
+    }
 }
  * 
  */
