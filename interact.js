@@ -245,7 +245,7 @@ define("interact", ["$class"], function($) {
                 return this;
             }
             this._queue = events.concat();
-            this._order = events.concat();
+            this._order = events;
 
             function bind(key) {
                 flow.bind(key, function() {
@@ -260,7 +260,7 @@ define("interact", ["$class"], function($) {
                 bind(events[index]);
             }
 
-            function lastFn(event) {
+            function lastFn() {
                 //如果没有达到目标次数, 或事件类型之前没有指定过
                 if(times < length) {
                     return;
@@ -303,8 +303,8 @@ define("interact", ["$class"], function($) {
 /**
 2012.1.10
 用tabView做一个简单的实验，但是这个不是组件，这个是散的
-var tab = new Twitter();
-var view = new Twitter();
+var tab = new $.Twitter();
+var view = new $.Twitter();
 view.follow(tab, function(msg){
     var view = document.getElementById("view").getElementsByTagName("span");
     for(var i = 0; i < view.length; i++){
