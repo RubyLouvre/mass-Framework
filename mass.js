@@ -329,7 +329,7 @@ function(global, DOC) {
         var cur = scripts[scripts.length - 1],
         url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
         kernel = $.config;
-        basepath = kernel.base = url.substr(0, url.lastIndexOf("/") + 1) ;
+        basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1) ;
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
         kernel.level = 9;
@@ -377,7 +377,7 @@ function(global, DOC) {
                 if(tmp !== "." && tmp != "/") { //相对于根路径
                     ret = basepath + url;
                 } else if(url.slice(0, 2) == "./") { //相对于兄弟路径
-                    ret = parent + url.substr(1);
+                    ret = parent + url.slice(1);
                 } else if(url.slice(0, 2) == "..") { //相对于父路径
                     var arr = parent.replace(/\/$/, "").split("/");
                     tmp = url.replace(/\.\.\//g, function() {
@@ -417,7 +417,7 @@ function(global, DOC) {
             stack = e.stack;
             if(!stack && window.opera){
                 //opera 9没有e.stack,但有e.Backtrace,但不能直接取得,需要对e对象转字符串进行抽取
-                stack = (Strin(e).match(/of linked script \S+/g) || []).join(" ");
+                stack = (String(e).match(/of linked script \S+/g) || []).join(" ");
             }
         }
         if(stack) {
