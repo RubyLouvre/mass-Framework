@@ -73,6 +73,9 @@ define("interact",["$class"], function($){
                 if (listeners && listeners.length) {
                     args = $.slice(arguments, 1)
                     if(normal){//在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
+                        if(this._events[ev]){
+                            this._fired[ev] =  args.concat();
+                        }
                         args.unshift({
                             type: type,
                             target: this._target
@@ -88,19 +91,58 @@ define("interact",["$class"], function($){
             }
             return this;
         },
-        //待所有子步骤都执行过一遍后,执行最后的回调,之后每次都执行最后的回调以局部刷新数据
+        /**待所有子步骤都执行过一遍后,执行最后的回调,之后每次都执行最后的回调以局部刷新数据
+            require("interact",function($){
+                var flow = new $.Flow;
+                flow.refresh("aaa,bbb,ccc",function(){
+                    $.log(Array.apply([],arguments))
+                });
+                flow.fire("aaa",1)//没反应
+                flow.fire("bbb",2)//没反应
+                flow.fire("ccc",3)//[1,2,3]
+                flow.fire("aaa",4)//[4,2,3]
+                flow.fire("bbb",5)//[4,5,3]
+                flow.fire("ccc",6)//[4,5,6]
+            })
+         */
         refresh: function () {
             Array.prototype.push.call(arguments, false);
             _assign.apply(this, arguments);
             return this;
         },
-        //待所有子步骤都执行过一遍后,执行最后的回调,然后清后所有数据,重新开始这过程
+        /**待所有子步骤都执行过一遍后,执行最后的回调,然后清后所有数据,重新开始这过程
+            require("interact",function($){
+                var flow = new $.Flow;
+                flow.reload("aaa,bbb,ccc",function(){
+                    $.log(Array.apply([],arguments))
+                });
+                flow.fire("aaa",1)//没反应
+                flow.fire("bbb",2)//没反应
+                flow.fire("ccc",3)//[1,2,3]
+                flow.fire("aaa",4)//没反应
+                flow.fire("bbb",5)//没反应
+                flow.fire("ccc",6)//[4,5,6]
+            })
+         */
         reload: function () {
             Array.prototype.push.call(arguments, true);
             _assign.apply(this, arguments);
             return this;
         },
-        //一个子步骤在重复执行N遍后,执行最后的回调
+        /**一个子步骤在重复执行N遍后,执行最后的回调
+            require("interact",function($){
+                var flow = new $.Flow;
+                flow.repeat("aaa",4,function(){
+                    $.log(Array.apply([],arguments))
+                });
+                flow.fire("aaa",1)//没反应
+                flow.fire("aaa",2)//没反应
+                flow.fire("aaa",3)//没反应
+                flow.fire("aaa",4)//[1,2,3,4]
+                flow.fire("aaa",5)//没反应
+                flow.fire("aaa",6)//没反应
+            })
+         */
         repeat: function(type, times, callback){
             var target = this._target, that = this, ret = []
             function wrapper(){
@@ -161,7 +203,6 @@ define("interact",["$class"], function($){
         }
         function bind(key) {
             flow.bind(key, function () {
-                flow._fired[key] = $.slice(arguments, 1);
                 if (!uniq[key]) {
                     uniq[key] = true;
                     times++;
