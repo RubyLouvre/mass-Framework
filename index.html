@@ -23,15 +23,15 @@
         <script>
             require("interact",function($){
                 var flow = new $.Flow;
-                flow.refresh("aaa,bbb,ccc",function(){
+                flow.refresh("aaa,bbb,ccc", function(){
+                    $.log(this._fired)
                     $.log(Array.apply([],arguments))
                 });
-                flow.fire("aaa",1)//没反应
-                flow.fire("bbb",2)//没反应
-                flow.fire("ccc",3)//[1,2,3]
-                flow.fire("aaa",4)//[4,2,3]
-                flow.fire("bbb",5)//[4,5,3]
-                flow.fire("ccc",6)//[4,5,6]
+                flow.order("aaa",1);//没有反应
+                flow.order("aaa",2);//出错,它本应该触发bbb,但没有警告,它只要求你重来
+                flow.order("aaa",3);//没有反应
+                flow.order("bbb",4);//没有反应
+                flow.order("ccc",5);//[4,5,6]
             })
         </script>
     </head>
