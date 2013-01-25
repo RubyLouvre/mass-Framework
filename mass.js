@@ -582,7 +582,7 @@ function(global, DOC) {
         loadings.unshift(id);
     }
     /**
-     * 请求模块
+     * 定义模块
      * @param {String} id ? 模块ID
      * @param {Array} deps ? 依赖列表
      * @param {Function} factory 模块工厂
