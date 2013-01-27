@@ -708,3 +708,4 @@ define("ajax", ["mass", "$interact"], function($) {
 对XMLHttpRequest.abort进行try...catch
 2012.3.31 v2 大重构,支持XMLHttpRequest Level2
  */
+ /*test*/

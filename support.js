@@ -119,7 +119,8 @@ define("support",["mass"], function( $ ){
             }, false);
             a.focus();
         }
-        div.style.width = div.style.paddingLeft = "10px";//检测是否支持盒子模型
+        //检测是否支持盒子模型
+        div.style.width = div.style.paddingLeft = "10px";
         support.boxModel = div.offsetWidth === 20;
         body.removeChild( div );
         div =  null;
