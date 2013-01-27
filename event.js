@@ -128,9 +128,10 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
     });
 
     $.mix(facade, {
-        //addEventListner API的支持情况:chrome 1+ FF1.6+ IE9+ opera 7+ safari 1+;
-        //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
         add: function(elem, hash) {
+            //用于绑定事件(包括自定义事件)
+            //addEventListner API的支持情况:chrome 1+ FF1.6+ IE9+ opera 7+ safari 1+;
+            //http://functionsource.com/post/addeventlistener-all-the-way-back-to-ie-6
             var elemData = $._data(elem),
             //取得对应的缓存体
             types = hash.type,
@@ -172,7 +173,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                     handlers.delegateCount = 0;
                     if(!hook.setup || hook.setup.call(elem, namespaces, eventHandle) === false) {
                         if($["@bind"] in elem) {
-                            $.bind(elem, type, eventHandle)
+                            $.bind(elem, type, eventHandle);
                         }
                     }
                 }
@@ -193,12 +194,12 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
         },
         //用于优化事件派发
         global: {},
-        //移除目标元素绑定的回调
+      
         remove: function(elem, hash) {
+            //移除目标元素绑定的回调
             var elemData = $._data(elem),
             events, origType
             if(!(events = elemData.events)) return;
-
             var types = hash.type || "",
             selector = hash.selector,
             handler = hash.handler;
@@ -220,7 +221,6 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                 var handlers = events[type] || [];
                 var origCount = handlers.length;
                 namespaces = namespaces ? new RegExp("(^|\\.)" + namespaces.split(".").sort().join("\\.(?:.*\\.|)") + "(\\.|$)") : null;
-
                 for(var j = 0, handleObj; j < handlers.length; j++) {
                     handleObj = handlers[j];
                     //如果事件类型相同，回调相同，命名空间相同，选择器相同则移除此handleObj
@@ -242,7 +242,6 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                             $.unbind(elem, type, elemData.handle)
                         }
                     }
-
                     delete events[type];
                 }
             })
@@ -259,15 +258,12 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
             if(elem && (elem.nodeType === 3 || elem.nodeType === 8)) {
                 return;
             }
-
             var i, cur, old, ontype, handle, eventPath, bubbleType, type = event.type || event,
             namespaces = event.namespace ? event.namespace.split(".") : [];
-
             // focus/blur morphs to focusin/out; ensure we're not firing them right now
             if(rfocusMorph.test(type + facade.triggered)) {
                 return;
             }
-
             if(type.indexOf(".") >= 0) {
                 //分解出命名空间
                 namespaces = type.split(".");
@@ -278,8 +274,6 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
             if(!elem && !facade.global[type]) {
                 return;
             }
-
-            // Caller can pass in an Event, Object, or just an event type string
             event = typeof event === "object" ?
             // 如果是$.Event实例
             event.originalEvent ? event :
@@ -330,7 +324,6 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
 
                 cur = eventPath[i][0];
                 event.type = eventPath[i][1];
-
                 handle = ($._data(cur, "events") || {})[event.type] && $._data(cur, "handle");
                 if(handle) {
                     handle.apply(cur, data);
@@ -370,13 +363,13 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
 
             return event.result;
         },
-        //执行用户回调,只在当前元素中执行
+      
         dispatch: function(e) {
-            //如果不存在事件回调就没有必要继续进行下去
+            //执行用户回调,只在当前元素中执行
             var eventType = e.type,
             handlers = (($._data(this, "events") || {})[eventType] || [])
             if(!handlers.length) {
-                return;
+                return;   //如果不存在事件回调就没有必要继续进行下去
             }
             //摒蔽事件对象在各浏览器下的差异性
             var event = $.event.fix(e),
@@ -459,12 +452,11 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
             if(hook.postDispatch) {
                 hook.postDispatch.call(this, event);
             }
-
             return event.result;
         },
-
-        //修正事件对象,摒蔽差异性
+ 
         fix: function(event) {
+            //修正事件对象,摒蔽差异性
             if(!event.originalEvent) {
                 var real = event;
                 event = $.Event(real);

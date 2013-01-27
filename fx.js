@@ -116,7 +116,7 @@ define("fx", ["$css"], function($) {
         for(var i = 1; i < arguments.length; i++) {
             addOptions(opts, arguments[i]);
         }
-        opts.duration = typeof opts.duration == "number" ? opts.duration : 700;
+        opts.duration = typeof opts.duration == "number" ? opts.duration : 400;
         opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
         opts.specialEasing = opts.specialEasing || {}
         return opts;
@@ -330,7 +330,6 @@ define("fx", ["$css"], function($) {
             var hooks = effect.updateHooks
             // 处理渐变
             for(var i = 0, obj; obj = fx.props[i++];) {
-                ;
                 (hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
             if(end) { //最后一帧
