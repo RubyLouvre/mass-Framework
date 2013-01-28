@@ -55,7 +55,8 @@ define("support",["mass"], function( $ ){
         //        keepSize: true,
         //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
         pixelPosition: true,
-        transition: false
+        transition: false,
+        calc: false
     };
     //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
     input.checked = true;
@@ -105,7 +106,10 @@ define("support",["mass"], function( $ ){
         support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
         if( window.getComputedStyle ) {
             div.style.top = "1%";
-            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
+            var computed = window.getComputedStyle( div, null ) || {}
+            support.pixelPosition = computed.top  !== "1%";
+            div.style.width = "calc(7px + 8px)";//注意+两边有空白
+            support.calc = computed.width == "15px";
         }
         //        div.style.cssText = "width:20px;"
         //        div.innerHTML = "<div style='width:40px;'></div>";
