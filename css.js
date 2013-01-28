@@ -6,9 +6,8 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         rrelNum = /^([\-+])=([\-+.\de]+)/,
         rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
         cssTransform = $.cssName("transform");
-    adapter["_default:set"] = function(node, name, value) {
-        node.style[name] = value;
-    }
+    //这里的属性不需要自行添加px
+    $.cssNumber = $.oneObject("columnCount,fillOpacity,fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if(window.getComputedStyle) {
         $.getStyles = function(node) {
@@ -66,7 +65,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         }
         return 0;
     }
-
+    adapter["_default:set"] = function(node, name, value) {
+        node.style[name] = value;
+    }
     // 获取CSS3变形中的角度
     adapter["rotate:get"] = function(node) {
         return $._data(node, 'rotate') || 0;
@@ -78,13 +79,11 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         }
     }
 
-    var supportBoxSizing = $.cssName("box-sizing")
+    var supportBoxSizing = $.cssName("box-sizing");
     adapter["boxSizing:get"] = function(node, name) {
-            return supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ? "border-box" : "content-box"
-        }
+        return supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ? "border-box" : "content-box"
+    }
 
-        //这里的属性不需要自行添加px
-        $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     $.css = function(node, name, value, styles) {
         if(node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
             var prop = $.String.camelize(name)
@@ -95,7 +94,15 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             } else { //设置样式
                 var temp;
                 if(typeof value === "string" && (temp = rrelNum.exec(value))) {
-                    value = (temp[1] + 1) * temp[2] + parseFloat($.css(node, name, void 0, styles));
+                    if($.support.calc && name in styles) {
+                        //在firefox18, ie10中必须要求运算符两边都有空白才生效
+                        return node.style[name] = "calc(" + styles[name] + " " + value.replace("=", " ") + ")";
+                    } else {
+                        var cur = parseFloat($.css(node, name, void 0, styles)); //取得当前值
+                        $.css(node, name, value.split("=")[1]); //将增减量赋到元素上
+                        var delta = parseFloat($.css(node, name, void 0, styles)); //转换
+                        value = cur + (temp[1] + 1) * delta;
+                    }
                 }
                 if(isFinite(value) && !$.cssNumber[prop]) {
                     value += "px";
@@ -287,7 +294,6 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     }
 
     //=========================　处理　offset　=========================
-
 
     function setOffset(node, options) {
         if(node && node.nodeType == 1) {
