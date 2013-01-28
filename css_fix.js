@@ -113,8 +113,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         }
     };
     //=========================　处理　background-position　=========================
-    adapter["backgroundPosition:get"] = function(node) {
-        var style = node.currentStyle;
+    adapter["backgroundPosition:get"] = function(node, _,style ) {
         return style.backgroundPositionX + " " + style.backgroundPositionX;
     };
     //=========================　处理　rotate　=========================
