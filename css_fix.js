@@ -13,9 +13,13 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
             medium: ie8 ? '3px' : '4px',
             thick: ie8 ? '5px' : '6px'
         };
-    adapter["_default:get"] = function(node, name) {
+    $.getStyles = function(node) {
+        return node.currentStyle;
+    }
+    adapter["_default:get"] = function(node, name, styles) {
         //取得精确值，不过它有可能是带em,pc,mm,pt,%等单位
-        var ret = node.currentStyle[name];
+        var currentStyle = styles || node.currentStyle;
+        var ret = currentStyle[name];
         if((rnumnonpx.test(ret) && !rposition.test(ret))) {
             //①，保存原有的style.left, runtimeStyle.left,
             var style = node.style,
@@ -24,7 +28,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
             //②由于③处的style.left = xxx会影响到currentStyle.left，
             //因此把它currentStyle.left放到runtimeStyle.left，
             //runtimeStyle.left拥有最高优先级，不会style.left影响
-            node.runtimeStyle.left = node.currentStyle.left;
+            node.runtimeStyle.left = currentStyle.left;
             //③将精确值赋给到style.left，然后通过IE的另一个私有属性 style.pixelLeft
             //得到单位为px的结果；fontSize的分支见http://bugs.jquery.com/ticket/760
             style.left = name === 'fontSize' ? '1em' : (ret || 0);
@@ -36,13 +40,9 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         if(ret == "medium") {
             name = name.replace("Width", "Style");
             //border width 默认值为medium，即使其为0"
-            if(arguments.callee(node, name) == "none") {
+            if(currentStyle[name] == "none") {
                 ret = "0px";
             }
-        }
-        //处理auto值
-        if(rposition.test(name) && ret === "auto") {
-            ret = "0px";
         }
         return ret === "" ? "auto" : border[ret] || ret;
     }
@@ -55,9 +55,8 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
     }
     //http://www.freemathhelp.com/matrix-multiplication.html
     //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
-    adapter["opacity:set"] = function(node, name, value) {
-        var currentStyle = node.currentStyle,
-            style = node.style;
+    adapter["opacity:set"] = function(node, name, value, currentStyle) {
+        var style = node.style;
         if(!isFinite(value)) { //"xxx" * 100 = NaN
             return;
         }

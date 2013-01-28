@@ -3,21 +3,25 @@
 //=========================================
 define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     var adapter = $.cssHooks || ($.cssHooks = {}),
-    rrelNum = /^([\-+])=([\-+.\de]+)/,
-    rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
-    cssTransform = $.cssName("transform");
+        rrelNum = /^([\-+])=([\-+.\de]+)/,
+        rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
+        cssTransform = $.cssName("transform");
     adapter["_default:set"] = function(node, name, value) {
         node.style[name] = value;
     }
     //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if(window.getComputedStyle) {
-        adapter["_default:get"] = function(node, name) {
-            var ret, width, minWidth, maxWidth, computed = window.getComputedStyle(node, null)
-            if(computed) {
-                ret = name == "filter" ? computed.getPropertyValue(name) : computed[name]
-                var style = node.style;
+        $.getStyles = function(node) {
+            return window.getComputedStyle(node, null);
+        }
+        adapter["_default:get"] = function(node, name, styles) {
+            var ret, width, minWidth, maxWidth
+            styles = styles || getStyles(node);
+            if(styles) {
+                ret = name == "filter" ? styles.getPropertyValue(name) : styles[name]
+                var style = node.style; //这里只有firefox与IE10会智能处理未插入DOM树的节点的样式,它会自动打内联样式
                 if(ret === "" && !$.contains(node.ownerDocument, node)) {
-                    ret = style[name]; //如果还没有加入DOM树，则取内联样式
+                    ret = style[name]; //其他需要我们手动取内联样式
                 }
                 //  Dean Edwards大神的hack，用于转换margin的百分比值为更有用的像素值
                 // webkit不能转换top, bottom, left, right, margin, text-indent的百分比值
@@ -27,7 +31,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                     maxWidth = style.maxWidth;
 
                     style.minWidth = style.maxWidth = style.width = ret;
-                    ret = computed.width;
+                    ret = styles.width;
 
                     style.width = width;
                     style.minWidth = minWidth;
@@ -37,16 +41,20 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             return ret;
         }
     }
-    var getter = adapter["_default:get"]
-    function parseNumber(node, name){
-        return parseFloat(getter(node, name)) || 0;
+    var getStyles = $.getStyles;
+    delete $.getStyles;
+    //用于性能优化,内部不用转换单位,属性名风格及进行相对赋值,远比调用$.css高效
+    var getter = adapter["_default:get"];
+
+    function parseNumber(styles, name) {
+        return parseFloat(styles[name]) || 0;
     }
 
     adapter["zIndex:get"] = function(node) {
         while(node.nodeType !== 9) {
             //即使元素定位了，但如果zindex设置为"aaa"这样的无效值，浏览器都会返回auto;
             //如果没有指定zindex值，IE会返回数字0，其他返回auto
-            var position = getter(node, "position") || "static"; //getter = adapter[ "_default:get" ]
+            var position = getter(node, "position") || "static";
             if(position !== "static") {
                 // <div style="z-index: -10;"><div style="z-index: 0;"></div></div>
                 var value = parseInt(getter(node, "zIndex"), 10);
@@ -72,31 +80,32 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 
     var supportBoxSizing = $.cssName("box-sizing")
     adapter["boxSizing:get"] = function(node, name) {
-        return supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ? "border-box" : "content-box"
-    }
+            return supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ? "border-box" : "content-box"
+        }
 
-    //这里的属性不需要自行添加px
-    $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
-    $.css = function(node, name, value) {
+        //这里的属性不需要自行添加px
+        $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
+    $.css = function(node, name, value, styles) {
         if(node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
             var prop = $.String.camelize(name)
             name = $.cssName(name);
+            styles = styles || getStyles(node);
             if(value === void 0) { //获取样式
-                return(adapter[prop + ":get"] || adapter["_default:get"])(node, name);
+                return(adapter[prop + ":get"] || getter)(node, name, styles);
             } else { //设置样式
                 var temp;
                 if(typeof value === "string" && (temp = rrelNum.exec(value))) {
-                    value = (temp[1] + 1) * temp[2] + parseFloat($.css(node, name));
+                    value = (temp[1] + 1) * temp[2] + parseFloat($.css(node, name, void 0, styles));
                 }
                 if(isFinite(value) && !$.cssNumber[prop]) {
                     value += "px";
                 }
-                (adapter[prop + ":set"] || adapter["_default:set"])(node, name, value);
+                (adapter[prop + ":set"] || adapter["_default:set"])(node, name, value, styles);
             }
         }
     }
 
-    $.fn.css = function(name, value, neo) {
+    $.fn.css = function(name, value) {
         return $.access(this, name, value, $.css);
     }
     var cssPair = {
@@ -108,10 +117,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         visibility: "hidden",
         display: "block"
     }
-    //http://www.cnblogs.com/rubylouvre/archive/2012/10/27/2742529.html
-
 
     function showHidden(node, array) {
+        //http://www.cnblogs.com/rubylouvre/archive/2012/10/27/2742529.html
         if(node && node.nodeType == 1 && node.offsetWidth == 0) {
             if(getter(node, "display") == "none") {
                 var obj = {
@@ -129,19 +137,20 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 
 
     function setWH(node, name, val, extra) {
-        var which = cssPair[name]
+        var which = cssPair[name],
+            styles = getStyles(node);
         which.forEach(function(direction) {
-            if(extra < 1) val -= parseNumber(node, 'padding' + direction);
-            if(extra < 2) val -= parseNumber(node, 'border' + direction + 'Width');
+            if(extra < 1) val -= parseNumber(styles, 'padding' + direction);
+            if(extra < 2) val -= parseNumber(styles, 'border' + direction + 'Width');
             if(extra === 3) {
-                val += parseNumber(node, 'margin' + direction);
+                val += parseFloat(getter(node, 'margin' + direction, styles)) || 0;
             }
             if(extra === "padding-box") {
-                val += parseNumber(node, 'padding' + direction);
+                val += parseNumber(styles, 'padding' + direction);
             }
             if(extra === "border-box") {
-                val += parseNumber(node, 'padding' + direction);
-                val += parseNumber(node, 'border' + direction + 'Width');
+                val += parseNumber(styles, 'padding' + direction);
+                val += parseNumber(styles, 'border' + direction + 'Width');
             }
         });
         return val
@@ -160,14 +169,14 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             }
         }
         return val;
-    };
+    }
 
     //=========================　处理　width, height, innerWidth, innerHeight, outerWidth, outerHeight　========
     "Height,Width".replace($.rword, function(name) {
         var lower = name.toLowerCase(),
-        clientProp = "client" + name,
-        scrollProp = "scroll" + name,
-        offsetProp = "offset" + name;
+            clientProp = "client" + name,
+            scrollProp = "scroll" + name,
+            offsetProp = "offset" + name;
         $.cssHooks[lower + ":get"] = function(node) {
             return getWH(node, name, 0) + "px"; //添加相应适配器
         }
@@ -189,7 +198,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                         //IE 标准模式 : html.scrollHeight> body.scrollHeight
                         //IE 怪异模式 : html.scrollHeight 最大等于可视窗口多一点？
                         return Math.max(
-                            node.body[scrollProp], doc[scrollProp], node.body[offsetProp], doc[offsetProp], doc[clientProp]);
+                        node.body[scrollProp], doc[scrollProp], node.body[offsetProp], doc[offsetProp], doc[clientProp]);
                     } else if(size === void 0) {
                         return getWH(node, name, num)
                     } else {
@@ -202,22 +211,22 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     });
     //=========================　生成　show hide toggle　=========================
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd", "inline"),
-    blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"),
-    sandbox, sandboxDoc
-    $.callSandbox = function(parent, callback) {
-        if(!sandbox) {
-            sandbox = document.createElement("iframe");
-            sandbox.frameBorder = sandbox.width = sandbox.height = 0;
+        blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"),
+        sandbox, sandboxDoc
+        $.callSandbox = function(parent, callback) {
+            if(!sandbox) {
+                sandbox = document.createElement("iframe");
+                sandbox.frameBorder = sandbox.width = sandbox.height = 0;
+            }
+            parent.appendChild(sandbox);
+            if(!sandboxDoc || !sandbox.createElement) {
+                sandboxDoc = (sandbox.contentWindow || sandbox.contentDocument).document;
+                sandboxDoc.write("<!doctype html><html><body>");
+                sandboxDoc.close();
+            }
+            callback(sandboxDoc);
+            parent.removeChild(sandbox);
         }
-        parent.appendChild(sandbox);
-        if(!sandboxDoc || !sandbox.createElement) {
-            sandboxDoc = (sandbox.contentWindow || sandbox.contentDocument).document;
-            sandboxDoc.write("<!doctype html><html><body>");
-            sandboxDoc.close();
-        }
-        callback(sandboxDoc);
-        parent.removeChild(sandbox);
-    }
 
     $.mix(cacheDisplay, blocks);
     $.parseDisplay = function(nodeName) {
@@ -232,16 +241,16 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         return cacheDisplay[nodeName];
     }
 
-    function isHidden(elem) {
-        return elem.sourceIndex === 0 || getter(elem, "display") === "none" || !$.contains(elem.ownerDocument, elem);
+    function isHidden(node) {
+        return node.sourceIndex === 0 || getter(node, "display") === "none" || !$.contains(node.ownerDocument, node);
     }
     $._isHidden = isHidden;
 
     function toggelDisplay(nodes, show) {
         var elem, values = [],
-        status = [],
-        index = 0,
-        length = nodes.length;
+            status = [],
+            index = 0,
+            length = nodes.length;
         //由于传入的元素们可能存在包含关系，因此分开两个循环来处理，第一个循环用于取得当前值或默认值
         for(; index < length; index++) {
             elem = nodes[index];
@@ -282,19 +291,19 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 
     function setOffset(node, options) {
         if(node && node.nodeType == 1) {
-            var position = $.css(node, "position");
+            var position = getter(node, "position");
             //强逼定位
             if(position === "static") {
                 node.style.position = "relative";
             }
             var curElem = $(node),
-            curOffset = curElem.offset(),
-            curCSSTop = $.css(node, "top"),
-            curCSSLeft = $.css(node, "left"),
-            calculatePosition = (position === "absolute" || position === "fixed") && [curCSSTop, curCSSLeft].indexOf("auto") > -1,
-            props = {},
-            curPosition = {},
-            curTop, curLeft;
+                curOffset = curElem.offset(),
+                curCSSTop = getter(node, "top"),
+                curCSSLeft = getter(node, "left"),
+                calculatePosition = (position === "absolute" || position === "fixed") && [curCSSTop, curCSSLeft].indexOf("auto") > -1,
+                props = {},
+                curPosition = {},
+                curTop, curLeft;
             if(calculatePosition) {
                 curPosition = curElem.position();
                 curTop = curPosition.top;
@@ -323,11 +332,11 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         }
 
         var node = this[0],
-        doc = node && node.ownerDocument,
-        pos = {
-            left: 0,
-            top: 0
-        };
+            doc = node && node.ownerDocument,
+            pos = {
+                left: 0,
+                top: 0
+            };
         if(!doc) {
             return pos;
         }
@@ -335,12 +344,12 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
         var box = node.getBoundingClientRect(),
-        win = getWindow(doc),
-        root = (navigator.vendor || doc.compatMode == "BackCompat") ? doc.body : doc.documentElement,
-        clientTop = root.clientTop >> 0,
-        clientLeft = root.clientLeft >> 0,
-        scrollTop = win.pageYOffset || root.scrollTop,
-        scrollLeft = win.pageXOffset || root.scrollLeft;
+            win = getWindow(doc),
+            root = (navigator.vendor || doc.compatMode == "BackCompat") ? doc.body : doc.documentElement,
+            clientTop = root.clientTop >> 0,
+            clientLeft = root.clientLeft >> 0,
+            scrollTop = win.pageYOffset || root.scrollTop,
+            scrollLeft = win.pageXOffset || root.scrollLeft;
         // 把滚动距离加到left,top中去。
         // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
         // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
@@ -350,11 +359,11 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     }
     //=========================　处理　position　=========================
     $.fn.position = function() { //取得元素相对于其offsetParent的坐标
-        var offset, offsetParent, node = this[0],
-        parentOffset = { //默认的offsetParent相对于视窗的距离
-            top: 0,
-            left: 0
-        }
+        var offset, node = this[0],
+            parentOffset = { //默认的offsetParent相对于视窗的距离
+                top: 0,
+                left: 0
+            }
         if(!node || node.nodeType !== 1) {
             return
         }
@@ -363,16 +372,17 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             offset = node.getBoundingClientRect();
         } else {
             offset = this.offset(); //得到元素相对于视窗的距离（我们只有它的top与left）
-            offsetParent = this.offsetParent();
+            var offsetParent = this.offsetParent();
             if(offsetParent[0].tagName !== "HTML") {
                 parentOffset = offsetParent.offset(); //得到它的offsetParent相对于视窗的距离
             }
-            parentOffset.top += parseNumber(offsetParent[0], "borderTopWidth");
-            parentOffset.left += parseNumber(offsetParent[0], "borderLeftWidth");
+            var styles = getStyles(offsetParent[0]);
+            parentOffset.top += parseNumber(styles, "borderTopWidth");
+            parentOffset.left += parseNumber(styles, "borderLeftWidth");
         }
         return {
-            top: offset.top - parentOffset.top - parseNumber(node, "marginTop"),
-            left: offset.left - parentOffset.left - parseNumber(node, "marginLeft")
+            top: offset.top - parentOffset.top - parseFloat(getter(node, "marginTop", styles)) || 0,
+            left: offset.left - parentOffset.left - parseFloat(getter(node, "marginLeft", styles)) || 0
         };
     }
     //https://github.com/beviz/jquery-caret-position-getter/blob/master/jquery.caretposition.js
@@ -388,17 +398,18 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         });
     }
     $.fn.scrollParent = function() {
-        var scrollParent;
-        if ((window.VBArray && (/(static|relative)/).test(this.css('position'))) || (/absolute/).test(this.css('position'))) {
-            scrollParent = this.parents().filter(function() {
-                return (/(relative|absolute|fixed)/).test($.css(this,'position')) && (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
-            }).eq(0);
-        } else {
-            scrollParent = this.parents().filter(function() {
-                return (/(auto|scroll)/).test($.css(this,'overflow')+$.css(this,'overflow-y')+$.css(this,'overflow-x'));
-            }).eq(0);
-        }
-        return (/fixed/).test(this.css('position')) || !scrollParent.length ? $(document) : scrollParent;
+        var scrollParent, node = this[0],
+            pos = getter(node, "position")
+            if((window.VBArray && (/(static|relative)/).test(pos)) || (/absolute/).test(pos)) {
+                scrollParent = this.parents().filter(function() {
+                    return(/(relative|absolute|fixed)/).test(getter(this, "position")) && (/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
+                }).eq(0);
+            } else {
+                scrollParent = this.parents().filter(function() {
+                    return(/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
+                }).eq(0);
+            }
+        return(/fixed/).test(pos) || !scrollParent.length ? $(document) : scrollParent;
     }
     //=========================　处理　scrollLeft scrollTop　=========================
     "scrollLeft_pageXOffset,scrollTop_pageYOffset".replace($.rmapper, function(_, method, prop) {

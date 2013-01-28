@@ -13,7 +13,7 @@ define("../more/random,$css".split(","),function(random, $){
        
             expect( node[0].tagName ).eq( "DIV" ,"这是一个DIV元素");
           
-            expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px" );
+            expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px");
             node.css( 'width',"+=2px" );
             expect( node.css('width') ).eq( document.documentMode < 9 ? "9px" : "10px" );
             expect( node.css('float')).eq('left');
@@ -26,6 +26,7 @@ define("../more/random,$css".split(","),function(random, $){
             }
             expect( node.css( 'fontSize')).eq('16px');
             expect( node.css( 'border-right-width')).eq('5px');
+          //  alert(1)
             expect( node.css( 'paddingLeft')).eq('2px');
             expect( node.css( 'padding-left')).eq('2px');
             expect( node.css( 'padding-right')).eq('0px');
@@ -173,8 +174,8 @@ define("../more/random,$css".split(","),function(random, $){
 
         "$.css(el,left)": function(){
 
-            var node = $("<div style='position:absolute;'/>").appendTo("body");
-            expect( node.css("left") ).eq("auto");
+            var node = $("<div style='position:absolute;left:8px'/>").appendTo("body");
+            expect( node.css("left") ).eq("8px");
             expect( node.offset() ).log();
             expect( node.css("left") ).log();
             node.remove();
