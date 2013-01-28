@@ -460,7 +460,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 2012.5.9 $.Matrix2D支持matrix方法，去掉rotate方法 css 升级到v3
 2012.5.10 FIX toFloat BUG
 2012.5.26 重构$.fn.width, $.fn.height,$.fn.innerWidth, $.fn.innerHeight, $.fn.outerWidth, $.fn.outerHeight
-2012.11.25 添加旋转
+2012.11.25 v4 添加旋转
+2012.1.28 v5 css_fix去掉对auto的处理,为了提高性能,内部使用getter, getStyle进行快速取样式精确值，
+利用css3 calc函数进行增量或减量的样式设置，为cssNumber添加两个新成员
 //本地模拟多个域名http://hi.baidu.com/fmqc/blog/item/07bdeefa75f2e0cbb58f3100.html
 //z-index的最大值（各浏览器）http://hi.baidu.com/flondon/item/a64550ba98a9d3ef4ec7fd77
 http://joeist.com/2012/06/what-is-the-highest-possible-z-index-value/ 这里有更全面的测试
