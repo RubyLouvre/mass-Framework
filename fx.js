@@ -118,7 +118,7 @@ define("fx", ["$css"], function($) {
         }
         opts.duration = typeof opts.duration == "number" ? opts.duration : 400;
         opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
-        opts.specialEasing = opts.specialEasing || {}
+        opts.specialEasing = opts.specialEasing || {};
         return opts;
     };
 
