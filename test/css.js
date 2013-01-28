@@ -13,9 +13,9 @@ define("../more/random,$css".split(","),function(random, $){
        
             expect( node[0].tagName ).eq( "DIV" ,"这是一个DIV元素");
           
-            expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px");
-            node.css( 'width',"+=2px" );
-            expect( node.css('width') ).eq( document.documentMode < 9 ? "9px" : "10px" );
+            expect( node.css('width') ).eq( document.documentMode < 9 ? "7px" : "8px", "7或8");
+            node.css( 'width',"+=5px" );
+            expect( node.css('width') ).eq( document.documentMode < 9 ? "12px" : "13px","12或13" );
             expect( node.css('float')).eq('left');
       
             expect( node.css('position')).eq('static',"position:static");

@@ -2062,7 +2062,8 @@ define("support",["mass"], function( $ ){
         //        keepSize: true,
         //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
         pixelPosition: true,
-        transition: false
+        transition: false,
+        calc: false
     };
     //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
     input.checked = true;
@@ -2112,7 +2113,10 @@ define("support",["mass"], function( $ ){
         support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
         if( window.getComputedStyle ) {
             div.style.top = "1%";
-            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
+            var computed = window.getComputedStyle( div, null ) || {}
+            support.pixelPosition = computed.top  !== "1%";
+            div.style.width = "calc(7px + 8px)";//注意+两边有空白
+            support.calc = computed.width == "15px";
         }
         //        div.style.cssText = "width:20px;"
         //        div.innerHTML = "<div style='width:40px;'></div>";
@@ -3155,7 +3159,8 @@ define("support",["mass"], function( $ ){
         //        keepSize: true,
         //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
         pixelPosition: true,
-        transition: false
+        transition: false,
+        calc: false
     };
     //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
     input.checked = true;
@@ -3205,7 +3210,10 @@ define("support",["mass"], function( $ ){
         support.inlineBlock = div.offsetHeight < 40;//检测是否支持inlineBlock
         if( window.getComputedStyle ) {
             div.style.top = "1%";
-            support.pixelPosition = ( window.getComputedStyle( div, null ) || {} ).top  !== "1%";
+            var computed = window.getComputedStyle( div, null ) || {}
+            support.pixelPosition = computed.top  !== "1%";
+            div.style.width = "calc(7px + 8px)";//注意+两边有空白
+            support.calc = computed.width == "15px";
         }
         //        div.style.cssText = "width:20px;"
         //        div.innerHTML = "<div style='width:40px;'></div>";
@@ -4571,8 +4579,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         }
     };
     //=========================　处理　background-position　=========================
-    adapter["backgroundPosition:get"] = function(node) {
-        var style = node.currentStyle;
+    adapter["backgroundPosition:get"] = function(node, _,style ) {
         return style.backgroundPositionX + " " + style.backgroundPositionX;
     };
     //=========================　处理　rotate　=========================
@@ -4607,9 +4614,8 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         rrelNum = /^([\-+])=([\-+.\de]+)/,
         rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
         cssTransform = $.cssName("transform");
-    adapter["_default:set"] = function(node, name, value) {
-        node.style[name] = value;
-    }
+    //这里的属性不需要自行添加px
+    $.cssNumber = $.oneObject("columnCount,fillOpacity,fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     //有关单位转换的 http://heygrady.com/blog/2011/12/21/length-and-angle-unit-conversion-in-javascript/
     if(window.getComputedStyle) {
         $.getStyles = function(node) {
@@ -4667,7 +4673,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         }
         return 0;
     }
-
+    adapter["_default:set"] = function(node, name, value) {
+        node.style[name] = value;
+    }
     // 获取CSS3变形中的角度
     adapter["rotate:get"] = function(node) {
         return $._data(node, 'rotate') || 0;
@@ -4679,13 +4687,11 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         }
     }
 
-    var supportBoxSizing = $.cssName("box-sizing")
+    var supportBoxSizing = $.cssName("box-sizing");
     adapter["boxSizing:get"] = function(node, name) {
-            return supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ? "border-box" : "content-box"
-        }
+        return supportBoxSizing ? getter(node, name) : document.compatMode == "BackCompat" ? "border-box" : "content-box"
+    }
 
-        //这里的属性不需要自行添加px
-        $.cssNumber = $.oneObject("fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
     $.css = function(node, name, value, styles) {
         if(node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
             var prop = $.String.camelize(name)
@@ -4696,7 +4702,15 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             } else { //设置样式
                 var temp;
                 if(typeof value === "string" && (temp = rrelNum.exec(value))) {
-                    value = (temp[1] + 1) * temp[2] + parseFloat($.css(node, name, void 0, styles));
+                    if($.support.calc && name in styles) {
+                        //在firefox18, ie10中必须要求运算符两边都有空白才生效
+                        return node.style[name] = "calc(" + styles[name] + " " + value.replace("=", " ") + ")";
+                    } else {
+                        var cur = parseFloat($.css(node, name, void 0, styles)); //取得当前值
+                        $.css(node, name, value.split("=")[1]); //将增减量赋到元素上
+                        var delta = parseFloat($.css(node, name, void 0, styles)); //转换
+                        value = cur + (temp[1] + 1) * delta;
+                    }
                 }
                 if(isFinite(value) && !$.cssNumber[prop]) {
                     value += "px";
@@ -4888,7 +4902,6 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     }
 
     //=========================　处理　offset　=========================
-
 
     function setOffset(node, options) {
         if(node && node.nodeType == 1) {

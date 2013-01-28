@@ -5,34 +5,34 @@
         <title>测试</title>
         <style>
 
-            #parent{
+            #aaa{
                 width:200px;
                 height:200px;
-                overflow:hidden;
-            }
-            #parent img{
-                width:50px;
-                height:50px;
-                float:left;
-                display:inline-block;
-                position: relative;
+                background:red;
             }
 
+
         </style>
-     <script src="mass.js"> </script>
-<!--            <script src="jquery1.83.js"> </script>-->
+        <script src="mass.js"> </script>
+        <!--            <script src="jquery1.83.js"> </script>-->
         <script>
             require("node,ready",function($){
-         // $(function(){
-               console.log($("#test_has li").has("b"))
+                // $(function(){
+                var el = $("#aaa")[0];
+                try{
+                   el.style.width = "calc(10px + 10px)";
+                    alert( window.getComputedStyle(el, null).width )
+                }catch(e){
+                    alert(e)
+                }
+
+
             })
         </script>
     </head>
 
     <body>
-        <ul id="test_has">
-            <li class="_travel" id="aaaa"><b>foo</b></li><li class="_travel" id="bar">bar</li><li id="baz">baz</li>
-        </ul>
+        <div id="aaa"></div>
     </body>
 
 </body>
