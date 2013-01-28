@@ -153,8 +153,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         filter: function(obj, fn, scope) {
             for(var i = 0, n = obj.length, ret = []; i < n; i++) {
                 var val = fn.call(scope || obj[i], obj[i], i);
-                if(val === true) {
-                    ret[ret.length] = obj[i]
+                if(!!val) {
+                    ret[ret.length] = obj[i];
                 }
             }
             return ret;
