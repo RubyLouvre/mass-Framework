@@ -3,15 +3,15 @@
 //==================================================
 define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEvent ? [] : ["$node_fix"]), function($) {
     var rtag = /^[a-zA-Z]+$/,
-        rtagName = /<([\w:]+)/,
-        //取得其tagName
-        rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
-        rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
-        types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
-        //需要处理套嵌关系的标签
-        rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
-        adjacent = "insertAdjacentHTML",
-        TAGS = "getElementsByTagName"
+    rtagName = /<([\w:]+)/,
+    //取得其tagName
+    rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
+    rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
+    types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
+    //需要处理套嵌关系的标签
+    rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
+    adjacent = "insertAdjacentHTML",
+    TAGS = "getElementsByTagName"
 
     function getDoc() { //获取文档对象
         for(var i = 0, el; i < arguments.length; i++) {
@@ -71,10 +71,13 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
         valueOf: function() { //转换为纯数组对象
             return Array.prototype.slice.call(this);
         },
+        size: function(){
+            return this.length;
+        },
         toString: function() { //对得它们的tagName，组成纯数组返回
             var i = this.length,
-                ret = [],
-                getType = $.type;
+            ret = [],
+            getType = $.type;
             while(i--) {
                 ret[i] = getType(this[i]);
             }
@@ -268,15 +271,15 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
     $.mix({
         //判定元素是否支持此样式   http://www.cnblogs.com/rubylouvre/archive/2011/03/28/1998223.html
         cssName: cssName,
-        //判定元素节点是否匹配CSS表达式
+   
         match: function(node, expr) {
+            //判定元素节点是否匹配CSS表达式
             try {
                 return node[matchesAPI](expr);
             } catch(e) {
-                var parent = node.parentNode,
-                    array
+                var parent = node.parentNode;
                 if(parent) {
-                    array = $.query(expr, node.ownerDocument);
+                    var array = $.query(expr, node.ownerDocument);
                     return array.indexOf(node) != -1
                 }
                 return false;
@@ -325,16 +328,16 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
                 html = html.replace(rcreate, "<br class='fix_create_all'/>$1"); //在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec(html) || ["", ""])[1].toLowerCase(),
-                //取得其标签名
-                wrap = tagHooks[tag] || tagHooks._default,
-                fragment = doc.createDocumentFragment(),
-                wrapper = doc.createElement("div"),
-                firstChild;
+            //取得其标签名
+            wrap = tagHooks[tag] || tagHooks._default,
+            fragment = doc.createDocumentFragment(),
+            wrapper = doc.createElement("div"),
+            firstChild;
             wrapper.innerHTML = wrap[1] + html + (wrap[2] || "");
             var els = wrapper[TAGS]("script");
             if(els.length) { //使用innerHTML生成的script节点不会发出请求与执行text属性
                 var script = doc.createElement("script"),
-                    neo;
+                neo;
                 for(var i = 0, el; el = els[i++];) {
                     if(!el.type || types[el.type]) { //如果script节点的MIME能让其执行脚本
                         neo = script.cloneNode(false); //FF不能省略参数
@@ -370,35 +373,35 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
         _default: $.support.createAll ? [0, ""] : [1, "X<div>"] //div可以不用闭合
     },
-        insertHooks = {
-            prepend: function(el, node) {
-                el.insertBefore(node, el.firstChild);
-            },
-            append: function(el, node) {
-                el.appendChild(node);
-            },
-            before: function(el, node) {
-                el.parentNode.insertBefore(node, el);
-            },
-            after: function(el, node) {
-                el.parentNode.insertBefore(node, el.nextSibling);
-            },
-            replace: function(el, node) {
-                el.parentNode.replaceChild(node, el);
-            },
-            prepend2: function(el, html) {
-                el[adjacent]("afterBegin", html);
-            },
-            append2: function(el, html) {
-                el[adjacent]("beforeEnd", html);
-            },
-            before2: function(el, html) {
-                el[adjacent]("beforeBegin", html);
-            },
-            after2: function(el, html) {
-                el[adjacent]("afterEnd", html);
-            }
-        };
+    insertHooks = {
+        prepend: function(el, node) {
+            el.insertBefore(node, el.firstChild);
+        },
+        append: function(el, node) {
+            el.appendChild(node);
+        },
+        before: function(el, node) {
+            el.parentNode.insertBefore(node, el);
+        },
+        after: function(el, node) {
+            el.parentNode.insertBefore(node, el.nextSibling);
+        },
+        replace: function(el, node) {
+            el.parentNode.replaceChild(node, el);
+        },
+        prepend2: function(el, html) {
+            el[adjacent]("afterBegin", html);
+        },
+        append2: function(el, html) {
+            el[adjacent]("beforeEnd", html);
+        },
+        before2: function(el, html) {
+            el[adjacent]("beforeBegin", html);
+        },
+        after2: function(el, html) {
+            el[adjacent]("afterEnd", html);
+        }
+    };
     tagHooks.optgroup = tagHooks.option;
     tagHooks.tbody = tagHooks.tfoot = tagHooks.colgroup = tagHooks.caption = tagHooks.thead;
     tagHooks.th = tagHooks.td;
@@ -429,7 +432,7 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
     function makeFragment(nodes, fragment, bool) {
         //只有非NodeList的情况下我们才为i递增;
         var ret = fragment.cloneNode(false),
-            go = !nodes.item;
+        go = !nodes.item;
         for(var i = 0, node; node = nodes[i]; go && i++) {
             ret.appendChild(bool && cloneNode(node, true, true) || node);
         }
@@ -448,7 +451,7 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
         var elems = $.filter(nodes, function(el) {
             return el.nodeType === 1; //转换为纯净的元素节点数组
         }),
-            handler = insertHooks[type];
+        handler = insertHooks[type];
         if(item.nodeType) {
             //如果是传入元素节点或文本节点或文档碎片
             insertAdjacentNode(elems, item, handler);
@@ -471,7 +474,7 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
             if(key === void 0) { //如果什么都不传，则把用户数据与用户写在标签内以data-*形式储存的数据一并返回
                 if(this.length) {
                     var target = this[0],
-                        data = $.data(target);
+                    data = $.data(target);
                     if(target.nodeType === 1 && !$._data(target, "parsedAttrs")) {
                         for(var i = 0, attrs = target.attributes, attr; attr = attrs[i++];) {
                             var name = attr.name;
@@ -495,21 +498,18 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
         }
     });
 
-    //移除节点对数据的清除
-
-
     function cleanNode(node) {
+        //移除节点对数据的清除
         $._removeData(node);
         node.clearAttributes && node.clearAttributes();
     }
-    //复制节点时对数据与事件的复制处理
-
 
     function cloneNode(node, dataAndEvents, deepDataAndEvents) {
+        //复制节点时对数据与事件的复制处理
         if(node.nodeType === 1) {
             var neo = $.fixCloneNode(node),
-                src, neos, i
-                // 复制自定义属性，事件也被当作一种特殊的能活动的数据
+            src, neos, i
+            // 复制自定义属性，事件也被当作一种特殊的能活动的数据
             if(dataAndEvents) {
                 $.mergeData(neo, node);
                 if(deepDataAndEvents) {
@@ -523,20 +523,20 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
             src = neos = null;
             return neo;
         } else {
-            return node.cloneNode(true)
+            return node.cloneNode(true);
         }
     }
 
     function outerHTML(el) {
         switch(el.nodeType + "") {
-        case "1":
-        case "9":
-            return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
-        case "3":
-        case "4":
-            return el.nodeValue;
-        default:
-            return "";
+            case "1":
+            case "9":
+                return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
+            case "3":
+            case "4":
+                return el.nodeValue;
+            default:
+                return "";
         }
     }
 
@@ -548,33 +548,27 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
     }
 
     $.implement({
-
         find: function(expr) {
             //取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。
             return this.labor($.query(expr, this));
         },
-
         filter: function(expr) {
             //取得当前匹配节点的所有匹配expr的节点，组成新mass实例返回。
-            return this.labor(filterhElement(this.valueOf(), expr, this.ownerDocument, false));
+            return this.labor(filterhElement(this, expr, this.ownerDocument, false));
         },
-
         not: function(expr) {
             //取得当前匹配节点的所有不匹配expr的节点，组成新mass实例返回。
-            return this.labor(filterhElement(this.valueOf(), expr, this.ownerDocument, true));
+            return this.labor(filterhElement(this, expr, this.ownerDocument, true));
         },
-
-
         has: function(expr) {
             //在当前的节点中，往下遍历他们的后代，收集匹配给定的CSS表达式的节点，封装成新mass实例返回
             var nodes = $(expr, this.ownerDocument);
-            return this.filter(function() {
+            var array = $.filter(this, function(el){
                 for(var i = 0, node; node = nodes[i++];) {
-                    if($.contains(this, node)) { //a包含b
-                        return true;
-                    }
+                    return $.contains(el, node) //a包含b
                 }
-            });
+            })
+            return this.labor(array)
         },
 
         closest: function(expr, context) {
@@ -603,8 +597,8 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
         is: function(expr) {
             //判定当前匹配节点是否匹配给定选择器，DOM元素，或者mass对象
             var nodes = $.query(expr, this.ownerDocument),
-                obj = {},
-                uid;
+            obj = {},
+            uid;
             for(var i = 0, node; node = nodes[i++];) {
                 uid = $.getUid(node);
                 obj[uid] = 1;
@@ -633,19 +627,17 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
         not = !! not;
         if(typeof expr === "string") {
             var fit = $.query(expr, doc);
-            nodes.forEach(function(node) {
+            ret = $.filter(nodes, function(node) {
                 if(node.nodeType === 1) {
-                    if((fit.indexOf(node) !== -1) ^ not) {
-                        ret.push(node);
-                    }
+                    return (fit.indexOf(node) !== -1) ^ not
                 }
             });
         } else if($.type(expr, "Function")) {
-            return nodes.filter(function(node, i) {
+            return $.filter(nodes, function(node, i) {
                 return !!expr.call(node, node, i) ^ not;
             });
         } else if(expr.nodeType) {
-            return nodes.filter(function(node) {
+            return $.filter(nodes, function(node) {
                 return(node === expr) ^ not;
             });
         }
@@ -655,7 +647,7 @@ define("node", ["$support", "$class", "$query", "$data"].concat(top.dispatchEven
 
     function travel(el, prop, expr) {
         var result = [],
-            ri = 0;
+        ri = 0;
         while((el = el[prop])) {
             if(el && el.nodeType === 1) {
                 result[ri++] = el;
@@ -755,4 +747,4 @@ doc = this.ownerDocument =  scope.ownerDocument || scope ;
 2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
 2012.7.31 使用$.Array.merge代替不可靠的[].push,对cloneNode进行重构,只对元素节点进行修复
 2013.1.17 修正rnest正则,防止遗漏tbody
- */
+*/
