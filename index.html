@@ -19,37 +19,20 @@
             }
 
         </style>
-        <script src="mass.js"> </script>
+     <script src="mass.js"> </script>
+<!--            <script src="jquery1.83.js"> </script>-->
         <script>
-            require("interact",function($){
-                var flow = new $.Flow;
-                flow.refresh("aaa,bbb,ccc", function(){
-                    $.log(this._fired)//Object { aaa=[1], bbb=[1], ccc=[1]}
-                    $.log(Array.apply([],arguments))//[4,5,6]
-                });
-                flow.order("aaa",1);//没有反应
-                flow.order("aaa",2);//出错,它本应该触发bbb,但没有警告,它只要求你重来
-                flow.order("aaa",3);//没有反应
-                flow.order("bbb",4);//没有反应
-                flow.order("ccc",5);//[4,5,6]
+            require("node,ready",function($){
+         // $(function(){
+               console.log($("#test_has li").has("b"))
             })
         </script>
     </head>
 
     <body>
-        <form>
-            <textarea></textarea>
-            <input >
-            <input type="file" >
-            <input  type="checkbox" >
-            <input  type="radio" >
-            <input  type="image" >
-            <select >
-                <option></option>
-            </select>
-        </form>
-        <div class="aaa" id="aaa" style="width:300px;height:100px;">xxxvvvvvvvvvvvvvvvvvv</div>
-        <div class="aaa" id="bbb"style="width:300px;height:100px;">xxxvvvvvvvvvvvvvvvvvv</div>
+        <ul id="test_has">
+            <li class="_travel" id="aaaa"><b>foo</b></li><li class="_travel" id="bar">bar</li><li id="baz">baz</li>
+        </ul>
     </body>
 
 </body>

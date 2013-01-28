@@ -153,6 +153,7 @@ define(["$spec","$node"],function(){
     
         },
         has: function(){
+           // alert($("#aaa",idoc2).html())
             expect(li.has("b" ).length ).eq(1);
             expect(li.filter("._travel"  ).length ).eq(2);
             //移除测试数据
