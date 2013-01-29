@@ -1,5 +1,5 @@
 //=========================================
-// 样式操作模块 v4 by 司徒正美
+// 样式操作模块 v5 by 司徒正美
 //=========================================
 define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     var adapter = $.cssHooks || ($.cssHooks = {}),
@@ -18,9 +18,9 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             styles = styles || getStyles(node);
             if(styles) {
                 ret = name == "filter" ? styles.getPropertyValue(name) : styles[name]
-                var style = node.style; //这里只有firefox与IE10会智能处理未插入DOM树的节点的样式,它会自动打内联样式
+                var style = node.style; //这里只有firefox与IE10会智能处理未插入DOM树的节点的样式,它会自动找内联样式
                 if(ret === "" && !$.contains(node.ownerDocument, node)) {
-                    ret = style[name]; //其他需要我们手动取内联样式
+                    ret = style[name]; //其他浏览器需要我们手动取内联样式
                 }
                 //  Dean Edwards大神的hack，用于转换margin的百分比值为更有用的像素值
                 // webkit不能转换top, bottom, left, right, margin, text-indent的百分比值
@@ -96,7 +96,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                     temp;
                 if(type === "string" && (temp = rrelNum.exec(value))) {
                     if($.support.calc && name in styles) {
-                        //在firefox18, ie10中必须要求运算符两边都有空白才生效
+                        //在firefox18, ie10中必须要求calc括号中的运算符两边都有空白才生效
                         var cur = styles[name],
                             unit = (cur.match(/[a-z%]+$/) || [""])[0];
                         return node.style[name] = $.support.calc + "(" + [styles[name], temp[1], temp[2] + unit].join(" ") + ")";
@@ -224,32 +224,55 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
 
     });
     //=========================　生成　show hide toggle　=========================
-    var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,img,kbd", "inline"),
+    var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,kbd", "inline"),
         blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"),
-        sandbox, sandboxDoc
-        $.callSandbox = function(parent, callback) {
-            if(!sandbox) {
-                sandbox = document.createElement("iframe");
-                sandbox.frameBorder = sandbox.width = sandbox.height = 0;
+        shadowRoot, shadowDoc, shadowBody, shadowWin, reuse
+        $.applyShadowDOM = function(callback) {
+            //用于提供一个沙箱环境,IE6-10,opera,safari,firefox使用iframe, chrome20+使用Shodow DOM
+            if(!shadowRoot) {
+                if(window.WebKitShadowRoot) { //如果支持WebKitShadowRoot
+                    shadowRoot = new WebKitShadowRoot($.html);
+                    shadowBody = document.createElement("div");
+                    shadowBody.style.cssText = "width:0px;height:0px;"
+                    shadowRoot.appendChild(shadowBody);
+                } else {
+                    shadowRoot = document.createElement("iframe");
+                    shadowRoot.frameBorder = shadowRoot.width = shadowRoot.height = 0;
+                }
             }
-            parent.appendChild(sandbox);
-            if(!sandboxDoc || !sandbox.createElement) {
-                sandboxDoc = (sandbox.contentWindow || sandbox.contentDocument).document;
-                sandboxDoc.write("<!doctype html><html><body>");
-                sandboxDoc.close();
+            if(shadowRoot.nodeType == 1) {
+                $.html.appendChild(shadowRoot);
+                if(!reuse) { //firefox, safari, chrome不能重用shadowDoc,shadowWin
+                    shadowDoc = shadowRoot.contentDocument || shadowRoot.contentWindow.document;
+                    shadowWin = shadowDoc.defaultView || shadowDoc.parentWindow;
+                    shadowDoc.write("<!doctype html><html><body>");
+                    shadowDoc.close();
+                    reuse = window.VBArray || window.opera; //opera9-12, ie6-10有效
+                }
+                callback(shadowWin, shadowDoc, shadowDoc.body);
+                $.html.removeChild(shadowRoot);
+            } else {
+                callback(window, document, shadowBody);
+                shadowBody.innerHTML = "";
             }
-            callback(sandboxDoc);
-            parent.removeChild(sandbox);
+
         }
 
     $.mix(cacheDisplay, blocks);
     $.parseDisplay = function(nodeName) {
         nodeName = nodeName.toLowerCase();
         if(!cacheDisplay[nodeName]) {
-            $.callSandbox(document.body, function(doc) {
-                var elem = doc.createElement(nodeName);
-                doc.body.appendChild(elem);
-                cacheDisplay[nodeName] = getter(elem, "display");
+            $.applyShadowDOM(function(win, doc, body) {
+                var node = doc.createElement(nodeName),
+                    val
+                    body.appendChild(node);
+                if(win.getComputedStyle) {
+                    val = win.getComputedStyle(node, null).display
+                } else {
+                    val = node.currentStyle.display
+                }
+                cacheDisplay[nodeName] = val; //getter(node, "display")
+                body.innerHTML = "";
             });
         }
         return cacheDisplay[nodeName];

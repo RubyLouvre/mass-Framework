@@ -491,9 +491,9 @@ define("fx", ["$css"], function($) {
 
     function parseColor(color) {
         var value;
-        $.callSandbox($.html, function(doc) {
-            var range = doc.body.createTextRange();
-            doc.body.style.color = color;
+        $.applyShadowDOM( function(wid, doc, body) {
+            var range = body.createTextRange();
+            body.style.color = color;
             value = range.queryCommandValue("ForeColor");
         });
         return [value & 0xff, (value & 0xff00) >> 8, (value & 0xff0000) >> 16];

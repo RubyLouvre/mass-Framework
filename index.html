@@ -5,27 +5,26 @@
         <title>测试</title>
         <style>
 
-            #aaa{
+            div  {
                 width:200px;
                 height:200px;
-                background:red;
+                display:inline-block;
+                background:green;
             }
-
+            a,abbr,b,span,strong,em{
+                  display:table;
+            }
 
         </style>
         <script src="mass.js"> </script>
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
-            require("node,ready",function($){
+            require("css,ready",function($){
                 // $(function(){
-                var el = $("#aaa")[0];
-                try{
-                   el.style.width = "calc(10px + 10px)";
-                    alert( window.getComputedStyle(el, null).width )
-                }catch(e){
-                    alert(e)
-                }
-
+                "h1,div,a,abbr,b,span,strong,em,font,i,img,kbd".replace($.rword, function(tag){
+                      $.log(tag +" "+$.parseDisplay(tag))
+                })
+              
 
             })
         </script>
