@@ -387,7 +387,7 @@ define("event", top.dispatchEvent ? ["$node"] : ["$event_fix"], function($) {
                 return;
             }
             //收集阶段
-            //如果使用了事件代理，则先执行事件代理的回调, FF的右键会触发点击事件，与标签不符
+            //如果使用了事件代理，则先执行事件代理的回调, FF的右键会触发点击事件，与标准不符
             if(delegateCount && !(event.button && eventType === "click")) {
                 for(var cur = event.target; cur != this; cur = cur.parentNode || this) {
                     //disabled元素不能触发点击事件

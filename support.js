@@ -83,7 +83,6 @@ define("support", ["mass"], function($) {
     //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
     div.style.backgroundClip = "content-box";
     div.cloneNode(true).style.backgroundClip = "";
-    //alert( div.style.backgroundClip)
     support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
     var table = div[TAGS]("table")[0]
     try { //检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
