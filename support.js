@@ -41,7 +41,7 @@ define("support", ["mass"], function($) {
         //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
         cloneHTML5: DOC.createElement("nav").cloneNode(true).outerHTML !== "<:nav></:nav>",
         //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
-        cloneNode: true,
+        //        noCloneEvent: true,
         //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
         focusin: $["@bind"] === "attachEvent",
         //IE肯定支持
@@ -71,14 +71,15 @@ define("support", ["mass"], function($) {
     //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
     select.disabled = true;
     support.optDisabled = !opt.disabled;
-    var clickFn
+    /**    var clickFn
     if(!div.addEventListener && div.attachEvent && div.fireEvent) {
         div.attachEvent("onclick", clickFn = function() {
-            support.cloneNode = false; //w3c的节点复制是不复制事件的
+            support.noCloneEvent = false; //w3c的节点复制是不复制事件的
         });
         div.cloneNode(true).fireEvent("onclick");
         div.detachEvent("onclick", clickFn);
     }
+    */
     //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
     div.style.backgroundClip = "content-box";
     div.cloneNode(true).style.backgroundClip = "";
@@ -105,28 +106,25 @@ define("support", ["mass"], function($) {
         } catch(e) {};
         div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
         body.insertBefore(div, body.firstChild);
-        var ib = '<div style="height:20px;display:inline-block"></div>';
-        div.innerHTML = ib + ib; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
+        var a = '<div style="height:20px;display:inline-block"></div>';
+        div.innerHTML = a + a; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
         support.inlineBlock = div.offsetHeight < 40; //检测是否支持inlineBlock
         if(window.getComputedStyle) {
             div.style.top = "1%";
             var computed = window.getComputedStyle(div, null) || {}
             support.pixelPosition = computed.top !== "1%";
             for(var arr = ["calc", "-webkit-calc", "-moz-calc"], i = 0; ib = arr[i++];) {
-                div.style.width = ib + "(7px + 8px)"; //注意+两边有空白
+                div.style.width = a + "(7px + 8px)"; //注意+两边有空白
                 if(computed.width == "15px") {
-                    support.calc = ib;
+                    support.calc = a;
                     break;
                 }
             }
         }
-        //        div.style.cssText = "width:20px;"
-        //        div.innerHTML = "<div style='width:40px;'></div>";
-        //        support.keepSize = div.offsetWidth == 20;//检测是否会被子元素撑大
         //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
         div.innerHTML = "<a href='#'></a>"
         if(!support.focusin) {
-            var a = div.firstChild;
+            a = div.firstChild;
             a.addEventListener('focusin', function() {
                 support.focusin = true;
             }, false);
