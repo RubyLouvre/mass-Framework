@@ -92,20 +92,27 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
             if(value === void 0) { //获取样式
                 return(adapter[prop + ":get"] || getter)(node, name, styles);
             } else { //设置样式
-                var temp;
-                if(typeof value === "string" && (temp = rrelNum.exec(value))) {
+                var type = typeof value,
+                    temp;
+                if(type === "string" && (temp = rrelNum.exec(value))) {
                     if($.support.calc && name in styles) {
                         //在firefox18, ie10中必须要求运算符两边都有空白才生效
-                        return node.style[name] = "calc(" + styles[name] + " " + value.replace("=", " ") + ")";
+                        var cur = styles[name],
+                            unit = (cur.match(/[a-z%]+$/) || [""])[0];
+                        return node.style[name] = $.support.calc + "(" + [styles[name], temp[1], temp[2] + unit].join(" ") + ")";
                     } else {
-                        var cur = parseFloat($.css(node, name, void 0, styles)); //取得当前值
-                        $.css(node, name, value.split("=")[1]); //将增减量赋到元素上
-                        var delta = parseFloat($.css(node, name, void 0, styles)); //转换
-                        value = cur + (temp[1] + 1) * delta;
+                        value = (+(temp[1] + 1) * +temp[2]) + parseFloat($.css(node, name, void 0, styles));
+                        type = "number";
                     }
                 }
-                if(isFinite(value) && !$.cssNumber[prop]) {
+                if(type === "number" && !isFinite(value + "")) { //因为isFinite(null) == true
+                    return;
+                }
+                if(type === "number" && !$.cssNumber[prop]) {
                     value += "px";
+                }
+                if(value === "" && !$.support.cloneBackgroundStyle && name.indexOf("background") === 0) {
+                    node.style[name] = "inherit";
                 }
                 (adapter[prop + ":set"] || adapter["_default:set"])(node, name, value, styles);
             }
