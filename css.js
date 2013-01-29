@@ -218,7 +218,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                     } else {
                         return num > 0 ? this : $.css(node, lower, size);
                     }
-                }, this)
+                }, this);
             }
         })
 
@@ -233,12 +233,11 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                 if(window.WebKitShadowRoot) { //如果支持WebKitShadowRoot
                     shadowRoot = new WebKitShadowRoot($.html);
                     shadowBody = document.createElement("div");
-                    shadowBody.style.cssText = "width:0px;height:0px;"
                     shadowRoot.appendChild(shadowBody);
                 } else {
                     shadowRoot = document.createElement("iframe");
-                    shadowRoot.frameBorder = shadowRoot.width = shadowRoot.height = 0;
                 }
+                (shadowBody || shadowRoot).style.cssText = "width:0px;height:0px;border:0 none;";
             }
             if(shadowRoot.nodeType == 1) {
                 $.html.appendChild(shadowRoot);
@@ -255,24 +254,22 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                 callback(window, document, shadowBody);
                 shadowBody.innerHTML = "";
             }
-
         }
 
     $.mix(cacheDisplay, blocks);
     $.parseDisplay = function(nodeName) {
+        //用于取得此类标签的默认display值
         nodeName = nodeName.toLowerCase();
         if(!cacheDisplay[nodeName]) {
-            $.applyShadowDOM(function(win, doc, body) {
-                var node = doc.createElement(nodeName),
-                    val
-                    body.appendChild(node);
+            $.applyShadowDOM(function(win, doc, body, val) {
+                var node = doc.createElement(nodeName);
+                body.appendChild(node);
                 if(win.getComputedStyle) {
-                    val = win.getComputedStyle(node, null).display
+                    val = win.getComputedStyle(node, null).display;
                 } else {
-                    val = node.currentStyle.display
+                    val = node.currentStyle.display;
                 }
-                cacheDisplay[nodeName] = val; //getter(node, "display")
-                body.innerHTML = "";
+                cacheDisplay[nodeName] = val;
             });
         }
         return cacheDisplay[nodeName];
@@ -295,10 +292,10 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                 continue;
             }
             values[index] = $._data(elem, "olddisplay");
-            status[index] = isHidden(elem)
+            status[index] = isHidden(elem);
             if(!values[index]) {
                 values[index] = status[index] ? $.parseDisplay(elem.nodeName) : getter(elem, "display");
-                $._data(elem, "olddisplay", values[index])
+                $._data(elem, "olddisplay", values[index]);
             }
         }
         //第二个循环用于设置样式，-1为toggle, 1为show, 0为hide
@@ -328,7 +325,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     function setOffset(node, options) {
         if(node && node.nodeType == 1) {
             var position = getter(node, "position");
-            //强逼定位
+            //强制定位
             if(position === "static") {
                 node.style.position = "relative";
             }
@@ -390,7 +387,6 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
         // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
         pos.top = box.top + scrollTop - clientTop, pos.left = box.left + scrollLeft - clientLeft;
-
         return pos;
     }
     //=========================　处理　position　=========================
@@ -401,7 +397,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
                 left: 0
             }
         if(!node || node.nodeType !== 1) {
-            return
+            return;
         }
         //fixed 元素是相对于window
         if(getter(node, "position") === "fixed") {
@@ -435,16 +431,16 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
     }
     $.fn.scrollParent = function() {
         var scrollParent, node = this[0],
-            pos = getter(node, "position")
-            if((window.VBArray && (/(static|relative)/).test(pos)) || (/absolute/).test(pos)) {
-                scrollParent = this.parents().filter(function() {
-                    return(/(relative|absolute|fixed)/).test(getter(this, "position")) && (/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
-                }).eq(0);
-            } else {
-                scrollParent = this.parents().filter(function() {
-                    return(/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
-                }).eq(0);
-            }
+            pos = getter(node, "position");
+        if((window.VBArray && (/(static|relative)/).test(pos)) || (/absolute/).test(pos)) {
+            scrollParent = this.parents().filter(function() {
+                return(/(relative|absolute|fixed)/).test(getter(this, "position")) && (/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
+            }).eq(0);
+        } else {
+            scrollParent = this.parents().filter(function() {
+                return(/(auto|scroll)/).test(getter(this, "overflow") + $.css(this, "overflow-y") + $.css(this, "overflow-x"));
+            }).eq(0);
+        }
         return(/fixed/).test(pos) || !scrollParent.length ? $(document) : scrollParent;
     }
     //=========================　处理　scrollLeft scrollTop　=========================
