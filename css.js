@@ -228,7 +228,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"),
         shadowRoot, shadowDoc, shadowBody, shadowWin, reuse
         $.applyShadowDOM = function(callback) {
-            //用于提供一个沙箱环境,IE6-10,opera,safari,firefox使用iframe, chrome20+使用Shodow DOM
+            //用于提供一个沙箱环境,IE6-10,opera,safari,firefox使用iframe, chrome20+(25+不需要开启实验性JS)使用Shodow DOM
             if(!shadowRoot) {
                 if(window.WebKitShadowRoot) { //如果支持WebKitShadowRoot
                     shadowRoot = new WebKitShadowRoot($.html);
