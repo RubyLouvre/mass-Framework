@@ -706,7 +706,9 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         $.fn[name] = function(expr) {
             var nodes = [];
             for (var i = 0, el; el = this[i++]; ) { //expr只用于Until
-                nodes = nodes.concat(method(el, expr));
+                var type = el.nodeType;
+                if (type === 1 || type === 11 || type === 9)
+                    nodes = nodes.concat(method(el, expr));
             }
             if (/Until/.test(name)) {
                 expr = 0;
