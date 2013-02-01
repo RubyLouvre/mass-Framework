@@ -1,7 +1,7 @@
 //=========================================
 // 事件系统 v9
 //==========================================
-define( top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
+define("event", top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
     var facade = $.event || ($.event = {
         //对某种事件类型进行特殊处理
         special: {},

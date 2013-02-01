@@ -1,7 +1,7 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define(["support", "class", "query", "data"].concat(top.dispatchEvent ? [] : ["node_fix"]), function($) {
+define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? [] : ["node_fix"]), function($) {
     var rtag = /^[a-zA-Z]+$/,
             rtagName = /<([\w:]+)/,
             //取得其tagName
