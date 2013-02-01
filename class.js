@@ -1,7 +1,7 @@
 //=========================================
 // 类工厂模块 v11 by 司徒正美
 //==========================================
-define("class", ["$lang"], function($) {
+define("class", ["lang"], function($) {
     var
     unextend = $.oneObject(["_super", "prototype", 'extend', 'implement']),
     //不能重写的类成员列表

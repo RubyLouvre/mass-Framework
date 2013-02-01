@@ -1,4 +1,4 @@
-define("attr_fix", !! top.getComputedStyle, ["$node"], function($) {
+define("attr_fix", !! top.getComputedStyle, ["node"], function($) {
     $.fixIEAttr = function(valHooks, attrHooks) {
         var rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
             rquote = /^['"]/,
@@ -19,8 +19,8 @@ define("attr_fix", !! top.getComputedStyle, ["$node"], function($) {
                 obj = {},
                 k, v;
             while(k = rattrs.exec(str)) { //属性值只有双引号与无引号的情况
-                v = k[2]
-                obj[k[1].toLowerCase()] = v ? rquote.test(v) ? v.slice(1, -1) : v : ""
+                v = k[2];
+                obj[k[1].toLowerCase()] = v ? rquote.test(v) ? v.slice(1, -1) : v : "";
             }
             return obj[name];
         }

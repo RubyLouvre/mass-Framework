@@ -1,7 +1,7 @@
 //==================================================
 // 属性操作模块 v3
 //==================================================
-define("attr", !! top.getComputedStyle ? ["$node"] : ["$attr_fix"], function($) {
+define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
     var rreturn = /\r/g,
     rtabindex = /^(a|area|button|input|object|select|textarea)$/i,
     rnospaces = /\S+/g,
