@@ -111,7 +111,7 @@ $(function(){
                                                      ——真阿当
 </pre>
 <h3>JS文件的合并</h3>
-<p>请利用我的newland.js项目</p>
+<p>使用combo.js</p>
 <h3>BUG提交与插件的友情贡献。</h3>
 
 <p>大家在github注册后，就可以在<a href="https://github.com/RubyLouvre/mass-Framework/issues">https://github.com/RubyLouvre/mass-Framework/issues</a>里面提交建议或BUG什么了。</p>
@@ -134,7 +134,7 @@ $(function(){
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/7.jpg"/>
 <p>接着就是修改代码了，这要在自己发现真的存在漏洞或有什么改进之处才要动手啊！不能想改就改。要通读你要改的那一部分，必要时通读全框架。因此新手们最好找国内高手的框架进行学习，
     一来中文注释比较亲切，二来也方便接下来的交流。通常我们在clone git到本地进行修改的，这又涉及另外一些工具与命令的学习。不过，github完全允许你在线上进行修改，提交，合并。</p>
-<p>比如你发现data模块的注释与mass模块的不一样，要统一合并，将函数外的注释移到里头。（千万不要轻视这工作，jQuery的许多代码贡献者一开始就只能帮JR大神修修注释，在看注释时也了解到不少东西）</p>
+<p>比如你发现data模块的注释与mass模块的不一样，要统一合并，将函数外的注释移到里头。（更有意义的方式是，打开<a href="http://www.jshint.com/">http://www.jshint.com/</a>，就能发现许多小问题。</p>
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/8.jpg"/>
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/9.jpg"/>
 <p>变成编辑状态，不过不太好用。大家有条件一定要学学如何使用TortoiseGit或Sublime Text 2下载github项目到本地，进行修改，提交，pull request啊！</p>
