@@ -1,13 +1,14 @@
-
+//由于目录下有一个叫node.js的文件，因此不能直接使用node命令，请用node.exe combo
+console.log("欢迎使用mass  Framework!")
 var modules = {
     dest: "mass.js",
-    src: [
+    src: [//这里是可选的模块（不包含补丁模块，为了让框架也能在IE678下使用，请不要删掉补丁模块）
         "lang.js", //各种工具方法
         "class.js", //类工厂
         "interact.js", //观察者模式,流程控制
         "data.js", //缓存
         "query.js",//选择器
-        "support.js",
+        "support.js",//特征侦测
         "fx.js",
         "css.js",
         "attr.js",
@@ -43,7 +44,6 @@ for (var i = 0, url; url = modules.src[i++]; ) {
     })(url.replace(/\.js$/i, "").replace(/\\/g, "/"));
 
 }
-//如果目录下有两个叫node.js与aaa.js的文件，我用node aaa打来执行程序，在window下它会执行打开node.js的命令，这怎么办
 var additionalContent = function() {
     var define = function(a) {
         var array = [basepath + a + ".js"];//重写模块名;basepath变量为mass.js的一个变量
