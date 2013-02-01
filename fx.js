@@ -1,13 +1,13 @@
 //=========================================
 // 动画模块 v6
 //==========================================
-define("fx", ["$css"], function($) {
+define("fx", ["css"], function($) {
     var types = {
         color: /color/i,
         scroll: /scroll/i
     },
-    rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
-    timeline = $.timeline = [] //时间轴
+        rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i,
+        timeline = $.timeline = []; //时间轴
     $.mix({ //缓动公式
         easing: {
             linear: function(pos) {
@@ -20,7 +20,6 @@ define("fx", ["$css"], function($) {
         fps: 30
     })
     //用于向主列队或元素的子列队插入动画实例，并会让停走了的定时器再次动起来
-
 
     function tick(fx) {
         if(fx.queue) { //让同一个元素的动画一个接一个执行
@@ -43,10 +42,10 @@ define("fx", ["$css"], function($) {
         }
     }
     tick.id = null;
-    //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
 
 
     function nextTick() {
+        //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
         var i = timeline.length;
         while(--i >= 0) {
             if(!(timeline[i].node && animate(timeline[i], i))) {
@@ -57,49 +56,48 @@ define("fx", ["$css"], function($) {
     }
 
     var effect = $.fn.fx = function(props, /*internal*/ p) {
-        var opts = resetArguments.apply(null, arguments);
-        if((props = opts.props)) {
-            var ease = opts.specialEasing;
-            for(var name in props) {
-                p = $.cssName(name) || name;
-                if(name != p) {
-                    props[p] = props[name]; //收集用于渐变的属性
-                    ease[p] = ease[name];
-                    delete ease[name];
-                    delete props[name];
+            var opts = resetArguments.apply(null, arguments);
+            if((props = opts.props)) {
+                var ease = opts.specialEasing;
+                for(var name in props) {
+                    p = $.cssName(name) || name;
+                    if(name != p) {
+                        props[p] = props[name]; //收集用于渐变的属性
+                        ease[p] = ease[name];
+                        delete ease[name];
+                        delete props[name];
+                    }
                 }
             }
+            for(var i = 0, node; node = this[i++];) {
+                tick($.mix({
+                    positive: [],
+                    negative: [],
+                    method: "noop",
+                    node: node
+                }, opts, false));
+            }
+            return this;
         }
-        for(var i = 0, node; node = this[i++];) {
-            tick( $.mix({
-                positive:[],
-                negative:[],
-                method: "noop",
-                node:node
-            }, opts, false));
-        }
-        return this;
-    }
     $.fn.animate = effect;
-    //.animate( properties [, duration] [, easing] [, complete] )
-    //.animate( properties, options )
-
 
     function addOptions(opts, p) {
+        //.animate( properties [, duration] [, easing] [, complete] )
+        //.animate( properties, options )
         switch($.type(p)) {
-            case "Object":
-                delete p.props;
-                $.mix(opts, p);
-                break;
-            case "Number":
-                opts.duration = p;
-                break;
-            case "String":
-                opts.easing = p;
-                break;
-            case "Function":
-                opts.complete = p;
-                break;
+        case "Object":
+            delete p.props;
+            $.mix(opts, p);
+            break;
+        case "Number":
+            opts.duration = p;
+            break;
+        case "String":
+            opts.easing = p;
+            break;
+        case "Function":
+            opts.complete = p;
+            break;
         }
     }
 
@@ -116,7 +114,7 @@ define("fx", ["$css"], function($) {
         for(var i = 1; i < arguments.length; i++) {
             addOptions(opts, arguments[i]);
         }
-        opts.duration = typeof opts.duration == "number" ? opts.duration : 400;
+        opts.duration = typeof opts.duration === "number" ? opts.duration : 400;
         opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
         opts.specialEasing = opts.specialEasing || {};
         return opts;
@@ -128,9 +126,9 @@ define("fx", ["$css"], function($) {
         },
         color: function(node, per, end, obj) {
             var pos = obj.easing(per),
-            rgb = end ? obj.to : obj.from.map(function(from, i) {
-                return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
-            });
+                rgb = end ? obj.to : obj.from.map(function(from, i) {
+                    return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
+                });
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
     }
@@ -165,10 +163,10 @@ define("fx", ["$css"], function($) {
             }
             return "_default";
         },
-        //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
-        //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
-        //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
         show: function(node, fx) {
+            //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
+            //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
+            //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
             if(node.nodeType == 1 && $._isHidden(node)) {
                 var display = $._data(node, "olddisplay");
                 if(!display || display == "none") {
@@ -196,7 +194,7 @@ define("fx", ["$css"], function($) {
         hide: function(node, fx) {
             if(node.nodeType == 1 && !$._isHidden(node)) {
                 var display = $.css(node, "display"),
-                s = node.style;
+                    s = node.style;
                 if(display !== "none" && !$._data(node, "olddisplay")) {
                     $._data(node, "olddisplay", display);
                 }
@@ -218,15 +216,15 @@ define("fx", ["$css"], function($) {
         toggle: function(node) {
             $[$._isHidden(node) ? "show" : "hide"](node);
         },
-        //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
         create: function(node, fx, index) {
+            //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
             var to, parts, unit, op, parser, props = [],
-            revertProps = [],
-            orig = {},
-            hidden = $._isHidden(node),
-            ease = fx.specialEasing,
-            hash = fx.props,
-            easing = fx.easing //公共缓动公式
+                revertProps = [],
+                orig = {},
+                hidden = $._isHidden(node),
+                ease = fx.specialEasing,
+                hash = fx.props,
+                easing = fx.easing //公共缓动公式
             if(!hash.length) {
                 for(var name in hash) {
                     if(!hash.hasOwnProperty(name)) {
@@ -305,8 +303,6 @@ define("fx", ["$css"], function($) {
             }
         }
     }
-    //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, step, after, complete），
-    //并在动画结束后，从子列队选取下一个动画实例取替自身
 
 
     function callback(fx, node, name) {
@@ -316,12 +312,14 @@ define("fx", ["$css"], function($) {
     }
 
     function animate(fx, index) {
+        //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, step, after, complete），
+        //并在动画结束后，从子列队选取下一个动画实例取替自身
         var node = fx.node,
-        now = +new Date;
+            now = +new Date;
         if(!fx.startTime) { //第一帧
             callback(fx, node, "before"); //动画开始前的预操作
             fx.props && Animation.create(fx.node, fx, index); //添加props属性与设置负向列队
-            fx.props = fx.props || []
+            fx.props = fx.props || [];
             Animation[fx.method].call(node, node, fx); //这里用于设置node.style.display
             fx.startTime = now;
         } else {
@@ -333,7 +331,7 @@ define("fx", ["$css"], function($) {
                 (hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
             if(end) { //最后一帧
-                if(fx.method == "hide") {
+                if(fx.method === "hide") {
                     for(var i in fx.orig) { //还原为初始状态
                         $.css(node, i, fx.orig[i]);
                     }
@@ -363,35 +361,35 @@ define("fx", ["$css"], function($) {
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
     $.fn.stop = function(clearQueue, gotoEnd) {
-        clearQueue = clearQueue ? "1" : ""
-        gotoEnd = gotoEnd ? "1" : "0"
+        clearQueue = clearQueue ? "1" : "";
+        gotoEnd = gotoEnd ? "1" : "0";
         var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
         return this.each(function(node) {
             for(var i = 0, fx; fx = timeline[i]; i++) {
                 if(fx.node === node) {
                     switch(stopCode) { //如果此时调用了stop方法
-                        case 0:
-                            //中断当前动画，继续下一个动画
-                            fx.update = fx.step = $.noop
-                            fx.revert && fx.negative.shift();
-                            fx.gotoEnd = true;
-                            break;
-                        case 1:
-                            //立即跳到最后一帧，继续下一个动画
-                            fx.gotoEnd = true;
-                            break;
-                        case 2:
-                            //清空该元素的所有动画
-                            delete fx.node
-                            break;
-                        case 3:
-                            Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
-                            fx.negative = []; // 清空负向列队
-                            for(var j = 0; fx = fx.positive[j++];) {
-                                fx.before = fx.after = fx.step = $.noop
-                                fx.gotoEnd = true; //立即完成该元素的所有动画
-                            }
-                            break;
+                    case 0:
+                        //中断当前动画，继续下一个动画
+                        fx.update = fx.step = $.noop
+                        fx.revert && fx.negative.shift();
+                        fx.gotoEnd = true;
+                        break;
+                    case 1:
+                        //立即跳到最后一帧，继续下一个动画
+                        fx.gotoEnd = true;
+                        break;
+                    case 2:
+                        //清空该元素的所有动画
+                        delete fx.node
+                        break;
+                    case 3:
+                        Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
+                        fx.negative = []; // 清空负向列队
+                        for(var j = 0; fx = fx.positive[j++];) {
+                            fx.before = fx.after = fx.step = $.noop
+                            fx.gotoEnd = true; //立即完成该元素的所有动画
+                        }
+                        break;
                     }
                 }
             }
@@ -399,9 +397,9 @@ define("fx", ["$css"], function($) {
     }
 
     var fxAttrs = [
-    ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
-    ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
-    ["opacity"]
+        ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
+        ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+        ["opacity"]
     ]
 
     function genFx(type, num) { //生成属性包
@@ -452,10 +450,10 @@ define("fx", ["$css"], function($) {
 
     function beforePuff(node, fx) {
         var position = $.css(node, "position"),
-        width = $.css(node, "width"),
-        height = $.css(node, "height"),
-        left = $.css(node, "left"),
-        top = $.css(node, "top");
+            width = $.css(node, "width"),
+            height = $.css(node, "height"),
+            left = $.css(node, "left"),
+            top = $.css(node, "top");
         node.style.position = "relative";
         $.mix(fx.props, {
             width: "*=1.5",
@@ -491,7 +489,7 @@ define("fx", ["$css"], function($) {
 
     function parseColor(color) {
         var value;
-        $.applyShadowDOM( function(wid, doc, body) {
+        $.applyShadowDOM(function(wid, doc, body) {
             var range = body.createTextRange();
             body.style.color = color;
             value = range.queryCommandValue("ForeColor");
@@ -501,16 +499,16 @@ define("fx", ["$css"], function($) {
 
     function color2array(val) { //将字符串变成数组
         var color = val.toLowerCase(),
-        ret = [];
+            ret = [];
         if(colorMap[color]) {
             return colorMap[color];
         }
-        if(color.indexOf("rgb") == 0) {
+        if(color.indexOf("rgb") === 0) {
             var match = color.match(/(\d+%?)/g),
-            factor = match[0].indexOf("%") !== -1 ? 2.55 : 1
+                factor = match[0].indexOf("%") !== -1 ? 2.55 : 1;
             return(colorMap[color] = [parseInt(match[0]) * factor, parseInt(match[1]) * factor, parseInt(match[2]) * factor]);
-        } else if(color.charAt(0) == '#') {
-            if(color.length == 4) color = color.replace(/([^#])/g, '$1$1');
+        } else if(color.charAt(0) === '#') {
+            if(color.length === 4) color = color.replace(/([^#])/g, '$1$1');
             color.replace(/\w{2}/g, function(a) {
                 ret.push(parseInt(a, 16))
             });
@@ -525,8 +523,8 @@ define("fx", ["$css"], function($) {
     if($.query && $.query.pseudoHooks) {
         $.query.pseudoHooks.animated = function(el) {
             for(var i = 0, fx; fx = timeline[i++];) {
-                if(el == fx.node) {
-                    return true
+                if(el === fx.node) {
+                    return true;
                 }
             }
         }
@@ -534,30 +532,30 @@ define("fx", ["$css"], function($) {
     return $;
 })
 /**
-2011.10.10 改进$.fn.stop
-2011.10.20 改进所有特效函数，让传参更加灵活
-2011.10.21 改进内部的normalizer函数
-2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
-2012.5.17 升级到  v4
-2012.5.19 effect.parse.transform FIX BUG
-2012.6.1 优化show hide toggle方法
-2012.11.25 升级到 v5 去掉transform的支持,只支持旋转效果
-2012.12.8 升级到 v6 $.fn.fx与jQuery的保持一致
-http://caniuse.com/
-http://gitcp.com/sorenbs/jsgames-articles/resources
-http://www.kesiev.com/akihabara/
-http://www.effectgames.com/effect/
-http://www.effectgames.com/effect/#Article/joe/My_HTML5_CSS3_Browser_Wish_List
-http://www.effectgames.com/games/absorb-hd/
-http://shanabrian.com/web/library/cycle.php
-http://slodive.com/freebies/jquery-animate/
-http://wonderfl.net/search?page=2&q=DoTweener
-http://www.phoboslab.org/ztype/
-http://kangax.github.com/fabric.js/kitchensink/
-http://canvimation.github.com/
-https://github.com/sole/tween.js/blob/master/src/Tween.js
-http://lab.soledadpenades.com/js/webgl_vga/
-http://tmlife.net/tag/enchant-js
-GSAP JS, 出自GreenSock的JS动效库，绝对不能错过。包括TweenLite，TweenMax，TimelineLite和TimelineMax，号称比jQuery快20倍！
-http://www.greensock.com/gsap-js/
+ 2011.10.10 改进$.fn.stop
+ 2011.10.20 改进所有特效函数，让传参更加灵活
+ 2011.10.21 改进内部的normalizer函数
+ 2012.2.19 normalizer暴露为$.fx 改进绑定回调的机制
+ 2012.5.17 升级到  v4
+ 2012.5.19 effect.parse.transform FIX BUG
+ 2012.6.1 优化show hide toggle方法
+ 2012.11.25 升级到 v5 去掉transform的支持,只支持旋转效果
+ 2012.12.8 升级到 v6 $.fn.fx与jQuery的保持一致
+ http://caniuse.com/
+ http://gitcp.com/sorenbs/jsgames-articles/resources
+ http://www.kesiev.com/akihabara/
+ http://www.effectgames.com/effect/
+ http://www.effectgames.com/effect/#Article/joe/My_HTML5_CSS3_Browser_Wish_List
+ http://www.effectgames.com/games/absorb-hd/
+ http://shanabrian.com/web/library/cycle.php
+ http://slodive.com/freebies/jquery-animate/
+ http://wonderfl.net/search?page=2&q=DoTweener
+ http://www.phoboslab.org/ztype/
+ http://kangax.github.com/fabric.js/kitchensink/
+ http://canvimation.github.com/
+ https://github.com/sole/tween.js/blob/master/src/Tween.js
+ http://lab.soledadpenades.com/js/webgl_vga/
+ http://tmlife.net/tag/enchant-js
+ GSAP JS, 出自GreenSock的JS动效库，绝对不能错过。包括TweenLite，TweenMax，TimelineLite和TimelineMax，号称比jQuery快20倍！
+ http://www.greensock.com/gsap-js/
  */

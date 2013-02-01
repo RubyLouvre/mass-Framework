@@ -1,7 +1,7 @@
 //=========================================
 // 组件交互模块v1 by 司徒正美
 //=========================================
-define("interact", ["$class"], function($) {
+define("interact", ["class"], function($) {
     //观察者模式
     $.Observer = $.factory({
         init: function(target) {
@@ -71,7 +71,7 @@ define("interact", ["$class"], function($) {
         fire: function(type, args) {
             var calls = this._events,
                 normal = 2,
-                listeners, ev
+                listeners, ev;
             while(normal--) {
                 ev = normal ? type : last;
                 listeners = calls[ev];
@@ -161,11 +161,11 @@ define("interact", ["$class"], function($) {
                     limit = false;
                 }
                 if(type == cur && limit) {
-                    this.fire.apply(this, arguments)
+                    this.fire.apply(this, arguments);
                 } else {
                     this._queue = this._order.concat();
-                    this._fired = {}
-                    delete this.timestamp
+                    this._fired = {};
+                    delete this.timestamp;
                 }
             }
         },
@@ -186,7 +186,7 @@ define("interact", ["$class"], function($) {
         repeat: function(type, times, callback) {
             var target = this._target,
                 that = this,
-                ret = []
+                ret = [];
 
             function wrapper() {
                 ret.push.apply(ret, $.slice(arguments, 1));

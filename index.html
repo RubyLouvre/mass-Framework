@@ -5,33 +5,21 @@
         <title>测试</title>
         <style>
 
-            div  {
-                width:200px;
-                height:200px;
-                display:inline-block;
-                background:green;
-            }
-            a,abbr,b,span,strong,em{
-                  display:table;
-            }
+
 
         </style>
-        <script src="mass.js"> </script>
+        <script src="mass_merge.js"></script>
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
-            require("css,ready",function($){
-                // $(function(){
-                "h1,div,a,abbr,b,span,strong,em,font,i,img,kbd".replace($.rword, function(tag){
-                      $.log(tag +" "+$.parseDisplay(tag))
-                })
-              
+            require("data,ready", function($) {
+                $.log("已经成功")
 
             })
         </script>
     </head>
 
     <body>
-        <div id="aaa"></div>
+
     </body>
 
 </body>
