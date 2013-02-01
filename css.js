@@ -376,7 +376,7 @@ define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
         //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
         //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
         //http://msdn.microsoft.com/en-us/library/ms536433.aspx
-        var box = node.getBoundingClientRect(),
+        var box = node.getBoundingClientRect(),//chrome1+, firefox3+, ie4+, opera(yes) safari4+	
             win = getWindow(doc),
             root = (navigator.vendor || doc.compatMode == "BackCompat") ? doc.body : doc.documentElement,
             clientTop = root.clientTop >> 0,
