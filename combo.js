@@ -121,7 +121,7 @@ function mergeFile() {
         var arr = seed.split("/*combine modules*/");
         //第一部分去掉文档注释
         files.unshift(arr[0].replace(rcomments, ""), replaced);
-        files.push(arr[1]);
+        files.push(arr[1].replace(rcomments, ""));
         var result = files.join("  \r\n   ");
 
         fs.writeFile(curdir + "mass_merge.js", result, "utf8", function(err) {
