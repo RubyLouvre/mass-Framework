@@ -83,24 +83,16 @@ define("query", ["mass"], function($) {
             }
         }
     });
-    var reg_combinator = /^\s*([>+~,\s])\s*(\*|(?:[-\w*]|[^\x00-\xa0]|\\.)*)/
-    var trimLeft = /^\s+/;
-    var trimRight = /\s+$/;
-    var reg_quick = /^(^|[#.])((?:[-\w]|[^\x00-\xa0]|\\.)+)$/;
-    var reg_comma = /^\s*,\s*/;
-    var reg_sequence = /^([#\.:]|\[\s*)((?:[-\w]|[^\x00-\xa0]|\\.)+)/;
-    var reg_pseudo = /^\(\s*("([^"]*)"|'([^']*)'|[^\(\)]*(\([^\(\)]*\))?)\s*\)/;
-    var reg_attrib = /^\s*(?:(\S?=)\s*(?:(['"])(.*?)\2|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/
-    var reg_attrval = /\\([0-9a-fA-F]{2,2})/g;
-    var reg_sensitive = /^(title|id|name|class|for|href|src)$/;
-    var reg_backslash = /\\/g;
-    var reg_tag = /^((?:[-\w\*]|[^\x00-\xa0]|\\.)+)/; //能使用getElementsByTagName处理的CSS表达式
-    if(trimLeft.test("\xA0")) {
-        trimLeft = /^[\s\xA0]+/;
-        trimRight = /[\s\xA0]+$/;
-    }
-
-    var hash_operator = {
+    var reg_combinator = /^\s*([>+~,\s])\s*(\*|(?:[-\w*]|[^\x00-\xa0]|\\.)*)/,
+        trimLeft = /^\s+/,
+        trimRight = /\s+$/,
+        reg_quick = /^(^|[#.])((?:[-\w]|[^\x00-\xa0]|\\.)+)$/,
+        reg_comma = /^\s*,\s*/,
+        reg_sequence = /^([#\.:]|\[\s*)((?:[-\w]|[^\x00-\xa0]|\\.)+)/,
+        reg_pseudo = /^\(\s*("([^"]*)"|'([^']*)'|[^\(\)]*(\([^\(\)]*\))?)\s*\)/,
+        reg_attrib = /^\s*(?:(\S?=)\s*(?:(['"])(.*?)\2|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/
+    reg_attrval = /\\([0-9a-fA-F]{2,2})/g, reg_sensitive = /^(title|id|name|class|for|href|src)$/, reg_backslash = /\\/g, reg_tag = /^((?:[-\w\*]|[^\x00-\xa0]|\\.)+)/, //能使用getElementsByTagName处理的CSS表达式
+    hash_operator = {
         "=": 1,
         "!=": 2,
         "|=": 3,
@@ -108,7 +100,13 @@ define("query", ["mass"], function($) {
         "^=": 5,
         "$=": 6,
         "*=": 7
+    };
+
+    if(trimLeft.test("\xA0")) {
+        trimLeft = /^[\s\xA0]+/;
+        trimRight = /[\s\xA0]+$/;
     }
+
 
     function sortOrder1(a, b) {
         if(a === b) {
@@ -299,7 +297,6 @@ define("query", ["mass"], function($) {
     //http://msdn.microsoft.com/zh-CN/library/ms256086.aspx
     //https://developer.mozilla.org/cn/DOM/document.evaluate
     //http://d.hatena.ne.jp/javascripter/20080425/1209094795
-
 
     function getElementsByXPath(xpath, context, doc) {
         var result = [];
