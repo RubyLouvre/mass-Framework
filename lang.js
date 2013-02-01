@@ -1,7 +1,7 @@
 //=========================================
 // 语言扩展模块v6 by 司徒正美
 //=========================================
-define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
+define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
     var global = this,
         // JSON RegExp
         rvalidchars = /^[\],:{}\s]*$/,
@@ -12,15 +12,15 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         seval = global.execScript ? "execScript" : "eval",
         rformat = /\\?\#{([^{}]+)\}/gm,
         sopen = (global.open + '').replace(/open/g, ""),
-        defineProperty = Object.defineProperty
+        defineProperty = Object.defineProperty;
 
-    function method(obj, name, method) {
+    function method(obj, name, val) {
         if(!obj[name]) {
             defineProperty(obj, name, {
                 configurable: true,
                 enumerable: false,
                 writable: true,
-                value: method
+                value: val
             });
         }
     }
@@ -117,7 +117,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             if(isArray) {
                 for(var n = obj.length; i < n; i++) {
                     value = fn.call(scope || obj[i], obj[i], i);
-                    ret.push(value)
+                    ret.push(value);
                     if(!map && value === false) {
                         break;
                     }
@@ -125,7 +125,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
             } else {
                 for(i in obj) {
                     value = fn.call(scope || obj[i], obj[i], i);
-                    ret.push(value)
+                    ret.push(value);
                     if(!map && value === false) {
                         break;
                     }
@@ -141,7 +141,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
          * @return {Array}
          */
         map: function(obj, fn, scope) {
-            return $.each(obj, fn, scope, true)
+            return $.each(obj, fn, scope, true);
         },
         /**
          * 过滤数组中不合要求的元素
@@ -153,7 +153,7 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         filter: function(obj, fn, scope) {
             for(var i = 0, n = obj.length, ret = []; i < n; i++) {
                 var val = fn.call(scope || obj[i], obj[i], i);
-                if(!!val) {
+                if( !! val) {
                     ret[ret.length] = obj[i];
                 }
             }
@@ -171,8 +171,8 @@ define("lang", Array.isArray ? ["mass"] : ["$lang_fix"], function($) {
         format: function(str, object) {
             var array = $.slice(arguments, 1);
             return str.replace(rformat, function(match, name) {
-                if(match.charAt(0) == "\\") return match.slice(1);
-                var index = Number(name)
+                if(match.charAt(0) === "\\") return match.slice(1);
+                var index = Number(name);
                 if(index >= 0) return array[index];
                 if(object && object[name] !== void 0) return object[name];
                 return '';
