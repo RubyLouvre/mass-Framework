@@ -1,7 +1,7 @@
 //=========================================
 //  样式补丁模块
 //==========================================
-define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
+define("css_fix", !! top.getComputedStyle, ["node"], function($) {
     var adapter = $.cssHooks = {},
         ie8 = !! top.XDomainRequest,
         rfilters = /[\w\:\.]+\([^)]+\)/g,
@@ -15,7 +15,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         };
     $.getStyles = function(node) {
         return node.currentStyle;
-    }
+    };
     adapter["_default:get"] = function(node, name, styles) {
         //取得精确值，不过它有可能是带em,pc,mm,pt,%等单位
         var currentStyle = styles || node.currentStyle;
@@ -40,7 +40,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         if(ret == "medium") {
             name = name.replace("Width", "Style");
             //border width 默认值为medium，即使其为0"
-            if(currentStyle[name] == "none") {
+            if(currentStyle[name] === "none") {
                 ret = "0px";
             }
         }
@@ -65,7 +65,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         var filter = currentStyle.filter || style.filter || "";
         //http://snook.ca/archives/html_and_css/ie-position-fixed-opacity-filter
         //IE78的透明滤镜当其值为100时会让文本模糊不清
-        if(value == 100) { //IE78的透明滤镜当其值为100时会让文本模糊不清
+        if(value === 100) { //IE78的透明滤镜当其值为100时会让文本模糊不清
             // var str =  "filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color='#FFFFFF')"+
             //   "progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',"+
             //   "M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558)";
@@ -73,7 +73,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
                 return /alpha/i.test(a) ? "" : a; //可能存在多个滤镜，只清掉透明部分
             });
             //如果只有一个透明滤镜 就直接去掉
-            if(value.trim() == "" && style.removeAttribute) {
+            if(value.trim() === "" && style.removeAttribute) {
                 style.removeAttribute("filter");
             }
             return;
@@ -85,7 +85,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         } else {
             style.filter = ((filter ? filter + "," : "") + "alpha(opacity=" + value + ")");
         }
-    }
+    };
     /**=========================　处理　user-select　=========================
      * auto——默认值，用户可以选中元素中的内容
      * none——用户不能选择元素中的任何内容
@@ -113,7 +113,7 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         }
     };
     //=========================　处理　background-position　=========================
-    adapter["backgroundPosition:get"] = function(node, _,style ) {
+    adapter["backgroundPosition:get"] = function(node, _, style) {
         return style.backgroundPositionX + " " + style.backgroundPositionX;
     };
     //=========================　处理　rotate　=========================
@@ -134,9 +134,9 @@ define("css_fix", !! top.getComputedStyle, ["$node"], function($) {
         matrix.M21 = sintheta;
         matrix.M22 = costheta;
         name = adapter.centerOrigin;
-        node.style[name == 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth / 2) + (node.clientWidth / 2) + "px";
-        node.style[name == 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight / 2) + (node.clientHeight / 2) + "px";
-    }
+        node.style[name === 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth / 2) + (node.clientWidth / 2) + "px";
+        node.style[name === 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight / 2) + (node.clientHeight / 2) + "px";
+    };
     return $;
 });
 /**

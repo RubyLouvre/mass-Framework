@@ -1,7 +1,7 @@
 //==================================================
 // 数据缓存模块(本模块只是用于试验WeakMap与Element.dataset)
 //==================================================
-define("data", ["$lang"], function( $ ){
+define( ["lang"], function( $ ){
     var caches = new WeakMap;//FF6+
     function innerData( owner, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
         var table = caches.get( owner );

@@ -1,7 +1,7 @@
 //=========================================
 // 样式操作模块 v5 by 司徒正美
 //=========================================
-define("css", top.getComputedStyle ? ["$node"] : ["$css_fix"], function($) {
+define("css", top.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     var adapter = $.cssHooks || ($.cssHooks = {}),
         rrelNum = /^([\-+])=([\-+.\de]+)/,
         rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
