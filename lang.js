@@ -55,7 +55,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             try { //不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
                 for(var key in obj) //只有一个方法是来自其原型立即返回flase
                 if(!Object.prototype.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
-                    return false
+                    return false;
                 }
             } catch(e) {
                 return false;

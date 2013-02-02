@@ -68,7 +68,7 @@ define("data", ["lang"], function($) {
             var delOne = typeof name === "string",
                 table = caches[index],
                 cache = table,
-                clear = 1
+                clear = 1;
             if(delOne) {
                 if(!pvt) {
                     table = table.data;

@@ -259,23 +259,20 @@ define("event", top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
             if (elem && (elem.nodeType === 3 || elem.nodeType === 8)) {
                 return;
             }
-            var i, cur, old, ontype, handle, eventPath, bubbleType;
-            if (typeof event === "string") {
-                var type = event;//如果是aaa.bbb
-                if (type.indexOf(".") >= 0) {
-                    //分解出命名空间
-                    var namespaces = type.split(".");
-                    type = namespaces.shift();
-                    namespaces.sort();
-                }
-            } else {
-                type = event.type;
-                namespaces = String(event.namespace).split(".");
-            }
+            var type = $.hasOwn(event, "type") ? event.type : event,
+                    namespaces = $.hasOwnl(event, "namespace") ? event.namespace.split(".") : [],
+                    i, cur, old, ontype, handle, eventPath, bubbleType;
             // focus/blur morphs to focusin/out; ensure we're not firing them right now
             if (rfocusMorph.test(type + facade.triggered)) {
                 return;
             }
+            if (type.indexOf(".") >= 0) {
+                //分解出命名空间
+                namespaces = type.split(".");
+                type = namespaces.shift();
+                namespaces.sort();
+            }
+
             //如果从来没有绑定过此种事件，也不用继续执行了
             if (!elem && !facade.global[type]) {
                 return;
@@ -524,49 +521,49 @@ define("event", top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
     });
     $.fn.trigger = $.fn.fire;
     //这个迭代器产生四个重要的事件绑定API on off bind unbind
-    var rtypes = /^[a-z0-9_\-\.\s\,]+$/i;
-    "on_bind,off_unbind".replace($.rmapper, function(_, method, mapper) {
-        $.fn[method] = function(types, selector, fn) {
+    "on_bind,off_unbind".replace($.rmapper, function(_, on, bind) {
+        $.fn[on] = function(types, selector, fn) {
             if (typeof types === "object") {
                 for (var type in types) {
-                    $.fn[method](this, type, selector, types[type], fn);
+                    $.fn[on](this, type, selector, types[type], fn);
                 }
                 return this;
             }
             var hash = {};
             for (var i = 0; i < arguments.length; i++) {
                 var el = arguments[i];
-                if (typeof el === "number") {
-                    hash.times = el;
-                } else if (typeof el === "function") {
-                    hash.handler = el
-                } else if (typeof el === "object") {
-                    $.mix(hash, el, false);
-                }
-                if (typeof el === "string") {
-                    if (hash.type !== null) {
-                        hash.selector = el.trim();
-                    } else {
-                        hash.type = el.trim(); //只能为字母数字-_.空格
-                        if (!rtypes.test(hash.type)) {
-                            $.error("事件类型格式不正确", TypeError);
+                switch (typeof el) {
+                    case "number":
+                        hash.times = el;
+                        break;
+                    case "function":
+                        hash.handler = el
+                        break;
+                    case "object":
+                        $.mix(hash, el, false);
+                        break;
+                    case "string":
+                        if ("type" in hash) {
+                            hash.selector = el.trim();
+                        } else {
+                            hash.type = el.trim(); //只能为字母数字-_.空格
                         }
-                    }
+                        break;
                 }
             }
             if (!hash.type) {
                 $.error("必须指明事件类型");
             }
-            if (method === "on" && !hash.handler) {
+            if (on === "on" && !hash.handler) {
                 $.error("必须指明事件回调");
             }
             hash.times = hash.times > 0 ? hash.times : Infinity;
             return this.each(function() {
-                facade[mapper](this, hash);
+                facade[bind](this, hash);
             });
         }
-        $.fn[mapper] = function() { // $.fn.bind $.fn.unbind
-            return $.fn[method].apply(this, arguments);
+        $.fn[bind] = function() { // $.fn.bind $.fn.unbind
+            return $.fn[on].apply(this, arguments);
         }
     });
 

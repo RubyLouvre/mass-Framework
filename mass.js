@@ -1,5 +1,4 @@
-!
-function(global, DOC) {
+!function(global, DOC) {
     var $$ = global.$; //保存已有同名变量
     var rmakeid = /(#.+|\W)/g; //用于处理掉href中的hash与所有特殊符号，生成长命名空间
     var NsKey = DOC.URL.replace(rmakeid, ""); //长命名空间（字符串）
@@ -14,6 +13,7 @@ function(global, DOC) {
     var cbi = 1e5; //用于生成回调函数的名字
     var all = "mass,lang,class,interact,data,support,query,support,node,attr,css,event,ajax,fx";
     var moduleClass = "mass" + (new Date - 0);
+    var hasOwn = Object.prototype.hasOwnProperty;
     var class2type = {
         "[object HTMLDocument]": "Document",
         "[object HTMLCollection]": "NodeList",
@@ -26,7 +26,7 @@ function(global, DOC) {
         "undefined": "Undefined"
     };
     var toString = class2type.toString,
-        basepath;
+            basepath;
     /**
      * 命名空间
      * @namespace 可变的短命名空间
@@ -36,20 +36,21 @@ function(global, DOC) {
      */
 
     function $(expr, context) { //新版本的基石
-        if($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
+        if ($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return $.require(all + ",ready", expr);
         }
-        if(!$.fn) $.error("必须加载node模块");
+        if (!$.fn)
+            $.error("必须加载node模块");
         return new $.fn.init(expr, context);
     }
     //多版本共存
-    if(typeof NsVal !== "function") {
+    if (typeof NsVal !== "function") {
         NsVal = $; //公用命名空间对象
         NsVal.uuid = 1;
     }
-    if(NsVal.mass !== mass) {
+    if (NsVal.mass !== mass) {
         NsVal[mass] = $; //保存当前版本的命名空间对象到公用命名空间对象上
-        if(NsVal.mass || ($$ && $$.mass == null)) {
+        if (NsVal.mass || ($$ && $$.mass == null)) {
             postfix = (mass + "").replace(/\D/g, ""); //是否强制使用多库共存
         }
     } else {
@@ -62,20 +63,20 @@ function(global, DOC) {
      * @return  {Object} 目标对象
      * @api public
      */
-    var has = Object.prototype.hasOwnProperty;
+
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
-        if(args.length === 1) { //处理$.mix(hash)的情形
+                i = 1,
+                key, //如果最后参数是布尔，判定是否覆写同名属性
+                ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+        if (args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
         }
-        while((supplier = args[i++])) {
-            for(key in supplier) { //允许对象糅杂，用户保证都是对象
-                if(has.call(supplier, key) && (ride || !(key in receiver))) {
+        while ((supplier = args[i++])) {
+            for (key in supplier) { //允许对象糅杂，用户保证都是对象
+                if (hasOwn.call(supplier, key) && (ride || !(key in receiver))) {
                     receiver[key] = supplier[key];
                 }
             }
@@ -90,6 +91,9 @@ function(global, DOC) {
         rword: /[^, ]+/g,
         rmapper: /(\w+)_(\w+)/g,
         mass: mass,
+        hasOwn: function(obj, key) {
+           return hasOwn.call(obj, key);
+        },
         //大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": W3C ? "addEventListener" : "attachEvent",
         /**
@@ -101,24 +105,24 @@ function(global, DOC) {
          * @api public
          */
         slice: W3C ?
-        function(nodes, start, end) {
-            return parsings.slice.call(nodes, start, end);
-        } : function(nodes, start, end) {
+                function(nodes, start, end) {
+                    return parsings.slice.call(nodes, start, end);
+                } : function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
-            if(end === void 0 || typeof end === "number" && isFinite(end)) {
+                    n = nodes.length;
+            if (end === void 0 || typeof end === "number" && isFinite(end)) {
                 start = parseInt(start, 10) || 0;
                 end = end == void 0 ? n : parseInt(end, 10);
-                if(start < 0) {
+                if (start < 0) {
                     start += n;
                 }
-                if(end > n) {
+                if (end > n) {
                     end = n;
                 }
-                if(end < 0) {
+                if (end < 0) {
                     end += n;
                 }
-                for(var i = start; i < end; ++i) {
+                for (var i = start; i < end; ++i) {
                     ret[i - start] = nodes[i];
                 }
             }
@@ -130,14 +134,14 @@ function(global, DOC) {
          * @return {Number} 一个UUID
          */
         getUid: W3C ?
-        function(obj) { //IE9+,标准浏览器
-            return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
-        } : function(obj) {
-            if(obj.nodeType !== 1) { //如果是普通对象，文档对象，window对象
+                function(obj) { //IE9+,标准浏览器
+                    return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
+                } : function(obj) {
+            if (obj.nodeType !== 1) { //如果是普通对象，文档对象，window对象
                 return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
             } //注：旧式IE的XML元素不能通过el.xxx = yyy 设置自定义属性
             var uid = obj.getAttribute("uniqueNumber");
-            if(!uid) {
+            if (!uid) {
                 uid = NsVal.uuid++;
                 obj.setAttribute("uniqueNumber", uid);
             }
@@ -152,10 +156,10 @@ function(global, DOC) {
          * @return {Function} fn 刚才绑定的回调
          */
         bind: W3C ?
-        function(el, type, fn, phase) {
-            el.addEventListener(type, fn, !! phase);
-            return fn;
-        } : function(el, type, fn) {
+                function(el, type, fn, phase) {
+                    el.addEventListener(type, fn, !!phase);
+                    return fn;
+                } : function(el, type, fn) {
             el.attachEvent && el.attachEvent("on" + type, fn);
             return fn;
         },
@@ -167,10 +171,10 @@ function(global, DOC) {
          * @param {Boolean} phase ? 是否捕获，默认false
          */
         unbind: W3C ?
-        function(el, type, fn, phase) {
-            el.removeEventListener(type, fn || $.noop, !! phase);
-        } : function(el, type, fn) {
-            if(el.detachEvent) {
+                function(el, type, fn, phase) {
+                    el.removeEventListener(type, fn || $.noop, !!phase);
+                } : function(el, type, fn) {
+            if (el.detachEvent) {
                 el.detachEvent("on" + type, fn || $.noop);
             }
         },
@@ -183,21 +187,21 @@ function(global, DOC) {
          */
         type: function(obj, str) {
             var result = class2type[(obj == null || obj !== obj) ? obj : toString.call(obj)] || obj.nodeName || "#";
-            if(result.charAt(0) === "#") { //兼容旧式浏览器与处理个别情况,如window.opera
+            if (result.charAt(0) === "#") { //兼容旧式浏览器与处理个别情况,如window.opera
                 //利用IE678 window == document为true,document == window竟然为false的神奇特性
-                if(obj == obj.document && obj.document != obj) {
+                if (obj == obj.document && obj.document != obj) {
                     result = "Window"; //返回构造器名字
-                } else if(obj.nodeType === 9) {
+                } else if (obj.nodeType === 9) {
                     result = "Document"; //返回构造器名字
-                } else if(obj.callee) {
+                } else if (obj.callee) {
                     result = "Arguments"; //返回构造器名字
-                } else if(isFinite(obj.length) && obj.item) {
+                } else if (isFinite(obj.length) && obj.item) {
                     result = "NodeList"; //处理节点集合
                 } else {
                     result = toString.call(obj).slice(8, -1);
                 }
             }
-            if(str) {
+            if (str) {
                 return str === result;
             }
             return result;
@@ -223,23 +227,23 @@ function(global, DOC) {
          *  @api public
          */
         log: function(str, page, level) {
-            for(var i = 1, show = true; i < arguments.length; i++) {
+            for (var i = 1, show = true; i < arguments.length; i++) {
                 level = arguments[i];
-                if(typeof level === "number") {
+                if (typeof level === "number") {
                     show = level <= $.config.level;
-                } else if(level === true) {
+                } else if (level === true) {
                     page = true;
                 }
             }
-            if(show) {
-                if(page === true) {
+            if (show) {
+                if (page === true) {
                     $.require("ready", function() {
                         var div = DOC.createElement("pre");
                         div.className = "mass_sys_log";
                         div.innerHTML = str + ""; //确保为字符串
                         DOC.body.appendChild(div);
                     });
-                } else if(global.console) {
+                } else if (global.console) {
                     console.log(str);
                 }
             }
@@ -252,12 +256,12 @@ function(global, DOC) {
          * @return {Object}
          */
         oneObject: function(array, val) {
-            if(typeof array === "string") {
+            if (typeof array === "string") {
                 array = array.match($.rword) || [];
             }
             var result = {},
-                value = val !== void 0 ? val : 1;
-            for(var i = 0, n = array.length; i < n; i++) {
+                    value = val !== void 0 ? val : 1;
+            for (var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
             return result;
@@ -269,16 +273,17 @@ function(global, DOC) {
          */
         config: function(settings) {
             var kernel = $.config;
-            for(var p in settings) {
-                if(!settings.hasOwnProperty(p)) continue;
+            for (var p in settings) {
+                if (!hasOwn.call(settings, p))
+                    continue;
                 var prev = kernel[p];
                 var curr = settings[p];
-                if(prev && p === "alias") {
-                    for(var c in curr) {
-                        if(curr.hasOwnProperty(c)) {
+                if (prev && p === "alias") {
+                    for (var c in curr) {
+                        if (hasOwn.call(curr,c)) {
                             var prevValue = prev[c];
                             var currValue = curr[c];
-                            if(prevValue && prev !== curr) {
+                            if (prevValue && prev !== curr) {
                                 $.error(c + "不能重命名");
                             }
                             prev[c] = currValue;
@@ -288,7 +293,7 @@ function(global, DOC) {
                     kernel[p] = curr;
                 }
             }
-            return this
+            return this;
         },
         /**
          * 将内部对象挂到window下，此时可重命名，实现多库共存
@@ -304,7 +309,8 @@ function(global, DOC) {
             return global[name] = this;
         },
         //一个空函数
-        noop: function() {},
+        noop: function() {
+        },
         /**
          * 抛出错误,方便调试
          * @param {String} str
@@ -317,14 +323,14 @@ function(global, DOC) {
          * URIError: 错误发生在encodeURI()或decodeURI()中
          */
         error: function(str, e) {
-            throw new(e || Error)(str);
+            throw new (e || Error)(str);
         }
     });
 
     (function(scripts) {
         var cur = scripts[scripts.length - 1],
-            url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
-            kernel = $.config;
+                url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+                kernel = $.config;
         basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1);
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
@@ -359,29 +365,29 @@ function(global, DOC) {
     function parseURL(url, parent, ret) {
         //[]里面，不是开头的-要转义，因此要用/^[-a-z0-9_$]{2,}$/i而不是/^[a-z0-9_-$]{2,}
         //别名至少两个字符；不用汉字是避开字符集的问题
-        if(/^(mass|ready)$/.test(url)) { //特别处理ready标识符
+        if (/^(mass|ready)$/.test(url)) { //特别处理ready标识符
             return [url, "js"];
         }
-        if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url]) {
+        if (/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url]) {
             ret = $.config.alias[url];
         } else {
             parent = parent.substr(0, parent.lastIndexOf('/'))
-            if(/^(\w+)(\d)?:.*/.test(url)) { //如果用户路径包含协议
+            if (/^(\w+)(\d)?:.*/.test(url)) { //如果用户路径包含协议
                 ret = url;
             } else {
                 var tmp = url.charAt(0);
-                if(tmp !== "." && tmp !== "/") { //相对于根路径
+                if (tmp !== "." && tmp !== "/") { //相对于根路径
                     ret = basepath + url;
-                } else if(url.slice(0, 2) === "./") { //相对于兄弟路径
+                } else if (url.slice(0, 2) === "./") { //相对于兄弟路径
                     ret = parent + url.slice(1);
-                } else if(url.slice(0, 2) === "..") { //相对于父路径
+                } else if (url.slice(0, 2) === "..") { //相对于父路径
                     var arr = parent.replace(/\/$/, "").split("/");
                     tmp = url.replace(/\.\.\//g, function() {
                         arr.pop();
                         return "";
                     });
                     ret = arr.join("/") + "/" + tmp;
-                } else if(tmp === "/") {
+                } else if (tmp === "/") {
                     ret = parent + url;
                 } else {
                     $.error("不符合模块标识规则: " + url);
@@ -390,10 +396,10 @@ function(global, DOC) {
         }
         var ext = "js";
         tmp = ret.replace(/[?#].*/, "");
-        if(/\.(css|js)$/.test(tmp)) { // 处理"http://113.93.55.202/mass.draggable"的情况
+        if (/\.(css|js)$/.test(tmp)) { // 处理"http://113.93.55.202/mass.draggable"的情况
             ext = RegExp.$1;
         }
-        if(ext !== "css" && tmp === ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
+        if (ext !== "css" && tmp === ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
             ret += ".js";
         }
         return [ret, ext];
@@ -402,21 +408,21 @@ function(global, DOC) {
 
     function getCurrentScript() {
         //取得正在解析的script节点
-        if(DOC.currentScript) { //firefox 4+
+        if (DOC.currentScript) { //firefox 4+
             return DOC.currentScript.src;
         }
         // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
         var stack;
         try {
             a.b.c(); //强制报错,以便捕获e.stack
-        } catch(e) { //safari的错误对象只有line,sourceId,sourceURL
+        } catch (e) { //safari的错误对象只有line,sourceId,sourceURL
             stack = e.stack;
-            if(!stack && window.opera) {
+            if (!stack && window.opera) {
                 //opera 9没有e.stack,但有e.Backtrace,但不能直接取得,需要对e对象转字符串进行抽取
                 stack = (String(e).match(/of linked script \S+/g) || []).join(" ");
             }
         }
-        if(stack) {
+        if (stack) {
             /**e.stack最后一行在所有支持的浏览器大致如下:
              *chrome23:
              * at http://113.93.50.63/data.js:4:1
@@ -432,8 +438,8 @@ function(global, DOC) {
             return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
-        for(var i = 0, node; node = nodes[i++];) {
-            if(node.className === moduleClass && node.readyState === "interactive") {
+        for (var i = 0, node; node = nodes[i++]; ) {
+            if (node.className === moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
         }
@@ -441,8 +447,8 @@ function(global, DOC) {
 
     function checkCycle(deps, nick) {
         //检测是否存在循环依赖
-        for(var id in deps) {
-            if(deps[id] === "司徒正美" && modules[id].state !== 2 && (id === nick || checkCycle(modules[id].deps, nick))) {
+        for (var id in deps) {
+            if (deps[id] === "司徒正美" && modules[id].state !== 2 && (id === nick || checkCycle(modules[id].deps, nick))) {
                 return true;
             }
         }
@@ -451,16 +457,16 @@ function(global, DOC) {
 
     function checkDeps() {
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
-        loop: for(var i = loadings.length, id; id = loadings[--i];) {
+        loop: for (var i = loadings.length, id; id = loadings[--i]; ) {
             var obj = modules[id],
-                deps = obj.deps;
-            for(var key in deps) {
-                if(deps.hasOwnProperty(key) && modules[key].state !== 2) {
+                    deps = obj.deps;
+            for (var key in deps) {
+                if (hasOwn.call(deps,key) && modules[key].state !== 2) {
                     continue loop;
                 }
             }
             //如果deps是空对象或者其依赖的模块的状态都是2
-            if(obj.state !== 2) {
+            if (obj.state !== 2) {
                 loadings.splice(i, 1); //必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
                 fireFactory(obj.id, obj.args, obj.factory);
                 checkDeps();
@@ -472,7 +478,7 @@ function(global, DOC) {
         //检测是否死链
         var id = node.src;
         node.onload = node.onreadystatechange = node.onerror = null;
-        if(error || !modules[id].state) {
+        if (error || !modules[id].state) {
             setTimeout(function() {
                 head.removeChild(node);
             });
@@ -487,11 +493,11 @@ function(global, DOC) {
         var node = DOC.createElement("script");
         node.className = moduleClass; //让getCurrentScript只处理类名为moduleClass的script节点
         node[W3C ? "onload" : "onreadystatechange"] = function() {
-            if(W3C || /loaded|complete/i.test(node.readyState)) {
+            if (W3C || /loaded|complete/i.test(node.readyState)) {
                 //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
                 var factory = parsings.pop();
                 factory && factory.delay(node.src);
-                if(checkFail(node)) {
+                if (checkFail(node)) {
                     $.log("已成功加载 " + node.src, 7);
                 }
             }
@@ -507,7 +513,7 @@ function(global, DOC) {
     function loadCSS(url) {
         //通过link节点加载模块需要的CSS文件
         var id = url.replace(rmakeid, "");
-        if(!DOC.getElementById(id)) {
+        if (!DOC.getElementById(id)) {
             var node = DOC.createElement("link");
             node.rel = "stylesheet";
             node.href = url;
@@ -525,34 +531,34 @@ function(global, DOC) {
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-            // 用于依赖列表中的模块的返回值
-            args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32);
+                // 用于依赖列表中的模块的返回值
+                args = [],
+                // 需要安装的模块数
+                dn = 0,
+                // 已安装完的模块数
+                cn = 0,
+                id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath;
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
-                url = array[0];
-            if(array[1] === "js") {
+                    url = array[0];
+            if (array[1] === "js") {
                 dn++;
-                if(!modules[url]) {
+                if (!modules[url]) {
                     modules[url] = {
                         id: url,
                         parent: parent,
                         exports: {}
                     };
                     loadJS(url);
-                } else if(modules[url].state === 2) {
+                } else if (modules[url].state === 2) {
                     cn++;
                 }
-                if(!deps[url]) {
+                if (!deps[url]) {
                     args.push(url);
                     deps[url] = "司徒正美"; //去重
                 }
-            } else if(array[1] === "css") {
+            } else if (array[1] === "css") {
                 loadCSS(url);
             }
         });
@@ -564,7 +570,7 @@ function(global, DOC) {
             args: args,
             state: 1
         };
-        if(dn === cn) { //如果需要安装的等于已安装好的
+        if (dn === cn) { //如果需要安装的等于已安装好的
             fireFactory(id, args, factory); //装配到框架中
             return checkDeps();
         }
@@ -580,31 +586,31 @@ function(global, DOC) {
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
         var args = $.slice(arguments);
-        if(typeof id === "string") {
+        if (typeof id === "string") {
             var _id = args.shift();
         }
-        if(typeof args[0] === "boolean") { //用于文件合并, 在标准浏览器中跳过补丁模块
-            if(args[0]) {
+        if (typeof args[0] === "boolean") { //用于文件合并, 在标准浏览器中跳过补丁模块
+            if (args[0]) {
                 return;
             }
             args.shift();
         }
-        if(typeof args[0] === "function") {
+        if (typeof args[0] === "function") {
             args.unshift([]);
         } //上线合并后能直接得到模块ID,否则寻找当前正在解析中的script节点的src作为模块ID
-        //但getCurrentScript方法只对IE6-10,FF4+有效,其他使用onload+delay闭包组合
+        //现在除了safari外，我们都能直接通过getCurrentScript一步到位得到当前执行的script节点，safari可通过onload+delay闭包组合解决
         id = modules[id] && modules[id].state >= 1 ? _id : getCurrentScript();
         factory = args[1];
         factory.id = _id; //用于调试
         factory.delay = function(id) {
             args.push(id);
-            if(checkCycle(modules[id].deps, id)) {
+            if (checkCycle(modules[id].deps, id)) {
                 $.error(id + "模块与之前的某些模块存在循环依赖");
             }
             delete factory.delay; //释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
         };
-        if(id) {
+        if (id) {
             factory.delay(id, args);
         } else { //先进先出
             parsings.push(factory);
@@ -620,13 +626,13 @@ function(global, DOC) {
      */
 
     function fireFactory(id, deps, factory) {
-        for(var i = 0, array = [], d; d = deps[i++];) {
+        for (var i = 0, array = [], d; d = deps[i++]; ) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+                ret = factory.apply(global, array);
         module.state = 2;
-        if(ret !== void 0) {
+        if (ret !== void 0) {
             modules[id].exports = ret;
         }
         return ret;
@@ -640,7 +646,7 @@ function(global, DOC) {
     function fireReady() {
         modules.ready.state = 2;
         checkDeps();
-        if(readyFn) {
+        if (readyFn) {
             $.unbind(DOC, ready, readyFn);
         }
         fireReady = $.noop; //隋性函数，防止IE9二次调用_checkDeps
@@ -650,27 +656,29 @@ function(global, DOC) {
         try { //IE下通过doScrollCheck检测DOM树是否建完
             html.doScroll("left");
             fireReady();
-        } catch(e) {
+        } catch (e) {
             setTimeout(doScrollCheck);
         }
-    };
+    }
+    ;
     //在firefox3.6之前，不存在readyState属性
     //http://www.cnblogs.com/rubylouvre/archive/2012/12/18/2822912.html
-    if(!DOC.readyState) {
+    if (!DOC.readyState) {
         var readyState = DOC.readyState = "loading";
     }
-    if(DOC.readyState === "complete") {
+    if (DOC.readyState === "complete") {
         fireReady(); //如果在domReady之外加载
     } else {
         $.bind(DOC, ready, readyFn = function() {
-            if(W3C || DOC.readyState === "complete") {
+            if (W3C || DOC.readyState === "complete") {
                 fireReady();
-                if(readyState) { //IE下不能改写DOC.readyState
+                if (readyState) { //IE下不能改写DOC.readyState
                     DOC.readyState = "complete";
                 }
             }
         });
-        if(html.doScroll && self.eval === parent.eval) doScrollCheck();
+        if (html.doScroll && self.eval === parent.eval)
+            doScrollCheck();
     }
     //============================HTML5新标签支持===========================
     //IE6789必须以硬编码形式把mass.js写在页面才生效
