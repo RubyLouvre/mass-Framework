@@ -186,7 +186,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
                     return node.removeAttribute(name)
                 }
                 //读写操作
-                var access = value === void 0 ? "get" : "set"
+                var access = value === void 0 ? "get" : "set";
                 if(isBool) {
                     type = "@bool";
                     name = prop;
@@ -200,7 +200,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
                 if(!support.attrInnateName) {
                     name = $.propMap[name.toLowerCase()] || name;
                 }
-                node[name] = defaultProp(node, name)
+                node[name] = defaultProp(node, name);
             } else {
                 node[name] = void 0;
             }
@@ -280,7 +280,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
     //safari IE9 IE8 我们必须访问上一级元素时,才能获取这个值
     if(!support.optSelected) {
         $.propHooks["selected:get"] = function(node) {
-            for(var p = node; typeof p.selectedIndex != "number"; p = p.parentNode) {}
+            for(var p = node; typeof p.selectedIndex !== "number"; p = p.parentNode) {}
             return node.selected;
         }
     }
@@ -315,7 +315,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             return values;
         },
         "select:set": function(node, name, values, getter) {
-            $.slice(node.options).forEach(function(el) {
+            $.each(node.options, function(el) {
                 el.selected = !! ~values.indexOf(getter(el));
             });
             if(!values.length) {
@@ -339,7 +339,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             }
         }
     });
-    if(typeof $.fixIEAttr == "function") {
+    if(typeof $.fixIEAttr === "function") {
         $.fixIEAttr(valHooks, $.attrHooks);
     }
     return $;
