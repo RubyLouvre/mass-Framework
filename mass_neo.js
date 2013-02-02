@@ -60,7 +60,7 @@ function(global, DOC) {
      * @return  {Object} 目标对象
      * @api public
      */
-    var has = Object.prototype.hasOwnProperty
+    var hasOwn = Object.prototype.hasOwnProperty
 
     function mix(receiver, supplier) {
         var args = Array.apply([], arguments),
@@ -73,7 +73,7 @@ function(global, DOC) {
         }
         while((supplier = args[i++])) {
             for(key in supplier) { //允许对象糅杂，用户保证都是对象
-                if(has.call(supplier, key) && (ride || !(key in receiver))) {
+                if(hasOwn.call(supplier, key) && (ride || !(key in receiver))) {
                     receiver[key] = supplier[key];
                 }
             }
@@ -100,6 +100,9 @@ function(global, DOC) {
          */
         slice: function(nodes, start, end) {
             return parsings.slice.call(nodes, start, end);
+        },
+                        hasOwn: function(obj, key) {
+           return hasOwn.call(obj, key);
         },
         /**
          * 用于建立一个从元素到数据的关联，应用于事件绑定，元素去重
@@ -223,12 +226,12 @@ function(global, DOC) {
         config: function(settings) {
             var kernel = $.config;
             for(var p in settings) {
-                if(!settings.hasOwnProperty(p)) continue;
+                if(!hasOwn.call(settings,p)) continue;
                 var prev = kernel[p];
                 var curr = settings[p];
                 if(prev && p === "alias") {
                     for(var c in curr) {
-                        if(curr.hasOwnProperty(c)) {
+                        if(hasOwn.call(curr,c)) {
                             var prevValue = prev[c];
                             var currValue = curr[c];
                             if(prevValue && prev !== curr) {
