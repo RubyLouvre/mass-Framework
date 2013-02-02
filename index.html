@@ -12,7 +12,23 @@
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
             require("fx,ready", function($) {
-                $.log("已经成功")
+            var createXML = function (str) {
+  if (typeof DOMParser !== "undefined") {
+    return (new DOMParser()).parseFromString(str, "application/xml");
+  }else if (ActiveXObject) {
+    var xml = new ActiveXObject("Microsoft.XMLDOM");
+    xml.async="false";
+    xml.loadXML(str);
+    return xml
+  }
+}
+ 
+
+  var xml = createXML('<HTML><body><book><title>司徒正美</title></book></body></HTML>');   
+console.log( xml.xmlVersion)
+
+console.log( Object.prototype.toString.call(xml))
+console.log( document.xmlVersion)
 
             })
         </script>

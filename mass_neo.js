@@ -1,6 +1,6 @@
 !
 function(global, DOC) {
-    var $$ = global.$ //保存已有同名变量
+    var $$ = global.$; //保存已有同名变量
     var rmakeid = /(#.+|\W)/g; //用于处理掉href中的hash与所有特殊符号，生成长命名空间
     var NsKey = DOC.URL.replace(rmakeid, ""); //长命名空间（字符串）
     var NsVal = global[NsKey]; //长命名空间（mass对象）
@@ -12,7 +12,7 @@ function(global, DOC) {
     var postfix = ""; //用于强制别名
     var cbi = 1e5; //用于生成回调函数的名字
     var all = "lang_fix,lang,class,interact,data,support,query,support,node_fix,node,attr_fix,attr,css_fix,css,event_fix,event,ajax,fx"
-    var moduleClass = "mass" + (new Date - 0);
+    var moduleClass = "mass" + Date.now();
     var class2type = {
         "[object HTMLDocument]": "Document",
         "[object HTMLCollection]": "NodeList",
@@ -24,22 +24,21 @@ function(global, DOC) {
         "undefined": "Undefined"
     }
     var toString = class2type.toString,
-        basepath
-        /**
-         * 命名空间
-         * @namespace 可变的短命名空间
-         * @param  {String|Function} expr  CSS表达式或函数
-         * @param  {Node|NodeList|Array|Mass} context ？ 上下文对象
-         * @return {Mass}
-         */
+        basepath;
+    /**
+     * 命名空间
+     * @namespace 可变的短命名空间
+     * @param  {String|Function} expr  CSS表达式或函数
+     * @param  {Node|NodeList|Array|Mass} context ？ 上下文对象
+     * @return {Mass}
+     */
 
     function $(expr, context) { //新版本的基石
         if($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return $.require(all + ",ready", expr);
-        } else {
-            if(!$.fn) $.error("必须加载node模块");
-            return new $.fn.init(expr, context);
         }
+        if(!$.fn) $.error("必须加载node模块");
+        return new $.fn.init(expr, context);
     }
     //多版本共存
     if(typeof NsVal !== "function") {
@@ -199,7 +198,6 @@ function(global, DOC) {
             }
             return str;
         },
-
         /**
          * 生成键值统一的对象，用于高速化判定
          * @param {Array|String} array 如果是字符串，请用","或空格分开
@@ -252,7 +250,7 @@ function(global, DOC) {
          * @api public
          */
         exports: function(name) {
-            $$ && (global.$ = $$); //多库共存
+            global.$ = $$; //多库共存
             name = name || $.config.nick; //取得当前简短的命名空间
             $.config.nick = name;
             global[NsKey] = NsVal;
@@ -280,7 +278,7 @@ function(global, DOC) {
         var cur = scripts[scripts.length - 1],
             url = cur.src.replace(/[?#].*/, ""),
             kernel = $.config;
-        basepath = kernel.base = url.substr(0, url.lastIndexOf("/")) + "/";
+        basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1);
         kernel.nick = cur.getAttribute("nick") || "$";
         kernel.alias = {};
         kernel.level = 9;
@@ -320,22 +318,22 @@ function(global, DOC) {
         } else {
             parent = parent.substr(0, parent.lastIndexOf('/'))
             if(/^(\w+)(\d)?:.*/.test(url)) { //如果用户路径包含协议
-                ret = url
+                ret = url;
             } else {
                 var tmp = url.charAt(0);
-                if(tmp !== "." && tmp != "/") { //相对于根路径
+                if(tmp !== "." && tmp !== "/") { //相对于根路径
                     ret = basepath + url;
-                } else if(url.slice(0, 2) == "./") { //相对于兄弟路径
+                } else if(url.slice(0, 2) === "./") { //相对于兄弟路径
                     ret = parent + url.substr(1);
-                } else if(url.slice(0, 2) == "..") { //相对于父路径
+                } else if(url.slice(0, 2) === "..") { //相对于父路径
                     var arr = parent.replace(/\/$/, "").split("/");
                     tmp = url.replace(/\.\.\//g, function() {
                         arr.pop();
                         return "";
                     });
                     ret = arr.join("/") + "/" + tmp;
-                } else if(tmp == "/") {
-                    ret = parent + url
+                } else if(tmp === "/") {
+                    ret = parent + url;
                 } else {
                     $.error("不符合模块标识规则: " + url);
                 }
@@ -346,7 +344,7 @@ function(global, DOC) {
         if(/\.(css|js)$/.test(tmp)) { // 处理"http://113.93.55.202/mass.draggable"的情况
             ext = RegExp.$1;
         }
-        if(ext != "css" && tmp == ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
+        if(ext !== "css" && tmp === ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
             ret += ".js";
         }
         return [ret, ext];
@@ -367,14 +365,13 @@ function(global, DOC) {
         }
         if(stack) {
             // chrome IE10使用 at, firefox opera 使用 @
-            e = stack.indexOf(' at ') !== -1 ? ' at ' : '@';
-            i = stack.lastIndexOf(e);
-            var a = stack.slice(i + e.length).replace(/\s\s*$/, "").replace(/(:\d+)?:\d+$/i, "");
-            return a
+            stack = stack.split(/[@ ]/g).pop(); //取得最后一行,最后一个空格或@之后的部分
+            stack = stack[0] === "(" ? stack.slice(1, -1) : stack;
+            return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
         for(i = 0; node = nodes[i++];) {
-            if(node.className == moduleClass && node.readyState === "interactive") {
+            if(node.className === moduleClass && node.readyState === "interactive") {
                 return node.className = node.src;
             }
         }
@@ -383,7 +380,7 @@ function(global, DOC) {
     function checkCycle(deps, nick) {
         //检测是否存在循环依赖
         for(var id in deps) {
-            if(deps[id] == "司徒正美" && modules[id].state != 2 && (id == nick || checkCycle(modules[id].deps, nick))) {
+            if(deps[id] === "司徒正美" && modules[id].state !== 2 && (id == nick || checkCycle(modules[id].deps, nick))) {
                 return true;
             }
         }
@@ -396,12 +393,12 @@ function(global, DOC) {
             var obj = modules[id],
                 deps = obj.deps;
             for(var key in deps) {
-                if(deps.hasOwnProperty(key) && modules[key].state != 2) {
+                if(deps.hasOwnProperty(key) && modules[key].state !== 2) {
                     continue loop;
                 }
             }
             //如果deps是空对象或者其依赖的模块的状态都是2
-            if(obj.state != 2) {
+            if(obj.state !== 2) {
                 loadings.splice(i, 1); //必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
                 fireFactory(obj.id, obj.args, obj.factory);
                 checkDeps();
@@ -440,12 +437,7 @@ function(global, DOC) {
         }
 
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
-        if(window.netscape) { //这也避开了IE6下的自闭合base标签引起的BUG
-            html.insertBefore(node, head); //在最新的firefox下,如果父节点还没有完成不能插入新节点
-        } else {
-            head.appendChild(node, head.firstChild); //chrome下第二个参数不能为null
-        }
-
+        head.appendChild(node, head.firstChild); //chrome下第二个参数不能为null
         $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
 
@@ -478,11 +470,11 @@ function(global, DOC) {
             // 已安装完的模块数
             cn = 0,
             id = parent || "cb" + (cbi++).toString(32);
-        parent = parent || basepath
+        parent = parent || basepath;
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
                 url = array[0];
-            if(array[1] == "js") {
+            if(array[1] === "js") {
                 dn++;
                 if(!modules[url]) {
                     modules[url] = {
@@ -526,7 +518,7 @@ function(global, DOC) {
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
         var args = $.slice(arguments);
-        if(typeof id == "string") {
+        if(typeof id === "string") {
             var _id = args.shift();
         }
         if(typeof args[0] === "boolean") { //用于文件合并, 在标准浏览器中跳过补丁模块
@@ -539,7 +531,7 @@ function(global, DOC) {
             args.unshift([]);
         } //上线合并后能直接得到模块ID,否则寻找当前正在解析中的script节点的src作为模块ID
         //但getCurrentScript方法只对IE6-10,FF4+有效,其他使用onload+delay闭包组合
-        id = modules[id] && modules[id].state == 2 ? _id : getCurrentScript();
+        id = modules[id] && modules[id].state >= 1 ? _id : getCurrentScript();
         factory = args[1];
         factory.id = _id; //用于调试
         factory.delay = function(id) {
@@ -615,7 +607,7 @@ function(global, DOC) {
 
 }(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
 /**
- changelog::
-2012.12.6 mass_neo
-2012.1.23 升级getCurrentScript
- */
+         changelog::
+         2012.12.6 mass_neo
+         2012.1.23 升级getCurrentScript
+         */
