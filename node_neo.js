@@ -133,9 +133,6 @@ define("node", ["support", "class", "query", "data"], function($) {
         html: function(item) { //取得或设置节点的innerHTML属性
             item = item === void 0 ? item : item == null ? '' : item + "";
             return $.access(this, 0, item, function(el) { //getter
-                //如果当前元素不是null, undefined,并确保是元素节点或者nodeName为XML,则进入分支
-                //为什么要刻意指出XML标签呢?因为在IE中,这标签并不是一个元素节点,而是内嵌文档
-                //的nodeType为9,IE称之为XML数据岛
                 if(el && el.nodeType === 1) {
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el);
                 }
