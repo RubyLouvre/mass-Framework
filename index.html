@@ -4,39 +4,165 @@
         <meta charset="UTF-8" />
         <title>测试</title>
         <style>
+            .grid, .flex-grid, .column, .border, .mpb, .nested-center, .nested, .code, .horizontal, .vertical {
+                overflow: auto;
+                border:1px solid #0090ff;
+            }
 
+            .c {
+                background-color: rgb(220,220,220);
+                border: 1px solid blueviolet;
+                text-align: center;
+                width: 100px;
+                height: 100px;
+                display: inline-block;
+            }
+            .cc {
+                background-color: rgb(220,220,220);
+                border: 2px solid brown;
+                text-align: center;
+                margin:5px;
+                width: 100px;
+                height: 120px;
+                display: inline-block;
+            }
 
+            .e {
+                height: 150px;
+            }
 
+            .d {
+                width: 150px;
+            }
+
+            .nested-center, .mpb {
+                display: inline-block;
+            }
+
+            .mpb .center {
+                margin-left: 5em;
+                width: 5em;
+                height: 5em;
+            }
+
+            .mpb .east {
+                border-right: 2em solid green;
+                width: 10em;
+            }
+
+            .mpb .north {
+                padding-top: 2em;
+                height: 2em;
+                width: 35em;
+            }
+
+            .col-1, .col-2 {
+                padding-right: 2em;
+                text-align: justify;
+                display: inline-block;
+            }
+
+            #flow-left {
+                overflow: auto;
+                width: 350px;
+                height: 200px;
+            }
+
+            #flow-left div {
+                width: auto;
+                height: auto;
+            }
+
+            .large {
+                font-size: 3.5em;
+            }
+
+            .small {
+                font-size: 2em;
+            }
+
+            .medium {
+                font-size: 3em;
+            }
         </style>
         <script src="mass.js"></script>
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
-            require("fx,ready", function($) {
-                var createXML = function(str) {
-                    if (typeof DOMParser !== "undefined") {
-                        return (new DOMParser()).parseFromString(str, "application/xml");
-                    } else if (ActiveXObject) {
-                        var xml = new ActiveXObject("Microsoft.XMLDOM");
-                        xml.async = "false";
-                        xml.loadXML(str);
-                        return xml
+            require("css,ready", function($) {
+
+
+                var element = $(".grid")
+                var node = element[0]
+                node.style.position = "relative";
+                node.style.height = "400px"
+                //      o = (element.data('layout')) ? $.mix(opts, element.data('layout')) : opts;
+                var children = element[0].children;
+                var w = [], h = []
+                for (var i = 0, el; el = children[i++]; ) {
+                    w.push(parseFloat($(el).outerWidth(true)))
+                    h.push(parseFloat($(el).outerHeight(true)))
+                }
+
+                var gw = Math.max.apply(0, w)
+                var gh = Math.max.apply(0, h)
+                console.log(gh)
+                row = 0
+                for (var i = 0, el; el = children[i]; i++) {
+                    var dew = gw - w[i];
+                    //    console.log(dew)
+                    $(el).css("position", "absolute");
+                    var col = i % 4;
+                    if (i !== 0 && col === 0) {
+                        row++
+                    }
+                    console.log(row)
+                    var left = (gw + 20) * col;
+                    var top = (gh + 20) * row;
+                    $(el).css("top", top);
+                    $(el).css("left", left);
+                    if (dew) {
+                        $(el).width("+=" + dew)
+                    }
+                    var deg = gh - h[i];
+                    //   console.log(deg)
+                    if (deg) {
+                        $(el).height("+=" + deg)
                     }
                 }
-alert(1)
-
-                var xml = createXML('<HTML><body><book><title>司徒正美</title></book></body></HTML>');
-                $.log(xml.xmlVersion)
-
-                $.log(Object.prototype.toString.call(xml))
-                $.log(document.xmlVersion)
-
+                element.css("width", gw * 4 + 20 * 3)
+                element.css("height", gh * 2 + 20 * 1)
             })
         </script>
     </head>
 
     <body>
-
+        <div data-layout='{"type": "grid", "hgap": 3, "vgap": 3, "columns": 2, "rows": 2}' class="grid">
+            <div class="c">
+                One
+            </div>
+            <div class="c">
+                Two
+            </div>
+            <div class="cc">
+                Three
+            </div>
+            <div class="cc">
+                Four
+            </div>
+            <div class="c">
+                One
+            </div>
+            <div class="c">
+                Two
+            </div>
+            <div class="cc">
+                Three
+            </div>
+            <div class="cc">
+                Four
+            </div>
+        </div>
     </body>
 
-</body>
+
 </html>

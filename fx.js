@@ -167,7 +167,7 @@ define("fx", ["css"], function($) {
             //show 开始时计算其width1 height1 保存原来的width height display改为inline-block或block overflow处理 赋值（width1，height1）
             //hide 保存原来的width height 赋值为(0,0) overflow处理 结束时display改为none;
             //toggle 开始时判定其是否隐藏，使用再决定使用何种策略
-            if(node.nodeType == 1 && $._isHidden(node)) {
+            if(node.nodeType == 1 && $.isHidden(node)) {
                 var display = $._data(node, "olddisplay");
                 if(!display || display == "none") {
                     display = $.parseDisplay(node.nodeName)
@@ -192,7 +192,7 @@ define("fx", ["css"], function($) {
             }
         },
         hide: function(node, fx) {
-            if(node.nodeType == 1 && !$._isHidden(node)) {
+            if(node.nodeType == 1 && !$.isHidden(node)) {
                 var display = $.css(node, "display"),
                     s = node.style;
                 if(display !== "none" && !$._data(node, "olddisplay")) {
@@ -214,14 +214,14 @@ define("fx", ["css"], function($) {
             }
         },
         toggle: function(node) {
-            $[$._isHidden(node) ? "show" : "hide"](node);
+            $[$.isHidden(node) ? "show" : "hide"](node);
         },
         create: function(node, fx, index) {
             //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
             var to, parts, unit, op, parser, props = [],
                 revertProps = [],
                 orig = {},
-                hidden = $._isHidden(node),
+                hidden = $.isHidden(node),
                 ease = fx.specialEasing,
                 hash = fx.props,
                 easing = fx.easing //公共缓动公式
