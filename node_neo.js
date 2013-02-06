@@ -663,8 +663,7 @@ define("node", ["support", "class", "query", "data"], function($) {
 
     $.each({
         parent: function(el) { //取得父节点
-            var parent = el.parentNode;
-            return parent && parent.nodeType !== 11 ? parent : [];
+            return el.parentElement || [];
         },
         parents: function(el) { //取得祖先节点
             return travel(el, "parentElement").reverse();
@@ -673,7 +672,7 @@ define("node", ["support", "class", "query", "data"], function($) {
             return travel(el, "parentElement", expr).reverse();
         },
         next: function(el) { //取右边的兄弟节点 nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
-            return travel(el, "nextElementSibling", true);
+            return el.nextElementSibling || [];
         },
         nextAll: function(el) { //取右边所有的兄弟节点
             return travel(el, "nextElementSibling");
@@ -682,7 +681,7 @@ define("node", ["support", "class", "query", "data"], function($) {
             return travel(el, "nextElementSibling", expr);
         },
         prev: function(el) { //取左边的兄弟节点
-            return travel(el, "previousElementSibling", true);
+            return el.previousElementSibling || [] ;
         },
         prevAll: function(el) { //取左边所有的兄弟节点
             return travel(el, "previousElementSibling").reverse();
@@ -691,7 +690,9 @@ define("node", ["support", "class", "query", "data"], function($) {
             return travel(el, "previousElementSibling", expr).reverse();
         },
         children: function(el) { //支持情况chrome1+ FF3.5+,IE5+,opera10+,safari4+
-            return Array.prototype.slice.call(el.children);
+              return el.children ? $.slice(el.children) : $.filter(el.childNodes, function(node) {
+                return node.nodeType === 1;
+            });
         },
         siblings: function(el) { //取所有兄弟节点
             return travel(el, "previousElementSibling").reverse().concat(travel(el, "nextElementSibling"));
