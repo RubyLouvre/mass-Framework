@@ -667,10 +667,10 @@ define("node", ["support", "class", "query", "data"], function($) {
             return parent && parent.nodeType !== 11 ? parent : [];
         },
         parents: function(el) { //取得祖先节点
-            return travel(el, "parentNode").reverse();
+            return travel(el, "parentElement").reverse();
         },
         parentsUntil: function(el, expr) { //往上取节点,直到某一条件不符合为止
-            return travel(el, "parentNode", expr).reverse();
+            return travel(el, "parentElement", expr).reverse();
         },
         next: function(el) { //取右边的兄弟节点 nextSiblingElement支持情况 chrome4+ FF3.5+ IE9+ opera9.8+ safari4+
             return travel(el, "nextElementSibling", true);
