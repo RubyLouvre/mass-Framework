@@ -260,7 +260,7 @@ define("event", top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                 return;
             }
             var type = $.hasOwn(event, "type") ? event.type : event,
-                    namespaces = $.hasOwnl(event, "namespace") ? event.namespace.split(".") : [],
+                    namespaces = $.hasOwn(event, "namespace") ? event.namespace.split(".") : [],
                     i, cur, old, ontype, handle, eventPath, bubbleType;
             // focus/blur morphs to focusin/out; ensure we're not firing them right now
             if (rfocusMorph.test(type + facade.triggered)) {

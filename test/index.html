@@ -22,10 +22,7 @@
                 level: 6
             });
             require("event,ready",function($){
-                console.log("xxxxxxxxxxxxx")
-                console.log( $("#js_test").length)
                 $("#js_test").change(function(){
-                    console.log("33333333333")
                     location.href = location.href.replace(/[?#].*/, '') +"#"+this.value;
                     location.reload()
                 })

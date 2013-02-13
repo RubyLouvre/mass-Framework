@@ -3,14 +3,16 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <title>mass Frameword 测试页面</title>
-
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache">
+        <meta http-equiv="Expires" content="0">
         <script>
-            window.onload = function(){
-                (function self(){
-                    if( window.parent.attrTestCall){
+            window.onload = function() {
+                (function self() {
+                    if (window.parent.attrTestCall) {
                         window.parent.attrTestCall()
-                    }else{
-                        setTimeout(self,16)
+                    } else {
+                        setTimeout(self, 16)
                     }
                 })()
             }
@@ -48,6 +50,7 @@
                     </tr>
                 </tbody>
             </table>
+            测试下拉框
             <select id="test-select">
                 <option id="test-opt" value="1">0</option>
                 <option>2</option>

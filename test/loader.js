@@ -34,7 +34,7 @@ define(["$spec"],function( spec ){
             });
             $.require( "./test/loader/aaa.bbb.ccc", function(ret){
                 $.log("测试./test/loader/aaa.bbb.ccc")
-                expect( ret.bbb, id).eq( "aaa.bbb.ccc" );
+                expect( ret, id).eq( "aaa.bbb.ccc" );
             });
         },
         "测试exports模块依赖":function(id){
