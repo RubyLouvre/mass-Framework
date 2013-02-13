@@ -12,9 +12,9 @@
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
             require("attr,ready", function($) {
-
+$("select")[0].disabled = true;
                 console.log($("option")[0].outerHTML)
-                console.log($("option")[0].innerHTML)
+                   console.log($("option")[0].disabled)
                 var a = $("select").val();
                 console.log(a)
             })
@@ -23,7 +23,7 @@
 
     <body>
         <select id="test-select">
-            <option id="test-opt" disabled="" value="1">0</option>
+            <option id="test-opt"  value="1">0</option>
             <option disabled>2</option>
             <option disabled>3</option>
         </select>

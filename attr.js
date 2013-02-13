@@ -18,7 +18,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
 
     function getValType(el) {
         var ret = el.tagName.toLowerCase();
-        return ret === "input" && /checkbox|radio/.test(el.type) ? el.type : ret;
+        return ret === "input" && /checkbox|radio/.test(el.type) ? "checked" : ret;
     }
 
     $.implement({
@@ -106,7 +106,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
                     var arr = node.className.match(rnospaces),
                             cls = [];
                     for (var j = 0; j < arr.length; j++) {
-                        cls.push(arr[j] == old ? neo : arr[j]);
+                        cls.push(arr[j] === old ? neo : arr[j]);
                     }
                     node.className = cls.join(" ");
                 }
@@ -175,7 +175,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
                     if (!support.attrInnateName) {
                         type = "@ie";
                     }
-                    var isBool = typeof node[prop] === "boolean" && typeof defaultProp(node, prop) === "boolean" //判定是否为布尔属性
+                    var isBool = typeof node[prop] === "boolean" && typeof defaultProp(node, prop) === "boolean"; //判定是否为布尔属性
                 }
                 //移除操作
                 if (noxml) {
@@ -190,7 +190,8 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
                 if (isBool) {
                     type = "@bool";
                     name = prop;
-                };
+                }
+                ;
                 return(noxml && $.attrHooks[name + ":" + access] || $.attrHooks[type + ":" + access])(node, name, value);
             }
         },
@@ -304,7 +305,7 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
                 //旧式IE在reset后不会改变selected，需要改用i === index判定
                 //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
                 //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
-                if ((option.selected || i === index) && (support.optDisabled ? !option.disabled : option.getAttribute("disabled") === null) && (!option.parentNode.disabled || !$.type(option.parentNode, "OPTGROUP"))) {
+                if ((option.selected || i === index) && !(support.optDisabled ? option.disabled : / disabled=/.test(option.outerHTML.replace(option.innerHTML, "")))) {
                     value = getter(option);
                     if (one) {
                         return value;
@@ -325,23 +326,19 @@ define("attr", !!top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             }
         }
     }
-    
+
     //checkbox的value默认为on，唯有chrome 返回空字符串
     if (!support.checkOn) {
-        "radio,checkbox".replace($.rword, function(name) {
-            valHooks[name + ":get"] = function(node) {
-                return node.getAttribute("value") === null ? "on" : node.value;
-            };
-        });
+        valHooks["checked:get"] = function(node) {
+            return node.getAttribute("value") === null ? "on" : node.value;
+        };
     }
     //处理单选框，复选框在设值后checked的值
-    "radio,checkbox".replace($.rword, function(name) {
-        valHooks[name + ":set"] = function(node, name, value) {
-            if (Array.isArray(value)) {
-                return node.checked = !!~value.indexOf(node.value);
-            }
+    valHooks["checked:set"] = function(node, name, value) {
+        if (Array.isArray(value)) {
+            return node.checked = !!~value.indexOf(node.value);
         }
-    });
+    }
     if (typeof $.fixIEAttr === "function") {
         $.fixIEAttr(valHooks, $.attrHooks);
     }
