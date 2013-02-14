@@ -12,11 +12,12 @@
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
             require("attr,ready", function($) {
-$("select")[0].disabled = true;
-                console.log($("option")[0].outerHTML)
-                   console.log($("option")[0].disabled)
-                var a = $("select").val();
-                console.log(a)
+                $("select").html("<option>aaa</option><option>aaa</option><option>aaa</option>");
+                 $("select").text()
+                 var a = $("a");
+                 a.val("xxxxxxxxx");
+                 console.log(a.val())
+                 
             })
         </script>
     </head>
@@ -27,6 +28,7 @@ $("select")[0].disabled = true;
             <option disabled>2</option>
             <option disabled>3</option>
         </select>
+        <a href="aaa">dddd</a>
     </body>
 
 

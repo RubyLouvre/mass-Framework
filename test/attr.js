@@ -188,16 +188,23 @@ define(["mass", "$attr", "$spec"], function($) {
                 //测试移除contenteditable属性，但又不会影响其内容
                 var contenteditable = $("#removeAttr", idoc).removeAttr("contenteditable")
                 expect(contenteditable[0].innerHTML).eq("AAA");
-              
+                container.remove();
             }
         })
     }
 
-    // var iframe2 =  $("<iframe id='test_attr' src='pages/attr2.html' style='display:none;width:0px;height:0px;' frameBorder=0  />" ).appendTo("body");//
+    var iframe2 =  $("<iframe id='test_attr' src='pages/attr2.html' style='display:none;width:0px;height:0px;' frameBorder=0  />" ).appendTo("body");//
     window.classNameTestCall = function() {
         describe("属性模块-attr(className部分)", {
             "className": function() {
                 var idoc = iframe2.contents()[0];
+				
+                var container = $("<div/>").appendTo("body");
+                container[0].innerHTML = idoc.body.innerHTML;
+                iframe2.remove();
+                idoc = document;
+				
+				
                 var a = $('#foo-class a', idoc);
                 a[0].className = 'link link2\t' + 'link9 link3';
                 expect(a.hasClass('link')).eq(true);
@@ -240,7 +247,8 @@ define(["mass", "$attr", "$spec"], function($) {
                 a.toggleClass('link2');
                 expect(a.hasClass('link2')).eq(true);
 
-                iframe2.remove();
+                 container.remove();
+
             }
         });
     }

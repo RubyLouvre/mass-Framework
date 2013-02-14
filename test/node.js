@@ -35,9 +35,9 @@ define(["$spec","$node"],function(){
         append: function(){
             //先添加两个类为.test_node的P元素
             $("body",idoc ).append("<p class='test_node'>测试append方法<strong>这是它的内部</strong></p><p class='test_node'>测试append方法<strong>这是它的内部</strong></p><div id='test_text'></div>");
-            expect( $(".test_node",idoc ).length ).eq(2);
+            expect( $(".test_node",idoc ).length ).eq(2,"2");
             $("#test_text",idoc ).text("888888888");
-            expect( $("#test_text",idoc ).text() ).eq("888888888");
+            expect( $("#test_text",idoc ).text() ).eq("888888888","text");
             var nav = $("<nav>test</nav>").appendTo( $("body",idoc ) )
             expect( nav[0].tagName ).eq("NAV");
             nav.remove()
