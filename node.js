@@ -272,25 +272,25 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
                 var parent = node.parentNode;
                 if(parent) {
                     var array = $.query(expr, node.ownerDocument);
-                    return array.indexOf(node) != -1
+                    return array.indexOf(node) != -1;
                 }
                 return false;
             }
         },
-        access: function(elems, callback, type, args) {
+        access: function(elems, callback, directive, args) {
             //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML,data, attr, prop, val
             //css width height innerWidth innerHeight outerWidth outerHeight
             var length = elems.length,
                 key = args[0],
                 value = args[1];
-            if(args.length === 0 || args.length === 1 && typeof type === "string") {
+            if(args.length === 0 || args.length === 1 && typeof directive === "string") {
                 var first = elems[0];
                 return first && first.nodeType === 1 ? callback.call($, first, key) : void 0;
             } else {
-                if(type === null) {
+                if(directive === null) {
                     callback.call(elems, args);
                 } else {
-                    if(typeof args[0] === "object") {
+                    if(typeof key === "object") {
                         for(var k in key) { //为所有元素设置N个属性
                             for(var i = 0; i < length; i++) {
                                 callback.call(elems, elems[i], k, key[k]);
