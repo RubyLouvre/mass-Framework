@@ -130,52 +130,50 @@ define("node", ["support", "class", "query", "data"], function($) {
                 return cloneNode(this, dataAndEvents, deepDataAndEvents);
             });
         },
-        html: function(item) { //取得或设置节点的innerHTML属性
-            item = item === void 0 ? item : item == null ? '' : item + "";
-            return $.access(this, 0, item, function(el) { //getter
-                if(el && el.nodeType === 1) {
+               html: function(item) { //取得或设置节点的innerHTML属性
+            return $.access(this, function(el, value) {
+                if(this === $) { //getter
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el);
-                }
-                return null;
-            }, function(el, _, value) { //setter
-                //接着判断innerHTML属性是否符合标准,不再区分可读与只读
-                //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
-                //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
-                if($.support.innerHTML && (!rcreate.test(value) && !rnest.test(value))) {
-                    try {
-                        for(var i = 0; el = this[i++];) {
-                            if(el.nodeType === 1) {
-                                $.each(el[TAGS]("*"), cleanNode);
-                                el.innerHTML = value;
+                } else { //setter
+                    value = item == null ? "" : item + ""; //如果item为null, undefined转换为空字符串，其他强制转字符串
+                    //接着判断innerHTML属性是否符合标准,不再区分可读与只读
+                    //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
+                    //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
+                    if($.support.innerHTML && (!rcreate.test(value) && !rnest.test(value))) {
+                        try {
+                            for(var i = 0; el = this[i++];) {
+                                if(el.nodeType === 1) {
+                                    $.each(el[TAGS]("*"), cleanNode);
+                                    el.innerHTML = value;
+                                }
                             }
-                        }
-                        return;
-                    } catch(e) {};
+                            return;
+                        } catch(e) {};
+                    }
+                    this.empty().append(value);
                 }
-                this.empty().append(value);
-            }, this);
+            }, null, arguments);
         },
         text: function(item) { // 取得或设置节点的text或innerText或textContent属性
-            return $.access(this, 0, item, function(el) {
-                if(!el) { //getter
-                    return "";
-                } else if(el.tagName === "OPTION" || el.tagName === "SCRIPT") {
-                    return el.text;
+            return $.access(this, function(el) {
+                if(this === $) { //getter
+                    if(el.tagName === "OPTION" || el.tagName === "SCRIPT") {
+                        return el.text;
+                    }
+                    return el.textContent || el.innerText || $.getText([el]);
+                } else { //setter
+                    this.empty().append(this.ownerDocument.createTextNode(item));
                 }
-                return el.textContent || el.innerText || $.getText([el]);
-            }, function() { //setter
-                this.empty().append(this.ownerDocument.createTextNode(item));
-            }, this);
+            }, null, arguments);
         },
         outerHTML: function(item) { // 取得或设置节点的outerHTML
-            return $.access(this, 0, item, function(el) {
-                if(el && el.nodeType === 1) {
+            return $.access(this, function(el) {
+                if(this === $) { //getter
                     return "outerHTML" in el ? el.outerHTML : outerHTML(el);
+                } else { //setter
+                    this.empty().replace(item);
                 }
-                return null;
-            }, function() {
-                this.empty().replace(item);
-            }, this);
+            }, null, arguments);
         }
     });
     $.fn = $.prototype;
@@ -275,26 +273,32 @@ define("node", ["support", "class", "query", "data"], function($) {
                 return false;
             }
         },
-        access: function(elems, key, value, getter, setter, bind) {
-            //用于统一配置多态方法的读写访问，涉及方法有text, html,outerHTML,data, attr, prop, val
-            var length = elems.length;
-            setter = typeof setter === "function" ? setter : getter;
-            bind = arguments[arguments.length - 1];
-            if(typeof key === "object") {
-                for(var k in key) { //为所有元素设置N个属性
-                    for(var i = 0; i < length; i++) {
-                        setter.call(bind, elems[i], k, key[k]);
+        access: function(elems, callback, directive, args) {
+            //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML,data, attr, prop, val, css
+            var length = elems.length,
+                key = args[0],
+                value = args[1];
+            if(args.length === 0 || args.length === 1 && typeof directive === "string") {
+                var first = elems[0];
+                return first && first.nodeType === 1 ? callback.call($, first, key) : void 0;
+            } else {
+                if(directive === null) {
+                    callback.call(elems, args);
+                } else {
+                    if(typeof key === "object") {
+                        for(var k in key) { //为所有元素设置N个属性
+                            for(var i = 0; i < length; i++) {
+                                callback.call(elems, elems[i], k, key[k]);
+                            }
+                        }
+                    } else {
+                        for(i = 0; i < length; i++) {
+                            callback.call(elems, elems[i], key, value);
+                        }
                     }
                 }
-                return elems;
             }
-            if(value !== void 0) {
-                for(i = 0; i < length; i++) {
-                    setter.call(bind, elems[i], key, value);
-                }
-                return elems;
-            } //取得第一个元素的属性, getter的参数总是少于setter
-            return length ? getter.call(bind, elems[0], key) : void 0;
+            return elems;
         },
         /**
          * 将字符串转换为文档碎片，如果没有传入文档碎片，自行创建一个
@@ -473,25 +477,28 @@ define("node", ["support", "class", "query", "data"], function($) {
         });
     }
     $.implement({
-        data: function(key, item) {
+        data: function(key, value) {
             if(key === void 0) { //如果什么都不传，则把用户数据与用户写在标签内以data-*形式储存的数据一并返回
                 if(this.length) {
                     var target = this[0],
                         data = $.data(target);
                     if(target.nodeType === 1 && !$._data(target, "parsedAttrs")) {
-                        for(var name in target.dataset) {
-                            $.parseData(target, name, data, target.dataset[name])
+                        for(var i = 0, attrs = target.attributes, attr; attr = attrs[i++];) {
+                            var name = attr.name;
+                            if(!name.indexOf("data-")) {
+                                $.parseData(target, name.slice(5), data, attr.value)
+                            }
                         }
                         $._data(target, "parsedAttrs", true);
                     }
                 }
                 return data;
             }
-            return $.access(this, key, item, function(el) {
+            return $.access(this, function(el, data) {
                 if(/^[^238]$/.test(el.nodeType)) {
-                    return $.data(el, key, item);
+                    return $.data(el, key, value);
                 }
-            })
+            }, key, arguments);
         },
         removeData: function(key) { //移除用户数据
             return this.each(function() {

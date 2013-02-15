@@ -138,7 +138,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
             return $.access(this, function(el, value) {
                 if(this === $) { //getter
                     return "innerHTML" in el ? el.innerHTML : innerHTML(el);
-                } else { //setter this为0
+                } else { //setter
                     value = item == null ? "" : item + ""; //如果item为null, undefined转换为空字符串，其他强制转字符串
                     //接着判断innerHTML属性是否符合标准,不再区分可读与只读
                     //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
@@ -278,8 +278,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
             }
         },
         access: function(elems, callback, directive, args) {
-            //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML,data, attr, prop, val
-            //css width height innerWidth innerHeight outerWidth outerHeight
+            //用于统一配置多态方法的读写访问，涉及方法有text, html, outerHTML,data, attr, prop, val, css
             var length = elems.length,
                 key = args[0],
                 value = args[1];

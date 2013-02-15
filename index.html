@@ -11,12 +11,13 @@
         <script src="mass.js"></script>
         <!--            <script src="jquery1.83.js"> </script>-->
         <script>
-            require("attr,ready", function($) {
+            require("css,attr,ready", function($) {
                 $("select").html("<option>aaa</option><option>aaa</option><option>aaa</option>");
                  $("select").text()
                  var a = $("a");
                  a.val("xxxxxxxxx");
                  console.log(a.val())
+                 console.log($(window).width())
                  
             })
         </script>

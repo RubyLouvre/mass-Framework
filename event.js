@@ -721,4 +721,6 @@ define("event", top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
  
  自定义下拉框
  http://odyniec.net/projects/selectlist/
+
+　　消息作为信封，信封内容是事件，这种异步机制是聚合根与外界交互的最好方式，在松耦合上要好于聚合根直接暴露自己的行为或者Hold其他聚合根，能够更加严密保护自己内部状态不被外界侵入。
  */

@@ -1,7 +1,7 @@
 //==================================================
 // 数据缓存模块(本模块只是用于试验WeakMap与Element.dataset)
 //==================================================
-define( ["lang"], function( $ ){
+define( "data", ["lang"], function( $ ){
     var caches = new WeakMap;//FF6+
     function innerData( owner, name, data, pvt ) {//IE678不能为文本节点注释节点添加数据
         var table = caches.get( owner );
@@ -56,18 +56,18 @@ define( ["lang"], function( $ ){
 
     $.mix( {
         hasData: function( target ) {
-            return caches.has(target)
+            return caches.has(target);////判定是否关联了数据 
         },
-        data: function( target, name, data ) {  // 读写数据
-            return innerData(target, name, data)
+        data: function( target, name, data ) {  // 读写用户数据
+            return innerData(target, name, data);
         },
-        _data: function(target,name,data){//仅内部调用
-            return innerData(target, name, data, true)
+        _data: function(target,name,data){//读写私有数据
+            return innerData(target, name, data, true);
         },
-        removeData: function(target, name){  //移除数据
+        removeData: function(target, name){  //移除用户数据
             return innerRemoveData(target, name);
         },
-        _removeData: function(target, name){//仅内部调用
+        _removeData: function(target, name){//移除私有数据
             return innerRemoveData(target, name, true);
         },
         parseData: function(target, name, table, value){
