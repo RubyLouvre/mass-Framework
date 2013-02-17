@@ -43,7 +43,6 @@ function(global, DOC) {
     //多版本共存
     if(typeof NsVal !== "function") {
         NsVal = $; //公用命名空间对象
-        NsVal.uuid = 1;
     }
     if(NsVal.mass !== mass) {
         NsVal[mass] = $; //保存当前版本的命名空间对象到公用命名空间对象上
@@ -110,7 +109,7 @@ function(global, DOC) {
          * @return {Number} 一个UUID
          */
         getUid: function(obj) { //IE9+,标准浏览器
-            return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
+            return obj.uniqueNumber || (obj.uniqueNumber = setTimeout("1"));
         },
         /**
          * 绑定事件(简化版)
