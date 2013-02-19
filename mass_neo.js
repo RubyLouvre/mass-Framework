@@ -65,7 +65,7 @@ function(global, DOC) {
         var args = Array.apply([], arguments),
             i = 1,
             key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] == "boolean" ? args.pop() : true;
+            ride = typeof args[args.length - 1] === "boolean" ? args.pop() : true;
         if(args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -315,10 +315,10 @@ function(global, DOC) {
         if(/^(mass|ready)$/.test(url)) { //特别处理ready标识符
             return [url, "js"];
         }
-        if(/^[-a-z0-9_$]{2,}$/i.test(url) && $.config.alias[url]) {
+        if($.config.alias[url]) {
             ret = $.config.alias[url];
         } else {
-            parent = parent.substr(0, parent.lastIndexOf('/'))
+            parent = parent.substr(0, parent.lastIndexOf('/'));
             if(/^(\w+)(\d)?:.*/.test(url)) { //如果用户路径包含协议
                 ret = url;
             } else {
@@ -382,7 +382,7 @@ function(global, DOC) {
     function checkCycle(deps, nick) {
         //检测是否存在循环依赖
         for(var id in deps) {
-            if(deps[id] === "司徒正美" && modules[id].state !== 2 && (id == nick || checkCycle(modules[id].deps, nick))) {
+            if(deps[id] === "司徒正美" && modules[id].state !== 2 && (id === nick || checkCycle(modules[id].deps, nick))) {
                 return true;
             }
         }
@@ -429,18 +429,18 @@ function(global, DOC) {
         node.onload = function() {
             //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
             var factory = parsings.pop();
-            factory && factory.delay(node.src)
+            factory && factory.delay(node.src);
             if(checkFail(node)) {
                 $.log("已成功加载 " + node.src, 7);
             }
-        }
+        };
         node.onerror = function() {
-            checkFail(node, true)
-        }
+            checkFail(node, true);
+        };
 
         node.src = url; //插入到head的第一个节点前，防止IE6下head标签没闭合前使用appendChild抛错
         head.appendChild(node, head.firstChild); //chrome下第二个参数不能为null
-        $.log("正准备加载 " + node.src, 7) //更重要的是IE6下可以收窄getCurrentScript的寻找范围
+        $.log("正准备加载 " + node.src, 7); //更重要的是IE6下可以收窄getCurrentScript的寻找范围
     }
 
 
@@ -503,14 +503,14 @@ function(global, DOC) {
             deps: deps,
             args: args,
             state: 1
-        }
+        };
         if(dn === cn) { //如果需要安装的等于已安装好的
             fireFactory(id, args, factory); //装配到框架中
             return checkDeps();
         }
         //在正常情况下模块只能通过_checkDeps执行
         loadings.unshift(id);
-    }
+    };
     /**
      * 请求模块
      * @param {String} id ? 模块ID
@@ -529,7 +529,7 @@ function(global, DOC) {
             }
             args.shift();
         }
-        if(typeof args[0] == "function") {
+        if(typeof args[0] === "function") {
             args.unshift([]);
         } //上线合并后能直接得到模块ID,否则寻找当前正在解析中的script节点的src作为模块ID
         //但getCurrentScript方法只对IE6-10,FF4+有效,其他使用onload+delay闭包组合
@@ -543,13 +543,13 @@ function(global, DOC) {
             }
             delete factory.delay; //释放内存
             require.apply(null, args); //0,1,2 --> 1,2,0
-        }
+        };
         if(id) {
             factory.delay(id, args);
         } else { //先进先出
             parsings.push(factory);
         }
-    }
+    };
     $.require.amd = modules;
     /**
      * 请求模块从modules对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
@@ -575,7 +575,7 @@ function(global, DOC) {
         $.config.alias["$" + a] = basepath + a + ".js";
     });
     //============================domReady机制===========================
-    var readyFn, ready = "DOMContentLoaded"
+    var readyFn, ready = "DOMContentLoaded";
 
     function fireReady() {
         modules.ready.state = 2;
