@@ -11,7 +11,7 @@
     var mass = 1; //当前框架的版本号
     var postfix = ""; //用于强制别名
     var cbi = 1e5; //用于生成回调函数的名字
-    var all = "mass,lang,class,interact,data,support,query,support,node,attr,css,event,ajax,fx";
+    var all = "mass,lang,class,interact,data,support,query,node,attr,css,event,ajax,fx";
     var moduleClass = "mass" + (new Date - 0);
     var hasOwn = Object.prototype.hasOwnProperty;
     var class2type = {
