@@ -21,7 +21,7 @@ define("attr", !! top.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
         return ret === "input" && /checkbox|radio/.test(el.type) ? "checked" : ret;
     }
 
-    $.implement({
+    $.fn.extend({
         /**
          *  为所有匹配的元素节点添加className，添加多个className要用空白隔开
          *  如$("body").addClass("aaa");$("body").addClass("aaa bbb");

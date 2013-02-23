@@ -60,8 +60,7 @@ define("interact", ["class"], function($) {
     });
     //用于处理需要通过N个子步骤才能完成的一些操作
     //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
-    $.Flow = $.factory({
-        inherit: $.Observer,
+    $.Flow =  $.Observer.extend({
         init: function(timeout) {
             this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
             if(typeof timeout == "number") {

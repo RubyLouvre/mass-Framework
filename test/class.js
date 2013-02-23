@@ -13,22 +13,20 @@ define( "$class".split(","), function( $ ){
                 instance_fn2:function(){
                     return "ancestor_instance2"
                 },
-                extend:{
+                statics:{
                     class_fn:function(){
                         return "ancestor_class";
                     }
                 }
             });
-            var Parent = $.factory({
-                inherit:Ancestor,
-                extend:{
+            var Parent = $.factory(Ancestor, {
+                statics:{
                     class_fn:function(){
                         return "parent_class";
                     }
                 }
             });
-            var Son = $.factory({
-                inherit:Parent,
+            var Son = Parent.extend({
                 init:function(name,age){
                     this.age = age;
                 },
@@ -38,7 +36,7 @@ define( "$class".split(","), function( $ ){
                 instance_fn3:function(){
                     return "instance_fn3"
                 },
-                extend:{
+                statics:{
                     class_fn:function(){
                         return "son_class";
                     }

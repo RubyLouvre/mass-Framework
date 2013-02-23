@@ -489,7 +489,7 @@ define("event", top.dispatchEvent ? ["node"] : ["event_fix"], function($) {
     facade.bind = facade.add;
     facade.unbind = facade.remove;
     //以下是用户使用的API
-    $.implement({
+    $.fn.extend({
         hover: function(fnIn, fnOut) {
             return this.mouseenter(fnIn).mouseleave(fnOut || fnIn);
         },

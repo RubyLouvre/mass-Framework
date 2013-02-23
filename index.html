@@ -10,19 +10,46 @@
         </style>
         <script src="mass.js"></script>
         <script>
-            require("css,attr,fx", function($) {
-              console.log(require.amd)
+            require("class,node", function($) {
+
+                var Animal = $.factory({
+                    init: function(name) {
+                        this.name = name
+                    },
+                    getName: function() {
+                        return this.name;
+                    },
+                    setName: function(name) {
+                        this.name = name;
+                    }
+                });
+              
+                var a = new Animal("zzz");
+                var Dog = $.factory(Animal, {
+                    init: function(name, age) {
+                        this.age = age;
+                    },
+                    getAge: function() {
+                        return this.age;
+                    },
+                    setAge: function(age) {
+                        this.age = age;
+                    }
+                });
+                
+                var dog = new Dog("dog",222);
+            
+                console.log(a);
+                console.log(dog)
+
             })
         </script>
     </head>
 
     <body>
-        <select id="test-select">
-            <option id="test-opt"  value="1">0</option>
-            <option disabled>2</option>
-            <option disabled>3</option>
-        </select>
-        <a href="aaa">dddd</a>
+
+        <button onclick="">Test</button>
+        <a href="aaa">司徒正美</a>
     </body>
 
 

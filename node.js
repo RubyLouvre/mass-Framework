@@ -30,7 +30,10 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         return node.cloneNode(true)
     }
     $.fixParseHTML = $.fixParseHTML || $.noop;
-    $.mix($.factory).implement({
+    $.fn = $.prototype;
+    $.fn.extend = $.factory.extend;
+    $.extend = $.mix;
+    $.fn.extend({
         init: function(expr, context) {
             // 分支1: 处理空白字符串,null,undefined参数
             if(!expr) {
@@ -180,7 +183,6 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
             }, null, arguments);
         }
     });
-    $.fn = $.prototype;
     $.fn.init.prototype = $.fn;
     "push,unshift,pop,shift,splice,sort,reverse".replace($.rword, function(method) {
         $.fn[method] = function() {
@@ -466,7 +468,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         }
         return nodes;
     }
-    $.implement({
+    $.fn.extend({
         data: function(key, value) {
             if(key === void 0) { //如果什么都不传，则把用户数据与用户写在标签内以data-*形式储存的数据一并返回
                 if(this.length) {
@@ -546,7 +548,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         return ret.join("");
     }
 
-    $.implement({
+    $.fn.extend({
         find: function(expr) {
             //取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。
             return this.labor($.query(expr, this));
