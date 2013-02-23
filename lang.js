@@ -49,7 +49,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
          * @return {Boolean}
          */
         isPlainObject: function(obj) {
-            if(!$.type(obj, "Object") || $.isNative(obj, "reload")) {
+            if(!$.type(obj, "Object") || $.isNative( "reload", obj)) {
                 return false;
             }
             try { //不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
@@ -63,12 +63,12 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             return true;
         },
         /**
-         * 判定method是否为obj的原生方法，如$.isNative(window,"JSON")
-         * @param {Any} obj 对象
+         * 判定method是否为obj的原生方法，如$.isNative("JSON",window)
          * @param {Function} method
+		 * @param {Any} obj 对象
          * @return {Boolean}
          */
-        isNative: function(obj, method) {
+        isNative: function(method, obj) {
             var m = obj ? obj[method] : false,
                 r = new RegExp(method, "g");
             return !!(m && typeof m != "string" && sopen === (m + "").replace(r, ""));
