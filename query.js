@@ -13,7 +13,7 @@ define("query", ["mass"], function($) {
         contains: function(a, b, itself) {
             // 第一个节点是否包含第二个节点
             //contains 方法支持情况：chrome+ firefox9+ ie5+, opera9.64+(估计从9.0+),safari5.1.7+
-            if (a == b) {
+            if (a === b) {
                 return !!itself;
             }
             if (a.nodeType === 9)
@@ -52,16 +52,26 @@ define("query", ["mass"], function($) {
                     array = [],
                     uniqResult = {},
                     node = nodes[0],
-                    index, ri = 0
+                    index, ri = 0,
+                    sourceIndex = typeof node.sourceIndex === "number",
+                    compare = typeof node.compareDocumentPosition == "function";
             //如果支持sourceIndex我们将使用更为高效的节点排序
             //http://www.cnblogs.com/jkisjk/archive/2011/01/28/array_quickly_sortby.html
-            if (node.sourceIndex) { //IE opera
+
+            if (!sourceIndex && !compare) { //用于旧式IE的XML
+                var all = (node.ownerDocument || node).geElementsByTagName("*");
+                for (var index = 0; node = all[index]; index++) {
+                    node.setAttribute("sourceIndex", index);
+                }
+                sourceIndex = true;
+            }
+            if (sourceIndex) { //IE opera
                 for (var i = 0, n = nodes.length; i < n; i++) {
                     node = nodes[i];
-                    index = node.sourceIndex + 1e8;
+                    index = (node.sourceIndex || node.getAttribute("sourceIndex")) + 1e8;
                     if (!uniqResult[index]) {
                         (array[ri++] = new String(index))._ = node;
-                        uniqResult[index] = 1
+                        uniqResult[index] = 1;
                     }
                 }
                 array.sort();
@@ -69,20 +79,30 @@ define("query", ["mass"], function($) {
                     result[--ri] = array[ri]._;
                 return result;
             } else {
-                var sortOrder = node.compareDocumentPosition ? sortOrder1 : sortOrder2;
                 nodes.sort(sortOrder);
                 if (sortOrder.hasDuplicate) {
-                    for (i = 1; i < nodes.length; i++) {
+                  for (i = 1; i < nodes.length; i++) {
                         if (nodes[i] === nodes[i - 1]) {
                             nodes.splice(i--, 1);
                         }
                     }
                 }
-                sortOrder.hasDuplicate = false;
+                sortOrder.hasDuplicate = false; //还原
                 return nodes;
             }
         }
     });
+
+    function sortOrder(a, b) {
+        if (a === b) {
+            sortOrder.hasDuplicate = true;
+            return 0;
+        } //现在标准浏览器的HTML与XML好像都支持compareDocumentPosition
+        if (!a.compareDocumentPosition || !b.compareDocumentPosition) {
+            return a.compareDocumentPosition ? -1 : 1;
+        }
+        return a.compareDocumentPosition(b) & 4 ? -1 : 1;
+    }
     var reg_combinator = /^\s*([>+~,\s])\s*(\*|(?:[-\w*]|[^\x00-\xa0]|\\.)*)/,
             trimLeft = /^\s+/,
             trimRight = /\s+$/,
@@ -108,78 +128,7 @@ define("query", ["mass"], function($) {
     }
 
 
-    function sortOrder1(a, b) {
-        if (a === b) {
-            sortOrder1.hasDuplicate = true;
-            return 0;
-        }
-        if (!a.compareDocumentPosition || !b.compareDocumentPosition) {
-            return a.compareDocumentPosition ? -1 : 1;
-        }
-        return a.compareDocumentPosition(b) & 4 ? -1 : 1;
-    }
-    ;
 
-    function sortOrder2(a, b) { //处理旧式的标准浏览器与XML
-        if (a === b) {
-            sortOrder2.hasDuplicate = true;
-            return 0;
-        }
-        var al, bl, ap = [],
-                bp = [],
-                aup = a.parentNode,
-                bup = b.parentNode,
-                cur = aup;
-        //如果是属于同一个父节点，那么就比较它们在childNodes中的位置
-        if (aup === bup) {
-            return siblingCheck(a, b);
-            // If no parents were found then the nodes are disconnected
-        } else if (!aup) {
-            return -1;
-
-        } else if (!bup) {
-            return 1;
-        }
-        // Otherwise they're somewhere else in the tree so we need
-        // to build up a full list of the parentNodes for comparison
-        while (cur) {
-            ap.unshift(cur);
-            cur = cur.parentNode;
-        }
-
-        cur = bup;
-
-        while (cur) {
-            bp.unshift(cur);
-            cur = cur.parentNode;
-        }
-
-        al = ap.length;
-        bl = bp.length;
-
-        for (var i = 0; i < al && i < bl; i++) {
-            if (ap[i] !== bp[i]) {
-                return siblingCheck(ap[i], bp[i]);
-            }
-        }
-        return i === al ? siblingCheck(a, bp[i], -1) : siblingCheck(ap[i], b, 1);
-    }
-    ;
-
-    function siblingCheck(a, b, ret) {
-        if (a === b) {
-            return ret;
-        }
-        var cur = a.nextSibling;
-
-        while (cur) {
-            if (cur === b) {
-                return -1;
-            }
-            cur = cur.nextSibling;
-        }
-        return 1;
-    }
     var slice = Array.prototype.slice,
             makeArray = function(nodes, result, flag_multi) {
         nodes = slice.call(nodes, 0);
@@ -518,10 +467,9 @@ define("query", ["mass"], function($) {
     $.mix(Icarus, {
         //getAttribute总会返回字符串
         //http://reference.sitepoint.com/javascript/Element/getAttribute
-        getAttribute: !fixGetAttribute ?
-                function(elem, name) {
-                    return elem.getAttribute(name) || '';
-                } : function(elem, name, flag_xml) {
+        getAttribute: !fixGetAttribute ? function(elem, name) {
+            return elem.getAttribute(name) || '';
+        } : function(elem, name, flag_xml) {
             if (flag_xml)
                 return elem.getAttribute(name) || '';
             name = name.toLowerCase();
@@ -539,10 +487,9 @@ define("query", ["mass"], function($) {
             var attr = boolOne[name] ? (elem.getAttribute(name) ? name : '') : (elem = elem.getAttributeNode(name)) && elem.value || '';
             return reg_sensitive.test(name) ? attr : attr.toLowerCase();
         },
-        hasAttribute: !fixHasAttribute ?
-                function(elem, name, flag_xml) {
-                    return flag_xml ? !!elem.getAttribute(name) : elem.hasAttribute(name);
-                } : function(elem, name) {
+        hasAttribute: !fixHasAttribute ? function(elem, name, flag_xml) {
+            return flag_xml ? !!elem.getAttribute(name) : elem.hasAttribute(name);
+        } : function(elem, name) {
             //http://help.dottoro.com/ljnqsrfe.php
             name = name.toLowerCase();
             //如果这个显式设置的属性是""，即使是outerHTML也寻不见其踪影
@@ -904,7 +851,7 @@ define("query", ["mass"], function($) {
             return el === el.ownerDocument.activeElement;
         },
         focus: function(el) {
-            return(el.type || el.href) && el === el.ownerDocument.activeElement;
+            return (el.type || el.href) && el === el.ownerDocument.activeElement;
         },
         indeterminate: function(node) { //标准
             return node.indeterminate === true && node.type === "checkbox"
@@ -980,7 +927,7 @@ define("query", ["mass"], function($) {
 
     "text,radio,checkbox,file,password,submit,image,reset".replace($.rword, function(name) {
         Icarus.pseudoHooks[name] = function(el) {
-            return(el.getAttribute("type") || el.type) === name; //避开HTML5新增类型导致的BUG，不直接使用el.type === name;
+            return (el.getAttribute("type") || el.type) === name; //避开HTML5新增类型导致的BUG，不直接使用el.type === name;
         }
     });
     return Icarus;
