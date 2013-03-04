@@ -66,7 +66,7 @@
 
 
     function mix(receiver, supplier) {
-        var args = Array.call([], arguments)[0],
+        var args = Array.call(0, arguments)[0],
                 i = 1,
                 key, //如果最后参数是布尔，判定是否覆写同名属性
                 ride = typeof args[args.length - 1] === "boolean" ? args.pop() : true;
