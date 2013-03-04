@@ -3,12 +3,12 @@
 //==========================================
 define("query", ["mass"], function($) {
     var global = this,
-            DOC = global.document;
+        DOC = global.document;
     $.mix({
         isXML: function(el) {
             //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
             var doc = el.ownerDocument || el
-            return doc.createElement("p").nodeName !== doc.createElement("P").nodeName;
+            return doc.createElement("p").nodeName === "p";
         },
         contains: function(a, b, itself) {
             // 第一个节点是否包含第二个节点
@@ -16,23 +16,21 @@ define("query", ["mass"], function($) {
             if (a === b) {
                 return !!itself;
             }
-            if (a.nodeType === 9)
-                return true;
+            if (a.nodeType === 9) return true;
             if (a.contains) {
                 return a.contains(b);
             } else if (a.compareDocumentPosition) {
                 return !!(a.compareDocumentPosition(b) & 16);
             }
             while ((b = b.parentNode))
-                if (a === b)
-                    return true;
+            if (a === b) return true;
             return false;
         },
         getText: function() {
             //获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本，
             //为了让结果在所有浏览器下一致，忽略所有空白节点，因此它非元素的innerText或textContent
             return function getText(nodes) {
-                for (var i = 0, ret = "", node; node = nodes[i++]; ) {
+                for (var i = 0, ret = "", node; node = nodes[i++];) {
                     // 对得文本节点与CDATA的内容
                     if (node.nodeType === 3 || node.nodeType === 4) {
                         ret += node.nodeValue;
@@ -49,12 +47,12 @@ define("query", ["mass"], function($) {
                 return nodes;
             }
             var result = [],
-                    array = [],
-                    uniqResult = {},
-                    node = nodes[0],
-                    index, ri = 0,
-                    sourceIndex = typeof node.sourceIndex === "number",
-                    compare = typeof node.compareDocumentPosition == "function";
+                array = [],
+                uniqResult = {},
+                node = nodes[0],
+                index, ri = 0,
+                sourceIndex = typeof node.sourceIndex === "number",
+                compare = typeof node.compareDocumentPosition == "function";
             //如果支持sourceIndex我们将使用更为高效的节点排序
             //http://www.cnblogs.com/jkisjk/archive/2011/01/28/array_quickly_sortby.html
 
@@ -76,12 +74,12 @@ define("query", ["mass"], function($) {
                 }
                 array.sort();
                 while (ri)
-                    result[--ri] = array[ri]._;
+                result[--ri] = array[ri]._;
                 return result;
             } else {
                 nodes.sort(sortOrder);
                 if (sortOrder.hasDuplicate) {
-                  for (i = 1; i < nodes.length; i++) {
+                    for (i = 1; i < nodes.length; i++) {
                         if (nodes[i] === nodes[i - 1]) {
                             nodes.splice(i--, 1);
                         }
@@ -104,23 +102,26 @@ define("query", ["mass"], function($) {
         return a.compareDocumentPosition(b) & 4 ? -1 : 1;
     }
     var reg_combinator = /^\s*([>+~,\s])\s*(\*|(?:[-\w*]|[^\x00-\xa0]|\\.)*)/,
-            trimLeft = /^\s+/,
-            trimRight = /\s+$/,
-            reg_quick = /^(^|[#.])((?:[-\w]|[^\x00-\xa0]|\\.)+)$/,
-            reg_comma = /^\s*,\s*/,
-            reg_sequence = /^([#\.:]|\[\s*)((?:[-\w]|[^\x00-\xa0]|\\.)+)/,
-            reg_pseudo = /^\(\s*("([^"]*)"|'([^']*)'|[^\(\)]*(\([^\(\)]*\))?)\s*\)/,
-            reg_attrib = /^\s*(?:(\S?=)\s*(?:(['"])(.*?)\2|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/
-    reg_attrval = /\\([0-9a-fA-F]{2,2})/g, reg_sensitive = /^(title|id|name|class|for|href|src)$/, reg_backslash = /\\/g, reg_tag = /^((?:[-\w\*]|[^\x00-\xa0]|\\.)+)/, //能使用getElementsByTagName处理的CSS表达式
-            hash_operator = {
-        "=": 1,
-        "!=": 2,
-        "|=": 3,
-        "~=": 4,
-        "^=": 5,
-        "$=": 6,
-        "*=": 7
-    };
+        trimLeft = /^\s+/,
+        trimRight = /\s+$/,
+        reg_quick = /^(^|[#.])((?:[-\w]|[^\x00-\xa0]|\\.)+)$/,
+        reg_comma = /^\s*,\s*/,
+        reg_sequence = /^([#\.:]|\[\s*)((?:[-\w]|[^\x00-\xa0]|\\.)+)/,
+        reg_pseudo = /^\(\s*("([^"]*)"|'([^']*)'|[^\(\)]*(\([^\(\)]*\))?)\s*\)/,
+        reg_attrib = /^\s*(?:(\S?=)\s*(?:(['"])(.*?)\2|(#?(?:[\w\u00c0-\uFFFF\-]|\\.)*)|)|)\s*\]/,
+        reg_attrval = /\\([0-9a-fA-F]{2,2})/g,
+        reg_sensitive = /^(title|id|name|class|for|href|src)$/,
+        reg_backslash = /\\/g,
+        reg_tag = /^((?:[-\w\*]|[^\x00-\xa0]|\\.)+)/, //能使用getElementsByTagName处理的CSS表达式
+        hash_operator = {
+            "=": 1,
+            "!=": 2,
+            "|=": 3,
+            "~=": 4,
+            "^=": 5,
+            "$=": 6,
+            "*=": 7
+        };
 
     if (trimLeft.test("\xA0")) {
         trimLeft = /^[\s\xA0]+/;
@@ -130,23 +131,23 @@ define("query", ["mass"], function($) {
 
 
     var slice = Array.prototype.slice,
-            makeArray = function(nodes, result, flag_multi) {
-        nodes = slice.call(nodes, 0);
-        if (result) {
-            result.push.apply(result, nodes);
-        } else {
-            result = nodes;
-        }
-        return flag_multi ? $.unique(result) : result;
-    };
+        makeArray = function(nodes, result, flag_multi) {
+            nodes = slice.call(nodes, 0);
+            if (result) {
+                result.push.apply(result, nodes);
+            } else {
+                result = nodes;
+            }
+            return flag_multi ? $.unique(result) : result;
+        };
     //IE56789无法使用数组方法转换节点集合
     try {
         slice.call($.html.childNodes, 0)[0].nodeType;
     } catch (e) {
         makeArray = function(nodes, result, flag_multi) {
             var ret = result || [],
-                    ri = ret.length;
-            for (var i = 0, el; el = nodes[i++]; ) {
+                ri = ret.length;
+            for (var i = 0, el; el = nodes[i++];) {
                 ret[ri++] = el
             }
             return flag_multi ? $.unique(ret) : ret;
@@ -169,9 +170,9 @@ define("query", ["mass"], function($) {
 
     function getElementsByTagName(tagName, els, flag_xml) {
         var method = "getElementsByTagName",
-                elems = [],
-                uniqResult = {},
-                prefix
+            elems = [],
+            uniqResult = {},
+            prefix
         if (flag_xml && tagName.indexOf(":") > 0 && els.length && els[0].lookupNamespaceURI) {
             var arr = tagName.split(":");
             prefix = arr[0];
@@ -185,16 +186,16 @@ define("query", ["mass"], function($) {
             case 1:
                 //在IE67下，如果存在一个name为length的input元素，下面的all.length返回此元素，而不是长度值
                 var all = prefix ? els[0][method](prefix, tagName) : els[0][method](tagName);
-                for (var i = 0, ri = 0, el; el = all[i++]; ) {
+                for (var i = 0, ri = 0, el; el = all[i++];) {
                     if (el.nodeType === 1) { //防止混入注释节点
                         elems[ri++] = el
                     }
                 }
                 return elems;
             default:
-                for (i = 0, ri = 0; el = els[i++]; ) {
+                for (i = 0, ri = 0; el = els[i++];) {
                     var nodes = prefix ? el[method](prefix, tagName) : el[method](tagName)
-                    for (var j = 0, node; node = nodes[j++]; ) {
+                    for (var j = 0, node; node = nodes[j++];) {
                         var uid = $.getUid(node);
 
                         if (!uniqResult[uid]) {
@@ -207,7 +208,7 @@ define("query", ["mass"], function($) {
     }
     //IE9 以下的XML文档不能直接设置自定义属性
     var attrURL = $.oneObject('action,cite,codebase,data,href,longdesc,lowsrc,src,usemap', 2);
-    var bools = $["@bools"] = "autofocus,autoplay,async,checked,controls,declare,disabled,defer,defaultChecked," + "contentEditable,ismap,loop,multiple,noshade,open,noresize,readOnly,selected"
+    var bools = "autofocus,autoplay,async,checked,controls,declare,disabled,defer,defaultChecked," + "contentEditable,ismap,loop,multiple,noshade,open,noresize,readOnly,selected"
     var boolOne = $.oneObject(bools.toLowerCase());
 
     //检测各种BUG（fixGetAttribute，fixHasAttribute，fixById，fixByTag）
@@ -217,15 +218,15 @@ define("query", ["mass"], function($) {
     new function() {
         var select = DOC.createElement("select");
         var option = select.appendChild(DOC.createElement("option"));
-        option.setAttribute("selected", "selected")
-        option.className = "x"
-        fixGetAttribute = option.getAttribute("class") != "x";
+        option.setAttribute("selected", "selected");
+        option.className = "x";
+        fixGetAttribute = option.getAttribute("class") !== "x";
         select.appendChild(DOC.createComment(""));
-        fixByTag = select.getElementsByTagName("*").length == 2
+        fixByTag = select.getElementsByTagName("*").length === 2;
         var all = DOC.getElementsByTagName("*"),
-                node, nodeType, comments = [],
-                i = 0,
-                j = 0;
+            node, nodeType, comments = [],
+            i = 0,
+            j = 0;
         while ((node = all[i++])) {
             nodeType = node.nodeType;
             nodeType === 1 ? $.getUid(node) : nodeType === 8 ? comments.push(node) : 0;
@@ -236,11 +237,11 @@ define("query", ["mass"], function($) {
         fixHasAttribute = select.hasAttribute ? !option.hasAttribute('selected') : true;
 
         var form = DOC.createElement("div"),
-                id = "fixId" + (new Date()).getTime(),
-                root = $.html;
+            id = "fixId" + (new Date()).getTime(),
+            root = $.html;
         form.innerHTML = "<a name='" + id + "'/>";
         root.insertBefore(form, root.firstChild);
-        fixById = !!DOC.getElementById(id);
+        fixById = !! DOC.getElementById(id);
         root.removeChild(form)
     };
 
@@ -267,8 +268,7 @@ define("query", ["mass"], function($) {
             return false;
         }
         return result;
-    }
-    ;
+    };
     /**
      * 选择器
      * @param {String} expr CSS表达式
@@ -287,34 +287,31 @@ define("query", ["mass"], function($) {
         var pushResult = makeArray;
         if (!contexts.nodeType) { //实现对多上下文的支持
             contexts = pushResult(contexts);
-            if (!contexts.length)
-                return result
+            if (!contexts.length) return result
         } else {
             contexts = [contexts];
         }
         var rrelative = reg_combinator,
-                //保存到本地作用域
-                rquick = reg_quick,
-                rBackslash = reg_backslash,
-                rcomma = reg_comma,
-                //用于切割并联选择器
-                context = contexts[0],
-                doc = context.ownerDocument || context,
-                rtag = reg_tag,
-                flag_all, uniqResult, elems, nodes, tagName, last, ri, uid;
+            //保存到本地作用域
+            rquick = reg_quick,
+            rBackslash = reg_backslash,
+            rcomma = reg_comma,
+            //用于切割并联选择器
+            context = contexts[0],
+            doc = context.ownerDocument || context,
+            rtag = reg_tag,
+            flag_all, uniqResult, elems, nodes, tagName, last, ri, uid;
         //将这次得到的结果集放到最终结果集中
         //如果要从多个上下文中过滤孩子
         expr = expr.replace(trimLeft, "").replace(trimRight, "");
         flag_xml = flag_xml !== void 0 ? flag_xml : $.isXML(doc);
-        if (flag_xml && expr === "body" && context.body)
-            return pushResult([context.body], result, flag_multi);
+        if (flag_xml && expr === "body" && context.body) return pushResult([context.body], result, flag_multi);
         if (!flag_xml && doc.querySelectorAll) {
             var query = expr;
             if (contexts.length > 2 || doc.documentMode == 8 && context.nodeType == 1) {
-                if (contexts.length > 2)
-                    context = doc;
+                if (contexts.length > 2) context = doc;
                 query = ".fix_icarus_sqa " + query; //IE8也要使用类名确保查找范围
-                for (var i = 0, node; node = contexts[i++]; ) {
+                for (var i = 0, node; node = contexts[i++];) {
                     if (node.nodeType === 1) {
                         node.className = "fix_icarus_sqa " + node.className;
                     }
@@ -323,10 +320,9 @@ define("query", ["mass"], function($) {
             if (doc.documentMode !== 8 || context.nodeName.toLowerCase() !== "object") {
                 try {
                     return pushResult(context.querySelectorAll(query), result, flag_multi);
-                } catch (e) {
-                } finally {
+                } catch (e) {} finally {
                     if (query.indexOf(".fix_icarus_sqa") === 0) { //如果为上下文添加了类名，就要去掉类名
-                        for (i = 0; node = contexts[i++]; ) {
+                        for (i = 0; node = contexts[i++];) {
                             if (node.nodeType === 1) {
                                 node.className = node.className.replace("fix_icarus_sqa ", "");
                             }
@@ -338,7 +334,7 @@ define("query", ["mass"], function($) {
         var match = expr.match(rquick);
         if (match) { //对只有单个标签，类名或ID的选择器进行提速
             var value = match[2].replace(rBackslash, ""),
-                    key = match[1];
+                key = match[1];
             if (key == "") { //tagName;
                 nodes = getElementsByTagName(value, contexts, flag_xml);
             } else if (key === "." && contexts.length === 1) { //className，并且上下文只有1个
@@ -402,8 +398,7 @@ define("query", ["mass"], function($) {
                             while ((node = lastResult[i++])) {
                                 while ((node = node.nextSibling)) {
                                     if (node.nodeType === 1) {
-                                        if (flag_all || tagName === node.nodeName)
-                                            elems[ri++] = node;
+                                        if (flag_all || tagName === node.nodeName) elems[ri++] = node;
                                         break;
                                     }
                                 }
@@ -455,13 +450,12 @@ define("query", ["mass"], function($) {
                 return pushResult(elems, result, flag_multi);
             }
         } else if (DOC !== doc || fixByTag && flag_dirty) {
-            for (result = [], ri = 0, i = 0; node = elems[i++]; )
-                if (node.nodeType === 1)
-                    result[ri++] = node;
-            return result
+            for (result = [], ri = 0, i = 0; node = elems[i++];)
+            if (node.nodeType === 1) result[ri++] = node;
+            return result;
         }
         return elems;
-    }
+    };
     var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
 
     $.mix(Icarus, {
@@ -470,8 +464,7 @@ define("query", ["mass"], function($) {
         getAttribute: !fixGetAttribute ? function(elem, name) {
             return elem.getAttribute(name) || '';
         } : function(elem, name, flag_xml) {
-            if (flag_xml)
-                return elem.getAttribute(name) || '';
+            if (flag_xml) return elem.getAttribute(name) || '';
             name = name.toLowerCase();
             //http://jsfox.cn/blog/javascript/get-right-href-attribute.html
             if (attrURL[name]) { //得到href属性里原始链接，不自动转绝对地址、汉字和符号都不编码
@@ -488,7 +481,7 @@ define("query", ["mass"], function($) {
             return reg_sensitive.test(name) ? attr : attr.toLowerCase();
         },
         hasAttribute: !fixHasAttribute ? function(elem, name, flag_xml) {
-            return flag_xml ? !!elem.getAttribute(name) : elem.hasAttribute(name);
+            return flag_xml ? !! elem.getAttribute(name) : elem.hasAttribute(name);
         } : function(elem, name) {
             //http://help.dottoro.com/ljnqsrfe.php
             name = name.toLowerCase();
@@ -498,15 +491,15 @@ define("query", ["mass"], function($) {
         },
         filter: function(expr, elems, lastResult, doc, flag_xml, flag_get) {
             var rsequence = reg_sequence,
-                    rattrib = reg_attrib,
-                    rpseudo = reg_pseudo,
-                    rBackslash = reg_backslash,
-                    rattrval = reg_attrval,
-                    pushResult = makeArray,
-                    toHex = _toHex,
-                    _hash_op = hash_operator,
-                    parseNth = parse_nth,
-                    match, key, tmp;
+                rattrib = reg_attrib,
+                rpseudo = reg_pseudo,
+                rBackslash = reg_backslash,
+                rattrval = reg_attrval,
+                pushResult = makeArray,
+                toHex = _toHex,
+                _hash_op = hash_operator,
+                parseNth = parse_nth,
+                match, key, tmp;
             while (match = expr.match(rsequence)) { //主循环
                 expr = RegExp.rightContext;
                 key = (match[2] || "").replace(rBackslash, "");
@@ -543,8 +536,8 @@ define("query", ["mass"], function($) {
                 }
                 //取得用于过滤的函数，函数参数或数组
                 var filter = 0,
-                        flag_not = false,
-                        args;
+                    flag_not = false,
+                    args;
                 switch (match[1]) {
                     case "#":
                         //ID选择器
@@ -559,7 +552,7 @@ define("query", ["mass"], function($) {
                         tmp = Icarus.pseudoHooks[key];
                         if (match = expr.match(rpseudo)) {
                             expr = RegExp.rightContext;
-                            if (!!~key.indexOf("nth")) {
+                            if ( !! ~key.indexOf("nth")) {
                                 args = parseNth[match[1]] || parseNth(match[1]);
                             } else {
                                 args = match[3] || match[2] || match[1]
@@ -574,9 +567,8 @@ define("query", ["mass"], function($) {
                             } else if (reg_tag.test(args)) { //处理反选伪类中的标签选择器
                                 tmp = [];
                                 match = flag_xml ? args : args.toUpperCase();
-                                for (var i = 0, ri = 0, elem; elem = elems[i++]; )
-                                    if (match !== elem.nodeName)
-                                        tmp[ri++] = elem;
+                                for (var i = 0, ri = 0, elem; elem = elems[i++];)
+                                if (match !== elem.nodeName) tmp[ri++] = elem;
                                 elems = tmp;
                             } else {
                                 var obj = Icarus.filter(args, elems, lastResult, doc, flag_xml, true);
@@ -614,14 +606,12 @@ define("query", ["mass"], function($) {
                         if (onePosition[key]) {
                             //如果args为void则将集合的最大索引值传进去，否则将exp转换为数字
                             args = args === void 0 ? elems.length - 1 : ~~args;
-                            for (; elem = elems[i]; ) {
-                                if (filter(i++, args) ^ flag_not)
-                                    tmp[ri++] = elem;
+                            for (; elem = elems[i];) {
+                                if (filter(i++, args) ^ flag_not) tmp[ri++] = elem;
                             }
                         } else {
                             while ((elem = elems[i++])) {
-                                if ((!!filter(elem, args)) ^ flag_not)
-                                    tmp[ri++] = elem;
+                                if (( !! filter(elem, args)) ^ flag_not) tmp[ri++] = elem;
                             }
                         }
                     } else if (typeof filter.exec === "function") { //如果是子元素过滤伪类
@@ -631,14 +621,14 @@ define("query", ["mass"], function($) {
                         }, elems, args, doc);
                     } else {
                         var name = filter[0],
-                                op = _hash_op[filter[1]],
-                                val = filter[2] || "",
-                                flag, attr;
+                            op = _hash_op[filter[1]],
+                            val = filter[2] || "",
+                            flag, attr;
                         if (!flag_xml && name === "class" && op === 4) { //如果是类名
                             val = " " + val + " ";
                             while ((elem = elems[i++])) {
                                 var className = elem.className;
-                                if (!!(className && (" " + className + " ").indexOf(val) > -1) ^ flag_not) {
+                                if ( !! (className && (" " + className + " ").indexOf(val) > -1) ^ flag_not) {
                                     tmp[ri++] = elem;
                                 }
                             }
@@ -687,8 +677,7 @@ define("query", ["mass"], function($) {
                                             break;
                                     }
                                 }
-                                if (flag ^ flag_not)
-                                    tmp[ri++] = elem;
+                                if (flag ^ flag_not) tmp[ri++] = elem;
                             }
                         }
                     }
@@ -704,22 +693,22 @@ define("query", ["mass"], function($) {
         return {
             exec: function(flags, lastResult, args) {
                 var result = [],
-                        flag_not = flags.not,
-                        child = strchild,
-                        sibling = strsibling,
-                        ofType = type,
-                        cache = {},
-                        lock = {},
-                        a = args.a,
-                        b = args.b,
-                        i = 0,
-                        ri = 0,
-                        el, found, diff, count;
+                    flag_not = flags.not,
+                    child = strchild,
+                    sibling = strsibling,
+                    ofType = type,
+                    cache = {},
+                    lock = {},
+                    a = args.a,
+                    b = args.b,
+                    i = 0,
+                    ri = 0,
+                    el, found, diff, count;
                 if (!ofType && a === 1 && b === 0) {
                     return flag_not ? [] : lastResult;
                 }
                 var checkName = ofType ? "nodeName" : "nodeType";
-                for (; el = lastResult[i++]; ) {
+                for (; el = lastResult[i++];) {
                     var parent = el.parentNode;
                     var pid = $.getUid(parent);
                     if (!lock[pid]) {
@@ -766,29 +755,26 @@ define("query", ["mass"], function($) {
         return {
             exec: function(flags, elems) {
                 var result = [],
-                        prop = str_prop,
-                        flag_not = flag ? flags.not : !flags.not;
-                for (var i = 0, ri = 0, elem; elem = elems[i++]; )
-                    if (elem[prop] ^ flag_not)
-                        result[ri++] = elem; //&& ( !flag || elem.type !== "hidden" )
+                    prop = str_prop,
+                    flag_not = flag ? flags.not : !flags.not;
+                for (var i = 0, ri = 0, elem; elem = elems[i++];)
+                if (elem[prop] ^ flag_not) result[ri++] = elem; //&& ( !flag || elem.type !== "hidden" )
                 return result;
             }
         };
-    }
-    ;
+    };
     Icarus.pseudoHooks = {
         root: function(el) { //标准
             return el === (el.ownerDocument || el.document).documentElement;
         },
-        target: {//标准
+        target: { //标准
             exec: function(flags, elems, _, doc) {
                 var result = [],
-                        flag_not = flags.not;
+                    flag_not = flags.not;
                 var win = doc.defaultView || doc.parentWindow;
                 var hash = win.location.hash.slice(1);
-                for (var i = 0, ri = 0, elem; elem = elems[i++]; )
-                    if (((elem.id || elem.name) === hash) ^ flag_not)
-                        result[ri++] = elem;
+                for (var i = 0, ri = 0, elem; elem = elems[i++];)
+                if (((elem.id || elem.name) === hash) ^ flag_not) result[ri++] = elem;
                 return result;
             }
         },
@@ -815,34 +801,31 @@ define("query", ["mass"], function($) {
             }
             return true;
         },
-        link: {//标准
+        link: { //标准
             exec: function(flags, elems) {
                 var links = (elems[0].ownerDocument || elems[0].document).links;
-                if (!links)
-                    return [];
+                if (!links) return [];
                 var result = [],
-                        checked = {},
-                        flag_not = flags.not;
-                for (var i = 0, ri = 0, elem; elem = links[i++]; )
-                    checked[$.getUid(elem)] = 1;
-                for (i = 0; elem = elems[i++]; )
-                    if (checked[$.getUid(elem)] ^ flag_not)
-                        result[ri++] = elem;
+                    checked = {},
+                    flag_not = flags.not;
+                for (var i = 0, ri = 0, elem; elem = links[i++];)
+                checked[$.getUid(elem)] = 1;
+                for (i = 0; elem = elems[i++];)
+                if (checked[$.getUid(elem)] ^ flag_not) result[ri++] = elem;
                 return result;
             }
         },
-        lang: {//标准 CSS3语言伪类
+        lang: { //标准 CSS3语言伪类
             exec: function(flags, elems, arg) {
                 var result = [],
-                        reg = new RegExp("^" + arg, "i"),
-                        flag_not = flags.not;
-                for (var i = 0, ri = 0, elem; elem = elems[i++]; ) {
+                    reg = new RegExp("^" + arg, "i"),
+                    flag_not = flags.not;
+                for (var i = 0, ri = 0, elem; elem = elems[i++];) {
                     var tmp = elem;
                     while (tmp && !tmp.getAttribute("lang"))
-                        tmp = tmp.parentNode;
-                    tmp = !!(tmp && reg.test(tmp.getAttribute("lang")));
-                    if (tmp ^ flag_not)
-                        result[ri++] = elem;
+                    tmp = tmp.parentNode;
+                    tmp = !! (tmp && reg.test(tmp.getAttribute("lang")));
+                    if (tmp ^ flag_not) result[ri++] = elem;
                 }
                 return result;
             }
@@ -866,11 +849,10 @@ define("query", ["mass"], function($) {
         contains: {
             exec: function(flags, elems, arg) {
                 var res = [],
-                        fn = flags.xml ? $.getText : getHTMLText,
-                        flag_not = flags.not;
-                for (var i = 0, ri = 0, elem; elem = elems[i++]; ) {
-                    if ((!!~fn([elem]).indexOf(arg)) ^ flag_not)
-                        res[ri++] = elem;
+                    fn = flags.xml ? $.getText : getHTMLText,
+                    flag_not = flags.not;
+                for (var i = 0, ri = 0, elem; elem = elems[i++];) {
+                    if (( !! ~fn([elem]).indexOf(arg)) ^ flag_not) res[ri++] = elem;
                 }
                 return res;
             }
