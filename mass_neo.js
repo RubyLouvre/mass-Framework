@@ -62,7 +62,7 @@ function(global, DOC) {
     var hasOwn = Object.prototype.hasOwnProperty
 
     function mix(receiver, supplier) {
-        var args = Array.apply([], arguments),
+        var args = Array.call([], arguments)[0],
             i = 1,
             key, //如果最后参数是布尔，判定是否覆写同名属性
             ride = typeof args[args.length - 1] === "boolean" ? args.pop() : true;

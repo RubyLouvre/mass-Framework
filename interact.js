@@ -99,7 +99,7 @@ define("interact", ["class"], function($) {
             require("interact",function($){
                 var flow = new $.Flow;
                 flow.refresh("aaa,bbb,ccc",function(){
-                    $.log(Array.apply([],arguments))
+                    $.log(Array.call([],arguments))
                 });
                 flow.fire("aaa",1)//没反应
                 flow.fire("bbb",2)//没反应
@@ -118,7 +118,7 @@ define("interact", ["class"], function($) {
             require("interact",function($){
                 var flow = new $.Flow;
                 flow.reload("aaa,bbb,ccc",function(){
-                    $.log(Array.apply([],arguments))
+                    $.log(Array.call([],arguments))
                 });
                 flow.fire("aaa",1)//没反应
                 flow.fire("bbb",2)//没反应
@@ -137,7 +137,7 @@ define("interact", ["class"], function($) {
         require("interact",function($){
             var flow = new $.Flow;
             flow.refresh("aaa,bbb,ccc", function(){
-                $.log(Array.apply([],arguments))
+                $.log(Array.call([],arguments))
             });
             flow.order("aaa",1);//没有反应
             flow.order("aaa",2);//出错,它本应该触发bbb,但没有警告,它只要求你重来
@@ -172,7 +172,7 @@ define("interact", ["class"], function($) {
             require("interact",function($){
                 var flow = new $.Flow;
                 flow.repeat("aaa",4,function(){
-                    $.log(Array.apply([],arguments))
+                    $.log(Array.call([],arguments))
                 });
                 flow.fire("aaa",1)//没反应
                 flow.fire("aaa",2)//没反应
