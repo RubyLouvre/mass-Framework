@@ -37,7 +37,7 @@ define("support", ["mass"], function($) {
         traverseAll: !! div[TAGS]("param").length,
         //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
         //IE678不能通过innerHTML生成link,style,script节点（bug）
-        createAll: !! div[TAGS]("link").length,
+        noscope: !div[TAGS]("link").length ,
         //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
         cloneHTML5: DOC.createElement("nav").cloneNode(true).outerHTML !== "<:nav></:nav>",
         //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
