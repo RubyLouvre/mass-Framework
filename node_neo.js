@@ -92,7 +92,7 @@ define("node", ["support", "class", "query", "data"], function($) {
             return this.labor($.slice(this, a, b));
         },
         get: function(num) { //取得与索引值相对应的节点，若为负数从后面取起，如果不传，则返回节点集的纯数组
-            return num == null ? this.valueOf() : this[num < 0 ? this.length + num : num];
+            return !arguments.length ? this.valueOf() : this[num < 0 ? this.length + num : num];
         },
         eq: function(i) { //取得与索引值相对应的节点，并构成mass对象返回
             return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
@@ -185,7 +185,7 @@ define("node", ["support", "class", "query", "data"], function($) {
         $.fn[method] = function() {
             Array.prototype[method].apply(this, arguments);
             return this;
-        }
+        };
     });
     "remove,empty,detach".replace($.rword, function(method) {
         $.fn[method] = function() {
@@ -209,40 +209,30 @@ define("node", ["support", "class", "query", "data"], function($) {
                 }
             }
             return this;
-        }
+        };
     });
     //前导 前置 追加 后放 替换
     "append,prepend,before,after,replace".replace($.rword, function(method) {
         $.fn[method] = function(item) {
             return manipulate(this, method, item, this.ownerDocument);
-        }
+        };
         $.fn[method + "To"] = function(item) {
             $(item, this.ownerDocument)[method](this);
             return this;
-        }
+        };
     });
     //添加对jQuery insertAfter/insertBefore的兼容支持
     $.fn.insertAfter = function(item) {
-        $.log("insertAfter is deprecated, instead of afterTo")
+        $.log("insertAfter is deprecated, instead of afterTo");
         return this.afterTo(item);
-    }
+    };
     $.fn.insertBefore = function(item) {
-        $.log("insertBefore is deprecated, instead of beforeTo")
+        $.log("insertBefore is deprecated, instead of beforeTo");
         return this.beforeTo(item);
-    }
+    };
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
     var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-', 'WebKit-', 'moz-', "webkit-", 'ms-', '-khtml-'];
     var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
-        c: "color",
-        h: "height",
-        o: "opacity",
-        w: "width",
-        x: "left",
-        y: "top",
-        fs: "fontSize",
-        st: "scrollTop",
-        sl: "scrollLeft",
-        bgc: "backgroundColor",
         "float": $.support.cssFloat ? 'cssFloat' : 'styleFloat'
     };
 

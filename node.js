@@ -56,7 +56,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
                 expr = expr.trim();
                 if(expr.charAt(0) === "<" && expr.charAt(expr.length - 1) === ">" && expr.length >= 3) {
                     nodes = $.parseHTML(expr, doc); //分支5: 动态生成新节点
-                    nodes = nodes.childNodes
+                    nodes = nodes.childNodes;
                 } else if(rtag.test(expr)) { //分支6: getElementsByTagName
                     nodes = scope[TAGS](expr);
                 } else { //分支7：进入选择器模块
@@ -97,7 +97,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
             return this.labor($.slice(this, a, b));
         },
         get: function(num) { //取得与索引值相对应的节点，若为负数从后面取起，如果不传，则返回节点集的纯数组
-            return num == null ? this.valueOf() : this[num < 0 ? this.length + num : num];
+            return !arguments.length ? this.valueOf() : this[num < 0 ? this.length + num : num];
         },
         eq: function(i) { //取得与索引值相对应的节点，并构成mass对象返回
             return i === -1 ? this.slice(i) : this.slice(i, +i + 1);
@@ -236,16 +236,6 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
     var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-', 'WebKit-', 'moz-', "webkit-", 'ms-', '-khtml-'];
     var cssMap = { //支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
-        c: "color",
-        h: "height",
-        o: "opacity",
-        w: "width",
-        x: "left",
-        y: "top",
-        fs: "fontSize",
-        st: "scrollTop",
-        sl: "scrollLeft",
-        bgc: "backgroundColor",
         "float": $.support.cssFloat ? 'cssFloat' : 'styleFloat'
     };
 
@@ -274,7 +264,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
                 var parent = node.parentNode;
                 if(parent) {
                     var array = $.query(expr, node.ownerDocument);
-                    return array.indexOf(node) != -1;
+                    return array.indexOf(node) !== -1;
                 }
                 return false;
             }
