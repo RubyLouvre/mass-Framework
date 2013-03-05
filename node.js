@@ -6,12 +6,12 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         rtagName = /<([\w:]+)/,
         //取得其tagName
         rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
-        rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
+        rcreate = $.support.noscope ? /(<(?:script|link|style|meta|noscript))/ig : /[^\d\D]/,
         types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
         //需要处理套嵌关系的标签
         rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
         adjacent = "insertAdjacentHTML",
-        TAGS = "getElementsByTagName"
+        TAGS = "getElementsByTagName";
 
     function getDoc() { //获取文档对象
         for(var i = 0, el; i < arguments.length; i++) {
