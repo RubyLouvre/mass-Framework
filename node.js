@@ -360,7 +360,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         tr: [2, "<table><tbody>"],
         td: [3, "<table><tbody><tr>"],
         //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
-        _default: $.support.createAll ? [0, ""] : [1, "X<div>"] //div可以不用闭合
+        _default: $.support.noscope? [1, "X<div>"] :[0, ""]   //div可以不用闭合
     },
         insertHooks = {
             prepend: function(el, node) {
