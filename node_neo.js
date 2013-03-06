@@ -6,7 +6,6 @@ define("node", ["support", "class", "query", "data"], function($) {
             rtagName = /<([\w:]+)/,
             //取得其tagName
             rxhtml = /<(?!area|br|col|embed|hr|img|input|link|meta|param)(([\w:]+)[^>]*)\/>/ig,
-            rcreate = $.support.createAll ? /<(?:script)/ig : /(<(?:script|link|style))/ig,
             types = $.oneObject("text/javascript", "text/ecmascript", "application/ecmascript", "application/javascript", "text/vbscript"),
             //需要处理套嵌关系的标签
             rnest = /<(?:tb|td|tf|th|tr|col|opt|leg|cap|area)/,
@@ -141,7 +140,7 @@ define("node", ["support", "class", "query", "data"], function($) {
                     //接着判断innerHTML属性是否符合标准,不再区分可读与只读
                     //用户传参是否包含了script style meta等不能用innerHTML直接进行创建的标签
                     //及像col td map legend等需要满足套嵌关系才能创建的标签, 否则会在IE与safari下报错
-                    if ($.support.innerHTML && (!rcreate.test(value) && !rnest.test(value))) {
+                    if ($.support.innerHTML  && !rnest.test(value)) {
                         try {
                             for (var i = 0; el = this[i++]; ) {
                                 if (el.nodeType === 1) {
@@ -307,7 +306,7 @@ define("node", ["support", "class", "query", "data"], function($) {
             html = html.replace(rxhtml, "<$1></$2>").trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            if ($.commonRange && doc === document && !rcreate.test(html) && !rnest.test(html)) {
+            if ($.commonRange && doc === document && !rnest.test(html)) {
                 return $.commonRange.createContextualFragment(html);
             }
 

@@ -313,7 +313,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
             if($.commonRange && doc === document && !rcreate.test(html) && !rnest.test(html)) {
                 return $.commonRange.createContextualFragment(html);
             }
-            if(!$.support.createAll) { //fix IE
+            if($.support.noscope) { //fix IE
                 html = html.replace(rcreate, "<br class='fix_create_all'/>$1"); //在link style script等标签之前添加一个补丁
             }
             var tag = (rtagName.exec(html) || ["", ""])[1].toLowerCase(),
