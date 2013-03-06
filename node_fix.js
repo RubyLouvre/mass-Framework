@@ -62,32 +62,33 @@ define("node_fix", !! top.dispatchEvent, ["mass"], function($) {
 
     var rtbody = /<tbody[^>]*>/i
     $.fixParseHTML = function(wrapper, html) {
-        //在IE6中,当我们在处理colgroup, thead, tfoot, table时会发生成一个tbody标签
-        if(!$.support.insertTbody) {
-            var noTbody = !rtbody.test(html),
-                //矛:html本身就不存在<tbody字样
-                els = wrapper["getElementsByTagName"]("tbody");
-            if(els.length > 0 && noTbody) { //盾：实际上生成的NodeList中存在tbody节点
-                for(var i = 0, el; el = els[i++];) {
-                    if(!el.childNodes.length) //如果是自动插入的里面肯定没有内容
-                    el.parentNode.removeChild(el);
-                }
-            }
-        }
-        if(!$.support.createAll) { //移除所有br补丁
-            for(els = wrapper["getElementsByTagName"]("br"), i = 0; el = els[i++];) {
-                if(el.className && el.className === "fix_create_all") {
-                    el.parentNode.removeChild(el);
-                }
-            }
-        }
-        if(!$.support.appendChecked) { //IE67没有为它们添加defaultChecked
-            for(els = wrapper["getElementsByTagName"]("input"), i = 0; el = els[i++];) {
-                if(el.type === "checkbox" || el.type === "radio") {
-                    el.defaultChecked = el.checked;
-                }
-            }
-        }
+	if ($.support.noscope) { //移除所有br补丁
+		for (els = wrapper["getElementsByTagName"]("br"), i = 0; el = els[i++];) {
+			if (el.className && el.className === "fix_noscope") {
+				el.parentNode.removeChild(el);
+			}
+		}
+	}
+	//当我们在生成colgroup, thead, tfoot时 IE会自作多情地插入tbody节点
+	if (!$.support.insertTbody) {
+		var noTbody = !rtbody.test(html),
+			//矛:html本身就不存在<tbody字样
+			els = wrapper["getElementsByTagName"]("tbody");
+		if (els.length > 0 && noTbody) { //盾：实际上生成的NodeList中存在tbody节点
+			for (var i = 0, el; el = els[i++];) {
+				if (!el.childNodes.length) //如果是自动插入的里面肯定没有内容
+				el.parentNode.removeChild(el);
+			}
+		}
+	}
+	//IE67没有为它们添加defaultChecked
+	if (!$.support.appendChecked) {
+		for (els = wrapper["getElementsByTagName"]("input"), i = 0; el = els[i++];) {
+			if (el.type === "checkbox" || el.type === "radio") {
+				el.defaultChecked = el.checked;
+			}
+		}
+	}
     }
 })
 //2013.1.11
