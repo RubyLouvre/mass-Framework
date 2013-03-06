@@ -3,54 +3,60 @@
 <html>
     <head>
         <title></title>
+        <link href="aa" type="text/css" rel="stylesheet" charset="utf-8" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>测试</title>
         <style>
-
+           
         </style>
-        <script src="mass.js"></script>
+          <script src="mass.js"></script>
         <script>
-            require("class,node", function($) {
-
-                var Animal = $.factory({
-                    init: function(name) {
-                        this.name = name
-                    },
-                    getName: function() {
-                        return this.name;
-                    },
-                    setName: function(name) {
-                        this.name = name;
-                    }
-                });
-              
-                var a = new Animal("zzz");
-                var Dog = $.factory(Animal, {
-                    init: function(name, age) {
-                        this.age = age;
-                    },
-                    getAge: function() {
-                        return this.age;
-                    },
-                    setAge: function(age) {
-                        this.age = age;
-                    }
-                });
-                
-                var dog = new Dog("dog",222);
-            
-                console.log(a);
-                console.log(dog)
-
-            })
+window.onload = function() {
+	var div = document.createElement("div");
+	　　div.innerHTML = '<table><tbody><tr></tr></tbody></table>';
+	//　　alert(div.getElementsByTagName("tr").length);　
+	//　div.innerHTML = '<table><tbody><tr></tr>';　
+	//　alert(div.getElementsByTagName("tr").length);
+    var a =  document.body.insertAdjacentHTML("afterBegin", "<div>6666666</div>");
+    console.log(a)
+}
         </script>
     </head>
 
     <body>
-
-        <button onclick="">Test</button>
-        <a href="aaa">司徒正美</a>
+        <div class="aaa bbb" >
+1111111
+        </div>
+        <div>
+            2222222222
+        </div >
+        <div>
+            33333333
+        </div>
+          <div>
+            4444444444
+        </div>
+          <div>
+            555555555
+        </div>
+          <div>
+            6666666666666
+        </div>
+         <div>
+            77777777
+        </div>
+         <div>
+            888888888
+        </div>
+           <div>
+            999999
+        </div>
+           <div>
+            10
+        </div>
+           <div>
+            11
+        </div>
     </body>
-
 
 </html>

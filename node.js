@@ -310,8 +310,8 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
             html = html.replace(rxhtml, "<$1></$2>").trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            if($.commonRange && doc === document && !rcreate.test(html) && !rnest.test(html)) {
-                return $.commonRange.createContextualFragment(html);
+            if($.cachedRange && doc === document && !rcreate.test(html) && !rnest.test(html)) {
+                return $.cachedRange.createContextualFragment(html);
             }
             if($.support.noscope) { //fix IE
                 html = html.replace(rcreate, "<br class='fix_create_all'/>$1"); //在link style script等标签之前添加一个补丁
@@ -359,7 +359,7 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         thead: [1, "<table>", "</table>"],
         tr: [2, "<table><tbody>"],
         td: [3, "<table><tbody><tr>"],
-        //IE678在用innerHTML生成节点时存在BUG，不能直接创建script,link,meta,style与HTML5的新标签
+	//IE6-8在用innerHTML生成节点时，不能直接创建no-scope元素与HTML5的新标签
         _default: $.support.noscope? [1, "X<div>"] :[0, ""]   //div可以不用闭合
     },
         insertHooks = {

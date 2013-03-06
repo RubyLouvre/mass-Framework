@@ -306,8 +306,8 @@ define("node", ["support", "class", "query", "data"], function($) {
             html = html.replace(rxhtml, "<$1></$2>").trim();
             //尝试使用createContextualFragment获取更高的效率
             //http://www.cnblogs.com/rubylouvre/archive/2011/04/15/2016800.html
-            if ($.commonRange && doc === document && !rnest.test(html)) {
-                return $.commonRange.createContextualFragment(html);
+            if ($.cachedRange && doc === document && !rnest.test(html)) {
+                return $.cachedRange.createContextualFragment(html);
             }
 
             var tag = (rtagName.exec(html) || ["", ""])[1].toLowerCase(),
