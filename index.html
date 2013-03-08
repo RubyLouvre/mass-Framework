@@ -6,57 +6,20 @@
         <link href="aa" type="text/css" rel="stylesheet" charset="utf-8" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>测试</title>
-        <style>
-           
-        </style>
-          <script src="mass.js"></script>
+        <script src="mass.js"></script>
         <script>
-window.onload = function() {
-	var div = document.createElement("div");
-	　　div.innerHTML = '<table><tbody><tr></tr></tbody></table>';
-	//　　alert(div.getElementsByTagName("tr").length);　
-	//　div.innerHTML = '<table><tbody><tr></tr>';　
-	//　alert(div.getElementsByTagName("tr").length);
-    var a =  document.body.insertAdjacentHTML("afterBegin", "<div>6666666</div>");
-    console.log(a)
+    window.onload = function(){
+require("node", function($){
+    var a = $("div")
+    var b = $("div").remove();
+    alert(a[0])
+})
+ 
 }
         </script>
     </head>
-
     <body>
-        <div class="aaa bbb" >
-1111111
-        </div>
-        <div>
-            2222222222
-        </div >
-        <div>
-            33333333
-        </div>
-          <div>
-            4444444444
-        </div>
-          <div>
-            555555555
-        </div>
-          <div>
-            6666666666666
-        </div>
-         <div>
-            77777777
-        </div>
-         <div>
-            888888888
-        </div>
-           <div>
-            999999
-        </div>
-           <div>
-            10
-        </div>
-           <div>
-            11
-        </div>
+        <div><div id="test1">test1</div></div>
+        <div><div id="test2">test2</div></div>
     </body>
-
 </html>

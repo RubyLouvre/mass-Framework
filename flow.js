@@ -1,7 +1,7 @@
 //=========================================
 // 组件交互模块v1 by 司徒正美
 //=========================================
-define("interact", ["class"], function($) {
+define("flow", ["class"], function($) {
     //观察者模式
     $.Observer = $.factory({
         init: function(target) {

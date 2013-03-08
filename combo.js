@@ -5,7 +5,7 @@ var modules = {
     src: [//这里是可选的模块（不包含补丁模块，为了让框架也能在IE678下使用，请不要删掉补丁模块）
         "lang.js", //各种工具方法
         "class.js", //类工厂
-        "interact.js", //观察者模式,流程控制
+        "flow.js", //观察者模式,流程控制
         "data.js", //缓存
         "query.js",//选择器
         "support.js",//特征侦测

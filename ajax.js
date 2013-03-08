@@ -2,7 +2,7 @@
 //  数据交互模块
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
-define("ajax", ["mass", "interact"], function($) {
+define("ajax", ["mass", "flow"], function($) {
     var global = this,
     DOC = global.document,
     r20 = /%20/g,
