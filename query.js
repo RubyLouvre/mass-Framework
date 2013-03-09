@@ -27,8 +27,7 @@ define("query", ["mass"], function($) {
             return false;
         },
         getText: function() {
-            //获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本，
-            //为了让结果在所有浏览器下一致，忽略所有空白节点，因此它非元素的innerText或textContent
+            //获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本
             return function getText(nodes) {
                 for (var i = 0, ret = "", node; node = nodes[i++];) {
                     // 对得文本节点与CDATA的内容

@@ -126,7 +126,7 @@ define("store", this.JSON && JSON.parse ? ["support"] :["$support","./json2"], f
         }
         function withIEStorage(storeFunction) {
             return function() {
-                var args = Array.call([],arguments)[0];
+                var args = [].slice.call(arguments);
                 args.unshift(storage)
                 //  http://msdn.microsoft.com/en-us/library/ms531081(v=VS.85).aspx
                 //  http://msdn.microsoft.com/en-us/library/ms531424(v=VS.85).aspx

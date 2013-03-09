@@ -163,8 +163,8 @@ define("node", ["support", "class", "query", "data"].concat(top.dispatchEvent ? 
         text: function(item) { // 取得或设置节点的text或innerText或textContent属性
             return $.access(this, function(el) {
                 if (this === $) { //getter
-                    if (el.tagName === "OPTION" || el.tagName === "SCRIPT") {
-                        return el.text;
+                    if (el.tagName === "SCRIPT") {
+                        return el.text;//IE6-8下只能用innerHTML, text获取内容
                     }
                     return el.textContent || el.innerText || $.getText([el]);
                 } else { //setter

@@ -7,18 +7,21 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>测试</title>
         <script src="mass.js"></script>
-        <script>
-    window.onload = function(){
-require("node", function($){
-    var a = $("div")
-    var b = $("div").remove();
-    alert(a[0])
+        <script id="444">
+
+require("node,ready", function($){
+  var a = $("#aa")[0];
+  alert("|"+a.text +"|");
+  alert("|"+a.textContent +"|")
+  alert("|"+a.innerText +"|")
+   alert("|"+a.innerHTML +"|")
 })
- 
-}
         </script>
     </head>
     <body>
+        <select>
+            <option id="aa"><b>  wwwww</b> </option>
+        </select>
         <div><div id="test1">test1</div></div>
         <div><div id="test2">test2</div></div>
     </body>
