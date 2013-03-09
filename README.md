@@ -16,10 +16,10 @@ mass Framework
 <hr/>
 <h3>mass Framework的源码阅读顺序</h3>
 <p>都是位于src目录下，里面的子目录是外围模块。</p>
-<p>mass.js -> lang.js(lang_fix.js) ->  class.js -> interact.js -> data.js -> support.js -> query.js -><br/>
+<p>mass.js -> lang.js(lang_fix.js) ->  class.js -> flow.js -> data.js -> support.js -> query.js -><br/>
     node.js(node_fix.js) -> css.js(css_fix.js) -> attr.js(attr_fix.js) -> event.js(event_fix.js) -> fx.js -> ajax.js
 </p>
-<p>lang, class, interact, data专注于语言层面，query, node, css, attr, event, fx, ajax专注于DOM层面。</p>
+<p>lang, class, flow, data专注于语言层面，query, node, css, attr, event, fx, ajax专注于DOM层面。</p>
 <hr/>
 <h3>mass Framework的文档：</h3>
 <p>它大部分文档已经转移到newland.js项目之下，我们可以在<a href="http://rubylouvre.github.com/doc/index.html">这里</a>访问得到它！</p>
