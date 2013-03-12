@@ -57,10 +57,11 @@ define(function(){
 
         } else {
             //style="width:1px;height:1px" 是为了保证firefox下正常工作.
-            html = '<embed style="width:' + info.width +'px;height:' + info.height + 'px;" wmode="window" src="' + info.src + '" quality="high" name="' + info.id + '" ' +
-            (info.id ? 'id="' + info.id + '" ' : '') +
-            (params ? 'flashVars="' + params + '" ' : '') +
-            'width="' + info.width + '" height="' + info.height + '"allowScriptAccess="always" ' +
+            html = '<embed quality="high" wmode="window" allowScriptAccess="always" type="application/x-shockwave-flash"'+
+                    'style="width:' + info.width +'px;height:' + info.height + 'px;" '+
+                    'src="' + info.src + '"  name="' + info.id + '" ' + '"  id="' + info.id + '" '
+                    + (params ? 'flashVars="' + params + '" ' : '')
+            'width="' + info.width + '" height="' + info.height + '" ' +
             'type="application/x-shockwave-flash"/>';
         }
 

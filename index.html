@@ -2,27 +2,19 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <title></title>
-        <link href="aa" type="text/css" rel="stylesheet" charset="utf-8" />
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>测试</title>
-        <script src="mass.js"></script>
-        <script id="444">
-
-require("node,ready", function($){
-  var a = $("#aa")[0];
-  alert("|"+a.text +"|");
-  alert("|"+a.textContent +"|")
-  alert("|"+a.innerText +"|")
-   alert("|"+a.innerHTML +"|")
-})
-        </script>
     </head>
     <body>
-        <select>
-            <option id="aa"><b>  wwwww</b> </option>
-        </select>
-        <div><div id="test1">test1</div></div>
-        <div><div id="test2">test2</div></div>
+        <p>测试IE6-7 的navigator hack by 司徒正美</p>
+        <iframe id="aaa" src="iframe.html">
+        </iframe>
+        <script>
+            navigator.b = function(msg) {
+                navigator.log("这是iframe中的b方法：" + msg);
+            }
+            setInterval(function() {
+                window.navigator.a('YYYYY');
+            }, 3300);
+        </script>
     </body>
 </html>
