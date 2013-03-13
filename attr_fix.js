@@ -1,4 +1,4 @@
-define("attr_fix", !! top.getComputedStyle, ["node"], function($) {
+define("attr_fix", !! document.dispatchEvent, ["node"], function($) {
     $.fixIEAttr = function(valHooks, attrHooks) {
         var rattrs = /\s+([\w-]+)(?:=("[^"]*"|'[^']*'|[^\s>]+))?/g,
             rquote = /^['"]/,
