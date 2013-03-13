@@ -26,8 +26,8 @@ define(["node"], function($) {
                 if (event.source != me.win)
                     return;//如果不是来源自win所指向的窗口,返回
                 var data = event.data;
-                if (me.hack && data.indexOf(me.hack) === 0) {
-                    data = data.replace(me.hack, "");
+                if (me._hack && data.indexOf(me.hack) === 0) {
+                    data = data.replace(me._hack, "");
                     data = JSON.parse(data, function(k, v) {
                         if (v.indexOf && v.indexOf('function') > -1) {
                             return eval("(function(){return " + v + " })()")
