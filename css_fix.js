@@ -3,7 +3,7 @@
 //==========================================
 define("css_fix", !! document.dispatchEvent, ["node"], function($) {
     var adapter = $.cssHooks = {},
-        ie8 = !! top.XDomainRequest,
+        ie8 = !! window.XDomainRequest,
         rfilters = /[\w\:\.]+\([^)]+\)/g,
         rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
         rposition = /^(top|right|bottom|left)$/,

@@ -42,16 +42,16 @@ define("deltectZoom", function() {
         }
     };
     function deleteBrower() {
-        if (top.VBArray) {
+        if (self.VBArray) {
             return "ie";
         }
-        if (top.netscape) {
+        if (self.netscape) {
             return "firefox";
         }
-        if (top.opera) {
+        if (self.opera) {
             return "opera";
         }
-        if (top.chrome) {
+        if (self.chrome) {
             return "chrome";
         }
     }
