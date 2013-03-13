@@ -18,26 +18,47 @@ define(["node"], function($) {
         }
         this.init();
     }
+
     Messenger.prototype = {
         init: function() {
-            var self = this;
-            this._callback = function(event) {
-                var n = self._messages.length
-                console.log("准备进入循环"+n)
-             //   if (event.source != self.win)
-                   // return;//如果不是来源自win所指向的窗口,返回
-                for (var i = 0; i < n; i++ ) {
-                  var  fn = self._messages[i]
-                    fn.call(self, event.data);
+            var me = this;
+            me._callback = function(event) {
+                if (event.source != me.win)
+                    return;//如果不是来源自win所指向的窗口,返回
+                var data = event.data;
+                if (me.hack && data.indexOf(me.hack) === 0) {
+                    data = data.replace(me.hack, "");
+                    data = JSON.parse(data, function(k, v) {
+                        if (v.indexOf && v.indexOf('function') > -1) {
+                            return eval("(function(){return " + v + " })()")
+                        }
+                        return v;
+                    });
+                }
+                for (var i = 0, fn; fn = me._messages[i++]; ) {
+                    fn.call(me, data);
                 }
             };
-            $.bind(window, "message", this._callback);
+            var mode = document.documentMode;
+            if (mode === 8 || mode === 9) {
+                this._hack = String(new Date - 0);
+            }
+            $.bind(window, "message", me._callback);
         },
         receive: function(fn) {
             fn.win = this.win;
             this._messages.push(fn);
         },
         send: function(data) {
+            if (this._hack && data && typeof data === "object") {
+                data = JSON.stringify(data, function(key, val) {
+                    if (typeof val === 'function') {
+                        return val + '';
+                    }
+                    return val;
+                });
+                data = this._hack + data
+            }
             this.win.postMessage(data, '*');//parent
         }
     };
@@ -59,7 +80,7 @@ define(["node"], function($) {
 
         Messenger.prototype.initForCrossDomain = function() {
             var fns = navigator.messages = navigator.messages || [];
-            var self = this;
+            var me = this;
             for (var i = 0, fn; fn = this._messages[i++]; ) {
                 fns.push(fn);
             }
@@ -70,8 +91,8 @@ define(["node"], function($) {
             this.send = function(data) {
                 setTimeout(function() {
                     for (var i = 0, fn; fn = fns[i++]; ) {
-                        if (fn.win != self.win) {
-                            fn.call(self, data);
+                        if (fn.win != me.win) {
+                            fn.call(me, data);
                         }
                     }
                 });
@@ -79,21 +100,21 @@ define(["node"], function($) {
         }
 
         Messenger.prototype.initForSameOrigin = function() {
-            var self = this;
+            var me = this;
             this.send = function(data) {
                 setTimeout(function() {
-                    var event = self.win.document.createEventObject();
+                    var event = me.win.document.createEventObject();
                     event.eventType = 'message';
                     event.eventSource = window;
                     event.eventData = data;
-                    self.win.document.fireEvent('ondataavailable', event);
+                    me.win.document.fireEvent('ondataavailable', event);
                 });
             }
             this._dataavailable = function(event) {
-                if (event.eventType !== 'message' || event.eventSource != self.win)
+                if (event.eventType !== 'message' || event.eventSource != me.win)
                     return;
-                for (var i = 0, fn; fn = self._messages[i++]; ) {
-                    fn.call(self, event.eventData);
+                for (var i = 0, fn; fn = me._messages[i++]; ) {
+                    fn.call(me, event.eventData);
                 }
             };
             document.attachEvent('ondataavailable', this._dataavailable);

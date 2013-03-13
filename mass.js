@@ -92,7 +92,7 @@
         rmapper: /(\w+)_(\w+)/g,
         mass: mass,
         hasOwn: function(obj, key) {
-           return hasOwn.call(obj, key);
+            return hasOwn.call(obj, key);
         },
         //大家都爱用类库的名字储存版本号，我也跟风了
         "@bind": W3C ? "addEventListener" : "attachEvent",
@@ -104,10 +104,9 @@
          * @return {Array}
          * @api public
          */
-        slice: W3C ?
-                function(nodes, start, end) {
-                    return parsings.slice.call(nodes, start, end);
-                } : function(nodes, start, end) {
+        slice: W3C ? function(nodes, start, end) {
+            return parsings.slice.call(nodes, start, end);
+        } : function(nodes, start, end) {
             var ret = [],
                     n = nodes.length;
             if (end === void 0 || typeof end === "number" && isFinite(end)) {
@@ -133,10 +132,9 @@
          * @param {Any} obj
          * @return {Number} 一个UUID
          */
-        getUid: W3C ?
-                function(obj) { //IE9+,标准浏览器
-                    return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
-                } : function(obj) {
+        getUid: W3C ? function(obj) { //IE9+,标准浏览器
+            return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
+        } : function(obj) {
             if (obj.nodeType !== 1) { //如果是普通对象，文档对象，window对象
                 return obj.uniqueNumber || (obj.uniqueNumber = NsVal.uuid++);
             } //注：旧式IE的XML元素不能通过el.xxx = yyy 设置自定义属性
@@ -155,11 +153,10 @@
          * @param {Boolean} phase ? 是否捕获，默认false
          * @return {Function} fn 刚才绑定的回调
          */
-        bind: W3C ?
-                function(el, type, fn, phase) {
-                    el.addEventListener(type, fn, !!phase);
-                    return fn;
-                } : function(el, type, fn) {
+        bind: W3C ? function(el, type, fn, phase) {
+            el.addEventListener(type, fn, !!phase);
+            return fn;
+        } : function(el, type, fn) {
             el.attachEvent && el.attachEvent("on" + type, fn);
             return fn;
         },
@@ -170,10 +167,9 @@
          * @param {Function} fn 回调
          * @param {Boolean} phase ? 是否捕获，默认false
          */
-        unbind: W3C ?
-                function(el, type, fn, phase) {
-                    el.removeEventListener(type, fn || $.noop, !!phase);
-                } : function(el, type, fn) {
+        unbind: W3C ? function(el, type, fn, phase) {
+            el.removeEventListener(type, fn || $.noop, !!phase);
+        } : function(el, type, fn) {
             if (el.detachEvent) {
                 el.detachEvent("on" + type, fn || $.noop);
             }
@@ -280,7 +276,7 @@
                 var curr = settings[p];
                 if (prev && p === "alias") {
                     for (var c in curr) {
-                        if (hasOwn.call(curr,c)) {
+                        if (hasOwn.call(curr, c)) {
                             var prevValue = prev[c];
                             var currValue = curr[c];
                             if (prevValue && prev !== curr) {
@@ -326,7 +322,6 @@
             throw new (e || Error)(str);
         }
     });
-
     (function(scripts) {
         var cur = scripts[scripts.length - 1],
                 url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
@@ -336,14 +331,9 @@
         kernel.alias = {};
         kernel.level = 9;
     })(DOC.getElementsByTagName("script"));
-
-
-
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
     });
-
-
     //============================加载系统===========================
     var modules = $.modules = {
         ready: {
@@ -366,7 +356,7 @@
         if (/^(mass|ready)$/.test(url)) { //特别处理ready标识符
             return [url, "js"];
         }
-        if ( $.config.alias[url] ) {
+        if ($.config.alias[url]) {
             ret = $.config.alias[url];
         } else {
             parent = parent.substr(0, parent.lastIndexOf('/'))
@@ -459,7 +449,7 @@
             var obj = modules[id],
                     deps = obj.deps;
             for (var key in deps) {
-                if (hasOwn.call(deps,key) && modules[key].state !== 2) {
+                if (hasOwn.call(deps, key) && modules[key].state !== 2) {
                     continue loop;
                 }
             }
@@ -675,8 +665,15 @@
                 }
             }
         });
-        if (html.doScroll && self.eval === parent.eval)
-            doScrollCheck();
+        if (html.doScroll) {
+            try {
+                if (self.eval === parent.eval) {
+                    doScrollCheck();
+                }
+            } catch (e) {
+                doScrollCheck();
+            }
+        }
     }
     //============================HTML5新标签支持===========================
     //IE6789必须以硬编码形式把mass.js写在页面才生效
