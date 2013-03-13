@@ -10,10 +10,12 @@
                 var messager = new Messenger({
                     target: '#iframe',
                     onmessage: function(data) {
-                        $.log(data)
+                        console.log(data)
                     }
                 });
+               // alert(iframe[0].contentWindow.eval)
                 iframe.on("load", function() {
+                 //   $.log("============")
                     messager.send('发给子页面的消息');
                 });
 

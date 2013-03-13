@@ -25,7 +25,7 @@
         "NaN": "NaN",
         "undefined": "Undefined"
     };
-    var toString = class2type.toString,
+    var serialize = class2type.toString,
             basepath;
     /**
      * 命名空间
@@ -36,7 +36,7 @@
      */
 
     function $(expr, context) { //新版本的基石
-        if ($.type(expr, "Function")) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
+        if (typeof expr === "function" && expr.call) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return $.require(all + ",ready", expr);
         }
         if (!$.fn)
@@ -186,7 +186,7 @@
          * @api public
          */
         type: function(obj, str) {
-            var result = class2type[(obj == null || obj !== obj) ? obj : toString.call(obj)] || obj.nodeName || "#";
+            var result = class2type[(obj == null || obj !== obj) ? obj : serialize.call(obj)] || obj.nodeName || "#";
             if (result.charAt(0) === "#") { //兼容旧式浏览器与处理个别情况,如window.opera
                 //利用IE678 window == document为true,document == window竟然为false的神奇特性
                 if (obj == obj.document && obj.document != obj) {
@@ -198,7 +198,7 @@
                 } else if (isFinite(obj.length) && obj.item) {
                     result = "NodeList"; //处理节点集合
                 } else {
-                    result = toString.call(obj).slice(8, -1);
+                    result = serialize.call(obj).slice(8, -1);
                 }
             }
             if (str) {

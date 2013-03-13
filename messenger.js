@@ -1,18 +1,20 @@
 define(["node"], function($) {
     function Messenger(config) {
         //win为其他页面的window对象或装载此window对象的iframe元素或其表达式
-        var win = config.target || parent;
-        if ($.type(win, "String")) {
+        var win = config.target
+        if (typeof win === "string") {
             win = $(win).get(0);
-        }
-        if (win && win.tagName === 'IFRAME') {
-            win = win.contentWindow;
+            if (win && win.tagName === 'IFRAME') {
+                win = win.contentWindow;
+            }
+        } else {
+            win = parent;
         }
         this.win = win;
         this._messages = [];
         //onmessage为当前页面处理其他页面发过来的
         if (typeof config.onmessage === "function") {
-            this.receive(config.onmessage)
+            this.receive(config.onmessage);
         }
         this.init();
     }
@@ -20,9 +22,12 @@ define(["node"], function($) {
         init: function() {
             var self = this;
             this._callback = function(event) {
-                if (event.source != self.win)
-                    return;//如果不是来源自win所指向的窗口,返回
-                for (var i = 0, fn; fn = self._messages[i++]; ) {
+                var n = self._messages.length
+                console.log("准备进入循环"+n)
+             //   if (event.source != self.win)
+                   // return;//如果不是来源自win所指向的窗口,返回
+                for (var i = 0; i < n; i++ ) {
+                  var  fn = self._messages[i]
                     fn.call(self, event.data);
                 }
             };
