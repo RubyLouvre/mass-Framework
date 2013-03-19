@@ -666,7 +666,7 @@
             }
         });
         if (html.doScroll) {
-            try {
+            try {//如果跨域会报错，那时肯定证明是存在两个窗口
                 if (self.eval === parent.eval) {
                     doScrollCheck();
                 }
