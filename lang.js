@@ -281,6 +281,8 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         parseJS: function(code) {
             //IE中，global.eval()和eval()一样只在当前作用域生效。
             //Firefox，Safari，Opera中，直接调用eval()为当前作用域，global.eval()调用为全局作用域。
+            //window.execScript 在IE下一些限制条件
+            //http://www.ascadnetworks.com/Guides-and-Tips/IE-error-%2522Could-not-complete-the-operation-due-to-error-80020101%2522
             if(code && /\S/.test(code)) {
                 try {
                     global[seval](code);
