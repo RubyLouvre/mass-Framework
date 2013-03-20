@@ -96,10 +96,10 @@ define("flow", ["class"], function($) {
             return this;
         },
         /**待所有子步骤都执行过一遍后,执行最后的回调,之后每次都执行最后的回调以局部刷新数据
-            require("interact",function($){
+            require("flow",function($){
                 var flow = new $.Flow;
                 flow.refresh("aaa,bbb,ccc",function(){
-                    $.log(Array.call([],arguments))
+                    $.log(Array.apply([],arguments))
                 });
                 flow.fire("aaa",1)//没反应
                 flow.fire("bbb",2)//没反应
@@ -115,10 +115,10 @@ define("flow", ["class"], function($) {
             return this;
         },
         /**待所有子步骤都执行过一遍后,执行最后的回调,然后清后所有数据,重新开始这过程
-            require("interact",function($){
+            require("flow",function($){
                 var flow = new $.Flow;
                 flow.reload("aaa,bbb,ccc",function(){
-                    $.log(Array.call([],arguments))
+                    $.log(Array.apply([],arguments))
                 });
                 flow.fire("aaa",1)//没反应
                 flow.fire("bbb",2)//没反应
@@ -134,10 +134,10 @@ define("flow", ["class"], function($) {
             return this;
         },
         /**配合refresh使用,相当于一种特殊的fire,要求用户在fire时,按refresh的第一个参数绑定的顺序依次执行
-        require("interact",function($){
+        require("flow",function($){
             var flow = new $.Flow;
             flow.refresh("aaa,bbb,ccc", function(){
-                $.log(Array.call([],arguments))
+                $.log(Array.apply([],arguments))
             });
             flow.order("aaa",1);//没有反应
             flow.order("aaa",2);//出错,它本应该触发bbb,但没有警告,它只要求你重来
@@ -145,8 +145,8 @@ define("flow", ["class"], function($) {
             flow.order("bbb",4);//没有反应
             flow.order("ccc",5);//[4,5,6]
         })
-        //如果new $.Flow(4000)在构器器传入timeout,在第一个fire后,过了4秒时间限制还没有全部依次触发完aaa,bbb,ccc
-        //也要求你重来
+        //此外我们也可以在构造器传入时间限制，如果new $.Flow(4000),从第一个fire这个时间点到4秒内，
+        //没有能依次触发完aaa,bbb,ccc，则清空已有数据，重新开始
         // 可以应用于游戏中的QTE http://baike.baidu.com/view/1398321.htm，我们只需要绑定keydown事件，在回调中调用flow.order(e.which);
          */
         order: function(type) { //
@@ -169,41 +169,44 @@ define("flow", ["class"], function($) {
             }
         },
         /**一个子步骤在重复执行N遍后,执行最后的回调
-            require("interact",function($){
+            require("flow", function($) {
                 var flow = new $.Flow;
-                flow.repeat("aaa",4,function(){
-                    $.log(Array.call([],arguments))
+                flow.repeat("aaa", 4, function() {
+                    $.log(Array.apply([], arguments))
                 });
-                flow.fire("aaa",1)//没反应
-                flow.fire("aaa",2)//没反应
-                flow.fire("aaa",3)//没反应
-                flow.fire("aaa",4)//[1,2,3,4]
-                flow.fire("aaa",5)//没反应
-                flow.fire("aaa",6)//没反应
+                flow.fire("aaa", 1) //没反应
+                flow.fire("aaa", 2) //没反应
+                flow.fire("aaa", 3) //没反应
+                flow.fire("aaa", 4) //[1,2,3,4]
+                flow.fire("aaa", 5) //没反应
+                flow.fire("aaa", 6) //没反应
+                flow.fire("aaa", 7) //没反应
+                flow.fire("aaa", 8) //[5,6,7,8]
             })
          */
         repeat: function(type, times, callback) {
-            var target = this._target,
+            var old = times,
                 that = this,
                 ret = [];
-
             function wrapper() {
                 ret.push.apply(ret, $.slice(arguments, 1));
-                if(--times == 0) {
-                    that.unbind(last, wrapper);
-                    callback.apply(target, ret);
+                if(--times === 0) {
+                    callback.apply(this._target, ret);
+                    times = old;
+                    ret = [];
                 }
             }
             that.bind(type, wrapper);
             return this;
         },
+        //用于提供一个简单的成功回调
         done: function(callback) {
             var that = this;
             return function(err, data) {
                 if(err) {
                     return that.fire('error', err);
                 }
-                if(typeof handler === 'string') {
+                if(typeof callback === 'string') {
                     return that.fire(callback, data);
                 }
                 if(arguments.length <= 2) {
@@ -213,6 +216,7 @@ define("flow", ["class"], function($) {
                 callback.apply(null, args);
             }
         },
+         //用于提供一个简单的错误回调
         fail: function(callback) {
             var that = this;
             that.once('error', function(err) {
@@ -265,7 +269,7 @@ define("flow", ["class"], function($) {
                     return;
                 }
                 var result = [];
-                for(index = 0; index < length; index++) {
+                for(var index = 0; index < length; index++) {
                     result.push.apply(result, flow._fired[events[index]]);
                 }
                 if(reload) {

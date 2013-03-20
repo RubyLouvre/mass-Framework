@@ -3,145 +3,39 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="mass_merge.js"></script>
+        <script src="mass.js"></script>
+
         <style>
             #ccc {
                 border:1px solid red;
             }
         </style>
         <script>
-            require("messenger,event,ready", function(Messenger, $) {
-                var iframe = $("#iframe");
-                var messager = new Messenger({
-                    target: '#iframe',
-                    onmessage: function(data) {
-                        $.log(data, true)
-                        if (typeof data == "object") {
-                            $.log(data.aaa, true);
-                            $.log(data.fn, true);
-                        }
-                    }
-                });
-                iframe.on("load", function() {
-                    messager.send('发给子页面的消息');
-                });
-                 var el = $("#aaa")[0]
-               var div =  document.createElement("div");
-               div.id = "ccc"
-               el.applyElement(div,"inside")
 
+            require("flow", function($) {
+                var flow = new $.Flow;
+                flow.refresh("aaa,bbb,ccc", function() {
+                    $.log(Array.apply([], arguments))
+                });
+                flow.fire("aaa", 1)//没反应
+                flow.fire("bbb", 2)//没反应
+                flow.fire("ccc", 3)//[1,2,3]
+                flow.fire("aaa", 4)//[4,2,3],刷新第一个
+                flow.fire("bbb", 5)//[4,5,3],刷新第二个
+                flow.fire("ccc", 6)//[4,5,6],刷新第三个
             })
-(function (constructors, defineGetter, defineSetter) {
-  constructors.forEach (defineGetter);
-  constructors.forEach (defineSetter);
-})(
-   [ Element, Attr, EntityReference, Entity, DocumentFragment ],
-   
-   (function (getInnerText) {
-     return function (C) { C.prototype.__defineGetter__('innerText', getInnerText); };
-   })(
-    (function (getInnerText) {
-      return function () { return Array.map (this.childNodes, getInnerText).join (''); };
-    })(
-     function (n) { return n.innerText; })),
-   
-   (function (setInnerText) {
-     return function (C) { C.prototype.__defineSetter__('innerText', setInnerText); };
-   })(
-    function (s) {
-      while (this.hasChildNodes ()) this.removeChild (this.firstChild);
-      this.appendChild (this.ownerDocument.createTextNode (s));
-    }));
-
-(function (constructors, defineGetter, defineSetter) {
-  constructors.forEach (defineGetter);
-  constructors.forEach (defineSetter);
-})(
-   [ Text, CDATASection ],
-   
-   (function (getInnerText) {
-     return function (C) { C.prototype.__defineGetter__('innerText', getInnerText); };
-   })(
-    function () { return this.data; }),
-   
-   (function (setInnerText) {
-     return function (C) { C.prototype.__defineSetter__('innerText', setInnerText); };
-   })(
-    function (s) { this.data = s; }));
- 
-(function (constructors, defineGetter, defineSetter) {
-  constructors.forEach (defineGetter);
-  constructors.forEach (defineSetter);
-})(
-   [ ProcessingInstruction, Comment, Document, DocumentType, Notation ],
-   
-   (function (getInnerText) {
-     return function (C) { C.prototype.__defineGetter__('innerText', getInnerText); };
-   })(
-    function () { return ''; }),
-   
-   (function (setInnerText) {
-     return function (C) { C.prototype.__defineSetter__('innerText', setInnerText); };
-   })(
-    function (s) { throw new TypeError ('DOMException.NO_MODIFICATION_ALLOWED_ERR(7)'); }));
-HTMLElement.prototype.__defineGetter__('innerText', function () {
-  var s = [ ];
-  var d = this.ownerDocument || this;
-  var t = NodeFilter.SHOW_TEXT | NodeFilter.SHOW_CDATA_SECTION;
-  var w = d.createTreeWalker (this, t, null, true);
-  var n;
-  while (n = w.nextNode ()) s[s.length] = n.data;
-  return s.join ('');
-});
-HTMLElement.prototype.__defineGetter__('innerText', function () {
-  var d = this.ownerDocument || this;
-  var r = d.createRange ();
-  r.selectNodeContents (this);
-  return r.toString ();
-});
-HTMLElement.prototype.__defineGetter__('innerText', function () {
-  var d = this.ownerDocument || this;
-  var x = 'string(self::node())';
-  var r = d.createNSResolver (this);
-  var t = XPathResult.STRING_TYPE;
-  return d.evaluate (x, this, r, t, null).stringValue;
-});
-// <http://www.w3.org/TR/ElementTraversal/>
-
-(function (proto, getElement) {
-    proto.__defineGetter__ ('firstElementChild', function () {
-        return getElement.call (this, 'firstChild', 'nextSibling');
-    });
-    
-    proto.__defineGetter__ ('lastElementChild', function () {
-        return getElement.call (this, 'lastChild', 'previousSibling');
-    });
-    
-    proto.__defineGetter__ ('previousElementSibling', function () {
-        return getElement.call (this, 'previousSibling');
-    });
-    
-    proto.__defineGetter__ ('nextElementSibling', function () {
-        return getElement.call (this, 'nextSibling');
-    });
-    
-    proto.__defineGetter__ ('childElementCount', function () {
-        for (var count = 0, n = this.firstElementChild; n; n = n.nextElementSibling, count++);
-        return count;
-    });
-} )(
-    Element.prototype,
-    
-    function (start, direction) {
-        for (var node = this[start]; node; node = node[direction || start]) {
-            if (node.nodeType == Node.ELEMENT_NODE) {
-                break;
-            }
-        }
-        return node;
-    }
-);
-
+            require("flow", function($) {
+                var flow = new $.Flow;
+                flow.reload("aaa,bbb,ccc", function() {
+                    $.log(Array.call([], arguments))
+                });
+                flow.fire("aaa", 1)//没反应
+                flow.fire("bbb", 2)//没反应
+                flow.fire("ccc", 3)//[1,2,3]
+                flow.fire("aaa", 4)//没反应
+                flow.fire("bbb", 5)//没反应
+                flow.fire("ccc", 6)//[4,5,6]
+            })
 
 
         </script> 
@@ -149,8 +43,30 @@ HTMLElement.prototype.__defineGetter__('innerText', function () {
     </head>
     <body>
         <p id="aaa">mass messager 组件 by 司徒正美</p>
-        <iframe id="iframe" width="800" height="200" src="iframe.html">
-        </iframe>
 
+        <a href="#button" id="button">Button</a>
+        <script type="text/vbscript">
+
+
+        </script>
+        function onRead(obj, prop) {
+        return obj[prop] + "!!";
+        }
+        function onWrite(obj, prop, val) {
+        obj[prop] = val
+        }
+        var obj = {
+        aa: 1,
+        bb: 2,
+        cc: function() {
+        return 3
+        }
+        };
+        var a = fn(obj, onRead, onWrite);
+        console.log(a)
+        a.aa = 4
+        console.log(a.aa)// -> 1!!
+        console.log(a.bb)// -> 2!!
+        console.log(a.cc())// -> 3
     </body>
 </html>

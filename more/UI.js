@@ -2415,3 +2415,38 @@ var ifm = document.createElement('iframe');
 ifm.src = 'about:blank';
 document.body.insertBefore(ifm, document.body.lastChild);
 ifm.contentWindow.location.replace('javascript:;');
+
+
+我测试下来, 可能 js replace 是最佳做法的样子
+额 说错.  把笔记贴来看看
+1. window.open 
+被弹出页面,IE全系,不会带有refer.非ie 带有当前页面地址作为 refer .
+
+2.一个页面用 <meta http-equiv="refresh" content="0;url=redirect url">
+跳转. 则IE,FF 不会带有refer .     chrome, opera, safari则会带有. 另外值得一提的是,ie6,7 使用meta 跳转.会留有历史记录, 这一点和其他浏览器有重要区别. IE8+改进了这个行为.
+
+
+3.swf 弹窗:
+    ie : refer 为swf的url
+    ff : 无refer .
+    webkit : refer 为 swf所在页面url.
+教主Franky(449666)  15:50:03
+不过 firefox 最近改变了 refer 的策略
+
+
+教主Franky(449666)  15:52:59
+
+另外要注意的几个问题是.  appendChild这种动态加载的脚本引入的外部脚本中如果有document.write 操作 就会有很大兼容性差异
+两种场景
+A: 当外部脚本写入文档流时,当前页面文档流未关闭
+    除了Opera,以及早期webkit浏览器比如Safari4-,Chrome8-,Firefox3.6- , 其他浏览器都不会有写入文档流操作
+
+
+B: 外部脚本写入文档流时,当前页面文档流已关闭
+  除了webkit 早期版本如Safari4-, chrome8-,Firefox3.6-,Opera11-(11.6+已修正) 其他浏览器都不会写入或覆盖文档流… (这应该是浏览器做的防范措施)
+
+这是 最近我有动态加载 cnzz统计代码需求时遇到的. 因为cnzz 的统计代码里 要doc.write 他们的logo到文档流
+教主Franky(449666)  15:54:29
+又因为这个渠道 是ie only .所以确定可以动态加载cnzz . 不会有被覆盖文档流的风险.   从发展角度来看 ie系一直有这种保护.其他浏览器在后期才开始改进
+教主Franky(449666)  15:56:18
+跟各种渠道 和代理商 交流 是见很长见识的事情.. 你根本想不到,他们能写出什么样的 js代码来
