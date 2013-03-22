@@ -96,15 +96,10 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                 var type = typeof value,
                         temp;
                 if (type === "string" && (temp = rrelNum.exec(value))) {
-                    if ($.support.calc && name in styles) {
-                        //在firefox18, ie10中必须要求calc括号中的运算符两边都有空白才生效
-                        var cur = styles[name],
-                                unit = (cur.match(/[a-z%]+$/) || [""])[0];
-                        return node.style[name] = $.support.calc + "(" + [styles[name], temp[1], temp[2] + unit].join(" ") + ")";
-                    } else {
+
                         value = (+(temp[1] + 1) * +temp[2]) + parseFloat($.css(node, name, void 0, styles));
                         type = "number";
-                    }
+
                 }
                 if (type === "number" && !isFinite(value + "")) { //因为isFinite(null) == true
                     return;
