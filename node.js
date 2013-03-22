@@ -235,7 +235,8 @@ define("node", ["support", "class", "query", "data"].concat(this.dispatchEvent ?
     //http://dev.opera.com/articles/view/opera-mobile-emulator-experimental-webkit-prefix-support/
     var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-', 'WebKit-', 'moz-', "webkit-", 'ms-', '-khtml-'];
     var cssMap = { //支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
-        "float": $.support.cssFloat ? 'cssFloat' : 'styleFloat'
+        "float": $.support.cssFloat ? 'cssFloat' : 'styleFloat',
+         background: "backgroundColor"
     };
 
     function cssName(name, host, camelCase) {
