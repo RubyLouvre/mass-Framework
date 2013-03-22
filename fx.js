@@ -296,12 +296,13 @@ define("fx", ["css"], function($) {
             fx.revertProps = revertProps;
             fx.orig = orig;
         }
-        if (fx.record || fx.revert) {
+      
+        if (hash.record || hash.revert) {
+            fx.revert = hash.revert;
             var fx2 = {}; //回滚到最初状态
             for (name in fx) {
                 fx2[name] = fx[name];
             }
-            fx2.record = fx2.revert = void 0;
             fx2.props = fx.revertProps.concat();
             fx2.revertProps = fx.props.concat();
             var el = $.timeline[index];

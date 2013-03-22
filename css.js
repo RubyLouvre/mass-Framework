@@ -76,7 +76,6 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
         return $._data(node, 'rotate') || 0;
     };
     if (cssTransform) {
-        console.log(cssTransform)
         adapter["rotate:set"] = function(node, name, value) {
             $._data(node, 'rotate', value);
             node.style[cssTransform] = 'rotate(' + (value * Math.PI / 180) + 'rad)';
