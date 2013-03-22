@@ -1,8 +1,4 @@
-// wrapped by build app
-//https://code.google.com/p/vbclass/
-//http://webreflection.blogspot.com/2011/03/rewind-getters-setters-for-all-ie-with.html
-//http://webreflection.blogspot.com/2011/02/btw-getters-setters-for-ie-6-7-and-8.html
-//http://download.dojotoolkit.org/release-1.8.3/dojo-release-1.8.3/dojox/lang/observable.js
+
 define("mvvm", ["mass"], function($) {
 //特征测试，依次使用以下实现
 //1 Object.defineProperty，
@@ -194,13 +190,4 @@ define("mvvm", ["mass"], function($) {
     }
 
 });
-require("fx,event,ready", function($) {
-    var h = $("#hide").click(function() {
-        h.hide(1000, function() {
-            h.css("background", "blue").show(1000);
-        });
-    });
-    $("#toggle_btn").click(function() {
-        $("#toggle").toggle();
-    });
-});
+
