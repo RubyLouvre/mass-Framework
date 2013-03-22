@@ -4,42 +4,72 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="mass.js"></script>
-
+ <script src="test.js"></script>
         <style>
             #ccc {
                 border:1px solid red;
             }
+            #hide{
+                width:200px;
+                height:200px;
+                background: red;
+                float:left;
+                overflow: auto;
+            }
+            #scroll{
+                width:180px;
+                height:700px;
+                background:#bd362f;
+            }
+            #toggle{
+                width:200px;
+                height:200px;
+                background:orange;
+                float:left;
+            }
+            #color{
+                width:200px;
+                height:200px;
+                background:green;
+                float:left;
+            }
+            #slideToggle{
+                width:200px;
+                height:200px;
+                background:gold;
+                float:left;
+            }
         </style>
-        <script type="text/javascript; version=1.7"> 
-            
-function Generator(next) {
-  setTimeout(next, 1000)
-  var a = yield 1000
-  console.log(a)
-
- var a = yield setTimeout(next, 1000)
-  console.log(a)
-
-  var a = yield setTimeout(next, 1000)
-  console.log(a)
-} 
-function process(f) {
-  var g
-  //这是传参next, next里面再次驱动它执行生成器的next，从来形成递归调用
-  g = f(function() {
-    try {
-      g.next();
-    } catch (e) {}
-  });
-  g.next(); //执行它
-}
-
-process(Generator);
-
+        <script> 
+          
         </script> 
 
     </head>
     <body>
+        <p ><span id="toggle_btn">toggle第二个</span><span id="scroll_btn"> scrollTop第一个</span><span id="slideToggle_btn"> slideToggle第四个</span></p>
+        <div id="hide">
+            <div id="scroll">
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+                scrollTop<br/>
+            </div>
+        </div>
+        <div id="toggle">
+
+        </div>
+        <div id="color">
+
+        </div>
+        <div id="slideToggle">
+
+        </div>
+
         <p id="aaa" data-aaa="bbb">mass messager 组件 by 司徒正美</p>
 
         <a href="#button" id="button">Button</a>
@@ -47,27 +77,7 @@ process(Generator);
 
 
         </script>
-        Function.prototype.wait = function() {
-        var me = this;
-        alert(me)
-        var g = me(function(t) {//这里就是resume
-        try {
-        g.send(t)
-        } catch (e) {}
-        });
-        g.next();
-        }
-        Requester = function(a) {
-        this.resume = a;
-        };
 
-        Requester.prototype.delay = function(time) {
-        var resume = this.resume
-        console.log(time+"!")
-        setTimeout(function() {
-        resume(time)
-        }, time)
-        };
 
 
         (function(resume) {

@@ -3,7 +3,7 @@
 //==========================================
 define("fx", ["css"], function($) {
     var types = {
-        color: /color/i,
+        color: /background$|color/i,
         scroll: /scroll/i
     };
     var rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
@@ -139,18 +139,22 @@ define("fx", ["css"], function($) {
         color: function(node, per, end, obj) {
             var pos = obj.easing(per),
                     rgb = end ? obj.to : obj.from.map(function(from, i) {
-                return Math.min(from + (obj.to[i] - from) * pos % 256, 0);
+                return Math.max(Math.min(parseInt(from + (obj.to[i] - from) * pos, 10), 255), 0);
             });
             node.style[obj.name] = "rgb(" + rgb + ")";
+        },
+        scroll: function(node, per, end, obj) {
+            node[obj.name] = (end ? obj.to : obj.from + obj.easing(per) * (obj.to - obj.from))
         }
     };
-    function getVal(node, prop) {
-        if ( !(prop in node.style) && prop in node) {
+    function initVal(node, prop) {
+        if (!(prop in node.style) && prop in node) {
             return node[prop];
         }
         var result = $.css(node, prop);
         return !result || result === "auto" ? 0 : result;
     }
+
     var Animation = {
         noop: function() {
         },
@@ -204,7 +208,7 @@ define("fx", ["css"], function($) {
                 }
                 fx.after = function(node, fx) {
                     s.display = "none";
-                    if (fx.overflow!= null) {
+                    if (fx.overflow != null) {
                         ["", "X", "Y"].forEach(function(postfix, index) {
                             s["overflow" + postfix] = fx.overflow[index];
                         });
@@ -233,7 +237,7 @@ define("fx", ["css"], function($) {
                 }
                 var val = hash[name]; //取得结束值
                 var type = Animation.type(name); //取得类型
-                var from = getVal(node, name); //取得起始值
+                var from = initVal(node, name); //取得起始值
                 //用于分解属性包中的样式或属性,变成可以计算的因子
                 if (val === "show" || (val === "toggle" && hidden)) {
                     val = $._data(node, "old" + name) || from;
@@ -248,7 +252,7 @@ define("fx", ["css"], function($) {
                 if (type === "color") {
                     parts = [color2array(from), color2array(val)];
                 } else {
-                    from =  parseFloat(from) //确保from为数字
+                    from = parseFloat(from) //确保from为数字
                     if ((parts = rfxnum.exec(val))) {
                         to = parseFloat(parts[2]), //确保to为数字
                                 unit = $.cssNumber[name] ? 0 : (parts[3] || "px");
@@ -407,7 +411,7 @@ define("fx", ["css"], function($) {
             obj[name] = type;
             if (~name.indexOf("margin")) {
                 effect.updateHooks[name] = function(node, per, end, obj) {
-                    var val = (end ? obj.to : obj.from + (obj.from - obj.to) * obj.easing(per));
+                    var val = (end ? obj.to : obj.from + obj.easing(per) * (obj.to - obj.from))
                     node.style[name] = Math.max(val, 0) + obj.unit;
                 };
             }
