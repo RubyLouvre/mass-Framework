@@ -1,5 +1,5 @@
 //=========================================
-// 选择器模块 v5 开发代号Icarus
+// 选择器模块 Icarus的裁剪版 去掉对query自定义伪类的支持,只支持IE9+
 //==========================================
 define("query", ["mass"], function($) {
     var global = this,
@@ -19,8 +19,6 @@ define("query", ["mass"], function($) {
             if (a.nodeType === 9) return true;
             if (a.contains) {
                 return a.contains(b);
-            } else if (a.compareDocumentPosition) {
-                return !!(a.compareDocumentPosition(b) & 16);
             }
             while ((b = b.parentNode))
             if (a === b) return true;
@@ -126,9 +124,6 @@ define("query", ["mass"], function($) {
         trimLeft = /^[\s\xA0]+/;
         trimRight = /[\s\xA0]+$/;
     }
-
-
-
     var slice = Array.prototype.slice,
         makeArray = function(nodes, result, flag_multi) {
             nodes = slice.call(nodes, 0);
@@ -139,19 +134,6 @@ define("query", ["mass"], function($) {
             }
             return flag_multi ? $.unique(result) : result;
         };
-    //IE56789无法使用数组方法转换节点集合
-    try {
-        slice.call($.html.childNodes, 0)[0].nodeType;
-    } catch (e) {
-        makeArray = function(nodes, result, flag_multi) {
-            var ret = result || [],
-                ri = ret.length;
-            for (var i = 0, el; el = nodes[i++];) {
-                ret[ri++] = el
-            }
-            return flag_multi ? $.unique(ret) : ret;
-        }
-    }
 
     function _toHex(x, y) {
         return String.fromCharCode(parseInt(y, 16));
@@ -171,7 +153,7 @@ define("query", ["mass"], function($) {
         var method = "getElementsByTagName",
             elems = [],
             uniqResult = {},
-            prefix
+            prefix, el
         if (flag_xml && tagName.indexOf(":") > 0 && els.length && els[0].lookupNamespaceURI) {
             var arr = tagName.split(":");
             prefix = arr[0];
@@ -185,18 +167,12 @@ define("query", ["mass"], function($) {
             case 1:
                 //在IE67下，如果存在一个name为length的input元素，下面的all.length返回此元素，而不是长度值
                 var all = prefix ? els[0][method](prefix, tagName) : els[0][method](tagName);
-                for (var i = 0, ri = 0, el; el = all[i++];) {
-                    if (el.nodeType === 1) { //防止混入注释节点
-                        elems[ri++] = el
-                    }
-                }
-                return elems;
+                return slice.call(all);
             default:
-                for (i = 0, ri = 0; el = els[i++];) {
+                for (var i = 0, ri = 0; el = els[i++];) {
                     var nodes = prefix ? el[method](prefix, tagName) : el[method](tagName)
                     for (var j = 0, node; node = nodes[j++];) {
                         var uid = $.getUid(node);
-
                         if (!uniqResult[uid]) {
                             uniqResult[uid] = elems[ri++] = node;
                         }
@@ -205,69 +181,11 @@ define("query", ["mass"], function($) {
                 return elems;
         }
     }
-    //IE9 以下的XML文档不能直接设置自定义属性
-    var attrURL = $.oneObject('action,cite,codebase,data,href,longdesc,lowsrc,src,usemap', 2);
-    var bools = "autofocus,autoplay,async,checked,controls,declare,disabled,defer,defaultChecked," + "contentEditable,ismap,loop,multiple,noshade,open,noresize,readOnly,selected"
-    var boolOne = $.oneObject(bools.toLowerCase());
 
-    //检测各种BUG（fixGetAttribute，fixHasAttribute，fixById，fixByTag）
-    var fixGetAttribute, fixHasAttribute, fixById, fixByTag;
-    var getHTMLText = new Function("els", "return els[0]." + ($.html.textContent ? "textContent" : "innerText"));
 
-    new function() {
-        var select = DOC.createElement("select");
-        var option = select.appendChild(DOC.createElement("option"));
-        option.setAttribute("selected", "selected");
-        option.className = "x";
-        fixGetAttribute = option.getAttribute("class") !== "x";
-        select.appendChild(DOC.createComment(""));
-        fixByTag = select.getElementsByTagName("*").length === 2;
-        var all = DOC.getElementsByTagName("*"),
-            node, nodeType, comments = [],
-            i = 0,
-            j = 0;
-        while ((node = all[i++])) {
-            nodeType = node.nodeType;
-            nodeType === 1 ? $.getUid(node) : nodeType === 8 ? comments.push(node) : 0;
-        }
-        while ((node = comments[j++])) {
-            node.parentNode.removeChild(node);
-        }
-        fixHasAttribute = select.hasAttribute ? !option.hasAttribute('selected') : true;
+    var getHTMLText = new Function("els", "return els[0].textContent");
 
-        var form = DOC.createElement("div"),
-            id = "fixId" + (new Date()).getTime(),
-            root = $.html;
-        form.innerHTML = "<a name='" + id + "'/>";
-        root.insertBefore(form, root.firstChild);
-        fixById = !! DOC.getElementById(id);
-        root.removeChild(form)
-    };
 
-    //http://www.atmarkit.co.jp/fxml/tanpatsu/24bohem/01.html
-    //http://msdn.microsoft.com/zh-CN/library/ms256086.aspx
-    //https://developer.mozilla.org/cn/DOM/document.evaluate
-    //http://d.hatena.ne.jp/javascripter/20080425/1209094795
-
-    function getElementsByXPath(xpath, context, doc) {
-        var result = [];
-        try {
-            if (global.DOMParser) { //IE9支持DOMParser，但我们不能使用doc.evaluate!global.DOMParser
-                var nodes = doc.evaluate(xpath, context, null, 7, null);
-                for (var i = 0, n = nodes.snapshotLength; i < n; i++) {
-                    result[i] = nodes.snapshotItem(i)
-                }
-            } else {
-                nodes = context.selectNodes(xpath);
-                for (i = 0, n = nodes.length; i < n; i++) {
-                    result[i] = nodes[i]
-                }
-            }
-        } catch (e) {
-            return false;
-        }
-        return result;
-    };
     /**
      * 选择器
      * @param {String} expr CSS表达式
@@ -286,7 +204,7 @@ define("query", ["mass"], function($) {
         var pushResult = makeArray;
         if (!contexts.nodeType) { //实现对多上下文的支持
             contexts = pushResult(contexts);
-            if (!contexts.length) return result
+            if (!contexts.length) return result;
         } else {
             contexts = [contexts];
         }
@@ -316,19 +234,20 @@ define("query", ["mass"], function($) {
                     }
                 }
             }
-            if (doc.documentMode !== 8 || context.nodeName.toLowerCase() !== "object") {
-                try {
-                    return pushResult(context.querySelectorAll(query), result, flag_multi);
-                } catch (e) {} finally {
-                    if (query.indexOf(".fix_icarus_sqa") === 0) { //如果为上下文添加了类名，就要去掉类名
-                        for (i = 0; node = contexts[i++];) {
-                            if (node.nodeType === 1) {
-                                node.className = node.className.replace("fix_icarus_sqa ", "");
-                            }
+
+            try {
+                return pushResult(context.querySelectorAll(query), result, flag_multi);
+            } catch (e) {} finally {
+                if (query.indexOf(".fix_icarus_sqa") === 0) { //如果为上下文添加了类名，就要去掉类名
+                    for (i = 0; node = contexts[i++];) {
+                        if (node.nodeType === 1) {
+                            node.className = node.className.replace("fix_icarus_sqa ", "");
                         }
                     }
                 }
             }
+
+
         }
         var match = expr.match(rquick);
         if (match) { //对只有单个标签，类名或ID的选择器进行提速
@@ -337,20 +256,15 @@ define("query", ["mass"], function($) {
             if (key == "") { //tagName;
                 nodes = getElementsByTagName(value, contexts, flag_xml);
             } else if (key === "." && contexts.length === 1) { //className，并且上下文只有1个
-                if (flag_xml) { //如果XPATH查找失败，就会返回字符，那些我们就使用普通方式去查找
-                    nodes = getElementsByXPath("//*[@class='" + value + "']", context, doc);
-                } else if (context.getElementsByClassName) {
+                if (context.getElementsByClassName) {
                     nodes = context.getElementsByClassName(value);
                 }
             } else if (key === "#" && contexts.length === 1) { //ID，并且上下文只有1个
-                if (flag_xml) {
-                    nodes = getElementsByXPath("//*[@id='" + value + "']", context, doc);
-                    //基于document的查找是不安全的，因为生成的节点可能还没有加入DOM树，比如$("<div id=\"A'B~C.D[E]\"><p>foo</p></div>").find("p")
-                } else if (context.nodeType == 9) {
-                    node = doc.getElementById(value);
+                if (context.nodeType == 9) {
+                    var node = doc.getElementById(value);
                     //IE67 opera混淆表单元素，object以及链接的ID与NAME
                     //http://webbugtrack.blogspot.com/2007/08/bug-152-getelementbyid-returns.html
-                    nodes = !node ? [] : !fixById ? [node] : node.getAttributeNode("id").nodeValue === value ? [node] : false;
+                    nodes = node ? [node] : [];
                 }
             }
             if (nodes) {
@@ -448,45 +362,22 @@ define("query", ["mass"], function($) {
             if (elems.length) {
                 return pushResult(elems, result, flag_multi);
             }
-        } else if (DOC !== doc || fixByTag && flag_dirty) {
+        } else if (DOC !== doc || flag_dirty) {
             for (result = [], ri = 0, i = 0; node = elems[i++];)
             if (node.nodeType === 1) result[ri++] = node;
             return result;
         }
         return elems;
     };
-    var onePosition = $.oneObject("eq,gt,lt,first,last,even,odd");
 
     $.mix(Icarus, {
         //getAttribute总会返回字符串
         //http://reference.sitepoint.com/javascript/Element/getAttribute
-        getAttribute: !fixGetAttribute ? function(elem, name) {
+        getAttribute: function(elem, name) {
             return elem.getAttribute(name) || '';
-        } : function(elem, name, flag_xml) {
-            if (flag_xml) return elem.getAttribute(name) || '';
-            name = name.toLowerCase();
-            //http://jsfox.cn/blog/javascript/get-right-href-attribute.html
-            if (attrURL[name]) { //得到href属性里原始链接，不自动转绝对地址、汉字和符号都不编码
-                return elem.getAttribute(name, 2) || ''
-            }
-            if (name === "style") {
-                return elem.style.cssText.toLowerCase();
-            }
-            if (elem.tagName === "INPUT" && name == "type") {
-                return elem.getAttribute("type") || elem.type; //IE67无法辩识HTML5添加添加的input类型，如input[type=search]，不能使用el.type与el.getAttributeNode去取。
-            }
-            //布尔属性，如果为true时则返回其属性名，否则返回空字符串，其他一律使用getAttributeNode
-            var attr = boolOne[name] ? (elem.getAttribute(name) ? name : '') : (elem = elem.getAttributeNode(name)) && elem.value || '';
-            return reg_sensitive.test(name) ? attr : attr.toLowerCase();
         },
-        hasAttribute: !fixHasAttribute ? function(elem, name, flag_xml) {
+        hasAttribute: function(elem, name, flag_xml) {
             return flag_xml ? !! elem.getAttribute(name) : elem.hasAttribute(name);
-        } : function(elem, name) {
-            //http://help.dottoro.com/ljnqsrfe.php
-            name = name.toLowerCase();
-            //如果这个显式设置的属性是""，即使是outerHTML也寻不见其踪影
-            elem = elem.getAttributeNode(name);
-            return !!(elem && (elem.specified || elem.nodeValue));
         },
         filter: function(expr, elems, lastResult, doc, flag_xml, flag_get) {
             var rsequence = reg_sequence,
@@ -513,7 +404,7 @@ define("query", ["mass"], function($) {
                                         continue;
                                     }
                                     //处理拥有name值为"id"的控件的form元素
-                                    if (fixById ? tmp.id === key : tmp.getAttributeNode("id").nodeValue === key) {
+                                    if (tmp.getAttributeNode("id").nodeValue === key) {
                                         elems = [tmp];
                                         continue;
                                     }
@@ -602,16 +493,8 @@ define("query", ["mass"], function($) {
                     i = 0;
                     ri = 0;
                     if (typeof filter === "function") { //如果是一些简单的伪类
-                        if (onePosition[key]) {
-                            //如果args为void则将集合的最大索引值传进去，否则将exp转换为数字
-                            args = args === void 0 ? elems.length - 1 : ~~args;
-                            for (; elem = elems[i];) {
-                                if (filter(i++, args) ^ flag_not) tmp[ri++] = elem;
-                            }
-                        } else {
-                            while ((elem = elems[i++])) {
-                                if (( !! filter(elem, args)) ^ flag_not) tmp[ri++] = elem;
-                            }
+                        while ((elem = elems[i++])) {
+                            if (( !! filter(elem, args)) ^ flag_not) tmp[ri++] = elem;
                         }
                     } else if (typeof filter.exec === "function") { //如果是子元素过滤伪类
                         tmp = filter.exec({
@@ -770,7 +653,7 @@ define("query", ["mass"], function($) {
             exec: function(flags, elems, _, doc) {
                 var result = [],
                     flag_not = flags.not;
-                var win = doc.defaultView || doc.parentWindow;
+                var win = doc.defaultView;
                 var hash = win.location.hash.slice(1);
                 for (var i = 0, ri = 0, elem; elem = elems[i++];)
                 if (((elem.id || elem.name) === hash) ^ flag_not) result[ri++] = elem;
@@ -861,56 +744,20 @@ define("query", ["mass"], function($) {
             el.parentNode && el.parentNode.selectedIndex; //处理safari的bug
             return el.selected === true;
         },
-        header: function(el) {
-            return /h\d/i.test(el.nodeName);
-        },
-        button: function(el) {
-            return "button" === el.type || el.nodeName === "BUTTON";
-        },
-        input: function(el) {
-            return /input|select|textarea|button/i.test(el.nodeName);
-        },
         parent: function(el) {
             return !!el.firstChild;
         },
         has: function(el, expr) { //孩子中是否拥有匹配expr的节点
             return !!$.query(expr, [el]).length;
         },
-        //与位置相关的过滤器
-        first: function(index) {
-            return index === 0;
-        },
-        last: function(index, num) {
-            return index === num;
-        },
-        even: function(index) {
-            return index % 2 === 0;
-        },
-        odd: function(index) {
-            return index % 2 === 1;
-        },
-        lt: function(index, num) {
-            return index < num;
-        },
-        gt: function(index, num) {
-            return index > num;
-        },
-        eq: function(index, num) {
-            return index === num;
-        },
         hidden: function(el) { // Opera <= 12.12 reports offsetWidths and offsetHeights less than zero on some elements
-            return el.offsetWidth <= 0 || el.offsetHeight <= 0 || (el.currentStyle || {}).display == "none";
+            return el.offsetWidth <= 0 || el.offsetHeight <= 0;
         }
-    }
+    };
     Icarus.pseudoHooks.visible = function(el) {
         return !Icarus.pseudoHooks.hidden(el);
-    }
+    };
 
-    "text,radio,checkbox,file,password,submit,image,reset".replace($.rword, function(name) {
-        Icarus.pseudoHooks[name] = function(el) {
-            return (el.getAttribute("type") || el.type) === name; //避开HTML5新增类型导致的BUG，不直接使用el.type === name;
-        }
-    });
     return Icarus;
 });
 /**
@@ -933,4 +780,5 @@ define("query", ["mass"], function($) {
  2011.11.9 增加getText 重构 getElementById与过滤ID部分
  2011.11.10 exec一律改为match,对parseNth的结果进行缓存
  2012.5.21 对body进行优化
+ 201.3.23 去掉旧式IE与jQuery的兼容支持
  */
