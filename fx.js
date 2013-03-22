@@ -206,8 +206,9 @@ define("fx", ["css"], function($) {
                     fx.overflow = [s.overflow, s.overflowX, s.overflowY];
                     s.overflow = "hidden";
                 }
+                var fn = fx.after || $.noop
                 fx.after = function(node, fx) {
-                    s.display = "none";
+                    fn(node, fx);
                     if (fx.overflow) {
                         ["", "X", "Y"].forEach(function(postfix, index) {
                             s["overflow" + postfix] = fx.overflow[index];
@@ -383,7 +384,7 @@ define("fx", ["css"], function($) {
                             break;
                         case 2:
                             //清空该元素的所有动画
-                            delete fx.node
+                            delete fx.node;
                             break;
                         case 3:
                             Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
@@ -456,7 +457,8 @@ define("fx", ["css"], function($) {
                 width = $.css(node, "width"),
                 height = $.css(node, "height"),
                 left = $.css(node, "left"),
-                top = $.css(node, "top");
+                top = $.css(node, "top"),
+                opacity = $.css(node, "opacity");
         node.style.position = "relative";
         $.mix(fx.props, {
             width: "*=1.5",
@@ -465,13 +467,14 @@ define("fx", ["css"], function($) {
             left: "-=" + parseInt(width) * 0.25,
             top: "-=" + parseInt(height) * 0.25
         });
-        fx.after = function(node, fx) {
+        fx.after = function() {
             node.style.position = position;
             node.style.width = width;
             node.style.height = height;
             node.style.left = left;
             node.style.top = top;
-        }
+            $.css(node, "opacity", opacity);
+        };
     }
     //扩大1.5倍并淡去
     $.fn.puff = function() {

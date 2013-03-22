@@ -1,18 +1,18 @@
 //=========================================
 //  样式补丁模块
 //==========================================
-define("css_fix", !! document.dispatchEvent, ["node"], function($) {
+define("css_fix", !!document.dispatchEvent, ["node"], function($) {
     var adapter = $.cssHooks = {},
-        ie8 = !! window.XDomainRequest,
-        rfilters = /[\w\:\.]+\([^)]+\)/g,
-        rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
-        rposition = /^(top|right|bottom|left)$/,
-        salpha = "DXImageTransform.Microsoft.Alpha",
-        border = {
-            thin: ie8 ? '1px' : '2px',
-            medium: ie8 ? '3px' : '4px',
-            thick: ie8 ? '5px' : '6px'
-        };
+            ie8 = !!window.XDomainRequest,
+            rfilters = /[\w\:\.]+\([^)]+\)/g,
+            rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
+            rposition = /^(top|right|bottom|left)$/,
+            salpha = "DXImageTransform.Microsoft.Alpha",
+            border = {
+        thin: ie8 ? '1px' : '2px',
+        medium: ie8 ? '3px' : '4px',
+        thick: ie8 ? '5px' : '6px'
+    };
     $.getStyles = function(node) {
         return node.currentStyle;
     };
@@ -20,11 +20,11 @@ define("css_fix", !! document.dispatchEvent, ["node"], function($) {
         //取得精确值，不过它有可能是带em,pc,mm,pt,%等单位
         var currentStyle = styles || node.currentStyle;
         var ret = currentStyle[name];
-        if((rnumnonpx.test(ret) && !rposition.test(ret))) {
+        if ((rnumnonpx.test(ret) && !rposition.test(ret))) {
             //①，保存原有的style.left, runtimeStyle.left,
             var style = node.style,
-                left = style.left,
-                rsLeft = node.runtimeStyle.left;
+                    left = style.left,
+                    rsLeft = node.runtimeStyle.left;
             //②由于③处的style.left = xxx会影响到currentStyle.left，
             //因此把它currentStyle.left放到runtimeStyle.left，
             //runtimeStyle.left拥有最高优先级，不会style.left影响
@@ -37,10 +37,10 @@ define("css_fix", !! document.dispatchEvent, ["node"], function($) {
             style.left = left;
             node.runtimeStyle.left = rsLeft;
         }
-        if(ret == "medium") {
+        if (ret == "medium") {
             name = name.replace("Width", "Style");
             //border width 默认值为medium，即使其为0"
-            if(currentStyle[name] === "none") {
+            if (currentStyle[name] === "none") {
                 ret = "0px";
             }
         }
@@ -50,22 +50,23 @@ define("css_fix", !! document.dispatchEvent, ["node"], function($) {
     adapter["opacity:get"] = function(node) {
         //这是最快的获取IE透明值的方式，不需要动用正则了！
         var alpha = node.filters.alpha || node.filters[salpha],
-            op = alpha ? alpha.opacity : 100;
+                op = alpha ? alpha.opacity : 100;
         return(op / 100) + ""; //确保返回的是字符串
     }
     //http://www.freemathhelp.com/matrix-multiplication.html
     //金丝楠木是皇家专用木材，一般只有皇帝可以使用做梓宫。
     adapter["opacity:set"] = function(node, name, value, currentStyle) {
         var style = node.style;
-        if(!isFinite(value)) { //"xxx" * 100 = NaN
+        if (!isFinite(value)) { //"xxx" * 100 = NaN
             return;
         }
         value = (value > 0.999) ? 100 : (value < 0.001) ? 0 : value * 100;
-        if(!currentStyle.hasLayout) style.zoom = 1; //让元素获得hasLayout
+        if (!currentStyle.hasLayout)
+            style.zoom = 1; //让元素获得hasLayout
         var filter = currentStyle.filter || style.filter || "";
         //http://snook.ca/archives/html_and_css/ie-position-fixed-opacity-filter
         //IE78的透明滤镜当其值为100时会让文本模糊不清
-        if(value === 100) { //IE78的透明滤镜当其值为100时会让文本模糊不清
+        if (value === 100) { //IE78的透明滤镜当其值为100时会让文本模糊不清
             // var str =  "filter: progid:DXImageTransform.Microsoft.Alpha(opacity=100) Chroma(Color='#FFFFFF')"+
             //   "progid:DXImageTransform.Microsoft.Matrix(sizingMethod='auto expand',"+
             //   "M11=1.5320888862379554, M12=-1.2855752193730787,  M21=1.2855752193730796, M22=1.5320888862379558)";
@@ -73,14 +74,14 @@ define("css_fix", !! document.dispatchEvent, ["node"], function($) {
                 return /alpha/i.test(a) ? "" : a; //可能存在多个滤镜，只清掉透明部分
             });
             //如果只有一个透明滤镜 就直接去掉
-            if(value.trim() === "" && style.removeAttribute) {
+            if (value.trim() === "" && style.removeAttribute) {
                 style.removeAttribute("filter");
             }
             return;
         }
         //如果已经设置过透明滤镜可以使用以下便捷方式
         var alpha = node.filters.alpha || node.filters[salpha];
-        if(alpha) {
+        if (alpha) {
             alpha.opacity = value;
         } else {
             style.filter = ((filter ? filter + "," : "") + "alpha(opacity=" + value + ")");
@@ -97,18 +98,18 @@ define("css_fix", !! document.dispatchEvent, ["node"], function($) {
      */
     adapter["userSelect:set"] = function(node, name, value) {
         var allow = /none/.test(value) ? "on" : "",
-            e, i = 0,
-            els = node.getElementsByTagName('*');
+                e, i = 0,
+                els = node.getElementsByTagName('*');
         node.setAttribute('unselectable', allow);
-        while((e = els[i++])) {
-            switch(e.tagName) {
-            case 'IFRAME':
-            case 'TEXTAREA':
-            case 'INPUT':
-            case 'SELECT':
-                break;
-            default:
-                e.setAttribute('unselectable', allow);
+        while ((e = els[i++])) {
+            switch (e.tagName) {
+                case 'IFRAME':
+                case 'TEXTAREA':
+                case 'INPUT':
+                case 'SELECT':
+                    break;
+                default:
+                    e.setAttribute('unselectable', allow);
             }
         }
     };
@@ -122,28 +123,31 @@ define("css_fix", !! document.dispatchEvent, ["node"], function($) {
     adapter["rotate:set"] = function(node, name, value) {
         $._data(node, 'rotate', value);
         var matrix = node.filters[stransform];
-        if(!matrix) {
-            node.style.filter += "progid:" + stransform + "(M11=1,M12=1,M21=1,M22=1,sizingMethod='auto expand')";
+        if (!matrix) {
+           node.style.filter += "progid:" + stransform + "(M11=1,M12=1,M21=1,M22=1,sizingMethod='auto expand')";
             matrix = node.filters[stransform];
         }
         var _rad = value * Math.PI / 180,
-            costheta = Math.cos(_rad),
-            sintheta = Math.sin(_rad);
+                costheta = Math.cos(_rad),
+                sintheta = Math.sin(_rad);
+
         matrix.M11 = costheta;
         matrix.M12 = -sintheta;
         matrix.M21 = sintheta;
         matrix.M22 = costheta;
         name = adapter.centerOrigin;
-        node.style[name === 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth / 2) + (node.clientWidth / 2) + "px";
-        node.style[name === 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight / 2) + (node.clientHeight / 2) + "px";
+	//可以在这里验证 http://www.useragentman.com/IETransformsTranslator/
+        //注IE10的IE7-8的兼容模式下无效,需在原生IE6,IE8下试验
+          node.style[name === 'margin' ? 'marginLeft' : 'left'] = -(node.offsetWidth / 2) + (node.clientWidth / 2) + "px";
+          node.style[name === 'margin' ? 'marginTop' : 'top'] = -(node.offsetHeight / 2) + (node.clientHeight / 2) + "px";
     };
     return $;
 });
 /**
-2011.10.21 去掉opacity:setter 的style.visibility处理
-2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
-2012.5.9 完美支持CSS3 transform 2D
-2012.10.25 重构透明度的读写
-2012.11.25 添加旋转
-CSS3 学习资料 http://demo.doyoe.com/
+ 2011.10.21 去掉opacity:setter 的style.visibility处理
+ 2011.11.21 将IE的矩阵滤镜的相应代码转移到这里
+ 2012.5.9 完美支持CSS3 transform 2D
+ 2012.10.25 重构透明度的读写
+ 2012.11.25 添加旋转
+ CSS3 学习资料 http://demo.doyoe.com/
  */

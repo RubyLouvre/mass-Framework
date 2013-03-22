@@ -76,6 +76,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
         return $._data(node, 'rotate') || 0;
     };
     if (cssTransform) {
+        console.log(cssTransform)
         adapter["rotate:set"] = function(node, name, value) {
             $._data(node, 'rotate', value);
             node.style[cssTransform] = 'rotate(' + (value * Math.PI / 180) + 'rad)';
@@ -87,8 +88,9 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     };
     $.css = function(node, name, value, styles) {
         if (node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
-            var prop = $.String.camelize(name);
-            name = $.cssName(name);
+            var prop = /\_/.test(name) ? $.String.camelize(name) : name;
+            
+            name = $.cssName(prop) || prop;
             styles = styles || getStyles(node);
             if (value === void 0) { //获取样式
                 return(adapter[prop + ":get"] || getter)(node, name, styles);
@@ -110,7 +112,9 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                 if (value === "" && !$.support.cloneBackgroundStyle && name.indexOf("background") === 0) {
                     node.style[name] = "inherit";
                 }
-                (adapter[prop + ":set"] || adapter["_default:set"])(node, name, value, styles);
+               var fn  = adapter[prop + ":set"] || adapter["_default:set"];
+             //  console.log(fn)
+               fn(node, name, value, styles);
             }
         }
     };

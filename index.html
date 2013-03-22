@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="mass.js"></script>
- <script src="test.js"></script>
+     <script src="test.js"></script>
         <style>
             #ccc {
                 border:1px solid red;
@@ -39,76 +39,84 @@
                 background:gold;
                 float:left;
             }
+            #fadeToggle{
+                width:200px;
+                height:200px;
+                background:#a9ea00;
+                float:left;
+            }
+            #puff{
+                width:200px;
+                height:200px;
+                background:violet;
+                float:left;
+            }
+             #rotate{
+                 position:relative;
+                 margin:10px;
+                width:200px;
+                height:200px;
+                background:red;
+                float:left;
+            }
         </style>
         <script> 
-          
+
+
         </script> 
 
     </head>
     <body>
-        <p ><span id="toggle_btn">toggle第二个</span><span id="scroll_btn"> scrollTop第一个</span><span id="slideToggle_btn"> slideToggle第四个</span></p>
-        <div id="hide">
-            <div id="scroll">
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
-                scrollTop<br/>
+        <p>
+            <span id="scroll_btn"> scrollTop第一个</span>
+            <span id="toggle_btn"> toggle第二个</span>
+            <span id="slide_btn"> slideToggle第四个</span>
+            <span id="fade_btn"> fadeToggle第五个</span>
+        </p>
+        <div style='height:230px'>
+            <div id="hide">
+                <div id="scroll">
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                    scrollTop<br/>
+                </div>
+            </div>
+            <div id="toggle">
+
+            </div>
+            <div id="color">
+                点我变色
+            </div>
+            <div id="slideToggle">
+
+            </div>
+            <div id="fadeToggle">
+
+            </div>
+            <div id="puff">
+
             </div>
         </div>
-        <div id="toggle">
-
-        </div>
-        <div id="color">
-
-        </div>
-        <div id="slideToggle">
-
-        </div>
-
         <p id="aaa" data-aaa="bbb">mass messager 组件 by 司徒正美</p>
 
         <a href="#button" id="button">Button</a>
+        
+         <div id="rotate">
+
+            </div>
         <script type="text/vbscript">
 
 
         </script>
 
 
+        <br/>
 
-        (function(resume) {
-
-        var r = new Requester(resume);
-        //这里隔1000秒才执行
-        var json = yield r.delay(2000);
-        console.log(json);
-        //这里隔1000秒才执行
-        json = yield r.delay(2000);
-        console.log(json);
-
-        }).wait()
-        function onRead(obj, prop) {
-        return obj[prop] + "!!";
-        }
-        function onWrite(obj, prop, val) {
-        obj[prop] = val
-        }
-        var obj = {
-        aa: 1,
-        bb: 2,
-        cc: function() {
-        return 3
-        }
-        };
-        var a = fn(obj, onRead, onWrite);
-        console.log(a)
-        a.aa = 4
-        console.log(a.aa)// -> 1!!
-        console.log(a.bb)// -> 2!!
-        console.log(a.cc())// -> 3
     </body>
 </html>

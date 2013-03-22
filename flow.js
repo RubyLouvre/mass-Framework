@@ -28,7 +28,7 @@ define("flow", ["class"], function($) {
         },
         unbind: function(type, callback) {
             var n = arguments.length;
-            if(n == 0) {
+            if(n === 0) {
                 this._events = {};
             } else if(n == 1) {
                 this._events[type] = [];
