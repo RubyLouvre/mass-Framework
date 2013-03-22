@@ -58,8 +58,7 @@ define("support", ["mass"], function($) {
         //        keepSize: true,
         //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
         pixelPosition: true,
-        transition: false,
-        calc: false
+        transition: false
     };
     //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
     input.checked = true;
@@ -71,15 +70,7 @@ define("support", ["mass"], function($) {
     //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
     select.disabled = true;
     support.optDisabled = !opt.disabled;
-    /**    var clickFn
-    if(!div.addEventListener && div.attachEvent && div.fireEvent) {
-        div.attachEvent("onclick", clickFn = function() {
-            support.noCloneEvent = false; //w3c的节点复制是不复制事件的
-        });
-        div.cloneNode(true).fireEvent("onclick");
-        div.detachEvent("onclick", clickFn);
-    }
-    */
+
     //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
     div.style.backgroundClip = "content-box";
     div.cloneNode(true).style.backgroundClip = "";
@@ -112,13 +103,6 @@ define("support", ["mass"], function($) {
             div.style.top = "1%";
             var computed = window.getComputedStyle(div, null) || {}
             support.pixelPosition = computed.top !== "1%";
-            for(var arr = ["calc", "-webkit-calc", "-moz-calc"], i = 0; ib = arr[i++];) {
-                div.style.width = a + "(7px + 8px)"; //注意+两边有空白
-                if(computed.width == "15px") {
-                    support.calc = a;
-                    break;
-                }
-            }
         }
         //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
         div.innerHTML = "<a href='#'></a>"

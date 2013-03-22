@@ -208,7 +208,7 @@ define("fx", ["css"], function($) {
                 }
                 fx.after = function(node, fx) {
                     s.display = "none";
-                    if (fx.overflow != null) {
+                    if (fx.overflow) {
                         ["", "X", "Y"].forEach(function(postfix, index) {
                             s["overflow" + postfix] = fx.overflow[index];
                         });
@@ -252,7 +252,7 @@ define("fx", ["css"], function($) {
                 if (type === "color") {
                     parts = [color2array(from), color2array(val)];
                 } else {
-                    from = parseFloat(from) //确保from为数字
+                    from = parseFloat(from); //确保from为数字
                     if ((parts = rfxnum.exec(val))) {
                         to = parseFloat(parts[2]), //确保to为数字
                                 unit = $.cssNumber[name] ? 0 : (parts[3] || "px");

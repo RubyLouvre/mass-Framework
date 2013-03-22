@@ -114,7 +114,7 @@ define("mvvm", ["mass"], function($) {
                     return onInvoke(scope, wrapped, name, arguments);
                 };
             }
-            var ID  = setTimeout("1"); //当前实例的编号
+            var ID = setTimeout("1"); //当前实例的编号
             // create globals for the getters and setters so they can be accessed from the vbscript
             var getName = "gettable_" + ID; //当前实例的getter适配器
             lettableWin[getName] = onRead;
@@ -193,4 +193,14 @@ define("mvvm", ["mass"], function($) {
         }
     }
 
+});
+require("fx,event,ready", function($) {
+    var h = $("#hide").click(function() {
+        h.hide(1000, function() {
+            h.css("background", "blue").show(1000);
+        });
+    });
+    $("#toggle_btn").click(function() {
+        $("#toggle").toggle();
+    });
 });
