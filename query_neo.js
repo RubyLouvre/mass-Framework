@@ -129,7 +129,7 @@ define("query", ["mass"], function($) {
             return flag_multi ? $.unique(result) : result;
         };
 
-    function _toHex(x, y) {
+    function toHex(x, y) {
         return String.fromCharCode(parseInt(y, 16));
     }
 
@@ -356,17 +356,11 @@ define("query", ["mass"], function($) {
 
     $.mix(Icarus, {
         filter: function(expr, elems, lastResult, doc, flag_get) {
-            var rsequence = reg_sequence,
-                rattrib = reg_attrib,
-                rpseudo = reg_pseudo,
-                rBackslash = reg_backslash,
-                rattrval = reg_attrval,
+            var rBackslash = reg_backslash,
                 pushResult = makeArray,
-                toHex = _toHex,
-                _hash_op = hash_operator,
                 parseNth = parse_nth,
                 match, key, tmp;
-            while (match = expr.match(rsequence)) { //主循环
+            while (match = expr.match(reg_sequence)) { //主循环
                 expr = RegExp.rightContext;
                 key = (match[2] || "").replace(rBackslash, "");
                 if (!elems) { //取得用于过滤的元素
@@ -415,7 +409,7 @@ define("query", ["mass"], function($) {
                     case ":":
                         //伪类选择器
                         tmp = Icarus.pseudoHooks[key];
-                        if (match = expr.match(rpseudo)) {
+                        if (match = expr.match(reg_pseudo)) {
                             expr = RegExp.rightContext;
                             if ( !! ~key.indexOf("nth")) {
                                 args = parseNth[match[1]] || parseNth(match[1]);
@@ -446,12 +440,12 @@ define("query", ["mass"], function($) {
                         break
                     default:
                         filter = [key.toLowerCase()];
-                        if ((match = expr.match(rattrib))) {
+                        if ((match = expr.match(reg_attrib))) {
                             expr = RegExp.rightContext;
                             if (match[1]) {
                                 filter[1] = match[1]; //op
                                 filter[2] = match[3] || match[4]; //对值进行转义
-                                filter[2] = filter[2] ? filter[2].replace(rattrval, toHex).replace(rBackslash, "") : "";
+                                filter[2] = filter[2] ? filter[2].replace(reg_attrval, toHex).replace(rBackslash, "") : "";
                             }
                         }
                         break;
@@ -478,7 +472,7 @@ define("query", ["mass"], function($) {
                         }, elems, args, doc);
                     } else {
                         var name = filter[0],
-                            op = _hash_op[filter[1]],
+                            op = hash_operator[filter[1]],
                             val = filter[2] || "",
                             flag, attr;
                         if (name === "class" && op === 4) { //如果是类名
