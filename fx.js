@@ -44,7 +44,6 @@ define("fx", ["css"], function($) {
     }
     tick.id = null;
 
-
     function nextTick() {
         //用于从主列队中剔除已经完成或被强制完成的动画实例，一旦主列队被清空，还负责中止定时器，节省内存
         var i = timeline.length;
@@ -145,12 +144,13 @@ define("fx", ["css"], function($) {
             node.style[obj.name] = "rgb(" + rgb + ")";
         }
     };
-
-    effect._default = $.css; //getter
-    effect.scroll = function(el, prop) { //getter
-        return el[prop];
-    };
-
+    function getVal(node, prop) {
+        if ( !(prop in node.style) && prop in node) {
+            return node[prop];
+        }
+        var result = $.css(node, prop);
+        return !result || result === "auto" ? 0 : result;
+    }
     var Animation = {
         noop: function() {
         },
@@ -204,7 +204,7 @@ define("fx", ["css"], function($) {
                 }
                 fx.after = function(node, fx) {
                     s.display = "none";
-                    if (!fx.overflow) {
+                    if (fx.overflow!= null) {
                         ["", "X", "Y"].forEach(function(postfix, index) {
                             s["overflow" + postfix] = fx.overflow[index];
                         });
@@ -233,7 +233,7 @@ define("fx", ["css"], function($) {
                 }
                 var val = hash[name]; //取得结束值
                 var type = Animation.type(name); //取得类型
-                var from = (effect[type] || effect._default)(node, name); //取得起始值
+                var from = getVal(node, name); //取得起始值
                 //用于分解属性包中的样式或属性,变成可以计算的因子
                 if (val === "show" || (val === "toggle" && hidden)) {
                     val = $._data(node, "old" + name) || from;
@@ -248,7 +248,7 @@ define("fx", ["css"], function($) {
                 if (type === "color") {
                     parts = [color2array(from), color2array(val)];
                 } else {
-                    from = !from || from === "auto" ? 0 : parseFloat(from) //确保from为数字
+                    from =  parseFloat(from) //确保from为数字
                     if ((parts = rfxnum.exec(val))) {
                         to = parseFloat(parts[2]), //确保to为数字
                                 unit = $.cssNumber[name] ? 0 : (parts[3] || "px");
