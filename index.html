@@ -10,45 +10,77 @@
                 border:1px solid red;
             }
         </style>
-        <script>
+        <script type="text/javascript; version=1.7"> 
+            
+function Generator(next) {
+  setTimeout(next, 1000)
+  var a = yield 1000
+  console.log(a)
 
-            require("flow", function($) {
-                var flow = new $.Flow;
-                flow.refresh("aaa,bbb,ccc", function() {
-                    $.log(Array.apply([], arguments))
-                });
-                flow.fire("aaa", 1)//没反应
-                flow.fire("bbb", 2)//没反应
-                flow.fire("ccc", 3)//[1,2,3]
-                flow.fire("aaa", 4)//[4,2,3],刷新第一个
-                flow.fire("bbb", 5)//[4,5,3],刷新第二个
-                flow.fire("ccc", 6)//[4,5,6],刷新第三个
-            })
-            require("flow", function($) {
-                var flow = new $.Flow;
-                flow.reload("aaa,bbb,ccc", function() {
-                    $.log(Array.call([], arguments))
-                });
-                flow.fire("aaa", 1)//没反应
-                flow.fire("bbb", 2)//没反应
-                flow.fire("ccc", 3)//[1,2,3]
-                flow.fire("aaa", 4)//没反应
-                flow.fire("bbb", 5)//没反应
-                flow.fire("ccc", 6)//[4,5,6]
-            })
+ var a = yield setTimeout(next, 1000)
+  console.log(a)
 
+  var a = yield setTimeout(next, 1000)
+  console.log(a)
+} 
+function process(f) {
+  var g
+  //这是传参next, next里面再次驱动它执行生成器的next，从来形成递归调用
+  g = f(function() {
+    try {
+      g.next();
+    } catch (e) {}
+  });
+  g.next(); //执行它
+}
+
+process(Generator);
 
         </script> 
 
     </head>
     <body>
-        <p id="aaa">mass messager 组件 by 司徒正美</p>
+        <p id="aaa" data-aaa="bbb">mass messager 组件 by 司徒正美</p>
 
         <a href="#button" id="button">Button</a>
         <script type="text/vbscript">
 
 
         </script>
+        Function.prototype.wait = function() {
+        var me = this;
+        alert(me)
+        var g = me(function(t) {//这里就是resume
+        try {
+        g.send(t)
+        } catch (e) {}
+        });
+        g.next();
+        }
+        Requester = function(a) {
+        this.resume = a;
+        };
+
+        Requester.prototype.delay = function(time) {
+        var resume = this.resume
+        console.log(time+"!")
+        setTimeout(function() {
+        resume(time)
+        }, time)
+        };
+
+
+        (function(resume) {
+
+        var r = new Requester(resume);
+        //这里隔1000秒才执行
+        var json = yield r.delay(2000);
+        console.log(json);
+        //这里隔1000秒才执行
+        json = yield r.delay(2000);
+        console.log(json);
+
+        }).wait()
         function onRead(obj, prop) {
         return obj[prop] + "!!";
         }

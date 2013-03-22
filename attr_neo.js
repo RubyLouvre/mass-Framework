@@ -198,7 +198,6 @@ define("attr", ["node"], function($) {
             return this;
         },
         //如果不传入类名,则清空所有类名,允许同时删除多个类名
-        //如果不传入类名,则清空所有类名,允许同时删除多个类名
         removeClass: function(item) {
             var removeSome = item && typeof item === "string",
                     removeAll = item === void 0;
@@ -268,25 +267,25 @@ define("attr", ["node"], function($) {
             return this;
         },
         //用于取得表单元素的value值
- val: function(item) {
+        val: function(item) {
             var getter = valHooks["option:get"];
-            if(arguments.length) {
-                if(Array.isArray(item)) {
+            if (arguments.length) {
+                if (Array.isArray(item)) {
                     item = item.map(function(item) {
                         return item == null ? "" : item + "";
                     });
-                } else if(isFinite(item)) {
+                } else if (isFinite(item)) {
                     item += "";
                 } else {
                     item = item || ""; //我们确保传参为字符串数组或字符串，null/undefined强制转换为"", number变为字符串
                 }
             }
             return $.access(this, function(el) {
-                if(this === $) { //getter
+                if (this === $) { //getter
                     var ret = (valHooks[getValType(el) + ":get"] || $.propHooks["@default:get"])(el, "value", getter);
                     return typeof ret === "string" ? ret.replace(rreturn, "") : ret == null ? "" : ret;
                 } else { //setter 
-                    if(el.nodeType === 1) {
+                    if (el.nodeType === 1) {
                         (valHooks[getValType(el) + ":set"] || $.propHooks["@default:set"])(el, "value", item, getter);
                     }
                 }
