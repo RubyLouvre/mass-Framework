@@ -112,6 +112,16 @@ $(function(){
 </pre>
 <h3>JS文件的合并</h3>
 <p>使用combo.js</p>
+<pre>
+node.exe combo
+</pre>
+
+<h3>JS文件的合并</h3>
+<p>使用compiler.jar( GCC，需要有JAVA运行环境)</p>
+<pre>
+java -jar compiler.jar --js mass_merge.js --js_output_file mass_min.js
+</pre>
+
 <h3>BUG提交与插件的友情贡献。</h3>
 
 <p>大家在github注册后，就可以在<a href="https://github.com/RubyLouvre/mass-Framework/issues">https://github.com/RubyLouvre/mass-Framework/issues</a>里面提交建议或BUG什么了。</p>
