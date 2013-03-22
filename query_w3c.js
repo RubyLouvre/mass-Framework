@@ -116,5 +116,6 @@ define("query", ["mass"], function($) {
     return Icarus;
 });
 /**
- 最精版
+ * 2013.3.23
+这个最精简版的选择器，应用于手机，不支持旧式IE，jQuery与XML，只有100多行，不要逻辑是去掉排序
  */
