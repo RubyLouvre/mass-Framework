@@ -738,69 +738,13 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             return result;
         },
         
-        quote: String.quote ||
-        function(str) {
-            return '"' + str.replace(runicode, function(a) {
-                switch(a) {
-                case '"':
-                    return '\\"';
-                case '\\':
-                    return '\\\\';
-                case '\b':
-                    return '\\b';
-                case '\f':
-                    return '\\f';
-                case '\n':
-                    return '\\n';
-                case '\r':
-                    return '\\r';
-                case '\t':
-                    return '\\t';
-                }
-                a = a.charCodeAt(0).toString(16);
-                while(a.length < 4) a = "0" + a;
-                return "\\u" + a;
-            }) + '"';
-        },
+        quote: String.quote || JSON.stringify,
         
-        dump: function(obj, indent) {
-            indent = indent || "";
-            if(obj == null) //处理null,undefined
-            return indent + "obj";
-            if(obj.nodeType === 9) return indent + "[object Document]";
-            if(obj.nodeType) return indent + "[object " + (obj.tagName || "Node") + "]";
-            var arr = [],
-                type = $.type(obj),
-                self = $.dump,
-                next = indent + "\t";
-            switch(type) {
-            case "Boolean":
-            case "Number":
-            case "NaN":
-            case "RegExp":
-                return indent + obj;
-            case "String":
-                return indent + $.quote(obj);
-            case "Function":
-                return(indent + obj).replace(/\n/g, "\n" + indent);
-            case "Date":
-                return indent + '(new Date(' + obj.valueOf() + '))';
-            case "Window":
-                return indent + "[object " + type + "]";
-            default:
-                if($.isArrayLike(obj)) {
-                    for(var i = 0, n = obj.length; i < n; ++i)
-                    arr.push(self(obj[i], next).replace(/^\s* /g, next));
-                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
-                }
-                if($.isPlainObject(obj)) {
-                    for(i in obj) {
-                        arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
-                    }
-                    return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
-                }
-                return indent + "[object " + type + "]";
-            }
+        dump: function(obj) {
+            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t"
+            return JSON.stringify(obj, function(key, value){
+                  return typeof value === "function" ?  value + "" : value;
+            }, space);
         },
         
         parseJS: function(code) {
@@ -1416,256 +1360,6 @@ define("class", ["lang"], function($) {
     $.mix($.factory, hash);
     return $
 });
-  
-   //=========================================
-// 流程模块v1 by 司徒正美 （流程控制，消息交互）
-//=========================================
-define("flow", ["class"], function($) {
-    //观察者模式
-    $.Observer = $.factory({
-        init: function(target) {
-            this._events = {};
-            this._target = target || this;
-        },
-        bind: function(type, callback) {
-            var listeners = this._events[type]
-            if(listeners) {
-                listeners.push(callback)
-            } else {
-                this._events[type] = [callback]
-            }
-            return this;
-        },
-        once: function(type, callback) {
-            var self = this;
-            var wrapper = function() {
-                    callback.apply(self, arguments);
-                    self.unbind(type, wrapper);
-                };
-            this.bind(type, wrapper);
-            return this;
-        },
-        unbind: function(type, callback) {
-            var n = arguments.length;
-            if(n === 0) {
-                this._events = {};
-            } else if(n == 1) {
-                this._events[type] = [];
-            } else {
-                var listeners = this._events[type] || [];
-                var i = listeners.length;
-                while(--i > -1) {
-                    if(listeners[i] === callback) {
-                        return listeners.splice(i, 1);
-                    }
-                }
-            }
-            return this;
-        },
-        fire: function(type) {
-            var listeners = (this._events[type] || []).concat(); //防止影响原数组
-            if(listeners.length) {
-                var target = this._target,
-                    args = $.slice(arguments);
-                args[0] = {
-                    type: type,
-                    target: target
-                }
-                for(var i = 0, callback; callback = listeners[i++];) {
-                    callback.apply(target, args);
-                }
-            }
-        }
-    });
-    //用于处理需要通过N个子步骤才能完成的一些操作
-    //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
-    $.Flow =  $.Observer.extend({
-        init: function(timeout) {
-            this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
-            if(typeof timeout == "number") {
-                this.timeout = timeout; //用于order,时间限制
-            }
-        },
-        fire: function(type, args) {
-            var calls = this._events,
-                normal = 2,
-                listeners, ev;
-            while(normal--) {
-                ev = normal ? type : last;
-                listeners = calls[ev];
-                if(listeners && listeners.length) {
-                    args = $.slice(arguments, 1)
-                    if(normal) { //在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
-                        if(this._events[ev]) {
-                            this._fired[ev] = args.concat();
-                        }
-                        args.unshift({
-                            type: type,
-                            target: this._target
-                        })
-                    }
-                    for(var i = 0, callback; callback = listeners[i++];) {
-                        //第一次执行目标事件,第二次执行最后的回调
-                        callback.apply(this, args);
-                    }
-                } else {
-                    break;
-                }
-            }
-            return this;
-        },
-        
-        refresh: function() {
-            Array.prototype.push.call(arguments, false);
-            _assign.apply(this, arguments);
-            return this;
-        },
-        
-        reload: function() {
-            Array.prototype.push.call(arguments, true);
-            _assign.apply(this, arguments);
-            return this;
-        },
-        
-        order: function(type) { //
-            if(this._events[type]) {
-                var cur = this._queue.shift();
-                if(!this.timestamp) {
-                    this.timestamp = new Date - 0
-                }
-                var limit = true;
-                if(this.timeout && (new Date - this.timestamp > this.timeout)) {
-                    limit = false;
-                }
-                if(type == cur && limit) {
-                    this.fire.apply(this, arguments);
-                } else {
-                    this._queue = this._order.concat();
-                    this._fired = {};
-                    delete this.timestamp;
-                }
-            }
-        },
-        
-        repeat: function(type, times, callback) {
-            var old = times,
-                that = this,
-                ret = [];
-            function wrapper() {
-                ret.push.apply(ret, $.slice(arguments, 1));
-                if(--times === 0) {
-                    callback.apply(this._target, ret);
-                    times = old;
-                    ret = [];
-                }
-            }
-            that.bind(type, wrapper);
-            return this;
-        },
-        //用于提供一个简单的成功回调
-        done: function(callback) {
-            var that = this;
-            return function(err, data) {
-                if(err) {
-                    return that.fire('error', err);
-                }
-                if(typeof callback === 'string') {
-                    return that.fire(callback, data);
-                }
-                if(arguments.length <= 2) {
-                    return callback(data);
-                }
-                var args = $.slice(arguments, 1);
-                callback.apply(null, args);
-            }
-        },
-         //用于提供一个简单的错误回调
-        fail: function(callback) {
-            var that = this;
-            that.once('error', function(err) {
-                that.unbind();
-                callback(err);
-            });
-            return this;
-        }
-    })
-
-    $.Flow.create = function(names, callback, errorback) {
-        var that = new $.Flow;
-        var args = names.match($.rword) || [];
-        if(typeof errorback === "function") {
-            that.fail(errorback);
-        }
-        args.push(callback)
-        that.refresh.apply(that, args);
-        return that;
-    };
-    var last = "$" + Date.now();
-    var _assign = function(name, callback, reload) {
-            var flow = this,
-                times = 0,
-                uniq = {},
-                events = name.match($.rword),
-                length = events.length;
-            if(!events.length) {
-                return this;
-            }
-            this._queue = events.concat();
-            this._order = events;
-
-            function bind(key) {
-                flow.bind(key, function() {
-                    if(!uniq[key]) {
-                        uniq[key] = true;
-                        times++;
-                    }
-                });
-            }
-            //绑定所有子事件
-            for(var index = 0; index < length; index++) {
-                bind(events[index]);
-            }
-
-            function lastFn() {
-                //如果没有达到目标次数, 或事件类型之前没有指定过
-                if(times < length) {
-                    return;
-                }
-                var result = [];
-                for(var index = 0; index < length; index++) {
-                    result.push.apply(result, flow._fired[events[index]]);
-                }
-                if(reload) {
-                    uniq = {};
-                    times = 0;
-                }
-                callback.apply(flow, result);
-            }
-            flow.bind(last, lastFn);
-        };
-    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
-    //单点发布 自愿收听 单向联接 分散传播
-    $.Twitter = $.factory({
-        init: function() {
-            this.followers = [];
-        },
-        tweet: function(msg) {
-            for(var i = 0; i < this.followers.length; i++) {
-                var follower = this.followers[i];
-                if(follower.handler) {
-                    follower.handler.call(follower.target, msg); //deal
-                }
-            }
-        },
-        follow: function(master, handler) {
-            master.followers.push({
-                target: this,
-                handler: handler
-            });
-        }
-    })
-    return $;
-})
   
    //==================================================
 // 数据缓存模块
@@ -6074,6 +5768,256 @@ define("fx", ["css"], function($) {
         };
     } catch (e) {
     }
+    return $;
+})
+  
+   //=========================================
+// 流程模块v1 by 司徒正美 （流程控制，消息交互）
+//=========================================
+define("flow", ["class"], function($) {
+    //观察者模式
+    $.Observer = $.factory({
+        init: function(target) {
+            this._events = {};
+            this._target = target || this;
+        },
+        bind: function(type, callback) {
+            var listeners = this._events[type]
+            if(listeners) {
+                listeners.push(callback)
+            } else {
+                this._events[type] = [callback]
+            }
+            return this;
+        },
+        once: function(type, callback) {
+            var self = this;
+            var wrapper = function() {
+                    callback.apply(self, arguments);
+                    self.unbind(type, wrapper);
+                };
+            this.bind(type, wrapper);
+            return this;
+        },
+        unbind: function(type, callback) {
+            var n = arguments.length;
+            if(n === 0) {
+                this._events = {};
+            } else if(n == 1) {
+                this._events[type] = [];
+            } else {
+                var listeners = this._events[type] || [];
+                var i = listeners.length;
+                while(--i > -1) {
+                    if(listeners[i] === callback) {
+                        return listeners.splice(i, 1);
+                    }
+                }
+            }
+            return this;
+        },
+        fire: function(type) {
+            var listeners = (this._events[type] || []).concat(); //防止影响原数组
+            if(listeners.length) {
+                var target = this._target,
+                    args = $.slice(arguments);
+                args[0] = {
+                    type: type,
+                    target: target
+                }
+                for(var i = 0, callback; callback = listeners[i++];) {
+                    callback.apply(target, args);
+                }
+            }
+        }
+    });
+    //用于处理需要通过N个子步骤才能完成的一些操作
+    //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
+    $.Flow =  $.Observer.extend({
+        init: function(timeout) {
+            this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
+            if(typeof timeout == "number") {
+                this.timeout = timeout; //用于order,时间限制
+            }
+        },
+        fire: function(type, args) {
+            var calls = this._events,
+                normal = 2,
+                listeners, ev;
+            while(normal--) {
+                ev = normal ? type : last;
+                listeners = calls[ev];
+                if(listeners && listeners.length) {
+                    args = $.slice(arguments, 1)
+                    if(normal) { //在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
+                        if(this._events[ev]) {
+                            this._fired[ev] = args.concat();
+                        }
+                        args.unshift({
+                            type: type,
+                            target: this._target
+                        })
+                    }
+                    for(var i = 0, callback; callback = listeners[i++];) {
+                        //第一次执行目标事件,第二次执行最后的回调
+                        callback.apply(this, args);
+                    }
+                } else {
+                    break;
+                }
+            }
+            return this;
+        },
+        
+        refresh: function() {
+            Array.prototype.push.call(arguments, false);
+            _assign.apply(this, arguments);
+            return this;
+        },
+        
+        reload: function() {
+            Array.prototype.push.call(arguments, true);
+            _assign.apply(this, arguments);
+            return this;
+        },
+        
+        order: function(type) { //
+            if(this._events[type]) {
+                var cur = this._queue.shift();
+                if(!this.timestamp) {
+                    this.timestamp = new Date - 0
+                }
+                var limit = true;
+                if(this.timeout && (new Date - this.timestamp > this.timeout)) {
+                    limit = false;
+                }
+                if(type == cur && limit) {
+                    this.fire.apply(this, arguments);
+                } else {
+                    this._queue = this._order.concat();
+                    this._fired = {};
+                    delete this.timestamp;
+                }
+            }
+        },
+        
+        repeat: function(type, times, callback) {
+            var old = times,
+                that = this,
+                ret = [];
+            function wrapper() {
+                ret.push.apply(ret, $.slice(arguments, 1));
+                if(--times === 0) {
+                    callback.apply(this._target, ret);
+                    times = old;
+                    ret = [];
+                }
+            }
+            that.bind(type, wrapper);
+            return this;
+        },
+        //用于提供一个简单的成功回调
+        done: function(callback) {
+            var that = this;
+            return function(err, data) {
+                if(err) {
+                    return that.fire('error', err);
+                }
+                if(typeof callback === 'string') {
+                    return that.fire(callback, data);
+                }
+                if(arguments.length <= 2) {
+                    return callback(data);
+                }
+                var args = $.slice(arguments, 1);
+                callback.apply(null, args);
+            }
+        },
+         //用于提供一个简单的错误回调
+        fail: function(callback) {
+            var that = this;
+            that.once('error', function(err) {
+                that.unbind();
+                callback(err);
+            });
+            return this;
+        }
+    })
+
+    $.Flow.create = function(names, callback, errorback) {
+        var that = new $.Flow;
+        var args = names.match($.rword) || [];
+        if(typeof errorback === "function") {
+            that.fail(errorback);
+        }
+        args.push(callback)
+        that.refresh.apply(that, args);
+        return that;
+    };
+    var last = "$" + Date.now();
+    var _assign = function(name, callback, reload) {
+            var flow = this,
+                times = 0,
+                uniq = {},
+                events = name.match($.rword),
+                length = events.length;
+            if(!events.length) {
+                return this;
+            }
+            this._queue = events.concat();
+            this._order = events;
+
+            function bind(key) {
+                flow.bind(key, function() {
+                    if(!uniq[key]) {
+                        uniq[key] = true;
+                        times++;
+                    }
+                });
+            }
+            //绑定所有子事件
+            for(var index = 0; index < length; index++) {
+                bind(events[index]);
+            }
+
+            function lastFn() {
+                //如果没有达到目标次数, 或事件类型之前没有指定过
+                if(times < length) {
+                    return;
+                }
+                var result = [];
+                for(var index = 0; index < length; index++) {
+                    result.push.apply(result, flow._fired[events[index]]);
+                }
+                if(reload) {
+                    uniq = {};
+                    times = 0;
+                }
+                callback.apply(flow, result);
+            }
+            flow.bind(last, lastFn);
+        };
+    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
+    //单点发布 自愿收听 单向联接 分散传播
+    $.Twitter = $.factory({
+        init: function() {
+            this.followers = [];
+        },
+        tweet: function(msg) {
+            for(var i = 0; i < this.followers.length; i++) {
+                var follower = this.followers[i];
+                if(follower.handler) {
+                    follower.handler.call(follower.target, msg); //deal
+                }
+            }
+        },
+        follow: function(master, handler) {
+            master.followers.push({
+                target: this,
+                handler: handler
+            });
+        }
+    })
     return $;
 })
   
