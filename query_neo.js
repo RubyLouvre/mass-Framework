@@ -54,7 +54,7 @@ define("query", ["mass"], function($) {
             //http://www.cnblogs.com/jkisjk/archive/2011/01/28/array_quickly_sortby.html
 
             if (!sourceIndex && !compare) { //用于旧式IE的XML
-                var all = (node.ownerDocument || node).geElementsByTagName("*");
+                var all = (node.ownerDocument || node).getElementsByTagName("*");
                 for (var index = 0; node = all[index]; index++) {
                     node.setAttribute("sourceIndex", index);
                 }
@@ -246,8 +246,6 @@ define("query", ["mass"], function($) {
             } else if (key === "#" && contexts.length === 1) { //ID，并且上下文只有1个
                 if (context.nodeType === 9) {
                     var node = doc.getElementById(value);
-                    //IE67 opera混淆表单元素，object以及链接的ID与NAME
-                    //http://webbugtrack.blogspot.com/2007/08/bug-152-getelementbyid-returns.html
                     nodes = node ? [node] : [];
                 }
             }

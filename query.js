@@ -56,7 +56,7 @@ define("query", ["mass"], function($) {
             //http://www.cnblogs.com/jkisjk/archive/2011/01/28/array_quickly_sortby.html
 
             if (!sourceIndex && !compare) { //用于旧式IE的XML
-                var all = (node.ownerDocument || node).geElementsByTagName("*");
+                var all = (node.ownerDocument || node).getElementsByTagName("*");
                 for (var index = 0; node = all[index]; index++) {
                     node.setAttribute("sourceIndex", index);
                 }
