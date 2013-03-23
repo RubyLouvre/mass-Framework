@@ -715,31 +715,5 @@ define("node", ["support", "class","query", "data"]
         });
 
 /**
- 2011.7.11 dom["class"]改为dom["@class"]
- 2011.7.26 对init与parseHTML进行重构
- 2011.9.22 去掉isInDomTree 重构cloneNode,manipulate,parseHTML
- 2011.10.7 移除isFormElement
- 2011.10.9 将遍历模块合并到节点模块
- 2011.10.12 重构index closest
- 2011.10.20 修复rid的BUG
- 2011.10.21 添加even odd这两个切片方法 重构html方法
- 2011.10.23 增加rcheckEls成员,它是一个成员
- 2011.10.27 修正init方法中doc的指向错误
- 由 doc = this.ownerDocument = expr.ownerDocument || expr.nodeType == 9 && expr || document 改为
- doc = this.ownerDocument =  scope.ownerDocument || scope ;
- 2011.10.29 优化$.parseHTML 在IE6789下去掉所有为修正createAll特性而添加的补丁元素
- （原来是添加一个文本节点\u200b，而现在是<br class="fix_create_all"/>）
- /http://d.hatena.ne.jp/edvakf/20100205/1265338487
- 2011.11.5 添加get方法 init的context参数可以是类数组对象
- 2011.11.6 outerHTML支持对文档对象的处理，html可以取得XML数据岛的innerHTML,修正init中scope与ownerDocument的取得
- 2011.11.7 重构find， 支持不插入文档的节点集合查找
- 2012.3.1 增强对HTML5新标签的支持 fix index方法的BUG
- 2012.3.9 添加一些数组方法
- 2012.4.5 使用isArrayLike精简init方法
- 2012.4.29 重构$.access与$.fn.data
- 2012.5.4 $.access添加第六个可选参数，用于绑定作用域，因此顺带重构了html, text, outerHTML,data原型方法
- 2012.5.21 Remove $("body") case; $(document.body) is 2x faster.
- 2012.5.28 cssName支持检测mozMatchesSelector, Fix $.match BUG
- 2012.7.31 使用$.Array.merge代替不可靠的[].push,对cloneNode进行重构,只对元素节点进行修复
- 2013.1.17 修正rnest正则,防止遗漏tbody
+合并时采用的保守模块
  */

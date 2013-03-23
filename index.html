@@ -3,120 +3,193 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
         <script src="mass.js"></script>
-     <script src="test.js"></script>
+
         <style>
-            #ccc {
-                border:1px solid red;
+            .modules-slider{
+                width:900px;
+                height:30px;
+                border: 1px solid red;
+                position:relative;
+                overflow:hidden;
             }
-            #hide{
-                width:200px;
-                height:200px;
-                background: red;
+            .modules-slider-left, .modules-slider-right{
+                width:30px;
+                height:30px;
+                line-height: 30px;
+                text-align: center;
+                border: 1px solid red;
+                position:absolute;
+                background: white;
+                font-weight: bolder;
+                z-index:2
+            }
+            .modules-slider-left{
+                left:0;
+            }
+            .modules-slider-right{
+                right:0!important;
+            }
+            .modules-slider-center{
+                width:1200px;
+                height:30px;
+                border: 1px solid red;
+                position:absolute;
+                left:30px;
+                z-index:1
+            }
+            .modules-slider-center div{
+                padding-left: 10px;
+                padding-right: 1px;
+                height:30px;
+                line-height: 30px;
+                display:inline-block;
                 float:left;
+            }
+            .modules-slider-center .active{
+                color:blue;
+            }
+            .left-bar{
+                text-align: left;
+                width:150px;
+                height:400px;
                 overflow: auto;
+                background: #a9ea00;
             }
-            #scroll{
-                width:180px;
-                height:700px;
-                background:#bd362f;
+            .left-bar ul{
+                list-style: none;
+                padding:0;
+                margin:0;
             }
-            #toggle{
-                width:200px;
-                height:200px;
-                background:orange;
-                float:left;
+            .left-bar ul li {
+                background: #9FF;
+                padding-left: 1em;
+                height: 25px;
+                line-height: 25px;
+                color: #000;
             }
-            #color{
-                width:200px;
-                height:200px;
-                background:green;
-                float:left;
+            .left-bar ul li.odd {
+                background: #6F9;
             }
-            #slideToggle{
-                width:200px;
-                height:200px;
-                background:gold;
-                float:left;
+            .left-bar ul li.hover {
+                background: #73c32c!important;
+                color:#fff;
             }
-            #fadeToggle{
-                width:200px;
-                height:200px;
-                background:#a9ea00;
-                float:left;
-            }
-            #puff{
-                width:200px;
-                height:200px;
-                background:violet;
-                float:left;
-            }
-             #rotate{
-                 position:relative;
-                 margin:10px;
-                width:200px;
-                height:200px;
-                background:red;
-                float:left;
+            pre{
+              
+white-space: pre-wrap; /* CSS-3 */
+white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+white-space: -pre-wrap; /* Opera 4-6 */
+white-space: -o-pre-wrap; /* Opera 7 */
+word-wrap: break-word; /* Internet Explorer 5.5+ */
+
             }
         </style>
-        <script> 
+        <script>
+            require("fx, event, attr, ready", function() {
+                var person = {
+                    name: "Jim Cowart",
+                    getName: function() {
+                        alert(1)
+                    },
+                    location: {
+                        city: {
+                            name: "Chattanooga",
+                            population: 167674
+                        },
+                        state: {
+                            name: "Tennessee",
+                            abbreviation: "TN",
+                            population: 6403000
+                        }
+                    },
+                    company: "appendTo"
+                };
+                $("#json").text($.dump(person))
+
+
+
+                var center = $(".modules-slider-center");
+                $(".modules-slider-left,.modules-slider-right").click(function() {
+                    var left = this.className.indexOf("left") !== -1;
+                    if (!left) {
+                        var div = $(".modules-slider-center div").last();
+                        var width = div.width();
+                        div.detach().css("marginLeft", -1 * width).prependTo(center);
+                        div.fx({
+                            marginLeft: 0
+                        }, 700);
+                    } else {
+                        var div = $(".modules-slider-center div").first();
+                        var width = div.width();
+                        div.fx({
+                            marginLeft: "-=" + width
+                        }, 700, function() {
+                            center.append(div);
+                            div.css("marginLeft", 0);
+                        });
+                    }
+                });
+            });
+            require("doc/api, event, node, attr, ready", function(api, $) {
+                $(".modules-slider-center div").click(function() {
+                    if (this.className === "active") {
+                        return;
+                    }
+                    $(this).siblings().removeClass("active");
+                    this.className = "active";
+                    var moduleName = this.id.replace("m_", "");
+                    var html = ["<ul>"];
+                    $.each(api[moduleName], function(prop, index) {
+                        var className = index % 2 === 0 ? "even" : "odd";
+                        html.push("<li class=" + className + ">" + prop + "</li>");
+                    });
+                    html.push("</ul>");
+                    $(".left-bar").html(html.join(""));
+                });
+                $(".left-bar").delegate("li", "mouseover", function() {
+                    $(this).addClass("hover");
+                }).delegate("li", "mouseout", function() {
+                    $(this).removeClass("hover");
+                });
+            });
 
 
         </script> 
 
     </head>
     <body>
-        <p>
-            <span id="scroll_btn"> scrollTop第一个</span>
-            <span id="toggle_btn"> toggle第二个</span>
-            <span id="slide_btn"> slideToggle第四个</span>
-            <span id="fade_btn"> fadeToggle第五个</span>
-        </p>
-        <div style='height:230px'>
-            <div id="hide">
-                <div id="scroll">
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                    scrollTop<br/>
-                </div>
-            </div>
-            <div id="toggle">
+        <pre id="json">
 
+        </pre>
+        <div class="modules-slider">
+            <div class="modules-slider-left">＜</div>
+            <div class="modules-slider-center">
+                <div id="m_core">种子模块</div>
+                <div id="m_lang">语言扩展模块</div>
+                <div id="m_class">类工厂模块</div>
+                <div id="m_data">数据缓存模块</div>
+                <div id="m_flow">流程模块</div>
+                <div id="m_query">选择器模块</div>
+                <div id="m_node">节点模块</div>
+                <div id="m_css">样式模块</div>
+                <div id="m_event">事件模块</div>
+                <div id="m_attr">属性模块</div>
+                <div id="m_fx">动画模块</div>
+                <div id="m_ajax">AJAX模块</div>
             </div>
-            <div id="color">
-                点我变色
-            </div>
-            <div id="slideToggle">
-
-            </div>
-            <div id="fadeToggle">
-
-            </div>
-            <div id="puff">
-
-            </div>
+            <div class="modules-slider-right">＞</div>
         </div>
-        <p id="aaa" data-aaa="bbb">mass messager 组件 by 司徒正美</p>
+        <div>
+            <div class="left-bar"></div><div></div>
+        </div>
 
-        <a href="#button" id="button">Button</a>
-        
-         <div id="rotate">
-
-            </div>
-        <script type="text/vbscript">
+        http://rubylouvre.github.com/doc/fx/transform.rotate.html
 
 
-        </script>
-
-
-        <br/>
-
+        http://rubylouvre.github.com/doc/lang/$.parseJS.html
+        http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
+        http://jsfiddle.net/chandlerprall/Wj5yM/
     </body>
 </html>
