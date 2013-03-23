@@ -1,10 +1,8 @@
 //==================================================
 // 节点操作模块
 //==================================================
-define("node", ["support", "class", "data"]
-        .concat(this.dispatchEvent ? [] : "node_fix")
-        .concat(document.querySelector ? "query_neo" : "query"),
-//注意合并时
+define("node", ["support", "class","query", "data"]
+        .concat(this.dispatchEvent ? [] : "node_fix"),
         function($) {
             var rtag = /^[a-zA-Z]+$/,
                     rtagName = /<([\w:]+)/,

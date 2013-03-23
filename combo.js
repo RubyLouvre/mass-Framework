@@ -12,7 +12,7 @@ var modules = {
         "fx.js",
         "css.js",
         "attr.js",
-        "node.js",
+        "node_safe.js",
         "event.js",
         "fx.js",
         "ajax.js"
@@ -25,10 +25,15 @@ var rcomments = /\/\*\*([\s\S]+?)\*\//g;//用于去掉多行注释
 var rbody = /[^{]*\{([\d\D]*)\}$/;//用于抽出merge函数的toString()中的内容
 var length = modules.src.length;
 var names = [];
+var alias = {
+    node_safe: "node"
+};
+
 for (var i = 0, url; url = modules.src[i++]; ) {
-    (function(name) {
-        names.push(name)
-        var path = (curdir + name + ".js").replace(/\\/g, "/");
+    (function(orig) {
+        var name = alias[orig] || orig;
+        names.push(name);
+        var path = (curdir + orig + ".js").replace(/\\/g, "/");
         fs.readFile(path, "utf8", function(err, data) {
             if (err) {
                 console.log("合并模块 " + name + " 失败!")
@@ -98,6 +103,7 @@ function replaceName(module, name) {
             return  module.replace(str, 'define("' + name + '", ');
         case "changeModuleName":
             console.log("更改模块名 "+name);
+  
             return  module.replace(moduleName, '"' + name + '"');
         case "noChangeModuleName":
             console.log("不需要作出任何改变");
