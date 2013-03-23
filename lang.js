@@ -206,73 +206,20 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
          * @param {String} str
          * @return {String}
          */
-        quote: String.quote ||
-        function(str) {
-            return '"' + str.replace(runicode, function(a) {
-                switch(a) {
-                case '"':
-                    return '\\"';
-                case '\\':
-                    return '\\\\';
-                case '\b':
-                    return '\\b';
-                case '\f':
-                    return '\\f';
-                case '\n':
-                    return '\\n';
-                case '\r':
-                    return '\\r';
-                case '\t':
-                    return '\\t';
-                }
-                a = a.charCodeAt(0).toString(16);
-                while(a.length < 4) a = "0" + a;
-                return "\\u" + a;
-            }) + '"';
-        },
+        quote: String.quote || JSON.stringify,
         /**
          * 查看对象或数组的内部构造
          * @param {Any} obj
          * @return {String}
+         * https://github.com/tdolsen/jquery-dump/blob/master/jquery.dump.js
+         * https://github.com/Canop/JSON.prune/blob/master/JSON.prune.js
+         * http://freshbrewedcode.com/jimcowart/2013/01/29/what-you-might-not-know-about-json-stringify/
          */
-        dump: function(obj, indent) {
-            indent = indent || "";
-            if(obj == null) //处理null,undefined
-            return indent + "obj";
-            if(obj.nodeType === 9) return indent + "[object Document]";
-            if(obj.nodeType) return indent + "[object " + (obj.tagName || "Node") + "]";
-            var arr = [],
-                type = $.type(obj),
-                self = $.dump,
-                next = indent + "\t";
-            switch(type) {
-            case "Boolean":
-            case "Number":
-            case "NaN":
-            case "RegExp":
-                return indent + obj;
-            case "String":
-                return indent + $.quote(obj);
-            case "Function":
-                return(indent + obj).replace(/\n/g, "\n" + indent);
-            case "Date":
-                return indent + '(new Date(' + obj.valueOf() + '))';
-            case "Window":
-                return indent + "[object " + type + "]";
-            default:
-                if($.isArrayLike(obj)) {
-                    for(var i = 0, n = obj.length; i < n; ++i)
-                    arr.push(self(obj[i], next).replace(/^\s* /g, next));
-                    return indent + "[\n" + arr.join(",\n") + "\n" + indent + "]";
-                }
-                if($.isPlainObject(obj)) {
-                    for(i in obj) {
-                        arr.push(next + self(i) + ": " + self(obj[i], next).replace(/^\s+/g, ""));
-                    }
-                    return indent + "{\n" + arr.join(",\n") + "\n" + indent + "}";
-                }
-                return indent + "[object " + type + "]";
-            }
+        dump: function(obj) {
+            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t"
+            return JSON.stringify(obj, function(key, value){
+                  return typeof value === "function" ?  value + "" : value;
+            }, space);
         },
         /**
          * 将字符串当作JS代码执行
