@@ -9,13 +9,12 @@ var modules = {
         "data.js", //缓存
         "query.js",//选择器
         "support.js",//特征侦测
-        "fx.js",
-        "css.js",
-        "attr.js",
-        "node_safe.js",
-        "event.js",
-        "fx.js",
-        "ajax.js"
+        "css.js", //样式操作
+        "attr.js",//属性操作
+        "node_safe.js",//节点操作,这是一个保守的版本
+        "event.js",//事件系统
+        "fx.js",//动画引擎
+        "ajax.js"//数据传送
     ]
 }
 var fs = require("fs");
@@ -25,7 +24,7 @@ var rcomments = /\/\*\*([\s\S]+?)\*\//g;//用于去掉多行注释
 var rbody = /[^{]*\{([\d\D]*)\}$/;//用于抽出merge函数的toString()中的内容
 var length = modules.src.length;
 var names = [];
-var alias = {
+var alias = {//用于别名
     node_safe: "node"
 };
 
