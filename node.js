@@ -2,8 +2,7 @@
 // 节点操作模块
 //==================================================
 define("node", ["support", "class", "data"]
-        .concat(this.dispatchEvent ? [] : "node_fix")
-        .concat(document.querySelector ? "query_neo" : "query"),
+        .concat(this.dispatchEvent ? ["query_neo"] : ["node_fix","query"]),
 //注意合并时
         function($) {
             var rtag = /^[a-zA-Z]+$/,
