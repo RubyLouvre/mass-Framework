@@ -16,7 +16,8 @@ define("query", ["mass"], function($) {
             if (a === b) {
                 return !!itself;
             }
-            if (a.nodeType === 9) return true;
+            if(!b.parentNode)
+                return false;
             if (a.contains) {
                 return a.contains(b);
             } else if (a.compareDocumentPosition) {

@@ -88,7 +88,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     $.css = function(node, name, value, styles) {
         if (node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
             var prop = /\_/.test(name) ? $.String.camelize(name) : name;
-            
+
             name = $.cssName(prop) || prop;
             styles = styles || getStyles(node);
             if (value === void 0) { //获取样式
@@ -98,8 +98,8 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                         temp;
                 if (type === "string" && (temp = rrelNum.exec(value))) {
 
-                        value = (+(temp[1] + 1) * +temp[2]) + parseFloat($.css(node, name, void 0, styles));
-                        type = "number";
+                    value = (+(temp[1] + 1) * +temp[2]) + parseFloat($.css(node, name, void 0, styles));
+                    type = "number";
 
                 }
                 if (type === "number" && !isFinite(value + "")) { //因为isFinite(null) == true
@@ -111,9 +111,9 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                 if (value === "" && !$.support.cloneBackgroundStyle && name.indexOf("background") === 0) {
                     node.style[name] = "inherit";
                 }
-               var fn  = adapter[prop + ":set"] || adapter["_default:set"];
-             //  console.log(fn)
-               fn(node, name, value, styles);
+                var fn = adapter[prop + ":set"] || adapter["_default:set"];
+                //  console.log(fn)
+                fn(node, name, value, styles);
             }
         }
     };
@@ -211,7 +211,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                     }
                     return getWH(node, name, num);
                 } else {
-                    for (var i = 0; node = this[i++];) {
+                    for (var i = 0; node = this[i++]; ) {
                         $.css(node, lower, value);
                     }
                 }
@@ -245,7 +245,9 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                 reuse = window.VBArray || window.opera; //opera9-12, ie6-10有效
             }
             callback(shadowWin, shadowDoc, shadowDoc.body);
-            $.html.removeChild(shadowRoot);
+            setTimeout(function() {
+                $.html.removeChild(shadowRoot);
+            }, 1000);
         } else {
             callback(window, document, shadowBody);
             shadowBody.innerHTML = "";
