@@ -72,7 +72,7 @@ $(function(){
 ```
 </pre>
 <p>jQuery1.7最新的API它也支持了</p>
-<pre>
+
 ```javascript
 $(function(){
  $("#dataTable tbody tr").on("click", function(event){
@@ -80,7 +80,7 @@ $(function(){
  });
 });
 ```
-</pre>
+
 <p>相比于jQuery只限于DOM的操作，mass Framework对基本数据类型提供了大量的工具方法，甚至连es6的候选方法你都能找到。它们分别挂在$.String, $.Array, $.Number, $.Object之下。
 
 <h3>多库共存</h3>
