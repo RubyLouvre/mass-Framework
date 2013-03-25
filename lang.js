@@ -97,6 +97,10 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             }
             return false;
         },
+        isFunction: function(fn) {//为了性能起见,没有走$.type方法
+            return "[object Function]" === tools.toString.call(fn)
+        },
+        isArray: Array.isArray, //Array.isArray已在lang_fix中被修复
         /**
          * 取得对象的键值对，依次放进回调中执行,并收集其结果，视第四个参数的真伪表现为可中断的forEach操作或map操作
          * @param {Object} obj
@@ -242,7 +246,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
          */
         parseJSON: function(data) {
             try {
-                return global.JSON.parse( data.trim() );
+                return global.JSON.parse(data.trim());
             } catch (e) {
                 $.error("Invalid JSON: " + data, TypeError);
             }
@@ -290,15 +294,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
     }
     $.mix(tools, false);
 
-    "Array,Function".replace($.rword, function(method) {
-        $["is" + method] = function(obj) {
-            return obj && ({}).toString.call(obj) === "[object " + method + "]";
-        }
-    });
-
-    if (Array.isArray) {
-        $.isArray = Array.isArray;
-    }
     methods(String.prototype, {
         repeat: function(n) {
             //将字符串重复n遍
