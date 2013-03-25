@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            pre{
+
+                white-space: pre-wrap; /* CSS-3 */
+                white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+                white-space: -pre-wrap; /* Opera 4-6 */
+                white-space: -o-pre-wrap; /* Opera 7 */
+                word-wrap: break-word; /* Internet Explorer 5.5+ */
+
+            }
+        </style>
+        <script>
+            require("node,ready", function($) {
+                var person = {
+                    name: "Jim Cowart",
+                    getName: function() {
+                        alert(1)
+                    },
+                    location: {
+                        city: {
+                            name: "Chattanooga",
+                            population: 167674
+                        },
+                        state: {
+                            name: "Tennessee",
+                            abbreviation: "TN",
+                            population: 6403000
+                        }
+                    },
+                    company: "appendTo"
+                };
+                $("#json").text($.dump(person))
+            })
+
+        </script>
+    </head>
+    <body>
+        <div>TODO write content</div>
+        <pre id="json">
+
+        </pre>
+    </body>
+</html>

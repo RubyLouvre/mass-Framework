@@ -402,8 +402,8 @@ define("fx", ["css"], function($) {
     };
 
     var fxAttrs = [
-        ["height", "marginTop", "marginBottom", "paddingTop", "paddingBottom"],
-        ["width", "marginLeft", "marginRight", "paddingLeft", "paddingRight"],
+        ["height", "marginTop", "marginBottom","borderTopWidth", "borderBottomWidth","paddingTop", "paddingBottom"],
+        ["width", "marginLeft", "marginRight", "borderLeftWidth","borderRightWidth","paddingLeft", "paddingRight"],
         ["opacity"]
     ];
 

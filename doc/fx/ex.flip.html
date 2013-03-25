@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script>
+            document.write('<script src="http://' + location.host + '/mass.js"><\/script>')
+        </script>
+        <script>
+            require("fx2,ready", function() {
+                $("#son").click(function() {
+                    $("#son").flip(4000)
+                })
+            })
+        </script>
+        <style>
+            #parent, #son{
+                width:200px;
+                height:400px;
+                background:blue;
+            }
+            #parent{
+                perspective: 600px;
+                -webkit-perspective: 600px;
+                -moz-perspective: 600px;
+                -o-perspective: 600px;
+            }
+            #son{
+                background:green;
+            }
+        </style>
+    </head>
+    <body>
+        <div>flip</div>
+
+        <div id="parent">
+            <div id="son">
+                1111<br/>
+                2222<br/>
+                3333<br/>
+                4444<br/>
+            </div>
+        </div>
+        <pre>
+css 2.0还是没有翻转的，3.0里面有rotate属性，这个可以把元素进行任意角度旋转，灰常强大。除了这个rotate，还有一个scale，一般用法格式是
+
+-moz-transform:scale(1，1);
+
+括弧里面（1，1）前者表示X轴，后者表示Y轴，当数字大于1时放大，大于0并小于1时缩小，很好理解，那么负数是怎样的效果？答案是 翻转 。
+-moz-transform:scale(-1，1);
+
+表示水平翻转；
+
+-moz-transform:scale(1，-1); 
+
+表示垂直翻转。
+
+不过这些都是moz或者webkit的，万恶的IE怎么办? 
+于是我们想到滤镜，滤镜里面有这么一堆东西：
+
+顺时针旋转图片90度
+picID.style.filter="progid:DXImageTransform.Microsoft.BasicImage(rotation=1)";
+旋转180度
+picID.style.filter="progid:DXImageTransform.Microsoft.BasicImage(rotation=2)"; 
+逆时针旋转90度
+picID.style.filter="progid:DXImageTransform.Microsoft.BasicImage(rotation=3)";
+
+有没有想问“rotation=4”什么效果? 面壁去...90、180、270都出来了，还要rotation=4实现360干嘛，感觉这个很费呢。不过这个是静态费，如果动态的话，这个就是必须的了。假如用js控制元素旋转，从0顺时针旋到270的时候，如果没有360的话，那么270会快速的逆时针回到0，这样就2了，所以要给个360过渡，让270自然到360，然后再循环，这样就流畅了……
+
+这跟css3的rotate差不多，不过只能固定角度的旋转，来个顺时针15度就没折了，css确实很轻松的transform：rotate(15deg);
+
+不过这样也只是实现了“旋转”，还有“翻转”没实现。IE的翻转就需要用到这个：
+
+水平翻转：filter:FlipH; 
+垂直翻转：filter:FlipV; 
+
+这样就齐全了，不过是否还有疑问，为什么要写这《CSS旋转与翻转》，有何实战意义没?
+
+虽然我还没有在实际的项目应用到，不过我有这么一个想法，一般网站都有对称性按钮，图片背景之类的元素，我们一般处理方式就是逐个切出加以定位，但是如果运用旋转翻转的话，那么就只需要切一份，其它如果有如90旋转，水平翻转，垂直翻转的图片的话，那么就用css来写，这样就用css代替了ps的图片操作，节省了多余图片，提高网速。
+        </pre>
+        //http://www.tripwiremagazine.com/2012/09/jquery-accordion-plugins.html
+        //http://www.w3cplus.com/source/72-jQuery-slider-show.html
+    </body>
+</html>
