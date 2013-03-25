@@ -54,38 +54,33 @@ require("ready",function(){
 </pre>
 <p>上面的代面相当于：</p>
 <pre>
-```javascript
 require("ready,node",function(){
 /*待到domReady完成，并且在node.js模块加载完毕，执行回调*/
    $("&lt;pre&gt;将日志打印到页面上&lt;/pre&gt;").appendTo("body")
 })
-```
 </pre>
 <p>我们在请求node.js时，会自动加载其依赖，如lang.js,support.js,class.js,query.js,data.js等等，
     IE下还会加载lang_fix.js，但你无需理会它是怎么处理，只需专注于你的业务逻辑就行了。</p>
 <p>如果嫌麻烦，直接像jQuery那样，不过会把许多无用的部分都加载下来了。</p>
-<pre>
-```javascript
+<pre style="color:red">
+
 $(function(){
   $("&lt;pre&gt;将日志打印到页面上&lt;/pre&gt;").appendTo("body")
 });
-```
 </pre>
 <p>jQuery1.7最新的API它也支持了</p>
-
-```javascript
+<pre>
 $(function(){
  $("#dataTable tbody tr").on("click", function(event){
 	alert($(this).text());
  });
 });
-```
+</pre>
 
 <p>相比于jQuery只限于DOM的操作，mass Framework对基本数据类型提供了大量的工具方法，甚至连es6的候选方法你都能找到。它们分别挂在$.String, $.Array, $.Number, $.Object之下。
 
 <h3>多库共存</h3>
 <pre>
-```html
 &lt;!DOCTYPE html&gt;
 &lt;html lang="en"&gt;
     &lt;head&gt;
@@ -110,7 +105,6 @@ $(function(){
     &lt;body&gt;
     &lt;/body&gt;
 &lt;/html&gt;
-```
 </pre>
 <pre>
 写个框架，将自己过往的积累都沉淀下来，等到回头去看时，发现之前攻克的每一个知识点，都乖巧地排在框架里，
