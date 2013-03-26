@@ -239,9 +239,12 @@
                         div.innerHTML = str + ""; //确保为字符串
                         DOC.body.appendChild(div);
                     });
-                } else if (global.console) {
+                } else if(window.opera){
+                    opera.postError(str)
+                 }else if (global.console) {
                     console.log(str);
                 }
+                
             }
             return str;
         },
