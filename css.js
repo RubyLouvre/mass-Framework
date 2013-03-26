@@ -222,38 +222,28 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     //=========================　生成　show hide toggle　=========================
     var cacheDisplay = $.oneObject("a,abbr,b,span,strong,em,font,i,kbd", "inline"),
             blocks = $.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"),
-            shadowRoot, shadowDoc, shadowBody, shadowWin, reuse;
+            shadowRoot, shadowDoc, shadowWin, reuse;
     $.applyShadowDOM = function(callback) {
         //用于提供一个沙箱环境,IE6-10,opera,safari,firefox使用iframe, chrome20+(25+不需要开启实验性JS)使用Shodow DOM
         if (!shadowRoot) {
-            if (window.WebKitShadowRoot) { //如果支持WebKitShadowRoot
-                shadowRoot = new WebKitShadowRoot($.html);
-                shadowBody = document.createElement("div");
-                shadowRoot.appendChild(shadowBody);
-            } else {
-                shadowRoot = document.createElement("iframe");
-            }
-            (shadowBody || shadowRoot).style.cssText = "width:0px;height:0px;border:0 none;";
+            shadowRoot = document.createElement("iframe");
+            shadowRoot.style.cssText = "width:0px;height:0px;border:0 none;";
         }
-        if (shadowRoot.nodeType === 1) {
-            $.html.appendChild(shadowRoot);
-            if (!reuse) { //firefox, safari, chrome不能重用shadowDoc,shadowWin
-                shadowDoc = shadowRoot.contentDocument || shadowRoot.contentWindow.document;
-                shadowWin = shadowDoc.defaultView || shadowDoc.parentWindow;
-                shadowDoc.write("<!doctype html><html><body>");
-                shadowDoc.close();
-                reuse = window.VBArray || window.opera; //opera9-12, ie6-10有效
-            }
-            callback(shadowWin, shadowDoc, shadowDoc.body);
-            setTimeout(function() {
-                $.html.removeChild(shadowRoot);
-            }, 1000);
-        } else {
-            callback(window, document, shadowBody);
-            shadowBody.innerHTML = "";
+        $.html.appendChild(shadowRoot);
+        if (!reuse) { //firefox, safari, chrome不能重用shadowDoc,shadowWin
+            shadowWin = shadowRoot.contentWindow;
+            shadowDoc = shadowWin.document;
+            shadowDoc.write("<!doctype html><html><body>");
+            shadowDoc.close();
+            reuse = window.VBArray || window.opera; //opera9-12, ie6-10有效
         }
+        callback(shadowWin, shadowDoc, shadowDoc.body);
+        setTimeout(function() {
+            $.html.removeChild(shadowRoot);
+        }, 1000);
     };
     $.mix(cacheDisplay, blocks);
+    //https://developer.mozilla.org/en-US/docs/DOM/window.getDefaultComputedStyle
     $.parseDisplay = function(nodeName) {
         //用于取得此类标签的默认display值
         nodeName = nodeName.toLowerCase();
@@ -271,6 +261,17 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
         }
         return cacheDisplay[nodeName];
     };
+    if (window.getDefaultComputedStyle) {
+        $.parseDisplay = function(nodeName) {
+            nodeName = nodeName.toLowerCase();
+            if (!cacheDisplay[nodeName]) {
+                var node = document.createElement(nodeName);
+                var val = window.getDefaultComputedStyle(node, null).display;
+                cacheDisplay[nodeName] = val;
+            }
+            return cacheDisplay[nodeName];
+        }
+    }
     $.isHidden = function(node) {
         return node.sourceIndex === 0 || getter(node, "display") === "none" || !$.contains(node.ownerDocument, node);
     };
