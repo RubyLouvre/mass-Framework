@@ -1,50 +1,54 @@
 //=========================================
-// 动画模块 v7 IE10+
+// 动画模块 v7 IE10+等现代浏览器专用
 //==========================================
 define("fx", ["css", "event", "attr"], function($) {
+    //提供fx animate, fadeIn fadeToggle fadeOut slideUp, slideDown slideToggle show hide toggle
     var easingMap = {
-        "linear": {p1: 0.250, p2: 0.250, p3: 0.750, p4: 0.750},
-        "ease": {p1: 0.250, p2: 0.100, p3: 0.250, p4: 1.000},
-        "ease-in": {p1: 0.420, p2: 0.000, p3: 1.000, p4: 1.000},
-        "ease-out": {p1: 0.000, p2: 0.000, p3: 0.580, p4: 1.000},
-        "ease-in-out": {p1: 0.420, p2: 0.000, p3: 0.580, p4: 1.000},
-        "easeInQuad": {p1: 0.550, p2: 0.085, p3: 0.680, p4: 0.530},
-        "easeInCubic": {p1: 0.550, p2: 0.055, p3: 0.675, p4: 0.190},
-        "easeInQuart": {p1: 0.895, p2: 0.030, p3: 0.685, p4: 0.220},
-        "easeInQuint": {p1: 0.755, p2: 0.050, p3: 0.855, p4: 0.060},
-        "easeInSine": {p1: 0.470, p2: 0.000, p3: 0.745, p4: 0.715},
-        "easeInExpo": {p1: 0.950, p2: 0.050, p3: 0.795, p4: 0.035},
-        "easeInCirc": {p1: 0.600, p2: 0.040, p3: 0.980, p4: 0.335},
-        "easeInBack": {p1: 0.600, p2: -0.280, p3: 0.735, p4: 0.045},
-        "easeOutQuad": {p1: 0.250, p2: 0.460, p3: 0.450, p4: 0.940},
-        "easeOutCubic": {p1: 0.215, p2: 0.610, p3: 0.355, p4: 1.000},
-        "easeOutQuart": {p1: 0.165, p2: 0.840, p3: 0.440, p4: 1.000},
-        "easeOutQuint": {p1: 0.230, p2: 1.000, p3: 0.320, p4: 1.000},
-        "easeOutSine": {p1: 0.390, p2: 0.575, p3: 0.565, p4: 1.000},
-        "easeOutExpo": {p1: 0.190, p2: 1.000, p3: 0.220, p4: 1.000},
-        "easeOutCirc": {p1: 0.075, p2: 0.820, p3: 0.165, p4: 1.000},
-        "easeOutBack": {p1: 0.175, p2: 0.885, p3: 0.320, p4: 1.275},
-        "easeInOutQuad": {p1: 0.455, p2: 0.030, p3: 0.515, p4: 0.955},
-        "easeInOutCubic": {p1: 0.645, p2: 0.045, p3: 0.355, p4: 1.000},
-        "easeInOutQuart": {p1: 0.770, p2: 0.000, p3: 0.175, p4: 1.000},
-        "easeInOutQuint": {p1: 0.860, p2: 0.000, p3: 0.070, p4: 1.000},
-        "easeInOutSine": {p1: 0.445, p2: 0.050, p3: 0.550, p4: 0.950},
-        "easeInOutExpo": {p1: 1.000, p2: 0.000, p3: 0.000, p4: 1.000},
-        "easeInOutCirc": {p1: 0.785, p2: 0.135, p3: 0.150, p4: 0.860},
-        "easeInOutBack": {p1: 0.680, p2: -0.550, p3: 0.265, p4: 1.550},
-        "custom": {p1: 0.000, p2: 0.350, p3: 0.500, p4: 1.300},
-        "random": {p1: Math.random().toPrecision(3),
-            p2: Math.random().toPrecision(3),
-            p3: Math.random().toPrecision(3),
-            p4: Math.random().toPrecision(3)
-        }
-    }; //single line array of all set easing values
+        "linear": [0.250, 0.250, 0.750, 0.750],
+        "ease": [0.250, 0.100, 0.250, 1.000],
+        "ease-in": [0.420, 0.000, 1.000, 1.000],
+        "ease-out": [0.000, 0.000, 0.580, 1.000],
+        "ease-in-out": [0.420, 0.000, 0.580, 1.000],
+        "easeInQuad": [0.550, 0.085, 0.680, 0.530],
+        "easeInCubic": [0.550, 0.055, 0.675, 0.190],
+        "easeInQuart": [0.895, 0.030, 0.685, 0.220],
+        "easeInQuint": [0.755, 0.050, 0.855, 0.060],
+        "easeInSine": [0.470, 0.000, 0.745, 0.715],
+        "easeInExpo": [0.950, 0.050, 0.795, 0.035],
+        "easeInCirc": [0.600, 0.040, 0.980, 0.335],
+        "easeInBack": [0.600, -0.280, 0.735, 0.045],
+        "easeOutQuad": [0.250, 0.460, 0.450, 0.940],
+        "easeOutCubic": [0.215, 0.610, 0.355, 1.000],
+        "easeOutQuart": [0.165, 0.840, 0.440, 1.000],
+        "easeOutQuint": [0.230, 1.000, 0.320, 1.000],
+        "easeOutSine": [0.390, 0.575, 0.565, 1.000],
+        "easeOutExpo": [0.190, 1.000, 0.220, 1.000],
+        "easeOutCirc": [0.075, 0.820, 0.165, 1.000],
+        "easeOutBack": [0.175, 0.885, 0.320, 1.275],
+        "easeInOutQuad": [0.455, 0.030, 0.515, 0.955],
+        "easeInOutCubic": [0.645, 0.045, 0.355, 1.000],
+        "easeInOutQuart": [0.770, 0.000, 0.175, 1.000],
+        "easeInOutQuint": [0.860, 0.000, 0.070, 1.000],
+        "easeInOutSine": [0.445, 0.050, 0.550, 0.950],
+        "easeInOutExpo": [1.000, 0.000, 0.000, 1.000],
+        "easeInOutCirc": [0.785, 0.135, 0.150, 0.860],
+        "easeInOutBack": [0.680, -0.550, 0.265, 1.550],
+        "custom": [0.000, 0.350, 0.500, 1.300],
+        "random": [Math.random().toFixed(3),
+        Math.random().toFixed(3),
+        Math.random().toFixed(3),
+        Math.random().toFixed(3)]
+    } //single line array of all set easing values
 
     //http://css3playground.com/flip-card.php
-
-    var prefixJS = $.cssName("animation").replace(/animation/i, "");
+    var animation = $.cssName("animation")
+    var prefixJS = animation.replace(/animation/i, "");
     var prefixCSS = prefixJS === "" ? "" : "-" + prefixJS.toLowerCase() + "-";
-    var animationend = prefixJS === "Moz" ? "animationend" : prefixJS + "AnimationEnd";
+    var animationend = {
+        WebkitAnimation: "webkitAnimationEnd", //webkit safari
+        animation: "animationend", //IE10, firefox, opera12+
+        oAnimation: "oanimationend" //opera12-
+    }[animation]
     var playState = $.cssName("animation-play-state");
     var rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
 
@@ -96,7 +100,7 @@ define("fx", ["css", "event", "attr"], function($) {
         }
         opts.duration = duration;
         opts.effect = opts.effect || "fx";
-        opts.queue = !!(opts.queue == null || opts.queue); //默认使用列队
+        opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
         opts.easing = easingMap[opts.easing] ? opts.easing : "ease-in";
         if ("specialEasing" in opts) {
             delete opts.specialEasing;
@@ -110,8 +114,11 @@ define("fx", ["css", "event", "attr"], function($) {
     //两种传参方式,最后都被整成后面一种
     $.fn.fx = function(props) {
         var delay = arguments.length == 1 && isFinite(props);
+        var opts = {
+            queue: true
+        }
         if (!delay) {
-            var opts = addOptions.apply(null, $.slice(arguments, 1));
+            opts = addOptions.apply(null, $.slice(arguments, 1));
             for (var name in props) {
                 var p = $.cssName(name) || name;
                 if (name !== p) {
@@ -120,30 +127,39 @@ define("fx", ["css", "event", "attr"], function($) {
                 }
             }
         }
-
         var id = setTimeout("1");
         return this.each(function(node) {
             if (node.nodeType === 1) {
                 var data = $._data(node);
                 var queue = data.fxQueue || (data.fxQueue = []);
-                if (delay) {
-                    queue.push(props);//放入时间
+                if (!opts.queue) { //如果不用排队
+                    return startAnimation(node, id, props, opts);
                 } else {
-                    queue.push([id, props, opts]);
-                }
-                if (queue.length === 1 || !opts.queue) {
-                    nextAnimation(node, queue.shift(), queue)//?
+                    if (delay) {
+                        queue.push(props); //放入时间
+                    } else {
+                        queue.push([id, props, opts]);
+                    }
+                    nextAnimation(node, queue) //开始动画
                 }
             }
         })
     }
-    function nextAnimation(node, args, queue) {
-        if (isFinite(args)) {
-            setTimeout(function() {
-                nextAnimation(node, queue.shift(), queue)
-            }, args)
-        } else if (Array.isArray(args)) {
-            startAnimation(node, args[0], args[1], args[2]);
+
+    function nextAnimation(node, queue) {
+        if (!queue.busy) {
+            queue.busy = true;
+            var args = queue.shift();
+            if (isFinite(args)) {
+                setTimeout(function() {
+                    queue.busy = false;
+                    nextAnimation(node, queue);
+                }, args);
+            } else if (Array.isArray(args)) {
+                startAnimation(node, args[0], args[1], args[2]);
+            } else {
+                queue.busy = false;
+            }
         }
     }
     var AnimationRegister = {};
@@ -166,7 +182,8 @@ define("fx", ["css", "event", "attr"], function($) {
         var before = opts.before || $.noop;
         var complete = opts.complete || $.noop;
         var from = [],
-                to = [];
+            to = [];
+        //让一组元素共用同一个类名
         var count = AnimationRegister[className];
         if (!count) {
             //如果样式表中不存在这两条样式规则
@@ -198,15 +215,26 @@ define("fx", ["css", "event", "attr"], function($) {
                     to.push(selector + ":" + val);
                 }
             });
-            var classRule = ".#{className}{ #{prefix}animation-duration: #{duration}; #{prefix}animation-name: #{frameName}; #{prefix}animation-fill-mode:#{mode};  }";
+            //linear：线性过渡。等同于贝塞尔曲线(0.0, 0.0, 1.0, 1.0)
+            //ease：平滑过渡。等同于贝塞尔曲线(0.25, 0.1, 0.25, 1.0)
+            //ease-in： 由慢到快。等同于贝塞尔曲线(0.42, 0, 1.0, 1.0)
+            //ease-out：由快到慢。等同于贝塞尔曲线(0, 0, 0.58, 1.0)
+            //ease-in-out：由慢到快再到慢。等同于贝塞尔曲线(0.42, 0, 0.58, 1.0)
+            //cubic-bezier(<number>, <number>, <number>, <number>)：特定的贝塞尔曲线类型，4个数值需在[0, 1]区间内
+            var easing = "cubic-bezier( " + easingMap[opts.easing] + " )";
+            var classRule = ".#{className}{ #{prefix}animation: #{frameName} #{duration} #{easing}; #{prefix}animation-fill-mode:#{mode}  }";
             var frameRule = "@#{prefix}keyframes #{frameName}{ 0%{ #{from}; } 100%{  #{to}; }  }";
+            var mode = effectName === "hide" ? "backwards" : "forwards"
             var rule1 = $.format(classRule, {
                 className: className,
                 duration: opts.duration,
+                easing: easing,
                 frameName: frameName,
-                mode: effectName === "hide" ? "backwards" : "forwards",
+                mode: mode,
                 prefix: prefixCSS
             });
+
+            $.log(mode + easing)
             var rule2 = $.format(frameRule, {
                 frameName: frameName,
                 prefix: prefixCSS,
@@ -217,12 +245,18 @@ define("fx", ["css", "event", "attr"], function($) {
             insertCSSRule(rule2);
         }
         AnimationRegister[className] = count + 1;
+
         $.bind(node, animationend, function fn(event) {
             $(this).removeClass(className);
             $.unbind(this, animationend, fn);
             after(this);
-            stopAnimation(event.animationName, className);
+            stopAnimation(className);
             complete.call(this);
+            var queue = $._data(this, "fxQueue");
+            if (opts.queue && queue) { //如果在列状,那么开始下一个动画
+                queue.busy = false;
+                nextAnimation(node, queue);
+            }
         });
         before(node);
         $(node).addClass(className);
@@ -244,7 +278,7 @@ define("fx", ["css", "event", "attr"], function($) {
                 return false;
             }
             var style = node.style,
-                    overflows;
+                overflows;
             if ("width" in props || "height" in props) { //如果是缩放操作
                 //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
                 overflows = [style.overflow, style.overflowX, style.overflowY];
@@ -264,7 +298,7 @@ define("fx", ["css", "event", "attr"], function($) {
             var fn = AnimationPreproccess[hidden ? "show" : "hide"];
             return fn.apply(null, arguments);
         }
-    }
+    };
 
     function stopAnimation(className) {
         var count = AnimationRegister[className];
@@ -332,7 +366,7 @@ define("fx", ["css", "event", "attr"], function($) {
             for (var i = 0, n = cssRules.length; i < n; i++) {
                 var rule = cssRules[i];
                 if (rule.name === ruleName) {
-                    for (var j = 0, CSSKeyframeRule; CSSKeyframeRule = rule.cssRules[j++]; ) {
+                    for (var j = 0, CSSKeyframeRule; CSSKeyframeRule = rule.cssRules[j++];) {
                         if (CSSKeyframeRule.keyText === "100%") { //最得最后一帧
                             return CSSKeyframeRule.cssText;
                         }
@@ -415,9 +449,8 @@ define("fx", ["css", "event", "attr"], function($) {
         clearQueue = clearQueue ? "1" : "";
         gotoEnd = gotoEnd ? "1" : "0";
         var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
-        $.log(stopCode)
         return this.each(function(node) {
-            for (var j = 0, cls; cls = node.classList[j++]; ) {
+            for (var j = 0, cls; cls = node.classList[j++];) {
                 switch (stopCode) { //如果此时调用了stop方法
                     case 0:
                         pause(node, cls)
@@ -431,7 +464,7 @@ define("fx", ["css", "event", "attr"], function($) {
         });
     };
     $.fn.delay = function(number) {
-        return this.fx(number)
+        return this.fx(number);
     }
 
     $.fn.resume = function() {
