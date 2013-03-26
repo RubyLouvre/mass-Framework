@@ -8,9 +8,9 @@
             document.write('<script src="http://' + location.host + '/mass.js"><\/script>')
         </script>
         <script>
-            require("fx2,ready", function() {
+            require("fx_neo,ready", function() {
                 $("#son").click(function() {
-                    $("#son").flip(4000)
+                    $("#son").fx({transform: "rotateY(180deg)"},4000)
                 })
             })
         </script>
