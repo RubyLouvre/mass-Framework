@@ -36,9 +36,9 @@ define("fx", ["css", "event", "attr"], function($) {
         "easeInOutBack": [0.680, -0.550, 0.265, 1.550],
         "custom": [0.000, 0.350, 0.500, 1.300],
         "random": [Math.random().toFixed(3),
-            Math.random().toFixed(3),
-            Math.random().toFixed(3),
-            Math.random().toFixed(3)]
+        Math.random().toFixed(3),
+        Math.random().toFixed(3),
+        Math.random().toFixed(3)]
     }
 
     //http://css3playground.com/flip-card.php
@@ -90,7 +90,7 @@ define("fx", ["css", "event", "attr"], function($) {
 
         opts.duration = duration;
         opts.effect = opts.effect || "fx";
-        opts.queue = !!(opts.queue == null || opts.queue); //默认使用列队
+        opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
         opts.easing = easingMap[opts.easing] ? opts.easing : "ease-in";
         if ("specialEasing" in opts) {
             delete opts.specialEasing;
@@ -172,7 +172,7 @@ define("fx", ["css", "event", "attr"], function($) {
         var before = opts.before || $.noop;
         var complete = opts.complete || $.noop;
         var from = [],
-                to = [];
+            to = [];
         //让一组元素共用同一个类名
         var count = AnimationRegister[className];
         if (!count) {
@@ -244,10 +244,10 @@ define("fx", ["css", "event", "attr"], function($) {
                     node.style[i] = styles[i];
                 }
             }
-            $(node).removeClass(className);//移除类名
-            stopAnimation(className);//尝试移除keyframe
+            $(node).removeClass(className); //移除类名
+            stopAnimation(className); //尝试移除keyframe
             after(node);
-            complete.call(node);
+            complete(node);
             var queue = $._data(node, "fxQueue");
             if (opts.queue && queue) { //如果在列状,那么开始下一个动画
                 queue.busy = false;
@@ -259,6 +259,7 @@ define("fx", ["css", "event", "attr"], function($) {
         before(node);
         $(node).addClass(className);
     }
+
     function stopAnimation(className) {
         var count = AnimationRegister[className];
         if (count) {
@@ -287,7 +288,7 @@ define("fx", ["css", "event", "attr"], function($) {
                 return false;
             }
             var style = node.style,
-                    overflows;
+                overflows;
             if ("width" in props || "height" in props) { //如果是缩放操作
                 //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
                 overflows = [style.overflow, style.overflowX, style.overflowY];
@@ -365,7 +366,7 @@ define("fx", ["css", "event", "attr"], function($) {
             for (var i = 0, n = cssRules.length; i < n; i++) {
                 var rule = cssRules[i];
                 if (rule.name === ruleName) {
-                    for (var j = 0, CSSKeyframeRule; CSSKeyframeRule = rule.cssRules[j++]; ) {
+                    for (var j = 0, CSSKeyframeRule; CSSKeyframeRule = rule.cssRules[j++];) {
                         if (CSSKeyframeRule.keyText === "100%") { //最得最后一帧
                             return CSSKeyframeRule.cssText;
                         }
@@ -409,15 +410,19 @@ define("fx", ["css", "event", "attr"], function($) {
             if (!arguments.length || typeof a === "boolean") {
                 return pre.apply(this, arguments);
             } else {
-                var args = [].concat.apply([genFx(name, 3), {effect: name}], arguments);
+                var args = [].concat.apply([genFx(name, 3), {
+                    effect: name
+                }], arguments);
                 return $.fn.fx.apply(this, args);
             }
         };
     });
     $.each(effects, function(props, method) {
         $.fn[method] = function() {
-            var args = [].concat.apply([props, {effect: method}], arguments);
-            return  $.fn.fx.apply(this, args);
+            var args = [].concat.apply([props, {
+                effect: method
+            }], arguments);
+            return $.fn.fx.apply(this, args);
         };
     });
 
@@ -451,7 +456,7 @@ define("fx", ["css", "event", "attr"], function($) {
         var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
         return this.each(function(node) {
             var queue = $._data(node, "fxQueue");
-            for (var j = 0, cls; cls = node.classList[j++]; ) {
+            for (var j = 0, cls; cls = node.classList[j++];) {
                 switch (stopCode) { //如果此时调用了stop方法
                     case 0:
                         pause(node, cls);

@@ -1,0 +1,208 @@
+/* CSS Document */
+html,body{
+    background:#ddc;
+}
+a,a:visited{
+    color:#00FF00;
+}
+header, footer, nav, section, article {
+    display:block;
+}
+article{
+    margin:0;
+    padding:10px;
+    border-radius:10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius:10px;
+    color:#ffffff;
+    background:#252D37;
+    font-family:"Microsoft Yahei";
+    font-size:14px;
+}
+h3{
+    color:#ff7b26;
+    border-bottom:3px solid #00FF00;
+}
+p, dl{
+    text-indent:2em;
+}
+p .stress, legend{
+    color:#00FF00;
+    font-size:larger;
+    font-weight:bolder;
+}
+
+.doc_btn {
+    border: 2px outset #000000;
+    text-align:center;
+    background: #101529;
+    color: #00FF00;
+    font-size:12px;
+    font-weight:bold;
+    line-height:1.5;
+    text-shadow:0 -1px 1px rgba(0, 0, 0, 0.25);
+    -moz-box-shadow:0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.hide{
+    display:none;
+}
+
+fieldset{
+    padding:10px;
+    border:3px solid #00FF00;
+    border-radius:10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius:10px;
+}
+
+.knowledge {
+    padding:5px;
+    background:#1B2426;
+    border-radius:10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius:10px;
+    border:1px dashed #00FF00;
+}
+
+.note {
+    color:#ff0000;
+}
+
+.rundialog {
+    overflow: auto;
+    border: none;
+    width:75%;
+    background:#198488;
+    color:#fff;
+    font-size:14px;
+    font-family: 'Comic Sans MS', cursive, Georgia;
+}
+
+.table1 {
+    border:1px solid #666;border-collapse:collapse;width:700px
+}
+.table1 th ,.table1 td{
+    border:1px solid #666;
+}
+.clearfix:after {
+    content: ".";
+    display: block;
+    clear: both;
+    visibility: hidden;
+    line-height: 0;
+    height: 0;
+}
+
+.clearfix {
+    display: inline-block;
+}
+
+html[xmlns] .clearfix {
+    display: block;
+}
+
+* html .clearfix {
+    height: 1%;
+}
+
+.table-dark {
+  width: 98%;
+  margin-bottom: 18px;
+  border-collapse:collapse;
+  color:#CCC;
+}
+.table-dark caption {
+  color:#FFF;
+}
+.table-dark th,
+.table-dark td {
+  padding: 8px;
+  line-height: 18px;
+  text-align: left;
+  vertical-align: top;
+  border-top: 1px solid #232323;
+}
+.table-dark th.headerSortable:hover {
+  cursor:pointer;
+}
+.table-dark th.headerSortDown,
+.table-dark th.headerSortUp {
+  background-color:#000;
+  background-image: url('../img/asc_light.gif');
+  background-repeat: no-repeat;
+  background-position: center right;
+}
+.table-dark th {
+  font-weight: bold;
+}
+.table-dark thead th {
+  background:#111;
+  color:#E5E5E5;
+  vertical-align: bottom;
+}
+.table-dark colgroup + thead tr:first-child th,
+.table-dark colgroup + thead tr:first-child td,
+.table-dark thead:first-child tr:first-child th,
+.table-dark thead:first-child tr:first-child td {
+  border-top: 0;
+}
+.table-dark tbody + tbody {
+  border-top: 2px solid #232323;
+}
+.table-dark.table-condensed th,
+.table-dark.table-condensed td {
+  padding: 4px 5px;
+}
+.table-dark.table-bordered {
+  border: 1px solid #232323;
+  border-left: 0;
+  border-collapse: separate;
+  *border-collapse: collapsed;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+.table-dark.table-bordered th,
+.table-dark.table-bordered td {
+  border-left: 1px solid #232323;
+}
+.table-dark.table-bordered thead:first-child tr:first-child th,
+.table-dark.table-bordered tbody:first-child tr:first-child th,
+.table-dark.table-bordered tbody:first-child tr:first-child td {
+.table-dark border-top: 0;
+}
+.table-dark.table-bordered thead:first-child tr:first-child th:first-child,
+.table-dark.table-bordered tbody:first-child tr:first-child td:first-child {
+  -webkit-border-radius: 4px 0 0 0;
+  -moz-border-radius: 4px 0 0 0;
+  border-radius: 4px 0 0 0;
+}
+.table-dark.table-bordered thead:first-child tr:first-child th:last-child,
+.table-dark.table-bordered tbody:first-child tr:first-child td:last-child {
+  -webkit-border-radius: 0 4px 0 0;
+  -moz-border-radius: 0 4px 0 0;
+  border-radius: 0 4px 0 0;
+}
+.table-dark.table-bordered thead:last-child tr:last-child th:first-child,
+.table-dark.table-bordered tbody:last-child tr:last-child td:first-child {
+  -webkit-border-radius: 0 0 0 4px;
+  -moz-border-radius: 0 0 0 4px;
+  border-radius: 0 0 0 4px;
+}
+.table-dark.table-bordered thead:last-child tr:last-child th:last-child,
+.table-dark.table-bordered tbody:last-child tr:last-child td:last-child {
+  -webkit-border-radius: 0 0 4px 0;
+  -moz-border-radius: 0 0 4px 0;
+  border-radius: 0 0 4px 0;
+}
+.table-dark.table-striped tbody tr:nth-child(odd) td,
+.table-dark.table-striped tbody tr:nth-child(odd) th {
+  background-color: #393939;
+}
+.table-dark tbody tr td,
+.table-dark tbody tr th,
+.table-dark tbody tr:hover td,
+.table-dark tbody tr:hover th {
+  background-color: #333;
+}
+
