@@ -14,17 +14,18 @@
     
     <body>
         <article>
-            <h3>$.isNative(host,method)</h3>
+            <h3>$.isNative(method,host)</h3>
             <p>
                 <span class="stress">描述：</span>
             </p>
             <p>判定method是否为host对象的原生方法，用于向前兼容，详细讨论请看
                 <a href="http://www.cnblogs.com/rubylouvre/archive/2011/04/06/2002844.html">这里</a>。</p>
             <dl>
-                <dt>host</dt>
-                <dd>必需。Object。要检测的对象。</dd>
+              
                 <dt>method</dt>
                 <dd>必需。String。要检测的方法名。</dd>
+                  <dt>host</dt>
+                <dd>必需。Object。要检测的对象。</dd>
             </dl>
             <p>
                 <span class="stress">返回值：</span>
@@ -33,14 +34,14 @@
             <fieldset>
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("lang", function() {
-    $.log($.isNative(window, "alert"), true);
+require("lang", function($) {
+    $.log($.isNative( "alert", window ), true);
     window.test = {
         toString: function() {
             return '[function]';
         }
     };
-    $.log($.isNative(window, 'test'), true);
+    $.log($.isNative( 'test', window ), true);
 });
 </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
