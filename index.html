@@ -1,0 +1,215 @@
+
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+        <script src="mass_merge.js"></script>
+
+        <style>
+            html{
+                background:#252D37;
+            }
+            .modules-slider{
+                width:900px;
+                height:30px;
+                position:relative;
+                background:black;
+                overflow:hidden;
+            }
+            .modules-slider-left, .modules-slider-right{
+                width:30px;
+                height:30px;
+                line-height: 30px;
+                text-align: center;
+                border: 1px solid red;
+                position:absolute;
+                background: #141414;
+                color: #D91E76;
+                font-size: 16px;
+                font-weight: bolder;
+                z-index:2
+            }
+            .modules-slider-left{
+                left:0;
+            }
+            .modules-slider-right{
+                right:0!important;
+            }
+            .modules-slider-center{
+                width:1200px;
+                height:30px;
+                position:absolute;
+                left:30px;
+                z-index:1
+            }
+            .modules-slider-center div{
+                padding-left: 10px;
+                padding-right: 1px;
+                height:30px;
+                color:#00ff00;
+                font-weight: bolder;
+                line-height: 30px;
+                display:inline-block;
+                float:left;
+            }
+            .modules-slider-center .active{
+                color:#ff7B26;
+            }
+            .left-bar{
+                text-align: left;
+                width:150px;
+                height:400px;
+                overflow: auto;
+                float: left;
+            }
+            .left-bar ul{
+                list-style: none;
+                padding:0;
+                margin:0;
+            }
+            .left-bar ul li {
+                background: #9FF;
+                padding-left: 1em;
+                height: 25px;
+                line-height: 25px;
+                color: #000;
+            }
+            .left-bar ul li.odd {
+                background: #6F9;
+            }
+            .left-bar ul li.hover {
+                background: #73c32c!important;
+                color:#fff;
+            }
+            .main-area{
+                float:left;
+                width:740px;
+                height:700px;
+            }
+            #main{
+                width:100%;
+                height:100%;
+                background: white;
+            }
+
+        </style>
+        <script>
+            require("fx, event, attr, ready", function() {
+
+                var center = $(".modules-slider-center");
+                $(".modules-slider-left,.modules-slider-right").click(function() {
+                    var left = this.className.indexOf("left") !== -1;
+                    if (!left) {
+                        var div = $(".modules-slider-center div").last();
+                        var width = div.width();
+                        div.detach().css("marginLeft", -1 * width).prependTo(center);
+                        div.fx({
+                            marginLeft: 0
+                        }, 700);
+                    } else {
+                        var div = $(".modules-slider-center div").first();
+                        var width = div.width();
+                        div.fx({
+                            marginLeft: "-=" + width
+                        }, 700, function() {
+                            center.append(div);
+                            div.css("marginLeft", 0);
+                        });
+                    }
+                });
+            });
+            require("doc/scripts/api, event, node, attr, ready", function(api, $) {
+                var currentModule = "core"
+                $(".modules-slider-center div").click(function() {
+                    if (this.className === "active") {
+                        return;
+                    }
+                    $(this).siblings().removeClass("active");
+                    this.className = "active";
+
+                    var moduleName = this.id.replace("m_", "");
+                    currentModule = moduleName;
+                    var list = ["index"].concat(api[moduleName])
+                    var html = ["<ul>"];
+                    $.each(list, function(prop, index) {
+                        var className = index % 2 === 0 ? "even" : "odd";
+                        html.push("<li class=" + className + ">" + prop + "</li>");
+                    });
+                    html.push("</ul>");
+                    $(".left-bar").html(html.join(""));
+                });
+                var iframe = $("#main").get(0);
+
+                var url = location.href;
+                var basePath = url.slice(0, url.lastIndexOf("/") + 1)
+                iframe.src = basePath + "doc/core/index.html";
+                $(".left-bar").delegate("li", "mouseover", function() {
+                    $(this).addClass("hover");
+                }).delegate("li", "mouseout", function() {
+                    $(this).removeClass("hover");
+                }).delegate("li", "click", function() {
+                    var url = basePath + "doc/" + currentModule + "/" + $(this).text().trim() + ".html";
+                    var iframe = $("#main").get(0)
+                    if (url !== iframe.src) {
+                        iframe.src = url;
+                    }
+                })
+            });
+            window.onload = function() {
+                var el = document.getElementById("move");
+                var parent = document.getElementById("taxiway")
+                var distance = parent.offsetWidth - el.offsetWidth;//总移动距离
+                var begin = parseFloat(window.getComputedStyle(el, null).left);//开始位置
+                var end = begin + distance;//结束位置
+                var fps = 30;//刷新率
+                var step = distance / fps;//每次移动多少距离
+                var interval = Math.floor(1000 / fps);//每相隔多久才移动一次
+                el.onclick = function() {
+                    var id = setInterval(function() {
+                        if (begin >= end) {
+                            el.style.left = end + "px";
+                            clearInterval(id)
+                        } else {
+                            begin += step;
+                            el.style.left = begin + "px"
+                        }
+                    }, interval)
+                }
+            }
+        </script> 
+
+    </head>
+    <body>
+
+
+
+        <div class="modules-slider">
+            <div class="modules-slider-left">◀</div>
+            <div class="modules-slider-center">
+                <div id="m_core">种子模块</div>
+                <div id="m_lang">语言扩展模块</div>
+                <div id="m_class">类工厂模块</div>
+                <div id="m_data">数据缓存模块</div>
+                <div id="m_flow">流程模块</div>
+                <div id="m_query">选择器模块</div>
+                <div id="m_node">节点模块</div>
+                <div id="m_css">样式模块</div>
+                <div id="m_event">事件模块</div>
+                <div id="m_attr">属性模块</div>
+                <div id="m_fx">动画模块</div>
+                <div id="m_ajax">AJAX模块</div>
+            </div>
+            <div class="modules-slider-right">▶</div>
+        </div>
+        <div>
+            <div class="left-bar"></div>
+            <div class="main-area">
+                <iframe id="main" >
+                </iframe>
+            </div>
+        </div>
+
+
+    </body>
+</html>
