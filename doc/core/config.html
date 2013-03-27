@@ -1,68 +1,55 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>$.config</title>
         <script>
-            window.$$path  = location.protocol + "//" + location.host;
+            window.$$path = location.protocol + "//" + location.host;
             document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
             document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
         </script>
     </head>
-    
+
     <body>
         <article>
             <h3>$.cofig( opts )</h3>
             <p>
                 <span class="stress">描述：</span>
             </p>
-            <p>用于配置框架的重要参数，比如调试时消息的显示级别，框架的别名，是否打开调试追踪，为模块进行别名。</p>
+            <p>用于配置框架的重要参数，比如调试时消息的显示级别，框架的别名，为模块进行别名。</p>
             <p>
                 <span class="stress">参数：</span>
             </p>
             <dl>
                 <dt>opts</dt>
-                <dd>必需。Object。它的键值对将添加到$.config上，因此像length, name, constructor是添加不上去的！</dd>
+                <dd>必需。Object。它的键值对将添加到$.config上！</dd>
             </dl>
             <p>默认地,它拥有如下默认值,当然你可以通过$.config({ level: 1})这样的方式修改它。</p>
             <ul>
                 <li>$.config.base, String， mass.js这个种子文件所在的目录,以/结束。</li>
-                <li>$.config.debug, Boolean，是否打开调试追踪，这是由引入的种子文件的debug属性决定。</li>
                 <li>$.config.nick, String，框架的别名，默认为$。</li>
                 <li>$.config.alias, Object，用于放置框架的核心模块的别名。</li>
                 <li>$.config.level， Number，调试时消息的显示级别。</li>
-                <li>$.config.storage， Boolean，是否使用本地储存。</li>
-                <li>$.config.erase， String，用于清除本地储存中指定模块的cookie指令名。</li>
             </ul>
             <p>此外你可以另行设置其他项。</p>
             <p>在框架的种子模块mass.js,它是这样设置这些值</p>
             <pre class="brush:js;gutter:false;toolbar:false">
-(function(scripts, cur) {
-    cur = scripts[scripts.length - 1]; //FF下可以使用DOC.currentScript
-    var url = cur.hasAttribute ? cur.src : cur.getAttribute('src', 4);
-    url = url.replace(/[?#].*/, '');
-    var a = cur.getAttribute("debug");
-    var b = cur.getAttribute("storage");
-    var kernel = $.config;
-    kernel.debug = a == 'true' || a == '1';
-    kernel.storage = b == 'true' || b == '1';
-    kernel.base = url.substr(0, url.lastIndexOf('/')) + "/";
-    kernel.nick = cur.getAttribute("nick") || "$";
-    kernel.erase = cur.getAttribute("erase") || "erase";
-    kernel.alias = {};
-    kernel.level = 9;
-})(DOC.getElementsByTagName("script"));
-</pre>
-            <p>另外,它为框架的核心模块都定义好别名了,都以$开头!</p>
+    (function(scripts) {
+        var cur = scripts[scripts.length - 1],
+                url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
+                kernel = $.config;
+        basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1);
+        kernel.nick = cur.getAttribute("nick") || "$";
+        kernel.alias = {};
+        kernel.level = 9;
+    })(DOC.getElementsByTagName("script"));;
+            </pre>
+            <p>使用:</p>
             <pre class="brush:js;gutter:false;toolbar:false">
-var all = "lang_fix,lang,support,class,flow,query,data,node,attr,css_fix,css,event_fix,event,ajax,fx"
-//...略...
-all.replace($.rword, function(a) {
-    $.config.alias["$" + a] = $.config.base + a + ".js"
-});
-</pre>
+ $.config.level = 3;//只打印最重要的出错信息
+            </pre>
         </article>
     </body>
 

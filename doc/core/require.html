@@ -72,7 +72,7 @@
                 <p>加载单个模块。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 // 由于lang.js与mass.js是位于同一目录下，可以省略./
-$.require("lang", function() {
+require("lang", function($) {
     alert($.String.toUpperCase("aa"))
 });
 </pre>
@@ -83,7 +83,7 @@ $.require("lang", function() {
                 <p>加载多个模块。需要注意的是，涉及DOM操作时必须要待到DOM树建完才能进入，因此我们在这里指定了一个标识，叫ready， 它并不一个模块，用户自定义模块，也不要起名叫ready。</p>
                 <pre
                 class="brush:javascript;gutter:false;toolbar:false">
-$.require("ready,node,attr", function() {
+require("ready,node,attr", function($) {
     alert($.fn.attr + ""); //这两个方法都循环生成出来,源码上看不出区别
     alert($.fn.prop + "");
 });
@@ -94,7 +94,7 @@ $.require("ready,node,attr", function() {
                 <legend>例子</legend>
                 <p>加载多个模块，使用字符串数组形式的依赖列表。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require(["ready", "node", "css"], function() {
+require(["ready", "node", "css"], function($) {
     $("#js_require_ex3").toggle();
 });
 </pre>
@@ -105,7 +105,7 @@ $.require(["ready", "node", "css"], function() {
                 <legend>例子</legend>
                 <p>加载远程模块。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("http://files.cnblogs.com/rubylouvre/random.js,ready,node,css", function(random) {
+require("http://files.cnblogs.com/rubylouvre/random.js,ready,node,css", function(random,$) {
     $("#js_require_ex4").css("bgc", random.color()); //每点一次随机变换颜色
 });
 </pre>
