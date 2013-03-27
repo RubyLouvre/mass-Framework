@@ -1,81 +1,14 @@
-define("api",["mass"], function(){
-   
+define("api", ["mass"], function() {
+
     return {
         core: "require,define,config, mix,slice,type,log,oneObject,bind,unbind,html,head,rword,mass,getUid,exports".match($.rword).sort(),
-
-        "语言扩展模块": {
-            "String": {
-                contains: "function",
-                startsWith: "function",
-                endsWith: "function",
-                repeat: "function",
-                byteLen: "function",
-                "truncate": "function",
-                "camelize": "function",
-                "underscored": "function",
-                "capitalize": "function",
-                "escapeHTML": "function",
-                "unescapeHTML": "function",
-                "stripTags": "function",
-                "stripScripts": "function",
-                "wbr": "function",
-                "pad": "function"
-            },
-            "Array": {
-                "clone": "function",
-                "contains": "function",
-                "remove": "function",
-                "removeAt": "function",
-                "shuffle": "function",
-                "random": "function",
-                "min": "function",
-                "max": "function",
-                "pluck": "function",
-                "sortBy": "function",
-                "compact": "function",
-                "diff": "function",
-                "merge": "function",
-                "union": "function",
-                "intersect": "function",
-                "unique": "function",
-                "ensure": "function",
-                "inGroupsOf": "function",
-                "flatten": "function"
-            },
-            "Number": {
-                "limit": "function",
-                "nearer": "function",
-                "round": "function"
-            },
-            "Object": {
-                "subset": "function",
-                "each": "function",
-                "map": "function",
-                "clone": "function",
-                "merge": "function",
-                "without": "function"
-            },
-            "isPlainObject": "function",
-            "isNative": "function",
-            "isEmptyObject": "function",
-            "isArrayLike": "function",
-            "format": "function",
-            "tag": "function",
-            "range": "function",
-            "quote": "function",
-            "dump": "function",
-            "parseJS": "function",
-            "parseJSON": "function",
-            "parseXML": "function",
-            "isArray": "function",
-            "isFunction": "function",
-            "each": "function",
-            "map": "function",
-            "lang": "function"
-        },
-        "类工厂模块": {
-            "factory": "function"
-        },
+        lang: ("String.contains, String.startsWith, String.endsWith,String.repeat,String.byteLen,String.truncate,String.camelize,String.underscored," +
+                "String.capitalize, String.escapeHTML, String.unescapeHTML,String.stripTags,String.stripScripts,String.wbr,String.pad," +
+                "Array.clone,Array.contains,Array.remove,Array.removeAt,Array.shuffle,Array.random,Array.min,Array.max,Array.pluck,Array.sortBy," +
+                "Array.compact,Array.diff,Array.merge,Array.union,Array.intersect,Array.unique,Array.ensure,Array.inGroupsOf,Array.flatten," +
+                "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge,Object.without," +
+                "isPlainObject,isNative,isEmptyObject,isArrayLike,format,range,quote,dump,parseJS,parseJSON,parseXML,isArray,isFunction,each,map").match($.rword).sort(),
+        "class": ["factory"],
         "节点模块": {
             "fn": {
                 "init": "function",
@@ -144,13 +77,7 @@ define("api",["mass"], function(){
             "match": "function",
             "parseHTML": "function"
         },
-        "选择器模块": {
-            "isXML": "function",
-            "contains": "function",
-            "getText": "function",
-            "unique": "function",
-            "query": "function"
-        },
+        query: "isXML,contains,getText,unique,query".match($.rword).sort(),
         "数据缓存模块": {
             "data": "function",
             "parseData": "function",
@@ -288,7 +215,6 @@ define("api",["mass"], function(){
             },
             "xhr": "function"
         },
-
         "fx": ["fn.fx", "fn.stop"],
 //            "fn": { 
 //                "fx": "function",
@@ -312,16 +238,16 @@ define("api",["mass"], function(){
 //        },
         "flow": {
             "Flow": "function",
-            "flow.bind":"function",
-            "flow.unbind":"function",
-            "flow.fire":"function",
-            "flow.find":"function",
-            "flow.append":"function",
-            "flow.reduce":"function"
+            "flow.bind": "function",
+            "flow.unbind": "function",
+            "flow.fire": "function",
+            "flow.find": "function",
+            "flow.append": "function",
+            "flow.reduce": "function"
         },
         "特征侦探模块": {}
     }
 
 
-   
+
 })

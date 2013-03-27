@@ -61,13 +61,13 @@
                 <p>这里稍微说一下怎么调用模块吧。require有两个参数，第一个是字符串，表示要调用的模块，第二个是回调函数。比如我要调用aaa.js文件，而aaa.js与mass.js是位于同一目录下，那么这样调用。</p>
                 <pre
                 class="brush:js;gutter:false;toolbar:false">
-$.require("./aaa", function() {
+require("./aaa", function() {
 
 });
 </pre>
                     <p>当然你也可以，".js"后缀不是必需的。</p>
                     <pre class="brush:js;gutter:false;toolbar:false">
-$.require("./aaa.js", function() {
+require("./aaa.js", function() {
 
 });
 </pre>
@@ -75,20 +75,20 @@ $.require("./aaa.js", function() {
                         <strong>"./"</strong>表示在当前目录查找。</p>
                     <p>如果我要依赖两个模块，aaa.js, bbb.js，并且它们都与mass.js在同一目录下吧。</p>
                     <pre class="brush:js;gutter:false;toolbar:false">
-$.require("./aaa,./bbb", function(a, b) {
+require("./aaa,./bbb", function(a, b) {
     alert(a + b) //3
 });
 </pre>
                     <p>aaa.js,bbb.js的内容很简单</p>
                     <pre class="brush:js;gutter:false;toolbar:false">
 //aaa.js
-define("aaa", function() {
+define("aaa", function(aaa) {
     return 1
 });
 </pre>
                     <pre class="brush:js;gutter:false;toolbar:false">
 //bbb.js
-define("bbb", function() {
+define("bbb", function(bbb) {
     return 1
 });
 </pre>
@@ -141,7 +141,7 @@ define("ccc", ["./aaa"], function(a) { // ./表示aaa与ccc是同一目录
 
         &lt;/script&gt;
 	&lt;script&gt;
-           $.require("./ccc", function(c){
+           require("./ccc", function(c){
 	     alert(c)
            })
         &lt;/script&gt;
@@ -175,7 +175,7 @@ define("ddd", ["../ccc"], function(c) { // ../表示在上一级目录中查找�
 
         &lt;/script&gt;
 	&lt;script&gt;
-           $.require("./ddd/ddd", function(d){//在当前目录中ddd目录找ddd文件
+           require("./ddd/ddd", function(d){//在当前目录中ddd目录找ddd文件
 		      alert(d)
 		   })
         &lt;/script&gt;
@@ -215,7 +215,7 @@ define("remote", function() {
 
         &lt;/script&gt;
 		&lt;script&gt;
-           $.require("http://files.cnblogs.com/rubylouvre/20120830__amd.js", function(obj){
+           require("http://files.cnblogs.com/rubylouvre/20120830__amd.js", function(obj){
 		      alert(obj.address)
 		   })
         &lt;/script&gt;
@@ -243,12 +243,10 @@ define("remote", function() {
     &lt;head&gt;
         &lt;title&gt;AMD&lt;/title&gt;
         &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
-        &lt;script src="mass.js"&gt;
-
-        &lt;/script&gt;
+        &lt;script src="mass.js"&gt; &lt;/script&gt;
         &lt;script&gt;
        //相当于$.require("./aaa", fn),只有模块与mass.js是位于同一模块才能这样干
-           $.require("aaa", function(a,b){
+           require("aaa", function(a,b){
 		      alert(a+b)
 		   })
         &lt;/script&gt;
@@ -297,7 +295,7 @@ $.config({
         &lt;/script&gt;
         &lt;script&gt;
        //相当于$.require("./aaa", fn),只有模块与mass.js是位于同一模块才能这样干
-           $.require("$ddd", function(d){
+           require("$ddd", function(d){
               alert(d)
            })
         &lt;/script&gt;
@@ -368,7 +366,7 @@ define("jquery", function() {
 
         &lt;/script&gt;
         &lt;script&gt;
-            $.require("jquery", function(jQuery){
+            require("jquery", function(jQuery){
                 $.log(jQuery.fn.jquery);//这是jquery
                 $.log($.mass); //这是mass.js
             })
