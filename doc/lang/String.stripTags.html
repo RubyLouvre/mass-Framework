@@ -29,8 +29,8 @@ stripTags: function(str) {
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function(_) {
-    var s = "&lt;div&gt;你好&lt;script&gt;alert(1)&lt;\/script&gt;&lt;/div&gt;";
-    $.log(_(s).stripTags(), true);
+    var str = "&lt;div&gt;你好&lt;script&gt;alert(1)&lt;\/script&gt;&lt;/div&gt;";
+    $.log($.String.stripTags(str), true);
 });
 </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>

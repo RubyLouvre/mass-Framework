@@ -5,18 +5,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>$.String.unescapeHTML</title>
-        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
-        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
-        <script type="text/javascript" src="/scripts/doc/common.js"></script>
-        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
-        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
-        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
-        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css"
-        />
-        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css"
-        />
-        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css"
-        />
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
     </head>
     
     <body>
@@ -40,9 +33,9 @@ unescapeHTML: function(target) {
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function($$) {
     var s = "&lt;h1>&gt;Pride &amp; Prejudice&lt;/h1>&gt;";
-    $.log($$(s).unescapeHTML(), true);
+    $.log($.String.unescapeHTML(str), true);
     var s = "x &gt; 10";
-    $.log($$(s).unescapeHTML(), true);
+     $.log($.String.unescapeHTML(str), true);
 });
 </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>

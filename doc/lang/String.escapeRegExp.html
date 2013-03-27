@@ -23,9 +23,8 @@
             <fieldset>
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("lang", function() {
-    var a = $.lang(".animals.sheep[1]");
-    $.log(a.escapeRegExp(), true);
+require("lang", function($) {
+    $.log($.Array.escapeRegExp(".animals.sheep[1]"), true);
 });
 </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
