@@ -34,7 +34,7 @@ $.require("lang", function() {
         second: 'Monday',
         third: 'Tuesday'
     };
-    $.lang(obj).forEach(function(v) {
+    $.Object.forEach(obj, function(v) {
         $.log(v, true);
     });
 });

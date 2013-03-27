@@ -18,44 +18,21 @@
             <p>
                 <span class="stress">描述：</span>
             </p>
-            <p>作为一个框架，它就必然对数组，字符串，数字与对象这些基本数据类型的操作提供了诸多便捷方法。有的是对其原型进行扩展， 有的是提供一大打静态方法，mass
-                Framework的做法是把它作为参数传入$.lang方法从而返回一个
-                <span style="color:#00CED1">lang链式对象</span>，通过此对象的方法进行操作， 从而解决dom对象上挂N多静态的问题，也不必通过原型扩展就能进行链式操作。</p>
-            <p>对于字符串，如$.log("aaa")返回的
-                <span style="color:#00CED1">lang链对象</span>拥有如下方法：contains，startsWith， endsWith，repeat，byteLen，truncate，camelize，underscored，capitalize，stripTags，stripScripts，escapeHTML，
+            <p>作为一个框架，它就必然对数组，字符串，数字与对象这些基本数据类型的操作提供了诸多便捷方法。</p>
+            <p>它在$.String挂载了如下方法：contains，startsWith， endsWith，repeat，byteLen，truncate，camelize，underscored，capitalize，stripTags，stripScripts，escapeHTML，
                 unescapeHTML，escapeRegExp，pad，wbr； 此外，它还拥有原生字符串的这些常用方法：charCodeAt，concat，indexOf，lastIndexOf，localeCompare，match，replace，
-                search，slice，split，substring，toLowerCase，toLocaleLowerCase，toUpperCase，trim，toJSON。
-                由于链式对象的链式方法总是返回自身，想得到结果，则需要调用value方法取得它。</p>
-            <p>对于数组或类数组对象（它会内部转换为数组），返回的链对象拥有如下方法： contains，removeAt，remove，merge，shuffle，
+                search，slice，split，substring，toLowerCase，toLocaleLowerCase，toUpperCase，trim，toJSON。</p>
+            <p>它在$.Array挂载了如下方法： contains，removeAt，remove，merge，shuffle，
                 random，flatten，unique，compact，sortBy，groupBy，pluck，union，intersect，diff，min，max，clone。
                 此外，它还拥有原生数组的这些方法: concat，join，pop，push，shift，slice，sort，reverse，splice，unshift，
                 indexOf，lastIndexOf，every，some，forEach，map，filter，reduce，reduceRight。</p>
-            <p>对于数字，返回的
-                <span style="color:#00CED1">lang链对象</span>拥有如下方法：limit，nearer，round。 此外，它还拥有原生数字的这些方法: toLocaleString,
+            <p>它在$.Number挂载了如下方法：limit，nearer，round。 此外，它还拥有原生数字的这些方法: toLocaleString,
                 toFixed, toExponential, toPrecision, toJSON。另， 它还拥有原来Math对象的如下方法： abs,
                 acos, asin, atan, atan2, ceil, cos, exp, floor, log, pow,sin, sqrt, tan。</p>
-            <p>对于对象，返回的
-                <span style="color:#00CED1">lang链对象</span>拥有如下方法：subset，each，map，clone，merge，without， 另，它还拥有原来Object对象的如下方法：hasOwnerProperty，isPrototypeOf，propertyIsEnumerable。</p>
-            <p>因此
-                <span style="color:#00CED1">lang链对象</span>是一个可以匹敌dom链对象的强大对象，它庞大数量的API足以应对现实中的各种需求，另外，我们可以对$.Object,
-                $.String, $.Array, $.Number进行扩展，让
-                <span style="color:#00CED1">lang链对象</span>变得更加强大。</p>
+            <p>它在$.Object挂载了如下方法：subset，each，map，clone，merge，without。</p>
             <p>除此之外，本模块也提供了诸如isPlainObject, isFunction, isArray, isNative, isEmptyObject,
                 isArrayLike, format, tag, range, quote, parseJS, parseJSON, parseXML等判定数据类型与转换数据类型的方法。</p>
-            <fieldset>
-                <legend>例子</legend>
-                <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("lang", function() {
-    var ret = $.lang([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).map(function(el) {
-        return el + 10
-    }).filter(function(el) {
-        return el < 16
-    });
-    $.log(ret.value(), true); //把结果打印在页面底部
-});
-</pre>
-                <button class="doc_btn" type="button">点我，执行代码</button>
-            </fieldset>
+
             <pre style="display:none;">var sum = function(i){//统计0到i的总和 return eval(i+new Array(i).join("+(--i)"));
                 }; sum(10)</pre>
         </article>

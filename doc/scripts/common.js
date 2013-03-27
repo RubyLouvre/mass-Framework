@@ -11,21 +11,27 @@
         node.src = prefix + "/doc/scripts" + url;
         head.appendChild(node);
     };
-     var appendStyle = function(url) {
+    var appendStyle = function(url) {
         var node = document.createElement("link");
         node.type = "text/css";
         node.rel = "stylesheet";
         node.href = prefix + "/doc/styles" + url;
         head.appendChild(node);
     };
-    "/shCore.js  /common.css /shCore.css /shThemeRDark.css".replace(/[^, ]+/g, function(url){
-        if(/\.js$/.test(url)){
+    "/shCore.js  /common.css /shCore.css /shThemeRDark.css".replace(/[^, ]+/g, function(url) {
+        if (/\.js$/.test(url)) {
             appendScript(url);
-        }else{
+        } else {
             appendStyle(url);
         }
     });
-
+    function Highlight() {
+        try {
+            SyntaxHighlighter.highlight()
+        } catch (e) {
+            setTimeout(Highlight, 500);
+        }
+    }
     require("ready,event", function($) {
         $("pre").each(function() {
             if (this.exec !== "function") {
@@ -37,7 +43,9 @@
                 }
             }
         });
-        window.SyntaxHighlighter && SyntaxHighlighter.highlight();
+
+        Highlight();
+
         $("body").delegate(".doc_btn", "click", function() {
             if (typeof this.exec == "function") {
                 this.exec.call(window)

@@ -31,7 +31,6 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function() {
     var a = [1, 2, 3, "a"];
-    //var b = $.lang( a ).intersect([1, "a", 2]).value();
     var b = $.Array.intersect(a, [1, "a", 2]); //取交集
     var ret = $.dump(b); //序列化
     $.log(ret, true) //1,2,"a"

@@ -33,8 +33,7 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function() {
     var test = [3, 5, 6, 1, 20];
-    var a = $.lang(test);
-    $.log(a.removeAt(2), true);
+    $.log($.Array.removeAt(test,2), true);
     $.log($.dump(test), true);
 });
 </pre>

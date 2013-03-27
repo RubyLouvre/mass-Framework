@@ -28,7 +28,7 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function() {
     var a = [1, 2, 3];
-    a = $.lang(a).union([2, 3, 4, 5, 6]); //取并集
+    a = $.Array.union(a, [2, 3, 4, 5, 6]); //取并集
     $.log(a, true) //[1,2,3,4,5,6]
 });
 </pre>

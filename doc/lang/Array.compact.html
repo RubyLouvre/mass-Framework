@@ -24,7 +24,7 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function() {
     var arr = [3, 5, null, 6, undefined, 1]
-    var ret = $.lang(arr).compact()
+    var ret = $.Array.compact(arr)
     ret = $.dump(ret); //序列化
     $.log(ret, true);
 });

@@ -32,8 +32,8 @@
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function() {
-    var test = $.lang(["zero", "one", "two", "three"]);
-    var ret = test.sortBy(function(value) {
+    var arr = ["zero", "one", "two", "three"];
+    var ret = $.Array.sortBy(arr,function(value) {
         return value.length;
     });
     $.log($.dump(ret), true);
@@ -45,13 +45,13 @@ $.require("lang", function() {
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function() {
-    var test = $.lang([
+    var test = [
         [0, 10],
         [1, 9],
         [2, 8],
         [3, 7]
-    ]);
-    var ret = test.sortBy(function(value, index) {
+    ];
+    var ret = $.Array.sortBy(test,function(value, index) {
         return value[1];
     });
     $.log($.dump(ret), true);
