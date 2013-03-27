@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>类工厂模块</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>类工厂模块</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>此模块只包含一个factory方法。通过它创建的类，能够通过this._super访问其父类（继承链）。</p>
+            <fieldset style="display:none;">
+                <legend>月影对类，原型，函数式的见解</legend>
+                <p>所有跟继承有关的东西，js里都乱乱的。。。</p>
+                <p>我不是这么理解的，js里没有“继承”这个说法</p>
+                <p>或者说js的基于prototype的架构里面没有“继承”这个定义，所以外来的东西一定是乱的</p>
+                <p>但是js的“原型”体系是一个“自治”的体系</p>
+                <p>它本来是不需要继承的</p>
+                <p>我们从概念上来探讨这个问题</p>
+                <p>“面向对象”其实好比是人类成年期学习和整理知识的方法——把知识分门别类.比如猫、老虎，都属于猫科动物. class 猫 extends 猫科动物,class
+                    老虎 extends 猫科动物.描述的就是这种认知世界的方式</p>
+                <p>而“原型”是另一种认知世界的方式，是人类与生俱来的，幼年时期的学习方式.小孩子问父母，老虎是什么.
+                    <p>父母可能会回答小孩，老虎很像体型较大的猫.或者说，小孩的意识里“猫”和“老虎”相似. 用原型体系来表示，就是 猫.prototype = 一只老虎,或者
+                        老虎.prototype = 一只猫. 对于小孩来说，从猫认识老虎，再把它们不一样的部分特别说明.这就是原型体系. 所以原型体系就是没有分类的、人类原始认知世界的方式</p>
+                    <p>然后函数式：functional是什么体系，那个其实是数学体系. functional描述世界的方式和数学家描述世界的方式一致, 所以functional的抽象基于数学抽象，它在数学公式、算法的描述上占优势</p>
+                    <p>class的抽象基于类别类系的抽象</p>
+                    <p>prototye的抽象基于形似性的抽象</p>
+                    <p>后面两者都是描述自然的、人类的认知方式</p>
+                    <p>人类是用自己的世界观在设计计算机体系的</p>
+                    <p>在prototye体系中没有extends的概念,因为小孩子脑海里是把陌生的东西通过和自己认识的东西的相似来建立联系，获得新知识的, 这种建立比较直接，猫可以像老虎，猫可以像别的什么东西，比如在描述一个很灵活的人的时候，也可以告诉小孩
+                        看，那个体操运动员多么灵活，像猫儿一样, 所以他们没有继承关系, 也无法用extends表示， 所以对于javascript来说，至少现在建立在prototype体系上的javascript来说，继承是外来的东西。
+                        另外要说的是，通过prototype描述相似性也是完备的，所以我才说原型体系是自洽的，它本身绝对不存在逻辑上的矛盾， 比如不可能根据合理推导最后得出结论，A“必须”既像又不像
+                        B，所以用prototype可以描述整个世界，它的描述能力和class的描述能力等价</p>
+                    <p>举个简单的例子，如果没有类、门、纲、目、属，而是简单用相似性来表示，也不会推翻达尔文的进化论, 分类只是用来描述达尔文进化论，不管用prototye还是class，进化论都不会失效.
+                        prototype和class只是描述进化论的两种等价体系</p>
+                    <p>我对javascript来说喜欢prototye多于class， 因为prototype相比class是个更灵活的体系和门槛较低的体系， 这也是为什么一个3岁的小孩让他去学会分类别地理解知识很难，他更多通过相似性去认知世界.
+                        相似性认知应该更符合人脑作用于自然界的本质，相对class而言是更低层次的东西, 而更灵活和门槛更低，更符合前端精神一点</p>
+                    <p>当然prototye和class 相比在描述类-类问题的时候有些缺陷，但那些缺陷不是只本身不可描述，而是如何更方便的问题</p>
+                    <p>prototye本身更适合描述对象-对象和对象-类问题</P>
+                    <p>prototye描述类-类问题有个最大的缺陷我把它叫做“延迟构造”</p>
+                    <p>它是这样的一个情况.我们可以说，老虎像一只黄白相间的猫,所以：</p>
+                    <p>老虎.prototype = new 猫（黄白相间）</p>
+                    <p>但是，假如不幸的是，老虎中有白虎，它更像白猫，那么我们在描速它，考虑猫的颜色的时候</p>
+                    <p>于是我们遇到一个延迟构造的问题</p>
+                    <P>因为我们无法这样</p>
+                    <p>老虎.prototype = new 猫（黄白相间） or 猫（纯白）</p>
+                    <p>这里是我们要用不同的颜色去构造猫，而这一切发生在描述相似性的时候,而因为我们在描述相似性的时候老虎的实例还未构造出来, 因此我们无法决定颜色属性。只有放弃构造猫的颜色属性，或者说把这个属性延迟到老虎的实例化中去构造。
+                        但是这样又会改变猫的构造函数！所以我们被迫考虑一些等价的变换来解决这个问题</p>
+                    <p>我们分解猫的构造过程，看看有什么被我们忽视的东西</p>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+new猫 (黄白相间) <= > T = function() {};
+T.prototype = 猫.prototype;
+new T();
+T.apply(猫, [黄白相间])
+</pre>
+                    <p>也就是说，我分解出一个过程，把属性放在new之后描述 ——这里我们讨论的实际上已经不是prototype的理论而是js描述prototype的语法的缺陷</p>
+                    <p>好，既然能把属性放在new 之后再描速，那么我们就能解决这个问题了</p>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+extend: function(cls, p) {
+
+    var T = function() {}; //构造prototype-chain
+    T.prototype = p.prototype;
+
+    var cp = cls.prototype;
+
+    cls.prototype = new T();
+    cls.$super = p; //在构造器内可以通过arguments.callee.$super执行父类构造
+
+    //如果原始类型的prototype上有方法，先copy
+    mix(cls.prototype, cp, true);
+
+    return cls;
+}
+</pre>
+                    <p>现在看这个extends方法，extends只是沿用了class体系的概念，对于prototype体系， 它的作用其实不过是将构造函数的参数延迟到原型所派生的对象实例化的时候执行！</p>
+                    <p>cls.$super = p; 就是这一句，分离了p未执行，以便在new cls的时候，从cls的构造函数里面，通过contructor.$super去执行它
+                        <p>
+                            <p>所以这个</p>
+                            <pre class="brush:js;gutter:false;toolbar:false">
+new猫 (黄白相间) <= >
+
+T = function() {};
+T.prototype = 猫.prototype;
+new T();
+T.apply(猫, [黄白相间])
+</pre>
+                            <p>是一个非常重要的范式，它至少包含了两个推论</p>
+                            <p>一是 “new” 过程等价于函数调用</p>
+                            <pre class="brush:js;gutter:false;toolbar:false">
+createInstance: function(cls) {
+    var p = create(cls.prototype);
+    cls.apply(p, [].slice.call(arguments, 1));
+    return p;
+},
+</pre>
+                            <p>二是使构造函数的延迟执行可以实现</p>
+                            <p>第二个推论的重要性我们前面已经看到了，第一个推论有什么用呢</p>
+                            <p>这个是我们通过new不可能做到的</p>
+                            <p>还有从prototype体系本身和class体系本身的差别我们还能看出其中的“this”有什么区别. 很多人总说js的“this”怪，那是通过class的思维来看这个</p>
+                            <p>我们说class体系中，一个instance的class和class族系是固定的，所以代词“this”（或者叫上下文）始终指代这个主语本身，这没有什么问题.</p>
+                            <p>但是prototype体系中，我们可以把一组行为作用于一族拥有相似度的对象, 那么在具体行为发生的时候，“this”指代什么，就是可以变化的.我们会看“跳跃”究竟是猫发生的还是老虎发生的</p>
+            </fieldset>
+        </article>
+    </body>
+
+</html>
