@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.require</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.require(deps,callback)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>mass Framework提供了无以伦比的模块加载机制，并成功解决了在所有浏览器侦测JS的死链的问题。</p>
+            <p>通常，为了加载那些我们需要的模块，我们向DOM树添加一个临时节点，它们会在模块成功加载后移除， 判定时机一般是onload或onreadychange的complete|loaded状态，然后再执行JS文件最外层的那个函数，取得依赖列表，
+                待到所有指定依赖以及其所有依赖树都加载或执行成功后，就执行我们的回调。</p>
+            <p>但还有一种情况，就是指定的模块不存在，也就是所谓的死链接，从而触发script的onerror事件，此时我们也将临时节点移除。但在opera与IE6-8下，
+                script节点不支持onerror事件，因此也就无法移除节点与向用户发出警告。幸而，在我的模块加载系统 v5中 已创造性地解决这问题，到v7已经非常完美！</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>deps</dt>
+                <dd>必需。String|Array。依赖列表，可以是具体路径或模块标识，如果想用字符串表示多个模块，则请用“,”隔开它们。</dd>
+                <dt>callback</dt>
+                <dd>必需。Function。回调，当用户指定的依赖以及这些依赖的依赖树都加载执行完毕后，才会安全执行它。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>target</p>
+            <fieldset>
+                <legend>模块标识：</legend>
+                <p>一个模块标识就是一个字符串，通过它们来转换成到对应JS文件或CSS文件的路径。</p>
+                <p>有关模块标识的CommonJS规范，可以见
+                    <a href="http://wiki.commonjs.org/wiki/Modules/1.1.1">这里</a>
+                </p>
+                <p>具体约定如下：</p>
+                <ol>
+                    <li>每个模块标识的字符串组成只能是合法URL路径，因此只能是英文字母，数字，点号，斜扛，#号。</li>
+                    <li>如果模块标识是
+                        <span class="primary">以"./"开头</span>，则表示相对于它的父模块的目录中找。</li>
+                    <li>如果模块标识是
+                        <span class="primary">以"../"开头</span>，则表示相对于它的父模块的父目录中找。</li>
+                    <li>如果模块标识不以点号或斜扛开始，则有以下三种情况
+                        <br/>
+                        <ol>
+                            <li>如果此模块标识在
+                                <span class="primary">$.config.alias</span>存在对应值，换言之某一模块定义了一个别名，则用此模块的具体路径加载文件。</li>
+                            <li>如果此模块标识
+                                <span class="primary">以http://、https://、file:/// 等协议开头</span>的绝对路径，直接用它加载文件。</li>
+                            <li>否则我们将在引入框架种子模块（mass.js）的目录下寻找是否有同名JS文件，然后指向它。</li>
+                        </ol>
+                    </li>
+                    <li>对于JS模块，它可以省略后缀名，即“.js”可有可无；但对于CSS文件则不能省略。</li>
+                    <li>框架种子模块的目录保存于
+                        <span class="primary">$.config.base</span>属性中。</li>
+                    <li>ready是系统占位符，用于表示DOM树是否加载完毕，不会进行路径转换。</li>
+                    <li>在种子模块内部已经默认提供了
+                        <strong>所有核心模块的别名</strong>，以$开头加模块名，如$lang，$event。</li>
+                </ol>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>加载单个模块。</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+// 由于lang.js与mass.js是位于同一目录下，可以省略./
+$.require("lang", function() {
+    alert($.String.toUpperCase("aa"))
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>加载多个模块。需要注意的是，涉及DOM操作时必须要待到DOM树建完才能进入，因此我们在这里指定了一个标识，叫ready， 它并不一个模块，用户自定义模块，也不要起名叫ready。</p>
+                <pre
+                class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,attr", function() {
+    alert($.fn.attr + ""); //这两个方法都循环生成出来,源码上看不出区别
+    alert($.fn.prop + "");
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>加载多个模块，使用字符串数组形式的依赖列表。</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require(["ready", "node", "css"], function() {
+    $("#js_require_ex3").toggle();
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="js_require_ex3" style="display:none;width:300px;height:40px;background:purple;">这是隐藏的，现在把它显示出来</div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>加载远程模块。</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("http://files.cnblogs.com/rubylouvre/random.js,ready,node,css", function(random) {
+    $("#js_require_ex4").css("bgc", random.color()); //每点一次随机变换颜色
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="js_require_ex4" style="width:300px;height:40px;background:white"></div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

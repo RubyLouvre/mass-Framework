@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.log</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.log(str, showInPage?, level? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于调试，默认是打印到window.console上，但对于不支持window.console的浏览器（如IE6），我们可以添加showInPage=true强制在页面上显示。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>str</dt>
+                <dd>必需。要打印的内容。</dd>
+                <dt>showInPage</dt>
+                <dd>可选。Boolean。强逼打印到页面上，默认false。</dd>
+                <dt>level</dt>
+                <dd>可选。Number。从0到9的整数。用于决定是否打印此日志。如果 level
+                    <=当 前的$.config.level值则把它显示出来。 有效地设置level值，可以大大减少打印到控制台的日志数量。比如level为3或更少的值，则表示错误或更致命的异常。
+                    </dd>
+            </dl>
+            <p>level各代表的含义</p>
+            <ul>
+                <li>0 EMERGENCY 致命错误,框架崩溃</li>
+                <li>1 ALERT 需要立即采取措施进行修复</li>
+                <li>2 CRITICAL 危急错误</li>
+                <li>3 ERROR 异常</li>
+                <li>4 WARNING 警告</li>
+                <li>5 NOTICE 通知用户已经进行到方法</li>
+                <li>6 INFO 更一般化的通知</li>
+                <li>7 DEBUG 调试消息</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.log([] + {}, true);
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

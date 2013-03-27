@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.noop</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+         
+            <h3>$.noop</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>一个空函数，用于清除事件句柄或始化一个方法或复写一个方法，如早期的核心模块就有两处使用到它：</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+function fireReady() {
+    map["@ready"].state = 2;
+    mass._resolveCallbacks();
+    readylist.complete = function(fn) {
+        mass.type(fn, "Function") && fn()
+    }
+    readylist.fire();
+    fireReady = mass.noop;
+};
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+function deferred() { //一个简单的异步列队
+    var list = [],
+        self = function(fn) {
+            fn && fn.call && list.push(fn);
+            return self;
+        }
+    self.method = "shift";
+    self.fire = function(fn) {
+        while (fn = list[self.method]()) {
+            fn();
+        }
+        return list.length ? self : self.complete();
+    }
+    self.complete = mass.noop;
+    return self;
+}
+</pre>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

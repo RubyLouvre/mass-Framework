@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.type</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.type(obj, Type? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于判定类型或取得类型。如果只有一个参数，则返回其类型（大写开头），如果这个对象是元素节点，则返回其nodeName。 如果第二个参数Type存在，则判定目标的类型与给定类型Type是否一致，返回true或false。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var check = ["string",
+1, !1,
+NaN, /test/i,
+$.noop,
+null, {}, [1, 2, 3],
+new Date,
+window,
+document,
+document.documentElement,
+document.body,
+document.childNodes,
+document.getElementsByTagName("*")]
+var table = ["&lt;table style='background:#fff;color:#000;width:90%' border=1&gt;"];
+for (var i = 0, n = check.length; i < n; i++) {
+    var el = check[i];
+    table.push("&lt;tr&gt;&lt;td&gt;", String(el), "&lt;/td&gt;&lt;td&gt;", $.type(el), "&lt;/td&gt;&lt;/tr&gt;")
+}
+table.push("&lt;/table&gt;");
+document.getElementById("output").innerHTML = table.join("");
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="output"></div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>利用$.type判定对象是否为window</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var test1 = {};
+test1.window = test1;
+test1.document = document;
+$.log($.type(test1, "Window"), true); //false
+
+var test2 = {};
+test2.window = window;
+test2.document = document;
+$.log($.type(test2, "Window"), true); //false
+
+$.log($.type(window, "Window"), true); //true
+var iframe = document.createElement("iframe");
+document.body.appendChild(iframe);
+var iwin = iframe.contentWindow || iframe.contentDocument.parentWindow;
+$.log($.type(iwin, "Window"), true); //true
+document.body.removeChild(iframe);
+
+var wg = {
+    document: {}
+}, wgdoc = wg.document;
+wg.window = wg;
+wgdoc.createElement = function() {
+    return wg;
+};
+wgdoc.getElementsByTagName = function() {
+    return [wg];
+};
+wgdoc.parentWindow = wg;
+wg.insertBefore = function() {};
+wg.firstChild = wg.firstChild;
+wg.removeChild = function() {};
+$.log($.type(wg, "Window"), true); //false
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

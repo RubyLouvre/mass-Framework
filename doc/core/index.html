@@ -1,11 +1,106 @@
-
 <!DOCTYPE html>
 <html>
+
     <head>
-        <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>种子模块</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+
     </head>
+
     <body>
-        <div>这是种子模块，也叫模块加载模块，提供AMD式的加载器</div>
+        <article>
+            <h3>模块加载模块</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>mass Framework的
+                <span class="stress">最核心</span>的种子模块，提供构筑框架的最基本工具， 包括模块加载系统，mix机制， 数组化，类型判定，别名机制，调试机制，domReady......</p>
+            <p>mass的核心模块的正则非常多，仅次于选择器模块</p>
+            <h3>mass的加载状态:</h3>
+            <p>state值不存在，undefined，说明没有开始加载，为1时，说明开始加载了，并会接着把加载用的script节点插入DOM时， 为2时，说明其要依赖的模块都加载好了，执行执行回调函数，如果加载失败，状态永远为1，但会抛异常</p>
+            <h3>mass模块的依赖图</h3>
+            <div>
+                <script>
+                    document.write('<img src="' + $$path + '/doc/images/core/mass.jpg">')
+                </script>
+            </div>
+            <p>主要API介绍</p>
+            <table class="table-dark">
+                <thead>
+                    <tr>
+                        <th>API</th>
+                        <th>解说</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>require</td>
+                        <td>请求一个或N个模块，当它们都加载本地时，执行回调函数（第二个参数），如果有一个没加载回来， 执行第三个参数（错误回调，可选）</td>
+                    </tr>
+                    <tr>
+                        <td>define</td>
+                        <td>定义一个模块，它有三个参数，第一个为模块名，第二个是依赖列表（可选），第三个是模块本身（为一个函数）</td>
+                    </tr>
+                    <tr>
+                        <td>mix</td>
+                        <td>将一个或多个对象合并到第一个参数（它也必须是对象）中， 如果只有一个参数，则合并到mix的调用者上，如果最后一个参数是布尔，则用于判定是否覆盖已有属性</td>
+                    </tr>
+                    <tr>
+                        <td>slice</td>
+                        <td>将类数组对象转换成真正的数组，并进行切片操作(如果第二第三参数存在的情况下)</td>
+                    </tr>
+                    <tr>
+                        <td>type</td>
+                        <td>用于取得数据的类型（一个参数的情况下）或判定数据的类型（两个参数的情况下）</td>
+                    </tr>
+                    <tr>
+                        <td>log</td>
+                        <td>打印调试信息到控制台(1个参数的情况)或页面底部(第二参数为true或1的情况下)</td>
+                    </tr>
+                    <tr>
+                        <td>oneObject</td>
+                        <td>创建一个对象，其键值都为1(如果没有指定)或第二个参数，用于用于高速化判定</td>
+                    </tr>
+                    <tr>
+                        <td>bind</td>
+                        <td>简单的事件绑定</td>
+                    </tr>
+                    <tr>
+                        <td>unbind</td>
+                        <td>简单的事件卸载</td>
+                    </tr>
+                    <tr>
+                        <td>noop</td>
+                        <td>一个空函数</td>
+                    </tr>
+                    <tr>
+                        <td>html</td>
+                        <td>返回HTML节点</td>
+                    </tr>
+                    <tr>
+                        <td>head</td>
+                        <td>返回HEAD节点</td>
+                    </tr>
+                    <tr>
+                        <td>rword</td>
+                        <td>一个有用的正则，将字符串以空白或“,”切割成一个个单词</td>
+                    </tr>
+                    <tr>
+                        <td>mass</td>
+                        <td>用于储存框架当前的版本号</td>
+                    </tr>
+                    <tr>
+                        <td>exports</td>
+                        <td>将内部的对象释放到全局作用域下</td>
+                    </tr>
+                </tbody>
+            </table>
+        </article>
     </body>
+
 </html>

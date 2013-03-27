@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.exports</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.exports( name )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>别名机制。像EXT那样多文件框架不能让别人占用EXT这个命名空间的，那mass Framework可以让渡$这个最基本的命名空间。其关键在于它的模块的定义方式。每个JS文件里面都是一个
+                <a
+                href="http://benalman.com/news/2010/11/immediately-invoked-function-expression/">IIFE</a>， 这些模块依赖的是document.URL.replace(/(\W|(#.+))/g,'')这个隐藏命名空间，而不是"$"这个够短的命名空间。如果你与想jQuery混用，但又怕覆盖$，
+                    我们可以使用$.exports方法进行重新命名。 exports顾名思义，就是把新名字输出到全局作用域下，它也起到与jQuery的noConflict一样的作用，防止与其他框架相冲突。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>name</dt>
+                <dd>必需。新的短命名空间。我们可以通过
+                    <span class="info">$.config.nick</span>访问到当前的短命名空间。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+(function() {
+    $.exports("mass");
+    var $ = "取消";
+    mass.require("ready,support", function(dom, support, spec) {
+        var ret = mass.dump(support); //序列化
+        mass.log(dom, true);
+        mass.log($, true);
+        mass.log(ret, true);
+        mass.log("执行最后的回调函数", true)
+    });
+})()
+</pre>
+            </fieldset>
+            <p>
+                <span class="note">小贴士</span>： mass Framework还提供了另一种更有效的机制防止命名空间冲突, 你直接在引用框架的script标签中定义一个叫nick属性,
+                然后把你喜欢的命名空间赋给它就行了,如:</p>
+            <div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+        &ltscript nick="Baidu" src="path-to-mass/mass.js"&gt;&lt;/script&t;
+    
+                </pre>
+            </div>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.oneObject</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.oneObject(arr,[ val ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>生成键值统一的对象，用于高速化判定。通常情况下，hash判定是优于switch判定与else if判定。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>arr</dt>
+                <dd>必需。Array|String。如果是字符串，请用","或空格分开。</dd>
+                <dt>val</dt>
+                <dd>可选。默认是1。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>Object。其所有值都相同。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>在event模块中，我们需要通过click与keypress事件来模拟submit事件的冒泡。当用户在submit或image控件上点击时，
+                    会触发表单的submit事件；当text,password,textare这些控件获得焦点，并且在键盘上回车时（回车键的键码有两个13,108），
+                    也能触发form的submit事件。我们就根据这些默认行为成功模拟submit事件。但分明这里的分支太多了，要写许多else if, 如果善用oneObject方法，我们既可以节省代码也能提向性能。</p>
+                <pre
+                class="brush:javascript;gutter:false;toolbar:false">
+var submitWhich = $.oneObject("13,108");
+var submitInput = $.oneObject("submit,image");
+var submitType = $.oneObject("text,password,textarea");
+$.event.special.submit = {
+    setup: delegate(function(src) {
+        system.bind.call(src, "click._submit keypress._submit", function(e) {
+            var el = e.target,
+                type = el.type;
+            if (el.form && (submitInput[type] || submitWhich[e.which] && submitType[type])) {
+                e.type = "submit";
+                system.handle.call(src, e);
+            }
+        });
+    }),
+    teardown: delegate(function(src) {
+        system.unbind.call(src, "._submit");
+    })
+}
+</pre>
+                    <p>例2，生成一个值全部为false的对象。</p>
+                    <div>
+                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var ret = $.oneObject([1, 2, 3], false)
+    ret = $.dump(ret); //序列化
+    $.log(ret, true); //打印在页面底部
+});
+</pre>
+                        <button class="doc_btn" type="button">点我，执行代码</button>
+                    </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.define</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.define( id?, deps?, factory )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于定义一个模块。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>id</dt>
+                <dd>可选。String。模块ID。它最终会转换一个URL，放于
+                    <span class="info">$.modules</span>中。</dd>
+                <dt>deps</dt>
+                <dd>可选。String|Array。依赖列表。</dd>
+                <dt>factory</dt>
+                <dd>必需。Function|Object。模块工厂。它的参数列参为其依赖模块所有返回的值，如果某个模块没有返回值，则对应位置为undefined。详见下面教程。</dd>
+            </dl>
+            <p>每个模块的定义如下(请确保模块ID与文件名要一致，名字不能为"ready"，那是一个标识符，表示最后的回调函数要延迟到domReady之外才执行。</p>
+            <fieldset>
+                <legend>教程1</legend>
+                <p>然后建立一个HTML页面，index.html,内容为</p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+		&lt;script&gt;
+           $.log("测试是否加载成功")
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&lt;/h2&gt;
+
+    &lt;/body&gt;
+&lt;/html&gt;
+
+    
+</pre>
+                <p>然后你再用IE，FF或chrome打开，就会看到弹出三个alert了。</p>
+                <p>这里稍微说一下怎么调用模块吧。require有两个参数，第一个是字符串，表示要调用的模块，第二个是回调函数。比如我要调用aaa.js文件，而aaa.js与mass.js是位于同一目录下，那么这样调用。</p>
+                <pre
+                class="brush:js;gutter:false;toolbar:false">
+$.require("./aaa", function() {
+
+});
+</pre>
+                    <p>当然你也可以，".js"后缀不是必需的。</p>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+$.require("./aaa.js", function() {
+
+});
+</pre>
+                    <p>
+                        <strong>"./"</strong>表示在当前目录查找。</p>
+                    <p>如果我要依赖两个模块，aaa.js, bbb.js，并且它们都与mass.js在同一目录下吧。</p>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+$.require("./aaa,./bbb", function(a, b) {
+    alert(a + b) //3
+});
+</pre>
+                    <p>aaa.js,bbb.js的内容很简单</p>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+//aaa.js
+define("aaa", function() {
+    return 1
+});
+</pre>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+//bbb.js
+define("bbb", function() {
+    return 1
+});
+</pre>
+                    <p>于是页面改成这样：</p>
+                    <pre class="brush:xml;gutter:false;toolbar:false">
+
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+		&lt;script&gt;
+           $.require("./aaa,./bbb", function(a,b){
+		      alert(a+b)
+		   })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&lt;/h2&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                    <div>
+                        <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_ccc.jpg"
+                        />
+                    </div>
+                    <p>好了，我们再看一下模块间的依赖。每个模块应该自行处理依赖。现在有一个ccc.js，它与mass.js也位于同一目录下，它依赖于上面的aaa.js.</p>
+                    <pre
+                    class="brush:js;gutter:false;toolbar:false">
+//ccc.js
+define("ccc", ["./aaa"], function(a) { // ./表示aaa与ccc是同一目录
+    return a + 10
+});
+</pre>
+                        <p>那么我们在页面调用ccc模块时,就不用于是会aaa.js,它自行会加载aaa模块的.</p>
+                        <pre class="brush:xml;gutter:false;toolbar:false">
+
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+	&lt;script&gt;
+           $.require("./ccc", function(c){
+	     alert(c)
+           })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&lt;/h2&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                        <div>
+                            <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_deps.jpg">
+                        </div>
+                        <p>好了，我们再看一下引用其他目录的js文件是怎么用的。在mass.js的目录下建立一个ddd文件夹，然后里面再建立一个ddd.js文件，ddd模块依赖于ccc模块。</p>
+                        <pre
+                        class="brush:js;gutter:false;toolbar:false">
+//ddd.js
+define("ddd", ["../ccc"], function(c) { // ../表示在上一级目录中查找，会点编程的人都懂吧。很普通的常识，不需要学太多东西。
+    return c + 100
+});
+</pre>
+                            <p>然后我在页面上这样引用它们。</p>
+                            <pre class="brush:xml;gutter:false;toolbar:false">
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&gt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+	&lt;script&gt;
+           $.require("./ddd/ddd", function(d){//在当前目录中ddd目录找ddd文件
+		      alert(d)
+		   })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&gt;/h2&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                            <div>
+                                <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_ddd.jpg"
+                                />
+                            </div>
+                            <p>我们再来看远程文件的调用，肯定所有资源不是放在同一服务器上。比如我有一个模块是放在
+                                <em>http://files.cnblogs.com/rubylouvre/20120830__amd.js</em>中</p>
+                            <p>里面的内容为</p>
+                            <pre class="brush:js;gutter:false;toolbar:false">
+//20120830_amd.js
+define("remote", function() {
+    return {
+        name: "这是一个远程文件",
+        address: "位于cnblog的服务器上"
+    }
+})
+</pre>
+                            <p>然后调用时就直接输入这个URL</p>
+                            <pre class="brush:xml;gutter:false;toolbar:false">
+
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+		&lt;script&gt;
+           $.require("http://files.cnblogs.com/rubylouvre/20120830__amd.js", function(obj){
+		      alert(obj.address)
+		   })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&lt;/h2&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                            <div>
+                                <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_remote.jpg"
+                                />
+                            </div>
+            </fieldset>
+            <br/>
+            <fieldset>
+                <legend>教程2</legend>
+                <p>上一节，我们聊到相对于当前目录用“./”，相对于父目录用“../”，相对于父父目录用“http://www.cnblogs.com/”，如果是远程文件直接用URL。其实模块标识还有一种是相对于根目录，这特指是mass.js所在的目录。当然你可以通过配置手段修改根目录，但不建议这样干。比如aaa.js与mass.js是会于同一目录,用么沿着第一节的例子:</p>
+                <pre
+                class="brush:xml;gutter:false;toolbar:false">
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+        &lt;script&gt;
+       //相当于$.require("./aaa", fn),只有模块与mass.js是位于同一模块才能这样干
+           $.require("aaa", function(a,b){
+		      alert(a+b)
+		   })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&lt;/h2&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                    <p>
+                        <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_root.jpg"
+                        />
+                    </p>
+                    <h3>别名机制</h3>
+                    <p>比如一个项目,a页面引用N个JS文件,b页面要引用N个js文件,那么当我们用$.require调用它们可能很麻烦,不断地通过"./","../"来定位到目标JS文件中。这时我们可能用一个专门的JS文件对这些模块进行别名，方便引用。</p>
+                    <p>比如我们在第一节提到aaa.js, bbb.js, ccc.js, ddd.js，我们在一个独立的JS文件modules.js中定义它们的别名.</p>
+                    <pre
+                    class="brush:xml;gutter:false;toolbar:false">
+
+//$.config.base 为mass.js的目录
+$.config({
+  alias:{
+     $aaa: $.config.base + "aaa.js",
+     $bbb: $.config.base + "bbb.js",
+     $ccc: $.config.base + "ccc.js",
+     $ddd: $.config.base + "ddd/ddd.js"
+   }
+})
+    
+</pre>
+                        <p>然后在页面上这样引用ddd.js模块</p>
+                        <pre class="brush:xml;gutter:false;toolbar:false">
+
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+		&lt;script src="modules.js"&gt;
+
+        &lt;/script&gt;
+        &lt;script&gt;
+       //相当于$.require("./aaa", fn),只有模块与mass.js是位于同一模块才能这样干
+           $.require("$ddd", function(d){
+              alert(d)
+           })
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h2&gt;欢迎加入mass Framework团队！&lt;/h2&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                        <p>相对应的,这些JS模块也可以改为</p>
+                        <pre class="brush:js;gutter:false;toolbar:false">
+//aaa.js 没有依赖不用改
+define("aaa", function() {
+    return 1
+})
+
+//bbb.js  没有依赖不用改
+define("bbb", function() {
+    return 2
+});
+//ccc.js
+define("ccc", ["$aaa"], function(a) {
+    return 10 + a
+})
+
+//ddd/ddd.js
+define("ddd", ["$ddd"], function(c) {
+    return c + 100
+});
+</pre>
+                        <p>那么它就会正确弹出111!</p>
+                        <p>
+                            <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_ddd.jpg"
+                            />
+                        </p>
+                        <p>万一有一天,我们把ddd.js移到其他目录,如变成http://xdsfsd/sadfs/ddd.js,那么我们只需要改modules目录就行了!不用改$.require,也不用改ddd的依赖列表!</p>
+                        <pre
+                        class="brush:js;gutter:false;toolbar:false">
+$.config({
+    alias: {
+        $aaa: $.config.base + "aaa.js",
+        $bbb: $.config.base + "bbb.js",
+        $ccc: $.config.base + "ccc.js",
+        $ddd: "http://xdsfsd/sadfs/ddd.js"
+    }
+})
+</pre>
+                            <p>好了,我们再来看看jQuery与mass.js的使用。jQuery虽说是加了几行支持AMD，其实非常鸡肋！不过jQuery的多库共存做得很不错！我们只需要在外面包一层就能用了。到
+                                <a
+                                href="http://jquery.com/">jQuery官网</a>下载jQuery源码，无论是压缩版还是注释版。新建一个jquery.js文件，与mass.js同一目录，内容如下：</p>
+                            <pre
+                            class="brush:js;gutter:false;toolbar:false">
+define("jquery", function() {
+    //*********jquery源码*********
+    return jQuery.noConflict(true);
+})
+</pre>
+                                <pre class="brush:xml;gutter:false;toolbar:false">
+
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;AMD&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="mass.js" &gt;
+
+        &lt;/script&gt;
+        &lt;script&gt;
+            $.require("jquery", function(jQuery){
+                $.log(jQuery.fn.jquery);//这是jquery
+                $.log($.mass); //这是mass.js
+            })
+            setTimeout(function(){
+                $.log($)//这也是mass.js，jquery没有污染都外边的
+            },1000)
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                                <p>我们打开firebug可以看到以下日志：</p>
+                                <p>
+                                    <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_log.jpg"
+                                    />
+                                </p>
+                                <p>jquery插件的使用，也是外包一层</p>
+                                <pre class="brush:js;gutter:false;toolbar:false">
+(function($)
+$.fn.overlabel = function() {
+    this.each(function(index) {
+        var label = $(this);
+        var field;
+        var id = this.htmlFor || label.attr('for');
+        if (id && (field = document.getElementById(id))) {
+            var control = $(field);
+            label.addClass("overlabel-apply");
+            if (field.value !== '') {
+                label.css("text-indent", "-1000px");
+            }
+            control.focus(function() {
+                label.css("text-indent", "-1000px");
+            }).blur(function() {
+                if (this.value === '') {
+                    label.css("text-indent", "0px");
+                }
+            });
+            label.click(function() {
+                var label = $(this);
+                var field;
+                var id = this.htmlFor || label.attr('for');
+                if (id && (field = document.getElementById(id))) {
+                    field.focus();
+                }
+            });
+        }
+    });
+};
+})(jQuery)
+</pre>
+                                <p>改造为</p>
+                                <pre class="brush:js;gutter:false;toolbar:false">
+define("jquery_overlabel", ["./jquery"], function(jQuery) {
+    (function($) {
+        //************
+    })(jQuery);
+})
+</pre>
+            </fieldset>
+            <br/>
+            <fieldset>
+                <legend>教程3</legend>
+                <p>本节将介绍如何支持“
+                    <a href="http://blog.millermedeiros.com/amd-is-better-for-the-web-than-commonjs-modules/">Simplified CommonJS wrapper</a>”模块，node.js的
+                    <a href="https://github.com/joyent/node/blob/master/lib/module.js">SJS模块</a>实质在内部包一层构成一个SCW模块，而seajs提倡的 CMD 也源自于它。</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+//http://blog.millermedeiros.com/amd-is-better-for-the-web-than-commonjs-modules/
+//一个遵循SCW规范的模块，SCW是CommonJS关于模块定义的一个子规范
+define(function(require, exports, module) {
+    var myLib = require('myPackage/myLib');
+
+    function foo() {
+        console.log('foo');
+        myLib.doSomething();
+    }
+    //expose module API
+    exports.foo = foo;
+});
+</pre>
+                <p>我们也可以顺带看一下老外正在搞到的es6中有关模块的部分：</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+//http://calculist.org/blog/2012/03/29/synchronous-module-loading-in-es6/
+
+import $ from "jquery.js";
+$('myelement').style({
+    'background-color': 'yellow'
+})
+
+
+// http://wiki.ecmascript.org/doku.php?id=harmony:private_name_objects
+import Name from "@name";
+var key = new Name();...
+Proxy.create({...
+    get: function(receiver, name) {
+        if (name === key.public)...
+        else ...
+    },
+    ...
+});
+</pre>
+                <p>它们通过引入新的关键字方式来处理，这不是个好主意，估计以后像访问器一下，加到Object或某个对象上成为一个方法进行调用。</p>
+                <p>如果浏览器真的支持它们，我们可以通过特征侦测，然后整到我的加载器内部就行了，保证全平台前后兼容！</p>
+                <p>好了，我们回归正题，怎么通过mass.js实现SCW规范的模块加载，之前两节是前端社区提供的AMD规范，而SCW规范则是兼容node.js的重要手段。</p>
+                <p>建立一个index.html，内容如下：</p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;SAW规范的模块加载例子 by 司徒正美&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;style&gt;
+            html,body{
+                height:100%;
+            }
+        &lt;/style&gt;
+        &lt;script src="mass.js"&gt;
+
+        &lt;/script&gt;
+        &lt;script&gt;
+            //加载当前目录下的more目录的aaa.js
+            $.require("./more/aaa", function(a){
+                $.log(a)
+            })
+
+        &lt;/script&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;SAW规范的模块加载例子 by 司徒正美&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+    
+</pre>
+                <p>mass.js应该与此html文件在同一目录下，然后在此目录下建more目录，然后再建aaa.js文件，内容如下：</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+define(function(require, exports, module) {
+    var b = require("./bbb").bbb;
+    $.log(b);
+    $.log(exports);
+    $.log(module)
+    return "aaa"
+})
+</pre>
+                <p>我们可以看到依赖模块的加载放到模块工厂内部了，这意味着在前端如何要实现这语法只能提前把这个函数的源码全部分析一遍，用正则把require语句抽取出来，也意味着它无法做到按需加载，所有if分支都无法阻挡正则的解析。</p>
+                <p>再建一个bbb.js，它与aaa.js是在同一目录下</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+define(function() {
+    var c = require("./more/ccc").ccc;
+    $.log("已加载bbb模块")
+    $.log(c)
+    exports.bbb = "bbb"
+})
+</pre>
+                <p>我们会看到它bbb.js依赖于ccc.js，我们要记住一点，依赖模块总是根据父模块的位置定位的。谁是引入者（或被依赖者），谁就是父模块。相反，依赖模块是被引入者的子模块，我们可以在module中得到它们的关系，里面有parent与children属性。bbb.js已经在more目录下了，ccc那个路径意味着它还要在此more目录下再建一个more目录，里面有个ccc.js文件。</p>
+                <pre
+                class="brush:js;gutter:false;toolbar:false">
+define(function() {
+    $.log("已加载ccc模块")
+    exports.ccc = "ccc"
+})
+</pre>
+                    <p>好了，我们用firefox打开index.html，在firebug看到以下输出：</p>
+                    <div>
+                        <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_7.jpg"
+                        />
+                    </div>
+                    <p>我们再在firebug中展开那个Object{xxxxxxx}什么的，可以看到module对象里面的内容：</p>
+                    <div>
+                        <img src="http://images.cnblogs.com/cnblogs_com/rubylouvre/205314/o_amd_8.jpg"
+                        />
+                    </div>
+                    <p>你们可以把module, exports, require为模块工厂内部的变量就行了，参数里面不写它们也完全OK，你总是能引用到它们的！</p>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

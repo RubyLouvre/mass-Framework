@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.unbind</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.unbind(obj,type,fn, phase? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>与$.bind配套使用，用于卸载原生事件发送器上的某个事件回调，注意它没有返回值，因为没有意义。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>obj</dt>
+                <dd>必需。原生的事件发送器，如window,document与元素节点。</dd>
+                <dt>type</dt>
+                <dd>必需。String。事件类型，注意不要使用onXXX的格式。</dd>
+                <dt>fn</dt>
+                <dd>必需。Function。</dd>
+                <dt>phase</dt>
+                <dd>可选。Boolean。是否使用捕获，默认false，与不支持捕获的IE678保持一致。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var i = 0;
+var fn = $.bind(document, "click", function() {
+    i++;
+    $.log("触发了第" + i + "点击事件", true);
+    if (i === 4) {
+        $.unbind(document, "click", fn);
+        $.log("已移除点击事件", true);
+    }
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>
