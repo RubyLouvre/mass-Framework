@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.String.escapeHTML</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.String.escapeHTML(str)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>字符串过滤是在许多Web应用开发中需要考虑的问题。比如用户输入一个左尖括号(&lt;)， 在输出HTML代码对其进行显示的话，应该用”&amp;lt;”来表示。要不放便某一标签内，它就会被解析成一个新的元素了。比如代码高亮时，
+                我们就一定要使用此方法。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function($$) {
+    var s = "&lt;div aa='\bb'&gt;dd";
+    $.log($$(s).escapeHTML(), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <p>mass Framework先后采用的escapeHTML函数版本</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//v1
+var escapeHTML = function(s) {
+    var el = document.createElement('pre'); //这里要用pre，用div有时会丢失换行，例如：'a\r\n\r\nb'
+    var text = document.createTextNode(s);
+    el.appendChild(text);
+    return el.innerHTML;
+}
+//v2
+escapeHTML: function(target) {
+        return target.replace(/&(?!\w+;|#\d+;|#x[\da-f]+;)/gi, '&amp;').
+        replace(/</g, '&lt;').
+        replace(/>/g, '&gt;')
+        replace(/"/g, '&quot;').
+        replace(/'/g, '&#x27;').
+        replace(/\//g, '&#x2F;');
+    },
+    //v3
+    escapeHTML: function(str) {
+        return str.replace(/&/g, '&amp;').replace(/&lt;/g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    },
+</pre>
+        </article>
+    </body>
+
+</html>

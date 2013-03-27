@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Number.limit</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Number.limit( n, n1, n2 )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>确保数值n在[n1,n2]闭区间之内，如果超出限界，则置换为离它最近的最大值或最小值。</p>
+            <dl>
+                <dt>n1</dt>
+                <dd>必需。Number。最小值。</dd>
+                <dt>n2</dt>
+                <dd>必需。Number。最大值。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    $.log($.Number.limit(6, 1, 7), true);
+    $.log($.Number.limit(6, - 1, 4), true);
+    $.log($.Number.limit(6, 3, 4), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

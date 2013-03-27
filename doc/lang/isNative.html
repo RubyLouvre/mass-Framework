@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.isNative</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.isNative(host,method)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>判定method是否为host对象的原生方法，用于向前兼容，详细讨论请看
+                <a href="http://www.cnblogs.com/rubylouvre/archive/2011/04/06/2002844.html">这里</a>。</p>
+            <dl>
+                <dt>host</dt>
+                <dd>必需。Object。要检测的对象。</dd>
+                <dt>method</dt>
+                <dd>必需。String。要检测的方法名。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>Boolean</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    $.log($.isNative(window, "alert"), true);
+    window.test = {
+        toString: function() {
+            return '[function]';
+        }
+    };
+    $.log($.isNative(window, 'test'), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

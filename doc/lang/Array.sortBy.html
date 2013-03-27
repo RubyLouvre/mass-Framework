@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.sortBy</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.sortBy( fn, scope? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将数给元素与其索引值传一个迭代器中，用得到的新数组进行排序。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。回调函数，sortBy方法会为它传入两个参数，元素自身与其索引值</dd>
+                <dt>score</dt>
+                <dd>可选。要绑定的作用域。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var test = $.lang(["zero", "one", "two", "three"]);
+    var ret = test.sortBy(function(value) {
+        return value.length;
+    });
+    $.log($.dump(ret), true);
+});
+</pre>
+            </fieldset>
+            <button class="doc_btn" type="button">点我，执行代码</button>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var test = $.lang([
+        [0, 10],
+        [1, 9],
+        [2, 8],
+        [3, 7]
+    ]);
+    var ret = test.sortBy(function(value, index) {
+        return value[1];
+    });
+    $.log($.dump(ret), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

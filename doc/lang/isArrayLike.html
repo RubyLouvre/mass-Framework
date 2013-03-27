@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.isArrayLike</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.isArrayLike</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>限定为Array, Arguments, NodeList与拥有非负整数的length属性的Object对象，视情况添加字符串</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    $.log($.isArrayLike([]), true);
+    $.log($.isArrayLike(arguments), true);
+    $.log($.isArrayLike(document.childNodes), true);
+    $.log($.isArrayLike(document.getElementsByTagName("*")), true);
+    $.log($.isArrayLike({
+        0: 1,
+        1: 2,
+        2: 3,
+        length: 3
+    }), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

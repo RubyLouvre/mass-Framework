@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.String.startsWith</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.String.stripTags( str )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>去掉字符串中的html标签，但这方法有缺陷，如里面有script标签，会把这些不该显示出来的脚本也显示出来了</p>
+            <p>当前的实现：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+stripTags: function(str) {
+    return String(str || "").replace(/<[^>]+>/g, '');
+}
+</pre>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function(_) {
+    var s = "&lt;div&gt;你好&lt;script&gt;alert(1)&lt;\/script&gt;&lt;/div&gt;";
+    $.log(_(s).stripTags(), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

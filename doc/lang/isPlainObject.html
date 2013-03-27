@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.isPlainObject</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.isPlainObject(obj)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>判定是否是一个朴素的javascript对象（Object），不是DOM对象，不是BOM对象，不是自定义类的实例。</p>
+            <p>
+                <span class="stress">源码：</span>
+            </p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+isPlainObject: function(obj) {
+    if (!$.type(obj, "Object")) return false;
+    try { //不存在hasOwnProperty方法的对象肯定是IE的BOM对象或DOM对象
+        for (var key in obj) //只有一个方法是来自其原型立即返回flase
+        if (!String2.hasOwnProperty.call(obj, key)) { //不能用obj.hasOwnProperty自己查自己
+            return false
+        }
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
+</pre>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    $.log($.isPlainObject(new Date), true); //false
+    var fn = function() {};
+    $.log($.isPlainObject(fn), true); //false
+    var plainobj = fn.prototype = {
+        someMethod: function() {},
+        prop: 1
+    };
+    $.log($.isPlainObject(new fn), true); //false
+    var A = function() {}
+    A.prototype = {
+        hasOwnProperty: function() {
+            return true;
+        }
+    }
+    var a = new A;
+    $.log($.isPlainObject(a), true) //false
+    window.test = {
+        toString: function() {
+            return '[function]';
+        }
+    };
+    $.log($.isPlainObject(window.test), true); //true
+    $.log($.isPlainObject(plainobj), true); //true
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

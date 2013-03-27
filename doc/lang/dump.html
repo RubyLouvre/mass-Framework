@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.dump</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.dump( any )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>此方法可以将javascript数据用很漂亮的缩进打印出来。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>any</dt>
+                <dd>必需。任意类型。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>String。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+require("lang,support", function($) {
+    $.log($.dump("XXXX"), true);
+    $.log($.dump($.support), true);
+    var person = {
+        name: "Jim Cowart",
+        getName: function() {
+            alert(1)
+        },
+        location: {
+            city: {
+                name: "Chattanooga",
+                population: 167674
+            },
+            state: {
+                name: "Tennessee",
+                abbreviation: "TN",
+                population: 6403000
+            }
+        },
+        company: "appendTo"
+    };
+    $.log($.dump(person), true);
+
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

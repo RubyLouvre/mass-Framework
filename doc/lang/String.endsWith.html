@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.String.endsWith</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>string.endsWith(str, str1)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>判断字符串是否与str1结尾。</p>
+            <p>
+                <strong>参数：</strong>
+            </p>
+            <ul>
+                <li>
+                    <span class="list">str</span>必需。String。</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    $.log($.String.endsWith("司徒正美司徒正美", "正美"), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

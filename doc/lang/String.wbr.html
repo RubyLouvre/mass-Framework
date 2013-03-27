@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.String.wbr</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.String.wbr( str )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为目标字符串添加wbr软换行</p>
+            <ol>
+                <li>支持html标签、属性以及字符实体&lt;br&gt;。</li>
+                <li>任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。</li>
+                <li>1在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，可以在css中加上 wbr:after { content: "\00200B"
+                    } 解决此问题*/</li>
+            </ol>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    var s = "1111111123432mw3srret435tryrfjkweh, sdfselkrjw jksjfeewiorjkl ,ws.wefewarfkewhswriowahn";
+    $("#js-srring-wbr").html($.String.wbr(s));
+});
+</pre>
+                <p id="js-srring-wbr"></p>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

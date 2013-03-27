@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.unique</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.unique( arr )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对数组进行去重,但不影响原对象。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>arr</dt>
+                <dd>必需。一个类数组对象(包含数组)。</dd>
+            </dl>
+            <p>
+                <span class="stress">各种实现：</span>
+            </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//方法1
+Array.prototype.unique = function() {
+    var ret = [];
+    loop: for (var i = 0, n = this.length; i < n; i++) {
+        for (var x = i + 1; x < n; x++) {
+            if (this[x] === this[i]) continue loop;
+        }
+        ret.push(this[i]);
+    }
+    return ret;
+}
+//方法2
+Array.prototype.unique = function() {
+    var ret = [],
+        ri = 0,
+        array = this.concat().sort();
+    ret[ri] = array[0];
+    for (var j = 1, n = array.length; j < n; j++) {
+        if (ret[ri] !== array[j]) {
+            ret[++ri] = array[j]
+        }
+    }
+    return ret;
+}
+</pre>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var a = [1, 2, 2, "a", "b", "a", {},
+    $.noop, null, void 0, null, 3, 2, void 0, {}];
+    var uniqued = $.Array.unique(a);
+    $.log($.dump(uniqued), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

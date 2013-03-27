@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.String.truncate</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.String.truncate( str, length?, truncation? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将字符串截短为指定的长度（注意：这里的长度包含了后缀部分）， 并添加一个后缀（表示它仅只是一个摘要）。</p>
+            <p>
+                <strong>参数：</strong>
+            </p>
+            <ul>
+                <li>
+                    <span class="list">length</span>可选。Nunber。长度默认为 30。</li>
+                <li>
+                    <span class="list">truncation</span>可选。String。默认后缀为 "..."。</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var a = $.lang("A random sentence whose length exceeds 30 characters.");
+    $.log(a.truncate(), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

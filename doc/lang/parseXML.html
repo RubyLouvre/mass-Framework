@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.parseXML</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.parseXML(code)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将符合XML格式的字符串转换为XML文档。</p>
+            <dl>
+                <dt>code</dt>
+                <dd>必需。String。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var a = '<rss version="2.0"><channel><kkk>RSS Title</kkk></channel></rss>';
+    a = $.parseXML(a);
+    $.log(a.documentElement, true);
+    $.log(a.getElementsByTagName("kkk")[0].firstChild.nodeValue, true)
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.String.unescapeHTML</title>
+        <script type="text/javascript" src="/scripts/mass_merge.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shCore.js"></script>
+        <script type="text/javascript" src="/scripts/doc/common.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushJScript.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushCss.js"></script>
+        <script type="text/javascript" src="/scripts/doc/shBrushXml.js"></script>
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/common.css"
+        />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shCore.css"
+        />
+        <link media="screen" rel="stylesheet" type="text/css" href="/styles/doc/shThemeRDark.css"
+        />
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.String.unescapeHTML( str )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将用escapeHTML方法处理过的字符串，还原为可以document解析为HTML标签的字符串。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+unescapeHTML: function(target) {
+    return target.replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, "&");
+    //处理转义的中文和实体字符
+    return target.replace(/&#([\d]+);/g, function(_0, _1) {
+        return String.fromCharCode(parseInt(_1, 10));
+    });
+},
+</pre>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function($$) {
+    var s = "&lt;h1>&gt;Pride &amp; Prejudice&lt;/h1>&gt;";
+    $.log($$(s).unescapeHTML(), true);
+    var s = "x &gt; 10";
+    $.log($$(s).unescapeHTML(), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

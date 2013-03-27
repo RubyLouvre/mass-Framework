@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Number.nearer</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Number.nearer( num, n1, n2)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>求出距离原数最近的那个数</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>number</dt>
+                <dd>必需。Number。最小值或最大值。</dd>
+                <dt>fn</dt>
+                <dd>必需。Number。最大值或最小值。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var a = $.Number;
+    $.log(a.nearer(6, 1, 7), true);
+    $.log(a.nearer(6, - 1, 4), true);
+    $.log(a.nearer(6, 3, 4), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

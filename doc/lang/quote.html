@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.quote</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.quote(str)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为字符串两边添加上双引号，主要用于JSON或模板等(不能使用JSON.stringify,它会清掉里面的函数)。</p>
+            <dl>
+                <dt>str</dt>
+                <dd>必需。String。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    $.log($.quote("aaa\veee"), true);
+    $.log("aaa\veee", true);
+});
+</pre>
+                <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+            <p>mass Framework先后采用的quote函数版本</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//版本1 只能处理单行
+function quote(s) {
+    (s += '').replace(/\\/g, '\\\\');
+    var use = +(s.match(quote.q[1][0]) === null);
+    return quote.q[0][use] + s.replace(quote.q[1][1 - use], '\\$1') + quote.q[0][use];
+}
+quote.q = [
+    ['"', "'"],
+    [/(')/g, /(")/g]
+];
+//版本2 太长
+var quote = String.quote || (function() {
+    var meta = {
+        '\b': '\\b',
+        '\t': '\\t',
+        '\n': '\\n',
+        '\f': '\\f',
+        '\r': '\\r',
+        '"': '\\"',
+        '\\': '\\\\'
+    },
+    reg = /[\x00-\x1F\'\"\\\u007F-\uFFFF]/g,
+        regFn = function(c) {
+            if (c in meta) {
+                return '\\' + meta[c];
+            }
+            var ord = c.charCodeAt(0);
+            return ord < 0x20 ? '\\x0' + ord.toString(16) : ord < 0x7F ? '\\' + c : ord < 0x100 ? '\\x' + ord.toString(16) : ord < 0x1000 ? '\\u0' + ord.toString(16) : '\\u' + ord.toString(16)
+        };
+    return function(str) {
+        return '"' + (str || "").replace(reg, regFn) + '"';
+    }
+})();
+
+//版本3 太长太散
+var Escapes = {
+    "\\": "\\\\",
+    '"': '\\"',
+    "\b": "\\b",
+    "\f": "\\f",
+    "\n": "\\n",
+    "\r": "\\r",
+    "\t": "\\t"
+};
+var toPaddedString = function(width, value) {
+    return ("000000" + (value || 0)).slice(-width);
+};
+var quote = String.quote || function(value) {
+        var result = '"',
+            index = 0,
+            symbol;
+        for (; symbol = value.charAt(index); index++) {
+            result += '\\"\b\f\n\r\t'.indexOf(symbol) > -1 ? Escapes[symbol] : symbol < " " ? "\\u00" + toPaddedString(2, symbol.charCodeAt(0).toString(16)) : symbol;
+        }
+        return result + '"';
+    }
+    //版本4 现在采用的,由abcd提供
+var quote = String.quote || function(s) {
+        return '"' + s.replace(/[\x00-\x1f\x22\\\u007f-\uffff]/g, function(a) {
+            switch (a) {
+            case '"':
+                return '\\"';
+            case '\\':
+                return '\\\\';
+            case '\b':
+                return '\\b';
+            case '\f':
+                return '\\f';
+            case '\n':
+                return '\\n';
+            case '\r':
+                return '\\r';
+            case '\t':
+                return '\\t';
+            }
+            a = a.charCodeAt(0).toString(16);
+            while (a.length < 4) a = '0' + a;
+            return '\\u' + a;
+        }) + '"';
+    }
+</pre>
+        </article>
+    </body>
+
+</html>

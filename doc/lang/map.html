@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.map</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.map(obj, callback)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将类数组与普通对象的元素或键值放进回调中，收集返回的结果。</p>
+            <p>
+                <span class="stress">回调函数的传参情况：</span>
+            </p>
+            <ol>
+                <li>如果obj为类数组，那么依次为数组元素，当前索引值与类数组本身。</li>
+                <li>如果obj为对象，那么依次为值，键名与对象本身。</li>
+            </ol>
+            <p>回调函数中的this始终指向第三个参数。</p>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>一个新数组。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var ret = $.map({
+        aa: "人生",
+        bb: "工作",
+        cc: "评议",
+        dd: "祈祷"
+    }, function(a, b) {
+        return a
+    });
+    $.log($.dump(ret), true)
+
+    ret = $.map(["Wii U", " PS Vita", "Xperia"], function(el) {
+        return el + "XXX"
+    });
+    $.log($.dump(ret), true)
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

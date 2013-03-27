@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.shuffle</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.shuffle( arr )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对数组进行洗牌,但不影响原对象。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>arr</dt>
+                <dd>必需。一个类数组对象(包含数组)。</dd>
+            </dl>
+            <p>
+                <span class="stress">各种实现：</span>
+            </p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+//方法1
+Array.prototype.shuffle = function() {
+    var shuff = (this || []).concat(),
+        j, x, i = shuff.length;
+    for (; i > 0; j = parseInt(Math.ran$() * i), x = shuff[--i], shuff[i] = shuff[j], shuff[j] = x) {};
+    return shuff;
+}
+//方法2
+function ran$(a, b) {
+    return Math.ran$() > .5 ? -1 : 1;
+}
+Array.prototype.shuffle = function() {
+    return this.concat().sort(random);
+}
+//方法3
+Array.prototype.shuffle = function() {
+    var result = [],
+        len = this.length;
+    while (len--) {
+        result[result.length] = this.splice(Math.floor(Math.ran$() * (len + 1)), 1)[0];
+    }
+    return result;
+}
+</pre>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var arr = [3, 5, 6, 1, 20];
+    var shuffled = $.Array.shuffle(arr);
+    $.log($.dump(shuffled), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

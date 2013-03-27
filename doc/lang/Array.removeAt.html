@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.removeAt</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.removeAt( arr, index )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>
+                <span class="note">破坏性方法，修改原对象。</span>移除指定位置上的元素。</p>
+            <dl>
+                <dt>index</dt>
+                <dd>必须。Number。要移除元素的索引值。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>返回布尔值表示是否移除成功与否。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var test = [3, 5, 6, 1, 20];
+    var a = $.lang(test);
+    $.log(a.removeAt(2), true);
+    $.log($.dump(test), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

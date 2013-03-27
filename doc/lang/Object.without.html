@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Object.without</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Object.without( obj,arr )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>返回当前对象的一个子集，它不包含arr所指定的键名。</p>
+            <dl>
+                <dt>arr</dt>
+                <dd>必需。要去掉的键名的集合。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var obj = {
+        a: "one",
+        b: "two",
+        c: "three"
+    };
+    var neo = $.Object.without(obj, ["a", "b"]);
+    $.log($.dump(neo), true);
+});
+</pre>
+                <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

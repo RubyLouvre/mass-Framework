@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.format</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.format</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>通过其他参数来替换目标字符串的占位符，生成真正有用的字符串，类似其他类库的substitute方法</p>
+            <p>
+                <span class="stress">传参方式：</span>
+            </p>
+            <p>1.传入N个参数，分别对应第一个参数中以数字命名的占位符</p>
+            <p>2.只有两个参数，并且第二个参数是对象，其键名为第一个参数的占位符的名字</p>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>String。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var a = $.format("Result is #{0},#{1}", 22, 33);
+    $.log(a, true); //Result is 22,33
+    var b = $.format("#{aa}之晨是#{bb}，#{aa}之午是#{cc}，#{aa}之夜是#{dd}。", {
+        aa: "人生",
+        bb: "工作",
+        cc: "评议",
+        dd: "祈祷"
+    });
+    $.log(b, true); //人生之晨是工作，人生之午是评议，人生之夜是祈祷。
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

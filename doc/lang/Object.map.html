@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Object.map</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.Object.map( obj, callback, scope? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得对象的键值对，依次放进回调中执行,并收集其结果，以数组形式返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>callback</dt>
+                <dd>必需。回调函数，它的参数依次是对象的某个键对应的值，键名</dd>
+                <dt>scope</dt>
+                <dd>可选。回调函数里面的this值。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var obj = {
+        a: 0,
+        b: 1,
+        c: 2
+    };
+    var arr = $.Object.map(obj, function(v, k) {
+        return v + 10
+    });
+    $.log($.dump(arr), true);
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

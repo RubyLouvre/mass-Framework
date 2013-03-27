@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.range</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.range( start?, stop, step? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于创建一个整数组数。</p>
+            <dl>
+                <dt>start</dt>
+                <dd>可选。Number。没有则默认为0。</dd>
+                <dt>stop</dt>
+                <dd>必需。Number。生成的数组的最后一个值不能大于它。</dd>
+                <dt>step</dt>
+                <dd>可选。Number。每次递增（减）多少。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var a = $.range(10);
+    $.log(a, true) //[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    a = $.range(1, 11)
+    $.log(a, true); //[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    a = $.range(0, 30, 5)
+    $.log(a, true); //[0, 5, 10, 15, 20, 25]
+    a = $.range(0, 10, 3)
+    $.log(a, true);
+    [0, 3, 6, 9]
+    a = $.range(0, - 10, - 1)
+    $.log(a, true); //[0, -1, -2, -3, -4, -5, -6, -7, -8, -9]
+    $.log($.range(0), true) //[]
+    $.log($.range(1, 0), true) //[]
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

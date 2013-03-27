@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.diff</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.diff(arr,arr2)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>返回当前数组与arr2的差集,该数组包括了所有在当前数组但是不在arr2数组中的元素。它拥有一个别名函数叫without。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>arr2</dt>
+                <dd>必需。Array。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var arr1 = [1, 2, 3, 8];
+    var arr2 = [2, 3, 4];
+    var ret = $.Array.diff(arr1, arr2);
+    ret = $.dump(ret); //序列化
+    $.log(ret, true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

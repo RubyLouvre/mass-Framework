@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.pluck</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.pluck( arr, name )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>获取所有元素的同一个属性的值，组成新数组返回。</p>
+            <dl>
+                <dt>name</dt>
+                <dd>必需。String。元素的某一属性名。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var arr = [{
+        name: 'moe',
+        age: 40
+    }, {
+        name: 'larry',
+        age: 50
+    }, {
+        name: 'curly',
+        age: 60
+    }]
+    var ret = a.pluck("name")
+    $.log($.dump(ret), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

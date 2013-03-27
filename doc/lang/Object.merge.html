@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Object.merge</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Object.merge( obj, obj1, obj2?, objN? )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将所有参数（必须为对象）全部赋给当前对象。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>obj1</dt>
+                <dd>必需。要合并的对象1。</dd>
+                <dt>obj2</dt>
+                <dd>可选。要合并的对象2。</dd>
+                <dt>objN</dt>
+                <dd>可选。要合并的对象N。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var obj1 = {
+        a: 0,
+        b: 1
+    };
+    var obj2 = {
+        c: 2,
+        d: 3
+    };
+    var obj3 = {
+        a: 4,
+        d: 5
+    };
+    var merged = $.Object.merge(obj1, obj2, obj3);
+    $.log($.dump(merged), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

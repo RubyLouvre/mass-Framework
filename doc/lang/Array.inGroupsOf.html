@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Array.inGroupsOf</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.Array.inGroupsOf( target, number, fillWith)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将数组划分成N个分组，其中小组有number个数，最后一组可能小于number个数，但如果第三个参数不为undefine时，我们可以拿它来填空最后一组</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("lang", function() {
+    var ret = $.Array.inGroupsOf([1, 2, 3, 4, 5], 3, 7);
+    ret = $.dump(ret); //序列化
+    $.log(ret, true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <p>各种实现版本</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+var inGroupsOf = function(target, number, fillWith) {
+    var array = $.slice(target);
+    var fill = fillWith !== void 0;
+    var index = -number,
+        slices = [];
+    while ((index += number) < array.length) {
+        var s = array.slice(index, index + number);
+        while (fill && s.length < number)
+        s.push(fillWith);
+        slices.push(s);
+    }
+    return slices;
+};
+var inGroupsOf = function(target, number, fillWith) {
+    var array = $.slice(target),
+        result = [];
+    while ((array.length > number)) {
+        result.push(array.splice(0, number))
+    }
+    if (array.length) {
+        if (fillWith !== void 0) {
+            while ((array.length < number)) {
+                array.push(fillWith)
+            }
+        }
+        result.push(array)
+    }
+    return result;
+}
+//现在用的
+var inGroupsOf = function(target, number, fillWith) {
+    var t = target.length,
+        n = Math.ceil(t / number),
+        fill = fillWith !== void 0,
+        groups = [],
+        i, j, cur
+    for (i = 0; i < n; i++) {
+        groups[i] = [];
+        for (j = 0; j < number; j++) {
+            cur = i * number + j;
+            if (cur >= t) {
+                if (fill) {
+                    groups[i][j] = fillWith;
+                }
+            } else {
+                groups[i][j] = target[cur];
+            }
+        }
+    }
+    return groups;
+}
+</pre>
+        </article>
+    </body>
+
+</html>
