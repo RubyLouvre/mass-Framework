@@ -120,7 +120,8 @@
                 });
             });
             require("doc/scripts/api, event, node, attr, ready", function(api, $) {
-                var currentModule = "core"
+                var currentModule = "core";
+                console.log(api.lang)
                 $(".modules-slider-center div").click(function() {
                     if (this.className === "active") {
                         return;
@@ -156,32 +157,12 @@
                     }
                 })
             });
-            window.onload = function() {
-                var el = document.getElementById("move");
-                var parent = document.getElementById("taxiway")
-                var distance = parent.offsetWidth - el.offsetWidth;//总移动距离
-                var begin = parseFloat(window.getComputedStyle(el, null).left);//开始位置
-                var end = begin + distance;//结束位置
-                var fps = 30;//刷新率
-                var step = distance / fps;//每次移动多少距离
-                var interval = Math.floor(1000 / fps);//每相隔多久才移动一次
-                el.onclick = function() {
-                    var id = setInterval(function() {
-                        if (begin >= end) {
-                            el.style.left = end + "px";
-                            clearInterval(id)
-                        } else {
-                            begin += step;
-                            el.style.left = begin + "px"
-                        }
-                    }, interval)
-                }
-            }
+           
         </script> 
+
 
     </head>
     <body>
-
 
 
         <div class="modules-slider">
@@ -209,7 +190,14 @@
                 </iframe>
             </div>
         </div>
+ 
 
 
+        http://rubylouvre.github.com/doc/fx/transform.rotate.html
+
+
+        http://rubylouvre.github.com/doc/lang/$.parseJS.html
+        http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
+        http://jsfiddle.net/chandlerprall/Wj5yM/
     </body>
 </html>
