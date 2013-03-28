@@ -239,12 +239,12 @@
                         div.innerHTML = str + ""; //确保为字符串
                         DOC.body.appendChild(div);
                     });
-                } else if(window.opera){
+                } else if (window.opera) {
                     opera.postError(str)
-                 }else if (global.console) {
+                } else if (global.console) {
                     console.log(str);
                 }
-                
+
             }
             return str;
         },
@@ -395,13 +395,7 @@
         }
         return [ret, ext];
     }
-
-
     function getCurrentScript() {
-        //取得正在解析的script节点
-        if (DOC.currentScript) { //firefox 4+
-            return DOC.currentScript.src;
-        }
         // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
         var stack;
         try {
@@ -425,8 +419,11 @@
              *  at Global code (http://113.93.50.63/data.js:4:1)
              */
             stack = stack.split(/[@ ]/g).pop(); //取得最后一行,最后一个空格或@之后的部分
-            stack = stack[0] === "(" ? stack.slice(1, -1) : stack;
+            stack = stack[0] === "(" ? stack.slice(1, -1) : stack.replace(/\s/, "");//去掉换行符
             return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
+        }
+        if (DOC.currentScript) { //取得正在解析的script节点 firefox 4+
+            return DOC.currentScript.src;
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
         for (var i = 0, node; node = nodes[i++]; ) {
