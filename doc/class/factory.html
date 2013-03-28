@@ -53,77 +53,77 @@
             <fieldset>
                 <legend>例子</legend>
                 <p>超类-子类的关系是一种is-a关系。在设计对象继承层次的时候，对象模块使用子类化技术，这样就可以说子类是父类同样的类。例如：</p>
-                <pre
-                    class="brush:javascript;gutter:false;toolbar:false">
-                    $.require("class", function() {
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("class", function() {
 
-                    var Shape = $.factory({
+                var Shape = $.factory({
                     init: function(len) {
-                    $.log(len)
-                    this.length = len || 0;
+                        $.log(len)
+                        this.length = len || 0;
                     },
                     getLength: function() {
-                    return this.length;
+                        return this.length;
                     },
                     setLength: function(len) {
-                    this.length = len;
+                        this.length = len;
                     },
                     getArea: function() {
-                    throw "Subclasses must implement this method"
+                        throw "Subclasses must implement this method"
                     }
-                    })
+                })
 
-                    var Triangle = $.factory(Shape,{
+                var Triangle = $.factory(Shape, {
                     init: function(len, hei) { //len属性在父类中已定义，这里可以省去
-                    this.height = hei || 0;
+                        this.height = hei || 0;
                     },
                     getArea: function() {
-                    return this.length * this.height / 2
+                        return this.length * this.height / 2
                     }
-                    })
-                    var Square = $.factory(Shape,{
+                })
+                var Square = $.factory(Shape, {
                     getArea: function() {
-                    return this.length * this.length;
+                        return this.length * this.length;
                     }
-                    });
-                    var t = new Triangle(3, 4)
-                    $.log(t.getArea(), true)
-                    var s = new Square(4)
-                    $.log(s.getArea(), true)
-                    });
+                });
+                var t = new Triangle(3, 4)
+                $.log(t.getArea(), true)
+                var s = new Square(4)
+                $.log(s.getArea(), true)
+            });
                 </pre>
+                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <p>在上面的例子中，三角形(Triangle)是一种(is-a)形状(Shape)，因此Triangle类子类化了Shape类， 正方形(Square)也是一种(is-a)形状(Shape)，因此Square类也子类化了Shape类。</p>
                 <p>然而，子类化可以变得非常复杂，尤其在多继承的情况下。多继承允许一个类继承一个以上基类。 过分依赖于继承的软件通常形成扩展很广层次很深的继承树，一个类继承自多个超类可能会贯穿到整个系统中。由于多继承意味着实现继承(implementation
                     inheritance)， 定位一个方法的实现和确认调用正确的方法变成了一种挑战。实此mass Framework摒弃多重继续这种做法，使用组合模式
                     来建创新类。</p>
                 <p>比如一只鸟，我们不可能搞一个抽象类，拥有会飞的这个接口，因此有的鸟不会飞，也不可能搞个夜晚睡觉的接口，因为有的是夜行。 因此我们把它们分散到一个模块中，用implement去实现它。</p>
-                <pre
-                    class="brush:javascript;gutter:false;toolbar:false">
-                    var owlFly = {
-                    fly: function() {
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+            var owlFly = {
+                fly: function() {
                     return "能飞"
-                    }
-                    }
-                    var owlHabit = {
-                    getFood: function() {
+                }
+            }
+            var owlHabit = {
+                getFood: function() {
                     return "老鼠"
-                    },
-                    isNightWalk: function() {
+                },
+                isNightWalk: function() {
                     return true
-                    }
-                    }
-                    var Bird = $.factory({
-                    init: function(name) {
+                }
+            }
+            var Bird = $.factory({
+                init: function(name) {
                     this.name = name
-                    }
-                    })
-                    var Owl = Bird.extend(owlFly).extend(owlHabit)
-                    var owl = new Owl("猫头鹰1号");
-                    $.log(owl.name, true);
-                    $.log(owl.fly(), true);
-                    $.log(owl.getFood(), true);
-                    $.log(owl.isNightWalk(), true);
+                }
+            })
+            var Owl = Bird.extend(owlFly).extend(owlHabit)
+            var owl = new Owl("猫头鹰1号");
+            $.log(owl.name, true);
+            $.log(owl.fly(), true);
+            $.log(owl.getFood(), true);
+            $.log(owl.isNightWalk(), true);
                 </pre>
+                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <p>例子3：一个复杂的继承体系。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("ready,class", function() {
