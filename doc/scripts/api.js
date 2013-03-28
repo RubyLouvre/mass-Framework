@@ -3,7 +3,7 @@ define("api", ["mass"], function() {
     return {
         core: "require,define,config, mix,slice,type,log,oneObject,bind,unbind,html,head,rword,mass,getUid,exports".match($.rword).sort(),
         lang: ("String.contains, String.startsWith, String.endsWith,String.repeat,String.byteLen,String.truncate,String.camelize,String.underscored," +
-                "String.capitalize, String.escapeHTML, String.unescapeHTML,String.stripTags,String.stripScripts,String.wbr,String.pad," +
+                "String.capitalize, String.escapeHTML, String.unescapeHTML,String.stripTags,String.stripScripts,String.pad," +
                 "Array.clone,Array.contains,Array.remove,Array.removeAt,Array.shuffle,Array.random,Array.min,Array.max,Array.pluck,Array.sortBy," +
                 "Array.compact,Array.diff,Array.merge,Array.union,Array.intersect,Array.unique,Array.ensure,Array.inGroupsOf,Array.flatten," +
                 "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge,Object.without," +

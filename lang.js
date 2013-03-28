@@ -127,7 +127,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                 }
             } else {
                 for (i in obj) {
-                    value = fn.call(scope || obj[i], i.obj[i]);
+                    value = fn.call(scope || obj[i], i, obj[i]);
                     if (map) {
                         if (value != null) {
                             ret[ ret.length ] = value;
