@@ -32,9 +32,9 @@ unescapeHTML: function(target) {
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $.require("lang", function($$) {
-    var s = "&lt;h1>&gt;Pride &amp; Prejudice&lt;/h1>&gt;";
+    var str = "&lt;h1>&gt;Pride &amp; Prejudice&lt;/h1>&gt;";
     $.log($.String.unescapeHTML(str), true);
-    var s = "x &gt; 10";
+     str = "x &gt; 10";
      $.log($.String.unescapeHTML(str), true);
 });
 </pre>

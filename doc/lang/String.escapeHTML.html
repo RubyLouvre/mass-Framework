@@ -23,9 +23,9 @@
             <fieldset>
                 <legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-$.require("lang", function($$) {
-    var s = "&lt;div aa='\bb'&gt;dd";
-    $.log($$(s).escapeHTML(), true);
+require("lang", function($) {
+    var str = "&lt;div aa='\bb'&gt;dd";
+    $.log($.String.escapeHTML(str), true);
 });
 </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>

@@ -178,7 +178,7 @@ define("fx", ["css", "event", "attr"], function($) {
         if (!count) {
             //如果样式表中不存在这两条样式规则
             count = AnimationRegister[className] = 0;
-            $.each(props, function(val, key) {
+            $.each(props, function(key, val) {
                 var selector = key.replace(/[A-Z]/g, function(a) {
                     return "-" + a.toLowerCase();
                 });
@@ -417,7 +417,7 @@ define("fx", ["css", "event", "attr"], function($) {
             }
         };
     });
-    $.each(effects, function(props, method) {
+    $.each(effects, function( method, props ) {
         $.fn[method] = function() {
             var args = [].concat.apply([props, {
                 effect: method

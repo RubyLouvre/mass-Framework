@@ -132,7 +132,7 @@
                     currentModule = moduleName;
                     var list = ["index"].concat(api[moduleName])
                     var html = ["<ul>"];
-                    $.each(list, function(prop, index) {
+                    $.each(list, function( index, prop) {
                         var className = index % 2 === 0 ? "even" : "odd";
                         html.push("<li class=" + className + ">" + prop + "</li>");
                     });
@@ -190,7 +190,12 @@
             </div>
         </div>
  
+        http://rubylouvre.github.com/doc/fx/transform.rotate.html
 
+
+        http://rubylouvre.github.com/doc/lang/$.parseJS.html
+        http://www.chandlerprall.com/2011/06/beating-60fps-in-javascript/
+        http://jsfiddle.net/chandlerprall/Wj5yM/
 
 
     </body>

@@ -457,8 +457,8 @@ define("attr", ["node"], function($) {
         },
         "select:set": function(node, name, values, getter) {
             values = [].concat(values);
-            $.each(node.options, function(el) {
-                el.selected = !!~values.indexOf(getter(el));
+            $.each(node.options, function() {
+                this.selected = !!~values.indexOf(getter(this));
             });
             if (!values.length) {
                 node.selectedIndex = -1;

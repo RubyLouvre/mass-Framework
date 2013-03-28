@@ -115,17 +115,24 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                     ret = [];
             if (isArray) {
                 for (var n = obj.length; i < n; i++) {
-                    value = fn.call(scope || obj[i], obj[i], i);
+                    value = fn.call(scope || obj[i], i, obj[i]);
                     ret.push(value);
-                    if (!map && value === false) {
+                    if (map) {
+                        if (value != null) {
+                            ret[ ret.length ] = value;
+                        }
+                    } else if (value === false) {
                         break;
                     }
                 }
             } else {
                 for (i in obj) {
-                    value = fn.call(scope || obj[i], obj[i], i);
-                    ret.push(value);
-                    if (!map && value === false) {
+                    value = fn.call(scope || obj[i], i.obj[i]);
+                    if (map) {
+                        if (value != null) {
+                            ret[ ret.length ] = value;
+                        }
+                    } else if (value === false) {
                         break;
                     }
                 }
@@ -404,16 +411,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                 }
             }
             return num;
-        },
-        wbr: function(target) {
-            /**
-             * 为目标字符串添加wbr软换行
-             * 1.支持html标签、属性以及字符实体。<br>
-             * 2.任意字符中间都会插入wbr标签，对于过长的文本，会造成dom节点元素增多，占用浏览器资源。
-             * 3.在opera下，浏览器默认css不会为wbr加上样式，导致没有换行效果，
-             * 可以在css中加上 wbr:after { content: "\00200B" } 解决此问题
-             */
-            return String(target).replace(/(?:<[^>]+>)|(?:&#?[0-9a-z]{2,6};)|(.{1})/gi, "$&<wbr>").replace(/><wbr>/g, ">");
         }
     });
     //字符串的原生原型方法
@@ -600,10 +597,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                 }
             }
             return groups;
-        },
-        //可中断的forEach迭代器
-        forEach: $.each,
-        map: $.map
+        }
     });
     $.Array("concat,join,pop,push,shift,slice,sort,reverse,splice,unshift," + "indexOf,lastIndexOf,every,some,filter,reduce,reduceRight")
     var NumberPack = {
@@ -671,9 +665,17 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             return result;
         },
         //将参数一的键值都放入回调中执行，如果回调返回false中止遍历
-        forEach: $.each,
+        forEach: function(obj, fn) {
+            Object.keys(obj).forEach(function(name) {
+                fn(obj[name], name)
+            })
+        },
         //将参数一的键值都放入回调中执行，收集其结果返回
-        map: $.map,
+        map: function(obj, fn) {
+            return  Object.keys(obj).map(function(name) {
+                return fn(obj[name], name)
+            })
+        },
         clone: function(target) {
             //进行深拷贝，返回一个新对象，如果是浅拷贝请使用$.mix
             var clone = {};

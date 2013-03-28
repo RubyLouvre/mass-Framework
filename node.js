@@ -696,7 +696,7 @@ define("node", ["support", "class", "data"]
                 contents: function(el) { //取所有子孙
                     return el.tagName === "IFRAME" ? el.contentDocument || el.contentWindow.document : $.slice(el.childNodes);
                 }
-            }, function(method, name) {
+            }, function( name, method ) {
                 $.fn[name] = function(expr) {
                     var nodes = [];
                     for (var i = 0, el; el = this[i++]; ) { //expr只用于Until
