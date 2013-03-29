@@ -372,9 +372,9 @@ define("fx", ["css"], function($) {
         clearQueue = clearQueue ? "1" : "";
         gotoEnd = gotoEnd ? "1" : "0";
         var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
-        return this.each(function(node) {
+        return this.each(function() {
             for (var i = 0, fx; fx = timeline[i]; i++) {
-                if (fx.node === node) {
+                if (fx.node === this) {
                     switch (stopCode) { //如果此时调用了stop方法
                         case 0:
                             //中断当前动画，继续下一个动画

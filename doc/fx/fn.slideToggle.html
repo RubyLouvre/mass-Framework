@@ -38,7 +38,7 @@
             </p>
             <fieldset ><legend>例子</legend>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-            $.require("ready,fx,event",function(){
+             require("ready,fx,event",function($){
                 $("#aa").click(function () {
                     $("#sample div:not(.still)").slideToggle(400,function () {
                         var n = parseInt($("#sample span").text(), 10);

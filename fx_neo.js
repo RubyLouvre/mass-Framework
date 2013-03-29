@@ -117,7 +117,7 @@ define("fx", ["css", "event", "attr"], function($) {
             }
         }
         var id = setTimeout("1");
-        return this.each(function(node) {
+        return this.each(function(i, node) {
             if (node.nodeType === 1) {
                 var data = $._data(node);
                 var queue = data.fxQueue || (data.fxQueue = []);
@@ -445,7 +445,7 @@ define("fx", ["css", "event", "attr"], function($) {
         clearQueue = clearQueue ? "1" : "";
         gotoEnd = gotoEnd ? "1" : "0";
         var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
-        return this.each(function(node) {
+        return this.each(function(i,node) {
             var queue = $._data(node, "fxQueue");
             for (var j = 0, cls; cls = node.classList[j++]; ) {
                 switch (stopCode) { //如果此时调用了stop方法
@@ -475,7 +475,7 @@ define("fx", ["css", "event", "attr"], function($) {
         return this.fx(number);
     };
     $.fn.resume = function() {
-        return this.each(function(el) {
+        return this.each(function(i,el) {
             if (el.style[playState] === "paused") {
                 el.style[playState] = "running";
             }

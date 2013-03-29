@@ -79,7 +79,7 @@ define("attr", !! this.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             var type = typeof value,
                 classNames = type === "string" && value.match(rnospaces) || [],
                 className, i, isBool = typeof stateVal === "boolean";
-            return this.each(function(el) {
+            return this.each(function(_, el) {
                 i = 0;
                 if(el.nodeType === 1) {
                     var self = $(el),

@@ -75,7 +75,7 @@
             $.require("ready,event,fx",function(){
                 var box = $(".test");
                 $("#start").click(function(){
-                    box.fx(2000,{width:"+=100"}).fx(2000,{height:"+=100"})
+                    box.fx({width:"+=100"},2000).fx({height:"+=100"},2000)
                 });
                 $("#reset").click(function(){
                     box.width(10).height(10)
