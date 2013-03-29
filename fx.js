@@ -54,12 +54,28 @@ define("fx", ["css"], function($) {
         }
         timeline.length || (clearInterval(tick.id), tick.id = null);
     }
+    function addCallback(target, source, name) {
+        if (typeof source[name] === "function") {
+            var fn = target[name];
+            if (fn) {
+                target[name] = function(node, fx) {
+                    fn(node, fx);
+                    source[name](node, fx);
+                };
+            } else {
+                target[name] = source[name];
+            }
+        }
+        delete source[name];
+    }
     //==============================裁剪用户传参到可用状态===========================
     function addOption(opts, p) {
         //.animate( properties [, duration] [, easing] [, complete] )
         //.animate( properties, options )
         switch ($.type(p)) {
             case "Object":
+                addCallback(opts, p, "after");
+                addCallback(opts, p, "before");
                 delete p.props;
                 $.mix(opts, p);
                 break;
@@ -81,44 +97,26 @@ define("fx", ["css"], function($) {
                 duration: properties
             };
         }
-        var opts = {
-            props: properties
-        };
+        var opts = {};
         //如果第二参数是对象
         for (var i = 1; i < arguments.length; i++) {
             addOption(opts, arguments[i]);
         }
         opts.duration = typeof opts.duration === "number" ? opts.duration : 400;
         opts.queue = !!(opts.queue == null || opts.queue); //默认使用列队
-        opts.specialEasing = opts.specialEasing || {};
+        opts.easing = $.easing[opts.easing] ? opts.easing : "swing"
+        delete opts.specialEasing;
         return opts;
-    }
-    function addCallbacks(nodes, properties, args) {
-        //由于构建更高级的基于元素节点的复合动画
-        var options = {};
-        for (var i = 1; i < args.length; i++) {
-            addOption(options, args[i]);
-        }
-        "before,after".replace($.rword, function(call) {
-            options[call] = properties[call];
-            delete properties[call];
-        });
-        return nodes.fx(properties, options);
     }
 
     //animate or fx
     var effect = $.fn.animate = $.fn.fx = function(props) {
-        var opts = addOptions.apply(null, arguments);
-        if ((props = opts.props)) {
-            var ease = opts.specialEasing, p
-            for (var name in props) {
-                p = $.cssName(name) || name;
-                if (name !== p) {
-                    props[p] = props[name]; //收集用于渐变的属性
-                    ease[p] = ease[name];
-                    delete ease[name];
-                    delete props[name];
-                }
+        var opts = addOptions.apply(null, arguments), p
+        for (var name in props) {
+            p = $.cssName(name) || name;
+            if (name !== p) {
+                props[p] = props[name]; //收集用于渐变的属性
+                delete props[name];
             }
         }
         for (var i = 0, node; node = this[i++]; ) {
@@ -126,7 +124,8 @@ define("fx", ["css"], function($) {
                 positive: [],
                 negative: [],
                 method: "noop",
-                node: node
+                node: node,
+                props: props
             }, opts, false));
         }
         return this;
@@ -201,19 +200,26 @@ define("fx", ["css"], function($) {
                 if (display !== "none" && !$._data(node, "olddisplay")) {
                     $._data(node, "olddisplay", display);
                 }
+                var overflows;
                 if ("width" in fx.props || "height" in fx.props) { //如果是缩放操作
                     //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
-                    fx.overflow = [s.overflow, s.overflowX, s.overflowY];
+                    overflows = [s.overflow, s.overflowX, s.overflowY];
                     s.overflow = "hidden";
                 }
-                var fn = fx.after || $.noop
+                var fn = fx.after || $.noop;
                 fx.after = function(node, fx) {
-                    fn(node, fx);
-                    if (fx.overflow) {
+                    if (fx.method === "hide") {
+                        node.style.display = "none";
+                        for (var i in fx.orig) { //还原为初始状态
+                            $.css(node, i, fx.orig[i]);
+                        }
+                    }
+                    if (overflows) {
                         ["", "X", "Y"].forEach(function(postfix, index) {
-                            s["overflow" + postfix] = fx.overflow[index];
+                            s["overflow" + postfix] = overflows[index];
                         });
                     }
+                    fn(node, fx);
                 };
             }
         },
@@ -222,13 +228,12 @@ define("fx", ["css"], function($) {
         }
 
     };
-    function addQueue(node, fx, index) {
+    function parseKeyFrames(node, fx, index) {
         //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
         var to, parts, unit, op, props = [],
                 revertProps = [],
                 orig = {},
                 hidden = $.isHidden(node),
-                ease = fx.specialEasing,
                 hash = fx.props,
                 easing = fx.easing; //公共缓动公式
         if (!hash.length) {
@@ -240,14 +245,17 @@ define("fx", ["css"], function($) {
                 var type = Animation.type(name); //取得类型
                 var from = initVal(node, name); //取得起始值
                 //用于分解属性包中的样式或属性,变成可以计算的因子
-                if (val === "show" || (val === "toggle" && hidden)) {
+                if( val === "toggle" ){
+                     val = hidden ? "show" : "hide";
+                }
+                if (val === "show") {
+                    fx.method = val;
                     val = $._data(node, "old" + name) || from;
-                    fx.method = "show";
                     from = 0;
                     $.css(node, name, 0);
-                } else if (val === "hide" || val === "toggle") { //hide
+                } else if (val === "hide" ) { //hide
+                    fx.method = val;
                     orig[name] = $._data(node, "old" + name, from);
-                    fx.method = "hide";
                     val = 0;
                 }
                 if (type === "color") {
@@ -283,7 +291,7 @@ define("fx", ["css"], function($) {
                     from: from,
                     to: to,
                     type: type,
-                    easing: $.easing[String(ease[name] || easing).toLowerCase()] || $.easing.swing,
+                    easing: $.easing[easing],
                     unit: unit
                 };
                 props.push(prop);
@@ -296,7 +304,7 @@ define("fx", ["css"], function($) {
             fx.revertProps = revertProps;
             fx.orig = orig;
         }
-      
+
         if (hash.record || hash.revert) {
             fx.revert = hash.revert;
             var fx2 = {}; //回滚到最初状态
@@ -323,7 +331,7 @@ define("fx", ["css"], function($) {
                 now = +new Date;
         if (!fx.startTime) { //第一帧
             callback(fx, node, "before"); //动画开始前的预操作
-            fx.props && addQueue(fx.node, fx, index); //添加props属性与设置负向列队
+            fx.props && parseKeyFrames(fx.node, fx, index); //添加props属性与设置负向列队
             fx.props = fx.props || [];
             Animation[fx.method].call(node, node, fx); //这里用于设置node.style.display
             fx.startTime = now;
@@ -336,11 +344,6 @@ define("fx", ["css"], function($) {
                 (hooks[obj.type] || hooks._default)(node, per, end, obj);
             }
             if (end) { //最后一帧
-                if (fx.method === "hide") {
-                    for (var i in fx.orig) { //还原为初始状态
-                        $.css(node, i, fx.orig[i]);
-                    }
-                }
                 callback(fx, node, "after"); //动画结束后执行的一些收尾工作
                 callback(fx, node, "complete"); //执行用户回调
                 if (fx.revert && fx.negative.length) {
@@ -391,7 +394,7 @@ define("fx", ["css"], function($) {
                             Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
                             fx.negative = []; // 清空负向列队
                             for (var j = 0; fx = fx.positive[j++]; ) {
-                                fx.before = fx.after = fx.step = $.noop;
+                                fx.update = fx.step = $.noop
                                 fx.gotoEnd = true; //立即完成该元素的所有动画
                             }
                             break;
@@ -402,8 +405,8 @@ define("fx", ["css"], function($) {
     };
 
     var fxAttrs = [
-        ["height", "marginTop", "marginBottom","borderTopWidth", "borderBottomWidth","paddingTop", "paddingBottom"],
-        ["width", "marginLeft", "marginRight", "borderLeftWidth","borderRightWidth","paddingLeft", "paddingRight"],
+        ["height", "marginTop", "marginBottom", "borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"],
+        ["width", "marginLeft", "marginRight", "borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"],
         ["opacity"]
     ];
 
@@ -438,7 +441,8 @@ define("fx", ["css"], function($) {
 
     $.each(effects, function(props, method) {
         $.fn[method] = function() {
-            return addCallbacks(this, props, arguments);
+            var args = [].concat.apply([props], arguments);
+            return this.fx.apply(this, args);
         };
     });
 
@@ -448,7 +452,8 @@ define("fx", ["css"], function($) {
             if (!arguments.length || typeof a === "boolean") {
                 return pre.apply(this, arguments);
             } else {
-                return addCallbacks(this, genFx(name, 3), arguments);
+                var args = [].concat.apply([genFx(name, 3)], arguments);
+                return this.fx.apply(this, args);
             }
         };
     });
@@ -479,9 +484,10 @@ define("fx", ["css"], function($) {
     }
     //扩大1.5倍并淡去
     $.fn.puff = function() {
-        return addCallbacks(this, {
-            before: beforePuff
-        }, arguments);
+        var args = [].concat.apply([{}, {
+                before: beforePuff
+            }], arguments);
+        return this.fx.apply(this, args);
     };
     //=======================转换各种颜色值为RGB数组===========================
     var colorMap = {
@@ -542,6 +548,7 @@ define("fx", ["css"], function($) {
     }
     return $;
 })
+
 /**
  2011.10.10 改进$.fn.stop
  2011.10.20 改进所有特效函数，让传参更加灵活
@@ -552,6 +559,7 @@ define("fx", ["css"], function($) {
  2012.6.1 优化show hide toggle方法
  2012.11.25 升级到 v5 去掉transform的支持,只支持旋转效果
  2012.12.8 升级到 v6 $.fn.fx与jQuery的保持一致
+ 2012.12.8 升级到 v8 去掉specialEasing的支持
  http://caniuse.com/
  http://gitcp.com/sorenbs/jsgames-articles/resources
  http://www.kesiev.com/akihabara/
