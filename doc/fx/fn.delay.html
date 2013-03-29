@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        
+        <title>$.fn.delay</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+        <style type="text/css">
+            #sample {
+                position: relative;height: 90px;
+            }
+            #sample  div { position: absolute; width: 60px; height: 60px; float: left; }
+            .first { background-color: #3f3; left: 0;}
+            .second { background-color: #33f; left: 80px;}
+        </style>
+
+    </head>
+    <body>
+    <article>
+        <h3>$.fn.delay(duration)</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>delay会将其列队中没有执行的动画都向后延迟duration秒执行。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>duration</dt>
+            <dd>必需。Number。动画执行时间，单位为ms。</dd>
+        </dl>
+        <p><span class="stress">返回值：</span></p>
+        <p>mass实例</p>
+        <p>其实此方法相当于$.fn.fx(duration), 但fx方法会做许多其他操作, 而它不会。</p>
+        <fieldset ><legend>例子</legend>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+            $.require("ready,fx,event",function(){
+                $.require("ready,fx",function(){
+                    $("div.first").slideUp(300).fx(2000).fadeIn(400).hide(1000).show(1000);
+                    $("div.second").slideUp(300).fadeIn(400).hide(1000).show(1000);
+                });
+            });
+            </pre>
+           <button class="doc_btn" type="button">点我，执行代码</button>
+            <div id="sample">
+                <div class="first"></div>
+                <div class="second"></div>
+            </div>
+
+        </fieldset>
+
+    </article>
+</body>
+</html>

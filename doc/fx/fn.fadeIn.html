@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        
+        <title>$.fn.fadeIn</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+        <style type="text/css">
+
+            #sample div { margin:3px; width:80px; display:none;
+                           height:80px; float:left; }
+            div#one { background:#f00; }
+            div#two { background:#0f0; }
+            div#three { background:#00f; }
+        </style>
+
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.fadeIn(duration, props)</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>让匹配的每个节点进行淡入动画。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>duration</dt>
+                <dd>可选。Number。动画执行时间，单位为ms，默认为500ms。</dd>
+                <dd>可选。Function。动画结束时的回调函数</dd>
+                <dt>props</dt>
+                <dd>可选。Object。各种配置。</dd>
+            </dl>
+            <p><span class="stress">返回值：</span></p>
+            <p>mass实例</p>
+            <p>props配置对象可以指定各种CSS属性，如width, height, color, fontSize, opacity等进行动画变化，
+                还支持scrollTop与scrollLeft这两个属性进行动画变化。还可以指定动画开始前的回调函数before,动画结束时的回调函数after,
+                动画是否进行倒带revert....
+            </p>
+            <fieldset ><legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+                require("ready,fx",function($){
+                    $("#sample div:hidden").last().fadeIn(1000)
+                });
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="sample">
+                    <div id="one"></div>
+                    <div id="two"></div>
+                    <div id="three"></div>
+                </div>
+
+             
+            </fieldset>
+
+        </article>
+    </body>
+</html>

@@ -1,14 +1,118 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE html>
 <html>
+
     <head>
-        <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>fx</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
     </head>
+
     <body>
-        <div>TODO write content</div>
+        <article>
+            <h3>$.fn.fx</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>对元素的某些样式或属性进行动画。</p>
+            <p>有两种传参方式:</p>
+            <ul>
+                <li>properties [, duration ] [, easing ] [, complete ]</li>
+                <li>properties , options</li>
+            </ul>
+            <p>最后都在内部被整齐成下面那一种。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>properties</dt>
+                <dd>必需。Object样式集合。如width, height, color, fontSize, opacity等。</dd>
+                <dt>options</dt>
+                <dd>必需。Object。各种配置。</dd>
+            </dl>
+            <p><span class="stress">返回值：</span></p>
+            <p>mass实例</p>
+            <p>options里面的参数一览：</p>
+            <table class="table1">
+                <tr><th>键名</th><th>值</th></tr>
+                <tr><td>easing</td><td>缓动公式的名字，将作用于所有CSS属性或scrollTop,scrollLeft，当然可以在这些属性上用数组进行单个指定。</td></tr>
+                <tr><td>duration</td><td>动画时长。</td></tr>
+                <tr><td>step</td><td>每次执行补间后执行的回调函数。</td></tr>
+                <tr><td>compete</td><td>动画结束时的回调函数。</td></tr>
+                <tr><td>queue</td><td>是否进行排队，默认true。</td></tr>
+                <tr><td>revert</td><td>是否开始倒带。</td></tr>
+                <tr><td>record</td><td>将当前动画设置转录到负向列队，从而实现多个动画的倒带。</td></tr>
+            </table>
+            <hr/>
+            <p>step, compete这三个回调的参数情况:</p>
+            <table class="table">
+                <tr><th>参数名(按先后顺数排列)</th><th>说明</th></tr>
+                <tr><td>node</td><td>当前执行动画的元素节点，当然我们也可以直接在回调函数使用this取得它</td></tr>
+                <tr><td>fx</td><td>动画实例,它拥有startTime, node, duration, gotoEnd, props, revert, orig等属性。</td></tr>
+            </table>
+            <hr/>
+            <p>fx对象所拥有的属性：</p>
+            <table class="table1">
+                <tr><th>属性名</th><th>说明</th></tr>
+                <tr><td>node</td><td>元件,可以是元素节点或canvas中的图形</td></tr>
+                <tr><td>startTime</td><td>动画开始时间,单位毫秒</td></tr>
+                <tr><td>duration</td><td>动画时长,单位毫秒</td></tr>
+                <tr><td>gotoEnd</td><td>是否立即结束,默认false</td></tr>
+                <tr><td>revert</td><td>是否要回放动画,默认false</td></tr>
+                <tr><td>positive</td><td>正向子列队,数组,用于向主列队添加动画</td></tr>
+                <tr><td>negative</td><td>负向子列队,数组,用于向正向子列队添加动画</td></tr>
+                <tr><td>props</td><td>要渐变的属性,一个对象数组,每个对象包含属性名,起始值（from），结束值(to)，单位(unit)，
+                        类别(type)与对应的缓动公式(easing)</td></tr>
+            </table>
+            <style type="text/css">
+                #test{
+                    width:100px;
+                    height:100px;
+                    background:blue;
+                }
+            </style>
+            <div id="test" class="animate" ></div>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,fx", function() {
+     $("#test").fx({
+         width: 200,
+         height: 200
+    }, 2000).fx({
+         width: 100,
+         height:100
+    }, 2000)
+});
+            </pre>
+            <button class="doc_btn" type="button">点我，执行代码</button>
+            <p>上面代码相当于</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,fx", function() {
+     $("#test").fx({
+         width: 200,
+         height: 200
+    }, 2000,{
+        revert: true
+    });
+});
+            </pre>
+            <button class="doc_btn" type="button">点我，执行代码</button>
+            <p>上面的JS代码相当于以下CSS代码：</p>
+            <pre class="brush:css;gutter:false;toolbar:false;">
+/* 此动画先放大再缩回原状*/
+    .animate{
+        animation-duration:3s;
+        animation-name: cycle;
+        animation-iteration-count:2;
+        animation-direction:alternate;
+    }
+    @keyframes cycle{
+        to{
+        width:200px;
+        height:200px;
+    }
+    }
+            </pre>
+        </article>
     </body>
+
 </html>
