@@ -215,27 +215,8 @@ define("api", ["mass"], function() {
             },
             "xhr": "function"
         },
-        "fx": ["fn.fx", "fn.stop"],
-//            "fn": { 
-//                "fx": "function",
-//                "stop": "function",
-//                "delay": "function",
-//                "slideDown": "function",
-//                "slideUp": "function",
-//                "slideToggle": "function",
-//                "fadeIn": "function",
-//                "fadeOut": "function",
-//                "fadeToggle": "function",
-//                "show": "function",
-//                "hide": "function",
-//                "puff": "function"
-//            },
-//            "easing": "object",
-//            "fx": "function",
-//            "show": "function",
-//            "hide": "function",
-//            "toggle": "function"
-//        },
+        "fx": ["fn.fx", "fn.stop","fn.fadeToggle","fn.fadeIn","fn.fadeOut", 
+            "fn.slideDown","fn.slideUp","fn.slideToggle","fn.show","fn.hide","fn.toggle","fn.delay"],
         "flow": {
             "Flow": "function",
             "flow.bind": "function",
