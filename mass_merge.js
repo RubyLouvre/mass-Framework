@@ -1319,255 +1319,279 @@ define("class", ["lang"], function($) {
     return $
 });
   
-   //=========================================
-// 流程模块v1 by 司徒正美 （流程控制，消息交互）
-//=========================================
-define("flow", ["class"], function($) {
-    //观察者模式
-    $.Observer = $.factory({
-        init: function(target) {
-            this._events = {};
-            this._target = target || this;
-        },
-        bind: function(type, callback) {
-            var listeners = this._events[type]
-            if(listeners) {
-                listeners.push(callback)
-            } else {
-                this._events[type] = [callback]
+   //==================================================
+// 数据缓存模块
+//==================================================
+define("data", ["lang"], function($) {
+    var owners = [],
+        caches = [];
+    
+
+    function add(owner) {
+        var index = owners.push(owner);
+        return caches[index - 1] = {
+            data: {}
+        };
+    }
+    
+
+    function innerData(owner, name, data, pvt) { //IE678不能为文本节点注释节点添加数据
+        var index = owners.indexOf(owner);
+        var table = index === -1 ? add(owner) : caches[index];
+        var getOne = typeof name === "string" //取得单个属性
+        var cache = table;
+        //私有数据都是直接放到table中，普通数据放到table.data中
+        if(!pvt) {
+            table = table.data;
+        }
+        if(name && typeof name === "object") {
+            $.mix(table, name); //写入一组属性
+        } else if(getOne && data !== void 0) {
+            table[name] = data; //写入单个属性
+        }
+        if(getOne) {
+            if(name in table) {
+                return table[name];
+            } else if(!pvt && owner && owner.nodeType == 1) {
+                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
+                //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
+                return $.parseData(owner, name, cache);
             }
-            return this;
-        },
-        once: function(type, callback) {
-            var self = this;
-            var wrapper = function() {
-                    callback.apply(self, arguments);
-                    self.unbind(type, wrapper);
-                };
-            this.bind(type, wrapper);
-            return this;
-        },
-        unbind: function(type, callback) {
-            var n = arguments.length;
-            if(n === 0) {
-                this._events = {};
-            } else if(n == 1) {
-                this._events[type] = [];
-            } else {
-                var listeners = this._events[type] || [];
-                var i = listeners.length;
-                while(--i > -1) {
-                    if(listeners[i] === callback) {
-                        return listeners.splice(i, 1);
+        } else {
+            return table;
+        }
+    }
+    
+
+    function innerRemoveData(owner, name, pvt) {
+        var index = owners.indexOf(owner);
+        if(index > -1) {
+            var delOne = typeof name === "string",
+                table = caches[index],
+                cache = table,
+                clear = 1;
+            if(delOne) {
+                if(!pvt) {
+                    table = table.data;
+                }
+                if(table) {
+                    delOne = table[name];
+                    delete table[name];
+                }
+                for(var key in cache) {
+                    if(key === "data") {
+                        for(var i in cache.data) {
+                            clear = 0;
+                            break;
+                        }
+                    } else {
+                        clear = 0;
+                        break;
                     }
                 }
-            }
-            return this;
-        },
-        fire: function(type) {
-            var listeners = (this._events[type] || []).concat(); //防止影响原数组
-            if(listeners.length) {
-                var target = this._target,
-                    args = $.slice(arguments);
-                args[0] = {
-                    type: type,
-                    target: target
+                if(clear) {
+                    owners.splice(index, 1);
+                    caches.splice(index, 1);
                 }
-                for(var i = 0, callback; callback = listeners[i++];) {
-                    callback.apply(target, args);
+            }
+            return delOne; //返回被移除的数据
+        }
+    }
+    var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
+    $.mix({
+
+        hasData: function(owner) {
+            //判定是否关联了数据 
+            return owners.indexOf(owner) > -1;
+        },
+
+        data: function(target, name, data) {
+            //读写用户数据
+            return innerData(target, name, data);
+        },
+
+        _data: function(target, name, data) {
+            //读写内部数据
+            return innerData(target, name, data, true);
+        },
+
+        removeData: function(target, name) {
+            //删除用户数据
+            return innerRemoveData(target, name);
+        },
+
+        _removeData: function(target, name) {
+            //移除内部数据
+            return innerRemoveData(target, name, true);
+        },
+
+        parseData: function(target, name, cache, value) {
+            //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
+            var data, _eval, key = $.String.camelize(name);
+            if(cache && (key in cache)) return cache[key];
+            if(arguments.length !== 4) {
+                var attr = "data-" + name.replace(/([A-Z])/g, "-$1").toLowerCase();
+                value = target.getAttribute(attr);
+            }
+            if(typeof value === "string") { //转换 /^(?:\{.*\}|null|false|true|NaN)$/
+                if(rparse.test(value) || +value + "" === value) {
+                    _eval = true;
+                }
+                try {
+                    data = _eval ? eval("0," + value) : value;
+                } catch(e) {
+                    data = value;
+                }
+                if(cache) {
+                    cache[key] = data;
+                }
+            }
+            return data;
+
+        },
+
+        mergeData: function(cur, src) {
+            //合并数据
+            if($.hasData(cur)) {
+                var oldData = $._data(src),
+                    curData = $._data(cur),
+                    events = oldData.events;
+                $.Object.merge(curData, oldData);
+                if(events) {
+                    curData.events = [];
+                    for(var i = 0, item; item = events[i++];) {
+                        $.event.bind(cur, item);
+                    }
                 }
             }
         }
     });
-    //用于处理需要通过N个子步骤才能完成的一些操作
-    //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
-    $.Flow =  $.Observer.extend({
-        init: function(timeout) {
-            this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
-            if(typeof timeout == "number") {
-                this.timeout = timeout; //用于order,时间限制
-            }
-        },
-        fire: function(type, args) {
-            var calls = this._events,
-                normal = 2,
-                listeners, ev;
-            while(normal--) {
-                ev = normal ? type : last;
-                listeners = calls[ev];
-                if(listeners && listeners.length) {
-                    args = $.slice(arguments, 1)
-                    if(normal) { //在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
-                        if(this._events[ev]) {
-                            this._fired[ev] = args.concat();
-                        }
-                        args.unshift({
-                            type: type,
-                            target: this._target
-                        })
-                    }
-                    for(var i = 0, callback; callback = listeners[i++];) {
-                        //第一次执行目标事件,第二次执行最后的回调
-                        callback.apply(this, args);
-                    }
-                } else {
-                    break;
-                }
-            }
-            return this;
-        },
-        
-        refresh: function() {
-            Array.prototype.push.call(arguments, false);
-            _assign.apply(this, arguments);
-            return this;
-        },
-        
-        reload: function() {
-            Array.prototype.push.call(arguments, true);
-            _assign.apply(this, arguments);
-            return this;
-        },
-        
-        order: function(type) { //
-            if(this._events[type]) {
-                var cur = this._queue.shift();
-                if(!this.timestamp) {
-                    this.timestamp = new Date - 0
-                }
-                var limit = true;
-                if(this.timeout && (new Date - this.timestamp > this.timeout)) {
-                    limit = false;
-                }
-                if(type == cur && limit) {
-                    this.fire.apply(this, arguments);
-                } else {
-                    this._queue = this._order.concat();
-                    this._fired = {};
-                    delete this.timestamp;
-                }
-            }
-        },
-        
-        repeat: function(type, times, callback) {
-            var old = times,
-                that = this,
-                ret = [];
-            function wrapper() {
-                ret.push.apply(ret, $.slice(arguments, 1));
-                if(--times === 0) {
-                    callback.apply(this._target, ret);
-                    times = old;
-                    ret = [];
-                }
-            }
-            that.bind(type, wrapper);
-            return this;
-        },
-        //用于提供一个简单的成功回调
-        done: function(callback) {
-            var that = this;
-            return function(err, data) {
-                if(err) {
-                    return that.fire('error', err);
-                }
-                if(typeof callback === 'string') {
-                    return that.fire(callback, data);
-                }
-                if(arguments.length <= 2) {
-                    return callback(data);
-                }
-                var args = $.slice(arguments, 1);
-                callback.apply(null, args);
-            }
-        },
-         //用于提供一个简单的错误回调
-        fail: function(callback) {
-            var that = this;
-            that.once('error', function(err) {
-                that.unbind();
-                callback(err);
-            });
-            return this;
-        }
-    })
-
-    $.Flow.create = function(names, callback, errorback) {
-        var that = new $.Flow;
-        var args = names.match($.rword) || [];
-        if(typeof errorback === "function") {
-            that.fail(errorback);
-        }
-        args.push(callback)
-        that.refresh.apply(that, args);
-        return that;
-    };
-    var last = "$" + Date.now();
-    var _assign = function(name, callback, reload) {
-            var flow = this,
-                times = 0,
-                uniq = {},
-                events = name.match($.rword),
-                length = events.length;
-            if(!events.length) {
-                return this;
-            }
-            this._queue = events.concat();
-            this._order = events;
-
-            function bind(key) {
-                flow.bind(key, function() {
-                    if(!uniq[key]) {
-                        uniq[key] = true;
-                        times++;
-                    }
-                });
-            }
-            //绑定所有子事件
-            for(var index = 0; index < length; index++) {
-                bind(events[index]);
-            }
-
-            function lastFn() {
-                //如果没有达到目标次数, 或事件类型之前没有指定过
-                if(times < length) {
-                    return;
-                }
-                var result = [];
-                for(var index = 0; index < length; index++) {
-                    result.push.apply(result, flow._fired[events[index]]);
-                }
-                if(reload) {
-                    uniq = {};
-                    times = 0;
-                }
-                callback.apply(flow, result);
-            }
-            flow.bind(last, lastFn);
-        };
-    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
-    //单点发布 自愿收听 单向联接 分散传播
-    $.Twitter = $.factory({
-        init: function() {
-            this.followers = [];
-        },
-        tweet: function(msg) {
-            for(var i = 0; i < this.followers.length; i++) {
-                var follower = this.followers[i];
-                if(follower.handler) {
-                    follower.handler.call(follower.target, msg); //deal
-                }
-            }
-        },
-        follow: function(master, handler) {
-            master.followers.push({
-                target: this,
-                handler: handler
-            });
-        }
-    })
     return $;
-})
+});
+
+  
+   //==========================================
+// 特征嗅探模块 by 司徒正美
+//==========================================
+define("support", ["mass"], function($) {
+    var DOC = document,
+        div = DOC.createElement('div'),
+        TAGS = "getElementsByTagName";
+    div.setAttribute("className", "t");
+    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>' + '<object><param/></object><table></table><input type="checkbox" checked/>';
+    var a = div[TAGS]("a")[0],
+        style = a.style,
+        select = DOC.createElement("select"),
+        input = div[TAGS]("input")[0],
+        opt = select.appendChild(DOC.createElement("option"));
+    //true为正常，false为不正常
+    var support = $.support = {
+        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
+        insertTbody: !div[TAGS]("tbody").length,
+        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
+        checkOn: input.value === "on",
+        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
+        optSelected: !! opt.selected,
+        //IE67，无法取得用户设定的原始href值
+        attrInnateHref: a.getAttribute("href") === "/nasami",
+        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
+        attrInnateStyle: a.getAttribute("style") !== style,
+        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
+        attrInnateName: div.className !== "t",
+        //IE6-8,对于某些固有属性不会返回用户最初设置的值
+        attrInnateValue: input.getAttribute("checked") == "",
+        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
+        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
+        cssOpacity: style.opacity == "0.25",
+        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
+        cssFloat: !! style.cssFloat,
+        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
+        traverseAll: !! div[TAGS]("param").length,
+        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
+        //IE678不能通过innerHTML生成link,style,script节点（bug）
+        noscope: !div[TAGS]("link").length ,
+        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
+        cloneHTML5: DOC.createElement("nav").cloneNode(true).outerHTML !== "<:nav></:nav>",
+        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
+        //        noCloneEvent: true,
+        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
+        focusin: $["@bind"] === "attachEvent",
+        //IE肯定支持
+        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
+        innerHTML: false,
+        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
+        insertAdjacentHTML: false,
+        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
+        fastFragment: false,
+        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
+        inlineBlock: true,
+        //http://w3help.org/zh-cn/causes/RD1002
+        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
+        //        keepSize: true,
+        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
+        pixelPosition: true,
+        transition: false
+    };
+    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
+    input.checked = true;
+    support.cloneChecked = (input.cloneNode(true).checked === true);
+    support.appendChecked = input.checked;
+    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
+    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
+    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
+    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
+    select.disabled = true;
+    support.optDisabled = !opt.disabled;
+
+    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
+    div.style.backgroundClip = "content-box";
+    div.cloneNode(true).style.backgroundClip = "";
+    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
+    var table = div[TAGS]("table")[0]
+    try { //检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
+        table.innerHTML = "<tr><td>1</td></tr>";
+        support.innerHTML = true;
+        table.insertAdjacentHTML("afterBegin", "<tr><td>2</td></tr>");
+        support.insertAdjacentHTML = true;
+    } catch(e) {};
+
+    a = select = table = opt = style = null;
+    $.require("ready", function() {
+        var body = DOC.body;
+        if(!body) //frameset不存在body标签
+        return;
+        try {
+            var range = DOC.createRange();
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !! range.createContextualFragment("<a>");
+            $.cachedRange = range;
+        } catch(e) {};
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        body.insertBefore(div, body.firstChild);
+        var a = '<div style="height:20px;display:inline-block"></div>';
+        div.innerHTML = a + a; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
+        support.inlineBlock = div.offsetHeight < 40; //检测是否支持inlineBlock
+        if(window.getComputedStyle) {
+            div.style.top = "1%";
+            var computed = window.getComputedStyle(div, null) || {}
+            support.pixelPosition = computed.top !== "1%";
+        }
+        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
+        div.innerHTML = "<a href='#'></a>"
+        if(!support.focusin) {
+            a = div.firstChild;
+            a.addEventListener('focusin', function() {
+                support.focusin = true;
+            }, false);
+            a.focus();
+        }
+        div.style.width = div.style.paddingLeft = "10px"; //检测是否支持盒子模型
+        support.boxModel = div.offsetWidth === 20;
+        body.removeChild(div);
+        div = null;
+    });
+    return $;
+});
   
    //=========================================
 // 选择器模块 v5 开发代号Icarus
@@ -2474,280 +2498,6 @@ define("query", ["mass"], function($) {
         }
     });
     return Icarus;
-});
-  
-   //==================================================
-// 数据缓存模块
-//==================================================
-define("data", ["lang"], function($) {
-    var owners = [],
-        caches = [];
-    
-
-    function add(owner) {
-        var index = owners.push(owner);
-        return caches[index - 1] = {
-            data: {}
-        };
-    }
-    
-
-    function innerData(owner, name, data, pvt) { //IE678不能为文本节点注释节点添加数据
-        var index = owners.indexOf(owner);
-        var table = index === -1 ? add(owner) : caches[index];
-        var getOne = typeof name === "string" //取得单个属性
-        var cache = table;
-        //私有数据都是直接放到table中，普通数据放到table.data中
-        if(!pvt) {
-            table = table.data;
-        }
-        if(name && typeof name === "object") {
-            $.mix(table, name); //写入一组属性
-        } else if(getOne && data !== void 0) {
-            table[name] = data; //写入单个属性
-        }
-        if(getOne) {
-            if(name in table) {
-                return table[name];
-            } else if(!pvt && owner && owner.nodeType == 1) {
-                //对于用HTML5 data-*属性保存的数据， 如<input id="test" data-full-name="Planet Earth"/>
-                //我们可以通过$("#test").data("full-name")或$("#test").data("fullName")访问到
-                return $.parseData(owner, name, cache);
-            }
-        } else {
-            return table;
-        }
-    }
-    
-
-    function innerRemoveData(owner, name, pvt) {
-        var index = owners.indexOf(owner);
-        if(index > -1) {
-            var delOne = typeof name === "string",
-                table = caches[index],
-                cache = table,
-                clear = 1;
-            if(delOne) {
-                if(!pvt) {
-                    table = table.data;
-                }
-                if(table) {
-                    delOne = table[name];
-                    delete table[name];
-                }
-                for(var key in cache) {
-                    if(key === "data") {
-                        for(var i in cache.data) {
-                            clear = 0;
-                            break;
-                        }
-                    } else {
-                        clear = 0;
-                        break;
-                    }
-                }
-                if(clear) {
-                    owners.splice(index, 1);
-                    caches.splice(index, 1);
-                }
-            }
-            return delOne; //返回被移除的数据
-        }
-    }
-    var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
-    $.mix({
-
-        hasData: function(owner) {
-            //判定是否关联了数据 
-            return owners.indexOf(owner) > -1;
-        },
-
-        data: function(target, name, data) {
-            //读写用户数据
-            return innerData(target, name, data);
-        },
-
-        _data: function(target, name, data) {
-            //读写内部数据
-            return innerData(target, name, data, true);
-        },
-
-        removeData: function(target, name) {
-            //删除用户数据
-            return innerRemoveData(target, name);
-        },
-
-        _removeData: function(target, name) {
-            //移除内部数据
-            return innerRemoveData(target, name, true);
-        },
-
-        parseData: function(target, name, cache, value) {
-            //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
-            var data, _eval, key = $.String.camelize(name);
-            if(cache && (key in cache)) return cache[key];
-            if(arguments.length !== 4) {
-                var attr = "data-" + name.replace(/([A-Z])/g, "-$1").toLowerCase();
-                value = target.getAttribute(attr);
-            }
-            if(typeof value === "string") { //转换 /^(?:\{.*\}|null|false|true|NaN)$/
-                if(rparse.test(value) || +value + "" === value) {
-                    _eval = true;
-                }
-                try {
-                    data = _eval ? eval("0," + value) : value;
-                } catch(e) {
-                    data = value;
-                }
-                if(cache) {
-                    cache[key] = data;
-                }
-            }
-            return data;
-
-        },
-
-        mergeData: function(cur, src) {
-            //合并数据
-            if($.hasData(cur)) {
-                var oldData = $._data(src),
-                    curData = $._data(cur),
-                    events = oldData.events;
-                $.Object.merge(curData, oldData);
-                if(events) {
-                    curData.events = [];
-                    for(var i = 0, item; item = events[i++];) {
-                        $.event.bind(cur, item);
-                    }
-                }
-            }
-        }
-    });
-    return $;
-});
-
-  
-   //==========================================
-// 特征嗅探模块 by 司徒正美
-//==========================================
-define("support", ["mass"], function($) {
-    var DOC = document,
-        div = DOC.createElement('div'),
-        TAGS = "getElementsByTagName";
-    div.setAttribute("className", "t");
-    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>' + '<object><param/></object><table></table><input type="checkbox" checked/>';
-    var a = div[TAGS]("a")[0],
-        style = a.style,
-        select = DOC.createElement("select"),
-        input = div[TAGS]("input")[0],
-        opt = select.appendChild(DOC.createElement("option"));
-    //true为正常，false为不正常
-    var support = $.support = {
-        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
-        insertTbody: !div[TAGS]("tbody").length,
-        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
-        checkOn: input.value === "on",
-        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
-        optSelected: !! opt.selected,
-        //IE67，无法取得用户设定的原始href值
-        attrInnateHref: a.getAttribute("href") === "/nasami",
-        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
-        attrInnateStyle: a.getAttribute("style") !== style,
-        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
-        attrInnateName: div.className !== "t",
-        //IE6-8,对于某些固有属性不会返回用户最初设置的值
-        attrInnateValue: input.getAttribute("checked") == "",
-        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
-        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
-        cssOpacity: style.opacity == "0.25",
-        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
-        cssFloat: !! style.cssFloat,
-        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
-        traverseAll: !! div[TAGS]("param").length,
-        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
-        //IE678不能通过innerHTML生成link,style,script节点（bug）
-        noscope: !div[TAGS]("link").length ,
-        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
-        cloneHTML5: DOC.createElement("nav").cloneNode(true).outerHTML !== "<:nav></:nav>",
-        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
-        //        noCloneEvent: true,
-        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
-        focusin: $["@bind"] === "attachEvent",
-        //IE肯定支持
-        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
-        innerHTML: false,
-        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
-        insertAdjacentHTML: false,
-        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
-        fastFragment: false,
-        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
-        inlineBlock: true,
-        //http://w3help.org/zh-cn/causes/RD1002
-        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
-        //        keepSize: true,
-        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
-        pixelPosition: true,
-        transition: false
-    };
-    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
-    input.checked = true;
-    support.cloneChecked = (input.cloneNode(true).checked === true);
-    support.appendChecked = input.checked;
-    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
-    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
-    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
-    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
-    select.disabled = true;
-    support.optDisabled = !opt.disabled;
-
-    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
-    div.style.backgroundClip = "content-box";
-    div.cloneNode(true).style.backgroundClip = "";
-    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
-    var table = div[TAGS]("table")[0]
-    try { //检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
-        table.innerHTML = "<tr><td>1</td></tr>";
-        support.innerHTML = true;
-        table.insertAdjacentHTML("afterBegin", "<tr><td>2</td></tr>");
-        support.insertAdjacentHTML = true;
-    } catch(e) {};
-
-    a = select = table = opt = style = null;
-    $.require("ready", function() {
-        var body = DOC.body;
-        if(!body) //frameset不存在body标签
-        return;
-        try {
-            var range = DOC.createRange();
-            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
-            support.fastFragment = !! range.createContextualFragment("<a>");
-            $.cachedRange = range;
-        } catch(e) {};
-        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
-        body.insertBefore(div, body.firstChild);
-        var a = '<div style="height:20px;display:inline-block"></div>';
-        div.innerHTML = a + a; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
-        support.inlineBlock = div.offsetHeight < 40; //检测是否支持inlineBlock
-        if(window.getComputedStyle) {
-            div.style.top = "1%";
-            var computed = window.getComputedStyle(div, null) || {}
-            support.pixelPosition = computed.top !== "1%";
-        }
-        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
-        div.innerHTML = "<a href='#'></a>"
-        if(!support.focusin) {
-            a = div.firstChild;
-            a.addEventListener('focusin', function() {
-                support.focusin = true;
-            }, false);
-            a.focus();
-        }
-        div.style.width = div.style.paddingLeft = "10px"; //检测是否支持盒子模型
-        support.boxModel = div.offsetWidth === 20;
-        body.removeChild(div);
-        div = null;
-    });
-    return $;
 });
   
    //=========================================
@@ -4911,7 +4661,7 @@ define("fx", ["css"], function($) {
     };
     var rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
 
-    $.easing = {//缓动公式
+    $.easing = { //缓动公式
         linear: function(pos) {
             return pos;
         },
@@ -4927,7 +4677,7 @@ define("fx", ["css"], function($) {
     function insertFrame(frame) { //插入包含关键帧原始信息的帧对象
         if (frame.queue) { //如果指定要排队
             var gotoQueue = 1;
-            for (var i = timeline.length, el; el = timeline[--i]; ) {
+            for (var i = timeline.length, el; el = timeline[--i];) {
                 if (el.node === frame.node) { //★★★第一步
                     el.positive.push(frame); //子列队
                     gotoQueue = 0;
@@ -4940,7 +4690,7 @@ define("fx", ["css"], function($) {
         } else {
             timeline.push(frame);
         }
-        if (insertFrame.id === null) {//只要数组中有一个元素就开始运行
+        if (insertFrame.id === null) { //只要数组中有一个元素就开始运行
             insertFrame.id = setInterval(deleteFrame, 1000 / $.fps);
         }
     }
@@ -4950,8 +4700,10 @@ define("fx", ["css"], function($) {
         //执行动画与尝试删除已经完成或被强制完成的帧对象
         var i = timeline.length;
         while (--i >= 0) {
-            if (!(timeline[i].node && enterFrame(timeline[i], i))) {
-                timeline.splice(i, 1);
+            if (!timeline[i].paused) { //如果没有被暂停
+                if (!(timeline[i].node && enterFrame(timeline[i], i))) {
+                    timeline.splice(i, 1);
+                }
             }
         }
         timeline.length || (clearInterval(insertFrame.id), insertFrame.id = null);
@@ -4959,8 +4711,9 @@ define("fx", ["css"], function($) {
 
 
     //==============================裁剪用户传参到可用状态===========================
+
     function addOptions(properties) {
-        if (isFinite(properties)) {//如果第一个为数字
+        if (isFinite(properties)) { //如果第一个为数字
             return {
                 duration: properties
             };
@@ -4971,10 +4724,13 @@ define("fx", ["css"], function($) {
             addOption(opts, arguments[i]);
         }
         opts.duration = typeof opts.duration === "number" ? opts.duration : 400;
-        opts.queue = !!(opts.queue == null || opts.queue); //默认进行排队
+        opts.queue = !! (opts.queue == null || opts.queue); //默认进行排队
         opts.easing = $.easing[opts.easing] ? opts.easing : "swing";
+        opts.update = true;
+        opts.method = "noop"
         return opts;
     }
+
     function addOption(opts, p) {
         switch ($.type(p)) {
             case "Object":
@@ -4993,6 +4749,7 @@ define("fx", ["css"], function($) {
                 break;
         }
     }
+
     function addCallback(target, source, name) {
         if (typeof source[name] === "function") {
             var fn = target[name];
@@ -5011,25 +4768,25 @@ define("fx", ["css"], function($) {
     //.animate( properties, options )
     var effect = $.fn.animate = $.fn.fx = function(props) {
         //将多个参数整成两个，第一参数暂时别动
-        var opts = addOptions.apply(null, arguments), p;
+        var opts = addOptions.apply(null, arguments),
+            p;
         //第一个参数为元素的样式，我们需要将它们从CSS的连字符风格统统转为驼峰风格，
         //如果需要私有前缀，也在这里加上
         for (var name in props) {
             p = $.cssName(name) || name;
             if (name !== p) {
                 props[p] = props[name]; //添加borderTopWidth, styleFloat
-                delete props[name];     //删掉border-top-width, float
+                delete props[name]; //删掉border-top-width, float
             }
         }
-        for (var i = 0, node; node = this[i++]; ) {
+        for (var i = 0, node; node = this[i++];) {
             //包含关键帧的原始信息的对象到主列队或子列队。
             insertFrame($.mix({
                 positive: [], //正向列队
                 negative: [], //外队列队
-                method: "noop", //预处理函数名
                 node: node, //元素节点
-                props: props//@keyframes中要处理的样式集合
-            }, opts, false));
+                props: props //@keyframes中要处理的样式集合
+            }, opts));
         }
         return this;
     }
@@ -5040,9 +4797,9 @@ define("fx", ["css"], function($) {
         },
         color: function(node, per, end, obj) {
             var pos = obj.easing(per),
-                    rgb = end ? obj.to : obj.from.map(function(from, i) {
-                return Math.max(Math.min(parseInt(from + (obj.to[i] - from) * pos, 10), 255), 0);
-            });
+                rgb = end ? obj.to : obj.from.map(function(from, i) {
+                    return Math.max(Math.min(parseInt(from + (obj.to[i] - from) * pos, 10), 255), 0);
+                });
             node.style[obj.name] = "rgb(" + rgb + ")";
         },
         scroll: function(node, per, end, obj) {
@@ -5050,13 +4807,14 @@ define("fx", ["css"], function($) {
         }
     };
 
-    function initVal(node, prop) {
-        if (!(prop in node.style) && prop in node) {
+    function getInitVal(node, prop) {
+        if (isFinite(node[prop])) { //scrollTop/ scrollLeft
             return node[prop];
         }
         var result = $.css(node, prop);
         return !result || result === "auto" ? 0 : result;
     }
+
     function getFxType(attr) { //  用于取得适配器的类型
         for (var i in types) {
             if (types[i].test(attr)) {
@@ -5098,13 +4856,14 @@ define("fx", ["css"], function($) {
         hide: function(node, frame) {
             if (node.nodeType === 1 && !$.isHidden(node)) {
                 var display = $.css(node, "display"),
-                        s = node.style;
+                    s = node.style;
                 if (display !== "none" && !$._data(node, "olddisplay")) {
                     $._data(node, "olddisplay", display);
                 }
                 var overflows;
                 if ("width" in frame.props || "height" in frame.props) { //如果是缩放操作
-                    //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
+                    //确保内容不会溢出,记录原来的overflow属性，
+                    //因为IE在改变overflowX与overflowY时，overflow不会发生改变
                     overflows = [s.overflow, s.overflowX, s.overflowY];
                     s.overflow = "hidden";
                 }
@@ -5128,17 +4887,16 @@ define("fx", ["css"], function($) {
         toggle: function(node, fx) {
             $[$.isHidden(node) ? "show" : "hide"](node, fx);
         }
-
     };
 
     function parseFrames(node, fx, index) {
         //用于生成动画实例的关键帧（第一帧与最后一帧）所需要的计算数值与单位，并将回放用的动画放到negative子列队中去
         var to, parts, unit, op, props = [],
-                revertProps = [],
-                orig = {},
-                hidden = $.isHidden(node),
-                hash = fx.props,
-                easing = fx.easing; //公共缓动公式
+            revertProps = [],
+            orig = {},
+            hidden = $.isHidden(node),
+            hash = fx.props,
+            easing = fx.easing; //公共缓动公式
         if (!hash.length) {
             for (var name in hash) {
                 if (!hash.hasOwnProperty(name)) {
@@ -5146,8 +4904,8 @@ define("fx", ["css"], function($) {
                 }
                 var val = hash[name]; //取得结束值
                 var type = getFxType(name); //取得类型
-                var from = initVal(node, name); //取得起始值
-                //用于分解属性包中的样式或属性,变成可以计算的因子
+                var from = getInitVal(node, name); //取得起始值
+                //处理 toggle, show, hide
                 if (val === "toggle") {
                     val = hidden ? "show" : "hide";
                 }
@@ -5156,18 +4914,19 @@ define("fx", ["css"], function($) {
                     val = from;
                     from = 0;
                     $.css(node, name, 0);
-                } else if (val === "hide") { //hide
-                   fx.method = val;
+                } else if (val === "hide") {
+                    fx.method = val;
                     orig[name] = from;
                     val = 0;
                 }
+                //用于分解属性包中的样式或属性,变成可以计算的因子
                 if (type === "color") {
                     parts = [color2array(from), color2array(val)];
                 } else {
                     from = parseFloat(from); //确保from为数字
                     if ((parts = rfxnum.exec(val))) {
                         to = parseFloat(parts[2]), //确保to为数字
-                                unit = $.cssNumber[name] ? 0 : (parts[3] || "px");
+                        unit = $.cssNumber[name] ? 0 : (parts[3] || "px");
                         if (parts[1]) {
                             op = parts[1].charAt(0); //操作符
                             if (unit && unit !== "px" && (op === "+" || op === "-")) {
@@ -5213,7 +4972,7 @@ define("fx", ["css"], function($) {
             for (name in fx) {
                 fx2[name] = fx[name];
             }
-            delete fx2.revert
+            delete fx2.revert;
             fx2.props = fx.revertProps.concat();
             fx2.revertProps = fx.props.concat();
             var el = $.timeline[index];
@@ -5223,40 +4982,41 @@ define("fx", ["css"], function($) {
 
     function callback(fx, node, name) {
         if (fx[name]) {
-            fx[name]( node, fx );
+            fx[name](node, fx);
         }
     }
 
     function enterFrame(fx, index) {
-        //驱动主列队的动画实例进行补间动画(update)，执行各种回调（before, step, after, complete），
+        //驱动主列队的动画实例进行补间动画(update)，
         //并在动画结束后，从子列队选取下一个动画实例取替自身
         var node = fx.node,
-                now = +new Date;
+            now = +new Date;
         if (!fx.startTime) { //第一帧
-            callback(fx, node, "before"); //动画开始前的预操作
-            fx.props && parseFrames(fx.node, fx, index); //添加props属性与设置负向列队
+            callback(fx, node, "before"); //动画开始前做些预操作
+            fx.props && parseFrames(fx.node, fx, index); //parse原始材料为关键帧
             fx.props = fx.props || [];
-            AnimationPreproccess[fx.method](node, fx); //这里用于设置node.style.display
+            AnimationPreproccess[fx.method](node, fx); //parse后也要做些预处理
             fx.startTime = now;
-        } else {
+        } else { //中间自动生成的补间
             var per = (now - fx.startTime) / fx.duration;
-            var end = fx.gotoEnd || per >= 1;
+            var end = fx.gotoEnd || per >= 1; //gotoEnd可以被外面的stop方法操控,强制中止
             var hooks = effect.updateHooks;
-            // 处理渐变
-            for (var i = 0, obj; obj = fx.props[i++]; ) {
-                (hooks[obj.type] || hooks._default)(node, per, end, obj);
+            if (fx.update) {
+                for (var i = 0, obj; obj = fx.props[i++];) { // 处理渐变
+                    (hooks[obj.type] || hooks._default)(node, per, end, obj);
+                }
             }
             if (end) { //最后一帧
                 callback(fx, node, "after"); //动画结束后执行的一些收尾工作
                 callback(fx, node, "complete"); //执行用户回调
-                if (fx.revert && fx.negative.length) {
+                if (fx.revert && fx.negative.length) { //如果设置了倒带
                     Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
                     fx.negative = []; // 清空负向列队
                 }
                 var neo = fx.positive.shift();
                 if (!neo) {
                     return false;
-                }
+                } //如果存在排队的动画,让它继续
                 timeline[index] = neo;
                 neo.positive = fx.positive;
                 neo.negative = fx.negative;
@@ -5269,6 +5029,27 @@ define("fx", ["css"], function($) {
     $.fn.delay = function(ms) {
         return this.fx(ms);
     };
+
+    $.fn.pause = function() {
+        return this.each(function() {
+            for (var i = 0, fx; fx = timeline[i]; i++) {
+                if (fx.node === this) {
+                    fx.paused = new Date - 0;
+                }
+            }
+        });
+    }
+    $.fn.resume = function() {
+        var now = new Date;
+        return this.each(function() {
+            for (var i = 0, fx; fx = timeline[i]; i++) {
+                if (fx.node === this) {
+                    fx.startTime += (now - fx.paused)
+                    delete fx.paused;
+                }
+            }
+        });
+    }
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
     $.fn.stop = function(clearQueue, gotoEnd) {
@@ -5278,28 +5059,29 @@ define("fx", ["css"], function($) {
         return this.each(function() {
             for (var i = 0, fx; fx = timeline[i]; i++) {
                 if (fx.node === this) {
+                    fx.gotoEnd = true;
                     switch (stopCode) { //如果此时调用了stop方法
                         case 0:
                             //中断当前动画，继续下一个动画
-                            fx.update = fx.step = $.noop
+                            fx.update = false;
                             fx.revert && fx.negative.shift();
-                            fx.gotoEnd = true;
                             break;
                         case 1:
                             //立即跳到最后一帧，继续下一个动画
-                            fx.gotoEnd = true;
+                            fx.revert && fx.negative.shift();
                             break;
                         case 2:
                             //清空该元素的所有动画
                             delete fx.node;
                             break;
                         case 3:
-                            Array.prototype.unshift.apply(fx.positive, fx.negative.reverse());
-                            fx.negative = []; // 清空负向列队
-                            for (var j = 0; fx = fx.positive[j++]; ) {
-                                fx.update = fx.step = $.noop
-                                fx.gotoEnd = true; //立即完成该元素的所有动画
-                            }
+                            //立即完成该元素的所有动画
+                            fx.positive.forEach(function(a) {
+                                a.gotoEnd = true;
+                            });
+                            fx.negative.forEach(function(a) {
+                                a.gotoEnd = true;
+                            });
                             break;
                     }
                 }
@@ -5363,11 +5145,11 @@ define("fx", ["css"], function($) {
 
     function beforePuff(node, fx) {
         var position = $.css(node, "position"),
-                width = $.css(node, "width"),
-                height = $.css(node, "height"),
-                left = $.css(node, "left"),
-                top = $.css(node, "top"),
-                opacity = $.css(node, "opacity");
+            width = $.css(node, "width"),
+            height = $.css(node, "height"),
+            left = $.css(node, "left"),
+            top = $.css(node, "top"),
+            opacity = $.css(node, "opacity");
         node.style.position = "relative";
         $.mix(fx.props, {
             width: "*=1.5",
@@ -5388,8 +5170,8 @@ define("fx", ["css"], function($) {
     //扩大1.5倍并淡去
     $.fn.puff = function() {
         var args = [].concat.apply([{}, {
-                before: beforePuff
-            }], arguments);
+            before: beforePuff
+        }], arguments);
         return this.fx.apply(this, args);
     };
     //=======================转换各种颜色值为RGB数组===========================
@@ -5405,7 +5187,7 @@ define("fx", ["css"], function($) {
     };
 
     function parseColor(color) {
-        var value;
+        var value; //在iframe下进行操作
         $.applyShadowDOM(function(wid, doc, body) {
             var range = body.createTextRange();
             body.style.color = color;
@@ -5416,17 +5198,16 @@ define("fx", ["css"], function($) {
 
     function color2array(val) { //将字符串变成数组
         var color = val.toLowerCase(),
-                ret = [];
+            ret = [];
         if (colorMap[color]) {
             return colorMap[color];
         }
         if (color.indexOf("rgb") === 0) {
             var match = color.match(/(\d+%?)/g),
-                    factor = match[0].indexOf("%") !== -1 ? 2.55 : 1;
+                factor = match[0].indexOf("%") !== -1 ? 2.55 : 1;
             return (colorMap[color] = [parseInt(match[0]) * factor, parseInt(match[1]) * factor, parseInt(match[2]) * factor]);
         } else if (color.charAt(0) === '#') {
-            if (color.length === 4)
-                color = color.replace(/([^#])/g, '$1$1');
+            if (color.length === 4) color = color.replace(/([^#])/g, '$1$1');
             color.replace(/\w{2}/g, function(a) {
                 ret.push(parseInt(a, 16));
             });
@@ -5441,19 +5222,266 @@ define("fx", ["css"], function($) {
     //为选择器引擎添加:animated伪类
     try {
         $.query.pseudoHooks.animated = function(el) {
-            for (var i = 0, fx; fx = timeline[i++]; ) {
+            for (var i = 0, fx; fx = timeline[i++];) {
                 if (el === fx.node) {
                     return true;
                 }
             }
         };
-    } catch (e) {
-    }
+    } catch (e) {}
     return $;
 })
 
+  
+   //=========================================
+// 流程模块v1 by 司徒正美 （流程控制，消息交互）
+//=========================================
+define("flow", ["class"], function($) {
+    //观察者模式
+    $.Observer = $.factory({
+        init: function(target) {
+            this._events = {};
+            this._target = target || this;
+        },
+        bind: function(type, callback) {
+            var listeners = this._events[type]
+            if(listeners) {
+                listeners.push(callback)
+            } else {
+                this._events[type] = [callback]
+            }
+            return this;
+        },
+        once: function(type, callback) {
+            var self = this;
+            var wrapper = function() {
+                    callback.apply(self, arguments);
+                    self.unbind(type, wrapper);
+                };
+            this.bind(type, wrapper);
+            return this;
+        },
+        unbind: function(type, callback) {
+            var n = arguments.length;
+            if(n === 0) {
+                this._events = {};
+            } else if(n == 1) {
+                this._events[type] = [];
+            } else {
+                var listeners = this._events[type] || [];
+                var i = listeners.length;
+                while(--i > -1) {
+                    if(listeners[i] === callback) {
+                        return listeners.splice(i, 1);
+                    }
+                }
+            }
+            return this;
+        },
+        fire: function(type) {
+            var listeners = (this._events[type] || []).concat(); //防止影响原数组
+            if(listeners.length) {
+                var target = this._target,
+                    args = $.slice(arguments);
+                args[0] = {
+                    type: type,
+                    target: target
+                }
+                for(var i = 0, callback; callback = listeners[i++];) {
+                    callback.apply(target, args);
+                }
+            }
+        }
+    });
+    //用于处理需要通过N个子步骤才能完成的一些操作
+    //多路监听，收集每个子步骤的执行结果，触发最终回调,解耦回调的深层嵌套
+    $.Flow =  $.Observer.extend({
+        init: function(timeout) {
+            this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
+            if(typeof timeout == "number") {
+                this.timeout = timeout; //用于order,时间限制
+            }
+        },
+        fire: function(type, args) {
+            var calls = this._events,
+                normal = 2,
+                listeners, ev;
+            while(normal--) {
+                ev = normal ? type : last;
+                listeners = calls[ev];
+                if(listeners && listeners.length) {
+                    args = $.slice(arguments, 1)
+                    if(normal) { //在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
+                        if(this._events[ev]) {
+                            this._fired[ev] = args.concat();
+                        }
+                        args.unshift({
+                            type: type,
+                            target: this._target
+                        })
+                    }
+                    for(var i = 0, callback; callback = listeners[i++];) {
+                        //第一次执行目标事件,第二次执行最后的回调
+                        callback.apply(this, args);
+                    }
+                } else {
+                    break;
+                }
+            }
+            return this;
+        },
+        
+        refresh: function() {
+            Array.prototype.push.call(arguments, false);
+            _assign.apply(this, arguments);
+            return this;
+        },
+        
+        reload: function() {
+            Array.prototype.push.call(arguments, true);
+            _assign.apply(this, arguments);
+            return this;
+        },
+        
+        order: function(type) { //
+            if(this._events[type]) {
+                var cur = this._queue.shift();
+                if(!this.timestamp) {
+                    this.timestamp = new Date - 0
+                }
+                var limit = true;
+                if(this.timeout && (new Date - this.timestamp > this.timeout)) {
+                    limit = false;
+                }
+                if(type == cur && limit) {
+                    this.fire.apply(this, arguments);
+                } else {
+                    this._queue = this._order.concat();
+                    this._fired = {};
+                    delete this.timestamp;
+                }
+            }
+        },
+        
+        repeat: function(type, times, callback) {
+            var old = times,
+                that = this,
+                ret = [];
+            function wrapper() {
+                ret.push.apply(ret, $.slice(arguments, 1));
+                if(--times === 0) {
+                    callback.apply(this._target, ret);
+                    times = old;
+                    ret = [];
+                }
+            }
+            that.bind(type, wrapper);
+            return this;
+        },
+        //用于提供一个简单的成功回调
+        done: function(callback) {
+            var that = this;
+            return function(err, data) {
+                if(err) {
+                    return that.fire('error', err);
+                }
+                if(typeof callback === 'string') {
+                    return that.fire(callback, data);
+                }
+                if(arguments.length <= 2) {
+                    return callback(data);
+                }
+                var args = $.slice(arguments, 1);
+                callback.apply(null, args);
+            }
+        },
+         //用于提供一个简单的错误回调
+        fail: function(callback) {
+            var that = this;
+            that.once('error', function(err) {
+                that.unbind();
+                callback(err);
+            });
+            return this;
+        }
+    })
 
+    $.Flow.create = function(names, callback, errorback) {
+        var that = new $.Flow;
+        var args = names.match($.rword) || [];
+        if(typeof errorback === "function") {
+            that.fail(errorback);
+        }
+        args.push(callback)
+        that.refresh.apply(that, args);
+        return that;
+    };
+    var last = "$" + Date.now();
+    var _assign = function(name, callback, reload) {
+            var flow = this,
+                times = 0,
+                uniq = {},
+                events = name.match($.rword),
+                length = events.length;
+            if(!events.length) {
+                return this;
+            }
+            this._queue = events.concat();
+            this._order = events;
 
+            function bind(key) {
+                flow.bind(key, function() {
+                    if(!uniq[key]) {
+                        uniq[key] = true;
+                        times++;
+                    }
+                });
+            }
+            //绑定所有子事件
+            for(var index = 0; index < length; index++) {
+                bind(events[index]);
+            }
+
+            function lastFn() {
+                //如果没有达到目标次数, 或事件类型之前没有指定过
+                if(times < length) {
+                    return;
+                }
+                var result = [];
+                for(var index = 0; index < length; index++) {
+                    result.push.apply(result, flow._fired[events[index]]);
+                }
+                if(reload) {
+                    uniq = {};
+                    times = 0;
+                }
+                callback.apply(flow, result);
+            }
+            flow.bind(last, lastFn);
+        };
+    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
+    //单点发布 自愿收听 单向联接 分散传播
+    $.Twitter = $.factory({
+        init: function() {
+            this.followers = [];
+        },
+        tweet: function(msg) {
+            for(var i = 0; i < this.followers.length; i++) {
+                var follower = this.followers[i];
+                if(follower.handler) {
+                    follower.handler.call(follower.target, msg); //deal
+                }
+            }
+        },
+        follow: function(master, handler) {
+            master.followers.push({
+                target: this,
+                handler: handler
+            });
+        }
+    })
+    return $;
+})
   
    //=========================================
 //  数据交互模块
