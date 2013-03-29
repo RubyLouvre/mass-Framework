@@ -501,7 +501,7 @@ define("node", ["support", "class", "data", "query_neo"], function($) {
         switch (el.nodeType + "") {
             case "1":
             case "9":
-                return "xml" in el ? el.xml : new XMLSerializer().serializeToString(el);
+                return  new XMLSerializer().serializeToString(el);
             case "3":
             case "4":
                 return el.nodeValue;
@@ -667,7 +667,7 @@ define("node", ["support", "class", "data", "query_neo"], function($) {
             return travel(el, "previousSibling").reverse().concat(travel(el, "nextSibling"));
         },
         contents: function(el) { //取所有子孙
-            return el.tagName === "IFRAME" ? el.contentDocument || el.contentWindow.document : $.slice(el.childNodes);
+            return el.tagName === "IFRAME" ? el.contentDocument : $.slice(el.childNodes);
         }
     }, function(name, method) {
         $.fn[name] = function(expr) {
