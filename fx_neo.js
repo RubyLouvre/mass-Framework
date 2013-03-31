@@ -2,8 +2,8 @@
 // 动画模块 v7  Boneless IE10+等现代浏览器专用
 //==========================================
 define("fx", ["css", "event", "attr"], function($) {
-//提供以下原型方法
-//fx animate, fadeIn fadeToggle fadeOut slideUp, slideDown slideToggle show hide toggle delay resume stop
+    //提供以下原型方法
+    //fx animate, fadeIn fadeToggle fadeOut slideUp, slideDown slideToggle show hide toggle delay resume stop
     var easingMap = {
         "linear": [0.250, 0.250, 0.750, 0.750],
         "ease": [0.250, 0.100, 0.250, 1.000],
@@ -36,13 +36,14 @@ define("fx", ["css", "event", "attr"], function($) {
         "easeInOutBack": [0.680, -0.550, 0.265, 1.550],
         "custom": [0.000, 0.350, 0.500, 1.300],
         "random": [Math.random().toFixed(3),
-            Math.random().toFixed(3),
-            Math.random().toFixed(3),
-            Math.random().toFixed(3)]
+        Math.random().toFixed(3),
+        Math.random().toFixed(3),
+        Math.random().toFixed(3)]
     }
 
-//http://css3playground.com/flip-card.php
-    var animation = $.cssName("animation"), animationend;
+    //http://css3playground.com/flip-card.php
+    var animation = $.cssName("animation"),
+        animationend;
     var prefixJS = animation.replace(/animation/i, "");
     var prefixCSS = prefixJS === "" ? "" : "-" + prefixJS.toLowerCase() + "-";
     var eventName = {
@@ -53,12 +54,8 @@ define("fx", ["css", "event", "attr"], function($) {
         try {
             document.createEvent(name);
             animationend = eventName[name];
-        } catch (e) {
-        }
+        } catch (e) {}
     }
-
-    //http://ianlunn.co.uk/articles/opera-12-otransitionend-bugs-and-workarounds/
-    //https://github.com/jquery/jquery-mobile/issues/4521
 
     var playState = $.cssName("animation-play-state");
     var rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
@@ -96,7 +93,7 @@ define("fx", ["css", "event", "attr"], function($) {
 
         opts.duration = duration;
         opts.effect = opts.effect || "fx";
-        opts.queue = !!(opts.queue == null || opts.queue); //默认使用列队
+        opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
         opts.easing = easingMap[opts.easing] ? opts.easing : "easeIn";
         if ("specialEasing" in opts) {
             delete opts.specialEasing;
@@ -108,11 +105,11 @@ define("fx", ["css", "event", "attr"], function($) {
     //.fx( properties [, duration ] [, easing ] [, complete ] )
     //.fx( properties, options )
     //两种传参方式,最后都被整成后面一种
-    $.fn.fx = function(props) {
+    $.fn.animate = $.fn.fx = function(props) {
         var delay = arguments.length === 1 && isFinite(props);
         var opts = {
             queue: true
-        }
+        };
         if (!delay) {
             opts = addOptions.apply(null, arguments);
             for (var name in props) {
@@ -140,25 +137,26 @@ define("fx", ["css", "event", "attr"], function($) {
                 }
             }
         });
-    }
+    };
 
     function nextAnimation(node, queue) {
         if (!queue.busy) {
-            queue.busy = true;
+            queue.busy = 1;
             var args = queue.shift();
             if (isFinite(args)) {
                 setTimeout(function() {
-                    queue.busy = false;
+                    queue.busy = 0;
                     nextAnimation(node, queue);
                 }, args);
             } else if (Array.isArray(args)) {
                 startAnimation(node, args[0], args[1], args[2]);
             } else {
-                queue.busy = false;
+                queue.busy = 0;
             }
         }
     }
     var AnimationRegister = {};
+
     function startAnimation(node, id, props, opts) {
         var effectName = opts.effect;
         var className = "fx_" + effectName + "_" + id;
@@ -177,12 +175,14 @@ define("fx", ["css", "event", "attr"], function($) {
         var before = opts.before || $.noop;
         var complete = opts.complete || $.noop;
         var from = [],
-                to = [];
+            to = [];
         //让一组元素共用同一个类名
         var count = AnimationRegister[className];
+        node[className] = props;
         if (!count) {
             //如果样式表中不存在这两条样式规则
             count = AnimationRegister[className] = 0;
+
             $.each(props, function(key, val) {
                 var selector = key.replace(/[A-Z]/g, function(a) {
                     return "-" + a.toLowerCase();
@@ -220,7 +220,7 @@ define("fx", ["css", "event", "attr"], function($) {
             //ease-in-out：由慢到快再到慢。等同于贝塞尔曲线(0.42, 0, 0.58, 1.0)
             //cubic-bezier(<number>, <number>, <number>, <number>)：特定的贝塞尔曲线类型，4个数值需在[0, 1]区间内
             var easing = "cubic-bezier( " + easingMap[opts.easing] + " )";
-            var classRule = ".#{className}{ #{prefix}animation: #{frameName} #{duration} #{easing}; #{prefix}animation-fill-mode:#{mode}  }";
+            var classRule = ".#{className}{ #{prefix}animation: #{frameName} #{duration} #{easing} #{count} #{direction}; #{prefix}animation-fill-mode:#{mode}  }";
             var frameRule = "@#{prefix}keyframes #{frameName}{ 0%{ #{from}; } 100%{  #{to}; }  }";
             var mode = effectName === "hide" ? "backwards" : "forwards";
             var rule1 = $.format(classRule, {
@@ -229,7 +229,9 @@ define("fx", ["css", "event", "attr"], function($) {
                 easing: easing,
                 frameName: frameName,
                 mode: mode,
-                prefix: prefixCSS
+                prefix: prefixCSS,
+                count: opts.revert ? 2 : 1,
+                direction: opts.revert ? "alternate" : ""
             });
             var rule2 = $.format(frameRule, {
                 frameName: frameName,
@@ -256,11 +258,9 @@ define("fx", ["css", "event", "attr"], function($) {
             complete(node);
             var queue = $._data(node, "fxQueue");
             if (opts.queue && queue) { //如果在列状,那么开始下一个动画
-                queue.busy = false;
+                queue.busy = 0;
                 nextAnimation(node, queue);
             }
-
-
         });
         before(node);
         $(node).addClass(className);
@@ -294,7 +294,7 @@ define("fx", ["css", "event", "attr"], function($) {
                 return false;
             }
             var style = node.style,
-                    overflows;
+                overflows;
             if ("width" in props || "height" in props) { //如果是缩放操作
                 //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
                 overflows = [style.overflow, style.overflowX, style.overflowY];
@@ -319,6 +319,7 @@ define("fx", ["css", "event", "attr"], function($) {
     //========================样式规则相关辅助函数==================================
 
     var styleElement;
+
     function insertCSSRule(rule) {
         //动态插入一条样式规则
         if (styleElement) {
@@ -360,30 +361,13 @@ define("fx", ["css", "event", "attr"], function($) {
         //删除一条@keyframes样式规则
         deleteCSSRule(frameName, true);
     }
-
-    function findKeyframeRuleEndText(ruleName) {
-        //得到一条@keyframes样式规则的最后一帧的内容
-        if (styleElement) {
-            var sheet = styleElement.sheet || styleElement.styleSheet;
-            var cssRules = sheet.cssRules || sheet.rules;
-            for (var i = 0, n = cssRules.length; i < n; i++) {
-                var rule = cssRules[i];
-                if (rule.name === ruleName) {
-                    for (var j = 0, CSSKeyframeRule; CSSKeyframeRule = rule.cssRules[j++]; ) {
-                        if (CSSKeyframeRule.keyText === "100%") { //最得最后一帧
-                            return CSSKeyframeRule.cssText;
-                        }
-                    }
-                }
-            }
-        }
-    }
     //=============================各种合成动画==================================
     var fxAttrs = [
         ["height", "marginTop", "marginBottom", "borderTopWidth", "borderBottomWidth", "paddingTop", "paddingBottom"],
         ["width", "marginLeft", "marginRight", "borderLeftWidth", "borderRightWidth", "paddingLeft", "paddingRight"],
         ["opacity"]
     ];
+
     function genFx(type, num) { //生成属性包
         var obj = {};
         fxAttrs.concat.apply([], fxAttrs.slice(0, num)).forEach(function(name) {
@@ -406,6 +390,15 @@ define("fx", ["css", "event", "attr"], function($) {
             opacity: "toggle"
         }
     };
+
+    $.each(effects, function(method, props) {
+        $.fn[method] = function() {
+            var args = [].concat.apply([props, {
+                effect: method
+            }], arguments);
+            return $.fn.fx.apply(this, args);
+        };
+    });
     ["toggle", "show", "hide"].forEach(function(name, i) {
         var pre = $.fn[name];
         $.fn[name] = function(a) {
@@ -413,90 +406,62 @@ define("fx", ["css", "event", "attr"], function($) {
                 return pre.apply(this, arguments);
             } else {
                 var args = [].concat.apply([genFx(name, 3), {
-                        effect: name
-                    }], arguments);
+                    effect: name
+                }], arguments);
                 return $.fn.fx.apply(this, args);
             }
         };
     });
-    $.each(effects, function(method, props) {
-        $.fn[method] = function() {
-            var args = [].concat.apply([props, {
-                    effect: method
-                }], arguments);
-            return $.fn.fx.apply(this, args);
-        };
-    });
-    function gotoEnd(el, cls) {
-        //暂停动画,让它立即跑到结束帧
-        if (/fx_\w+_\d+/.test(cls)) {
-            var keyName = cls.replace("fx", "keyframe");
-            var cssText = findKeyframeRuleEndText(keyName);
-            if (typeof cssText === "string") {
-                var txt = cssText.replace(/100%\s{/, "").replace(/}$/, "");
-                //浏览器会智能去掉重复的样式
-                el.style.cssText = el.style.cssText + txt;
-                stopAnimation(cls);
-                $(el).removeClass(cls);
-            }
-        }
-    }
-
-    //在当前帧暂停动画
-
-    function pause(el, cls) {
-        if (/fx_\w+_\d+/.test(cls)) {
-            el.style[playState] = "paused";
-        }
-    }
+    //=============================stop delay pause resume========================
     var duration = $.cssName("animation-duration");
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
     $.fn.stop = function(clearQueue, gotoEnd) {
-        clearQueue = clearQueue ? "1" : "";
-        gotoEnd = gotoEnd ? "1" : "0";
-        var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
-        return this.each(function(i, node) {
+        var classNames = {};
+        this.each(function(i, node) {
             var queue = $._data(node, "fxQueue");
-            for (var j = 0, cls; cls = node.classList[j++]; ) {
-                switch (stopCode) { //如果此时调用了stop方法
-                    case 0:
-                        pause(node, cls);
-                        var styles = window.getComputedStyle(node, null);
-                        for (var i in styles) {
-                            node.style[i] = styles[i]
-                        }
-                        node.style[duration] = "0ms";
+            for (var j = 0, cls; cls = node.classList[j++];) {
+                if (/fx_\w+_\d+/.test(cls)) {
+                    classNames[cls] = "mass";
+                    node.style[playState] = "paused";
+                    if (gotoEnd) {
+                        node.style[duration] = "1ms";
                         node.style[playState] = "running";
-                        node.style[duration] = "";
-                        //中断当前动画，继续下一个动画
-                        nextAnimation(node, queue);
-                        break;
-                    case 1:
-                        gotoEnd(node, cls);
-                        nextAnimation(node, queue);
-                        break;
-                    case 2:
-                        pause(node, cls);
-                        var a = (queue || []);
-                        a.length = 0;
-                        a.busy = false;
-                        break;
-                    case 3:
-                        //以后实现
-                        break;
+                    }
+                    var names = node[cls];
+                    var styles = window.getComputedStyle(node, null);
+                    for (var name in names) {
+                        node.style[name] = styles[name];
+                    }
+                    if (clearQueue) {
+                        queue.length = 0;
+                    }
+                    node.style[playState] = "running";
+                    node.classList.remove(cls);
+                    delete node[cls];
+                    queue.busy = 0;
+                    nextAnimation(node, queue)
                 }
             }
         });
+        for (var name in classNames) {
+            if (classNames[name] === "mass") {
+                stopAnimation(name);
+            }
+        }
+        return this;
     };
     $.fn.delay = function(number) {
         return this.fx(number);
     };
+    $.fn.pause = function() {
+        return this.each(function() {
+            this.style[playState] = "paused";
+        });
+    };
     $.fn.resume = function() {
-        return this.each(function(i, el) {
-            if (el.style[playState] === "paused") {
-                el.style[playState] = "running";
-            }
+        return this.each(function() {
+            this.style[playState] = "running";
         });
     };
     return $;
