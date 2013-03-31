@@ -419,27 +419,33 @@ define("fx", ["css", "event", "attr"], function($) {
     //如果gotoEnd 为true，是否跳到此动画最后一帧
     $.fn.stop = function(clearQueue, gotoEnd) {
         return this.each(function(i, node) {
-            var queue = $._data(node, "fxQueue");
+            var queue = $._data(node, "fxQueue"), inline = node.style;
             for (var j = 0, cls; cls = node.classList[j++]; ) {
                 if (/fx_\w+_\d+/.test(cls)) {
-                    node.style[playState] = "paused";
+                    inline[playState] = "paused";
                     if (gotoEnd) {
-                        node.style[duration] = "1ms";
-                        node.style[playState] = "running";
+                        inline[duration] = "1ms";
+                        inline[playState] = "running";
                     }
                     var names = node[cls];
-                    var styles = window.getComputedStyle(node, null);
+                    var computed = window.getComputedStyle(node, null);
                     for (var name in names) {
-                        node.style[name] = styles[name];
+                        inline[name] = computed[name];
                     }
                     if (clearQueue) {
                         queue.length = 0;
                     }
-                    node.style[playState] = "running";
+                    inline[playState] = "running";
                     node.classList.remove(cls);
                     delete node[cls];
                     queue.busy = 0;
                     stopAnimation(cls);
+                    if (!clearQueue && gotoEnd) {
+                        inline[duration] = "";
+                    }
+                    setTimeout(function() {
+                        inline[duration] = "";
+                    });
                     nextAnimation(node, queue);
                 }
             }
