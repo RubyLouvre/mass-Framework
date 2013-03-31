@@ -74,7 +74,6 @@ define("fx", ["css"], function($) {
         opts.queue = !! (opts.queue == null || opts.queue); //默认进行排队
         opts.easing = $.easing[opts.easing] ? opts.easing : "swing";
         opts.update = true;
-        opts.method = "noop"
         return opts;
     }
 
@@ -342,7 +341,7 @@ define("fx", ["css"], function($) {
             callback(fx, node, "before"); //动画开始前做些预操作
             fx.props && parseFrames(fx.node, fx, index); //parse原始材料为关键帧
             fx.props = fx.props || [];
-            AnimationPreproccess[fx.method](node, fx); //parse后也要做些预处理
+            AnimationPreproccess[fx.method || "noop"](node, fx); //parse后也要做些预处理
             fx.startTime = now;
         } else { //中间自动生成的补间
             var per = (now - fx.startTime) / fx.duration;
