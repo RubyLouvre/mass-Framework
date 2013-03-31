@@ -42,14 +42,21 @@ define("fx", ["css", "event", "attr"], function($) {
     }
 
 //http://css3playground.com/flip-card.php
-    var animation = $.cssName("animation");
+    var animation = $.cssName("animation"), animationend;
     var prefixJS = animation.replace(/animation/i, "");
     var prefixCSS = prefixJS === "" ? "" : "-" + prefixJS.toLowerCase() + "-";
-    var animationend = {
-        WebkitAnimation: "webkitAnimationEnd", //webkit safari
-        animation: "animationend", //IE10, firefox, opera12+
-        oAnimation: "oanimationend" //opera12-
-    }[animation];
+    var eventName = {
+        AnimationEvent: 'animationend',
+        WebKitAnimationEventEvent: 'webkitAnimationEnd'
+    };
+    for (var name in eventName) {
+        try {
+            document.createEvent(name);
+            animationend = eventName[name];
+        } catch (e) {
+        }
+    }
+
     //http://ianlunn.co.uk/articles/opera-12-otransitionend-bugs-and-workarounds/
     //https://github.com/jquery/jquery-mobile/issues/4521
 
@@ -90,7 +97,7 @@ define("fx", ["css", "event", "attr"], function($) {
         opts.duration = duration;
         opts.effect = opts.effect || "fx";
         opts.queue = !!(opts.queue == null || opts.queue); //默认使用列队
-        opts.easing = easingMap[opts.easing] ? opts.easing : "ease-in";
+        opts.easing = easingMap[opts.easing] ? opts.easing : "easeIn";
         if ("specialEasing" in opts) {
             delete opts.specialEasing;
             $.log("不再支持specialEasing参数");
@@ -182,9 +189,12 @@ define("fx", ["css", "event", "attr"], function($) {
                 });
                 var parts;
                 //处理show toggle hide三个特殊值
-                if (val === "show" || (val === "toggle" && hidden)) {
+                if (val === "toggle") {
+                    val = hidden ? "show" : "hide";
+                }
+                if (val === "show") {
                     from.push(selector + ":0" + ($.cssNumber[key] ? "" : "px"));
-                } else if (val === "hide" || val === "toggle") { //hide
+                } else if (val === "hide") { //hide
                     to.push(selector + ":0" + ($.cssNumber[key] ? "" : "px"));
                 } else if (parts = rfxnum.exec(val)) {
                     var delta = parseFloat(parts[2]);
@@ -232,7 +242,7 @@ define("fx", ["css", "event", "attr"], function($) {
         }
         AnimationRegister[className] = count + 1;
         $.bind(node, animationend, function fn(event) {
-            $.unbind(this, animationend, fn);
+            $.unbind(this, event.type, fn);
             var styles = window.getComputedStyle(node, null);
             // 保存最后的样式
             for (var i in props) {
@@ -439,18 +449,26 @@ define("fx", ["css", "event", "attr"], function($) {
             el.style[playState] = "paused";
         }
     }
+    var duration = $.cssName("animation-duration");
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
     $.fn.stop = function(clearQueue, gotoEnd) {
         clearQueue = clearQueue ? "1" : "";
         gotoEnd = gotoEnd ? "1" : "0";
         var stopCode = parseInt(clearQueue + gotoEnd, 2); //返回0 1 2 3
-        return this.each(function(i,node) {
+        return this.each(function(i, node) {
             var queue = $._data(node, "fxQueue");
             for (var j = 0, cls; cls = node.classList[j++]; ) {
                 switch (stopCode) { //如果此时调用了stop方法
                     case 0:
                         pause(node, cls);
+                        var styles = window.getComputedStyle(node, null);
+                        for (var i in styles) {
+                            node.style[i] = styles[i]
+                        }
+                        node.style[duration] = "0ms";
+                        node.style[playState] = "running";
+                        node.style[duration] = "";
                         //中断当前动画，继续下一个动画
                         nextAnimation(node, queue);
                         break;
@@ -475,7 +493,7 @@ define("fx", ["css", "event", "attr"], function($) {
         return this.fx(number);
     };
     $.fn.resume = function() {
-        return this.each(function(i,el) {
+        return this.each(function(i, el) {
             if (el.style[playState] === "paused") {
                 el.style[playState] = "running";
             }

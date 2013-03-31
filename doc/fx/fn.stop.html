@@ -54,7 +54,8 @@
                 <button id="stop2" type="button">停止true,false</button>
                 <button id="stop3" type="button">停止true,true</button>
                 <button id="reset" type="button">重置</button></p>
-
+                <button id="resume" type="button">继续</button>
+                <button id="reset" type="button">重置</button></p>
             <div class="container">
                 <div class="test">
                     TEXT
@@ -91,6 +92,12 @@
                 });
                 $("#stop3").click(function(){
                     box.stop(true,true);
+                });
+                $("#pause").click(function() {
+                    box.pause()
+                });
+                $("#resume").click(function() {
+                    box.resume()
                 });
             });
             </pre>

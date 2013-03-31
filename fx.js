@@ -608,5 +608,12 @@ define("fx", ["css"], function($) {
  http://tmlife.net/tag/enchant-js
  GSAP JS, 出自GreenSock的JS动效库，绝对不能错过。包括TweenLite，TweenMax，TimelineLite和TimelineMax，号称比jQuery快20倍！
  http://www.greensock.com/gsap-js/
-
+ 教主Franky(449666) 2013-03-25 14:32:10
+ 说实话,还是html5描述的 spin 模型 给力
+ 教主Franky(449666) 2013-03-25 14:32:30查看前后消息
+ 有兴趣的话 也可以把自己的 事件系统 实现成 spin模型的样子.
+ 司徒正美/mg(1669866773) 2013-03-25 14:32:33
+ 什么spin模型,求地址
+ 教主Franky(449666) 2013-03-25 14:34:37
+ 旋转到一个弹槽,射出一个子弹. spin模型是,旋转到一个队列, 处理n个事物, 不同的队列有不同的权重. 权重高的, 一次处理的事务 比别的多
  */

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <style>
+            #test{
+                width:100px;
+                height:100px;
+                position: absolute;
+                background: red;
+                left:0;
+                -moz-transition: left 5s;
+                -o-transition:left 5s;
+                -webkit-transition:left 5s; 
+                transition:left 5s; 
+            }
+        </style>
+    </head>
+    <body>
+        <div id="test"></div>
+        <br/><br/><br/><br/><br/> 
+        <button id="run">开始动画</button> 
+        <button id="stop">中断动画并移除transition效果</button>
+        <button id="invalid">这次赋值将不会出现动画</button>
+
+        <script>
+            var $ = function(a) {
+                return document.getElementById(a)
+            }
+            var el = $("test")
+            $("run").onclick = function() {
+                el.style.left = "700px"
+            }
+            $("stop").onclick = function() {
+                var left = window.getComputedStyle(el, null).left;
+                el.style.left = left; //暂停
+                ["", "-moz-", "-o-", "-webkit-"].forEach(function(prefix) {
+                    el.style.removeProperty(prefix + "transition")
+                })
+            }
+            $("invalid").onclick = function() {
+                el.style.left = "340px";
+            }
+        </script>
+
+
+    </body>
+</html>

@@ -216,7 +216,7 @@ define("api", ["mass"], function() {
             "xhr": "function"
         },
         "fx": ["fn.fx", "fn.stop","fn.fadeToggle","fn.fadeIn","fn.fadeOut", 
-            "fn.slideDown","fn.slideUp","fn.slideToggle","fn.show","fn.hide","fn.toggle","fn.delay"],
+            "fn.slideDown","fn.slideUp","fn.slideToggle","fn.show","fn.hide","fn.toggle","fn.delay","fn.pause","fn.resume"].sort(),
         "flow": {
             "Flow": "function",
             "flow.bind": "function",
