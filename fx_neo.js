@@ -445,7 +445,7 @@ define("fx", ["css", "event", "attr"], function($) {
                     }
                     setTimeout(function() {
                         inline[duration] = "";
-                    });
+                    }, 35);
                     nextAnimation(node, queue);
                 }
             }
