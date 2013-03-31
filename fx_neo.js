@@ -36,14 +36,14 @@ define("fx", ["css", "event", "attr"], function($) {
         "easeInOutBack": [0.680, -0.550, 0.265, 1.550],
         "custom": [0.000, 0.350, 0.500, 1.300],
         "random": [Math.random().toFixed(3),
-        Math.random().toFixed(3),
-        Math.random().toFixed(3),
-        Math.random().toFixed(3)]
+            Math.random().toFixed(3),
+            Math.random().toFixed(3),
+            Math.random().toFixed(3)]
     }
 
     //http://css3playground.com/flip-card.php
     var animation = $.cssName("animation"),
-        animationend;
+            animationend;
     var prefixJS = animation.replace(/animation/i, "");
     var prefixCSS = prefixJS === "" ? "" : "-" + prefixJS.toLowerCase() + "-";
     var eventName = {
@@ -54,7 +54,8 @@ define("fx", ["css", "event", "attr"], function($) {
         try {
             document.createEvent(name);
             animationend = eventName[name];
-        } catch (e) {}
+        } catch (e) {
+        }
     }
 
     var playState = $.cssName("animation-play-state");
@@ -93,7 +94,7 @@ define("fx", ["css", "event", "attr"], function($) {
 
         opts.duration = duration;
         opts.effect = opts.effect || "fx";
-        opts.queue = !! (opts.queue == null || opts.queue); //默认使用列队
+        opts.queue = !!(opts.queue == null || opts.queue); //默认使用列队
         opts.easing = easingMap[opts.easing] ? opts.easing : "easeIn";
         if ("specialEasing" in opts) {
             delete opts.specialEasing;
@@ -175,7 +176,7 @@ define("fx", ["css", "event", "attr"], function($) {
         var before = opts.before || $.noop;
         var complete = opts.complete || $.noop;
         var from = [],
-            to = [];
+                to = [];
         //让一组元素共用同一个类名
         var count = AnimationRegister[className];
         node[className] = props;
@@ -294,7 +295,7 @@ define("fx", ["css", "event", "attr"], function($) {
                 return false;
             }
             var style = node.style,
-                overflows;
+                    overflows;
             if ("width" in props || "height" in props) { //如果是缩放操作
                 //确保内容不会溢出,记录原来的overflow属性，因为IE在改变overflowX与overflowY时，overflow不会发生改变
                 overflows = [style.overflow, style.overflowX, style.overflowY];
@@ -394,8 +395,8 @@ define("fx", ["css", "event", "attr"], function($) {
     $.each(effects, function(method, props) {
         $.fn[method] = function() {
             var args = [].concat.apply([props, {
-                effect: method
-            }], arguments);
+                    effect: method
+                }], arguments);
             return $.fn.fx.apply(this, args);
         };
     });
@@ -406,8 +407,8 @@ define("fx", ["css", "event", "attr"], function($) {
                 return pre.apply(this, arguments);
             } else {
                 var args = [].concat.apply([genFx(name, 3), {
-                    effect: name
-                }], arguments);
+                        effect: name
+                    }], arguments);
                 return $.fn.fx.apply(this, args);
             }
         };
@@ -417,12 +418,10 @@ define("fx", ["css", "event", "attr"], function($) {
     //如果clearQueue为true，是否清空列队
     //如果gotoEnd 为true，是否跳到此动画最后一帧
     $.fn.stop = function(clearQueue, gotoEnd) {
-        var classNames = {};
-        this.each(function(i, node) {
+        return this.each(function(i, node) {
             var queue = $._data(node, "fxQueue");
-            for (var j = 0, cls; cls = node.classList[j++];) {
+            for (var j = 0, cls; cls = node.classList[j++]; ) {
                 if (/fx_\w+_\d+/.test(cls)) {
-                    classNames[cls] = "mass";
                     node.style[playState] = "paused";
                     if (gotoEnd) {
                         node.style[duration] = "1ms";
@@ -440,16 +439,11 @@ define("fx", ["css", "event", "attr"], function($) {
                     node.classList.remove(cls);
                     delete node[cls];
                     queue.busy = 0;
-                    nextAnimation(node, queue)
+                    stopAnimation(cls);
+                    nextAnimation(node, queue);
                 }
             }
         });
-        for (var name in classNames) {
-            if (classNames[name] === "mass") {
-                stopAnimation(name);
-            }
-        }
-        return this;
     };
     $.fn.delay = function(number) {
         return this.fx(number);
