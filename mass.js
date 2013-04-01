@@ -528,6 +528,7 @@
                 id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath;
         String(list).replace($.rword, function(el) {
+            console.log(el)
             var array = parseURL(el, parent),
                     url = array[0];
             if (array[1] === "js") {
@@ -565,6 +566,7 @@
         //在正常情况下模块只能通过_checkDeps执行
         loadings.unshift(id);
     };
+    require.config = $.config;
     /**
      * 定义模块
      * @param {String} id ? 模块ID

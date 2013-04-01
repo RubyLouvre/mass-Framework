@@ -7,7 +7,7 @@
         <title>$.require</title>
         <script>
             window.$$path  = location.protocol + "//" + location.host;
-            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/mass.js"><\/script>')
             document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
         </script>
     </head>
@@ -111,6 +111,56 @@ require("http://files.cnblogs.com/rubylouvre/random.js,ready,node,css", function
 </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <div id="js_require_ex4" style="width:300px;height:40px;background:white"></div>
+            </fieldset>
+             <fieldset id="loadasync">
+                <legend>例子</legend>
+                <p>按需加载模块，点击时才继续加载。</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+
+require("/doc/scripts/loadtest/aaa,/doc/scripts/loadtest/bbb,ready", function(a,b,$) {
+    var parent = $("#loadasync")
+    parent.append(a);
+    parent.append(b);
+   $("#asynctest").click(function(){
+         require("/doc/scripts/loadtest/ccc,/doc/scripts/loadtest/ddd", function(c, d) {
+               parent.append(c);
+               parent.append(d);
+         })
+    })
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <button id="asynctest" type="button">点我，继续加载新模块</button>
+
+            </fieldset>
+              <fieldset id="loadasync2">
+                <legend>例子</legend>
+                <p>使用别名机制管理模块的链接。</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var path = location.protocol + "//" + location.host +"/doc/scripts/loadtest/"
+require.config({
+    alias: {
+      "aaa": path+"aaa.js",
+      "bbb": path+"bbb.js",
+      "ccc": path+"ccc.js",
+      "ddd": path+"ddd.js",
+   }
+})
+require("aaa,bbb,ready", function(a,b,$) {
+    var parent = $("#loadasync2")
+    parent.append(a);
+    parent.append(b);
+   $("#asynctest2").click(function(){
+         require("ccc,ddd", function(c, d) {
+               parent.append(c);
+               parent.append(d);
+         })
+    })
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <button id="asynctest2" type="button">点我，继续加载新模块</button>
+
             </fieldset>
         </article>
     </body>
