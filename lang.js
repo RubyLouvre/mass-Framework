@@ -414,7 +414,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         }
     });
     //字符串的原生原型方法
-    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,", //es6
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,"+ //es6
             "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         contains: function(target, item) {
