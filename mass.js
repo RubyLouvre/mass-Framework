@@ -354,7 +354,6 @@
      * @return {Array}  ret [url, type]
      * @api private
      */
-
     function parseURL(url, parent, ret) {
         if (/^(mass|ready)$/.test(url)) { //特别处理ready标识符
             return [url, "js"];
@@ -385,15 +384,15 @@
                 }
             }
         }
-        var ext = "js";
         tmp = ret.replace(/[?#].*/, "");
-        if (/\.(css|js)$/.test(tmp)) { // 处理"http://113.93.55.202/mass.draggable"的情况
-            ext = RegExp.$1;
+        var length = tmp.length;
+        if (tmp.slice(length - 3) === ".js") {
+            return [ret, "js"];
+        } else if (tmp.slice(length - 4) === ".css") {
+            return [ret, "css"];
+        } else {
+            return [ret + ".js", "js"];
         }
-        if (ext !== "css" && tmp === ret && !/\.js$/.test(ret)) { //如果没有后缀名会补上.js
-            ret += ".js";
-        }
-        return [ret, ext];
     }
     function getCurrentScript() {
         // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
@@ -417,13 +416,11 @@
              *@http://113.93.50.63/data.js:4
              *IE10:
              *  at Global code (http://113.93.50.63/data.js:4:1)
+             *  //firefox4+ 可以用document.currentScript 
              */
             stack = stack.split(/[@ ]/g).pop(); //取得最后一行,最后一个空格或@之后的部分
             stack = stack[0] === "(" ? stack.slice(1, -1) : stack.replace(/\s/, "");//去掉换行符
             return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
-        }
-        if (DOC.currentScript) { //取得正在解析的script节点 firefox 4+
-            return DOC.currentScript.src;
         }
         var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
         for (var i = 0, node; node = nodes[i++]; ) {
@@ -462,15 +459,15 @@
         }
     }
 
-    function checkFail(node, error) {
+    function checkFail(node, onError, testState) {
         //检测是否死链
         var id = node.src;
         node.onload = node.onreadystatechange = node.onerror = null;
-        if (error || !modules[id].state) {
+        if (onError || (testState && !modules[id].state)) {
             setTimeout(function() {
                 head.removeChild(node);
             });
-            $.log("加载 " + id + " 失败" + error + " " + (!modules[id].state), 7);
+            $.log("加载 " + id + " 失败" + onError + " " + (!modules[id].state), 7);
         } else {
             return true;
         }
@@ -485,7 +482,7 @@
                 //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
                 var factory = parsings.pop();
                 factory && factory.delay(node.src);
-                if (checkFail(node)) {
+                if (checkFail(node, false, !W3C)) {
                     $.log("已成功加载 " + node.src, 7);
                 }
             }
@@ -528,7 +525,6 @@
                 id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath;
         String(list).replace($.rword, function(el) {
-            console.log(el)
             var array = parseURL(el, parent),
                     url = array[0];
             if (array[1] === "js") {
@@ -561,10 +557,11 @@
         };
         if (dn === cn) { //如果需要安装的等于已安装好的
             fireFactory(id, args, factory); //装配到框架中
-            return checkDeps();
+        } else {
+            //在正常情况下模块只能通过_checkDeps执行
+            loadings.unshift(id);
         }
-        //在正常情况下模块只能通过_checkDeps执行
-        loadings.unshift(id);
+        checkDeps();
     };
     require.config = $.config;
     /**
