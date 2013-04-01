@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>$.require</title>
         <script>
-            window.$$path  = location.protocol + "//" + location.host;
+            window.$$path = location.protocol + "//" + location.host;
             document.write('<script src="' + $$path + '/mass.js"><\/script>')
             document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
         </script>
     </head>
-    
+
     <body>
         <article>
             <h3>$.require(deps,callback)</h3>
@@ -75,20 +75,20 @@
 require("lang", function($) {
     alert($.String.toUpperCase("aa"))
 });
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
             </fieldset>
             <fieldset>
                 <legend>例子</legend>
                 <p>加载多个模块。需要注意的是，涉及DOM操作时必须要待到DOM树建完才能进入，因此我们在这里指定了一个标识，叫ready， 它并不一个模块，用户自定义模块，也不要起名叫ready。</p>
                 <pre
-                class="brush:javascript;gutter:false;toolbar:false">
-require("ready,node,attr", function($) {
-    alert($.fn.attr + ""); //这两个方法都循环生成出来,源码上看不出区别
-    alert($.fn.prop + "");
-});
-</pre>
-                    <button class="doc_btn" type="button">点我，执行代码</button>
+                    class="brush:javascript;gutter:false;toolbar:false">
+                    require("ready,node,attr", function($) {
+                    alert($.fn.attr + ""); //这两个方法都循环生成出来,源码上看不出区别
+                    alert($.fn.prop + "");
+                    });
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
             </fieldset>
             <fieldset>
                 <legend>例子</legend>
@@ -97,7 +97,7 @@ require("ready,node,attr", function($) {
 require(["ready", "node", "css"], function($) {
     $("#js_require_ex3").toggle();
 });
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <div id="js_require_ex3" style="display:none;width:300px;height:40px;background:purple;">这是隐藏的，现在把它显示出来</div>
             </fieldset>
@@ -106,34 +106,33 @@ require(["ready", "node", "css"], function($) {
                 <p>加载远程模块。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 require("http://files.cnblogs.com/rubylouvre/random.js,ready,node,css", function(random,$) {
-    $("#js_require_ex4").css("bgc", random.color()); //每点一次随机变换颜色
+    $("#js_require_ex4").css("background", random.rgb()); //每点一次随机变换颜色
 });
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <div id="js_require_ex4" style="width:300px;height:40px;background:white"></div>
             </fieldset>
-             <fieldset id="loadasync">
+            <fieldset id="loadasync">
                 <legend>例子</legend>
                 <p>按需加载模块，点击时才继续加载。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-
-require("/doc/scripts/loadtest/aaa,/doc/scripts/loadtest/bbb,ready", function(a,b,$) {
-    var parent = $("#loadasync")
-    parent.append(a);
-    parent.append(b);
-   $("#asynctest").click(function(){
-         require("/doc/scripts/loadtest/ccc,/doc/scripts/loadtest/ddd", function(c, d) {
-               parent.append(c);
-               parent.append(d);
-         })
-    })
+require("/doc/scripts/loadtest/aaa,/doc/scripts/loadtest/bbb,ready", function(a, b, $) {
+    var node = $("#loadasync");
+    node.append(a);
+    node.append(b);
+    $("#asynctest").click(function() {
+        require("/doc/scripts/loadtest/ccc,/doc/scripts/loadtest/ddd", function(c, d) {
+            node.append(c);
+            node.append(d);
+        });
+    });
 });
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <button id="asynctest" type="button">点我，继续加载新模块</button>
 
             </fieldset>
-              <fieldset id="loadasync2">
+            <fieldset id="loadasync2">
                 <legend>例子</legend>
                 <p>使用别名机制管理模块的链接。</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
@@ -143,7 +142,7 @@ require.config({
       "aaa": path+"aaa.js",
       "bbb": path+"bbb.js",
       "ccc": path+"ccc.js",
-      "ddd": path+"ddd.js",
+      "ddd": path+"ddd.js"
    }
 })
 require("aaa,bbb,ready", function(a,b,$) {
@@ -157,7 +156,7 @@ require("aaa,bbb,ready", function(a,b,$) {
          })
     })
 });
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <button id="asynctest2" type="button">点我，继续加载新模块</button>
 

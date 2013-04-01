@@ -26,7 +26,7 @@
         "undefined": "Undefined"
     };
     var serialize = class2type.toString,
-            basepath;
+            basepath, kernel;
     /**
      * 命名空间
      * @namespace 可变的短命名空间
@@ -271,7 +271,6 @@
          * @return {Mass}
          */
         config: function(settings) {
-            var kernel = $.config;
             for (var p in settings) {
                 if (!hasOwn.call(settings, p))
                     continue;
@@ -325,15 +324,21 @@
             throw new (e || Error)(str);
         }
     });
-    (function(scripts) {
-        var cur = scripts[scripts.length - 1],
-                url = (cur.hasAttribute ? cur.src : cur.getAttribute("src", 4)).replace(/[?#].*/, ""),
-                kernel = $.config;
+    (function() {
+        var cur = getCurrentScript(true)
+        var url = cur.replace(/[?#].*/, "");
+        kernel = $.config;
         basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1);
-        kernel.nick = cur.getAttribute("nick") || "$";
+        var scripts = DOC.getElementsByTagName("script");
+        for (var i = 0, el; el = scripts[i++]; ) {
+            if (el.src === cur) {
+                kernel.nick = el.getAttribute("nick") || "$";
+                break;
+            }
+        }
         kernel.alias = {};
         kernel.level = 9;
-    })(DOC.getElementsByTagName("script"));
+    })();
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
     });
@@ -394,7 +399,7 @@
             return [ret + ".js", "js"];
         }
     }
-    function getCurrentScript() {
+    function getCurrentScript(base) {
         // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
         var stack;
         try {
@@ -422,9 +427,9 @@
             stack = stack[0] === "(" ? stack.slice(1, -1) : stack.replace(/\s/, "");//去掉换行符
             return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
         }
-        var nodes = head.getElementsByTagName("script"); //只在head标签中寻找
+        var nodes = (base ? document : head).getElementsByTagName("script"); //只在head标签中寻找
         for (var i = 0, node; node = nodes[i++]; ) {
-            if (node.className === moduleClass && node.readyState === "interactive") {
+            if ((base || node.className === moduleClass) && node.readyState === "interactive") {
                 return node.className = node.src;
             }
         }
@@ -438,7 +443,6 @@
             }
         }
     }
-
 
     function checkDeps() {
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
@@ -563,7 +567,8 @@
         }
         checkDeps();
     };
-    require.config = $.config;
+    require.config = kernel;
+
     /**
      * 定义模块
      * @param {String} id ? 模块ID
@@ -679,6 +684,16 @@
     global.VBArray && ("abbr,article,aside,audio,base,bdi,canvas,data,datalist,details,figcaption,figure,footer," + "header,hgroup,m,mark,meter,nav,output,progress,section,summary,time,video").replace($.rword, function(tag) {
         DOC.createElement(tag);
     });
+    function innerlog(str, time) {
+        setTimeout(function() {
+            var div = DOC.createElement("pre");
+            div.className = "mass_sys_log";
+            div.innerHTML = str + ""; //确保为字符串
+            DOC.body.appendChild(div);
+        }, time || 2300)
+
+    }
+    innerlog("mass.baseUrl" + getCurrentScript(true))
     //============================HTML5无缝刷新页面支持======================
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind(global, "popstate", function() {
