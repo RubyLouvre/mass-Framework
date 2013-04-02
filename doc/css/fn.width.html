@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
@@ -11,7 +11,7 @@
             document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
         </script>
     </head>
-    
+
     <body>
         <article>
             <style type="text/css">
@@ -79,7 +79,9 @@
                 <span class="note">它可以获取隐藏元素的宽。</span>
             </p>
             <p>w3c的盒子模型</p>
-            <img src="/styles/w3c_width.png" />
+            <script>
+                document.write('<img src="' + $$path + '/doc/styles/css/w3c_width.png" />');
+            </script>
             <fieldset>
                 <legend>例子</legend>
                 <button id="getp">取得测试段落的宽</button>
@@ -102,7 +104,7 @@ $.require("ready,node,css,event", function() {
         showHeight("窗口的宽为", $(window).width());
     });
 })
-</pre>
+                </pre>
             </fieldset>
             <fieldset>
                 <legend>例子</legend>
@@ -114,7 +116,7 @@ $.require("ready,node,css,event", function() {
                 </div>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 $("#sample2 div").width(60).css("backgroundColor", "#a9ea00");
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
             </fieldset>
             <fieldset>
@@ -126,7 +128,7 @@ $("#sample2 div").width(60).css("backgroundColor", "#a9ea00");
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 var a = $("#sample3 div").width() + "px";
 $("#sample3").append("&lt;p&gt;" + a + "&lt;/p&gt;")
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
             </fieldset>
             <fieldset>
@@ -147,7 +149,7 @@ $.require("ready,node,css", function() {
         $.log("window.getComputedStyle(el, null).width " + window.getComputedStyle(el, null).width)
     }
 })
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
                 <div class="box_sizing">
                     <div class="in">与盒子模型有关</div>
