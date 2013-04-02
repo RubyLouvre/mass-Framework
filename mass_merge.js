@@ -753,10 +753,18 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         quote: String.quote || JSON.stringify,
         
         dump: function(obj) {
-            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t";
-            return JSON.stringify(obj, function(key, value) {
+            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t", cache = [],
+            text = JSON.stringify(obj, function(key, value) {
+                if (typeof value === 'object' && value !== null) {//防止环引用
+                    if (cache.indexOf(value) !== -1) {
+                        return;
+                    }
+                    cache.push(value);
+                }
                 return typeof value === "function" ? value + "" : value;
             }, space);
+            cache = [];//GC回收
+            return text;
         },
         
         parseJS: function(code) {
@@ -911,7 +919,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         }
     });
     //字符串的原生原型方法
-    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,"+ //es6
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat," + //es6
             "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         contains: function(target, item) {
@@ -1214,114 +1222,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
     return $
 });
   
-   //=========================================
-// 类工厂模块 v12 by 司徒正美
-//==========================================
-define("class", ["lang"], function($) {
-
-    function bridge() {
-    }
-    var fnTest = /mass/.test(function() {
-        mass;
-    }) ? /\b_super|_superApply\b/ : /.*/;
-
-    var hash = {
-        inherit: function(parent, init) {
-            //继承一个父类，并将它放进_init列表中，并添加setOptions原型方法
-            if (typeof parent == "function") {
-                for (var i in parent) { //继承类成员
-                    this[i] = parent[i];
-                }
-                bridge.prototype = parent.prototype;
-                this.prototype = new bridge; //继承原型成员
-                this._super = parent; //指定父类
-                if (!this.__init__) {
-                    this.__init__ = [parent]
-                }
-            }
-            this.__init__ = (this.__init__ || []).concat();
-            if (init) {
-                this.__init__.push(init);
-            }
-            this.toString = function() {
-                return(init || bridge) + "";
-            }
-            var proto = this.fn = this.prototype;
-            proto.extend = hash.extend;
-            proto.setOptions = function() {
-                var first = arguments[0];
-                if (typeof first === "string") {
-                    first = this[first] || (this[first] = {});
-                    [].splice.call(arguments, 0, 1, first);
-                } else {
-                    [].unshift.call(arguments, this);
-                }
-                $.Object.merge.apply(null, arguments);
-                return this;
-            }
-            return proto.constructor = this;
-        },
-        extend: function(module) {
-            //添加一组原型方法
-            var target = this;
-            Object.keys(module).forEach(function(name) {
-                var fn = target[name], fn2 = module[name]
-                if (typeof fn === "funciton" && typeof fn2 === "function" && fnTest.test(fn2)) {
-                    var __super = function() { //创建方法链
-                        return fn.apply(this, arguments);
-                    };
-                    var __superApply = function(args) {
-                        return fn.apply(this, args);
-                    };
-                    target[name] = function() {
-                        var t1 = this._super;
-                        var t2 = this._superApply;
-                        this._super = __super;
-                        this._superApply = __superApply;
-                        var ret = fn2.apply(this, arguments);
-                        this._super = t1;
-                        this._superApply = t2;
-                        return ret;
-                    };
-                } else {
-                    target[name] = fn2;
-                }
-            });
-            return this;
-        }
-    };
-    function getSubClass(obj) {
-        return  $.factory(this, obj);
-    }
-    $.factory = function(parent, obj) {
-        if (arguments.length === 1) {
-            obj = parent;
-            parent = null;
-        }
-        var statics = obj.statics;//静态成员扩展包
-        var init = obj.init; //构造器
-        delete obj.init;
-        delete obj.statics;
-        var klass = function() {
-            for (var i = 0, init; init = klass.__init__[i++]; ) {
-                init.apply(this, arguments);
-            }
-        };
-        hash.inherit.call(klass, parent, init);//继承了父类原型成员与类成员
-        var fn = klass.fn;
-        var __init__ = klass.__init__;
-        $.mix(klass, statics);//添加类成员
-        klass.prototype = klass.fn = fn;
-        klass.__init__ = __init__;
-        klass.fn.extend(obj);
-        klass.mix = $.mix;
-        klass.extend = getSubClass;
-        return klass;
-    };
-    $.mix($.factory, hash);
-    return $
-});
-  
    //==================================================
 // 数据缓存模块
 //==================================================
@@ -1371,8 +1271,7 @@ define("data", ["lang"], function($) {
         if(index > -1) {
             var delOne = typeof name === "string",
                 table = caches[index],
-                cache = table,
-                clear = 1;
+                cache = table;
             if(delOne) {
                 if(!pvt) {
                     table = table.data;
@@ -1380,19 +1279,8 @@ define("data", ["lang"], function($) {
                 if(table) {
                     delOne = table[name];
                     delete table[name];
-                }
-                for(var key in cache) {
-                    if(key === "data") {
-                        for(var i in cache.data) {
-                            clear = 0;
-                            break;
-                        }
-                    } else {
-                        clear = 0;
-                        break;
-                    }
-                }
-                if(clear) {
+                }//在data_fix模块，我们已经对JSON进行补完
+                if(JSON.stringify(cache) === '{"data":{}}') {
                     owners.splice(index, 1);
                     caches.splice(index, 1);
                 }
@@ -1473,129 +1361,6 @@ define("data", ["lang"], function($) {
 });
 
   
-   //==========================================
-// 特征嗅探模块 by 司徒正美
-//==========================================
-define("support", ["mass"], function($) {
-    var DOC = document,
-        div = DOC.createElement('div'),
-        TAGS = "getElementsByTagName";
-    div.setAttribute("className", "t");
-    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>' + '<object><param/></object><table></table><input type="checkbox" checked/>';
-    var a = div[TAGS]("a")[0],
-        style = a.style,
-        select = DOC.createElement("select"),
-        input = div[TAGS]("input")[0],
-        opt = select.appendChild(DOC.createElement("option"));
-    //true为正常，false为不正常
-    var support = $.support = {
-        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
-        insertTbody: !div[TAGS]("tbody").length,
-        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
-        checkOn: input.value === "on",
-        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
-        optSelected: !! opt.selected,
-        //IE67，无法取得用户设定的原始href值
-        attrInnateHref: a.getAttribute("href") === "/nasami",
-        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
-        attrInnateStyle: a.getAttribute("style") !== style,
-        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
-        attrInnateName: div.className !== "t",
-        //IE6-8,对于某些固有属性不会返回用户最初设置的值
-        attrInnateValue: input.getAttribute("checked") == "",
-        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
-        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
-        cssOpacity: style.opacity == "0.25",
-        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
-        cssFloat: !! style.cssFloat,
-        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
-        traverseAll: !! div[TAGS]("param").length,
-        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
-        //IE678不能通过innerHTML生成link,style,script节点（bug）
-        noscope: !div[TAGS]("link").length ,
-        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
-        cloneHTML5: DOC.createElement("nav").cloneNode(true).outerHTML !== "<:nav></:nav>",
-        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
-        //        noCloneEvent: true,
-        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
-        focusin: $["@bind"] === "attachEvent",
-        //IE肯定支持
-        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
-        innerHTML: false,
-        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
-        insertAdjacentHTML: false,
-        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
-        fastFragment: false,
-        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
-        inlineBlock: true,
-        //http://w3help.org/zh-cn/causes/RD1002
-        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
-        //        keepSize: true,
-        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
-        pixelPosition: true,
-        transition: false
-    };
-    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
-    input.checked = true;
-    support.cloneChecked = (input.cloneNode(true).checked === true);
-    support.appendChecked = input.checked;
-    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
-    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
-    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
-    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
-    select.disabled = true;
-    support.optDisabled = !opt.disabled;
-
-    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
-    div.style.backgroundClip = "content-box";
-    div.cloneNode(true).style.backgroundClip = "";
-    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
-    var table = div[TAGS]("table")[0]
-    try { //检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
-        table.innerHTML = "<tr><td>1</td></tr>";
-        support.innerHTML = true;
-        table.insertAdjacentHTML("afterBegin", "<tr><td>2</td></tr>");
-        support.insertAdjacentHTML = true;
-    } catch(e) {};
-
-    a = select = table = opt = style = null;
-    $.require("ready", function() {
-        var body = DOC.body;
-        if(!body) //frameset不存在body标签
-        return;
-        try {
-            var range = DOC.createRange();
-            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
-            support.fastFragment = !! range.createContextualFragment("<a>");
-            $.cachedRange = range;
-        } catch(e) {};
-        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
-        body.insertBefore(div, body.firstChild);
-        var a = '<div style="height:20px;display:inline-block"></div>';
-        div.innerHTML = a + a; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
-        support.inlineBlock = div.offsetHeight < 40; //检测是否支持inlineBlock
-        if(window.getComputedStyle) {
-            div.style.top = "1%";
-            var computed = window.getComputedStyle(div, null) || {}
-            support.pixelPosition = computed.top !== "1%";
-        }
-        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
-        div.innerHTML = "<a href='#'></a>"
-        if(!support.focusin) {
-            a = div.firstChild;
-            a.addEventListener('focusin', function() {
-                support.focusin = true;
-            }, false);
-            a.focus();
-        }
-        div.style.width = div.style.paddingLeft = "10px"; //检测是否支持盒子模型
-        support.boxModel = div.offsetWidth === 20;
-        body.removeChild(div);
-        div = null;
-    });
-    return $;
-});
-  
    //=========================================
 // 样式操作模块 v5 by 司徒正美
 //=========================================
@@ -1612,7 +1377,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     cssShow = {
         position: "absolute",
         visibility: "hidden",
-        display: "block"
+        display: ""
     };
     //这里的属性不需要自行添加px
     $.cssNumber = $.oneObject("columnCount,fillOpacity,fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
@@ -1732,7 +1497,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                 };
                 for (var name in cssShow) {
                     obj[name] = node.style[name];
-                    node.style[name] = cssShow[name];
+                    node.style[name] = cssShow[name] || $.parseDisplay(node.nodeName);
                 }
                 array.push(obj);
             }
@@ -2064,6 +1829,114 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
         return $.type(node, "Window") ? node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
     }
     return $;
+});
+  
+   //=========================================
+// 类工厂模块 v12 by 司徒正美
+//==========================================
+define("class", ["lang"], function($) {
+
+    function bridge() {
+    }
+    var fnTest = /mass/.test(function() {
+        mass;
+    }) ? /\b_super|_superApply\b/ : /.*/;
+
+    var hash = {
+        inherit: function(parent, init) {
+            //继承一个父类，并将它放进_init列表中，并添加setOptions原型方法
+            if (typeof parent == "function") {
+                for (var i in parent) { //继承类成员
+                    this[i] = parent[i];
+                }
+                bridge.prototype = parent.prototype;
+                this.prototype = new bridge; //继承原型成员
+                this._super = parent; //指定父类
+                if (!this.__init__) {
+                    this.__init__ = [parent]
+                }
+            }
+            this.__init__ = (this.__init__ || []).concat();
+            if (init) {
+                this.__init__.push(init);
+            }
+            this.toString = function() {
+                return(init || bridge) + "";
+            }
+            var proto = this.fn = this.prototype;
+            proto.extend = hash.extend;
+            proto.setOptions = function() {
+                var first = arguments[0];
+                if (typeof first === "string") {
+                    first = this[first] || (this[first] = {});
+                    [].splice.call(arguments, 0, 1, first);
+                } else {
+                    [].unshift.call(arguments, this);
+                }
+                $.Object.merge.apply(null, arguments);
+                return this;
+            }
+            return proto.constructor = this;
+        },
+        extend: function(module) {
+            //添加一组原型方法
+            var target = this;
+            Object.keys(module).forEach(function(name) {
+                var fn = target[name], fn2 = module[name]
+                if (typeof fn === "funciton" && typeof fn2 === "function" && fnTest.test(fn2)) {
+                    var __super = function() { //创建方法链
+                        return fn.apply(this, arguments);
+                    };
+                    var __superApply = function(args) {
+                        return fn.apply(this, args);
+                    };
+                    target[name] = function() {
+                        var t1 = this._super;
+                        var t2 = this._superApply;
+                        this._super = __super;
+                        this._superApply = __superApply;
+                        var ret = fn2.apply(this, arguments);
+                        this._super = t1;
+                        this._superApply = t2;
+                        return ret;
+                    };
+                } else {
+                    target[name] = fn2;
+                }
+            });
+            return this;
+        }
+    };
+    function getSubClass(obj) {
+        return  $.factory(this, obj);
+    }
+    $.factory = function(parent, obj) {
+        if (arguments.length === 1) {
+            obj = parent;
+            parent = null;
+        }
+        var statics = obj.statics;//静态成员扩展包
+        var init = obj.init; //构造器
+        delete obj.init;
+        delete obj.statics;
+        var klass = function() {
+            for (var i = 0, init; init = klass.__init__[i++]; ) {
+                init.apply(this, arguments);
+            }
+        };
+        hash.inherit.call(klass, parent, init);//继承了父类原型成员与类成员
+        var fn = klass.fn;
+        var __init__ = klass.__init__;
+        $.mix(klass, statics);//添加类成员
+        klass.prototype = klass.fn = fn;
+        klass.__init__ = __init__;
+        klass.fn.extend(obj);
+        klass.mix = $.mix;
+        klass.extend = getSubClass;
+        return klass;
+    };
+    $.mix($.factory, hash);
+    return $
 });
   
    //==================================================
@@ -4086,6 +3959,129 @@ define("ajax", ["mass", "flow"], function($) {
                 $.log("iframe.parentNode.removeChild(iframe)")
             });
         }
+    });
+    return $;
+});
+  
+   //==========================================
+// 特征嗅探模块 by 司徒正美
+//==========================================
+define("support", ["mass"], function($) {
+    var DOC = document,
+        div = DOC.createElement('div'),
+        TAGS = "getElementsByTagName";
+    div.setAttribute("className", "t");
+    div.innerHTML = ' <link/><a href="/nasami"  style="float:left;opacity:.25;">d</a>' + '<object><param/></object><table></table><input type="checkbox" checked/>';
+    var a = div[TAGS]("a")[0],
+        style = a.style,
+        select = DOC.createElement("select"),
+        input = div[TAGS]("input")[0],
+        opt = select.appendChild(DOC.createElement("option"));
+    //true为正常，false为不正常
+    var support = $.support = {
+        //标准浏览器只有在table与tr之间不存在tbody的情况下添加tbody，而IE678则笨多了,即在里面为空也乱加tbody
+        insertTbody: !div[TAGS]("tbody").length,
+        // 在大多数游览器中checkbox的value默认为on，唯有chrome返回空字符串
+        checkOn: input.value === "on",
+        //当为select添加一个新option元素时，此option会被选中，但IE与早期的safari却没有这样做,需要访问一下其父元素后才能让它处于选中状态（bug）
+        optSelected: !! opt.selected,
+        //IE67，无法取得用户设定的原始href值
+        attrInnateHref: a.getAttribute("href") === "/nasami",
+        //IE67，无法取得用户设定的原始style值，只能返回el.style（CSSStyleDeclaration）对象(bug)
+        attrInnateStyle: a.getAttribute("style") !== style,
+        //IE67, 对于某些固有属性需要进行映射才可以用，如class, for, char，IE8及其他标准浏览器不需要
+        attrInnateName: div.className !== "t",
+        //IE6-8,对于某些固有属性不会返回用户最初设置的值
+        attrInnateValue: input.getAttribute("checked") == "",
+        //http://www.cnblogs.com/rubylouvre/archive/2010/05/16/1736535.html
+        //是否能正确返回opacity的样式值，IE8返回".25" ，IE9pp2返回0.25，chrome等返回"0.25"
+        cssOpacity: style.opacity == "0.25",
+        //某些浏览器不支持w3c的cssFloat属性来获取浮动样式，而是使用独家的styleFloat属性
+        cssFloat: !! style.cssFloat,
+        //IE678的getElementByTagName("*")无法遍历出Object元素下的param元素（bug）
+        traverseAll: !! div[TAGS]("param").length,
+        //https://prototype.lighthouseapp.com/projects/8886/tickets/264-ie-can-t-create-link-elements-from-html-literals
+        //IE678不能通过innerHTML生成link,style,script节点（bug）
+        noscope: !div[TAGS]("link").length ,
+        //IE6789由于无法识别HTML5的新标签，因此复制这些新元素时也不正确（bug）
+        cloneHTML5: DOC.createElement("nav").cloneNode(true).outerHTML !== "<:nav></:nav>",
+        //在标准浏览器下，cloneNode(true)是不复制事件的，以防止循环引用无法释放内存，而IE却没有考虑到这一点，把事件复制了（inconformity）
+        //        noCloneEvent: true,
+        //现在只有firefox不支持focusin,focus事件,并且它也不支持DOMFocusIn,DOMFocusOut,并且此事件无法通过eventSupport来检测
+        focusin: $["@bind"] === "attachEvent",
+        //IE肯定支持
+        //IE6789的innerHTML对于table,thead,tfoot,tbody,tr,col,colgroup,html,title,style,frameset是只读的（inconformity）
+        innerHTML: false,
+        //IE的insertAdjacentHTML与innerHTML一样，对于许多元素是只读的，另外FF8之前是不支持此API的
+        insertAdjacentHTML: false,
+        //是否支持createContextualFragment API，此方法发端于FF3，因此许多浏览器不支持或实现存在BUG，但它是将字符串转换为文档碎片的最高效手段
+        fastFragment: false,
+        //IE67不支持display:inline-block，需要通过hasLayout方法去模拟（bug）
+        inlineBlock: true,
+        //http://w3help.org/zh-cn/causes/RD1002
+        //在IE678中，非替换元素在设置了大小与hasLayout的情况下，会将其父级元素撑大（inconformity）
+        //        keepSize: true,
+        //getComputedStyle API是否能支持将left, top的百分比原始值自动转换为像素值
+        pixelPosition: true,
+        transition: false
+    };
+    //IE6789的checkbox、radio控件在cloneNode(true)后，新元素没有继承原来的checked属性（bug）
+    input.checked = true;
+    support.cloneChecked = (input.cloneNode(true).checked === true);
+    support.appendChecked = input.checked;
+    //添加对optDisabled,cloneAll,insertAdjacentHTML,innerHTML,fastFragment的特征嗅探
+    //判定disabled的select元素内部的option元素是否也有diabled属性，没有才是标准
+    //这个特性用来获取select元素的value值，特别是当select渲染为多选框时，需要注意从中去除disabled的option元素，
+    //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
+    select.disabled = true;
+    support.optDisabled = !opt.disabled;
+
+    //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
+    div.style.backgroundClip = "content-box";
+    div.cloneNode(true).style.backgroundClip = "";
+    support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
+    var table = div[TAGS]("table")[0]
+    try { //检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
+        table.innerHTML = "<tr><td>1</td></tr>";
+        support.innerHTML = true;
+        table.insertAdjacentHTML("afterBegin", "<tr><td>2</td></tr>");
+        support.insertAdjacentHTML = true;
+    } catch(e) {};
+
+    a = select = table = opt = style = null;
+    $.require("ready", function() {
+        var body = DOC.body;
+        if(!body) //frameset不存在body标签
+        return;
+        try {
+            var range = DOC.createRange();
+            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            support.fastFragment = !! range.createContextualFragment("<a>");
+            $.cachedRange = range;
+        } catch(e) {};
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        body.insertBefore(div, body.firstChild);
+        var a = '<div style="height:20px;display:inline-block"></div>';
+        div.innerHTML = a + a; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
+        support.inlineBlock = div.offsetHeight < 40; //检测是否支持inlineBlock
+        if(window.getComputedStyle) {
+            div.style.top = "1%";
+            var computed = window.getComputedStyle(div, null) || {}
+            support.pixelPosition = computed.top !== "1%";
+        }
+        //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
+        div.innerHTML = "<a href='#'></a>"
+        if(!support.focusin) {
+            a = div.firstChild;
+            a.addEventListener('focusin', function() {
+                support.focusin = true;
+            }, false);
+            a.focus();
+        }
+        div.style.width = div.style.paddingLeft = "10px"; //检测是否支持盒子模型
+        support.boxModel = div.offsetWidth === 20;
+        body.removeChild(div);
+        div = null;
     });
     return $;
 });
