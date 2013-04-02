@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.filter</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.filter( expr )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得当前匹配节点的所有匹配expr的节点，组成新mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。String|Function。CSS表达式，或者是一个回调函数。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新的mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>取得.sample1所有索引值为偶数的LI元素，这经常用于商场或新闻中隔行变色效果。</p>
+                <div class="sample1">
+                    <ul>
+                        <li>list item 1</li>
+                        <li>list item 2</li>
+                        <li>list item 3</li>
+                        <li>list item 4</li>
+                        <li>list item 5</li>
+                        <li>list item 6</li>
+                    </ul>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        <ul>
+            <li>list item 1</li>
+            <li>list item 2</li>
+            <li>list item 3</li>
+            <li>list item 4</li>
+            <li>list item 5</li>
+            <li>list item 6</li>
+        </ul>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css", function() {
+    $(".sample1 li").filter(":nth-child(even)").css("color", "red")
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>使用过滤函数取得只包含一个strong元素的LI元素。</p>
+                <div class="sample2">
+                    <ul>
+                        <li>
+                            <strong>list</strong>item 1 - one strong tag</li>
+                        <li>
+                            <strong>list</strong>item
+                            <strong>2</strong>- two
+                            <span>strong tags</span>
+                        </li>
+                        <li>list item 3</li>
+                        <li>list item 4</li>
+                        <li>list item 5</li>
+                        <li>list item 6</li>
+                    </ul>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample2">
+        <ul>
+            <li><strong>list</strong> item 1 - one strong tag</li>
+            <li><strong>list</strong> item <strong>2</strong> - two <span>strong tags</span></li>
+            <li>list item 3</li>
+            <li>list item 4</li>
+            <li>list item 5</li>
+            <li>list item 6</li>
+        </ul>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css", function() {
+    $(".sample2 li").filter(function(el, i) {
+        return $("strong", el).length == 1
+    }).css("color", "red")
+});
+</pre>
+                <p>使用过滤函数，this是当时正在操作的DOM元素。参数有两个,el与this一样，i为el在mass实例的索引值。</P>
+                <button class="doc_btn"
+                type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>为中间四个加上红框。</p>
+                <style>
+                    .sample3 div { width:60px; height:60px; margin:5px; float:left;  border:2px white solid;}
+                    .sample3{
+                        height: 70px;
+                    }
+                </style>
+                <div class="sample3">
+                    <div></div>
+                    <div class="middle"></div>
+                    <div class="middle"></div>
+                    <div class="middle"></div>
+                    <div class="middle"></div>
+                    <div></div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample3">
+        <div></div>
+        <div class="middle"></div>
+        <div class="middle"></div>
+        <div class="middle"></div>
+        <div class="middle"></div>
+        <div></div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css", function() {
+    $(".sample3 div").css("background", "#c8ebcc").filter(".middle").css("border-color", "red");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -684,16 +684,7 @@
     global.VBArray && ("abbr,article,aside,audio,base,bdi,canvas,data,datalist,details,figcaption,figure,footer," + "header,hgroup,m,mark,meter,nav,output,progress,section,summary,time,video").replace($.rword, function(tag) {
         DOC.createElement(tag);
     });
-    function innerlog(str, time) {
-        setTimeout(function() {
-            var div = DOC.createElement("pre");
-            div.className = "mass_sys_log";
-            div.innerHTML = str + ""; //确保为字符串
-            DOC.body.appendChild(div);
-        }, time || 2300)
 
-    }
-    innerlog("mass.baseUrl" + getCurrentScript(true))
     //============================HTML5无缝刷新页面支持======================
     //https://developer.mozilla.org/en/DOM/window.onpopstate
     $.bind(global, "popstate", function() {

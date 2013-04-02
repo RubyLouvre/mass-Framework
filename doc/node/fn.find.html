@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.find</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.find( expr )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得当前匹配节点的所有匹配expr的后代，组成新mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。String。CSS表达式。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新的mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>搜索.sample1所有后代的span元素，和效果与$(".sample1 span")一样</p>
+                <div class="sample1">
+                    <p>
+                        <span>Hello</span>, how are you?</p>
+                    <p>Me? I'm
+                        <span>good</span>.</p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        <p><span>Hello</span>, how are you?</p>
+        <p>Me? I'm <span>good</span>.</p>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css", function() {
+    $(".sample1").find("span").css("color", "red")
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

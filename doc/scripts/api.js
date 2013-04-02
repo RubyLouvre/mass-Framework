@@ -9,81 +9,16 @@ define("api", ["mass"], function() {
                 "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge,Object.without," +
                 "isPlainObject,isNative,isEmptyObject,isArrayLike,format,range,quote,dump,parseJS,parseJSON,parseXML,isArray,isFunction,each,map").match($.rword).sort(),
         "class": ["factory"],
-        "节点模块": {
-            "fn": {
-                "init": "function",
-                "mass": "number",
-                "length": "number",
-                "valueOf": "function",
-                "toString": "function",
-                "slice": "function",
-                "get": "function",
-                "eq": "function",
-                "gt": "function",
-                "lt": "function",
-                "first": "function",
-                "even": "function",
-                "odd": "function",
-                "last": "function",
-                "each": "function",
-                "map": "function",
-                "collect": "function",
-                "clone": "function",
-                "html": "function",
-                "text": "function",
-                "push": "function",
-                "unshift": "function",
-                "pop": "function",
-                "shift": "function",
-                "splice": "function",
-                "sort": "function",
-                "reverse": "function",
-                "remove": "function",
-                "empty": "function",
-                "append": "function",
-                "appendTo": "function",
-                "prepend": "function",
-                "prependTo": "function",
-                "before": "function",
-                "beforeTo": "function",
-                "after": "function",
-                "afterTo": "function",
-                "replace": "function",
-                "replaceTo": "function",
-                "data": "function",
-                "removeData": "function",
-                "find": "function",
-                "filter": "function",
-                "not": "function",
-                "is": "function",
-                "has": "function",
-                "closest": "function",
-                "index": "function",
-                "parent": "function",
-                "parents": "function",
-                "parentsUntil": "function",
-                "next": "function",
-                "nextAll": "function",
-                "nextUntil": "function",
-                "prev": "function",
-                "prevAll": "function",
-                "prevUntil": "function",
-                "children": "function",
-                "siblings": "function",
-                "contents": "function"
-            },
-            "implement": "function",
-            "extend": "function",
-            "match": "function",
-            "parseHTML": "function"
-        },
+        node: ("fn.after,fn.afterTo,fn.append,fn.appendTo,fn.before,fn.beforeTo,fn.children," +
+                "fn.clone,fn.closest,fn.collect,fn.contents,fn.data,fn.each,fn.empty,fn.eq," +
+                "fn.even,fn.filter,fn.find,fn.first,fn.get,fn.gt,fn.has,fn.html,fn.index,fn.init," +
+                "fn.is,fn.last,fn.length,fn.lt,fn.map,fn.mass,fn.next,fn.nextAll,fn.nextUntil," +
+                "fn.not,fn.odd,fn.parent,fn.parents,fn.parentsUntil,fn.pop,fn.prepend," +
+                "fn.prependTo,fn.prev,fn.prevAll,fn.prevUntil,fn.push,fn.remove,fn.removeData," +
+                "fn.replace,fn.replaceTo,fn.reverse,fn.shift,fn.siblings,fn.slice,fn.sort," +
+                "fn.splice,fn.text,fn.toString,fn.unshift,fn.valueOf,fn.extend,match,parseHTML,cssName").match($.rword).sort(),
         query: "isXML,contains,getText,unique,query".match($.rword).sort(),
-        "数据缓存模块": {
-            "data": "function",
-            "parseData": "function",
-            "removeData": "function",
-            "mergeData": "function"
-        },
+        data: ["data","parseData","removeData","mergeData"],
         "样式模块": {
             "fn": {
                 "css": "function",
@@ -215,8 +150,8 @@ define("api", ["mass"], function() {
             },
             "xhr": "function"
         },
-        "fx": ["fn.fx", "fn.stop","fn.fadeToggle","fn.fadeIn","fn.fadeOut", 
-            "fn.slideDown","fn.slideUp","fn.slideToggle","fn.show","fn.hide","fn.toggle","fn.delay","fn.pause","fn.resume"].sort(),
+        "fx": ["fn.fx", "fn.stop", "fn.fadeToggle", "fn.fadeIn", "fn.fadeOut",
+            "fn.slideDown", "fn.slideUp", "fn.slideToggle", "fn.show", "fn.hide", "fn.toggle", "fn.delay", "fn.pause", "fn.resume"].sort(),
         "flow": {
             "Flow": "function",
             "flow.bind": "function",

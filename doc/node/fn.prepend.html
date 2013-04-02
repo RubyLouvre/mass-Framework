@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.prepend</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.prepend( content )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>向每个匹配的元素内部前置内容。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>content</dt>
+                <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，或dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>原mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="container">
+                    <div class="inner">司徒正美</div>
+                    <div class="inner">司徒正美</div>
+                    <div class="inner">司徒正美</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="container">
+        <div class="inner">司徒正美</div>
+        <div class="inner">司徒正美</div>
+        <div class="inner">司徒正美</div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$(".inner").prepend(' &lt;span style="color:red;"&gt;作者&nbsp;:&nbsp;&lt;/span&gt;');
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p id="aaa">
+                    <strong>Ruby Louvre</strong>
+                </p>
+                <p id="bbb">为博客名！</p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <p id="aaa"><strong>Ruby Louvre</strong></p>
+    <p id="bbb">为博客名！ </p>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#bbb").prepend($("#aaa strong"));
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

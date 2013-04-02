@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.index</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.index( [el] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>从匹配的元素中搜索给定元素的索引值，从0开始计数。。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>el</dt>
+                <dd>可选。CSS表达式，DOM元素，或者dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <ul>
+                <li>如果没有参数，返回第一元素位于其兄弟的位置</li>
+                <li>如果参数是CSS表达式，则先构建一个mass实例，然后返回原实例中第一个元素在新实例中的位置</li>
+                <li>如果参数是节点或mass实例，则返回节点（如果是mass实例则取其第一个元素）位于原实例的位置</li>
+                <li>如果没有找到，返回-1</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample1">
+                    <span class="show_index" style="color:red">点击下面DIV!</span>
+                    <div>First div</div>
+                    <div>Second div</div>
+                    <div>Third div</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        <span class="show_index" style="color:red">点击下面DIV!</span>
+        <div>First div</div>
+        <div>Second div</div>
+        <div>Third div</div>
+    </div>
+    
+</pre>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,css,event", function() {
+    var self = $(".sample1 div").click(function() {
+        var index = self.index(this);
+        $(".show_index").text("点击第" + index + "个DIV");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>返回ID为bar的元素的索引值。</p>
+                <ul class="sample2">
+                    <li id="foo">foo</li>
+                    <li id="bar">bar</li>
+                    <li id="baz">baz</li>
+                </ul>
+                <p class="result1"></p>
+                <p class="result2"></p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="sample2">
+        <li id="foo">foo</li>
+        <li id="bar">bar</li>
+        <li id="baz">baz</li>
+    </ul>
+    <p class="result1"></p>
+    <p class="result2"></p>
+    
+</pre>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,css,event", function() {
+    var listItem = $('#bar');
+    $('.result1').html('方法1  ： ' + $('.sample2 li').index(listItem));
+    $('.result2').html('方法2  ： ' + listItem.index());
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

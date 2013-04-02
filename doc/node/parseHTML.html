@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.parseHTML</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.parseHTML( html, doc)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>一种高级的创建节点的方式。利用createContextualFragment或innerHTML将字符串转换成相应的节点，并且能同时设置样式与属性，在绝大多数情况下
+                效率比createElement高。有关innerHTML与createElement创建节点的效率可见
+                <a href="http://andrew.hedges.name/experiments/innerhtml/">这里</a>注意，它能执行元素的内联事件，如$.parseHTML("&lt;img src=1 onerror=alert(22) /&gt;")。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>html</dt>
+                <dd>必需。String。要转换为节点的字符串。</dd>
+                <dt>doc</dt>
+                <dd>可选。Document。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>文档碎片</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="test"></div>
+                <div class="test"></div>
+                <div class="test"></div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,lang", function() {
+    var str = "&lt;h1&gt;My First&lt;strong&gt;Heading&lt;/strong&gt;&lt;/h1&gt;&lt;p&gt;My first paragraph.&lt;/p&gt;&lt;script&gt;alert('司徒正美')&lt;/script&gt;";
+    document.body.appendChild($.parseHTML(str)) //alert "司徒正美"
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.replace</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.replace(content)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>使用content替换指定的节点。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>content</dt>
+                <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，或dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>原mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="container">
+                    <div class="inner">司徒正美</div>
+                    <div class="inner">司徒正美</div>
+                    <div class="inner">司徒正美</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="container">
+        <div class="inner">司徒正美</div>
+        <div class="inner">司徒正美</div>
+        <div class="inner">司徒正美</div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$(".inner").replace("&lt;dir&gt;新的内容&lt;/dir&gt;")
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("dir").each(function(el, i) {
+    this.innerHTML = this.innerHTML + i
+});
+$("dir:nth-child(1)").replace($("dir:nth-child(2)"));
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

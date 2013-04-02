@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.parentsUntil</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.parentsUntil( [expr] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>查找当前元素的所有祖先，直到遇到选择器匹配的元素为止，不包括那个匹配到的元素。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>可选，String，CSS表达式，用于确定到哪个祖先时停止匹配。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>查找 &lt;li class="item-a"&gt; 的前辈，直到 &lt;ul class="level-1"&gt; 为止，并给它们设置红色背景。</p>
+                <ul
+                class="level-1">
+                    <li class="item-i">I</li>
+                    <li class="item-ii">II
+                        <ul class="level-2">
+                            <li class="item-a">A</li>
+                            <li class="item-b">B
+                                <ul class="level-3">
+                                    <li class="item-1">1</li>
+                                    <li class="item-2">2</li>
+                                    <li class="item-3">3</li>
+                                </ul>
+                            </li>
+                            <li class="item-c">C</li>
+                        </ul>
+                    </li>
+                    <li class="item-iii">III</li>
+                    </ul>
+                    <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="level-1">
+        <li class="item-i">I</li>
+        <li class="item-ii">II
+            <ul class="level-2">
+                <li class="item-a">A</li>
+                <li class="item-b">B
+                    <ul class="level-3">
+                        <li class="item-1">1</li>
+                        <li class="item-2">2</li>
+                        <li class="item-3">3</li>
+                    </ul>
+                </li>
+                <li class="item-c">C</li>
+            </ul>
+        </li>
+        <li class="item-iii">III</li>
+    </ul>
+    
+</pre>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    $('li.item-a').parentsUntil('.level-1').css('background-color', 'red');
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

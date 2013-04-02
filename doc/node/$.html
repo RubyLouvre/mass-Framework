@@ -1,0 +1,116 @@
+DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$ 节点集合生成器与选择器</title>
+        <script src="../public/js/mass_merge.js" type="text/javascript" ></script>
+        <script src="../public/js/common.js" type="text/javascript" ></script>
+        <script src="../public/js/shCore.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushJScript.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushCss.js" type="text/javascript" ></script>
+        <script src="../public/js/shBrushXml.js" type="text/javascript" ></script>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shCore.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/shThemeRDark.css"/>
+        <link type="text/css" rel="stylesheet" href="../public/styles/common.css"/>
+        <style type="text/css">
+
+        </style>
+        <script type="text/javascript">
+            SyntaxHighlighter.config.clipboardSwf = '../js/clipboard.swf';
+            SyntaxHighlighter.all();
+            var exec1 = function(){
+                $("<li><strong>司徒正美</strong></li>").beforeTo(".container li:first-child");
+            }
+            var exec2 = function(){
+                $("<li><em>司徒正美</em><script>alert('动态执行代码！')<\/script></li>").afterTo(".container li:last-child");
+            }
+            var exec3 = function(){
+                $(".container").append("<div>append上去。</div>");
+            }
+            var exec4 = function(){
+                var $body = $(document.body).data("aaa","CCC");
+                $.log($body.data("aaa"),true)
+            }
+            var exec5 = function(){
+                var all = $(document.body.childNodes);
+                $.log([all[0],all[2],all.length],true);//因mass实例已类数组对象，可以像数组那样操作
+            }
+            var exec6 = function(){
+                $(function(){
+                    $.log("执行ready回调",true);
+                });
+            }
+            var exec7 = function(){
+                $.log($("body")[0],true);
+            }
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$(expr, [scope])</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>整个框架的入口函数，使用多态参数，随第一个参数的类型决定其行为，通常情况下都是返回一个mass实例。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。可以为CSS表达式，document, window，元素节点，符合HTML嵌套结构的字符串，mass实例， 函数。</dd>
+                <dt>scope</dt>
+                <dd>可选。document或元素节点。</dd>
+            </dl>
+            <p><span class="stress">返回值：</span></p>
+            <p>如果expr不为函数，则返回mass实例。</p>
+            <fieldset><legend>例子</legend>
+                <p>通过dom创建HTML插入到页面</p>
+                <ul class="container">
+                    <li class="inner" >列表1</li>
+                    <li class="inner" >列表1</li>
+                    <li class="inner" >列表1</li>
+                    <li class="inner" >列表1</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+      &lt;ul class="container"&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+      &lt;/ul&gt;
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("&lt;li&gt;&lt;strong&gt;司徒正美&lt;/strong&gt;&lt;/li&gt;").beforeTo(".container li:first-child");            </pre>
+                <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+     $("&lt;li&gt;&lt;em&gt;司徒正美&lt;/em&gt;&lt;script&gt;alert('动态执行代码！')&lt;\/script&gt;&lt;/li&gt;").after(".container:last-child");
+                </pre>
+                <button class="doc_btn" onclick="exec2()">点我，执行代码</button>
+                <p>选择某个元素再进操作</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+     $(".container").append("&lt;div&gt;append上去。&lt;/div&gt;");
+                </pre>
+                <button class="doc_btn" onclick="exec3()">点我，执行代码</button>
+                <p>传入某个元素再进操作</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+        var $body = $(document.body).data("aaa","CCC");
+        $.log($body.data("aaa"),true)
+                </pre>
+                <button class="doc_btn" onclick="exec4()">点我，执行代码</button>
+                <p>传入NodeList进行操作</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+        var all = $(document.body.childNodes);
+        $.log([all[0],all[2],all.length],true);//因mass实例已类数组对象，可以像数组那样操作
+                </pre>
+                <button class="doc_btn" onclick="exec5()">点我，执行代码</button>
+                <p>传入函数，相当于$.require("ready,node,event,fx",fn)</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+       $(function(){
+            $.log("执行ready回调",true)
+       });
+                </pre>
+                <button class="doc_btn" onclick="exec6()">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+       $.log($("body")[0],true);
+                </pre>
+                <button class="doc_btn" onclick="exec7()">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+</html>

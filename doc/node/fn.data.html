@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.data</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.data</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对实例中的每一个元素存入或读出指定数据。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <ul>
+                <li>$.fn.data(): 什么也不传,返回其缓存体,并且包括标签内的data-*特值.</li>
+                <li>$.fn.data(str): 取得相应的缓存数据.</li>
+                <li>$.fn.data(str,val): 缓存数据到框架内部的缓存体.</li>
+                <li>$.fn.data(obj): 缓存一组数据到框架内部的缓存体.</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <p>更换innerHTML</p>
+                <ul class="container">
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表1</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="container">
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表1</li>
+    </ul>
+    
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    $(".container li").data("aa", "bb");
+    $.log($(".container li").data("aa"), true);
+})
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>
