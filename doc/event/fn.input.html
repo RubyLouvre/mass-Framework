@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.input</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #show_result1 { color:red; }
+                #show_result2 { color:green; }
+            </style>
+            <h3>$.fn.input([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>当文本域或文本区的内容发生改变时立即响应的回调，这常用于类似百度google首页的那种搜索框，或者用户登陆或注册时， 对于用户输入进行即时验证。</p>
+            <p>此事件可以支持bind,delegate,fire等接口，尽管fire没什么用处。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <form class="test_submit" action="javascript:void(0)">
+                    <input class="textinputchange1" value="文本域1" />
+                    <input class="passwordchange1" type="password" value="测试1" />
+                    <br/>
+                    <textarea class="textareachange1">文本区</textarea>
+                    <div id="show_result1"></div>
+                    <hr/>
+                    <input class="textinputchange2" value="文本域2" />
+                    <input class="passwordchange2" type="password" value="测试2" />
+                    <br/>
+                    <textarea class="textareachange2">文本区</textarea>
+                    <br/>
+                    <div id="show_result2"></div>
+                </form>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+      &lt;form class="test_submit" action="javascript:void(0)" &gt;
+            &lt;input class="textinputchange1" value="文本域1" /&gt;
+            &lt;input class="passwordchange1"  type="password" value="测试1"/&gt;&lt;br/&gt;
+            &lt;textarea class="textareachange1"&gt;文本区&lt;/textarea&gt;
+            &lt;div id="show_result1"&gt;&lt;/div&gt;&lt;hr/&gt;
+            &lt;input class="textinputchange2" value="文本域2" /&gt;
+            &lt;input class="passwordchange2"  type="password" value="测试2"/&gt;&lt;br/&gt;
+            &lt;textarea class="textareachange2"&gt;文本区&lt;/textarea&gt;&lt;br/&gt;
+            &lt;div id="show_result2"&gt;&lt;/div&gt;
+        &lt;/form&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    function log(first, type, i) {
+        $("#show_result" + i).append(first + "测试" + type + "的事件" + (i == 1 ? "绑定" : "代理") + "<br/>");
+    }
+    //===================事件绑定=====================
+    $(".textinputchange1").input(function(e) {
+        log('text', e.type, 1);
+    });
+    $(".passwordchange1").input(function(e) {
+        log('pawword', e.type, 1);
+    });
+    $(".textareachange1").input(function(e) {
+        log('textarea', e.type, 1);
+    });
+    //===================事件绑定=====================
+    $("body").delegate(".textinputchange2", "input", function(e) {
+        log('text', e.type, 2);
+    });
+    $("body").delegate(".passwordchange2", "input", function(e) {
+        log('password', e.type, 2);
+    });
+    $("body").delegate(".textareachange2", "input", function(e) {
+        log('textarea', e.type, 2);
+    });
+})
+</pre>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

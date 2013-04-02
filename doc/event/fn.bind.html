@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.bind</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #red {
+                    width: 150px;
+                    height: 150px;
+                    background: red;
+                }
+            </style>
+            <h3>$.fn.bind(types,[ fn ], [ selector ], [ times ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>$.fn.on的别名方法，详细用法请见
+                <a href="$.fn.on.html">这里</a>
+            </p>
+            <h3>bind，live，delegate方法的区别</h3>
+            <p>首先，让我们观察一个很简单的页面，其DOM结构如下：</p>
+            <center>
+                <img src="/styles/event_dom_fn_bind_page.png" />
+            </center>
+            <p>然后我们为里面的A链接绑定一个单击事件</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('a').bind('click', function() {
+    alert("发生点击事件!")
+});
+</pre>
+            <p>然后单击它</p>
+            <center>
+                <img src="/styles/event_dom_fn_bind_click.png" />
+            </center>
+            <p>由于没有return false也没有stopPropagation，它就会沿着其祖先，一层层往上冒泡，并尝试触发沿途元素的click事件，如果存在的话</p>
+            <center>
+                <img src="/styles/event_dom_fn_bind_bubbling.png" />
+            </center>
+            <p>好了，我们再看看这几个方法是怎么实现的</p>
+            <h4>.bind()</h4>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('a').bind('click', function() {
+    alert("发生点击事件!")
+});
+</pre>
+            <p>它会把当前文档中的所有a链接找出来，逐个绑定单击事件，如果页面上有十个a链接，它会绑定十次。</p>
+            <h4>.live()</h4>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('a').live('click', function() {
+    alert("发生点击事件!")
+});
+</pre>
+            <p>它会把这个单击事件绑定到文档对象上,然后把a作为匹配器，每当页面发生事件时，如果这事件能传播到文档对象（不管是通过冒泡还是捕获）， 总之，我们能取得事件消息对象就行了，然后再取得其中的事件源对象，然后看它的事件类型是否为click，
+                元素本身是否匹配a这个CSS表达式，如果都满足则触发这个回调。因此无论页面上有多少个链接，只需要绑定一个监听器。</p>
+            <h4>.delegate()</h4>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('.container').delegate('a', 'click', function() {
+    alert("发生点击事件!")
+});
+</pre>
+            <p>它会把单击事件绑定到.container元素上，然后把a作为匹配器，每当页面发生事件时，如果这事件能传播到这些类名为 container元素（不管是通过冒泡还是捕获），
+                总之，我们能取得事件消息对象就行了，然后再取得其中的事件源对象，然后看它的事件类型是否为click， 元素本身是否匹配a这个CSS表达式，如果都满足则触发这个回调。因此delegate与live的行为是极其相似的，
+                $('a').live('click', fn) 相当于$(document).live('a','click',fn)。由于delegate能同时指定两个CSS表达式，因此它更为灵活。
+                由于delegate是把监听器绑定到DOM树中间，而不是顶层的文档对象上，因此冒泡（或捕获）的路径更短， 需要检测的节点就更少。因此对非常复杂的页面，使用它来添加事件，能大大提高性能。</p>
+            <p>live与delegate方向最大的不同之外是，live可以不用等到DOM建完之前就可以使用了，因为document对象总是存在,退一步说，
+                head也已存在了。因此我们总要通过head上的script标签来引用我们的核心模块。 但delegate不能绑定在head来监听。因为页面的内容都是由body的孩子传播上来的。</p>
+            <p>但要注意，live方法要求我们提供一个明确的CSS表达式用于匹配。如下面的例子，能正常工作：</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$("li a").live(...)
+$("li a").slice(3).live(...);
+$("li a").first().live(...)
+$("li a").gt(1).live(...) //slice first last eq gt lt都是切片操作，不会改变内部的selector属性
+</pre>
+            <p>但下面几种就不行了:</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$("a", someElement).live(...)
+$("a").parent().live(...)
+$("a").next().live(...)
+$("a").children().live(...) //这些操作会寻找近邻节点构建交的实例，其selector已不是a了！
+</pre>
+            <p>但不管怎么说，在mass Framework中，事件代理已发展得很完善，通过事件冒充得手段，成功模块老式IE那些不能冒泡的事件 如change,
+                submit, reset，focus, blur。并且delegate的第一个参数并不限是一个CSS表达式，可以为函数。可以让用户制定规则
+                来匹配元素。因此强烈建议使用delegate与live代替bind(on)。</p>
+            <p>虽然delegate是基于bind(on)上实现的，但它内部还是做了一些工作，让它比$('.container').on( 'click',
+                fn, 'a' })快。</p>
+            <p>相应源码：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+on: function(types, fn, selector, times) {
+    if (typeof types === "object") {
+        for (var type in types) {
+            this.on(type, types[type], selector, times);
+        }
+        return this;
+    }
+    if (!types || !fn) { //必须指定事件类型与回调
+        return this;
+    }
+    return this.each(function() { //转交dispatch模块去处理
+        system.bind.call(this, types, fn, selector, times);
+    });
+},
+one: function(types, fn) {
+    return this.on(types, fn, null, 1);
+},
+bind: function(types, fn, times) {
+    return this.on(types, fn, times);
+},
+
+live: function(types, fn, times) {
+    $(this.ownerDocument).on(types, fn, this.selector, times);
+    return this;
+},
+
+delegate: function(selector, types, fn, times) {
+    if (typeof selector === "string") { //拆解选择器，用于快速匹配
+        selector = quickParse(selector) || selector;
+    }
+    return this.on(types, fn, selector, times);
+},
+</pre>
+            <fieldset>
+                <legend>例子</legend>
+                <div id="red"></div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $("body").bind("click", function(e) {
+        $.log("333333333");
+    });
+    $("#red").bind("click", function(e) {
+        $.log("11111111111");
+    });
+    $("#red").bind("click", function(e) {
+        $.log("22222222222");
+    });
+
+    $("#red").fire("click", 1, 2, 3);
+    setTimeout(function() {
+        $("body").unbind("click");
+        $("#red").unbind("click");
+    }, 10000)
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

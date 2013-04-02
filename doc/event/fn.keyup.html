@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.keyup</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+            </style>
+            <h3>$.fn.keyup([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 keyup 事件绑定一个处理函数，或者触发元素上的 keyup 事件。</p>
+            <p>这个函数的第一种用法是 .bind('keyup', handler) 的快捷方式，第二种用法是 .fire('keyup') 的快捷方式。</p>
+            <p>javascript事件主要通过以下三个事件来捕获键盘事件：onkeydown,onkeypress与onkeyup。 该三个事件的执行顺序如下：onkeydown
+                -> onkeypress ->onkeyup。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>测试onkeydown,onkeypress与onkeyup的执行顺序.</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var callback = function(e) {
+        $(".sample").height($(".sample div").append(e.type + "&lt;br/&gr;").height() + 30)
+    }
+    $(".sample input").bind({
+        keydown: callback,
+        keypress: callback,
+        keyup: callback
+    })
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <input>
+                    <div></div>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

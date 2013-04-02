@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.Event</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    border:1px solid #a9ea00;
+                    width:200px;
+                    height:200px;
+                    background: red;
+                }
+            </style>
+            <h3>$.Event(e)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于标准化或模拟一个符合W3C标准的事件对象，e可以为原生事件或表示类型的字符串。</p>
+            <p>它至少拥有如下属性或方法</p>
+            <ul>
+                <li>originalEvent：保存原来事件对象，如果e为字符串，则为一个普通的对象。</li>
+                <li>type：String，事件类型。</li>
+                <li>timeStamp：创建这事件对象时的时间截。</li>
+                <li>namespace：用于判定是否已被包装与在事件系统中解绑事件回调。</li>
+                <li>preventDefault()：阻止浏览器的默认行为。</li>
+                <li>stopPropagation()：停止事件传播（冒泡或捕获）。</li>
+                <li>stopImmediatePropagation()：阻止同类型事件的下一个回调执行。</li>
+            </ul>
+            <h3>事件的命名空间</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>我们在开发插件时通常需要考虑到如何取消我们插件做过的事，换言之就反向操作。我们第一个想到的是，定义一个带"un"前缀的方法，如wrap对应unwrap,
+                lock对应unlock...另一种做法是使用匿名函数作为事件回调。移除事件对于dom Framework是小菜一碟，并且不同于浏览器提供的那个API（removeEventListener,detachEvent
+                ） 需要定义一个有名函数，使用保持着它待到卸载时使用。它使用命名空间来修饰事件类型。</p>
+            <p>举个例子，我们搞个插件叫"clicked"，它提供两个方法clicked与unclicked。clicked方法会叫调用它的元素在点击时添加一个叫"clicked"的类名，
+                而unclicked则会去掉这个类名并卸载click事件。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+(function(global, DOC) {
+    var dom = global[DOC.URL.replace(/(#.+|\W)/g, '')];
+    $.defind("clicked", "css,event", function($) {
+        $.fn.extend({
+            clicked: function() {
+                return this.bind('click', function() {
+                    $(this).addClass('clicked');
+                });
+            },
+            unclicked: function() {
+                return this.removeClass('clicked').unbind('click');
+            }
+        });
+
+    });
+})(this, this.document)
+</pre>
+            <p>使用方法：</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+$('div').clicked(); //绑定事件
+$('div').unclicked(); //卸载事件
+</pre>
+            <p>但这样做有一个问题，如果我有另一个插件也对点击事件进行改造，并恰恰这两个事件都绑定在同一组元素上时， 如果我这时调用unclicked方法，就会把另一个插件绑定的点击事件也卸载掉。</p>
+            <p>这时我们就需要用到命名空间，在移除事件时做一些限制，防止把不该卸载的也卸载了。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+(function(global, DOC) {
+    var dom = global[DOC.URL.replace(/(#.+|\W)/g, '')];
+    $.defind("clicked", "css,event", function($) {
+        $.fn.extend({
+            clicked: function() {
+                return this.bind('click.clicked', function() {
+                    $(this).addClass('clicked');
+                });
+            },
+            unclicked: function() {
+                return this.removeClass('clicked').unbind('click.clicked');
+            }
+        });
+
+    });
+})(this, this.document)
+</pre>
+            <p>有关namespace的实际操作可看下面例子！</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample"></div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,event", function() {
+    $(".sample").bind("click.aaa.bbb", function() {
+        $.log("has two namespaces!", true);
+        $.log([].slice.call(arguments), true)
+    });
+    $(".sample").fire("click.aaa", 1, 2, 3, 4, 5, 6);
+    $(".sample").unbind("click.eee"); //没有用
+    $(".sample").fire("click.aaa", "aaa", "bbb", "ccc");
+    $(".sample").fire("click.bbb", "XXX", "YYY", "ZZZ");
+    $(".sample").unbind("click.bbb"); //生效
+    $(".sample").fire("click.bbb", "不能再fire");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

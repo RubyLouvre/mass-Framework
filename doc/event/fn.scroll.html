@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.sroll</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.sroll([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 sroll 事件绑定一个处理函数，或者触发元素上的 sroll 事件。</p>
+            <p>这个函数的第一种用法是 .bind('sroll', handler) 的快捷方式，第二种用法是 .fire('sroll') 的快捷方式。</p>
+            <p>此事件适应于window以及所有带滚动条的元素节点</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $("p").clone().appendTo("body");
+    $("p").clone().appendTo("body");
+    $("p").clone().appendTo("body");
+    $(window).scroll(function() {
+        $("span").show().fadeOut(2000);
+    });
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <iframe frameborder=0 src="$.fn.scroll.iframe.html" style="width:90%;height:200px;"></iframe>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

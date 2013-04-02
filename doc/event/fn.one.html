@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.one</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1{
+                    background: #9932CC;
+                }
+                .sample1 div { width:60px; height:60px; margin:5px; float:left;
+                               background:green; border:10px outset;
+                               cursor:pointer; }
+                .sample1 p { color:red; margin:0; clear:left; }
+            </style>
+            <h3>$.fn.one(types,[ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>只允许被绑定的事件回调执行一次就自行卸载，如果想限制其他次数，请使用
+                <a href="$.fn.on.html">on</a>方法</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>types</dt>
+                <dd>如果是字符串则为事件类型，如果为对象则允许同时绑定多种事件，键为事件类型，值为回调函数。</dd>
+                <dt>fn</dt>
+                <dd>在types为对象时是可选，为字符串是必需，这时它是回调函数</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>点击第一个按钮只会为自己加1，点击第二个按钮会为两者加1</p>
+                <div class="sample1">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <p>请点击上面的方块。。。</p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+            &lt;div class="sample1"&gt;
+                &lt;button&gt;Button #1&lt;/button&gt;
+                &lt;button&gt;Button #2&lt;/button&gt;
+                &lt;div&gt;&lt;span&gt;0&lt;/span&gt; button #1 clicks.&lt;/div&gt;
+                &lt;div&gt;&lt;span&gt;0&lt;/span&gt; button #2 clicks.&lt;/div&gt;
+            &lt;/div&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,css", function() {
+    var n = 0;
+    var divs = $(".sample1 div").one("click", function() {
+        var index = divs.index(this);
+        $(this).css({
+            borderStyle: "inset",
+            cursor: "auto"
+        });
+        $(".sample1").text("Div at index #" + index + " clicked." + "  That's " + ++n + " total clicks.");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

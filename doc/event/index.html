@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>事件模块</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>事件模块</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>本模块用于提供跨浏览器、健壮易用的事件绑定，事件移除，事件派发与备受瞩目的事件代理能力。</p>
+            <p>对于IE678，框架会多加载一个叫event_fix的补丁模块，用于代理不能冒泡也不能捕获的事件， 如change submit reset事件，以及模拟不存在的input事件</p>
+            <p>根据W3C标准，元素节点，文档对象与window对象都实现了一个叫EventTarget的接口，拥有 addEventListener， removeEventListener，dispatchEvent这三个API。由于众所周知的原因，旧式IE另搞了一套，因此本模块用于统一与简化
+                这些API。</p>
+            <p>在mass Framework的命名空间之下拥有一个叫EventTarget的对象，我们只要mix了它，它就变成一个事件派发器， 就拥有添加(bind)，派发(fire)，移除(unbind)事件的能力，并且还多出defineEvents这个强大的API，用于预先定义事件类型，
+                那么对于普通的JS对象，我们也可以使用onXXX方法来添加多投事件了。</p>
+            <ul>
+                <li>
+                    <span style="color:greenyellow">bind(type,callback,times)</span>:type为事件类型，如果想同时绑定多个事件，type可以用空格分开，callback为回调函数,
+                    times为调用次数。</li>
+                <li>
+                    <span style="color:greenyellow">unbind(type,[callback])</span>:type为事件类型，如果没有指定callback，则移除所有type事件，否则只移除callback这个回调</li>
+                <li>
+                    <span style="color:greenyellow">unbind(type,[args0],[args1],[...])</span>:type为事件类型，如果想移入额外参数，则直接写后面。</li>
+                <li>
+                    <span style="color:greenyellow">defineEvents(types)</span>:types为事件类型，可以是字符串或数组，如果使用defineEvent，那么对象就多个几个诸如onXXX的方法，用于添加相应的事件回调。</li>
+            </ul>
+            <p>无论是原生事件派发器还是通过mix EventTarget转化成的自定义事件派发器，它们的bind，delegate, live, on,
+                onXXX, toggle等API最后都会到达$.event.bind方法，相对应unbind, undelegate, die, off等API会到达$.event.unbind,
+                fire方法则 到达$.event.fire方法，以经典的发布者/订阅者模式进行处理。</p>
+            <p>在事件回调中，系统会对
+                <span class="stress">事件消息对象</span>（通常简称为事件对象）进行包装，确保preventDefault，stopPropagation，stopImmediatePropagation等标准API可用。</p>
+            <p>无论是原生事件派发器还是普通对象，它们的回调中的事件对象，肯定会拥有以下几个属性：</p>
+            <ul>
+                <li>type,事件类型</li>
+                <li>target,引发事件的对象，亦即事件源对象</li>
+                <li>currentTarget,监听器注册的对象。在事件代理中，currentTarget总为target的顶层对象，但事件代理只对原生事件派发器有效。</li>
+            </ul>
+            <p>
+                <span class="stress">事件监听器</span>，原则上指实现了addEventListener或attachEvent接口的对象，因此原生事件派发器具有双重角色。
+                事件监听器在添加事件有个限制，同一个事件类型不能绑定重复的回调函数。而对于普通对象，只是一个虚名，无法根据用户的行为作出响应， 只能用其他对象调用其fire接口派发事件。</p>
+            <pre
+            class="brush:javascript;gutter:false;toolbar:false">
+function callback() {
+    alert(1)
+}
+document.addEventListener("click", callback, false)
+document.addEventListener("click", callback, false) //点击页面只会alert一次
+</pre>
+                <p>
+                    <span class="stress">事件处理器</span>，对于原生事件派发器，其事件处理器是不可知，不过我们通过对其外包一层，屏蔽了浏览器的差异。 例如，事件回调的执行顺序总是按照其添加时的先后顺序执行,this总是指向监听器注册的对象，会根据事件消息的状态（result,
+                    isPropagationStopped, isDefaultPrevented） 决定是否冒泡与阻止默认行为（只对原生事件派发器有效， 此外还涉及事件流的概念）。</p>
+                <p>想实现一个事件派发对象，有两个方式：</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+//方式一
+var a = {};
+$.mix(a, $.EventTarget);
+$.log(a); //请在firebug或chrome开发工具中查看此对象的构造！
+//方式二
+var SomeClass = $.factory({
+    implement: $.EventTarget,
+    init: function() {}
+});
+var b = new SomeClass()
+$.log(b); //请在firebug或chrome开发工具中查看此对象的构造！
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <p>注：当我们第一次为原生对象或自定义类绑定或卸载事件时，事件系统会为它添加一叫做uniqueNumber的属性。</p>
+                <fieldset>
+                    <legend>例子</legend>
+                    <p>添加事件与查看事件消息对象。</p>
+                    <div class="show_a" style="background: #8b0000;padding:5px;">A</div>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var a = $.a = {};
+    $.mix(a, $.EventTarget);
+    var repeat = function() {
+        $(".show_a").append("&lt;div&gt;已派发repeat事件&lt;/div&gt;")
+    }
+    a.bind("repeat", repeat)
+    a.bind("repeat", repeat);
+    a.bind("repeat", repeat);
+    a.fire("repeat");
+    a.bind("data", function() {
+        $(".show_a").append("&lt;div&gt;已派发data事件&lt;/div&gt;")
+    });
+    a.bind("data", function(e) {
+        $(".show_a").append("&lt;div&gt;" + [].slice.call(arguments) + "&lt;/div&gt;");
+        $(".show_a").append("&lt;div&gt;" + e.type + "&lt;/div&gt;")
+        $(".show_a").append("&lt;div&gt;" + a.uniqueNumber + "&lt;/div&gt;");
+        $(".show_a").append("&lt;div&gt;" + (a === e.target) + "&lt;/div&gt;")
+    });
+    a.fire("data", 3, 5);
+    delete $.a;
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+                <fieldset>
+                    <legend>例子</legend>
+                    <p>移除事件。</p>
+                    <div class="show_b" style="background: #8b0000;padding:5px;">B</div>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var b = $.b = {};
+    $.mix(b, $.EventTarget);
+    b.bind("write", function() {
+        $(".show_b").append("&lt;div&gt;" + [].slice.call(arguments) + "&lt;/div&gt;");
+    });
+    b.fire("write", "第一次触发");
+    b.fire("write", "第二次触发");
+    b.unbind("write");
+    b.fire("write", "第三次触发");
+    $(".show_b").append("==========================")
+    delete $.b;
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+                <fieldset>
+                    <legend>例子</legend>
+                    <p>同时绑定多个事件。</p>
+                    <div class="show_c" style="background: #8b0000;padding:5px;">C</div>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var c = $.c = {};
+    c.prop = "属性"
+    $.mix(c, $.EventTarget);
+    c.bind("first second", function(e) {
+        $(".show_c").append("&lt;div&gt;" + e.target.prop + "&lt;/div&gt;");
+        $(".show_c").append("&lt;div&gt;" + e.type + "&lt;/div&gt;");
+        $(".show_c").append("&lt;div&gt;" + [].slice.call(arguments) + "&lt;/div&gt;");
+    });
+    c.fire("first", "FFFFF", "AAAA", "DDDDD");
+    c.fire("second", "SSSS");
+    c.unbind("first second");
+    c.fire("first", "more");
+    $(".show_c").append("==========================");
+    delete $.c;
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+                <fieldset>
+                    <legend>例子</legend>
+                    <p>defineEvents API。</p>
+                    <div class="show_d" style="background: #8b0000;padding:5px;">D</div>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var d = $.d = {};
+    $.mix(d, $.EventTarget);
+    d.defineEvents("slideUp,resize,destroy");
+    d.onSlideUp(function(e) {
+        $(".show_d").append("&lt;div&gt;" + e.type + "&lt;/div&gt;");
+        $(".show_d").append("&lt;div&gt;第一个slideUp回调&lt;/div&gt;");
+    });
+
+    d.bind("slideUp", function(e) {
+        $(".show_d").append("&lt;div&gt;" + e.type + "&lt;/div&gt;");
+        $(".show_d").append("&lt;div&gt;第二个slideUp回调&lt;/div&gt;");
+        $(".show_d").append("&lt;div&gt;" + [].slice.call(arguments) + "&lt;/div&gt;");
+    });
+    d.onResize(function(e) {
+        $(".show_d").append("&lt;div&gt;" + e.type + "&lt;/div&gt;");
+        $(".show_d").append("&lt;div&gt;第一个resize回调&lt;/div&gt;");
+    });
+    d.onResize(function(e) {
+        $(".show_d").append("&lt;div&gt;" + e.type + "&lt;/div&gt;");
+        $(".show_d").append("&lt;div&gt;第二个resize回调&lt;/div&gt;");
+    });
+    d.onDestroy(function(e) {
+        $(".show_d").append("&lt;div&gt;" + e.type + "&lt;/div&gt;");
+        $(".show_d").append("&lt;div&gt;第一个destroy回调&lt;/div&gt;");
+    });
+    d.fire("slideUp", "收起");
+    d.fire("resize");
+    d.fire("destroy");
+    d.fire("destroy");
+    d.unbind("slideUp,resize,destroy");
+    $(".show_d").append("==========================");
+    delete $.d;
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+                <fieldset>
+                    <legend>例子</legend>
+                    <p>模拟YUI与jQuery的one API,只调用一次就移除它。</p>
+                    <div class="show_e" style="background: #8b0000;padding:5px;">E</div>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var obj = $.ee = {};
+    $.mix(obj, $.EventTarget);
+    obj.bind("oneone", function(event) {
+        $(".show_e").append("&lt;div&gt;" + event.type + "&lt;/div&gt;");
+        $(".show_e").append("&lt;div&gt;我只能调用一次&lt;/div&gt;");
+    }, 1); //设置第三个参数为正整数
+    obj.fire("oneone");
+    obj.fire("oneone");
+    obj.fire("oneone");
+    delete $.obj;
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                    <p>推而广之，我们可以限制这个回调函数只能调用两次或三次，而不像YUI，jQuery的那样只能调用一次！</p>
+                </fieldset>
+                <p>event.stopImmediatePropagation</p>
+                <p>如果某个元素有多个相同类型事件的事件监听函数,则当该类型的事件触发时, 多个事件监听函数将按照顺序依次执行.如果某个监听函数执行了 event.stopImmediatePropagation()方法,
+                    则除了该事件的冒泡行为被阻止之外(event.stopPropagation方法的作用), 该元素绑定的其余相同类型事件的监听函数的执行也将被阻止.</p>
+                <table
+                class="compat-table">
+                    <tbody>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Firefox (Gecko)</th>
+                            <th>Chrome</th>
+                            <th>Internet Explorer</th>
+                            <th>Opera</th>
+                            <th>Safari</th>
+                        </tr>
+                        <tr>
+                            <td>Basic support</td>
+                            <td>10.0 (10)</td>
+                            <td>
+                                <span style="color: #888" title="Please update this with the earliest version of support.">(Yes)</span>
+                            </td>
+                            <td>9.0</td>
+                            <td>
+                                <span style="color: #888" title="Please update this with the earliest version of support.">(Yes)</span>
+                            </td>
+                            <td>
+                                <span style="color: #888" title="Please update this with the earliest version of support.">(Yes)</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                    <p>普通的createEvent也能创建自定义事件(包括IE9!)</p>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+var event = document.createEvent("Events");
+event.initEvent("roar", true, true);
+event.isCustom = true;
+document.documentElement.addEventListener("roar", function(e) {
+    $.log(e);
+    $.log(e.isCustom + "!")
+}, true);
+document.body.addEventListener("roar", function(e) {
+    $.log(e);
+    $.log(e.isCustom)
+}, false);
+document.body.dispatchEvent(event)
+</pre>
+        </article>
+    </body>
+
+</html>

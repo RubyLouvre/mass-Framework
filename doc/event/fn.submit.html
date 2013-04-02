@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.submit</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 { padding: 10px; width: 400px; height: 80px; border: 1px solid #000; background: #fcfcfc;color:#000; }
+                #other {color:red;}
+            </style>
+            <h3>$.fn.submit( fn)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 submit 事件绑定一个处理函数，或者触发元素上的submit 事件。</p>
+            <p>这个函数的第一种用法是 .bind('submit', handler) 的快捷方式，第二种用法是 .fire('submit') 的快捷方式。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>必需。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <form id="target" action="$.fn.on.html">
+                    <input type="text" value="随便填点什么" />
+                    <input type="submit" value="提交" />
+                </form>
+                <div id="other">点击这里</div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <form id="target" action="$.fn.on.html">
+        <input type="text" value="随便填点什么" />
+        <input type="submit" value="提交" />
+    </form>
+    <div id="other">
+        点击这里
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $('#target').submit(function() {
+        $(this).prepend('触发submit事件&lt;br/&gt;');
+        return false;
+    });
+    $('#other').click(function() {
+        $('#target').submit();
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

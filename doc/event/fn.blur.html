@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.blur</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+                .sample p {
+                    color:#000;
+                }
+                .sample span {display:none;}
+            </style>
+            <h3>$.fn.blur([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 blur 事件绑定一个处理函数，或者触发元素上的 blur 事件。</p>
+            <p>这个函数的第一种用法是 .bind('blur', handler) 的快捷方式，第二种用法是 .fire('blur') 的快捷方式。</p>
+            <p>一个元素失去焦点将触发
+                <code>blur</code>事件。起初，这个事件仅适用于表单元素，如元素
+                <code>&lt;input&gt;</code>。 在最新的浏览器中，这个事件适用范围已经扩大到包括所有元素类型。一个元素可以通过键盘命令失去焦点，比如tab键，或用鼠标点击网页上的其他地方。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <p>举例来说，请看下面的HTML：</p>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+
+&lt;form&gt;
+  &lt;input id="target" type="text" value="Field 1" /&gt;
+  &lt;input type="text" value="Field 2" /&gt;
+&lt;/form&gt;
+&lt;div id="other"&gt;
+  Trigger the handler
+&lt;/div&gt;
+
+</pre>
+            <p>这个事件处理函数可以绑定到第一个 input field：</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('#target').blur(function() {
+    alert('Handler for .blur() called.');
+});
+</pre>
+            <p>现在，如果第一个字段有焦点并且我们点击其他地方，或按tab键离开它，会弹出alert：</p>
+            <p>
+                <span class="stress">blur的事件派发</span>
+            </p>
+            <p>我们可以点击另一个元素时触发事件：</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('#other').click(function() {
+    $('#target').blur();
+});
+</pre>
+            <p>这些代码执行后，点击
+                <span class="output">Trigger the handler</span>也会弹出alert。</p>
+            <p>
+                <code>blur</code>事件不会在Internet Explorer中泡沫。因此，用
+                <code>blur</code>事件代理，跨浏览器无法正常工作。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <input id="test" value="请填写成数字" />
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    var self = $("#test").blur(function() {
+        var color = /^\d+$/.test(self.val()) ? "green" : "red"
+        self.css({
+            borderColor: color,
+            color: color
+        });
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>事件代理。先在文本域内点一下，再在其他地方点一下。</p>
+                <div class="sample" id="sample1">
+                    <p>
+                        <input type="text" />
+                        <span>focus fire</span>
+                    </p>
+                    <p>
+                        <input type="password" />
+                        <span>focus fire</span>
+                    </p>
+                </div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $("body").delegate("#sample1 input", "blur", function(e) {
+        $(e.target).nextAll("span").html(e.type + " fire!").show().fadeOut(1000);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

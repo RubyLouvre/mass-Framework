@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.focusout</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .inputs { float: left; margin-right: 1em; }
+                .inputs p { margin-top: 0;text-indent: 0; }
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+                .sample p {
+                    color:#000;
+                }
+                .sample span {display:none;}
+            </style>
+            <h3>$.fn.focusout( fn )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 focusout 事件绑定一个处理函数。</p>
+            <p>这个函数是 .bind('focusout', handler) 的快捷方式。</p>
+            <p>focusout 事件会在元素（或者其内部的任何元素）失去焦点时触发。这跟 blur 事件的显著区别在于， 它可以在父元素上检测子元素失去焦点的情况(换而言之，它支持事件冒泡)。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>必需。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    var fo = 0,
+        b = 0;
+    $(".inputs p").focusout(function() {
+        fo++;
+        $("#fo").text("focusout fired: " + fo + "x");
+    }).blur(function() {
+        b++;
+        $("#b").text("blur fired: " + b + "x");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="inputs">
+                    <p>
+                        <input type="text" />
+                        <br />
+                        <input type="text" />
+                    </p>
+                    <p>
+                        <input type="password" />
+                    </p>
+                </div>
+                <div id="fo">focusout fire</div>
+                <div id="b">blur fire</div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>事件代理。先在文本域内点一下，再在其他地方点一下。</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $("body").delegate("#sample1 input", "focusout", function(e) {
+        $(e.target).nextAll("span").html(e.type + " fire!").show().fadeOut(1000);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample" id="sample1">
+                    <p>
+                        <input type="text" />
+                        <span>focus fire</span>
+                    </p>
+                    <p>
+                        <input type="password" />
+                        <span>focus fire</span>
+                    </p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

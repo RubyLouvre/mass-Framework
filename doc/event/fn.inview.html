@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.inview</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #sample {
+                    color:#000;
+                    height:40px;
+                    width:200px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+                .helper{
+                    width:20px;
+                    height:700px;
+                    background:#4B0082;
+                }
+                #logger{
+                    position:fixed;
+                    top:200px;
+                    right:20px;
+                    width:200px;
+                    height:30px;
+                    background:#FF00FF;
+                    color:#000;
+                }
+            </style>
+            <h3>$.fn.bind("inview", fn)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>这是一个非常有用的自定义事件,用于判定某元素位于可视区之内(外)。</p>
+            <p>注,此方法是独立一个新模块,位于more目录下。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+$(expr).bind('inview', function(event, visible, status) {
+    if (visible == true) {
+        $.log("当前元素进入可视区,管他显示完整不完整")
+        if (status == 'top') {
+            $.log("当前元素的上部可见")
+        } else if (status == 'bottom') {
+            $.log("当前元素的下部可见")
+        } else {
+            $.log("当前元素整体可见")
+        }
+    } else {
+        $.log("当前元素离开可视区")
+    }
+});
+</pre>
+            <p>
+                <span class="stress">回调函数的参数：</span>
+            </p>
+            <dl>
+                <dt>event</dt>
+                <dd>事件对象</dd>
+                <dt>visible</dt>
+                <dd>布尔值,true或者false.</dd>
+                <dt>status</dt>
+                <dd>字符串,表示当前的可视情况,分别为top, bottom, both</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,more/inview", function() {
+    var logger = $("#logger")
+    $("#sample").bind('inview', function(event, visible, status) {
+        if (visible == true) {
+            if (status == 'top') {
+                logger.text("当前元素的上部可见")
+            } else if (status == 'bottom') {
+                logger.text("当前元素的下部可见")
+            } else {
+                logger.text("当前元素整体可见")
+            }
+        } else {
+            logger.text("当前元素离开可视区")
+        }
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="helper"></div>
+                <p id="logger"></p>
+                <div id="sample"></div>
+                <div class="helper"></div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

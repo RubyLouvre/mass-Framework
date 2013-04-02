@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.dblclick</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+                .sample  div {
+                    background:blue;
+                    color:white;
+                    height:100px;
+                    width:150px;
+                }
+                div.dbl { background:yellow;color:black; }
+                .sample p {
+                    color:#000;
+                }
+            </style>
+            <h3>$.fn.dblclick([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 dblclick 事件绑定一个处理函数，或者触发元素上的 dblclick 事件。</p>
+            <p>这个函数的第一种用法是 .bind('dblclick', handler) 的快捷方式，第二种用法是 .fire('dblclick')
+                的快捷方式。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <p>
+                <code>dblclick</code>事件触发需要以下几点：</p>
+            <ul>
+                <li>鼠标指针在元素里面时点击。</li>
+                <li>鼠标指针在元素里面时释放。</li>
+                <li>鼠标指针在元素里面时再次点击，点击间隔时间，是系统而定。</li>
+                <li>鼠标指针在元素里面时再次释放。</li>
+            </ul>
+            <p>在同一个元素上绑定click 和 dblclick时间是不明智的。在不同浏览器上这个事件的触发顺序是多样的， 一些接受两个click事件,其他接受一个click事件。如果一个接口对于单，双击反应不同是无法避免，那么dblclick事件应该模拟click处理器。
+                我们可以通过在处理器中保存时间戳来实现这一点，然后比较当前时间在后续的点击保存时间戳。如果差异足够小，我们可以把它当作一个双击点击。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,css", function() {
+    var divdbl = $(".sample div");
+    divdbl.dblclick(function() {
+        divdbl.toggleClass('dbl');
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <div></div>
+                    <p>请双击上面方块</p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

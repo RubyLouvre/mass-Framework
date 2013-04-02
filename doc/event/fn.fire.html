@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.fire</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 {background: #ffe0bb;  }
+                .sample2 {background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000;}
+                .button1 { margin:10px; }
+                .sample1 div { color:blue; font-weight:bold; }
+                .sample1 span { color:red; }
+            </style>
+            <h3>$.fn.fire(type, [args0],[args1],[argsn])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于触发绑定到对象的type类型的事件，如果是元素节点，还会导致冒泡等行为。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>type</dt>
+                <dd>必需。String.事件类型。</dd>
+                <dt>args0</dt>
+                <dd>额外参数</dd>
+                <dt>args1</dt>
+                <dd>额外参数</dd>
+                <dt>argsn</dt>
+                <dd>额外参数</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>点击第一个按钮只会为自己加1，点击第二个按钮会为两者加1</p>
+                <div class="sample1">
+                    <button>Button #1</button>
+                    <button>Button #2</button>
+                    <div>
+                        <span>0</span>button #1 clicks.</div>
+                    <div>
+                        <span>0</span>button #2 clicks.</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+            &lt;div class="sample1"&gt;
+                &lt;button&gt;Button #1&lt;/button&gt;
+                &lt;button&gt;Button #2&lt;/button&gt;
+                &lt;div&gt;&lt;span&gt;0&lt;/span&gt; button #1 clicks.&lt;/div&gt;
+                &lt;div&gt;&lt;span&gt;0&lt;/span&gt; button #2 clicks.&lt;/div&gt;
+            &lt;/div&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var spans = $(".sample1 span")
+    var firstBtn = $(".sample1 button").first().click(function() {
+        update(spans.first());
+    });
+    $(".sample1 button").last().click(function() {
+        firstBtn.fire('click');
+        update(spans.last());
+    });
+
+    function update(el) {
+        var n = parseInt(el.text(), 10);
+        el.text(n + 1);
+    }
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>附加参数。</p>
+                <p class="sample2">请单击这里
+                    <br/>
+                </p>
+                <span class="show_b"></span>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+                 &lt;p class="sample2" &gt;请单击这里&lt;br/&gt;&lt;/p&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $(".sample2").click(function(e, a, b) {
+        $(this).append(e.type + "  " + String(a) + "   " + String(b) + "&lt;br/&gt;")
+    }).fire("click", "foo", "bar");
+
+
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

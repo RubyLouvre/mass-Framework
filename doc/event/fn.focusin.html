@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.focusin</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.focusin( fn )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 focusin 事件绑定一个处理函数。</p>
+            <p>这个函数是 .bind('focusin', handler) 的快捷方式。</p>
+            <p>focusin 事件会在元素（或者其内部的任何元素）获得焦点时触发。这跟 focus 事件的显著区别在于， 它可以在父元素上检测子元素获得焦点的情况(换而言之，它支持事件冒泡)。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>必需。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $(".sample p").focusin(function(e) {
+        $(this).find("span").html("fire " + e.type).show().fadeOut(1000);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <p>
+                        <input type="text" />
+                        <span>focus fire</span>
+                    </p>
+                    <p>
+                        <input type="password" />
+                        <span>focus fire</span>
+                    </p>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>事件代理。轮流点击两个文本域。</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $("body").delegate("#sample1 input", "focusin", function(e) {
+        $(e.target).nextAll("span").html(e.type + " fire!").show().fadeOut(1000);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample" id="sample1">
+                    <p>
+                        <input type="text" />
+                        <span>focus fire</span>
+                    </p>
+                    <p>
+                        <input type="password" />
+                        <span>focus fire</span>
+                    </p>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $("#focusin").bind("focusin", function(e) {
+        $("#focusin_text").text(e.type)
+        e.target.style.color = "red";
+    });
+    $("#focusin").bind("focusout", function(e) {
+        $("#focusin_text").text(e.type)
+        e.target.style.color = "";
+    });
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <form id="focusin">
+                    <p id="focusin_text">显示事件类型</p>User name:
+                    <input type="text" value="my name" />
+                    <br />E-mail:
+                    <input type="text" value="myname@mydomain.com" />
+                </form>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.undelegate</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #sample1{
+                    border-collapse: collapse;
+                    border: 1px solid #fff;
+                    width: 80%;
+                }
+                #sample1 caption{
+                    color:#ff7b26;
+                }
+                #sample1 td{
+                    padding: 5px;
+                    border: 1px solid #fff;
+                    text-align: center;
+                }
+                #sample1 .odd{
+                    background: #000;
+                    color:#fff;
+                }
+                #sample1 .even{
+                    background: #558405;
+                    color:#000;
+                }
+                #sample1 .hover{
+                    background: #4B0082;
+                }
+                .sample2{
+                    margin:0 5px 5px;
+                    padding: 5px;
+                    background: #47aed7;
+                }
+            </style>
+            <h3>$.fn.undelegate(selector, types, fn, [times])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>移除通过delegate绑定的事件回调。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <p>如果只有一个字符串参数，则selector意为types，如果不小心写错为选择器， 它会抛出“hash.type should be a combination
+                of this event type and the namespace”异常</p>
+            <p>如果只有一个对象参数，则其会分解为type与回调。</p>
+            <p>如果是一个对象参数跟一个字符串参数，则那个字符串会被认为是选择器。</p>
+            <p>否则情况同函数定义。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <button id="theone">没有事件……</button>
+                <button id="bind">绑定点击事件</button>
+                <button id="unbind">移除点击事件</button>
+                <div style="display:none;color:#000;background:#FF8C00"
+                class="hide_div">Click!</div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    function callback() {
+        $(".hide_div").show(1000);
+    }
+    $("#bind").click(function() {
+        $("body").delegate("#theone", "click", callback)
+        $("#theone").html("现在点击它下方会出现文字");
+    });
+    $("#unbind").click(function() {
+        $("body").undelegate("#theone", "click")
+        $("#theone").html("现在点击它一点反应也没有");
+        $(".hide_div").hide(1000);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

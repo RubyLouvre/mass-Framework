@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.keydown</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+            </style>
+            <h3>$.fn.keydown([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 keydown 事件绑定一个处理函数，或者触发元素上的 keydown 事件。</p>
+            <p>这个函数的第一种用法是 .bind('keydown', handler) 的快捷方式，第二种用法是 .fire('keydown') 的快捷方式。</p>
+            <p>当用户在一个元素上第一次按下键盘上的键的时候，keydown事件就会发送给这个元素。它可以绑定到任何元素，但该事件只是发送到具有焦点的元素上。
+                在不同浏览器之间聚焦元素可以有很多，但是表单元素总是能获取焦点，所以对于此事件类型表单元素是最合适的。</p>
+            <p>如果需要任何按键被捕获（例如，要实现网页全局上的快捷键），附加此事件到document对象是非常有用的。 由于事件冒泡，所有的按键将使他们DOM方式注册到document对象上，除非明确停止。</p>
+            <p>要确定哪个键被按下，我们可以检测回调函数第一个参数event对象的which属性。此属性对应一个键盘上的按键，包括像箭头这种特殊键的代码，
+                为捕获实际输入文本， .keypress()可能是一个更好的选择。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>当一个按键在文本框内被按下的时候显示事件对象的所有属性.</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $(".sample input").keydown(function(e) {
+        var html = ""
+        for (var i in e) {
+            html += i + "   :  " + e[i] + "&lt;br/&gt;"
+        }
+        $(".sample").height($(".sample div").html(html).height() + 40)
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <input>
+                    <div></div>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>
