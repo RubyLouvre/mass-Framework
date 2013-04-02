@@ -14,7 +14,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     cssShow = {
         position: "absolute",
         visibility: "hidden",
-        display: "block"
+        display: ""
     };
     //这里的属性不需要自行添加px
     $.cssNumber = $.oneObject("columnCount,fillOpacity,fontSizeAdjust,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom,rotate");
@@ -134,7 +134,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
                 };
                 for (var name in cssShow) {
                     obj[name] = node.style[name];
-                    node.style[name] = cssShow[name];
+                    node.style[name] = cssShow[name] || $.parseDisplay(node.nodeName);
                 }
                 array.push(obj);
             }
