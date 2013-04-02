@@ -67,8 +67,7 @@ define("data", ["lang"], function($) {
         if(index > -1) {
             var delOne = typeof name === "string",
                 table = caches[index],
-                cache = table,
-                clear = 1;
+                cache = table;
             if(delOne) {
                 if(!pvt) {
                     table = table.data;
@@ -76,19 +75,8 @@ define("data", ["lang"], function($) {
                 if(table) {
                     delOne = table[name];
                     delete table[name];
-                }
-                for(var key in cache) {
-                    if(key === "data") {
-                        for(var i in cache.data) {
-                            clear = 0;
-                            break;
-                        }
-                    } else {
-                        clear = 0;
-                        break;
-                    }
-                }
-                if(clear) {
+                }//在data_fix模块，我们已经对JSON进行补完
+                if(JSON.stringify(cache) === '{"data":{}}') {
                     owners.splice(index, 1);
                     caches.splice(index, 1);
                 }
