@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
@@ -11,7 +11,7 @@
             document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
         </script>
     </head>
-    
+
     <body>
         <article>
             <h3>$.fn.outerHeight( [includeMargin] )</h3>
@@ -32,18 +32,19 @@
                 <dt>includeMargin</dt>
                 <dd>可选。Boolean。是否加上margin。</dd>
             </dl>
-            <p>w3c的盒子模型</p>
-            <img src="/styles/outerheight.png" />
+            <script>
+                document.write('<img src="' + $$path + '/doc/styles/css/outerheight.png" />');
+            </script>
             <fieldset>
                 <legend>例子</legend>
                 <pre class="brush:xml;gutter:false;toolbar:false">
 
     <style type="text/css">
-        .outerHeight { margin:10px;padding:5px;border:2px solid #666; }
+                        .outerHeight { margin:10px;padding:5px;border:2px solid #666; }
     </style>
     <div class="outerHeight">&nbsp;</div>
     
-</pre>
+                </pre>
                 <style type="text/css">
                     .outerHeight { margin:10px;padding:5px;border:2px solid #666; }
                 </style>
@@ -54,7 +55,7 @@ $.require("ready,node,css", function() {
     a.html("它的outerHeight为" + a.outerHeight() + "px");
     a.html("&lt;br/&gt;它的outerHeight(包括margin)为" + a.outerHeight(true) + "px");
 });
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
             </fieldset>
         </article>
