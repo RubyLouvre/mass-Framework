@@ -19,26 +19,8 @@ define("api", ["mass"], function() {
                 "fn.splice,fn.text,fn.toString,fn.unshift,fn.valueOf,fn.extend,match,parseHTML,cssName").match($.rword).sort(),
         query: "isXML,contains,getText,unique,query".match($.rword).sort(),
         data: ["data","parseData","removeData","mergeData"],
-        "样式模块": {
-            "fn": {
-                "css": "function",
-                "width": "function",
-                "height": "function",
-                "innerWidth": "function",
-                "innerHeight": "function",
-                "outerWidth": "function",
-                "outerHeight": "function",
-                "offset": "function",
-                "position": "function",
-                "offsetParent": "function",
-                "scrollParent": "function",
-                "scrollLeft": "function",
-                "scrollTop": "function"
-            },
-            "cssName": "function",
-            "scrollbarWidth": "function",
-            "css": "function"
-        },
+        css: "fn.css, fn.width, fn.height, fn.innerWidth, fn.innerHeight, fn.outerWidth, fn.outerHeight, fn.offset, fn.position, fn.offsetParent, fn.scrollParent, fn.scrollTop, fn.scrollLeft, css".match($.rword).sort(),
+          
         "属性模块": {
             "fn": {
                 "addClass": "function",
