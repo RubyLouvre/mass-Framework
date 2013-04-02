@@ -58,12 +58,9 @@
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 require("ready,node", function($) {
     var self = $("#kbd");
-   alert(self.length)
     var tags = self.parents().map(function() {
         return this.tagName.toLowerCase();
     }).get()
-alert(tags.length);
-alert(self.parents().length)
     self.append("&lt;strong style='color:red;'&gt;" + tags.join(", ") + "&lt;/strong&gt;");
 });
                 </pre>
