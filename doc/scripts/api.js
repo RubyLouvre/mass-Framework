@@ -18,112 +18,21 @@ define("api", ["mass"], function() {
                 "fn.replace,fn.replaceTo,fn.reverse,fn.shift,fn.siblings,fn.slice,fn.sort," +
                 "fn.splice,fn.text,fn.toString,fn.unshift,fn.valueOf,fn.extend,match,parseHTML,cssName").match($.rword).sort(),
         query: "isXML,contains,getText,unique,query".match($.rword).sort(),
-        data: ["data","parseData","removeData","mergeData"],
+        data: ["data", "parseData", "removeData", "mergeData"],
         css: "fn.css, fn.width, fn.height, fn.innerWidth, fn.innerHeight, fn.outerWidth, fn.outerHeight, fn.offset, fn.position, fn.offsetParent, fn.scrollParent, fn.scrollTop, fn.scrollLeft, css".match($.rword).sort(),
         attr: "fn.addClass, fn.hasClass, fn.removeClass, fn.toggleClass, fn.replaceClass, fn.val, fn.removeAttr, fn.removeProp, fn.attr, fn.prop, attr, prop".match($.rword).sort(),
-        event: {
-            "fn": {
-                "on": "function",
-                "bind": "function",
-                "off": "function",
-                "unbind": "function",
-                "toggle": "function",
-                "hover": "function",
-                "delegate": "function",
-                "live": "function",
-                "one": "function",
-                "undelegate": "function",
-                "die": "function",
-                "fire": "function",
-                "contextmenu": "function",
-                "click": "function",
-                "dblclick": "function",
-                "mouseout": "function",
-                "mouseover": "function",
-                "mouseenter": "function",
-                "mouseleave": "function",
-                "mousemove": "function",
-                "mousedown": "function",
-                "mouseup": "function",
-                "mousewheel": "function",
-                "abort": "function",
-                "error": "function",
-                "load": "function",
-                "unload": "function",
-                "resize": "function",
-                "scroll": "function",
-                "change": "function",
-                "select": "function",
-                "reset": "function",
-                "submit": "function",
-                "blur": "function",
-                "focus": "function",
-                "focusin": "function",
-                "focusout": "function",
-                "keypress": "function",
-                "keydown": "function",
-                "keyup": "function"
-            },
-            "eventAdapter": {
-                "focus": "object",
-                "blur": "object",
-                "beforeunload": "object",
-                "focusin": "object",
-                "focusout": "object",
-                "mousewheel": "object"
-            },
-            "event": {
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "filter": "function",
-                "dispatch": "function",
-                "fix": "function"
-            },
-            "Event": "function",
-            "EventTarget": "object",
-            "eventSupport": "function"
-        },
-        "数据交互模块": {
-            "get": "function",
-            "post": "function",
-            "getScript": "function",
-            "getJSON": "function",
-            "upload": "function",
-            "serialize": "function",
-            "serializeArray": "function",
-            "param": "function",
-            "ajax": {
-                "uniqueNumber": "number",
-                "defineEvents": "function",
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "isLocal": "boolean",
-                "@data_14": "object"
-            },
-            "XHR": {
-                "inherit": "function",
-                "implement": "function",
-                "extend": "function",
-                "toString": "function"
-            },
-            "xhr": "function"
-        },
-        "fx": ["fn.fx", "fn.stop", "fn.fadeToggle", "fn.fadeIn", "fn.fadeOut",
-            "fn.slideDown", "fn.slideUp", "fn.slideToggle", "fn.show", "fn.hide", "fn.toggle", "fn.delay", "fn.pause", "fn.resume"].sort(),
-        "flow": {
-            "Flow": "function",
-            "flow.bind": "function",
-            "flow.unbind": "function",
-            "flow.fire": "function",
-            "flow.find": "function",
-            "flow.append": "function",
-            "flow.reduce": "function"
-        },
-        "特征侦探模块": {}
-    }
+        event: ("fn.on,fn.bind,fn.off,fn.unbind,fn.toggle,fn.delegate,fn.live,Event,eventSupport" +
+                "fn.one,fn.undelegate,fn.die,fn.fire,fn.contextmenu,fn.click,fn.dblclick," +
+                "fn.mouseout,fn.mouseover,fn.mouseenter,fn.mouseleave,fn.mousemove," +
+                "fn.mousedown,fn.mouseup,fn.mousewheel,fn.abort,fn.error,fn.load,fn.unload," +
+                "fn.resize,fn.scroll,fn.change,fn.select,fn.reset,fn.submit,fn.blur," +
+                "fn.focus,fn.focusin,fn.focusout,fn.keypress,fn.keydown,fn.keyup").match($.rword).sort(),
+        flow: [],
+        ajax: [],
+        fx: ["fn.fx", "fn.stop", "fn.fadeToggle", "fn.fadeIn", "fn.fadeOut",
+            "fn.slideDown", "fn.slideUp", "fn.slideToggle", "fn.show", "fn.hide", "fn.toggle", "fn.delay", "fn.pause", "fn.resume"].sort()
+    };
 
 
 
-})
+});

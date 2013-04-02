@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-    
+
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
@@ -11,7 +11,7 @@
             document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
         </script>
     </head>
-    
+
     <body>
         <article>
             <h3>$.fn.offset()</h3>
@@ -33,7 +33,7 @@ $.require("ready,node,css,event", function() {
     var coords = el.offset();
     el.html("left : " + coords.left + "&lt;br/&gt;top : " + coords.top)
 })
-</pre>
+                </pre>
                 <button class="doc_btn" type="button">点我，执行代码</button>
             </fieldset>
             <fieldset>
@@ -42,7 +42,9 @@ $.require("ready,node,css,event", function() {
                 <p>getBoundingClientRect用于获得页面中某个元素的左，上，右和下分别相对浏览器视窗的位置。该函数返回一个Object对象，该对象有6个属性：top,lef,right,bottom,width,height；这里的top、left和css中的理解很相似，width、height是元素自身的宽高，但是right，bottom和css中的理解有点不一样。right是指元素右边界距窗口最左边的距离，bottom是指元素下边界距窗口最上面的距离。
                     具体看示意图：</p>
                 <div>
-                    <img src="/styles/css_offset_getBoundingClientRect.gif" />
+                    <script>
+                        document.write('<img src="' + $$path + '/doc/images/css/css_offset_getBoundingClientRect.gif" />');
+                    </script>
                 </div>
                 <p>getBoundingClientRect()最先是IE的私有属性，现在已经是一个W3C标准。所以你不用当心浏览器兼容问题，不过还是有区别的。
                     IE只返回top,lef,right,bottom四个值，不够可以通过以下方法来获取width,height的值：</p>
@@ -50,12 +52,12 @@ $.require("ready,node,css,event", function() {
 var ro = object.getBoundingClientRect();
 var Width = ro.right - ro.left;
 var Height = ro.bottom - ro.top;
-</pre>
+                </pre>
                 <p>有了这个方法，获取页面元素的位置就简单多了</p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
 var X = this.getBoundingClientRect().left + document.documentElement.scrollLeft;
 var Y = this.getBoundingClientRect().top + document.documentElement.scrollTop;
-</pre>
+                </pre>
                 <p>其他一些参考资源:
                     <a href="http://help.dottoro.com/ljvmcrrn.php">http://help.dottoro.com/ljvmcrrn.php</a>
                 </p>
