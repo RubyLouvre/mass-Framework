@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.tags</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <p>标签伪类，不推荐使用，只是为了兼容jQuery。</p>
+            <ul>
+                <li>
+                    <span class="list">:header</span>匹配h1,h2,h3,h4,h5,h6。</li>
+                <li>
+                    <span class="list">:button</span>匹配button与&lt;input type="button"/&gt;。</li>
+                <li>
+                    <span class="list">:link</span>匹配链接(a标签)</li>
+                <li>
+                    <span class="list">:text</span>匹配&lt;input type="text"/&gt;</li>
+                <li>
+                    <span class="list">:radio</span>匹配&lt;input type="radio"/&gt;</li>
+                <li>
+                    <span class="list">:checkbox</span>匹配&lt;input type="checkbox"/&gt;</li>
+                <li>
+                    <span class="list">:file</span>匹配&lt;input type="file"/&gt;</li>
+                <li>
+                    <span class="list">:password</span>匹配&lt;input type="password"/&gt;</li>
+                <li>
+                    <span class="list">:submit</span>匹配&lt;input type="submit"/&gt;</li>
+                <li>
+                    <span class="list">:image</span>匹配&lt;input type="image"/&gt;</li>
+                <li>
+                    <span class="list">:reset</span>匹配&lt;input type="reset"/&gt;</li>
+                <li>
+                    <span class="list">:input</span>匹配所有input标签</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <table class="clicktable" cellspacing="0" width="700" rules="cols">
+                    <thead>
+                        <tr>
+                            <th>请点击下面表格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>$(":text").css("bgc","blue");</td>
+                        </tr>
+                        <tr>
+                            <td>$(":radio").css("border","1px solid green");</td>
+                        </tr>
+                        <tr>
+                            <td>$(":checkbox").css("border","1px solid red");</td>
+                        </tr>
+                        <tr>
+                            <td>$(":button").css("bgc","#FF6363");</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+  <form action="">
+        <input name="email" disabled="disabled" /><br/>
+        <input name="text" /><br/>
+        <input type="radio" />radio
+        <input type="button" value="button" /><br/>
+        <input type="checkbox" name="newsletter" checked="checked" value="Daily" />
+        <input type="checkbox" name="newsletter" value="Weekly" />
+        <input type="checkbox" name="newsletter" checked="checked" value="Monthly" />
+    </form>
+    
+</pre>
+                <form action="">
+                    <input name="email" disabled="disabled" />
+                    <br/>
+                    <input name="text" />
+                    <br/>
+                    <input type="radio" />radio
+                    <input type="button" value="button" />
+                    <br/>
+                    <input type="checkbox" name="newsletter" checked="checked" value="Daily"
+                    />
+                    <input type="checkbox" name="newsletter" value="Weekly" />
+                    <input type="checkbox" name="newsletter" checked="checked" value="Monthly"
+                    />
+                </form>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

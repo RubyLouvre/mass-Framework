@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.childFilter2</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style>
+                pre {
+                    margin:0;
+                    background:#EFEFDA;
+                    color:blue;
+                }
+                h4 {
+                    margin:0;
+                    color:navy;
+                    background:#eee;
+                }
+            
+                #sample3 li{
+                    background:cornsilk;
+                }
+            
+                #sample4 {
+                    width:100%;
+                }
+            
+                #sample5 dt {
+                    font-weight:bolder;
+                }
+                #sample8,[class='only']{
+                    background:#ABD7CB;
+                }
+                table.clicktable {
+                    border-collapse:collapse;
+                    border:#8a6100 1px solid;
+                }
+                table.clicktable th{
+                    border:#8a6100 2px solid;
+                    border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                    color: #ffff00;
+                    background:#e19d00;
+                }
+                table.clicktable td{
+                    border:#8a6100 1px   inset;
+                    background:#EEE8AA;
+                    color:#000;
+                }
+                table.clicktable tr.even td{
+                    background:#FF7F50;
+                    color:#8B4513;
+                }
+            </style>
+            <p>子元素过滤伪类的更多示例。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <table class="clicktable" cellspacing="0" width="700" rules="cols">
+                    <thead>
+                        <tr>
+                            <th>请点击下面表格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>$("#sample6 li:nth-last-child(2)").css("bgc","#7CFC00");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample7 p:nth-last-child(2)").css("bgc","#00FF7F");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample8 div:nth-last-child(2) ").css("bgc","#5F9EA0");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample12 div:first-of-type").css("bgc","#FF00FF");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample12 div:last-of-type").css("bgc","#1E90FF");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample13 p em:only-child").css("bgc","#daa520");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample14 p em:only-of-type").css("bgc","#6CF");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample15 p:empty").html("司徒正美司徒正美司徒正美").css("bgc","#FA8072");</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+& lt;
+div id = "games" & gt; & lt;
+p id = "fanalfantasy"
+class = "bbb" & gt;最终幻想 | & lt;
+span class = "aaa" & gt;勇者斗恶龙 | & lt;
+/span&gt;&lt;span class="ccc"&gt;女神转生| &lt;/span & gt; & lt;
+span class = "bbb" & gt;传说系列 & lt;
+/span&gt;&lt;/p & gt; & lt;
+p class = "aaa" & gt;荒野兵器 | & lt;
+span title = "hello" & gt;北欧女神 & lt;
+/span&gt;&lt;/p & gt; & lt;
+p title = "aaa" & gt;浪漫沙加 | & lt;
+span title = "bye" & gt;王国之心 & lt;
+/span&gt;&lt;/p & gt; & lt;
+p id = "legend " & gt;圣剑传说 | & lt;
+span class = "ccc eee"
+title = "goodbye" & gt;幻想水浒传 | & lt;
+/span&gt;&lt;em&gt;影之心 |&lt;span class="aaa"&gt;格兰蒂亚 &lt;/span & gt; & lt;
+/em&gt;&lt;/p & gt; & lt;
+/div&gt;
+</pre>
+                <h1>css 3 选择器</h1>
+                <h2>结构伪类(Structural pseudo-classes)</h2>
+                <h3>E:nth-last-child(n)</h3>
+                <p>匹配所有在其父元素中排倒数第 n 个的 E 元素。</p>
+                <pre>#sample6 li:nth-last-child(2) { /* #sample6子元素内的倒数第2个li */ background:#7CFC00;
+                    }</pre>
+                <h4>高亮星号显示的li元素</h4>
+                <ol id="sample6" class="aaa bbb ccc">
+                    <li>倒数第4个li</li>
+                    <li>倒数第3个li</li>
+                    <li>倒数第2个li ★★★</li>
+                    <li>倒数第1个li</li>
+                </ol>
+                <pre>#sample7 p:nth-last-child(2) { /* #sample7子元素内的倒数第2个元素，且类型为p */ background:#00FF7F;
+                    }</pre>
+                <h4>倒数第2个元素是p 3</h4>
+                <div id="sample7">
+                    <p>p 1</p>
+                    <div>div 1</div>
+                    <p>p 2</p>
+                    <div>div 2</div>
+                    <p>p 3</p>
+                    <div>div 3</div>
+                </div>
+                <pre>#sample8 div:nth-last-child(2) { /* #sample8子元素内的倒数第2个元素，且类型为div */ background:#5F9EA0;
+                    }</pre>
+                <h4>倒数第2个元素是div</h4>
+                <div id="sample8">
+                    <p>p 1</p>
+                    <div class="aaa">div 1</div>
+                    <p>p 2</p>
+                    <div>div 2</div>
+                    <p>p 3</p>
+                    <div>div 3</div>
+                    <div>div 4</div>
+                </div>
+                <h3>E:first-of-type</h3>
+                <p>根据E的类型匹配所有兄弟元素中第一个此类型元素，类似于“:nth-of-type(1)”。</p>
+                <h3>E:last-of-type</h3>
+                <p>根据E的类型匹配所有兄弟元素中最后一个此类型元素。</p>
+                <pre>#sample12 div:first-of-type { background:#FF00FF; } #sample12 div:last-of-type
+                    { background:#1E90FF; }</pre>
+                <div id="sample12">
+                    <p>p 1</p>
+                    <div>div 1</div>
+                    <p>p 2</p>
+                    <div>div 2</div>
+                    <p>p 3</p>
+                    <div>div 3</div>
+                    <p>p 4</p>
+                    <div>div 4</div>
+                    <p>p 5</p>
+                </div>
+                <h3>E:only-child</h3>
+                <p>匹配那些是其父元素唯一孩子的 E 元素。</p>
+                <pre>#sample13 p em:only-child { /* sample13 内 p 内的 em，且em是p唯一子元素。*/ background:#FF9;
+                    }</pre>
+                <div id="sample13">
+                    <p>p1,
+                        <em>子元素1：em</em>
+                    </p>
+                    <p>p2,
+                        <em>子元素1：em</em>，
+                        <strong>子元素2：strong</strong>
+                    </p>
+                    <p>p3,
+                        <strong>子元素1：strong</strong>
+                    </p>
+                </div>
+                <h3>
+                    <a name="only-of-type">E:only-of-type</a>
+                </h3>
+                <p>根据 E 的类型，匹配那些在其兄弟里是唯一此类元素的 E 元素。</p>
+                <pre>#sample14 p em:only-of-type { /* sample14 内 p 内的 em，且是p的子元素中唯一的em。*/ background:#6CF;
+                    }</pre>
+                <div id="sample14">
+                    <p>p1,
+                        <em>子元素1.0：em</em>
+                    </p>
+                    <p>p2,
+                        <em>子元素1.1：em</em>，
+                        <strong>子元素2：strong</strong>
+                    </p>
+                    <p>p3,
+                        <em>子元素1.2：em</em>，
+                        <em>子元素1.3：em</em>，
+                        <strong>子元素3：strong</strong>
+                    </p>
+                </div>
+                <h3>
+                    <a name="empty">E:empty</a>
+                </h3>
+                <p>匹配没有子元素的E元素。</p>
+                <pre>#sample15 p:empty { background:#FA8072; }</pre>
+                <div id="sample15">
+                    <p></p>
+                    <p>只有文本</p>
+                    <p>
+                        <em></em>
+                    </p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

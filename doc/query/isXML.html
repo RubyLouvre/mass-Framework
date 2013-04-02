@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.isXML</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.isXML(el)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>判定当前元素节点或文档对象是否为XML节点或XML文档，返回布尔值。</p>
+            <p>当前isXML使用的方案，通过是否区分nodeName的大小写进行识别。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+isXML: function(el) {
+    var doc = el.ownerDocument || el
+    return doc.createElement("p").nodeName !== doc.createElement("P").nodeName;
+},
+</pre>
+            <p>详尽的论述见我
+                <a href="http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.html">这篇博文</a>。</p>
+        </article>
+    </body>
+
+</html>

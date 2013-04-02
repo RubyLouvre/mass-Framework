@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.focus</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                ul{
+                    list-style-image: url(../public/images/li.gif)
+                }
+                .focused {
+                    background: #abcdef;
+                }
+            </style>
+            <script type="text/javascript">
+                $(function($){
+                    $( "#content" ).delegate( "*", "focus blur", function(  ) {
+                        var elem = $( this );
+                        setTimeout(function() {
+                            elem.toggleClass( "focused", elem.is( ":focus" ) );
+                        }, 0);
+                    });
+                })
+            </script>
+            </head>
+            
+            <body>
+                <article>
+                    <p>聚焦伪类，:focus，CSS2.1的链接伪类之一。如果此元素获得焦点就会被选中。</p>
+                    <fieldset>
+                        <legend>例子</legend>
+                        <pre class="brush:xml;gutter:false;toolbar:false">
+
+        <div id="content">
+            <input tabIndex="1">
+            <input tabIndex="2">
+            <select tabIndex="3">
+                <option>select menu</option>
+            </select>
+            <div tabIndex="4">
+                a div
+            </div>
+        </div>
+        
+</pre>
+                        <div id="content">
+                            <input tabIndex="1">
+                            <input tabIndex="2">
+                            <select tabIndex="3">
+                                <option>select menu</option>
+                            </select>
+                            <div tabIndex="4">a div</div>
+                        </div>
+                    </fieldset>
+                </article>
+            </body>
+
+</html>

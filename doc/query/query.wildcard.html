@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.wildcard</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <p>通配符选择器，亦即CSS表达式中的"*"，会选择当前元素的所有子孙元素。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <table class="clicktable" cellspacing="0" width="700" rules="cols">
+                    <thead>
+                        <tr>
+                            <th>请点击下面表格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>$("div *").css("bgc","red");</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div id="games">
+        <p id="fanalfantasy"class="bbb"> 最终幻想 | <span class="aaa">勇者斗恶龙 |</span><span class="ccc">女神转生| </span><span class="bbb">传说系列 </span></p>
+        <p class="aaa">荒野兵器 |<span title="hello">北欧女神 </span></p>
+        <p title="aaa">浪漫沙加|<span title="bye">王国之心 </span></p>
+        <p id="legend ">圣剑传说 |<span class="ccc eee" title="goodbye">幻想水浒传| </span><em>影之心 |<span class="aaa">格兰蒂亚 </span></em></p>
+    </div>
+    
+</pre>
+                <div id="games">
+                    <p id="fanalfantasy" class="bbb">最终幻想 |
+                        <span class="aaa">勇者斗恶龙 |</span>
+                        <span class="ccc">女神转生|</span>
+                        <span class="bbb">传说系列</span>
+                    </p>
+                    <p class="aaa">荒野兵器 |
+                        <span title="hello">北欧女神</span>
+                    </p>
+                    <p title="aaa">浪漫沙加|
+                        <span title="bye">王国之心</span>
+                    </p>
+                    <p id="legend ">圣剑传说 |
+                        <span class="ccc eee" title="goodbye">幻想水浒传|</span>
+                        <em>影之心 |
+                            <span class="aaa">格兰蒂亚</span>
+                        </em>
+                    </p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>> $("fieldset :target").css("bgc","red");</td>
+</tr>
+</tbody>
+</table>
+<pre class="brush:xml;gutter:false;toolbar:false">
+
+    <p id="show_url">这个用于动态显示location.href</p>
+    <p id="target">这个会被选中</p>
+
+</pre>
+<p id="show_url">这个用于动态显示location.href</p>
+<p id="target">这个会被选中</p>
+</fieldset>
+</article>
+</body>
+
+</html>ype="hidden" name="id" /></form>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var highlight1 = function() {
+    var str = " .sample中不可见的元素有 : "
+    var array = $(".sample :hidden").collect(function(el) {
+        return "&lt;" + el.tagName.toLowerCase() + (el.type ? " " + el.type : "") + "/&gt;";
+    });
+    $("#show_result").text(str + array.join(" , "));
+}
+</pre>
+<button class="doc_btn" type="button">点我，执行代码</button>
+<pre class="brush:javascript;gutter:false;toolbar:false">
+var highlight2 = function() {
+    var str = " .sample中可见的元素有 : "
+    var array = $(".sample :visible").collect(function(el) {
+        return "&lt;" + el.tagName.toLowerCase() + (el.type ? " " + el.type : "") + "/&gt;";
+    });
+    $("#show_result").text(str + array.join(" , "));
+}
+</pre>
+<button class="doc_btn" type="button">点我，执行代码</button>
+</fieldset>
+<div id="show_result"></div>
+</article>
+</body>
+
+</html>t" />
+<br/>
+<input type="radio" />radio
+<input type="button" value="button" />
+<br/>
+<input type="checkbox" name="newsletter" checked="checked" value="Daily"
+/>
+<input type="checkbox" name="newsletter" value="Weekly" />
+<input type="checkbox" name="newsletter" checked="checked" value="Monthly"
+/>
+</form>
+</pre>
+<form action="">
+    <input name="email" disabled="disabled" />
+    <br/>
+    <input name="text" />
+    <br/>
+    <input type="radio" />radio
+    <input type="button" value="button" />
+    <br/>
+    <input type="checkbox" name="newsletter" checked="checked" value="Daily"
+    />
+    <input type="checkbox" name="newsletter" value="Weekly" />
+    <input type="checkbox" name="newsletter" checked="checked" value="Monthly"
+    />
+</form>
+</fieldset>
+</article>
+</body>
+
+</html>ption>
+<option value="2" selected="selected">Gardens</option>
+<option value="3">Trees</option>
+</select>
+</form>
+</fieldset>
+</article>
+</body>
+
+</html>ang属性~=括号中的语言种类</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.not.html">反选伪类选择器</a>
+    </td>
+    <td>:not(.aaa)</td>
+    <td>指当前元素不具备括号中所指的特性</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.empty.html">empty子元素过滤选择器</a>
+    </td>
+    <td>:empty</td>
+    <td>此元素不存在任何子节点</td>
+</tr>
+<tr>
+    <td>link子元素过滤选择器</td>
+    <td>:link</td>
+    <td>如果没有前缀，则返回document.links，否则要求为链接</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.root.html">root伪类选择器</a>
+    </td>
+    <td>:root</td>
+    <td>返回根节点html</td>
+</tr>
+<tr>
+    <td colspan="3">伪类选择器(自定义扩展部分，灵感来自jQuery)</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.tags.html">标签伪类选择器</a>
+    </td>
+    <td>:text,
+        <br/>:file,
+        <br/>:radio,
+        <br/>:checkbox,
+        <br/>:password,
+        <br/>:submit,
+        <br/>:image,
+        <br/>:button,
+        <br/>:reset,
+        <br/>:input,
+        <br/>:header</td>
+    <td>大部分根据input元素的type值选择，有的根据tagName，header则选择h1~h6元素
+        <br/>
+        <span style="color:red">此类伪类不建议使用</span>
+    </td>
+</tr>
+<tr>
+    <td>
+        <a href="query.state.html">selected属性伪类选择器</a>
+    </td>
+    <td>:selected</td>
+    <td>返回选中的option元素</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.visibility.html">hidden伪类选择器</a>
+    </td>
+    <td>:hidden</td>
+    <td>此元素不可见，如本身为hidden表单元素，或display为hidden</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.visibility.html">visible伪类选择器</a>
+    </td>
+    <td>:visible</td>
+    <td>与上面相反</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.parent.html">parent伪类选择器</a>
+    </td>
+    <td>:parent</td>
+    <td>此元素存在子元素</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.contains.html">contains伪类</a>
+    </td>
+    <td>p:contains("司徒正美")</td>
+    <td>元素的文本包含括号中的内容</td>
+</tr>
+<tr>
+    <td>
+        <a href="query.has.html">has伪类</a>
+    </td>
+    <td>p:has(a)</td>
+    <td>如果p元素有孩子匹配a的这个选择器</td>
+</tr>
+</tbody>
+</table>
+<p>基本上它除了不支持jQuery的位置伪类（:first, :last, :gt, :lt, :eq, :even, :odd）外，都支持了。jQuery的位置伪类与w3c的选择器规则相悖，因此就算是jQuery
+    , 每次用到位置伪类都特殊处理（详细请看jquery1.7的is与$.event.add的源码）。作为替代，dom Framework提供了first(),
+    last(), gt(), lt(), eq(), even(), odd等切片方法。</p>
+</article>
+</body>
+
+</html>
+</td>
+</tr>
+<tr>
+    <td>$("ul [lang|='zh']").css("background-color","fuchsia");</td>
+</tr>
+<tr>
+    <td>$("ul [class!='second']").css("background-color","red");</td>
+</tr>
+<tr>
+    <td>$("ul [class='second'][title='second']").css("background-color","gold");</td>
+</tr>
+</tbody>
+</table>
+<pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul>
+        <li class="first" style="font-weight:bolder">First class.</li>
+        <li class="second" title="second">Second class.</li>
+        <li class="third">Third class.</li>
+        <li class="first second">First and second class.</li>
+        <li class="first third fourth">First , third and fourth class.</li>
+        <li class="second third">Second and third class.</li>
+        <li class="first fourth fifth " lang="zh-cn">First, fourth and fifth class.</li>
+    </ul>
+
+</pre>
+<ul>
+    <li class="first" style="font-weight:bolder">First class.</li>
+    <li class="second" title="second">Second class.</li>
+    <li class="third">Third class.</li>
+    <li class="first second">First and second class.</li>
+    <li class="first third fourth">First , third and fourth class.</li>
+    <li class="second third">Second and third class.</li>
+    <li class="first fourth fifth " lang="zh-cn">First, fourth and fifth class.</li>
+</ul>
+</fieldset>
+</article>
+</body>
+
+</html>background:cyan; } #sample3 li:nth-child(3) { background:chartreuse; }</pre>
+<ol
+id="sample3">
+    <li>列表项哦列表项</li>
+    <li>列表项哦列表项</li>
+    <li>列表项哦列表项</li>
+    <li>列表项哦列表项</li>
+    <li>列表项哦列表项</li>
+    <li>列表项哦列表项</li>
+    </ol>
+    <h4>表格的不同列背景色</h4>
+    <pre>#sample4 td:nth-child(3n+1) { background:#FCC; } #sample4 td:nth-child(3n+2)
+        { background:#F99; } #sample4 td:nth-child(3n+3) { background:#C6F; }</pre>
+    <table
+    id="sample4" border="0" cellpadding="0" cellspacing="0" width="80%">
+        <caption>表格的不同列背景色</caption>
+        <tbody>
+            <tr>
+                <td>1-1</td>
+                <td>1-2</td>
+                <td>1-3</td>
+            </tr>
+            <tr>
+                <td>2-1</td>
+                <td>2-2</td>
+                <td>2-3</td>
+            </tr>
+            <tr>
+                <td>3-1</td>
+                <td>3-2</td>
+                <td>3-3</td>
+            </tr>
+            <tr>
+                <td>4-1</td>
+                <td>4-2</td>
+                <td>4-3</td>
+            </tr>
+        </tbody>
+        </table>
+        <h4>所有子元素</h4>
+        <pre>#sample5 dt:nth-child(odd){ background:#6CF; }</pre>
+        <dl id="sample5">
+            <dt>dt 1,总排行1</dt>
+            <dd>dd 1,总排行2</dd>
+            <dt>dt 2,总排行3</dt>
+            <dd>dd 2,总排行4</dd>
+            <dd>dd 3,总排行5</dd>
+            <dt>dt 3,总排行6</dt>
+            <dt>dt 4,总排行7</dt>
+            <dd>dd 4,总排行8</dd>
+        </dl>
+        <pre>#sample6 li:nth-last-child(2) { background:#FF9; }</pre>
+        <ol id="sample6">
+            <li>倒数第4个li</li>
+            <li>倒数第3个li</li>
+            <li>倒数第2个li</li>
+            <li>倒数第1个li</li>
+        </ol>
+        <pre>#sample7 :nth-last-child(2) { background:#369; }</pre>
+        <ol id="sample7">
+            <li>倒数第4个li</li>
+            <li>倒数第3个li</li>
+            <li>倒数第2个li</li>
+            <li>倒数第1个li</li>
+        </ol>
+        <pre>[class='only'] :only-child{ background:#9932cc; }</pre>
+        <div class="only">它有一个文本节点</div>
+        <div class="only">
+            <span>它有一个元素节点</span>
+        </div>
+        <pre>#sample8 p:first-of-type{ background:#FF0; }</pre>
+        <ul id="sample8">
+            <li>匹配同级兄弟元素中的第一个E元素</li>
+            <li>匹配同级兄弟元素中的第一个E元素</li>
+            <li>匹配同级兄弟元素中的第一个E元素</li>
+            <li>匹配同级兄弟元素中的第一个E元素</li>
+            <li>匹配同级兄弟元素中的第一个E元素</li>
+        </ul>
+        <div style="width:733px; border: 1px solid #666; padding:5px;">
+            <div>
+                <p>匹配属于同类型中唯一兄弟元素的E</p>
+            </div>
+            <div>
+                <p>匹配属于同类型中唯一兄弟元素的E</p>
+                <p>匹配属于同类型中唯一兄弟元素的E</p>
+            </div>
+        </div>
+        </fieldset>
+        </article>
+        </body>
+        
+        </html>

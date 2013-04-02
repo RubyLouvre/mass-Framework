@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.not</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <p>反选伪类，:not(expr)，expr只能为不表示层级关系的单个选择器，里面不再镶嵌反选伪类。
+                <a href="https://developer.mozilla.org/en/CSS/:not">详见这里</a>
+            </p>
+            <fieldset>
+                <legend>例子</legend>
+                <table class="clicktable" cellspacing="0" width="700" rules="cols">
+                    <thead>
+                        <tr>
+                            <th>请点击下面表格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>$("#sample1 :not(:first)").css("bgc","#FF9");</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ol id="sample1">
+        <li>列表项哦列表项</li>
+        <li>列表项哦列表项</li>
+        <li>列表项哦列表项</li>
+        <li>列表项哦列表项</li>
+    </ol>
+    
+</pre>
+                <ol id="sample1">
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                </ol>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

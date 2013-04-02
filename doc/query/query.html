@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.query</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.query(expr, context)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>选择器引擎的入口，第一个参数为CSS表达式，第二参数为搜索起点（元素节点或文档对象）。</p>
+            <p>$.query(expr, context)相当于context.querySelectorAll(expr)，为此，不建议使用自定义伪类（冒号起头的表达式），
+                以便在IE8+，FF3.5+,chrome, opera10等浏览器中直接使用原生的querySelectorAll API。</p>
+            <p>有关querySelectorAll的使用可查看
+                <a href="https://developer.mozilla.org/En/DOM/Document.querySelectorAll">这里</a>
+            </p>
+        </article>
+    </body>
+
+</html>
