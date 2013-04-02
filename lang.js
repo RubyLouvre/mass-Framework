@@ -116,7 +116,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             if (isArray) {
                 for (var n = obj.length; i < n; i++) {
                     value = fn.call(scope || obj[i], i, obj[i]);
-                    ret.push(value);
                     if (map) {
                         if (value != null) {
                             ret[ ret.length ] = value;
