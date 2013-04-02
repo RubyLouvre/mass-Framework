@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>样式操作模块</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>样式操作模块</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>此模块，主要是针对元素的类名，样式，尺寸，方位进行读写操作。</p>
+            <p>
+                <span class="stress">主要API一览：</span>
+            </p>
+            <p>实例方法：</p>
+            <table class="table-dark">
+                <thead>
+                    <tr>
+                        <th>API</th>
+                        <th>解说</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>css</td>
+                        <td>取得第一个元素节点的样式或为所有选中的元素节点设置样式</td>
+                    </tr>
+                    <tr>
+                        <td>offset</td>
+                        <td>取得第一个元素节点位于页面的坐标或为所有选中的元素节点设置坐标</td>
+                    </tr>
+                    <tr>
+                        <td>position</td>
+                        <td>取得第一个元素节点相对于其offsetParent的坐标</td>
+                    </tr>
+                    <tr>
+                        <td>offsetParent</td>
+                        <td>在当前找到的节点中，收集它们的offsetParent，封装成mass对象返回</td>
+                    </tr>
+                    <tr>
+                        <td>scrollParent</td>
+                        <td>在当前找到的节点中，收集它们的scrollParent，封装成mass对象返回</td>
+                    </tr>
+                    <tr>
+                        <td>scrollTop</td>
+                        <td>取得第一个元素节点的scrollTop或为所有选中的元素节点设置scrollTop</td>
+                    </tr>
+                    <tr>
+                        <td>scrollLeft</td>
+                        <td>取得第一个元素节点的scrollLeft或为所有选中的元素节点设置scrollLeft</td>
+                    </tr>
+                    <tr>
+                        <td>width</td>
+                        <td>取得第一个元素节点的width(即使它被隐藏了)或为所有选中的元素节点设置width</td>
+                    </tr>
+                    <tr>
+                        <td>height</td>
+                        <td>取得第一个元素节点的height(即使它被隐藏了)或为所有选中的元素节点设置height</td>
+                    </tr>
+                    <tr>
+                        <td>innerWidth</td>
+                        <td>取得第一个元素节点的width与它左右padding之和</td>
+                    </tr>
+                    <tr>
+                        <td>innerHeight</td>
+                        <td>取得第一个元素节点的height与它上下padding之和</td>
+                    </tr>
+                    <tr>
+                        <td>outerWidth</td>
+                        <td>取得第一个元素节点的width与它左右padding,左右border之和（如果传参为true，则还包括其margin）</td>
+                    </tr>
+                    <tr>
+                        <td>outerHeight</td>
+                        <td>取得第一个元素节点的height与它上下padding,上下border之和（如果传参为true，则还包括其margin）</td>
+                    </tr>
+                    <tr>
+                        <td>show</td>
+                        <td>让元素显示出来</td>
+                    </tr>
+                    <tr>
+                        <td>hide</td>
+                        <td>让元素隐藏起来</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="width:100px;height:100px;" id="aaa"></div>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#aaa").css("background-color", "red")
+</pre>
+            <button class="doc_btn" type="button">点我，执行代码</button>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#aaa").css("bgc", "blue")
+</pre>
+            <button class="doc_btn" type="button">点我，执行代码</button>
+        </article>
+    </body>
+
+</html>
