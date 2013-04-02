@@ -224,10 +224,18 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
          * http://freshbrewedcode.com/jimcowart/2013/01/29/what-you-might-not-know-about-json-stringify/
          */
         dump: function(obj) {
-            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t";
-            return JSON.stringify(obj, function(key, value) {
+            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t", cache = [],
+            text = JSON.stringify(obj, function(key, value) {
+                if (typeof value === 'object' && value !== null) {//防止环引用
+                    if (cache.indexOf(value) !== -1) {
+                        return;
+                    }
+                    cache.push(value);
+                }
                 return typeof value === "function" ? value + "" : value;
             }, space);
+            cache = [];//GC回收
+            return text;
         },
         /**
          * 将字符串当作JS代码执行
@@ -413,7 +421,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         }
     });
     //字符串的原生原型方法
-    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,"+ //es6
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat," + //es6
             "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         contains: function(target, item) {
