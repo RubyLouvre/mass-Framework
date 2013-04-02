@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.attr</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 img {
+                    padding:10px;
+                    display:block;
+                }
+                .sample2 input{
+                    margin-right: 1em;
+                    display: inline-block;
+                    zoom:1;
+                    border: 1px solid greenyellow;
+                }
+            </style>
+            <h3>$.fn.attr( name, [val] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对元素节点的自定义属性进行读写操作。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <ul>
+                <li>如果只有一个字符串参数，则对第一个匹配节点进行读取操作。</li>
+                <li>如果有两个参数，第一个为字符串，第二个参数不为null, 则对所有匹配节点进行赋值操作，如果第二个参数为null则进行移除属性的操作。</li>
+                <li>如果只有一个对象参数，则依取取得里面的键值对，对所有匹配节点进行多个赋值操作。</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <p>为页面中所有img元素设置一些属性。</p>
+                <div class="sample1">
+                    <img/>
+                    <img/>
+                    <img/>
+                    <p>
+                        <strong>set by attr API</strong>
+                    </p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+        <div class="sample1">
+            <img/>
+            <img/>
+            <img/>
+            <p><strong>set by attr API</strong></p>
+        </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr", function() {
+    $(".sample1 img").attr({
+        src: "/styles/attr_rabbit.jpg",
+        title: "流氓兔",
+        alt: "流氓兔"
+        width: "200px",
+        height: "200px"
+    });
+    $(".sample1 strong").text($("img").attr("alt"));
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>使第二个后面的按钮disabled</p>
+                <div class="sample2">
+                    <input>
+                    <input>
+                    <input>
+                    <input>
+                    <input>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+        <div class="sample2">
+            <input><input><input><input><input>
+        </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr", function() {
+    $(".sample2 input").gt(1).attr("disabled", "disabled");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

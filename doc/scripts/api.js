@@ -20,30 +20,8 @@ define("api", ["mass"], function() {
         query: "isXML,contains,getText,unique,query".match($.rword).sort(),
         data: ["data","parseData","removeData","mergeData"],
         css: "fn.css, fn.width, fn.height, fn.innerWidth, fn.innerHeight, fn.outerWidth, fn.outerHeight, fn.offset, fn.position, fn.offsetParent, fn.scrollParent, fn.scrollTop, fn.scrollLeft, css".match($.rword).sort(),
-          
-        "属性模块": {
-            "fn": {
-                "addClass": "function",
-                "hasClass": "function",
-                "removeClass": "function",
-                "toggleClass": "function",
-                "replaceClass": "function",
-                "val": "function",
-                "removeAttr": "function",
-                "removeProp": "function",
-                "attr": "function",
-                "prop": "function",
-                "class": "function"
-            },
-            "attr": "function",
-            "prop": "function",
-            "attrMap": "object",
-            "propMap": "object",
-            "_remove_attr": "function",
-            "propAdapter": "object",
-            "valAdapter": "object"
-        },
-        "事件模块": {
+        attr: "fn.addClass, fn.hasClass, fn.removeClass, fn.toggleClass, fn.replaceClass, fn.val, fn.removeAttr, fn.removeProp, fn.attr, fn.prop, attr, prop".match($.rword).sort(),
+        event: {
             "fn": {
                 "on": "function",
                 "bind": "function",

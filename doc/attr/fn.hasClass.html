@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.hasClass</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.hasClass(className)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>检查匹配的元素是否含有某个特定的类名。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>className</dt>
+                <dd>必需。String。要查询的类名。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>Boolean</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample">请点击它</div>
+                <style>
+                    .sample{
+                        border:1px solid #00CED1;
+                        padding: 1em;
+                    }
+                    .selected {
+                        background:#8B0000;
+                    }
+                </style>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+                &lt;div class="sample"&gt;请点击它&lt;/div&gt;
+                &lt;style&gt;
+                    .selected {
+                       background:#8B0000;
+                    }
+                &lt;/style&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,attr", function() {
+    $(".sample").click(function(e) {
+        var self = $(this);
+        if (self.hasClass("selected")) {
+            self.removeClass("selected");
+        } else {
+            self.addClass("selected");
+        }
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

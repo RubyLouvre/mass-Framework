@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.removeClass</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample{
+                    border:1px solid #00CED1;
+                    padding: 1em;
+                }
+                .selected {
+                    background:#8B0000;
+                }
+            </style>
+            <h3>$.fn.removeClass( [className])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>移除每个匹配元素的一个，多个或全部类名。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>className</dt>
+                <dd>可选。String。要移除的类名，没有则移除所有类名。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample">请点击它</div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,attr", function() {
+    $(".sample").click(function() {
+        var self = $(this);
+        if (self.hasClass("selected")) {
+            self.removeClass("selected");
+        } else {
+            self.addClass("selected");
+        }
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

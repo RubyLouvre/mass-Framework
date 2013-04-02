@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.removeProp</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.removeProp( propName )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为匹配的每一个元素节点移除指定的属性。此方法与removeAttr方法的区别在于，它可以删除window, document上自定义的属性。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>propName</dt>
+                <dd>必需。String。要移除的属性名。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>设置一个段落数字属性，然后将其删除 。</p>
+                <div class="sample1">//////////////////////////</div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        //////////////////////////
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr", function() {
+    var $para = $(".sample1");
+    $para.prop("number", 1234);
+    $para.html("它拥有一个名为number的属性，其值为: " + String($para.prop("number")) + "， ");
+    $para.removeProp("number");
+    $para.append("经过removeProp操作之后，其值为: " + String($para.prop("number")) + "。 ");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>\</article>
+    </body>
+
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.removeAttr</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.removeAttr( attrName )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为匹配的每一个元素节点移除指定的属性。</p>
+            <p>.removeAttr() 方法使用原生的 JavaScript removeAttribute() 函数,但是它的优点是能够直接被jQuery对象访问调用。而且具有良好的浏览器兼容性。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>attrName</dt>
+                <dd>必需。String。要移除的属性名。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>让下面的文本域可以编辑 。</p>
+                <div class="sample1">
+                    <input type="text" disabled="disabled" value="test" />
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        <input type="text" disabled="disabled" value="test" />
+    </div>
+    
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr,event", function() {
+    $(".sample1 input").removeAttr("disabled").focus().val("editable now");
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

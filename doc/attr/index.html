@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>属性操作模块</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>属性操作模块</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>属性在这里只是一个统称，它对应两个术语attribute与property。attribute是指用户通过setAttribute设置的自定义属性，其值只能是字符串，
+                如果没有显式定义，用getAttribute取值为undefined。property是指元素固有属性，像title, className，tabIndex,
+                src, checked等等。 这些属性的值可以是五花八门，如className总是字符串，tabIndex总是数字（它只限表单元素与个别能获取焦点的元素），
+                表单元素的form属性总是指向其外围的表单对象（当然如果它没有放在form标签之内是不存在的）, checked, disabled , defer等属性，如果此元素支持它，总是返回布尔值。这些固有属性，如果没有显示定义，基本上是返回null（如果className,
+                value则是字符串）。</p>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+document.body.className = function() {}
+alert(typeof document.body.className) //无法重写，返回"string"
+</pre>
+            <button class="doc_btn" type="button">点我，执行代码</button>
+            <p>如何处理这些庞杂的属性就是本模块要做的事情。它拥有如下四类方法。</p>
+            <p>
+                <span style="color:#667f03;">处理表单元素节点value值的方法:val</span>。如果是普通元素则内部转交prop方法去处理。</p>
+            <p>
+                <span style="color:#667f03;">处理元素节点的className属性的方法：hasClass, addClass, removeClass, toggleClass, replaceClass</span>。它们分别用于
+                判定，添加， 移除， 切换与替换元素节点的className属性。className是一个特别的属性，它对应由多个类名组成的字符串，因此从prop独立出来区别对待。</p>
+            <p>
+                <span style="color:#667f03;">处理元素节点的自定义属性的方法：attr，removeAttr</span>。如果发现对象是window, document，则转交prop方法处理。</p>
+            <p>
+                <span style="color:#667f03;">处理节点或window的固有属性的方法：prop，removeProp</span>。</p>
+            <p>HTML5都推荐写在标准中的属性名为小写，但实际上元素节点的属性名与它们是一致的，有时需要驼峰化，有时完成不一样， 如著名的class对应className，for对应htmlFor，rowspan对应rowSpan，
+                bgcolor对应bgColor....在这个模块中两个映射列表来处理这工作， attrMap, propMap，你不用担忧这个属性是否写得正确，直接把写在标签的那个小写的属性填上去就行了。另外，有些属性是总是返回布尔值，
+                如async，autofocus，checked....。为此，val, attr, prop 方法内部都操控着数个适配器，确保能取得正确的值。</p>
+        </article>
+    </body>
+
+</html>

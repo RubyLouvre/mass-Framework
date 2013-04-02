@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.addClass</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.addClass(className)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为每个匹配的元素添加指定的类名.</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>className</dt>
+                <dd>必需。String。如果要添加多个类名，请用空字符隔开，如'aaa bbb ccc'</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <style type="text/css">
+                    .selected {
+                        color:red;
+                    }
+                </style>
+                <div class="test">aaaaa</div>
+                <div class="test">bbbbb</div>
+                <div class="test">ccccc</div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <style type="text/css">
+        .selected {
+            color:red;
+        }
+    </style>
+    <div class="test">aaaaa</div>
+    <div class="test">bbbbb</div>
+    <div class="test">ccccc</div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr", function() {
+    $(".test").addClass("selected");
+});
+</pre>
+                <button class="doc_btn" onclick="exec1()">点我，执行代码</button>
+            </fieldset>
+            <p>下面是几种实现方式比较：</p>
+            <p>正则去重</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+addClass: function(item) {
+    if (typeof item == "string") {
+        for (var i = 0, el; el = this[i++];) {
+            if (el.nodeType === 1) {
+                if (!el.className) {
+                    el.className = item;
+                } else {
+                    //(^|\s)(\S+)(?=\s(?:\S+\s)*\2(?:\s|$))/g,
+                    el.className = (el.className + " " + item).replace(rclass, "");
+                }
+            }
+        }
+    }
+    return this;
+},
+</pre>
+            <p>数组排序去重</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+addClass: function(item) {
+    if (typeof item == "string") {
+        for (var i = 0, el; el = this[i++];) {
+            if (el.nodeType === 1) {
+                if (!el.className) {
+                    el.className = item;
+                } else {
+                    var obj = {}, set = "";
+                    (el.className + " " + cls).replace(/\S+/g, function(w) {
+                        if (!obj['@' + w]) {
+                            set += w + " ";
+                            obj['@' + w] = 1;
+                        }
+                    });
+                    el.className = set.slice(0, set.length - 1);
+                }
+            }
+        }
+    }
+    return this;
+},
+</pre>
+            <p>对象去重</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+addClass: function(item) {
+    if (typeof item == "string") {
+        for (var i = 0, el; el = this[i++];) {
+            if (el.nodeType === 1) {
+                if (!el.className) {
+                    el.className = item;
+                } else {
+                    var a = (el.className + " " + cls).match(/\S+/g);
+                    a.sort();
+                    for (var i = a.length - 1; i > 0; --i)
+                    if (a[i] == a[i - 1]) a.splice(i, 1);
+                    el.className = a.join(' ');
+                }
+            }
+        }
+    }
+    return this;
+},
+</pre>
+        </article>
+    </body>
+
+</html>
