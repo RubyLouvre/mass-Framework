@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>nodejs框架设计</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    <body>
+     
+        <pre class="brush:js;gutter:false;toolbar:false;">
+var http = require('http');
+
+http.createServer(function(request, response) {
+  var cache = [];
+  var text = JSON.stringify(request, function(key, value) {
+    if (typeof value === 'object' && value !== null) {//防止环引用
+      if (cache.indexOf(value) !== -1) {
+        return;
+      }
+      cache.push(value);
+    }
+    return value;
+  }, 4);
+  cache = null; 
+  response.writeHead(200, {
+    'Content-Type': 'text/html'
+  });
+response.end("&lt;!doctype html&gt;&lt;body&gt;&lt;h1&gt;request object&lt;/h1&gt;&lt;pre&gt;"+text+"&lt;/pre&gt;&lt;/body&gt;");
+}).listen(9999);
+
+console.log('Server running at http://127.0.0.1:9999/');
+        </pre>
+        <p>如果不考虑动态生成页面，就是从服务器将已经写好的静态HTML返回前端。那么我们后端至少要返回图片，CSS，JS，HTML这四种资源。
+        这四种资源通常存放的地方也不一样，对应的地址不一样，当请求过来时，需要一种路由系统做别识，再进入MVC，最后在action中处理好，返回前端。
+        </p>
+    </body>
+</html>
