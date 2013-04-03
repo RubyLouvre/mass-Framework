@@ -63,8 +63,6 @@
      * @return  {Object} 目标对象
      * @api public
      */
-
-
     function mix(receiver, supplier) {
         var args = [].slice.call(arguments),
                 i = 1,
@@ -274,21 +272,11 @@
             for (var p in settings) {
                 if (!hasOwn.call(settings, p))
                     continue;
-                var prev = kernel[p];
-                var curr = settings[p];
-                if (prev && p === "alias") {
-                    for (var c in curr) {
-                        if (hasOwn.call(curr, c)) {
-                            var prevValue = prev[c];
-                            var currValue = curr[c];
-                            if (prevValue && prev !== curr) {
-                                $.error(c + "不能重命名");
-                            }
-                            prev[c] = currValue;
-                        }
-                    }
+                var val = settings[p];
+                if (typeof kernel.plugin[p] === "function") {
+                    kernel.plugin[p](val);
                 } else {
-                    kernel[p] = curr;
+                    kernel[p] = val;
                 }
             }
             return this;
@@ -328,6 +316,8 @@
         var cur = getCurrentScript(true)
         var url = cur.replace(/[?#].*/, "");
         kernel = $.config;
+        kernel.plugin = {}
+        kernel.alias = {};
         basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1);
         var scripts = DOC.getElementsByTagName("script");
         for (var i = 0, el; el = scripts[i++]; ) {
@@ -336,9 +326,24 @@
                 break;
             }
         }
-        kernel.alias = {};
+
         kernel.level = 9;
     })();
+
+    kernel.plugin["alias"] = function(val) {
+        var map = kernel.alias;
+        for (var c in val) {
+            if (hasOwn.call(val, c)) {
+                var prevValue = map[c];
+                var currValue = val[c];
+                if (prevValue) {
+                    $.error("注意" + c + "出经重写过");
+                }
+                map[c] = currValue;
+            }
+        }
+    };
+
     "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
     });
@@ -363,9 +368,16 @@
         if (/^(mass|ready)$/.test(url)) { //特别处理ready标识符
             return [url, "js"];
         }
+        var shim;
+        //从别名对象中直接取得路径
         if ($.config.alias[url]) {
             ret = $.config.alias[url];
+            if (typeof ret === "object") {
+                shim = ret;
+                ret = ret.src;
+            }
         } else {
+            //需要结合父路径拼凑路径
             parent = parent.substr(0, parent.lastIndexOf('/'))
             if (/^(\w+)(\d)?:.*/.test(url)) { //如果用户路径包含协议
                 ret = url;
@@ -389,15 +401,38 @@
                 }
             }
         }
-        tmp = ret.replace(/[?#].*/, "");
-        var length = tmp.length;
-        if (tmp.slice(length - 3) === ".js") {
-            return [ret, "js"];
-        } else if (tmp.slice(length - 4) === ".css") {
-            return [ret, "css"];
-        } else {
-            return [ret + ".js", "js"];
+        var src = ret.replace(/[?#].*/, ""), ext;
+        if (/\.(css|js)$/.test(src)) { // 处理"http://113.93.55.202/mass.draggable"的情况
+            ext = RegExp.$1;
         }
+        if (!ext) {
+            src += ".js";
+            ext = "js";
+        }
+        if (ext === "js") {
+            if (!modules[url]) {
+                modules[url] = {
+                    id: url,
+                    parent: parent,
+                    exports: {}
+                };
+            }
+            if (shim) {
+                require(shim.deps || "", function() {
+                    loadJS(src, function() {
+                        modules[src].state = 2;
+                        modules[src].exports = window[shim.exports];
+                        checkDeps();
+                    });
+                });
+            } else  {
+
+            }
+        }else{
+            
+        }
+
+        return [src, ext, shim];
     }
     function getCurrentScript(base) {
         // 参考 https://github.com/samyk/jiagra/blob/master/jiagra.js
@@ -477,7 +512,7 @@
         }
     }
 
-    function loadJS(url) {
+    function loadJS(url, callback) {
         //通过script节点加载目标模块
         var node = DOC.createElement("script");
         node.className = moduleClass; //让getCurrentScript只处理类名为moduleClass的script节点
@@ -486,6 +521,9 @@
                 //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
                 var factory = parsings.pop();
                 factory && factory.delay(node.src);
+                if (callback) {
+                    callback();
+                }
                 if (checkFail(node, false, !W3C)) {
                     $.log("已成功加载 " + node.src, 7);
                 }
@@ -531,7 +569,7 @@
         String(list).replace($.rword, function(el) {
             var array = parseURL(el, parent),
                     url = array[0];
-            if (array[1] === "js") {
+            if (array[1] === ".js") {
                 dn++;
                 if (!modules[url]) {
                     modules[url] = {
@@ -539,7 +577,8 @@
                         parent: parent,
                         exports: {}
                     };
-                    loadJS(url);
+                    if (!array[2])
+                        loadJS(url);
                 } else if (modules[url].state === 2) {
                     cn++;
                 }
@@ -559,6 +598,7 @@
             args: args,
             state: 1
         };
+        console.log(modules[id])
         if (dn === cn) { //如果需要安装的等于已安装好的
             fireFactory(id, args, factory); //装配到框架中
         } else {
@@ -608,7 +648,7 @@
             parsings.push(factory);
         }
     };
-    $.require.amd = modules;
+    $.define.amd = modules;
     /**
      * 请求模块从modules对象取得依赖列表中的各模块的返回值，执行factory, 完成模块的安装
      * @param {String} id  模块ID
@@ -695,7 +735,8 @@
     //============================合并核心模块支持===========================
     /*combine modules*/
 
-}(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
+}
+(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
 /**
  changelog:
  2011.7.11
