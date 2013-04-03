@@ -161,6 +161,33 @@ require("aaa,bbb,ready", function(a,b,$) {
                 <button id="asynctest2" type="button">点我，继续加载新模块</button>
 
             </fieldset>
+              <fieldset>
+                <legend>例子</legend>
+                <p>加载不按规范编写的JS文件。</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
++function() {
+            var path = "http://files.cnblogs.com/shuicaituya/"
+            require.config({
+                alias: {
+                    "jquery": {
+                        "src": path + "jquery.js",
+                        deps: [],//没有依赖可以不写
+                        exports: "jQuery"
+                    }
+                }
+            });
+            require("jquery", function($) {
+                alert($)
+                alert("回调调起成功");
+            })
+        }()
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <button id="asynctest2" type="button">点我，继续加载新模块</button>
+
+            </fieldset>
+            
+            
         </article>
     </body>
 
