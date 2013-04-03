@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-        <script src="mass.js"></script>
+        <script src="mass_merge.js"></script>
 
         <style>
             html{
@@ -98,22 +98,23 @@
 
 
         <script>
-            +function() {
-                var path = "http://files.cnblogs.com/shuicaituya/"
-                require.config({
-                    alias: {
-                        "jquery": {
-                            "src": path + "jquery.js",
-                            deps: [],//没有依赖可以不写
-                            exports: "jQuery"
-                        }
-                    }
-                });
-                require("jquery", function($) {
-                    console.log("回调调起成功");
-                })
-            }()
-            /*
+//            +function() {
+//                var path = "http://files.cnblogs.com/shuicaituya/"
+//                require.config({
+//                    alias: {
+//                        "jquery": {
+//                            "src": path + "jquery.js",
+//                            deps: ["aaa"],//没有依赖可以不写
+//                            exports: "jQuery"
+//                        }
+//                    }
+//                });
+//                require("node,ready", function($) {
+//                    console.log($)
+//                    console.log("回调调起成功");
+//                })
+//            }()
+   
              require("fx, event, attr, ready", function() {
              
              var center = $(".modules-slider-center");
@@ -178,7 +179,7 @@
              
              
              });
-             */
+ 
         </script> 
 
 
