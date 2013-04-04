@@ -10,7 +10,7 @@
         </script>
     </head>
     <body>
-     
+
         <pre class="brush:js;gutter:false;toolbar:false;">
 var http = require('http');
 
@@ -35,7 +35,248 @@ response.end("&lt;!doctype html&gt;&lt;body&gt;&lt;h1&gt;request object&lt;/h1&g
 console.log('Server running at http://127.0.0.1:9999/');
         </pre>
         <p>如果不考虑动态生成页面，就是从服务器将已经写好的静态HTML返回前端。那么我们后端至少要返回图片，CSS，JS，HTML这四种资源。
-        这四种资源通常存放的地方也不一样，对应的地址不一样，当请求过来时，需要一种路由系统做别识，再进入MVC，最后在action中处理好，返回前端。
+            这四种资源通常存放的地方也不一样，对应的地址不一样，当请求过来时，需要一种路由系统做别识，再进入MVC，最后在action中处理好，返回前端。
         </p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+ var http = require('http'),
+    url = require('url'),
+    Router = require('./router').Router;
+
+var router = new Router();
+router.add('GET', '/', function(req, res) {
+    res.end("&lt;h1&gt;这是首页&lt;/h1&gt;");
+});
+//括中的部分为可选
+router.add('GET', '/user(/:user_id)', function(req, res) {
+    res.end('&lt;h1&gt;这是用户页面&lt;/h1&gt;' + (req.param("user_id") || ""));
+});
+
+var app = http.createServer(function(req, res) {
+    var uri = url.parse(req.url, true); //转换为一个对象
+    var obj = router.route(req.method, uri.pathname); //匹配路由
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            res.writeHead(200, {
+                'Content-Type': "text/html; charset=utf-8"
+            });
+            return callback(req, res);
+        }
+    }
+    res.writeHead(404, {
+        'Content-Type': "text/plain; charset=UTF-8"
+    });
+    res.end("页面不存在");
+
+}).listen(3000);
+console.log('Server listen on port %d', app.address().port);
+        </pre>
+　　<p>那么重新启动 node index。在浏览器的地址栏输入localhost:3000，会看到“这是首页”的字样；
+            输入localhost:3000/user，会到“这是用户页面的”的字样；输入localhost:3000/user/123，与上次差不多，
+            只不过下面多了一行小字，为123；输入localhost:3000/user/ddd，小字变成”ddd”；
+            输入localhost:3000/user/23/34，就转到404页面。我们的路由系统试验成功。</p>
+
+　　<p>但目前还是不放便输出复杂的页面，我们需要编写一个单纯的HTML页面，里面有JS与CSS。
+            然后在action中通过fs API将它们从硬盘读到内存，然后发到前端。</p>
+        <p>我们先创建这些静态资源:</p>
+        <pre class="brush:xml;gutter:false;toolbar:false;">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;index&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="main.js" type="text/javascript"&gt;&lt;/script&gt;
+        &lt;link rel="stylesheet" href="main.css" type="text/css"  /&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;这是首页&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </pre>
+        <p>main.css</p>
+        <pre class="brush:css;gutter:false;toolbar:false;">
+body{
+    background:black;
+}
+h1 {
+    color:white;
+}
+h2{
+    color:darkorchid;
+}
+        </pre>
+        <p>main.js</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+window.onload = function(){
+    var h2 = document.createElement("h2");
+    h2.innerHTML = "这是动态创建的";
+    document.body.appendChild(h2)
+}
+        </pre>
+        <p>修改index.js为</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+var http = require('http'),
+url = require('url'),
+Router = require('./router').Router,
+fs = require("fs")
+
+var router = new Router();
+//读取静态页面
+router.add('GET', '/', function(req, res) {
+    fs.readFile("./index.html", "utf-8", function(err, bf) {
+        res.writeHead(200, {'Content-Type': "text/html; charset=utf-8"});
+        res.end(bf);
+    });
+});
+//读取JS
+router.add('GET', 'main.js', function(req, res) {
+    console.log("js")
+    console.log(req.headers)
+    fs.readFile(req.url, "utf-8", function(err, bf) {//req.url = "main.js"
+        res.writeHead(200, {'Content-Type': "text/javascript; charset=utf-8"});
+        res.end(bf);
+    });
+});
+//读取CSS
+router.add('GET', 'main.css', function(req, res) {
+     console.log("css")
+    console.log(req.headers)
+    fs.readFile(req.url, "utf-8", function(err, bf) {
+        res.writeHead(200, {'Content-Type': "text/css; charset=utf-8"});
+        res.end(bf);
+    });
+});
+var app = http.createServer(function(req, res) {
+    var uri = url.parse(req.url, true);//转换为一个对象,并处理querystring为一个对象
+    var obj = router.route(req.method, uri.pathname);//匹配路由
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            return  callback(req, res);
+        }
+    }
+    res.writeHead(404, {'Content-Type': "text/plain; charset=UTF-8"});
+    res.end("页面不存在");
+
+}).listen(3000);
+console.log('Server listen on port %d', app.address().port);
+        </pre>
+        <p>这时页面变为</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/index1.jpg" />');
+        </script>
+        <p>但是这样做个有缺陷，JS与CSS文件通常非常多，我们都是集中放在一个位置，它们只需要直接从目标路径读取就行，基于不用经过action。</p>
+        <p>为此我们尝试从accept首部进行判识</p>
+        <p>IE10</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/ie10accept.jpg" />');
+        </script>
+        <p>IE6</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/ie6accept.jpg" />');
+        </script>
+        <p>firefox19</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/firefox19accept.jpg" />');
+        </script>
+        <p>safari5</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/safari5accept.jpg" />');
+        </script>
+        <p>chrome26</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/chrome26accept.jpg" />');
+        </script>
+        <p>opera12</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/opera12accept.jpg" />');
+        </script>
+        <p>IE10最智能，IE6与opera不甚聪明。</p>
+        <p>升级如下：</p>
+    <pre class="brush:js;gutter:false;toolbar:false;">    
+        var http = require('http'),
+        url = require('url'),
+        Router = require('./router').Router,
+        fs = require("fs")
+
+var router = new Router();
+//读取静态页面
+router.add('GET', '/', function(req, res) {
+    fs.readFile("./index.html", "utf-8", function(err, bf) {
+        res.writeHead(200, {'Content-Type': "text/html; charset=utf-8"});
+        res.end(bf);
+    });
+});
+
+var app = http.createServer(function(req, res) {
+    var uri = url.parse(req.url, true);//转换为一个对象,并处理querystring为一个对象
+    var accept = req.headers.accept,  static;
+    if (accept.indexOf("application/javascript") !== -1) {//IE10
+        static = "js";
+    } else if (accept.indexOf("text/css") !== -1) {//IE10, safari, chrome, firfox19
+        static = "css";
+    }
+    if (!static) {
+        if (/\.(\w+)$/.test(uri.pathname)) {
+            static = RegExp.$1;
+        }
+    }
+    if (/js|css/.test(static)) {//处理静态资源
+        fs.readFile("." + uri.pathname, "utf-8", function(err, bf) {
+            var type = static === "js" ? "text/javascript" : "text/css";
+            res.writeHead(200, {'Content-Type': type + "; charset=utf-8"});
+            res.end(bf);
+        });
+        return;
+    }
+    var obj = router.route(req.method, uri.pathname);//匹配路由
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            return  callback(req, res);
+        }
+    }
+    res.writeHead(404, {'Content-Type': "text/plain; charset=UTF-8"});
+    res.end("页面不存在");
+
+}).listen(3000);
+console.log('Server listen on port %d', app.address().port);
+        </pre>       
+        <p>引入静态缓存，减少IO读写</p>
+    <pre class="brush:js;gutter:false;toolbar:false;">    
+function createCache(cacheLength) {
+    var cache,  keys = [];
+    return (cache = function(key, value) {
+        if (keys.push(key += " ") > cacheLength) {
+            delete cache[ keys.shift() ];
+        }
+        return (cache[ key ] = value);
+    });
+}
+var staticCache = createCache(300);
+//.............
+    if (/js|css/.test(static)) {//处理静态资源
+        var type = static === "js" ? "text/javascript" : "text/css";
+        res.writeHead(200, {'Content-Type': type + "; charset=utf-8"});
+        if (staticCache[uri.pathname]) {
+            res.end(staticCache[uri.pathname]);
+        } else {
+            fs.readFile("." + uri.pathname, "utf-8", function(err, bf) {
+                staticCache[uri.pathname] = bf;
+                res.end(bf);
+            });
+        }
+        return;
+    }
+        </pre>  
     </body>
 </html>

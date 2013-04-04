@@ -9,6 +9,7 @@ define("api", ["mass"], function() {
                 "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge,Object.without," +
                 "isPlainObject,isNative,isEmptyObject,isArrayLike,format,range,quote,dump,parseJS,parseJSON,parseXML,isArray,isFunction,each,map").match($.rword).sort(),
         "class": ["factory"],
+         newland: [],
         node: ("fn.after,fn.afterTo,fn.append,fn.appendTo,fn.before,fn.beforeTo,fn.children," +
                 "fn.clone,fn.closest,fn.collect,fn.contents,fn.data,fn.each,fn.empty,fn.eq," +
                 "fn.even,fn.filter,fn.find,fn.first,fn.get,fn.gt,fn.has,fn.html,fn.index,fn.init," +
