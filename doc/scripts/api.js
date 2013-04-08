@@ -6,7 +6,7 @@ define("api", ["mass"], function() {
                 "String.capitalize, String.escapeHTML, String.unescapeHTML,String.stripTags,String.stripScripts,String.pad," +
                 "Array.clone,Array.contains,Array.remove,Array.removeAt,Array.shuffle,Array.random,Array.min,Array.max,Array.pluck,Array.sortBy," +
                 "Array.compact,Array.diff,Array.merge,Array.union,Array.intersect,Array.unique,Array.ensure,Array.inGroupsOf,Array.flatten," +
-                "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge,Object.without," +
+                "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge," +
                 "isPlainObject,isNative,isEmptyObject,isArrayLike,format,range,quote,dump,parseJS,parseJSON,parseXML,isArray,isFunction,each,map").match($.rword).sort(),
         "class": ["factory"],
          newland: [],

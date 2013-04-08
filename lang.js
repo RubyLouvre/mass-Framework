@@ -489,18 +489,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             });
             return $.Array.pluck(array, 'el');
         },
-        groupBy: function(target, val) {
-            //根据指定条件（如回调或对象的某个属性）进行分组，构成对象返回。
-            var result = {};
-            var iterator = $.isFunction(val) ? val : function(obj) {
-                return obj[val];
-            };
-            target.forEach(function(value, index) {
-                var key = iterator(value, index);
-                (result[key] || (result[key] = [])).push(value);
-            });
-            return result;
-        },
         pluck: function(target, name) {
             //取得对象数组的每个元素的指定属性，组成数组返回。
             var result = [],
@@ -707,17 +695,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                 }
             }
             return target;
-        },
-        without: function(target, array) {
-            //去掉与传入参数相同的元素
-            var result = {},
-                    key;
-            for (key in target) { //相当于构建一个新对象，把不位于传入数组中的元素赋给它
-                if (!~array.indexOf(key)) {
-                    result[key] = target[key];
-                }
-            }
-            return result;
         }
     });
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");

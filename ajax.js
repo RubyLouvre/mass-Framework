@@ -41,7 +41,7 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
         html: "text/html",
         text: "text/plain",
         json: "application/json, text/javascript",
-        script: "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript",
+        script: "text/javascript, application/javascript, application/ecmascript",
         "*": ["*/"] + ["*"] //避免被压缩掉
     },
     defaults = {
@@ -192,7 +192,6 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                         if (nativeXHR.onerror === null) { //如果支持onerror, onload新API
                             nativeXHR.onload = nativeXHR.onerror = function(e) {
                                 this.readyState = 4; //IE9
-                                $.log(nativeXHR.readyState)
                                 this.status = e.type === "load" ? 200 : 500;
                                 self.respond();
                             };
@@ -203,8 +202,6 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                         }
                     }
                     nativeXHR.send(opts.hasContent && (this.data || this.querystring) || null);
-
-
                 },
                 //用于获取原始的responseXMLresponseText 修正status statusText
                 //第二个参数为1时中止清求
@@ -562,6 +559,9 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                 this.data = formdata;
             }
         };
+        $.each($.ajaxTransports.xhr, function(key, val) {
+            $.ajaxTransports.upload[key] = val;
+        });
     }
     if (typeof $.fixAjax === "function") {
         $.fixAjax();

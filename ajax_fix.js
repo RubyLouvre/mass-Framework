@@ -1,5 +1,21 @@
 
 define(!!this.FormData, ["flow"], function($) {
+    var str =  'Function BinaryToArray(binary)\r\n\
+                 Dim oDic\r\n\
+                 Set oDic = CreateObject("scripting.dictionary")\r\n\
+                 length = LenB(binary) - 1\r\n\
+                 For i = 1 To length\r\n\
+                     oDic.add i, AscB(MidB(binary, i, 1))\r\n\
+                 Next\r\n\
+                 BinaryToArray = oDic.Items\r\n\
+              End Function'
+    execScript(str, "VBScript");
+    $.ajaxConverters.arraybuffer = function() {
+        var body = this.tranport && this.tranport.responseBody
+        if (body) {
+            return  new VBArray(BinaryToArray(body)).toArray();
+        }
+    };
     $.fixAjax = function() {
         function createIframe(ID) {
             var iframe = $.parseHTML("<iframe " + " id='" + ID + "'" +
