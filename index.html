@@ -9,6 +9,7 @@
         <style>
             html{
                 background:#252D37;
+                color:white;
             }
             .modules-slider{
                 width:900px;
@@ -96,96 +97,81 @@
         </style>
 
 
-
         <script>
-//            +function() {
-//                var path = "http://files.cnblogs.com/shuicaituya/"
-//                require.config({
-//                    alias: {
-//                        "jquery": {
-//                            "src": path + "jquery.js",
-//                            deps: ["aaa"],//没有依赖可以不写
-//                            exports: "jQuery"
-//                        }
-//                    }
-//                });
-//                require("node,ready", function($) {
-//                    console.log($)
-//                    console.log("回调调起成功");
-//                })
-//            }()
-   
-             require("fx, event, attr, ready", function() {
-             
-             var center = $(".modules-slider-center");
-             $(".modules-slider-left,.modules-slider-right").click(function() {
-             var left = this.className.indexOf("left") !== -1;
-             if (left) {
-             var div = $(".modules-slider-center div").last();
-             var width = div.width();
-             div.detach().css("marginLeft", -1 * width).prependTo(center);
-             div.fx({
-             marginLeft: 0
-             }, 700);
-             } else {
-             var div = $(".modules-slider-center div").first();
-             var width = div.width();
-             div.fx({
-             marginLeft: "-=" + width
-             }, 700, function() {
-             center.append(div);
-             div.css("marginLeft", 0);
-             });
-             }
-             });
-             });
-             require("doc/scripts/api, event, node, attr, ready", function(api, $) {
-             var currentModule = "core";
-             
-             $(".modules-slider-center div").click(function() {
-             if (this.className === "active") {
-             return;
-             }
-             $(this).siblings().removeClass("active");
-             this.className = "active";
-             
-             var moduleName = this.id.replace("m_", "");
-             currentModule = moduleName;
-             var list = ["index"].concat(api[moduleName])
-             var html = ["<ul>"];
-             $.each(list, function(index, prop) {
-             var className = index % 2 === 0 ? "even" : "odd";
-             html.push("<li class=" + className + ">" + prop + "</li>");
-             });
-             html.push("</ul>");
-             $(".left-bar").html(html.join(""));
-             });
-             var iframe = $("#main").get(0);
-             
-             var url = location.href;
-             var basePath = url.slice(0, url.lastIndexOf("/") + 1)
-             iframe.src = basePath + "doc/core/index.html";
-             $(".left-bar").delegate("li", "mouseover", function() {
-             $(this).addClass("hover");
-             }).delegate("li", "mouseout", function() {
-             $(this).removeClass("hover");
-             }).delegate("li", "click", function() {
-             var url = basePath + "doc/" + currentModule + "/" + $(this).text().trim() + ".html";
-             var iframe = $("#main").get(0)
-             if (url !== iframe.src) {
-             iframe.src = url;
-             }
-             })
-             
-             
-             });
- 
+
+
+            require("fx, event, attr, ready", function() {
+
+                var center = $(".modules-slider-center");
+                $(".modules-slider-left,.modules-slider-right").click(function() {
+                    var left = this.className.indexOf("left") !== -1;
+                    if (left) {
+                        var div = $(".modules-slider-center div").last();
+                        var width = div.width();
+                        div.detach().css("marginLeft", -1 * width).prependTo(center);
+                        div.fx({
+                            marginLeft: 0
+                        }, 700);
+                    } else {
+                        var div = $(".modules-slider-center div").first();
+                        var width = div.width();
+                        div.fx({
+                            marginLeft: "-=" + width
+                        }, 700, function() {
+                            center.append(div);
+                            div.css("marginLeft", 0);
+                        });
+                    }
+                });
+            });
+            require("doc/scripts/api, event, node, attr, ready", function(api, $) {
+                var currentModule = "core";
+
+                $(".modules-slider-center div").click(function() {
+                    if (this.className === "active") {
+                        return;
+                    }
+                    $(this).siblings().removeClass("active");
+                    this.className = "active";
+
+                    var moduleName = this.id.replace("m_", "");
+                    currentModule = moduleName;
+                    var list = ["index"].concat(api[moduleName])
+                    var html = ["<ul>"];
+                    $.each(list, function(index, prop) {
+                        var className = index % 2 === 0 ? "even" : "odd";
+                        html.push("<li class=" + className + ">" + prop + "</li>");
+                    });
+                    html.push("</ul>");
+                    $(".left-bar").html(html.join(""));
+                });
+                var iframe = $("#main").get(0);
+
+                var url = location.href;
+                var basePath = url.slice(0, url.lastIndexOf("/") + 1)
+                iframe.src = basePath + "doc/core/index.html";
+                $(".left-bar").delegate("li", "mouseover", function() {
+                    $(this).addClass("hover");
+                }).delegate("li", "mouseout", function() {
+                    $(this).removeClass("hover");
+                }).delegate("li", "click", function() {
+                    var url = basePath + "doc/" + currentModule + "/" + $(this).text().trim() + ".html";
+                    var iframe = $("#main").get(0)
+                    if (url !== iframe.src) {
+                        iframe.src = url;
+                    }
+                })
+
+
+            });
+
         </script> 
 
 
     </head>
     <body>
 
+        <h3>mass Framework文档</h3>
 
         <div class="modules-slider">
             <div class="modules-slider-left">◀</div>
@@ -202,6 +188,7 @@
                 <div id="m_attr">属性模块</div>
                 <div id="m_fx">动画模块</div>
                 <div id="m_ajax">AJAX模块</div>
+                <div id="m_newland">newland后端框架</div>
             </div>
             <div class="modules-slider-right">▶</div>
         </div>

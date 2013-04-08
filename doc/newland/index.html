@@ -100,6 +100,7 @@ console.log('Server listen on port %d', app.address().port);
         <pre class="brush:css;gutter:false;toolbar:false;">
 body{
     background:black;
+    color: white;
 }
 h1 {
     color:white;
@@ -199,7 +200,7 @@ console.log('Server listen on port %d', app.address().port);
         </script>
         <p>IE10最智能，IE6与opera不甚聪明。</p>
         <p>升级如下：</p>
-    <pre class="brush:js;gutter:false;toolbar:false;">    
+        <pre class="brush:js;gutter:false;toolbar:false;">    
         var http = require('http'),
         url = require('url'),
         Router = require('./router').Router,
@@ -252,7 +253,7 @@ var app = http.createServer(function(req, res) {
 console.log('Server listen on port %d', app.address().port);
         </pre>       
         <p>引入静态缓存，减少IO读写</p>
-    <pre class="brush:js;gutter:false;toolbar:false;">    
+        <pre class="brush:js;gutter:false;toolbar:false;">    
 function createCache(cacheLength) {
     var cache,  keys = [];
     return (cache = function(key, value) {
@@ -278,5 +279,170 @@ var staticCache = createCache(300);
         return;
     }
         </pre>  
+        <p>添加AJAX支持,首先要对POST请求的参数进行处理:</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            if (req.method === "POST") {
+               
+                var buf = "";//收集post请求的参数
+                req.setEncoding('utf8');
+                function buildBuffer(chunk) {
+                    buf += chunk;
+                }
+                req.on('data', function(chunk) {
+                    buf += chunk;
+                });
+                req.on('end', function() {
+                    try {
+                        req.query = buf.length ? require("querystring").parse(buf) : {};
+                    } catch (err) {
+                    }
+                    callback(req, res);
+                });
+            } else {
+                callback(req, res);
+            }
+            return;
+        }
+    }
+
+http.IncomingMessage.prototype.getHeader = function(name) {
+    var headers = this.headers || {}
+    switch (name = name.toLowerCase()) {
+        case 'referer':
+        case 'referrer':
+            return headers.referrer
+                    || headers.referer;
+        default:
+            return headers[ name ] || "";
+    }
+};
+
+router.add('POST', '/ajax', function(req, res) {
+    var val = req.getHeader("X-Requested-With");
+    if ('xmlhttprequest' === val.toLowerCase()) {
+        console.log("这是一个AJAX请求");
+        console.log(req.query);
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.end('Hello World\n');
+    }
+});
+        </pre>  
+        <p>首页添加一个script标签:</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+            var xhr = new (self.XMLHttpRequest || ActiveXObject)("Microsoft.XMLHTTP")
+            xhr.onreadystatechange = function() {//先绑定事件后open
+                if (this.readyState === 4 && this.status === 200) {
+                   var div = document.createElement("div");
+                   div.innerHTML =this.responseText;
+                   document.body.appendChild(div)
+                }
+            }
+            xhr.open("POST", "/ajax", true);
+            //必须,用于让服务器端判断request是Ajax请求(异步)还是传统请求(同步)
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+            xhr.send("key=val&key1=val2");
+        </pre>  
+        <h3>下载文件</h3>
+        <p>首页加一个链接</p>
+        <pre class="brush:xml;gutter:false;toolbar:false;">    
+             &lt;p&gt;&lt;a href="/download"&gt;点我下载&lt;/a&gt;&lt;/p&gt;
+        </pre>  
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+router.add('GET', '/download', function(req, res) {
+    var userFile = "server.rar"
+    fs.stat(userFile, function(err, stat) {
+        var readStream = fs.createReadStream(userFile);
+        res.writeHead(200, {
+            "Content-Type": "application/octet-stream",
+            'Content-Length': stat.size,
+            'Content-disposition': 'attachment; filename=server.rar'//更名
+        });
+        readStream.on("open", function() {
+            readStream.pipe(res);
+        })
+        readStream.on("error", function(err) {
+            res.end(err)
+        })
+        //util.pump() is deprecated. Use readableStream.pipe() instead.
+        // util.pump(rs, res, function(err) {
+        //        if (err) {
+        //           throw err;
+        //    }
+        //   });
+    });
+});
+        </pre>  
+        <div style="display:none;">
+            //http://stackoverflow.com/questions/7288814/download-a-file-from-nodejs-server
+            //http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-fs-create-read-stream
+            //http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
+            // 压缩 http://cnodejs.org/topic/4f16442ccae1f4aa27001071
+            // http://fred.easymorse.com/?cat=101
+        </div>
+        <h3>处理纯文本的上传数据</h3>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+var matchString = {
+    doubleQuotedString: /"([^\\"\n]|\\.)*"/g,
+    singleQuotedString: /'([^\\'\n]|\\.)*'/g,
+    multiLineDoubleQuotedString: /"([^\\"]|\\.)*"/g,
+    multiLineSingleQuotedString: /'([^\\']|\\.)*'/g
+};
+function upload(req) {
+    var val = req.getHeader("content-type");
+    if (val.indexOf("multipart/form-data") !== -1) {
+        var m = val.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+        var boundary = m[1] || m[2];
+        var buffer = req.buffer;
+        var formData = {};
+        buffer.split(boundary).forEach(function(el) {
+            var str = el.trim(), name, val;
+            if (str.length > 32 && str.indexOf("Content-Disposition") !== -1) {
+                str = str.slice(32);//去掉最前面的Content-Disposition: form-data; name=
+                for (var i in matchString) {
+                    if (m = str.match(matchString[i])) {
+                        name = m[0];
+                        break;
+                    }
+                }
+                val = RegExp.rightContext.replace(/--$/, "").trim();
+                //http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.2
+                if(name.indexOf("%0D%0A")!== -1){//处理webkit系
+                    name = name.replace("%0D%0A","\r\n");
+                }
+                formData[name.slice(1, -1)] = val;
+            }
+        });
+        console.log(formData);
+    }
+}
+        </pre>  
+        <p>上传单个图片</p>
+          <pre class="brush:js;gutter:false;toolbar:false;">    
+      
+ router.add("PUT", '/upload', function(req, res, next) {
+    var val = req.getHeader("X-Requested-With");
+    if ('xmlhttprequest' === val.toLowerCase()) {
+        console.log('Uploading...');
+        var fName = req.getHeader('x-file-name');
+        var ws = fs.createWriteStream('./image/' + fName)
+        req.on('data', function(data) {
+            console.log('DATA');
+            ws.write(data);
+        });
+        req.on('end', function() {
+            console.log('All Done!!!!');
+            res.writeHead(200, {'Content-Type': "text/plain; charset=utf-8"});
+            res.end("/image/" + fName);
+        });
+    }
+});
+          </pre>
+        
     </body>
 </html>
