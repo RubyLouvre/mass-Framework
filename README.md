@@ -9,7 +9,7 @@ mass Framework
 <p>mass Framework的模块化经过一年化调整与改良，大致分为四类：</p>
 <ol>
     <li>种子模块， mass.js，最精简的内核， 包含模块加载系统。</li>
-    <li>补丁模块， lang_fix.js, css_fix.js, event_fix.js, node_fix.js, attr_fix, 主要是用于兼容IE678的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
+    <li>补丁模块， lang_fix.js, css_fix.js, event_fix.js, node_fix.js, attr_fix, ajax_fix, 主要是用于兼容IE678的，在chrome1+, FF4+, opera10+, safari4+是不会加载它们的。</li>
     <li>核心模块， 所有位于根目录下，但不在其子目录下的JS文件， 提供框架的核心功能。</li>
     <li>外围模块， 位于more的JS文件。</li>
 </ol>
@@ -17,7 +17,7 @@ mass Framework
 <h3>mass Framework的源码阅读顺序</h3>
 <p>都是位于src目录下，里面的子目录是外围模块。</p>
 <p>mass.js -> lang.js(lang_fix.js) ->  class.js -> flow.js -> data.js -> support.js -> query.js -><br/>
-    node.js(node_fix.js) -> css.js(css_fix.js) -> attr.js(attr_fix.js) -> event.js(event_fix.js) -> fx.js -> ajax.js
+    node.js(node_fix.js) -> css.js(css_fix.js) -> attr.js(attr_fix.js) -> event.js(event_fix.js) -> fx.js -> ajax.js(ajax_fix.js)
 </p>
 <p>lang, class, flow, data专注于语言层面，query, node, css, attr, event, fx, ajax专注于DOM层面。</p>
 <hr/>
@@ -28,9 +28,8 @@ mass Framework
     <li>多库共存。</li>
     <li>多版本共存。</li>
     <li>高度模块化，使用AMD规范的加载系统，实现并行加载，按需加载，自行处理依赖，有利于调试与最小化资源调度。(目前版本为v21)</li>
-    <li>interact模块提供三种组件交互的机制，$.Observer是提供观察者模块，以实现自定义事件与一般化的订阅机制；<br/>
-        $.Flow, 专注于流程控制与从多处获取数据，解耦回调嵌套，减少等待时间，实现多路监听，一处归化;<br/>
-        $.Twitter, 类似twitter的观察者模式，可以看作是事件强化版，实现单点发布 自愿收听 单向联接 分散传播
+    <li>flow提供自定义事件机制，$.Observer是一般化的观察者模块，</br/>
+	$.Flow, 是其强化版， 专注于流程控制与从多处获取数据，解耦回调嵌套，减少等待时间，实现多路监听，一处归化;<br/>
     </li>
     <li>强大的类工厂。（目前版本为v11）</li>
     <li>AS3式的补帧动画系统，支持回放，旋转，暂停！</li>
@@ -39,6 +38,7 @@ mass Framework
     <li>lang_fix模块已经为您修复了旧式IE的语言BUG，与添加上ECMA262v5的绝对大多数新API的支持与，因此痛快使用 String.prototype.trim,
         Array.prototype.forEach, Array.prototype.map,Array.prototype.filter, Array.prototype.reduce,
         Function.prototype.bind吧。</li>
+     <li>ajax模块支持XMLHTTPRequest2.0绝对大多数功能，能在旧式IE下上传下载二进制数据。</li>
     <li>lang模块的提供语言链对象相当于把underscore.js这个库整合进来，你能想到语言扩展都有了。</li>
     <li>API 95%与jQuery神似，学习成本极低。</li>
     <li>全中文注释与大量参考链接与版本变更日志，绝对对你提高JS水平的好教程。</li>
