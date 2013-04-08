@@ -48,7 +48,7 @@ define("flow", ["class"], function($) {
             if (listeners.length) {
                 var target = this._target,
                         args = $.slice(arguments);
-                if (this.rawFile) {
+                if (this.rawFire) {
                     args.shift()
                 } else {
                     args[0] = {

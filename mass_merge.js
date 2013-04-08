@@ -5547,8 +5547,8 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             var parts = rurl.exec(opts.url.toLowerCase());
             opts.crossDomain = !!(parts && (parts[1] !== segments[1] || parts[2] !== segments[2] || (parts[3] || (parts[1] === "http:" ? 80 : 443)) !== (segments[3] || (segments[1] === "http:" ? 80 : 443))));
         }
-        if (opts.data && typeof opts.data !== "obj") {
-            throw "data必须为对象"
+        if (opts.data && typeof opts.data !== "object") {
+            $.error( "data必须为对象")
         }
         var querystring = $.param(opts.data);
         opts.querystring = querystring || "";

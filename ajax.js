@@ -57,8 +57,8 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             var parts = rurl.exec(opts.url.toLowerCase());
             opts.crossDomain = !!(parts && (parts[1] !== segments[1] || parts[2] !== segments[2] || (parts[3] || (parts[1] === "http:" ? 80 : 443)) !== (segments[3] || (segments[1] === "http:" ? 80 : 443))));
         }
-        if (opts.data && typeof opts.data !== "obj") {
-            throw "data必须为对象"
+        if (opts.data && typeof opts.data !== "object") {
+            $.error("data必须为对象")
         }
         var querystring = $.param(opts.data);
         opts.querystring = querystring || "";
@@ -191,7 +191,7 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                     } else {
                         if (nativeXHR.onerror === null) { //如果支持onerror, onload新API
                             nativeXHR.onload = nativeXHR.onerror = function(e) {
-                                this.readyState = 4; //IE9
+                                this.readyState = 4; //IE9+ 
                                 this.status = e.type === "load" ? 200 : 500;
                                 self.respond();
                             };
@@ -207,28 +207,36 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                 //第二个参数为1时中止清求
                 respond: function(event, abort) {
                     var nativeXHR = this.transport;
+
                     if (!nativeXHR) {
                         return;
                     }
+
                     try {
                         var completed = nativeXHR.readyState === 4;
                         if (abort || completed) {  //由于respond在onreadystatechange会触发两次以上，因此必须
-                            nativeXHR.onerror = nativeXHR.onload = nativeXHR.onreadystatechange = $.noop;
+                            //nativeXHR.onerror = nativeXHR.onload = nativeXHR.onreadystatechange = $.noop;
+
                             if (abort) {
                                 if (!completed && typeof nativeXHR.abort === "function") { // 完成以后 abort 不要调用
                                     nativeXHR.abort();
                                 }
                             } else {
+
                                 var status = nativeXHR.status;
-                                var xml = nativeXHR.responseXML;
-                                // Construct response list
+                                this.responseText = nativeXHR.responseText;
+                                try {
+                                    //当responseXML为[Exception: DOMException]时，
+                                    //访问它会抛“An attempt was made to use an object that is not, or is no longer, usable”错误
+                                    var xml = nativeXHR.responseXML
+                                } catch (e) {
+                                }
                                 if (this.useResponseType) {
                                     this.response = nativeXHR.response;
                                 }
                                 if (xml && xml.documentElement) {
                                     this.responseXML = xml;
                                 }
-                                this.responseText = nativeXHR.responseText;
                                 this.responseHeadersString = nativeXHR.getAllResponseHeaders();
                                 //火狐在跨城请求时访问statusText值会抛出异常
                                 try {
@@ -251,6 +259,7 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                         // 如果网络问题时访问XHR的属性，在FF会抛异常
                         // http://helpful.knobs-dials.com/index.php/Component_returned_failure_code:_0x80040111_(NS_ERROR_NOT_AVAILABLE)
                         if (!abort) {
+
                             this.dispatch(500, e + "");
                         }
                     }
@@ -531,12 +540,12 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                 }
             }
             this.status = status;
-            this.statusText = statusText || "success";
+            this.statusText = statusText;
             if (this.timeoutID) {
                 clearTimeout(this.timeoutID);
                 delete this.timeoutID;
             }
-            this.rawFile = true;
+            this.rawFire = true;
             this._transport = this.transport;
             // 到这要么成功，调用success, 要么失败，调用 error, 最终都会调用 complete
             if (eventType === "success") {
