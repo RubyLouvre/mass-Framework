@@ -1,6 +1,9 @@
 //=========================================
 // 动画模块 v7  Boneless IE10+等现代浏览器专用
 //==========================================
+//CSS3 是个独立于 JS 的线程，这个特点目前已经在 Desktop Safari / IOS Safari / Android Chrome 中被支持，
+//所以说，移动 webapp 中的动画应用，尽可能使用 CSS3 吧。
+//http://www.phpied.com/css-animations-off-the-ui-thread/
 define("fx", ["css", "event", "attr"], function($) {
     //提供以下原型方法
     //fx animate, fadeIn fadeToggle fadeOut slideUp, slideDown slideToggle show hide toggle delay resume stop
