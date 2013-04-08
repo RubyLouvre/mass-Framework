@@ -1,6 +1,6 @@
 
 define(!!this.FormData, ["flow"], function($) {
-    var str =  'Function BinaryToArray(binary)\r\n\
+    var str = 'Function BinaryToArray(binary)\r\n\
                  Dim oDic\r\n\
                  Set oDic = CreateObject("scripting.dictionary")\r\n\
                  length = LenB(binary) - 1\r\n\
@@ -10,13 +10,13 @@ define(!!this.FormData, ["flow"], function($) {
                  BinaryToArray = oDic.Items\r\n\
               End Function'
     execScript(str, "VBScript");
-    $.ajaxConverters.arraybuffer = function() {
-        var body = this.tranport && this.tranport.responseBody
-        if (body) {
-            return  new VBArray(BinaryToArray(body)).toArray();
-        }
-    };
     $.fixAjax = function() {
+        $.ajaxConverters.arraybuffer = function() {
+            var body = this.tranport && this.tranport.responseBody
+            if (body) {
+                return  new VBArray(BinaryToArray(body)).toArray();
+            }
+        };
         function createIframe(ID) {
             var iframe = $.parseHTML("<iframe " + " id='" + ID + "'" +
                     " name='" + ID + "'" + " style='position:absolute;left:-9999px;top:-9999px;/>").firstChild;
@@ -58,14 +58,13 @@ define(!!this.FormData, ["flow"], function($) {
                     method: form.method
                 };
                 //必须指定method与enctype，要不在FF报错
-                //“表单包含了一个文件输入元素，但是其中缺少 method=POST 以及 enctype=multipart/form-data，所以文件将不会被发送。”
+                //表单包含文件域时，如果缺少 method=POST 以及 enctype=multipart/form-data，
                 // 设置target到隐藏iframe，避免整页刷新
                 form.target = ID;
                 form.action = opts.url;
                 form.method = "POST";
                 form.enctype = "multipart/form-data";
                 this.fields = opts.data ? addDataToForm(form, opts.data) : [];
-                this.form = form; //一个表单元素
                 $.log("iframe transport...");
                 this.uploadcallback = $.bind(iframe, "load", function(event) {
                     self.respond(event);
@@ -74,7 +73,7 @@ define(!!this.FormData, ["flow"], function($) {
                     form.submit();
                 });
             },
-            respond: function(event, forceAbort) {
+            respond: function(event) {
                 var node = this.transport;
                 // 防止重复调用,成功后 abort
                 if (!node) {
@@ -83,8 +82,7 @@ define(!!this.FormData, ["flow"], function($) {
                 if (event && event.type === "load") {
                     var doc = node.contentWindow.document;
                     this.responseXML = doc;
-                    if (doc.body) {
-                        // response is html document or plain text
+                    if (doc.body) {//如果存在body属性,说明不是返回XML
                         this.responseText = doc.body.innerHTML;
                         //当，MIME为"text/plain",浏览器会把文本放到一个PRE标签中
                         if (doc.body.firstChild && doc.body.firstChild.nodeName === 'PRE') {
@@ -104,8 +102,7 @@ define(!!this.FormData, ["flow"], function($) {
                 });
                 this.uploadcallback = $.unbind(node, "load", this.uploadcallback);
                 delete this.uploadcallback;
-                setTimeout(function() {
-                    // Fix busy state in FF3
+                setTimeout(function() {  // Fix busy state in FF3
                     node.parentNode.removeChild(node);
                     $.log("iframe.parentNode.removeChild(iframe)");
                 });
