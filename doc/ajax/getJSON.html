@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>getJSON</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.getJSON(url, data?, callback)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于发出JSONP方法。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>url</dt>
+                <dd>必需。请求地址。</dd>
+                <dt>data</dt>
+                <dd>可选。一个参数对象</dd>
+                <dt>callback</dt>
+                <dd>回调</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+          require("ajax", function() {
+                $.getJSON("/javascript",{
+                        aaa: 111111,
+                        ccc: 22222
+                    }, function(json) {
+                        $.log(json);
+                    })
+            })
+                </pre>
+                <p>相当于</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+          require("ajax", function() {
+                $.ajax({
+                    type: "GET",
+                    url: "/javascript",
+                    data: {
+                        aaa: 111111,
+                        ccc: 22222
+                    },
+                    success: function(json) {
+                        $.log(json);
+                    },
+                    dataType: "jsonp"
+                })
+            })
+                </pre>
+
+            </fieldset>
+        </article>
+    </body>
+
+</html>
