@@ -70,12 +70,11 @@ define("support", ["mass"], function($) {
     //但在Safari中，获取被设置为disabled的select的值时，由于所有option元素都被设置为disabled，会导致无法获取值。
     select.disabled = true;
     support.optDisabled = !opt.disabled;
-
     //IE下对div的复制节点设置与背景有关的样式会影响到原样式,说明它在复制节点对此样式并没有深拷贝,还是共享一份内存
     div.style.backgroundClip = "content-box";
     div.cloneNode(true).style.backgroundClip = "";
     support.cloneBackgroundStyle = div.style.backgroundClip === "content-box";
-    var table = div[TAGS]("table")[0]
+    var table = div[TAGS]("table")[0];
     try { //检测innerHTML与insertAdjacentHTML在某些元素中是否存在只读（这时会抛错）
         table.innerHTML = "<tr><td>1</td></tr>";
         support.innerHTML = true;
@@ -84,7 +83,7 @@ define("support", ["mass"], function($) {
     } catch(e) {};
 
     a = select = table = opt = style = null;
-    $.require("ready", function() {
+    require("ready", function() {
         var body = DOC.body;
         if(!body) //frameset不存在body标签
         return;
@@ -94,18 +93,18 @@ define("support", ["mass"], function($) {
             support.fastFragment = !! range.createContextualFragment("<a>");
             $.cachedRange = range;
         } catch(e) {};
-        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;"
+        div.style.cssText = "position:absolute;top:-1000px;left:-1000px;";
         body.insertBefore(div, body.firstChild);
         var a = '<div style="height:20px;display:inline-block"></div>';
         div.innerHTML = a + a; //div默认是block,因此两个DIV会上下排列0,但inline-block会让它们左右排列
         support.inlineBlock = div.offsetHeight < 40; //检测是否支持inlineBlock
         if(window.getComputedStyle) {
             div.style.top = "1%";
-            var computed = window.getComputedStyle(div, null) || {}
+            var computed = window.getComputedStyle(div, null) || {};
             support.pixelPosition = computed.top !== "1%";
         }
         //http://stackoverflow.com/questions/7337670/how-to-detect-focusin-support
-        div.innerHTML = "<a href='#'></a>"
+        div.innerHTML = "<a href='#'></a>";
         if(!support.focusin) {
             a = div.firstChild;
             a.addEventListener('focusin', function() {
@@ -126,19 +125,4 @@ define("support", ["mass"], function($) {
 2011.9.23增加fastFragment判定
 2012.1.28有些特征嗅探必须连接到DOM树上才能进行
 2012.5.22 精简插入DOM树后的五种检测
-
-    var endNames = {
-        WebkitTransition : "webkitTransitionEnd",
-        MozTransition    : "transitionend" ,
-        OTransition      : "oTransitionEnd otransitionend" ,
-        transition       : "transitionend"
-    }
-    for (var name in endNames){
-        if (div.style[name] !== undefined) {
-            support.transition  = {
-                end: endNames[name]
-            }
-            break
-        }
-    }
 */
