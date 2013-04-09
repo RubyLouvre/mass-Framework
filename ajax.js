@@ -59,7 +59,7 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             opts.crossDomain = !!(parts && (parts[1] !== segments[1] || parts[2] !== segments[2] || (parts[3] || (parts[1] === "http:" ? 80 : 443)) !== (segments[3] || (segments[1] === "http:" ? 80 : 443))));
         }
         if (opts.data && typeof opts.data !== "object") {
-            $.error("data必须为对象")
+            $.error("data必须为对象");
         }
         var querystring = $.param(opts.data);
         opts.querystring = querystring || "";
@@ -90,20 +90,13 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                 delete opts[name];
             }
         });
-        var transports = $.ajaxTransports;
-        var transport = $.ajaxTransports.xhr; //选择传送器
         var dataType = opts.dataType; //目标返回数据类型
-        if (opts.form && opts.form.nodeType === 1) {
-            transport = transports.upload;
-        } else if (dataType === "jsonp") {
-            transport = transports.script;
-            dataType = "script";
-        }
-        for (var i in transport) { //取得传送器的request, respond, preproccess
-            dummyXHR[i] = transport[i];
-        }
+        var transports = $.ajaxTransports;
+        var name = opts.form ? "upload" : dataType;
+        var transport = transports[name] || transports.xhr;
+        $.mix(dummyXHR, transport );//取得传送器的request, respond, preproccess
         if (dummyXHR.preproccess) { //这用于jsonp upload传送器
-            dummyXHR.preproccess();
+            dataType = dummyXHR.preproccess() || dataType;
         }
         //设置首部 1、Content-Type首部
         if (opts.contentType) {
@@ -123,7 +116,6 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
         dummyXHR.request();
         return dummyXHR;
     };
-
     "get,post".replace($.rword, function(method) {
         $[method] = function(url, data, callback, type) {
             if ($.isFunction(data)) {
@@ -140,7 +132,6 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             });
         };
     });
-
     function isValidParamValue(val) {
         var t = typeof val; // If the type of val is null, undefined, number, string, boolean, return true.
         return val == null || (t !== 'object' && t !== 'function');
@@ -250,18 +241,20 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                     }
                 }
             },
-            script: {
+            jsonp: {
                 preproccess: function() {
                     var namespace = DOC.URL.replace(/(#.+|\W)/g, ''); //得到框架的命名空间
                     var opts = this.options;
                     var name = this.jsonpCallback = opts.jsonpCallback || "jsonp" + setTimeout("1");
                     opts.url = opts.url + (rquery.test(opts.url) ? "&" : "?") + opts.jsonp + "=" + namespace + "." + name;
-                    opts.dataType = "jsonp";
                     //将后台返回的json保存在惰性函数中
                     global[namespace][name] = function(json) {
                         $[name] = json;
                     };
-                },
+                    return "script"
+                }
+            },
+            script: {
                 request: function() {
                     var opts = this.options;
                     var node = this.transport = DOC.createElement("script");
@@ -295,10 +288,19 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                         }
                     }
                 }
-
+            },
+            upload: {
+                preproccess: function() {
+                    var opts = this.options;
+                    var formdata = new FormData(opts.form); //将二进制什么一下子打包到formdata
+                    $.each(opts.data, function(key, val) {
+                        formdata.append(key, val); //添加客外数据
+                    });
+                    this.formdata = formdata;
+                }
             }
         },
-        ajaxConverters: {//转换器，返回用户想要做的数据（从原始返回值中提取加工）
+        ajaxConverters: {//转换器，返回用户想要做的数据
             text: function(text) {
                 return text || "";
             },
@@ -306,7 +308,7 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                 return xml !== void 0 ? xml : $.parseXML(text);
             },
             html: function(text) {
-                return $.parseHTML(text);
+                return $.parseHTML(text);//一个文档碎片,方便直接插入DOM树
             },
             json: function(text) {
                 return $.parseJSON(text);
@@ -420,6 +422,9 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             return $.param(json, false); // 名值键值对序列化,数组元素名字前不加 []
         }
     });
+    var transports = $.ajaxTransports;
+    $.mix(transports.jsonp, transports.script);
+    $.mix(transports.upload, transports.xhr);
     /**
      * 伪XMLHttpRequest类,用于屏蔽浏览器差异性
      * var ajax = new(self.XMLHttpRequest||ActiveXObject)("Microsoft.XMLHTTP")
@@ -531,19 +536,6 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             this.fire("complete", this, statusText);
             delete this.transport;
         }
-    });
-    $.ajaxTransports.upload = {
-        preproccess: function() {
-            var opts = this.options;
-            var formdata = new FormData(opts.form);//将二进制什么一下子打包到formdata
-            $.each(opts.data, function(key, val) {
-                formdata.append(key, val);//添加客外数据
-            });
-            this.formdata = formdata;
-        }
-    };
-    $.each($.ajaxTransports.xhr, function(key, val) {
-        $.ajaxTransports.upload[key] = val;//重用xhr传送器的方法
     });
     if (typeof $.fixAjax === "function") {
         $.fixAjax();

@@ -40,6 +40,7 @@ define(!!this.FormData, ["flow"], function($) {
             }
             return ret;
         }
+        //https://github.com/codenothing/Pure-Javascript-Upload/blob/master/src/upload.js
         $.AjaxTransports.upload = {
             request: function() {
                 var self = this;
@@ -51,12 +52,13 @@ define(!!this.FormData, ["flow"], function($) {
                 //1:application/x-www-form-urlencoded   在发送前编码所有字符（默认）
                 //2:multipart/form-data 不对字符编码。在使用包含文件上传控件的表单时，必须使用该值。
                 //3:text/plain  空格转换为 "+" 加号，但不对特殊字符编码。
-                this.backups = {
+                var backups = {
                     target: form.target || "",
                     action: form.action || "",
                     enctype: form.enctype,
                     method: form.method
                 };
+                var fields = opts.data ? addDataToForm(form, opts.data) : [];
                 //必须指定method与enctype，要不在FF报错
                 //表单包含文件域时，如果缺少 method=POST 以及 enctype=multipart/form-data，
                 // 设置target到隐藏iframe，避免整页刷新
@@ -64,17 +66,22 @@ define(!!this.FormData, ["flow"], function($) {
                 form.action = opts.url;
                 form.method = "POST";
                 form.enctype = "multipart/form-data";
-                this.fields = opts.data ? addDataToForm(form, opts.data) : [];
                 $.log("iframe transport...");
                 this.uploadcallback = $.bind(iframe, "load", function(event) {
                     self.respond(event);
                 });
-                setTimeout(function() {
-                    form.submit();
+                form.submit();
+                //还原form的属性
+                for (var i in backups) {
+                    form[i] = backups[i];
+                }
+                //移除之前动态添加的节点
+                fields.forEach(function(input) {
+                    form.removeChild(input);
                 });
             },
             respond: function(event) {
-                var node = this.transport;
+                var node = this.transport, child
                 // 防止重复调用,成功后 abort
                 if (!node) {
                     return;
@@ -84,22 +91,13 @@ define(!!this.FormData, ["flow"], function($) {
                     this.responseXML = doc;
                     if (doc.body) {//如果存在body属性,说明不是返回XML
                         this.responseText = doc.body.innerHTML;
-                        //当，MIME为"text/plain",浏览器会把文本放到一个PRE标签中
-                        if (doc.body.firstChild && doc.body.firstChild.nodeName === 'PRE') {
-                            this.responseText = doc.body.firstChild.firstChild.nodeValue;
+                        //当MIME为'application/javascript' 'text/javascript",浏览器会把内容放到一个PRE标签中
+                        if ((child = doc.body.firstChild) && child.nodeName.toUpperCase() === 'PRE' && child.firstChild) {
+                            this.responseText = child.firstChild.nodeValue;
                         }
                     }
                     this.dispatch(200, "success");
                 }
-                //还原form的属性
-                var form = this.options.form;
-                for (var i in transport.backups) {
-                    form[i] = transport.backups[i];
-                }
-                //移除之前动态添加的节点
-                transport.fields.forEach(function(input) {
-                    form.removeChild(input);
-                });
                 this.uploadcallback = $.unbind(node, "load", this.uploadcallback);
                 delete this.uploadcallback;
                 setTimeout(function() {  // Fix busy state in FF3
