@@ -6,7 +6,19 @@ define("flow", ["class"], function($) {
     $.Observer = $.factory({
         init: function(target) {
             this._events = {};
-            this._target = target || this;
+            if (target === "string") {
+                this._target = this;
+                var self = this;
+                target.replace(/(\w+)(?:\(([^\)]+)\))*/ig, function(a, b, c) {
+                    if (isFinite(c)) {
+                        self[a] = +c;
+                    } else {
+                        self[a] = c || true
+                    }
+                });
+            } else {
+                this._target = target;
+            }
         },
         bind: function(type, callback) {
             var listeners = this._events[type]
@@ -30,7 +42,7 @@ define("flow", ["class"], function($) {
             var n = arguments.length;
             if (n === 0) {
                 this._events = {};
-            } else if (n == 1) {
+            } else if (n === 1) {
                 this._events[type] = [];
             } else {
                 var listeners = this._events[type] || [];
@@ -54,7 +66,7 @@ define("flow", ["class"], function($) {
                     args[0] = {
                         type: type,
                         target: target
-                    }
+                    };
                 }
                 for (var i = 0, callback; callback = listeners[i++]; ) {
                     callback.apply(target, args);
@@ -67,9 +79,6 @@ define("flow", ["class"], function($) {
     $.Flow = $.Observer.extend({
         init: function(timeout) {
             this._fired = {}; //用于收集fire或order的参数(去掉第一个事件参数)
-            if (typeof timeout == "number") {
-                this.timeout = timeout; //用于order,时间限制
-            }
         },
         fire: function(type, args) {
             var calls = this._events,
@@ -79,7 +88,7 @@ define("flow", ["class"], function($) {
                 ev = normal ? type : last;
                 listeners = calls[ev];
                 if (listeners && listeners.length) {
-                    args = $.slice(arguments, 1)
+                    args = $.slice(arguments, 1);
                     if (normal) { //在正常的情况下,我们需要传入一个事件对象,当然与原生事件对象差很远,只有两个属性
                         if (this._events[ev]) {
                             this._fired[ev] = args.concat();
@@ -87,7 +96,7 @@ define("flow", ["class"], function($) {
                         args.unshift({
                             type: type,
                             target: this._target
-                        })
+                        });
                     }
                     for (var i = 0, callback; callback = listeners[i++]; ) {
                         //第一次执行目标事件,第二次执行最后的回调
@@ -153,17 +162,17 @@ define("flow", ["class"], function($) {
          //没有能依次触发完aaa,bbb,ccc，则清空已有数据，重新开始
          // 可以应用于游戏中的QTE http://baike.baidu.com/view/1398321.htm，我们只需要绑定keydown事件，在回调中调用flow.order(e.which);
          */
-        order: function(type) { //
+        order: function(type) { 
             if (this._events[type]) {
                 var cur = this._queue.shift();
                 if (!this.timestamp) {
-                    this.timestamp = new Date - 0
+                    this.timestamp = new Date - 0;
                 }
                 var limit = true;
                 if (this.timeout && (new Date - this.timestamp > this.timeout)) {
                     limit = false;
                 }
-                if (type == cur && limit) {
+                if (type === cur && limit) {
                     this.fire.apply(this, arguments);
                 } else {
                     this._queue = this._order.concat();
@@ -218,7 +227,7 @@ define("flow", ["class"], function($) {
                 }
                 var args = $.slice(arguments, 1);
                 callback.apply(null, args);
-            }
+            };
         },
         //用于提供一个简单的错误回调
         fail: function(callback) {
@@ -229,7 +238,7 @@ define("flow", ["class"], function($) {
             });
             return this;
         }
-    })
+    });
 
     $.Flow.create = function(names, callback, errorback) {
         var that = new $.Flow;
@@ -237,7 +246,7 @@ define("flow", ["class"], function($) {
         if (typeof errorback === "function") {
             that.fail(errorback);
         }
-        args.push(callback)
+        args.push(callback);
         that.refresh.apply(that, args);
         return that;
     };
@@ -284,53 +293,6 @@ define("flow", ["class"], function($) {
         }
         flow.bind(last, lastFn);
     };
-    //类似twitter的观察者模式，可以看作是事件强化版，感觉比广播好，也更灵活
-    //单点发布 自愿收听 单向联接 分散传播
-    $.Twitter = $.factory({
-        init: function() {
-            this.followers = [];
-        },
-        tweet: function(msg) {
-            for (var i = 0; i < this.followers.length; i++) {
-                var follower = this.followers[i];
-                if (follower.handler) {
-                    follower.handler.call(follower.target, msg); //deal
-                }
-            }
-        },
-        follow: function(master, handler) {
-            master.followers.push({
-                target: this,
-                handler: handler
-            });
-        }
-    })
     return $;
 })
-/**
- 2012.1.10
- 用tabView做一个简单的实验，但是这个不是组件，这个是散的
- var tab = new $.Twitter();
- var view = new $.Twitter();
- view.follow(tab, function(msg){
- var view = document.getElementById("view").getElementsByTagName("span");
- for(var i = 0; i < view.length; i++){
- if(i == msg){
- view[i].className = "active";
- }else{
- view[i].className = "";
- }
- }
- });
- 
- var tabContainer = document.getElementById("tab");
- tabContainer.onclick = function(event){
- var evt = event || window.event;
- var target = evt.srcElement || evt.target;
- 
- if(target != this){
- tab.tweet(target.innerHTML-1);
- }
- }
- * 
- */
+
