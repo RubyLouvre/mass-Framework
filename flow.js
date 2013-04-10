@@ -13,7 +13,7 @@ define("flow", ["class"], function($) {
                     if (isFinite(c)) {
                         self[a] = +c;
                     } else {
-                        self[a] = c || true
+                        self[a] = c || true;
                     }
                 });
             } else {
