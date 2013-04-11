@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.slice</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.slice(start,end)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对原实例进行切片操作，行为与数组的slice相似，生成新的mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>start</dt>
+                <dd>可选。要抽取的片断的起始下标。如果是负数，从后面取起。</dd>
+                <dt>end</dt>
+                <dd>可选。规定从何处结束选取。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新的mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    var a = $("article *");
+    $.log(a.length, true);
+    $.log(a.slice(4).length, true)
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

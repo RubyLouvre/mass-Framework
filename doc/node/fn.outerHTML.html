@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        
+        <title>$.fn.outerHTML</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    <body>
+        <article>
+            <h3>$.fn.outerHTML(val)</h3>
+            <p><span class="stress">描述：</span></p>
+            <p>采用get one set all方法操作节点的outerHTML属性。也就是说，如果没有参数，则返回第一个元素节点的outerHTML，否则替换它们为val所代表的节点，然后返回实例本身。</p>
+            <p><span class="stress">参数：</span></p>
+            <dl>
+                <dt>val</dt>
+                <dd>可选。String。</dd>
+            </dl>
+            <fieldset><legend>例子</legend>
+                <div class="test"></div>
+                <div class="test"></div>
+                <div class="test"></div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+       require("ready,node",function($){
+          $(".test").outerHTML('&lt;span style="color:red"&gt;司徒正美&lt;/span&gt;')
+       });
+                </pre>
+              <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+</html>

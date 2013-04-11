@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.focus</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+                .sample p {
+                    color:#000;
+                }
+                .sample span {display:none;}
+                #red {
+                    width: 150px;
+                    height: 150px;
+                    background: red;
+                }
+            </style>
+            <h3>$.fn.focus([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 focus 事件绑定一个处理函数，或者触发元素上的 focus 事件。</p>
+            <p>这个函数的第一种用法是 .bind('focus', handler) 的快捷方式，第二种用法是 .fire('focus') 的快捷方式。</p>
+            <p>该focus事件被发送到一个获得焦点时的元素。此事件隐式适用于有限的元素，比如表单元素（&lt;input&gt;, &lt;select&gt;等）和链接元素（&lt;a
+                href&gt;）。 在最近版本的浏览器中，该事件可以扩展到所有包括通过显式设置tabindex属性的元素类型。一个元素可以通过键盘命令获得焦点，如Tab键，或按鼠标点击的元素。</p>
+            <p>具有焦点的元素通常是通过浏览器突出显示的，比如，点线围绕的元素线。焦点是用于确定哪些元素是第一个接收键盘相关的事件。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <p>举例来说，请看下面的HTML：</p>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+
+&lt;form&gt;
+  &lt;input id="target" type="text" value="Field 1" /&gt;
+  &lt;input type="text" value="Field 2" /&gt;
+&lt;/form&gt;
+&lt;div id="other"&gt;
+  Trigger the handler
+&lt;/div&gt;
+
+</pre>
+            <p>这个事件处理函数可以绑定到第一个 input field：</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('#target').focus(function() {
+    alert('已触发focus事件.');
+});
+</pre>
+            <p>现在，如果点击第一个表单域或按tab键从其他地方切换到这个表单域，会弹出alert：</p>
+            <p>
+                <span class="stress">focus的事件派发</span>
+            </p>
+            <p>我们可以点击另一个元素时触发事件：</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$('#other').click(function() {
+    $('#target').focus();
+});
+</pre>
+            <p>这些代码执行后，点击
+                <span class="output">Trigger the handler</span>也会弹出alert。</p>
+            <p>focus事件不会在Internet Explorer中泡沫。因此，用focus事件委派，跨浏览器无法正常工作。</p>
+            <p>在Internet Explorer中,在隐藏的元素上触发focus事件会导致错误。在可见元素上，只调用不带参数的.focus()要小心。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $(".sample input").focus(function() {
+        $(this).next("span").show().fadeOut(1000);
+    });
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <p>
+                        <input type="text" />
+                        <span>focus fire</span>
+                    </p>
+                    <p>
+                        <input type="password" />
+                        <span>focus fire</span>
+                    </p>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>事件代理。轮流点击两个文本域。</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $("body").delegate("#sample1 input", "focus", function(e) {
+        $(e.target).nextAll("span").html(e.type + " fire!").show().fadeOut(1000);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample" id="sample1">
+                    <p>
+                        <input type="text" />
+                        <span>focus fire</span>
+                    </p>
+                    <p>
+                        <input type="password" />
+                        <span>focus fire</span>
+                    </p>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>测试focus事件的派发。</p>
+                <div id="red" onfocus="$.log('inline focus!',true)"></div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $("#red").bind("focus", function(e) {
+        $.log("focus1", true)
+    });
+    $("#red").bind("focus", function(e) {
+        $.log("focus2", true)
+    });
+    $("#red").fire("focus")
+
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

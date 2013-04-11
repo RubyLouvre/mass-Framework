@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>样式操作模块</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <style type="text/css">
+                .different {
+                    background:aqua;
+                }
+
+                .missing {
+                    background:pink;
+                }
+
+                #testcontainer {
+                    width: 50%;
+                }
+
+                #source {
+                    color:blue !important;
+                    font-family:"courier new";
+                    font-weight: bold;
+                    font-size: 1.5em;
+                    font-style:inherit;
+                    width:75%;
+                    border-color: #ff0000 !important;
+                    border-style: dashed !important;
+                    border-width:.3em;
+                    border-radius:30px;
+                    -moz-border-radius:30px;
+                    -webkit-border-radius:30px;
+                    margin:auto;
+                    padding:2%;
+
+                }
+
+                .testclass {
+                    background-color:white !important;
+                }
+
+                #demoContentWrapper{
+                    font-size: 10pt;
+                }
+
+                code{
+                    font-size: 10pt;
+                }
+
+                #demoactions{
+                    margin: 10px 0;
+                }
+
+                #demoactions input  {
+                    padding: 5px;
+                }
+                .fade {
+                    background: red;
+                    width:400px;
+                    height: 200px;
+                }
+            </style>
+            <script type="text/javascript">
+                $.require("ready,node,css,event", function() {
+                    $(".skimover div").hover(function() {
+                        $(this).css("backgroundColor", "#008080")
+                    }, function() {
+                        $(this).css("backgroundColor", "transparent")
+                    });
+
+                    var styles = ["border-top-width", "border-bottom-width", "border-right-width",
+                        "border-left-width", "height", "margin-top",
+                        "margin-right", "margin-left", "margin-bottom", "width", "border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius",
+                        "border-bottom-left-radius", "padding-top", "padding-right", "padding-bottom", "padding-left", "background-color", "border-top-color", "border-bottom-color",
+                        "border-right-color", "border-left-color", "color", "border-top-style",
+                        "border-bottom-style", "border-right-style", "border-left-style",
+                        "font-family", "font-size", "font-style", "font-variant",
+                        "font-weight"]
+                    function renderTable() {
+                        var arr = ["<table class=table1 style='width:450px;'><tr><td>样式名</td><td>当前值</td></tr>"]
+                        for (var i = 0, name; name = styles[i++]; ) {
+                            arr.push("<tr><td>", name, "</td><td></td></tr>")
+                        }
+                        arr.push("</table>");
+                        $("#results").html(arr.join(""));
+                    }
+                    renderTable();
+                    $("#getcss").click(function() {
+                        var target = $("#source");
+                        var arr = ["<table class=table1 style='width:450px;'><tr><td>样式名</td><td>当前值</td></tr>"]
+                        for (var i = 0, name; name = styles[i++]; ) {
+                            arr.push("<tr><td>", name, "</td><td>", target.css(name), "</td></tr>")
+                        }
+                        arr.push("</table>");
+                        $("#results").html(arr.join(""));
+                    });
+                });
+            </script>
+            <h3>$.fn.css(name, [ val ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>$.fn.css对于元素的样式读写提供跨浏览器的便捷途径。在老式IE中，不支持getComputedStyle，需要联合currentStyle，
+                runtimeStyle，offsetWidth, pixelLeft等各种私自实现，才取得当前样式值，并且它们在对于opacity， float，userSelect等操作都与其他浏览器不一致。不过，也不全错在IE中，比如
+                FF是不支持backgroundPositionXY，$.fn.css也对此差异进行屏蔽。即便如此，css对许多样式是无能为力的，如带前缀的私有属性，如-moz-,-webkit-，
+                这基本上来自于CSS3，圆角，盒子阴影，倒影，列布局，动画等等，还有一些缩写属性， 如font, border, marger, padding,
+                background，请把它们分解成更细的单位，如backgroundColor。另外，属性名不区分连字符风格与驼峰风格，双方均可。</p>
+            <p>此方法是属性于get one set all操作，根据传入参数决定其是读操作还是写操作。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>name</dt>
+                <dd>必需。第一种情况，String。数据的名字。如果只有它一个参数，则进行读操作，当前样式。</dd>
+                <dd>必需。第一种情况，一个普通的Object，进行写操作，同时对所有匹配元素设置多个样式，返回实例本身。</dd>
+                <dt>val</dt>
+                <dd>可选。样式的值。如果是数值，对于表示尺寸的样式，如width,height, fontSize等，会补上px单位，然后进行样式设置，返回实例本身</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="skimover">
+                    <div>perspective</div>
+                    <div>transform</div>
+                    <div>transition</div>
+                    <div>animation</div>
+                    <div>maskImage</div>
+                    <div>textShadow</div>
+                    <div>textStroke</div>
+                    <div>boxReflect</div>
+                    <div>boxReflect</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="skimover">
+        <div>perspective</div>
+        <div>transform</div>
+        <div>transition</div>
+        <div>animation</div>
+        <div>maskImage</div>
+        <div>textShadow</div>
+        <div>textStroke</div>
+        <div>boxReflect</div>
+        <div>boxReflect</div>
+    </div>
+    
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    $(".skimover div").hover(function() {
+        $(this).css("backgroundColor", "#008080")
+    }, function() {
+        $(this).css("backgroundColor", "transparent")
+    });
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p id="highlightword">通过点击高亮选中的汉字！！</p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+                &lt;p id="highlightword"&gt;通过点击高亮选中的汉字！！&lt;/p&gt;
+    
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    var p = $("#highlightword")
+    var text = p.text().replace(/([\u2E80-\u9FFF])/g, '&lt;span&gt;$1&lt;/span&gt;');
+    p.html(text);
+    p.click(function(e) {
+        $(e.target).css({
+            "background-color": "yellow",
+            color: "#000"
+        });
+    });
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>CSS3旋转</legend>
+                <script>
+                    (function() {
+                        var path = $$path + "/doc/images/css/css_rotate_mm", str = ""
+                        "1,2,3,4,5".replace(/\d/g, function(d) {
+                            str += '<img class="image_test_' + d + '" src="' + path + d + '.jpg" />'
+                        });
+                         document.write(str);
+                        
+                    })()
+                </script>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+require("ready,css", function($) {
+    $("fieldset img").lt(2).css("transform", "rotate(-7deg)")
+    $("fieldset img").gt(2).css("transform", "rotate(7deg)")
+})
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset style="height:800px">
+                <legend>例子</legend>
+                <div id="testcontainer" style="float: left;">
+                    <div id="source" class="testclass" style="color: white; background-color: red; border-bottom-style: solid;border-bottom-color: black;">
+                        <p>内部样式:</p>
+                        <pre>
+                            <code>#source { color:blue !important; font-family:"courier new"; font-weight:
+                                bold; font-size: 1.5em; font-style:inherit; width:75%; border-color: #ff0000
+                                !important; border-style: dashed !important; border-width:.3em; border-radius:30px;
+                                margin:auto; padding:2%; } .sourceclass { background-color:white !important;
+                                }</code>
+                        </pre>
+                        <p>内联样式</p>
+                        <pre>
+                            <code>style= "color:white; background-color:red; border-bottom-style:solid;
+                                border-bottom-color:black;"</code>
+                        </pre>
+                    </div>
+                    <input type="button" id="getcss" value="开始获取样式" />
+                </div>
+                <div style="float: left; width: 49%">
+                    <div id="results"></div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="fade">fade</div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css", function() {
+    $(".fade").css("opacity", .1)
+})
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

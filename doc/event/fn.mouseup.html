@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.mouseup</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+            </style>
+            <h3>$.fn.mouseup([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 mouseup 事件绑定一个处理函数，或者触发元素上的 mouseup 事件。</p>
+            <p>这个函数的第一种用法是 .bind('mouseup', handler) 的快捷方式，第二种用法是 .fire('mouseup') 的快捷方式。</p>
+            <p>当鼠标指针在元素上和按下鼠标键，mouseup事件被发送到这个元素。任何HTML元素都可以收到此事件。</p>
+            <p>任何鼠标按钮被点击时mouseup事件就会被发送。作用于特定的按钮，我们可以使用事件对象的which属性。并非所有浏览器都支持这个属性（IE浏览器使用button属性代替），
+                dom Framework对于做了统一处理，对于任何浏览器。点击鼠标左键which的值是1，点击鼠标中键which的值是2，点击鼠标右键which的值是3。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>测试onmousedown与onmouseup的执行顺序.</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $(".sample p").mouseup(function() {
+        $(this).append('&lt;span style="color:#F00;"&gt;Mouse up.&lt;/span&gt;');
+    }).mousedown(function() {
+        $(this).append('&lt;span style="color:#00F;"&gt;Mouse down.&lt;/span&gt;');
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <p>Press mouse and release here.</p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

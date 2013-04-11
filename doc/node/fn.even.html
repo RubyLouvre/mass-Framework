@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.even</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.even()</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得原实例中索引值为偶数的元素组成新实例返回。</p>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新的mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css", function() {
+    $("#sample li").even().css("backgroundColor", "red")
+})
+</pre>
+                <ul id="sample">
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                    <li>XXXXXXXXXXXX</li>
+                </ul>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

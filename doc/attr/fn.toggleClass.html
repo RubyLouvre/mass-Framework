@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.toggleClass</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample{
+                    border:1px solid #00CED1;
+                    padding: 1em;
+                }
+                .selected {
+                    background:#8B0000;
+                }
+            </style>
+            <h3>$.fn.toggleClass( className )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>在匹配的元素集合中的每个元素上添加或删除一个或多个类名,取决于这个样式类是否存在。即：如果存在（不存在）就删除（添加）它们。 因此它实现切换的操作，比hasClass,
+                addClass, removeClass方便得多，而实际上它内部就是调用这几个方法。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>className</dt>
+                <dd>可选。String。类名，如果要处理多个类名，请用空格隔开，如"aaa bbb ccc"。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample">请点击它</div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,attr", function() {
+    $(".sample").click(function() {
+        $(this).toggleClass("selected");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

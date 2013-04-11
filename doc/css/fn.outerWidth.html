@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.outerWidth</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.outerWidth( [includeMargin] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得第一个元素的当前宽度,包括padding，border和选择性的margin</p>
+            <p>
+                <span class="note">此方法是个只读文法。</span>
+            </p>
+            <p>
+                <span class="note">此方法不适用于window 与 document对象，可以使用.width()代替。</span>
+            </p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>includeMargin</dt>
+                <dd>可选。Boolean。是否加上margin。</dd>
+            </dl>
+            <p>w3c的盒子模型</p>
+            <script>
+                document.write('<img src="' + $$path + '/doc/images/css/outerwidth.png" />');
+            </script>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <style type="text/css">
+                        .outerWidth { margin:10px;padding:5px;border:2px solid #666; }
+    </style>
+    <div class="outerWidth">&nbsp;</div>
+    
+                </pre>
+                <style type="text/css">
+                    .outerWidth { margin:10px;padding:5px;border:2px solid #666; }
+                </style>
+                <div class="outerWidth">&nbsp;</div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    var a = $(".outerWidth");
+    a.html("它的outerWidth为" + a.outerWidth() + "px");
+    a.html("&lt;br/&gt;它的outerWidth(包括margin)为" + a.outerWidth(true) + "px");
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

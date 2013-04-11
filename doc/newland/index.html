@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>nodejs框架设计</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    <body>
+
+        <pre class="brush:js;gutter:false;toolbar:false;">
+var http = require('http');
+
+http.createServer(function(request, response) {
+  var cache = [];
+  var text = JSON.stringify(request, function(key, value) {
+    if (typeof value === 'object' && value !== null) {//防止环引用
+      if (cache.indexOf(value) !== -1) {
+        return;
+      }
+      cache.push(value);
+    }
+    return value;
+  }, 4);
+  cache = null; 
+  response.writeHead(200, {
+    'Content-Type': 'text/html'
+  });
+response.end("&lt;!doctype html&gt;&lt;body&gt;&lt;h1&gt;request object&lt;/h1&gt;&lt;pre&gt;"+text+"&lt;/pre&gt;&lt;/body&gt;");
+}).listen(9999);
+
+console.log('Server running at http://127.0.0.1:9999/');
+        </pre>
+        <p>如果不考虑动态生成页面，就是从服务器将已经写好的静态HTML返回前端。那么我们后端至少要返回图片，CSS，JS，HTML这四种资源。
+            这四种资源通常存放的地方也不一样，对应的地址不一样，当请求过来时，需要一种路由系统做别识，再进入MVC，最后在action中处理好，返回前端。
+        </p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+ var http = require('http'),
+    url = require('url'),
+    Router = require('./router').Router;
+
+var router = new Router();
+router.add('GET', '/', function(req, res) {
+    res.end("&lt;h1&gt;这是首页&lt;/h1&gt;");
+});
+//括中的部分为可选
+router.add('GET', '/user(/:user_id)', function(req, res) {
+    res.end('&lt;h1&gt;这是用户页面&lt;/h1&gt;' + (req.param("user_id") || ""));
+});
+
+var app = http.createServer(function(req, res) {
+    var uri = url.parse(req.url, true); //转换为一个对象
+    var obj = router.route(req.method, uri.pathname); //匹配路由
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            res.writeHead(200, {
+                'Content-Type': "text/html; charset=utf-8"
+            });
+            return callback(req, res);
+        }
+    }
+    res.writeHead(404, {
+        'Content-Type': "text/plain; charset=UTF-8"
+    });
+    res.end("页面不存在");
+
+}).listen(3000);
+console.log('Server listen on port %d', app.address().port);
+        </pre>
+　　<p>那么重新启动 node index。在浏览器的地址栏输入localhost:3000，会看到“这是首页”的字样；
+            输入localhost:3000/user，会到“这是用户页面的”的字样；输入localhost:3000/user/123，与上次差不多，
+            只不过下面多了一行小字，为123；输入localhost:3000/user/ddd，小字变成”ddd”；
+            输入localhost:3000/user/23/34，就转到404页面。我们的路由系统试验成功。</p>
+
+　　<p>但目前还是不放便输出复杂的页面，我们需要编写一个单纯的HTML页面，里面有JS与CSS。
+            然后在action中通过fs API将它们从硬盘读到内存，然后发到前端。</p>
+        <p>我们先创建这些静态资源:</p>
+        <pre class="brush:xml;gutter:false;toolbar:false;">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;index&lt;/title&gt;
+        &lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8"&gt;
+        &lt;script src="main.js" type="text/javascript"&gt;&lt;/script&gt;
+        &lt;link rel="stylesheet" href="main.css" type="text/css"  /&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;这是首页&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+        </pre>
+        <p>main.css</p>
+        <pre class="brush:css;gutter:false;toolbar:false;">
+body{
+    background:black;
+    color: white;
+}
+h1 {
+    color:white;
+}
+h2{
+    color:darkorchid;
+}
+        </pre>
+        <p>main.js</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+window.onload = function(){
+    var h2 = document.createElement("h2");
+    h2.innerHTML = "这是动态创建的";
+    document.body.appendChild(h2)
+}
+        </pre>
+        <p>修改index.js为</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">
+var http = require('http'),
+url = require('url'),
+Router = require('./router').Router,
+fs = require("fs")
+
+var router = new Router();
+//读取静态页面
+router.add('GET', '/', function(req, res) {
+    fs.readFile("./index.html", "utf-8", function(err, bf) {
+        res.writeHead(200, {'Content-Type': "text/html; charset=utf-8"});
+        res.end(bf);
+    });
+});
+//读取JS
+router.add('GET', 'main.js', function(req, res) {
+    console.log("js")
+    console.log(req.headers)
+    fs.readFile(req.url, "utf-8", function(err, bf) {//req.url = "main.js"
+        res.writeHead(200, {'Content-Type': "text/javascript; charset=utf-8"});
+        res.end(bf);
+    });
+});
+//读取CSS
+router.add('GET', 'main.css', function(req, res) {
+     console.log("css")
+    console.log(req.headers)
+    fs.readFile(req.url, "utf-8", function(err, bf) {
+        res.writeHead(200, {'Content-Type': "text/css; charset=utf-8"});
+        res.end(bf);
+    });
+});
+var app = http.createServer(function(req, res) {
+    var uri = url.parse(req.url, true);//转换为一个对象,并处理querystring为一个对象
+    var obj = router.route(req.method, uri.pathname);//匹配路由
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            return  callback(req, res);
+        }
+    }
+    res.writeHead(404, {'Content-Type': "text/plain; charset=UTF-8"});
+    res.end("页面不存在");
+
+}).listen(3000);
+console.log('Server listen on port %d', app.address().port);
+        </pre>
+        <p>这时页面变为</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/index1.jpg" />');
+        </script>
+        <p>但是这样做个有缺陷，JS与CSS文件通常非常多，我们都是集中放在一个位置，它们只需要直接从目标路径读取就行，基于不用经过action。</p>
+        <p>为此我们尝试从accept首部进行判识</p>
+        <p>IE10</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/ie10accept.jpg" />');
+        </script>
+        <p>IE6</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/ie6accept.jpg" />');
+        </script>
+        <p>firefox19</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/firefox19accept.jpg" />');
+        </script>
+        <p>safari5</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/safari5accept.jpg" />');
+        </script>
+        <p>chrome26</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/chrome26accept.jpg" />');
+        </script>
+        <p>opera12</p>
+        <script>
+            document.write('<img src="' + $$path + '/doc/images/newland/opera12accept.jpg" />');
+        </script>
+        <p>IE10最智能，IE6与opera不甚聪明。</p>
+        <p>升级如下：</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+        var http = require('http'),
+        url = require('url'),
+        Router = require('./router').Router,
+        fs = require("fs")
+
+var router = new Router();
+//读取静态页面
+router.add('GET', '/', function(req, res) {
+    fs.readFile("./index.html", "utf-8", function(err, bf) {
+        res.writeHead(200, {'Content-Type': "text/html; charset=utf-8"});
+        res.end(bf);
+    });
+});
+
+var app = http.createServer(function(req, res) {
+    var uri = url.parse(req.url, true);//转换为一个对象,并处理querystring为一个对象
+    var accept = req.headers.accept,  static;
+    if (accept.indexOf("application/javascript") !== -1) {//IE10
+        static = "js";
+    } else if (accept.indexOf("text/css") !== -1) {//IE10, safari, chrome, firfox19
+        static = "css";
+    }
+    if (!static) {
+        if (/\.(\w+)$/.test(uri.pathname)) {
+            static = RegExp.$1;
+        }
+    }
+    if (/js|css/.test(static)) {//处理静态资源
+        fs.readFile("." + uri.pathname, "utf-8", function(err, bf) {
+            var type = static === "js" ? "text/javascript" : "text/css";
+            res.writeHead(200, {'Content-Type': type + "; charset=utf-8"});
+            res.end(bf);
+        });
+        return;
+    }
+    var obj = router.route(req.method, uri.pathname);//匹配路由
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            return  callback(req, res);
+        }
+    }
+    res.writeHead(404, {'Content-Type': "text/plain; charset=UTF-8"});
+    res.end("页面不存在");
+
+}).listen(3000);
+console.log('Server listen on port %d', app.address().port);
+        </pre>       
+        <p>引入静态缓存，减少IO读写</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+function createCache(cacheLength) {
+    var cache,  keys = [];
+    return (cache = function(key, value) {
+        if (keys.push(key += " ") > cacheLength) {
+            delete cache[ keys.shift() ];
+        }
+        return (cache[ key ] = value);
+    });
+}
+var staticCache = createCache(300);
+//.............
+    if (/js|css/.test(static)) {//处理静态资源
+        var type = static === "js" ? "text/javascript" : "text/css";
+        res.writeHead(200, {'Content-Type': type + "; charset=utf-8"});
+        if (staticCache[uri.pathname]) {
+            res.end(staticCache[uri.pathname]);
+        } else {
+            fs.readFile("." + uri.pathname, "utf-8", function(err, bf) {
+                staticCache[uri.pathname] = bf;
+                res.end(bf);
+            });
+        }
+        return;
+    }
+        </pre>  
+        <p>添加AJAX支持,首先要对POST请求的参数进行处理:</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+    if (obj) {
+        req.param = function(key) {
+            return obj.params[key] ? obj.params[key] : uri.query[key];
+        };
+        var callback = obj.value;
+        if (typeof callback === 'function') {
+            if (req.method === "POST") {
+               
+                var buf = "";//收集post请求的参数
+                req.setEncoding('utf8');
+                function buildBuffer(chunk) {
+                    buf += chunk;
+                }
+                req.on('data', function(chunk) {
+                    buf += chunk;
+                });
+                req.on('end', function() {
+                    try {
+                        req.query = buf.length ? require("querystring").parse(buf) : {};
+                    } catch (err) {
+                    }
+                    callback(req, res);
+                });
+            } else {
+                callback(req, res);
+            }
+            return;
+        }
+    }
+
+http.IncomingMessage.prototype.getHeader = function(name) {
+    var headers = this.headers || {}
+    switch (name = name.toLowerCase()) {
+        case 'referer':
+        case 'referrer':
+            return headers.referrer
+                    || headers.referer;
+        default:
+            return headers[ name ] || "";
+    }
+};
+
+router.add('POST', '/ajax', function(req, res) {
+    var val = req.getHeader("X-Requested-With");
+    if ('xmlhttprequest' === val.toLowerCase()) {
+        console.log("这是一个AJAX请求");
+        console.log(req.query);
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.end('Hello World\n');
+    }
+});
+        </pre>  
+        <p>首页添加一个script标签:</p>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+            var xhr = new (self.XMLHttpRequest || ActiveXObject)("Microsoft.XMLHTTP")
+            xhr.onreadystatechange = function() {//先绑定事件后open
+                if (this.readyState === 4 && this.status === 200) {
+                   var div = document.createElement("div");
+                   div.innerHTML =this.responseText;
+                   document.body.appendChild(div)
+                }
+            }
+            xhr.open("POST", "/ajax", true);
+            //必须,用于让服务器端判断request是Ajax请求(异步)还是传统请求(同步)
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+            xhr.send("key=val&key1=val2");
+        </pre>  
+        <h3>下载文件</h3>
+        <p>首页加一个链接</p>
+        <pre class="brush:xml;gutter:false;toolbar:false;">    
+             &lt;p&gt;&lt;a href="/download"&gt;点我下载&lt;/a&gt;&lt;/p&gt;
+        </pre>  
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+router.add('GET', '/download', function(req, res) {
+    var userFile = "server.rar"
+    fs.stat(userFile, function(err, stat) {
+        var readStream = fs.createReadStream(userFile);
+        res.writeHead(200, {
+            "Content-Type": "application/octet-stream",
+            'Content-Length': stat.size,
+            'Content-disposition': 'attachment; filename=server.rar'//更名
+        });
+        readStream.on("open", function() {
+            readStream.pipe(res);
+        })
+        readStream.on("error", function(err) {
+            res.end(err)
+        })
+        //util.pump() is deprecated. Use readableStream.pipe() instead.
+        // util.pump(rs, res, function(err) {
+        //        if (err) {
+        //           throw err;
+        //    }
+        //   });
+    });
+});
+        </pre>  
+        <div style="display:none;">
+            //http://stackoverflow.com/questions/7288814/download-a-file-from-nodejs-server
+            //http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-fs-create-read-stream
+            //http://docs.nodejitsu.com/articles/advanced/streams/how-to-use-stream-pipe
+            // 压缩 http://cnodejs.org/topic/4f16442ccae1f4aa27001071
+            // http://fred.easymorse.com/?cat=101
+        </div>
+        <h3>处理纯文本的上传数据</h3>
+        <pre class="brush:js;gutter:false;toolbar:false;">    
+var matchString = {
+    doubleQuotedString: /"([^\\"\n]|\\.)*"/g,
+    singleQuotedString: /'([^\\'\n]|\\.)*'/g,
+    multiLineDoubleQuotedString: /"([^\\"]|\\.)*"/g,
+    multiLineSingleQuotedString: /'([^\\']|\\.)*'/g
+};
+function upload(req) {
+    var val = req.getHeader("content-type");
+    if (val.indexOf("multipart/form-data") !== -1) {
+        var m = val.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
+        var boundary = m[1] || m[2];
+        var buffer = req.buffer;
+        var formData = {};
+        buffer.split(boundary).forEach(function(el) {
+            var str = el.trim(), name, val;
+            if (str.length > 32 && str.indexOf("Content-Disposition") !== -1) {
+                str = str.slice(32);//去掉最前面的Content-Disposition: form-data; name=
+                for (var i in matchString) {
+                    if (m = str.match(matchString[i])) {
+                        name = m[0];
+                        break;
+                    }
+                }
+                val = RegExp.rightContext.replace(/--$/, "").trim();
+                //http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.2
+                if(name.indexOf("%0D%0A")!== -1){//处理webkit系
+                    name = name.replace("%0D%0A","\r\n");
+                }
+                formData[name.slice(1, -1)] = val;
+            }
+        });
+        console.log(formData);
+    }
+}
+        </pre>  
+        <p>上传单个图片</p>
+          <pre class="brush:js;gutter:false;toolbar:false;">    
+      
+ router.add("PUT", '/upload', function(req, res, next) {
+    var val = req.getHeader("X-Requested-With");
+    if ('xmlhttprequest' === val.toLowerCase()) {
+        console.log('Uploading...');
+        var fName = req.getHeader('x-file-name');
+        var ws = fs.createWriteStream('./image/' + fName)
+        req.on('data', function(data) {
+            console.log('DATA');
+            ws.write(data);
+        });
+        req.on('end', function() {
+            console.log('All Done!!!!');
+            res.writeHead(200, {'Content-Type': "text/plain; charset=utf-8"});
+            res.end("/image/" + fName);
+        });
+    }
+});
+          </pre>
+        
+    </body>
+</html>

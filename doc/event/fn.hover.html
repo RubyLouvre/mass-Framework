@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.hover</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    color:#000;
+                    height:150px;
+                    background: #FFE0BB;
+                    padding: 5px;
+                }
+                .sample p {
+                    color:#000;
+                }
+                p.hilite { background:yellow; }
+            </style>
+            <h3>$.fn.hover(fnIn, [fnOut])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>将二个事件函数绑定到匹配元素上，分别当鼠标指针进入和离开元素时被执行。如果只有一个函数，它会兼职第二个参数的工作。</p>
+            <p>.hover()方法是同时绑定 mouseenter和mouseleave事件。我们可以用它来简单地应用在鼠标在元素上活动行为。</p>
+            <p>调用$(selector).hover(fnIn, fnOut)是以下写法的简写：</P>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+$(selector).mouseenter(fnIn).mouseleave(fnOut || fnIn);
+</pre>
+            <p>更多细节参见
+                <a href="$.fn.mouseenter.html">.mouseenter()</a>和
+                <a href="$.fn.mouseleave.html"> .mouseleave()</a>。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>type</dt>
+                <dd>必需。String.事件类型。</dd>
+                <dt>args0</dt>
+                <dd>额外参数</dd>
+                <dt>args1</dt>
+                <dd>额外参数</dd>
+                <dt>argsn</dt>
+                <dd>额外参数</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $(".sample p").click(function() {
+        $(this).slideUp(function() {
+            if (!$(".sample p:visible").length) {
+                $(".sample p").delay(1000).show(1000)
+            }
+        });
+    });
+    $(".sample p").hover(function() {
+        $(this).toggleClass("hilite");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <p>帕尔斯专注于未知的世界；</p>
+                    <p>琳瑟则着眼于已知的世界；</p>
+                    <p>爱特罗传承不可知的世界。</p>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

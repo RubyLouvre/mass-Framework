@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.hashchange</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #show_result { color:red; }
+            </style>
+            <h3>$.fn.hashchange([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>当hash发生改变时触发此事件，解决AJAX下后退按钮失灵的问题。</p>
+            <p>此事件是单独在一个模块中，在more/hashchange.js中。这样做完全是因为它的存在性并不重要，只是一个补丁模块。当IE678淡出舞台，它就没有存在的必要。</p>
+            <p>需要注意的是,此事件只能绑在window上。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset id="first_example">
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,more/hashchange", function() {
+    var el = $("#show_result")
+    document.onclick = function() {
+        var t = "#" + Math.random();
+        location.hash = t
+    }
+    $(window).hashchange(function() {
+        el.html(location.href)
+    })
+
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="show_result"></div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

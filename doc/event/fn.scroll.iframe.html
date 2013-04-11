@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.sroll</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style>
+                div { color:blue; }
+                p { color:green; }
+                span { color:red; display:none; }
+            </style>
+            <div>尝试移动iframe的滚动条</div>
+            <p>Paragraph -
+                <span>Scroll happened!</span>
+            </p>
+            <script>
+                $.require("ready,event,fx",function(){
+                    $("p").clone().appendTo("body");
+                    $("p").clone().appendTo("body");
+                    $("p").clone().appendTo("body");
+                    $(window).scroll(function () { 
+                        $("span").show().fadeOut(2000);
+                    });
+                })
+            </script>
+        </article>
+    </body>
+
+</html>

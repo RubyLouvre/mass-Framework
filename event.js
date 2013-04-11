@@ -2,15 +2,58 @@
 // 事件系统 v9
 //==========================================
 define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
-    var facade = $.event || ($.event = {
+    function safeActiveElement() {
+        try {
+            return document.activeElement;
+        } catch (err) {
+        }
+    }
+    var facade = $.event = {
         //对某种事件类型进行特殊处理
-        special: {},
+        special: {
+            load: {//此事件不能冒泡
+                noBubble: true
+            },
+            click: {//处理checkbox中的点击事件
+                trigger: function() {
+                    if (this.nodeName === "INPUT" && this.type === "checkbox" && this.click) {
+                        this.click();
+                        return false;
+                    }
+                }
+            },
+            focus: {//IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
+                trigger: function() {
+                    if (this !== safeActiveElement() && this.focus) {
+                        this.focus();
+                        return false;
+                    }
+                },
+                delegateType: "focusin"
+            },
+            blur: {
+                trigger: function() { //blur事件的派发使用原生方法实现
+                   if ( this === safeActiveElement() && this.blur ) {
+                        this.blur();
+                        return false;
+                    }
+                },
+                delegateType: "focusout"
+            },
+            beforeunload: {
+                postDispatch: function(event) {
+                    if (event.result !== void 0) {
+                        event.originalEvent.returnValue = event.result;
+                    }
+                }
+            }
+        },
         //对Mouse事件这一大类事件类型的事件对象进行特殊处理
         fixMouse: function(event, real) {
             if (event.type === "mousewheel") { //处理滚轮事件
                 if ("wheelDelta" in real) { //统一为±120，其中正数表示为向上滚动，负数表示向下滚动
                     // http://www.w3help.org/zh-cn/causes/SD9015
-                    var delta = real.wheelDelta
+                    var delta = real.wheelDelta;
                     //opera 9x系列的滚动方向与IE保持一致，10后修正
                     if (window.opera && opera.version() < 10)
                         delta = -delta;
@@ -20,15 +63,15 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                 }
             }
         }
-    }),
+    },
     eventHooks = facade.special,
             rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
             rtypenamespace = /^([^.]*)(?:\.(.+)|)$/,
             mouseEvents = "contextmenu,click,dblclick,mouseout,mouseover,mouseenter,mouseleave,mousemove,mousedown,mouseup,mousewheel,",
-            types = mouseEvents + ",keypress,keydown,keyup," + "blur,focus,focusin,focusout," + "abort,error,load,unload,resize,scroll,change,input,select,reset,submit" //input
-    $.eventMap = $.oneObject(mouseEvents, "Mouse")
+            types = mouseEvents + ",keypress,keydown,keyup," + "blur,focus,focusin,focusout," + "abort,error,load,unload,resize,scroll,change,input,select,reset,submit"; //input
+    var eventMap = $.eventMap = $.oneObject(mouseEvents, "Mouse");
     $.eventSupport = function(eventName, el) {
-        el = el || $.html;//此方法只能检测元素节点对某种事件的支持，并且只能检测一般性的事件，对于像表单事件，需要传入input元素进行检测
+        el = el || $.html; //此方法只能检测元素节点对某种事件的支持，并且只能检测一般性的事件，对于像表单事件，需要传入input元素进行检测
         eventName = "on" + eventName;
         var ret = eventName in el;
         if (el.setAttribute && !ret) {
@@ -86,47 +129,6 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
         }
     };
     $.Event = Event;
-    $.mix(eventHooks, {
-        load: {//此事件不能冒泡
-            noBubble: true
-        },
-        click: {//处理checkbox中的点击事件
-            trigger: function() {
-                if (this.nodeName === "INPUT" && this.type === "checkbox" && this.click) {
-                    this.click();
-                    return false;
-                }
-            }
-        },
-        focus: {//IE9-在不能聚焦到隐藏元素上,强制触发此事件会抛错
-            trigger: function() {
-                if (this !== document.activeElement && this.focus) {
-                    try {
-                        this.focus();
-                        return false;
-                    } catch (e) {
-                    }
-                }
-            },
-            delegateType: "focusin"
-        },
-        blur: {
-            trigger: function() { //blur事件的派发使用原生方法实现
-                if (this === document.activeElement && this.blur) {
-                    this.blur();
-                    return false;
-                }
-            },
-            delegateType: "focusout"
-        },
-        beforeunload: {
-            postDispatch: function(event) {
-                if (event.result !== void 0) {
-                    event.originalEvent.returnValue = event.result;
-                }
-            }
-        }
-    });
 
     $.mix(facade, {
         add: function(elem, hash) {
@@ -189,7 +191,7 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                 }
                 //用于优化fire方法
                 facade.global[type] = true;
-            })
+            });
             //防止IE内在泄漏
             elem = null;
         },
@@ -240,12 +242,12 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                 if (handlers.length === 0 && origCount !== handlers.length) {
                     if (!hook.teardown || hook.teardown.call(elem, namespaces, elemData.handle) === false) {
                         if ($["@bind"] in elem) {
-                            $.unbind(elem, type, elemData.handle)
+                            $.unbind(elem, type, elemData.handle);
                         }
                     }
                     delete events[type];
                 }
-            })
+            });
 
             if ($.isEmptyObject(events)) {
                 delete elemData.handle;
@@ -342,11 +344,9 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
             //如果没有阻止默认行为
             if (!event.defaultPrevented) {
 
-                if ((!hook._default || hook._default.apply(elem.ownerDocument, data) === false) && !(type === "click" && elem.nodeName == "A")) {
+                if ((!hook._default || hook._default.apply(elem.ownerDocument, data) === false) && !(type === "click" && elem.nodeName === "A")) {
                     if (ontype && $.isFunction(elem[type]) && elem.nodeType) {
-
                         old = elem[ontype];
-
                         if (old) {
                             elem[ontype] = null;
                         }
@@ -371,9 +371,9 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
         dispatch: function(e) {
             //执行用户回调,只在当前元素中执行
             var eventType = e.type,
-                    handlers = (($._data(this, "events") || {})[eventType] || [])
+                    handlers = (($._data(this, "events") || {})[eventType] || []);
             if (!handlers.length) {
-                return;   //如果不存在事件回调就没有必要继续进行下去
+                return; //如果不存在事件回调就没有必要继续进行下去
             }
             //摒蔽事件对象在各浏览器下的差异性
             var event = $.event.fix(e),
@@ -400,10 +400,10 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                         matches = [];
                         for (var i = 0; i < delegateCount; i++) {
                             handleObj = handlers[i];
-                            sel = handleObj.selector + " ";//避免与Ovject.prototype的属性冲突,比如toString, valueOf等
+                            sel = handleObj.selector + " "; //避免与Ovject.prototype的属性冲突,比如toString, valueOf等
                             //判定目标元素(this)的孩子(cur)是否匹配（sel）
                             if (selMatch[sel] === void 0) {
-                                selMatch[sel] = $(sel, this).index(cur) >= 0
+                                selMatch[sel] = $(sel, this).index(cur) >= 0;
                             }
                             if (selMatch[sel]) {
                                 matches.push(handleObj);
@@ -440,7 +440,7 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                         ret = ((eventHooks[handleObj.origType] || {}).handle || handleObj.handler).apply(matched.elem, args);
                         handleObj.times--;
                         if (handleObj.times === 0) { //如果有次数限制并到用光所有次数，则移除它
-                            facade.unbind(matched.elem, handleObj)
+                            facade.unbind(matched.elem, handleObj);
                         }
                         if (ret !== void 0) {
                             event.result = ret;
@@ -478,8 +478,8 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                     event.target = event.target.parentNode;
                 }
                 event.metaKey = !!event.ctrlKey; // 处理IE678的组合键
-                var callback = facade["fix" + $.eventMap[event.type]]
-                if (typeof callback == "function") {
+                var callback = facade["fix" + eventMap[event.type]];
+                if (typeof callback === "function") {
                     callback(event, real);
                 }
             }
@@ -505,7 +505,7 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
             return this.on(types, fn, 1);
         },
         undelegate: function(selector, types, fn) { /*顺序不能乱*/
-            return arguments.length == 1 ? this.off(selector, "**") : this.off(types, fn, selector);
+            return arguments.length === 1 ? this.off(selector, "**") : this.off(types, fn, selector);
         },
         die: function(types, fn) {
             $.log("$.fn.die() is deprecated");
@@ -537,7 +537,7 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                         hash.times = el;
                         break;
                     case "function":
-                        hash.handler = el
+                        hash.handler = el;
                         break;
                     case "object":
                         $.mix(hash, el, false);
@@ -561,17 +561,17 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
             return this.each(function() {
                 facade[bind](this, hash);
             });
-        }
+        };
         $.fn[bind] = function() { // $.fn.bind $.fn.unbind
             return $.fn[on].apply(this, arguments);
-        }
+        };
     });
 
     types.replace($.rword, function(type) { //这里产生以事件名命名的快捷方法
-        $.eventMap[type] = $.eventMap[type] || (/key/.test(type) ? "Keyboard" : "HTML")
+        eventMap[type] = eventMap[type] || (/key/.test(type) ? "Keyboard" : "HTML");
         $.fn[type] = function(callback) {
             return callback ? this.bind(type, callback) : this.fire(type);
-        }
+        };
     });
     /* mouseenter/mouseleave/focusin/focusout已为标准事件，经测试IE5+，opera11,FF10+都支持它们
      详见http://www.filehippo.com/pl/download_opera/changelog/9476/
@@ -594,7 +594,7 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                     }
                     return ret;
                 }
-            }
+            };
         });
     }
     //现在只有firefox不支持focusin,focusout事件,并且它也不支持DOMFocusIn,DOMFocusOut,不能像DOMMouseScroll那样简单冒充,Firefox 17+
@@ -635,7 +635,9 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
         }
     } catch (e) {
     }
-    ;
+    if (typeof $.fixEvent === "function") {
+        $.fixEvent();
+    }
 
     return $;
 })
@@ -721,6 +723,6 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
  
  自定义下拉框
  http://odyniec.net/projects/selectlist/
-
-　　消息作为信封，信封内容是事件，这种异步机制是聚合根与外界交互的最好方式，在松耦合上要好于聚合根直接暴露自己的行为或者Hold其他聚合根，能够更加严密保护自己内部状态不被外界侵入。
+ 
+ 消息作为信封，信封内容是事件，这种异步机制是聚合根与外界交互的最好方式，在松耦合上要好于聚合根直接暴露自己的行为或者Hold其他聚合根，能够更加严密保护自己内部状态不被外界侵入。
  */

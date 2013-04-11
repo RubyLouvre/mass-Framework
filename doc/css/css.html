@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.css</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .skimover {
+                    width:200px;
+                    height:20px;
+                    background:red;
+                }
+            </style>
+            <h3>$.css(node, name, [ val ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>$.fn.css对应的静态方法，$.fn.css内部其实就是调用它。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>nodes</dt>
+                <dd>必需。单个节点。</dd>
+                <dt>name</dt>
+                <dd>必需。第一种情况，String。数据的名字。如果只有它一个参数，则进行读操作，当前样式。</dd>
+                <dd>必需。第一种情况，一个普通的Object，进行写操作，同时对所有匹配元素设置多个样式，返回实例本身。</dd>
+                <dt>val</dt>
+                <dd>可选。样式的值。如果是数值，对于表示尺寸的样式，如width,height, fontSize等，会补上px单位，然后进行样式设置，返回实例本身</dd>
+            </dl>
+
+                <fieldset>
+                    <legend>例子</legend>
+                    <div class="skimover"></div>
+                    <pre class="brush:xml;gutter:false;toolbar:false">
+
+                &lt;div class="skimover"&gt;
+
+                &lt;/div&gt;
+
+    
+</pre>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    $(".skimover").hover(function() {
+        $.css(this, "background", "#008080")
+    }, function() {
+        $.css(this, "backgroundColor", "transparent")
+    });
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+        </article>
+    </body>
+
+</html>

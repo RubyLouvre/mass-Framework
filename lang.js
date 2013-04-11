@@ -116,7 +116,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             if (isArray) {
                 for (var n = obj.length; i < n; i++) {
                     value = fn.call(scope || obj[i], i, obj[i]);
-                    ret.push(value);
                     if (map) {
                         if (value != null) {
                             ret[ ret.length ] = value;
@@ -225,10 +224,18 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
          * http://freshbrewedcode.com/jimcowart/2013/01/29/what-you-might-not-know-about-json-stringify/
          */
         dump: function(obj) {
-            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t";
-            return JSON.stringify(obj, function(key, value) {
+            var space = $.isNative("parse", window.JSON) ? 4 : "\r\t", cache = [],
+            text = JSON.stringify(obj, function(key, value) {
+                if (typeof value === 'object' && value !== null) {//防止环引用
+                    if (cache.indexOf(value) !== -1) {
+                        return;
+                    }
+                    cache.push(value);
+                }
                 return typeof value === "function" ? value + "" : value;
             }, space);
+            cache = [];//GC回收
+            return text;
         },
         /**
          * 将字符串当作JS代码执行
@@ -414,7 +421,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         }
     });
     //字符串的原生原型方法
-    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat,", //es6
+    $.String("charAt,charCodeAt,concat,indexOf,lastIndexOf,localeCompare,match," + "contains,endsWith,startsWith,repeat," + //es6
             "replace,search,slice,split,substring,toLowerCase,toLocaleLowerCase,toUpperCase,trim,toJSON")
     $.Array({
         contains: function(target, item) {
@@ -481,18 +488,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                 return a < b ? -1 : a > b ? 1 : 0;
             });
             return $.Array.pluck(array, 'el');
-        },
-        groupBy: function(target, val) {
-            //根据指定条件（如回调或对象的某个属性）进行分组，构成对象返回。
-            var result = {};
-            var iterator = $.isFunction(val) ? val : function(obj) {
-                return obj[val];
-            };
-            target.forEach(function(value, index) {
-                var key = iterator(value, index);
-                (result[key] || (result[key] = [])).push(value);
-            });
-            return result;
         },
         pluck: function(target, name) {
             //取得对象数组的每个元素的指定属性，组成数组返回。
@@ -700,17 +695,6 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
                 }
             }
             return target;
-        },
-        without: function(target, array) {
-            //去掉与传入参数相同的元素
-            var result = {},
-                    key;
-            for (key in target) { //相当于构建一个新对象，把不位于传入数组中的元素赋给它
-                if (!~array.indexOf(key)) {
-                    result[key] = target[key];
-                }
-            }
-            return result;
         }
     });
     $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");

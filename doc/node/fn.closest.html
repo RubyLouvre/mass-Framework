@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.closest</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 { margin: 3px; padding: 3px; }
+                .hilight { color:#00CED1 ; }
+            </style>
+            <h3>$.fn.closest(expr, [context])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得匹配节点中所有第一个匹配expr的最近祖先，去重排序后构成新实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。String。CSS表达式。</dd>
+                <dt>context</dt>
+                <dd>可选。元素节点。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新mass实例。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>closest最大的用处是实现自己的事件代理，虽然事件代理在dom Framework中提供支持。</p>
+                <ul class="sample1">
+                    <li>list item 1</li>
+                    <li>list item 2
+                        <ul>
+                            <li>list item 2-a</li>
+                            <li>list item 2-b</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <b>list item 3</b>
+                    </li>
+                    <li>list item 4</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+   <ul class="sample1">
+        <li>list item 1</li>
+        <li>list item 2
+            <ul>
+                <li>list item 2-a</li>
+                <li>list item 2-b</li>
+            </ul>
+        </li>
+        <li><b>list item 3</b></li>
+        <li>list item 4</li>
+    </ul>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr,event", function() {
+    $(document).one("click", function(e) {
+        $(e.target).closest("li").toggleClass("hilight");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

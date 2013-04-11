@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.nextUntil</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.nextUntil([expr])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>获取每个匹配元素之后所有的同辈元素，但不包括选择器匹配的元素以及更之后的同辈元素，去重排序组成新mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>可选，String，用于进一步过滤的CSS选择器。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>将.third-item元素到最后之间的所有弟弟的背景变红。</p>
+                <ul>
+                    <li>list item 0</li>
+                    <li>list item 1</li>
+                    <li>list item 2</li>
+                    <li class="third-item">list item 3</li>
+                    <li>list item 4</li>
+                    <li>list item 5</li>
+                    <li>list item 6</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul>
+        <li>list item 0</li>
+        <li>list item 1</li>
+        <li>list item 2</li>
+        <li class="third-item">list item 3</li>
+        <li>list item 4</li>
+        <li>list item 5</li>
+        <li>list item 6</li>
+    </ul>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    $(".third-item").nextUntil(":last-child").css("background-color", "red");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

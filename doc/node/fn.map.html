@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.map</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.map(callback)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对实例中的每一个元素进行map操作，将得到结果进行过滤，只留下是节点或window对象的元素，构成新的mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>callback</dt>
+                <dd>必需。回调函数。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>原mass实例。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>更换innerHTML</p>
+                <ul class="container">
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表2</li>
+                    <li class="inner">列表3</li>
+                    <li class="inner">列表4</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="container">
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表2</li>
+        <li class="inner" >列表3</li>
+        <li class="inner" >列表4</li>
+    </ul>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    var neo = $(".container li").map(function(index,el) {
+        return el.firstChild;
+    });
+    $.log(neo, true); //将得到四个文本节点
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

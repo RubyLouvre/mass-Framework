@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>选择器模块</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1{
+                    background: #9932CC;
+                }
+                .sample1 div { width:60px; height:60px; margin:5px; float:left;
+                               background:green; border:10px outset;
+                               cursor:pointer; }
+                .sample1 p { color:red; margin:0; clear:left; }
+            </style>
+            <h3>选择器模块</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>整个mass实例的基建起点，它总是通过选择器，得到某一些节点，把它们变成mass实例这个类数组对象的元素。</p>
+            <p>实例中要用到选择器的方法有dom, query, find, filter, not ,has, closest, index, 以及所有parent,
+                parents, parentsUntil, next, nextAll, nextUntil, prev, prevAll, prevUntil,
+                children, siblings, contents</p>
+            <p>
+                <span class="stress">支持选择器：</span>
+            </p>
+            <table class="table1" id="js-query-table">
+                <thead>
+                    <tr>
+                        <th colspan="3">选择器支持</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>通配符选择器</td>
+                        <td>*</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>标签选择器</td>
+                        <td>p ,div , div p</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>id选择器</td>
+                        <td>#aa</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>类选择器</td>
+                        <td>.bbb</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>属性选择器</td>
+                        <td>[aa]，[aa="bb"],
+                            <br/>[aa!="bb"],
+                            <br/>[aa~="bb"],
+                            <br/>[aa^="bb"],
+                            <br/>[aa$="bb"],
+                            <br/>[aa|="bb"]</td>
+                        <td>详见
+                            <strong>
+                                <a href="http://www.cnblogs.com/rubylouvre/archive/2009/10/27/1590102.html">这里</a>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>亲子选择器</td>
+                        <td>div &gt; p,div &gt; .aaa</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>兄长选择器</td>
+                        <td>div ~ p,div ~ [ddd]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>相邻选择器</td>
+                        <td>div + p,div + :empty</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>并联选择器</td>
+                        <td>div,p</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">伪类选择器(W3C标准部分)</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.child.html">子元素过滤选择器</a>
+                        </td>
+                        <td>:nth-child(an+b),
+                            <br/>:nth-of-type(an+b),
+                            <br/>:nth-last-child(an+b),
+                            <br/>:nth-last-of-type(an+b),
+                            <br/>:first-child,
+                            <br/>:last-child,
+                            <br/>:only-child,
+                            <br/>:first-of-type,
+                            <br/>:last-of-type,
+                            <br/>:only-of-type
+                            <br/>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.target.html#xxxx">目标伪类选择器</a>
+                        </td>
+                        <td>:target</td>
+                        <td>指id或name等于location.hash的元素</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.state.html">disabled属性伪类选择器</a>
+                        </td>
+                        <td>:disabled</td>
+                        <td>指表单元素的disabled为true</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.state.html">enabled属性伪类选择器</a>
+                        </td>
+                        <td>:enabled</td>
+                        <td>指表单元素的disabled为false</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.state.html">checked属性伪类选择器</a>
+                        </td>
+                        <td>:check</td>
+                        <td>指表单元素的checked为true</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.state.html">indeterminate属性伪类选择器</a>
+                        </td>
+                        <td>:indeterminate</td>
+                        <td>指checkbox元素的indeterminate为true</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.lang.html">lang伪类选择器</a>
+                        </td>
+                        <td>:lang(fr)</td>
+                        <td>指当前元素或其父元素的lang属性~=括号中的语言种类</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.not.html">反选伪类选择器</a>
+                        </td>
+                        <td>:not(.aaa)</td>
+                        <td>指当前元素不具备括号中所指的特性</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.empty.html">empty子元素过滤选择器</a>
+                        </td>
+                        <td>:empty</td>
+                        <td>此元素不存在任何子节点</td>
+                    </tr>
+                    <tr>
+                        <td>link子元素过滤选择器</td>
+                        <td>:link</td>
+                        <td>如果没有前缀，则返回document.links，否则要求为链接</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.root.html">root伪类选择器</a>
+                        </td>
+                        <td>:root</td>
+                        <td>返回根节点html</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">伪类选择器(自定义扩展部分，灵感来自jQuery)</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.tags.html">标签伪类选择器</a>
+                        </td>
+                        <td>:text,
+                            <br/>:file,
+                            <br/>:radio,
+                            <br/>:checkbox,
+                            <br/>:password,
+                            <br/>:submit,
+                            <br/>:image,
+                            <br/>:button,
+                            <br/>:reset,
+                            <br/>:input,
+                            <br/>:header</td>
+                        <td>大部分根据input元素的type值选择，有的根据tagName，header则选择h1~h6元素
+                            <br/>
+                            <span style="color:red">此类伪类不建议使用</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.state.html">selected属性伪类选择器</a>
+                        </td>
+                        <td>:selected</td>
+                        <td>返回选中的option元素</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.visibility.html">hidden伪类选择器</a>
+                        </td>
+                        <td>:hidden</td>
+                        <td>此元素不可见，如本身为hidden表单元素，或display为hidden</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.visibility.html">visible伪类选择器</a>
+                        </td>
+                        <td>:visible</td>
+                        <td>与上面相反</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.parent.html">parent伪类选择器</a>
+                        </td>
+                        <td>:parent</td>
+                        <td>此元素存在子元素</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.contains.html">contains伪类</a>
+                        </td>
+                        <td>p:contains("司徒正美")</td>
+                        <td>元素的文本包含括号中的内容</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <a href="query/query.has.html">has伪类</a>
+                        </td>
+                        <td>p:has(a)</td>
+                        <td>如果p元素有孩子匹配a的这个选择器</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>基本上它除了不支持jQuery的位置伪类（:first, :last, :gt, :lt, :eq, :even, :odd）外，都支持了。jQuery的位置伪类与w3c的选择器规则相悖，因此就算是jQuery
+                , 每次用到位置伪类都特殊处理（详细请看jquery1.7的is与$.event.add的源码）。作为替代，dom Framework提供了first(),
+                last(), gt(), lt(), eq(), even(), odd等切片方法。</p>
+        </article>
+    </body>
+
+</html>

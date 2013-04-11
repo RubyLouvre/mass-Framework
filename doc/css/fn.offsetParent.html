@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.offsetParent</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.offsetParent()</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>返回所有匹配节点的offsetParent所组成的新dom对象。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>寻找类名为tem-a的节点的offsetParent：</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+                &lt;ul class="level-1"&gt;
+                    &lt;li class="item-i"&gt;I&lt;/li&gt;
+                    &lt;li class="item-ii" style="position: relative;  background-color: red;"&gt;II
+                        &lt;ul class="level-2"&gt;
+                            &lt;li class="item-a"&gt;A&lt;/li&gt;
+                            &lt;li class="item-b"&gt;B
+                                &lt;ul class="level-3"&gt;
+                                    &lt;li class="item-1"&gt;1&lt;/li&gt;
+                                    &lt;li class="item-2"&gt;2&lt;/li&gt;
+                                    &lt;li class="item-3"&gt;3&lt;/li&gt;
+                                &lt;/ul&gt;
+                            &lt;/li&gt;
+                            &lt;li class="item-c"&gt;C&lt;/li&gt;
+                        &lt;/ul&gt;
+                    &lt;/li&gt;
+                    &lt;li class="item-iii"&gt;III&lt;/li&gt;
+                &lt;/ul&gt;
+                </pre>
+                <ul class="level-1">
+                    <li class="item-i">I</li>
+                    <li class="item-ii" style="position: relative;  background-color: red;">II
+                        <ul class="level-2">
+                            <li class="item-a">A</li>
+                            <li class="item-b">B
+                                <ul class="level-3">
+                                    <li class="item-1">1</li>
+                                    <li class="item-2">2</li>
+                                    <li class="item-3">3</li>
+                                </ul>
+                            </li>
+                            <li class="item-c">C</li>
+                        </ul>
+                    </li>
+                    <li class="item-iii">III</li>
+                </ul>
+                <pre class="brush:js;gutter:false;toolbar:false">
+            require("ready,css,event", function($) {
+                $("li.item-a").offsetParent().css("background-color", "#FF6347");
+            });
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

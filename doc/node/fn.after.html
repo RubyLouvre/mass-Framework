@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.after</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.after(content)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>在每个匹配的元素之后插入内容。</p>
+            <p>这个操作与对指定的元素执行appendChild方法，将它们添加到文档中的情况类似。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>content</dt>
+                <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，或dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>原mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="container">
+                    <h2>Greetings</h2>
+                    <div class="inner">Hello</div>
+                    <div class="inner">Goodbye</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="container">
+        <h2>Greetings</h2>
+        <div class="inner">Hello</div>
+        <div class="inner">Goodbye</div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$('.container .inner').after('&lt;p&gt;Test&lt;/p&gt;');
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample">
+                    <h2>标题</h2>
+                    <div class="inner">Hello</div>
+                    <p>Test</p>
+                    <div class="inner">Goodbye</div>
+                    <p>Test</p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample">
+        <h2>标题</h2>
+        <div class="inner">Hello</div>
+        <p>Test</p>
+        <div class="inner">Goodbye</div>
+        <p>Test</p>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$('.sample').after($('.sample h2'));
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

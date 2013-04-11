@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.is</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.is( expr )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>判定当前匹配节点是否匹配给定选择器，DOM元素，或者dom对象，如果这些元素至少一个匹配给定的参数，那么返回true。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。CSS表达式，DOM元素，回调函数 或者dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>Boolean</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>不像其他过滤和遍历方法，.is()并不创建一个新实例。相反，它可以让我们测试，而无需修改一个dom对象的内容。这通常是在事件处理程序，如回调，非常有用。</p>
+                <p>假设我们有其包含两个项目的子元素列表：</p>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="sample1">
+        <li>list <strong>item 1</strong></li>
+        <li><span>list item 2</span></li>
+        <li>list item 3</li>
+    </ul>
+    
+</pre>
+                <p>我们可以在UL元素绑定一个点击事件，然后限制的代码只有当列表项目本身时触发，并不是它的孩子之一，被点击：</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$(".sample1").click(function(e) {
+    var $target = $(e.target);
+    if ($target.is("li")) {
+        $target.css("background-color", "red");
+    }
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <p>现在，当在用户点击三个项目中的第一个项目中的单词或任何地方，点击列中的项目将得到一个红色背景。但是，当用户点击 item 1 中的第一项，
+                    或第二项的任何地方，什么都不会发生,因为在这些情况下，事件目标的将分别是&lt;strong&gt; 或者 &lt;span&gt;。</p>
+                <p>而这正是事件代理实现的核心原理！</p>
+                <p>亲手试一下：</p>
+                <ul class="sample1">
+                    <li>list
+                        <strong>item 1</strong>
+                    </li>
+                    <li>
+                        <span>list item 2</span>
+                    </li>
+                    <li>list item 3</li>
+                </ul>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>使用过滤函数，this是当时正在操作的DOM元素。参数有两个,el与this一样，i为el在mass实例的索引值。</P>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="sample2">
+        <li><strong>list</strong> item 1 - one strong tag</li>
+        <li><strong>list</strong> item <strong>2</strong> -two <span>strong tags</span></li>
+        <li>list item 3</li>
+        <li>list item 4</li>
+        <li>list item 5</li>
+    </ul>
+    
+</pre>
+                <p>点击元素在&lt;li&gt;在那个时候，您可以将每一个&lt;li&gt;单击处理程序计算结果&lt;strong&gt;的数量，像这样：</p>
+                <ul
+                class="sample2">
+                    <li>
+                        <strong>list</strong>item 1 - one strong tag</li>
+                    <li>
+                        <strong>list</strong>item
+                        <strong>2</strong>-two
+                        <span>strong tags</span>
+                    </li>
+                    <li>list item 3</li>
+                    <li>list item 4</li>
+                    <li>list item 5</li>
+                    </ul>
+                    <pre class="brush:js;gutter:false;toolbar:false">
+$(".sample2 li").click(function() {
+    var $li = $(this),
+        isWithTwo = $li.is(function() {
+            return $('strong', this).length === 2;
+        });
+    if (isWithTwo) {
+        $li.css("background-color", "green");
+    } else {
+        $li.css("background-color", "red");
+    }
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

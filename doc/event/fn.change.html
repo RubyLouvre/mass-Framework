@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.change</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #show_result,#show_result2,#show_result3 { color:red; }
+            </style>
+            <h3>$.fn.change([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 change 事件绑定一个处理函数，或者触发元素上的 change 事件。</p>
+            <p>这个函数的第一种用法是 .bind('change', handler) 的快捷方式，第二种用法是 .fire('change') 的快捷方式。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset id="first_example">
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,fx", function() {
+    $("#sweets").change(function() {
+        var str = "";
+        $("option:selected", this).each(function() {
+            str += $(this).text() + " ";
+        });
+        $("#show_result").text(str);
+    }).change();
+
+    $('#first_example').delegate('.listOfOptions', 'change', function() {
+        var selected = $(this).find(':selected')
+        if (selected.prop('class') == 'customOption') {
+            $("#show_result2").text(selected.text() + " ！！！");
+        } else {
+            $("#show_result2").text(selected.text());
+        }
+    });
+    $("#checkbox").change(function() {
+        $("#show_result3").text(this.checked)
+    });
+});;
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <select id="sweets" multiple="multiple">
+                    <option>Chocolate</option>
+                    <option selected="selected">Candy</option>
+                    <option>Taffy</option>
+                    <option selected="selected">Caramel</option>
+                    <option>Fudge</option>
+                    <option>Cookie</option>
+                </select>
+                <div id="show_result"></div>
+                <select class="listOfOptions">
+                    <option value="U">时光之轮</option>
+                    <option value="M">冰与火之歌</option>
+                    <option value="C" class="customOption">指环王</option>
+                </select>
+                <div id="show_result2"></div>
+                <input id="checkbox" type="checkbox" />
+                <div id="show_result3"></div>
+            </fieldset>
+            <fieldset id="second_example">
+                <legend>第二例子</legend>
+                <div id="checkboxparent">
+                    <input type="checkbox" />
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+               &lt;div id="checkboxparent"&gt;&lt;input type="checkbox"/&gt;&lt;/div&gt;
+    
+</pre>
+                <pre class="brush:js;gutter:false;toolbar:false">
+var second = 0;
+$('#checkboxparent').delegate('input', 'change', function() {
+    $("&lt;div&gt;" + (++second) + "&lt;/div&gt;").appendTo("#second_example")
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

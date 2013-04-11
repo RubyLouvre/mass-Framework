@@ -1,16 +1,23 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE html>
 <html>
+
     <head>
-        <title></title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>语言扩展模块</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
     </head>
     <body>
-        <div>动画模块</div>
-        <a href="ex.flip.html">flip</a>
-          <a href="ex.fx_neo.html">fx_neo</a>
+        <article>
+            <h3>动画模块</h3>
+            <p>mass Framework包含两个动画引擎，一个是基于JS的fx.js，另一个是基于CSS keyframe animation的fx_neo.js。</p>
+            <p>这两个引擎都实现了启动(fx)，延迟（delay）, 暂停（pause），继续(resume), 停止（stop）,倒带（使用参数revert）效果。</p>
+            <p>可以到这里查看<a href="ex.fx_neo.html">fx_neo</a>引擎的威力 </p>
+           
+        </article>
     </body>
 </html>

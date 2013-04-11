@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.childFilter</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style>
+                pre {
+                    margin:0;
+                    background:#EFEFDA;
+                    color:blue;
+                }
+                h4 {
+                    margin:0;
+                    color:navy;
+                    background:#eee;
+                }
+            
+                #sample3 li{
+                    background:cornsilk;
+                }
+            
+                #sample4 {
+                    width:100%;
+                }
+            
+                #sample5 dt {
+                    font-weight:bolder;
+                }
+                #sample8,[class='only']{
+                    background:#ABD7CB;
+                }
+                table.clicktable {
+                    border-collapse:collapse;
+                    border:#8a6100 1px solid;
+                }
+                table.clicktable th{
+                    border:#8a6100 2px solid;
+                    border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                    color: #ffff00;
+                    background:#e19d00;
+                }
+                table.clicktable td{
+                    border:#8a6100 1px   inset;
+                    background:#EEE8AA;
+                    color:#000;
+                }
+                table.clicktable tr.even td{
+                    background:#FF7F50;
+                    color:#8B4513;
+                }
+            </style>
+            <p>子元素过滤伪类，如lastResult:nth-child(exp)，它是CSS3中新增的结构伪类中最大一种类型，共有十个分支，它根据其父元素的子元素情况进行过滤筛选。</p>
+            <ul>
+                <li>
+                    <span class="list">:nth-child(an+b)</span>如果上次结果集的某个元素是其父元素的第an+b个元素节点，它才会成为这次的结果集的元素返回。
+                    <a
+                    href="https://developer.mozilla.org/en/CSS/:nth-child">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">tag:nth-of-type(an+b)</span>将其父元素的所有tag类型的子元素取出，如果它是属性于第an+b，才会成为这次的结果集的元素返回。
+                    <a
+                    href="https://developer.mozilla.org/en/CSS/:nth-of-type">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">:nth-last-child(an+b)</span>同第一种情况，只不过先把其子元素reverse一下。
+                    <a href="https://developer.mozilla.org/en/CSS/:nth-last-of-type">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">:nth-last-of-type(an+b)</span>同第二种情况，只不过先把其子元素reverse一下。
+                    <a href="https://developer.mozilla.org/en/CSS/:nth-last-of-type">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">:first-child</span>从上次结果集选取那些是它的父元素的第一个子元素（firstElementChild）的元素。
+                    <a href="https://developer.mozilla.org/en/CSS/:first-child">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">:last-child</span>从上次结果集选取那些是它的父元素的最后一个子元素（lastElementChild）的元素。
+                    <a href="https://developer.mozilla.org/en/CSS/:last-child">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">tag:first-of-type</span>从上次结果集选取那些是它的父元素的第一个标签类型为tag的子元素的元素。
+                    <a href="https://developer.mozilla.org/en/CSS/:first-of-type">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">tag:last-of-type</span>从上次结果集选取那些是它的父元素的最后一个标签类型为tag的子元素的元素。
+                    <a href="https://developer.mozilla.org/en/CSS/:last-of-type">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">only-type</span>从上次结果集选取那些是它的父元素的唯一一个子元素的元素。
+                    <a href="http://www.w3.org/TR/css3-selectors/#only-child-pseudo">详见这里</a>
+                </li>
+                <li>
+                    <span class="list">tag:only-of-type</span>从上次结果集选取那些是它的标签类型在其父元素的孩子是唯一的元素。
+                    <a href="https://developer.mozilla.org/en/CSS/:only-of-type">详见这里</a>
+                </li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <table class="clicktable" cellspacing="0" width="700" rules="cols">
+                    <thead>
+                        <tr>
+                            <th>请点击下面表格</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>$("#sample1 li:nth-child(even)").css("background-color","#FF9");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample1 li:nth-child(odd)").css("background-color","#FC3");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample2 li:nth-child(3n+1)").css("background-color","#290");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample2 li:nth-child(3n+2)").css("background-color","#2A2");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample2 li:nth-child(3n+3)").css("background-color","#2A4");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample3 li:nth-child(1)").css("background-color","fuchsia");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample3 li:nth-child(2)").css("background-color","cyan");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample3 li:nth-child(3)").css("background-color","chartreuse");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample4 td:nth-child(3n+1)").css("background-color","#FCC");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample4 td:nth-child(3n+2)").css("background-color","#F99");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample4 td:nth-child(3n+3)").css("background-color","#C6F");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample5 dt:nth-child(odd)").css("background-color","#6CF");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample6 li:nth-last-child(2)").css("background-color","#FF5");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample7 :nth-last-child(2)").css("background-color","#369");</td>
+                        </tr>
+                        <tr>
+                            <td>$("[class='only'] :only-child").css("background-color","#9932cc");</td>
+                        </tr>
+                        <tr>
+                            <td>$("#sample8 :first-of-type").css("background-color","#FF0");</td>
+                        </tr>
+                        <tr>
+                            <td>$("p:only-of-type").css("background-color","#daa520");</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h1>css 3 选择器</h1>
+                <h2>结构伪类(Structural pseudo-classes)</h2>
+                <h3>E:nth-child(n)</h3>
+                <h4>双背景色</h4>
+                <pre>#sample1 li:nth-child(even) { background:#FF9; } #sample1 li:nth-child(odd)
+                    { background:#FC3; }</pre>
+                <ol id="sample1">
+                    <li class="aaa">列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                </ol>
+                <h4>三背景色</h4>
+                <pre>#sample2 li:nth-child(3n+1) { background:#F90; } #sample2 li:nth-child(3n+2)
+                    { background:#Fc3; } #sample2 li:nth-child(3n) { background:#FF9; }</pre>
+                <ol
+                id="sample2">
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    <li>列表项哦列表项</li>
+                    </ol>
+                    <h4>前3名不同显示的排行榜</h4>
+                    <pre>#sample3 li:nth-child(1) { background:fuchsia; } #sample3 li:nth-child(2)
+                        { background:cyan; } #sample3 li:nth-child(3) { background:chartreuse;
+                        }</pre>
+                    <ol id="sample3">
+                        <li>列表项哦列表项</li>
+                        <li>列表项哦列表项</li>
+                        <li>列表项哦列表项</li>
+                        <li>列表项哦列表项</li>
+                        <li>列表项哦列表项</li>
+                        <li>列表项哦列表项</li>
+                    </ol>
+                    <h4>表格的不同列背景色</h4>
+                    <pre>#sample4 td:nth-child(3n+1) { background:#FCC; } #sample4 td:nth-child(3n+2)
+                        { background:#F99; } #sample4 td:nth-child(3n+3) { background:#C6F; }</pre>
+                    <table
+                    id="sample4" border="0" cellpadding="0" cellspacing="0" width="80%">
+                        <caption>表格的不同列背景色</caption>
+                        <tbody>
+                            <tr>
+                                <td>1-1</td>
+                                <td>1-2</td>
+                                <td>1-3</td>
+                            </tr>
+                            <tr>
+                                <td>2-1</td>
+                                <td>2-2</td>
+                                <td>2-3</td>
+                            </tr>
+                            <tr>
+                                <td>3-1</td>
+                                <td>3-2</td>
+                                <td>3-3</td>
+                            </tr>
+                            <tr>
+                                <td>4-1</td>
+                                <td>4-2</td>
+                                <td>4-3</td>
+                            </tr>
+                        </tbody>
+                        </table>
+                        <h4>所有子元素</h4>
+                        <pre>#sample5 dt:nth-child(odd){ background:#6CF; }</pre>
+                        <dl id="sample5">
+                            <dt>dt 1,总排行1</dt>
+                            <dd>dd 1,总排行2</dd>
+                            <dt>dt 2,总排行3</dt>
+                            <dd>dd 2,总排行4</dd>
+                            <dd>dd 3,总排行5</dd>
+                            <dt>dt 3,总排行6</dt>
+                            <dt>dt 4,总排行7</dt>
+                            <dd>dd 4,总排行8</dd>
+                        </dl>
+                        <pre>#sample6 li:nth-last-child(2) { background:#FF9; }</pre>
+                        <ol id="sample6">
+                            <li>倒数第4个li</li>
+                            <li>倒数第3个li</li>
+                            <li>倒数第2个li</li>
+                            <li>倒数第1个li</li>
+                        </ol>
+                        <pre>#sample7 :nth-last-child(2) { background:#369; }</pre>
+                        <ol id="sample7">
+                            <li>倒数第4个li</li>
+                            <li>倒数第3个li</li>
+                            <li>倒数第2个li</li>
+                            <li>倒数第1个li</li>
+                        </ol>
+                        <pre>[class='only'] :only-child{ background:#9932cc; }</pre>
+                        <div class="only">它有一个文本节点</div>
+                        <div class="only">
+                            <span>它有一个元素节点</span>
+                        </div>
+                        <pre>#sample8 p:first-of-type{ background:#FF0; }</pre>
+                        <ul id="sample8">
+                            <li>匹配同级兄弟元素中的第一个E元素</li>
+                            <li>匹配同级兄弟元素中的第一个E元素</li>
+                            <li>匹配同级兄弟元素中的第一个E元素</li>
+                            <li>匹配同级兄弟元素中的第一个E元素</li>
+                            <li>匹配同级兄弟元素中的第一个E元素</li>
+                        </ul>
+                        <div style="width:733px; border: 1px solid #666; padding:5px;">
+                            <div>
+                                <p>匹配属于同类型中唯一兄弟元素的E</p>
+                            </div>
+                            <div>
+                                <p>匹配属于同类型中唯一兄弟元素的E</p>
+                                <p>匹配属于同类型中唯一兄弟元素的E</p>
+                            </div>
+                        </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

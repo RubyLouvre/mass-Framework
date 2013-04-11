@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.height</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.height( [val])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得或设置匹配节点的高。</p>
+            <p>此方法是属性于get one set all操作，根据传入参数决定其是读操作还是写操作。</p>
+            <p>如果没有参数，则读取第一个元素的height，并返回。</p>
+            <p>如果存在参数，通过它设置所有元素的height,并返回原实例。</p>
+            <p>.css('height') 和 .height()之间的区别是后者返回一个没有单位的数值（例如，400），前者是返回带有完整单位的字符串（例如，400px）。当一个元素的高度需要数学计算的时候推荐使用.height()
+                方法 。</p>
+            <p>
+                <span class="note">如果没有设置单位，默认为px。</span>
+            </p>
+            <p>
+                <span class="note">它可以获取隐藏元素的高。</span>
+            </p>
+            <p>w3c的盒子模型</p>
+            <script>
+                document.write('<img src="' + $$path + '/doc/images/css/w3c_height.png" />');
+            </script>
+            <fieldset>
+                <legend>例子</legend>
+                <button id="getp">取得测试段落的高</button>
+                <button id="getd">取得当前文档对象（页面）的高</button>
+                <button id="getw">取得当前窗口的高</button>
+                <div id="show_result">&nbsp;</div>
+                <p id="test_p">这是测试的小白鼠</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    function showHeight(ele, h) {
+        $("#show_result").text(ele + h + "px.");
+    }
+    $("#getp").click(function() {
+        showHeight("段落的高为", $("#test_p").height());
+    });
+    $("#getd").click(function() {
+        showHeight("页面的高为", $(document).height());
+    });
+    $("#getw").click(function() {
+        showHeight("窗口的高为", $(window).height());
+    });
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>点击每个div时设置该div高度为30px，并改变颜色。</p>
+                <div id="sample2">
+                    <div></div>
+                    <div class="div2"></div>
+                    <div class="div3"></div>
+                </div>
+                <style>
+                    #sample2{
+                        height:130px;
+                    }
+                    #sample2 div {
+                        width:50px;
+                        height:70px;
+                        float:left;
+                        margin:5px;
+                        background:rgb(255,140,0);
+                        cursor:pointer;
+                    }
+                    #sample2 .div2{
+                        height:100px;
+                    }
+                    #sample2 .div3{
+                        height:120px;
+                    }
+                </style>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#aligning").click(function() {
+    $("#sample2 div").height(60).css("backgroundColor", "#a9ea00");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

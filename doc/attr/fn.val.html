@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.val</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.val( [ stringOrArray ] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对表单元素进行取值赋值操作。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <ul>
+                <li>如果没有参数，将取得第一个匹配元素的value值，对于 &lt;select multiple="multiple"&gt; 元素, 返回一个包含每个选中的option
+                    的值的数组。</li>
+                <li>如果value为一个字符串，则对所有匹配元素赋以此值。</li>
+                <li>如果value为一个数组，则对匹配元素依次进行赋值，在赋值的同时还可能会改变selected、checked这样的状态值。</li>
+            </ul>
+            <fieldset>
+                <legend>例子</legend>
+                <form action="">
+                    <select id="select1">
+                        <option value="volvo">第一个</option>
+                        <option value="saab">第二个</option>
+                        <option value="mercedes" selected>第三个</option>
+                        <option value="audi">第四个</option>
+                    </select>
+                    <select id="select2" multiple>
+                        <option>第1个</option>
+                        <option selected>第2个</option>
+                        <option selected>第3个</option>
+                        <option>第4个</option>
+                    </select>
+                </form>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <form action="">
+        <select id="select1">
+            <option value="volvo">第一个</option>
+            <option value="saab">第二个</option>
+            <option value="mercedes" selected>第三个</option>
+            <option value="audi">第四个</option>
+        </select>
+        <select id="select2" multiple>
+            <option>第1个</option>
+            <option selected>第2个</option>
+            <option selected>第3个</option>
+            <option>第4个</option>
+        </select>
+    </form>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.log($("#select1").val(), true);
+$.log($("#select2").val(), true);
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <input name="hotspring" type="checkbox" value="男汤">男汤
+                <input name="hotspring" type="checkbox" value="女汤" checked>女汤
+                <input name="hotspring" type="checkbox" value="木下秀吉汤">木下秀吉汤
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <input name="hotspring" type="checkbox" value="男汤" >男汤
+    <input name="hotspring" type="checkbox" value="女汤" checked >女汤
+    <input name="hotspring" type="checkbox" value="木下秀吉汤" >木下秀吉汤
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.log($(":checkbox").val(), true)
+</pre>
+                <button class="doc_btn" onclick="exec2()">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <div id="example3">
+                    <button>おおかみかくし</button>
+                    <button>ソ·ラ·ノ·ヲ·ト</button>
+                    <button>君に届け</button>
+                    <br/>
+                    <input type="text" value="一月新番" />
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div id="example3">
+        <button>おおかみかくし</button>
+        <button>ソ·ラ·ノ·ヲ·ト</button>
+        <button>君に届け</button><br/>
+        <input type="text" value="一月新番" />
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,attr", function() {
+    $("#example3 :button").click(function() {
+        var text = $(this).text();
+        $("#example3 :text").val(text);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>我们可以通过赋值勤改变控件的selected或checked的状态。</p>
+                <form id="form4" action="">
+                    <select id="single">
+                        <option>Single</option>
+                        <option>Single2</option>
+                        <option>Single3</option>
+                        <option>Single4</option>
+                    </select>
+                    <select id="multiple" multiple="multiple">
+                        <option selected="selected">Multiple</option>
+                        <option>Multiple2</option>
+                        <option selected="selected">Multiple3</option>
+                    </select>
+                    <input type="checkbox" name="checkboxname" value="check1" />check1
+                    <input type="checkbox" name="checkboxname" value="check2" />check2
+                    <input type="radio" name="r" value="radio1" />radio1
+                    <input type="radio" name="r" value="radio2" />radio2</form>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+     <form id="form4" action="">
+        <select id="single">
+            <option>Single</option>
+            <option>Single2</option>
+            <option>Single3</option>
+            <option>Single4</option>
+        </select>
+        <select id="multiple" multiple="multiple">
+            <option selected="selected">Multiple</option>
+            <option>Multiple2</option>
+            <option selected="selected">Multiple3</option>
+        </select>
+        <input type="checkbox" name="checkboxname" value="check1"/> check1
+        <input type="checkbox" name="checkboxname" value="check2"/> check2
+        <input type="radio"  name="r" value="radio1"/> radio1
+        <input type="radio"  name="r" value="radio2"/> radio2
+    </form>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#single").val("Single3");
+$("#multiple").val(["Multiple2", "Multiple3"]);
+$("#form4 input").val(["check1", "check2", "radio1"]);
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

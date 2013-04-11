@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.parents</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.parents([ expr ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>把匹配元素的所有祖先收集起来，去重排序组成新mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>可选，String，用于进一步过滤的CSS选择器。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>显示.sample1的所有孩子的层次关系</p>
+                <div class="sample1" style="background:#ffe0bb;color:#000;">
+                    <div>
+                        <p>
+                            <span>
+                                <kbd id="kbd">显示其所有祖先:</kbd>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+    &lt;div class="sample1" style="background:#ffe0bb;color:#000;"&gt;
+        &lt;div&gt;
+            &lt;p&gt;
+                &lt;span&gt;
+                    &lt;kbd &gt;显示其所有祖先: &lt;/kbd&gt;
+                &lt;/span&gt;
+            &lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    
+                </pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+require("ready,node", function($) {
+    var self = $("#kbd");
+    var tags = self.parents().map(function() {
+        return this.tagName.toLowerCase();
+    }).get()
+    self.append("&lt;strong style='color:red;'&gt;" + tags.join(", ") + "&lt;/strong&gt;");
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

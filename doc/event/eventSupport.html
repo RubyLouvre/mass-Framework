@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.eventSupport</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.eventSupport(type, [el])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于判定引元素节点是否支持某事件,默认是使用HTML元素做检测，但对于input事件，需要用input元素做检测， submit事件需要form元素做检测， 而且此方法只能检测DOM0事件，对于DOMAttrModified， animationend, transitionend等高级事件无效。
+            </p>
+        </article>
+    </body>
+
+</html>

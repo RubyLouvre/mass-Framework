@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.cssName</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.cssName(name)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>用于取得正确可用的样式名称，在现代浏览器中，它们私自下实现了许多CSS3属性，都未必都能成为标准，因此都带着-moz-，-webkit-，-o-这样的前缀。本方法就是专门用于取得这样方法名。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>name</dt>
+                <dd>必需。String。必须是连字符风格</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>一个驼峰风格的样式名或null</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+//-ms-interpolation-mode: bicubic （可以让IE7的图片在有缩放的情况下，失真变得不怎样明显）
+$.require("ready,node,css", function() {
+    $.log($.cssName("interpolation-mode"), true)
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>

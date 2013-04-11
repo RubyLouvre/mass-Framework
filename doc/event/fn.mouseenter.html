@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.mouseenter</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 {
+                    color:#000;
+                    height:150px;
+                    background: #3671a5;
+                    padding: 5px;
+                }
+                div.out {
+                    width:40%;
+                    height:120px;
+                    margin:0 10px;
+                    background-color:#D6EDFC;
+                    float:left;
+                }
+                div.in {
+                    width:60%;
+                    height:60%;
+                    background-color:#FFCC00;
+                    margin:10px auto;
+                }
+                #red {
+                    width: 150px;
+                    height: 150px;
+                    background: red;
+                    padding:20px;
+                }
+                #blue {
+                    width: 100px;
+                    height: 100px;
+                    background: blue;
+                }
+            </style>
+            <h3>$.fn.mouseenter([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 mouseenter（鼠标进入） 事件绑定一个处理函数，或者触发元素上的 mouseenter（鼠标进入） 事件。</p>
+            <p>这个函数的第一种用法是 .bind('mouseenter', handler) 的快捷方式，第二种用法是 .fire('mouseenter')
+                的快捷方式。</p>
+            <p>mouseenter事件原来是IE专有事件，由于在许多场合中，我们需要的是mouseenter的效果,而不是mouseover的效果，因此dom
+                Framework通过事件冒充，让其在所有浏览器通用。</p>
+            <p>opera11也支持mouseenter与mouserleave事件,同时它们也成为w3c DOM3 Event的规范， 详情可查看
+                <a href="http://www.filehippo.com/pl/download_opera/changelog/9476/">这里</a>与
+                <a href="http://dev.w3.org/2006/webapi/DOM-Level-3-Events/html/DOM3-Events.html">这里</a>
+            </p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <p>我们想象一下这样一个HTML结构</p>
+            <pre class="brush:xml;gutter:false;toolbar:false">
+
+            &lt;div&gt;
+                &lt;p&gt;
+                    &lt;span&gt;
+                        &lt;a&gt;
+                            mouse over me
+                        &lt;/a&gt;
+                    &lt;/span&gt;
+                &lt;/p&gt;
+            &lt;/div&gt;
+
+</pre>
+            <p>如果从CSS来考查，越内部的元素其实是越放到前面，相当于垒叠在其外面的元素之上。 这种隐藏的z-index关系，把内部元素与其祖先形成了一种奇特的梯形的金字塔结构：</p>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig0.png" />
+            </center>
+            <p>好了，我们现在把hover事件绑定在div上。</p>
+            <pre class="brush:js;gutter:false;toolbar:false">
+$("div").hover(function(e) {
+    $.log([e.type, e.target]);
+}, function(e) {
+    $.log([e.type, e.target]);
+});
+</pre>
+            <p>假如我们的hover是使用经典的mouseover/mouseout实现的，那么它的结果显示如下（我们用箭头表示鼠标移动）：</p>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig1.png" />
+            </center>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig2.png" />
+            </center>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig3.png" />
+            </center>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig4.png" />
+            </center>
+            <p>这当中发生了许多没必要的事件，如已进入到P元素或已离开P元素，而hover函数本意是让我们知道鼠标是否进入或离开DIV元素。 那么让我们用mouseenter/mouseleave看看：</p>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig5.png" />
+            </center>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig6.png" />
+            </center>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig7.png" />
+            </center>
+            <center>
+                <img src="/styles/event_dom_fn_mouseenter_zig8.png" />
+            </center>
+            <p>由此可见，mouseenter与mouseover区别在于：在元素内部移动时mouseenter不会触发，其原因在于它不会冒泡。明白这一点，
+                我们通过mouseover阻止冒泡也能成功模拟mouseenter事件了。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample1">
+                    <div class="out overout">
+                        <p>move your mouse</p>
+                        <div class="in overout">
+                            <p>move your mouse</p>
+                            <p>0</p>
+                        </div>
+                        <p>0</p>
+                    </div>
+                    <div class="out enterleave">
+                        <p>move your mouse</p>
+                        <div class="in enterleave">
+                            <p>move your mouse</p>
+                            <p>0</p>
+                        </div>
+                        <p>0</p>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $("#red").bind("mouseenter", function(e) {
+        $("#blue").text(e.type)
+    });
+    $("#red").bind("mouseleave", function(e) {
+        $("#blue").text(e.type)
+    });
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="red">
+                    <div id="blue"></div>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

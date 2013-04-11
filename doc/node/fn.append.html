@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.append</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.append(content)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>向每个匹配的元素内部追加内容。</p>
+            <p>这个操作与对指定的元素执行appendChild方法，将它们添加到文档中的情况类似。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>content</dt>
+                <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，CSS选择器或dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>原mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="container">
+                    <div class="inner">司徒正美</div>
+                    <div class="inner">司徒正美</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="container">
+        <div class="inner">司徒正美</div>
+        <div class="inner">司徒正美</div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$(".inner").append('<strong>(しとうなさみ)</strong>')
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$(".inner").append('&lt;em&gt;aaa&lt;/em&gt;&lt;script&gt;alert("内嵌脚本")&lt;\/script&gt;');
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p id="aaa">
+                    <strong>Ruby Louvre</strong>
+                </p>
+                <p id="bbb">我的博客名为:</p <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <p id="aaa"><strong>Ruby Louvre</strong></p>
+    <p id="bbb">我的博客名为: </p
+    
+</pre>
+                <pre
+                class="brush:javascript;gutter:false;toolbar:false">
+$("#bbb").append($("#aaa strong"));
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

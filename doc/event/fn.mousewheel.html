@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.mousewheel</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 { padding: 10px; width: 400px; height: 80px; border: 1px solid #000; background: #fcfcfc;color:#000; }
+                #show_area {display:none;}
+                #show_more {color:red}
+            </style>
+            <h3>$.fn.mousewheel([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 mousewheel 事件绑定一个处理函数，或者触发元素上的mousewheel 事件。</p>
+            <p>这个函数的第一种用法是 .bind('mousewheel', handler) 的快捷方式，第二种用法是 .fire('mousewheel')
+                的快捷方式。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <p>此方法已做跨浏览器处理，请放心使用。
+                <span id="show_more">点我显示更多</span>
+            </p>
+            <ul id="show_area">
+                <li>在FF下使用DOMMouseScroll冒充，不过在回调函数中e.type修正为mousewheel</li>
+                <li>事件对象中表示滚动距离的属性统一为wheelDelta（FF原为detail，此属性并没有删除，不过多出wheelDelta属性）</li>
+                <li>在opera 9往上滚是wheelDelta负数下使用DOMMouseScroll模拟，不过在回调函数中e.type修正为mousewheel</li>
+                <li>统一往上滚为正数，向下滚为负数，滚一圈的移动单位为120。</li>
+                <li>修正safari浮点数BUG</li>
+            </ul>
+            <p>详见这里：
+                <a href="http://www.w3help.org/zh-cn/causes/SD9015">http://www.w3help.org/zh-cn/causes/SD9015</a>
+            </p>
+            <fieldset>
+                <legend>例子</legend>
+                <p class="sample1">请在这里滚动鼠标滑轮
+                    <br/>
+                </p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var counterDelta = 0;
+    $(".sample1").mousewheel(function(e) {
+        counterDelta += e.wheelDelta;
+        this.innerHTML = counterDelta + ": " + (e.wheelDelta < 0 ? '向下滚 ' : '向上滚 ') + e.type;
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

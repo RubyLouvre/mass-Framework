@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.prop</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.prop( name, [val] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>对元素节点的固有属性进行读写操作。</p>
+            <p>
+                <span class="note">元素节点的固有属性是无法删除的，只能还原为初始值</span>，如className属性的初始值为空字符串， 布尔属性为false, form元素的method属性为get,
+                input元素的type属性为text, script元素的type属性为text/script, style元素的media属性为all....
+                因此对于表单元素的checked, selected, disabled, readonly等属性操作，我们应该使用prop方法而不是attr方法。</p>
+            <pre
+            class="brush:js;gutter:false;toolbar:false">
+accept, accept - charset, align, alink, axis,
+bgcolor, charset, checked, class, clear, codetype, color,
+compact, declare, defer, dir, direction, disabled,
+enctype, face, frame, hreflang, http - equiv, lang,
+language, link, media, method, multiple, nohref,
+noresize, noshade, nowrap, readonly, rel, rev,
+rules, scope, scrolling, selected, shape, target,
+text, type, valign, valuetype, vlink
+</pre>
+                <p>
+                    <span class="stress">参数：</span>
+                </p>
+                <ul>
+                    <li>如果只有一个字符串参数，则对第一个匹配节点进行读取操作。</li>
+                    <li>如果有两个参数，第一个为字符串，第二个参数不为null, 则对所有匹配节点进行赋值操作，如果第二个参数为null则进行移除属性的操作。</li>
+                    <li>如果只有一个对象参数，则依取取得里面的键值对，对所有匹配节点进行多个赋值操作。</li>
+                </ul>
+                <fieldset>
+                    <legend>例子</legend>
+                    <p>为页面中所有img元素设置一些属性。</p>
+                    <div class="sample1">
+                        <input type="checkbox" checked="checked">
+                        <label for="check1">点我</label>
+                        <div></div>
+                    </div>
+                    <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        <input type="checkbox" checked="checked">
+        <label for="check1">点我</label>
+        <div></div>
+    </div>
+    
+</pre>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr,event", function() {
+    $(".sample1 input").change(function() {
+        var $input = $(this);
+        $(".sample1 div").html(".attr('checked'): &lt;b&gt;" + $input.attr('checked') + "&lt;/b&gt;&lt;br&gt;" + ".prop('checked'): &lt;b&gt;" + $input.prop('checked') + "&lt;/b&gt;&lt;br&gt;")
+    }).change();
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+                <fieldset>
+                    <legend>例子</legend>
+                    <div class="sample2">
+                        <input type="checkbox" checked="checked" />
+                        <input type="checkbox" />
+                        <input type="checkbox" />
+                        <input type="checkbox" checked="checked" />
+                    </div>
+                    <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample2">
+        <input type="checkbox" checked="checked" />
+        <input type="checkbox" />
+        <input type="checkbox" />
+        <input type="checkbox"  checked="checked" />
+    </div>
+    
+</pre>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr", function() { //禁用复选框
+    $(".sample2 input[type='checkbox']").prop({
+        disabled: true
+    });
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                    <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr", function() { //启用复选框
+    $(".sample2 input[type='checkbox']").prop({
+        disabled: false
+    });
+});
+</pre>
+                    <button class="doc_btn" type="button">点我，执行代码</button>
+                </fieldset>
+        </article>
+    </body>
+
+</html>
+</article>
+</body>
+
+</html>

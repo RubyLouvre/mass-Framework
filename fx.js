@@ -74,7 +74,6 @@ define("fx", ["css"], function($) {
         opts.queue = !! (opts.queue == null || opts.queue); //默认进行排队
         opts.easing = $.easing[opts.easing] ? opts.easing : "swing";
         opts.update = true;
-        opts.method = "noop"
         return opts;
     }
 
@@ -342,7 +341,7 @@ define("fx", ["css"], function($) {
             callback(fx, node, "before"); //动画开始前做些预操作
             fx.props && parseFrames(fx.node, fx, index); //parse原始材料为关键帧
             fx.props = fx.props || [];
-            AnimationPreproccess[fx.method](node, fx); //parse后也要做些预处理
+            AnimationPreproccess[fx.method || "noop"](node, fx); //parse后也要做些预处理
             fx.startTime = now;
         } else { //中间自动生成的补间
             var per = (now - fx.startTime) / fx.duration;
@@ -608,5 +607,12 @@ define("fx", ["css"], function($) {
  http://tmlife.net/tag/enchant-js
  GSAP JS, 出自GreenSock的JS动效库，绝对不能错过。包括TweenLite，TweenMax，TimelineLite和TimelineMax，号称比jQuery快20倍！
  http://www.greensock.com/gsap-js/
-
+ 教主Franky(449666) 2013-03-25 14:32:10
+ 说实话,还是html5描述的 spin 模型 给力
+ 教主Franky(449666) 2013-03-25 14:32:30查看前后消息
+ 有兴趣的话 也可以把自己的 事件系统 实现成 spin模型的样子.
+ 司徒正美/mg(1669866773) 2013-03-25 14:32:33
+ 什么spin模型,求地址
+ 教主Franky(449666) 2013-03-25 14:34:37
+ 旋转到一个弹槽,射出一个子弹. spin模型是,旋转到一个队列, 处理n个事物, 不同的队列有不同的权重. 权重高的, 一次处理的事务 比别的多
  */

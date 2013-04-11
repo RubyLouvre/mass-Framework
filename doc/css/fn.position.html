@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.position</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #parent{
+                    position:relative;
+                    margin:10px;
+                    border:10px solid #FFDAB9;
+                    padding:8px;
+                    width:200px;
+                    height:200px;
+                    background:red;
+                }
+                #son{
+                    position:absolute;
+                    margin:20px;
+                    border:5px solid #FF83FA;
+                    padding:10px;
+                    width:50px;
+                    height:50px;
+                    background:#FF34B3;
+                }
+                .copy{
+                    background:blue!important;
+                    color:white;
+                }
+            </style>
+            <h3>$.fn.position()</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得第一个元素相对其offsetParent的坐标。</p>
+            <p>更详细地说，从此元素的margin的外边沿到offsetParent的padding的外边沿，如果offsetParent就是它的父节点，那么其position即简化为其
+                父节点的paddingLeftWidth与paddingTopWidth。</p>
+            <p>
+                <span class="note">这只是一个读方法。</span>
+            </p>
+            <p>
+                <span class="note">它也不支持获取隐藏元素的偏移坐标。</span>
+            </p>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>一个包含top与left属性的对象。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div id="parent">
+                    <div id="son"></div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div id="parent">
+        <div id="son">
+
+        </div>
+    </div>
+    
+</pre>
+                <pre class="brush:css;gutter:false;toolbar:false">
+
+            #parent {
+
+                position:relative;
+
+                margin:10px;
+
+                border:10px solid #FFDAB9;
+
+                padding:8px;
+
+                width:200px;
+
+                height:200px;
+
+                background:red;
+
+            }
+
+            #son {
+
+                position:absolute;
+
+                margin:20px;
+
+                border:5px solid #FF83FA;
+
+                padding:10px;
+
+                width:50px;
+
+                height:50px;
+
+                background:#FF34B3;
+
+            }
+
+            .copy {
+
+                background:blue!important;
+
+                color:white;
+
+            }
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css,event", function() {
+    var el = $("#son");
+    var parent = el.offsetParent();
+    var position = el.position();
+    el.clone(true).addClass("copy").appendTo(parent).css({
+        top: position.top, //让拷贝能完全覆盖原节点
+        left: position.left
+    }).html(position.left + " * " + position.top)
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <img src="styles/doc/css_position.jpg" />
+            </fieldset>
+        </article>
+    </body>
+
+</html>

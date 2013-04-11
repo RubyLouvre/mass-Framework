@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>query.visibility</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+        <style type="text/css">
+            ul{
+                list-style-image: url(../public/images/li.gif)
+            }
+            .list {
+                color:#FF6363;
+                font-weight:bolder;
+            }
+            table.clicktable {
+                border-collapse:collapse;
+                border:#8a6100 1px solid;
+            }
+            table.clicktable th{
+                border:#8a6100 2px solid;
+                border-color:  #ffe3a4 #ffe3a4 #8a6100 #8a6100;
+                color: #ffff00;
+                background:#e19d00;
+            }
+            table.clicktable td{
+                border:#8a6100 1px   inset;
+                background:#EEE8AA;
+                color:#000;
+            }
+            table.clicktable tr.even td{
+                background:#FF7F50;
+                color:#8B4513;
+            }
+        </style>
+        <script type="text/javascript">
+            $(function(){
+                $("body").delegate(".clicktable tbody td","click",function(){
+                    var input =  $("input[type=checkbox]:first")
+                    if(input.length){
+                        input[0].indeterminate = true;
+                    }
+                    var code = $.String.unescapeHTML( this.innerHTML )
+                    $.parseJS( code );
+                });
+            })
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #show_result {
+                    color:red;
+                    font-weight: bolder;
+                }
+            </style>
+            <p>可见性伪类。:hidden为不可见，:visible为可见。不可见的标准为长宽都为零或者为input[type=hidden]或者display为none。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <table class="sample" border="1">
+        <tr><td style="display:none">表格1</td></tr>
+        <tr><th>表格2</th></tr>
+    </table>
+    <form class="sample" action="">
+        <input type="text" name="email" />
+        <input type="hidden" name="id" />
+    </form>
+    
+</pre>
+                <table class="sample" border="1">
+                    <tr>
+                        <td style="display:none">表格1</td>
+                    </tr>
+                    <tr>
+                        <th>表格2</th>
+                    </tr>
+                </table>
+                <form class="sample" action="">
+                    <input type="text" name="email" />
+                    <input type="hidden" name="id" />
+                </form>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var highlight1 = function() {
+    var str = " .sample中不可见的元素有 : "
+    var array = $(".sample :hidden").collect(function(el) {
+        return "&lt;" + el.tagName.toLowerCase() + (el.type ? " " + el.type : "") + "/&gt;";
+    });
+    $("#show_result").text(str + array.join(" , "));
+}
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var highlight2 = function() {
+    var str = " .sample中可见的元素有 : "
+    var array = $(".sample :visible").collect(function(el) {
+        return "&lt;" + el.tagName.toLowerCase() + (el.type ? " " + el.type : "") + "/&gt;";
+    });
+    $("#show_result").text(str + array.join(" , "));
+}
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <div id="show_result"></div>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.replaceClass</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample{
+                    border:1px solid #00CED1;
+                    padding: 1em;
+                }
+                .selected {
+                    background:#8B0000;
+                }
+            </style>
+            <h3>$.fn.replaceClass( old, neo )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>如果匹配元素存在old类名则将它替换为neo类名，不存在则不会做任何操作的。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>old</dt>
+                <dd>必须。String。要替换掉的类名。</dd>
+                <dt>neo</dt>
+                <dd>必须。String。用来替换的新类名。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample">请点击它</div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event,attr", function() {
+    $(".sample").click(function() {
+        $(this).replaceClass("sample", "selected");
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

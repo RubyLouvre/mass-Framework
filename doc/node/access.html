@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>$.access</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+
+    </head>
+    <body>
+    <article>
+        <h3>$.access(elems, key, value, getter, setter )</h3>
+        <p><span class="stress">描述：</span></p>
+        <p>框架内部用于处理attr, prop, data, html, outerHTML, css等方法的读写操作，采取jQuery式的set all get first策略。</p>
+        <p><span class="stress">参数：</span></p>
+        <dl>
+            <dt>elems</dt>
+            <dd>必需，元素节点集合，一般为mass的节点链对象。</dd>
+            <dt>key</dt>
+            <dd>需要访问的属性名，像html这样的方法，一看就知是访问innerHTML属性,
+                val是访问表单元素的value属性, 它可以在其他函数类型的参数中设置。如果它是一个对象，则说明这是一个写方法，
+                同时为所有选中的元素设置多个属性。
+            </dd>
+            <dt>value</dt>
+            <dd>如果key不为对象，那由本参数是否为undefined，决定是写方法还是读方法。</dd>
+            <dt>getter</dt>
+            <dd>Function，读方法的具体操作，依次传入某一元素，第二个参数。</dd>
+            <dt>setter</dt>
+            <dd>Function，读方法的具体操作，依次传入某一元素，第二个参数，第三个参数，如果不存在使用getter参数代替。</dd>
+        </dl>
+
+
+    </article>
+</body>
+</html>

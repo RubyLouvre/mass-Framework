@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.text</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.text(val)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>采用get one set all方法操作节点里面的文本。也就是说，如果没有参数，则返回第一个元素节点的文本，否则更新所有匹配节点的文本为val，然后返回实例本身。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>val</dt>
+                <dd>可选。String。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="test"></div>
+                <div class="test"></div>
+                <div class="test"></div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    $(".test").text('&lt;span style="color:red"&gt;司徒正美&lt;/span&gt;')
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

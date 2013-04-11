@@ -6,229 +6,34 @@ define("api", ["mass"], function() {
                 "String.capitalize, String.escapeHTML, String.unescapeHTML,String.stripTags,String.stripScripts,String.pad," +
                 "Array.clone,Array.contains,Array.remove,Array.removeAt,Array.shuffle,Array.random,Array.min,Array.max,Array.pluck,Array.sortBy," +
                 "Array.compact,Array.diff,Array.merge,Array.union,Array.intersect,Array.unique,Array.ensure,Array.inGroupsOf,Array.flatten," +
-                "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge,Object.without," +
+                "Number.limit,Number.nearer,Number.round,Object.subset,Object.forEach,Object.map,Object.clone,Object.merge," +
                 "isPlainObject,isNative,isEmptyObject,isArrayLike,format,range,quote,dump,parseJS,parseJSON,parseXML,isArray,isFunction,each,map").match($.rword).sort(),
         "class": ["factory"],
-        "节点模块": {
-            "fn": {
-                "init": "function",
-                "mass": "number",
-                "length": "number",
-                "valueOf": "function",
-                "toString": "function",
-                "slice": "function",
-                "get": "function",
-                "eq": "function",
-                "gt": "function",
-                "lt": "function",
-                "first": "function",
-                "even": "function",
-                "odd": "function",
-                "last": "function",
-                "each": "function",
-                "map": "function",
-                "collect": "function",
-                "clone": "function",
-                "html": "function",
-                "text": "function",
-                "push": "function",
-                "unshift": "function",
-                "pop": "function",
-                "shift": "function",
-                "splice": "function",
-                "sort": "function",
-                "reverse": "function",
-                "remove": "function",
-                "empty": "function",
-                "append": "function",
-                "appendTo": "function",
-                "prepend": "function",
-                "prependTo": "function",
-                "before": "function",
-                "beforeTo": "function",
-                "after": "function",
-                "afterTo": "function",
-                "replace": "function",
-                "replaceTo": "function",
-                "data": "function",
-                "removeData": "function",
-                "find": "function",
-                "filter": "function",
-                "not": "function",
-                "is": "function",
-                "has": "function",
-                "closest": "function",
-                "index": "function",
-                "parent": "function",
-                "parents": "function",
-                "parentsUntil": "function",
-                "next": "function",
-                "nextAll": "function",
-                "nextUntil": "function",
-                "prev": "function",
-                "prevAll": "function",
-                "prevUntil": "function",
-                "children": "function",
-                "siblings": "function",
-                "contents": "function"
-            },
-            "implement": "function",
-            "extend": "function",
-            "match": "function",
-            "parseHTML": "function"
-        },
+         newland: [],
+        node: ("fn.after,fn.afterTo,fn.append,fn.appendTo,fn.before,fn.beforeTo,fn.children," +
+                "fn.clone,fn.closest,fn.collect,fn.contents,fn.data,fn.each,fn.empty,fn.eq," +
+                "fn.even,fn.filter,fn.find,fn.first,fn.get,fn.gt,fn.has,fn.html,fn.index,fn.init," +
+                "fn.is,fn.last,fn.length,fn.lt,fn.map,fn.mass,fn.next,fn.nextAll,fn.nextUntil," +
+                "fn.not,fn.odd,fn.parent,fn.parents,fn.parentsUntil,fn.pop,fn.prepend," +
+                "fn.prependTo,fn.prev,fn.prevAll,fn.prevUntil,fn.push,fn.remove,fn.removeData," +
+                "fn.replace,fn.replaceTo,fn.reverse,fn.shift,fn.siblings,fn.slice,fn.sort," +
+                "fn.splice,fn.text,fn.toString,fn.unshift,fn.valueOf,fn.extend,match,parseHTML,cssName").match($.rword).sort(),
         query: "isXML,contains,getText,unique,query".match($.rword).sort(),
-        "数据缓存模块": {
-            "data": "function",
-            "parseData": "function",
-            "removeData": "function",
-            "mergeData": "function"
-        },
-        "样式模块": {
-            "fn": {
-                "css": "function",
-                "width": "function",
-                "height": "function",
-                "innerWidth": "function",
-                "innerHeight": "function",
-                "outerWidth": "function",
-                "outerHeight": "function",
-                "offset": "function",
-                "position": "function",
-                "offsetParent": "function",
-                "scrollParent": "function",
-                "scrollLeft": "function",
-                "scrollTop": "function"
-            },
-            "cssName": "function",
-            "scrollbarWidth": "function",
-            "css": "function"
-        },
-        "属性模块": {
-            "fn": {
-                "addClass": "function",
-                "hasClass": "function",
-                "removeClass": "function",
-                "toggleClass": "function",
-                "replaceClass": "function",
-                "val": "function",
-                "removeAttr": "function",
-                "removeProp": "function",
-                "attr": "function",
-                "prop": "function",
-                "class": "function"
-            },
-            "attr": "function",
-            "prop": "function",
-            "attrMap": "object",
-            "propMap": "object",
-            "_remove_attr": "function",
-            "propAdapter": "object",
-            "valAdapter": "object"
-        },
-        "事件模块": {
-            "fn": {
-                "on": "function",
-                "bind": "function",
-                "off": "function",
-                "unbind": "function",
-                "toggle": "function",
-                "hover": "function",
-                "delegate": "function",
-                "live": "function",
-                "one": "function",
-                "undelegate": "function",
-                "die": "function",
-                "fire": "function",
-                "contextmenu": "function",
-                "click": "function",
-                "dblclick": "function",
-                "mouseout": "function",
-                "mouseover": "function",
-                "mouseenter": "function",
-                "mouseleave": "function",
-                "mousemove": "function",
-                "mousedown": "function",
-                "mouseup": "function",
-                "mousewheel": "function",
-                "abort": "function",
-                "error": "function",
-                "load": "function",
-                "unload": "function",
-                "resize": "function",
-                "scroll": "function",
-                "change": "function",
-                "select": "function",
-                "reset": "function",
-                "submit": "function",
-                "blur": "function",
-                "focus": "function",
-                "focusin": "function",
-                "focusout": "function",
-                "keypress": "function",
-                "keydown": "function",
-                "keyup": "function"
-            },
-            "eventAdapter": {
-                "focus": "object",
-                "blur": "object",
-                "beforeunload": "object",
-                "focusin": "object",
-                "focusout": "object",
-                "mousewheel": "object"
-            },
-            "event": {
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "filter": "function",
-                "dispatch": "function",
-                "fix": "function"
-            },
-            "Event": "function",
-            "EventTarget": "object",
-            "eventSupport": "function"
-        },
-        "数据交互模块": {
-            "get": "function",
-            "post": "function",
-            "getScript": "function",
-            "getJSON": "function",
-            "upload": "function",
-            "serialize": "function",
-            "serializeArray": "function",
-            "param": "function",
-            "ajax": {
-                "uniqueNumber": "number",
-                "defineEvents": "function",
-                "bind": "function",
-                "unbind": "function",
-                "fire": "function",
-                "isLocal": "boolean",
-                "@data_14": "object"
-            },
-            "XHR": {
-                "inherit": "function",
-                "implement": "function",
-                "extend": "function",
-                "toString": "function"
-            },
-            "xhr": "function"
-        },
-        "fx": ["fn.fx", "fn.stop","fn.fadeToggle","fn.fadeIn","fn.fadeOut", 
-            "fn.slideDown","fn.slideUp","fn.slideToggle","fn.show","fn.hide","fn.toggle","fn.delay"],
-        "flow": {
-            "Flow": "function",
-            "flow.bind": "function",
-            "flow.unbind": "function",
-            "flow.fire": "function",
-            "flow.find": "function",
-            "flow.append": "function",
-            "flow.reduce": "function"
-        },
-        "特征侦探模块": {}
-    }
+        data: ["data", "parseData", "removeData", "mergeData"],
+        css: "fn.css, fn.width, fn.height, fn.innerWidth, fn.innerHeight, fn.outerWidth, fn.outerHeight, fn.offset, fn.position, fn.offsetParent, fn.scrollParent, fn.scrollTop, fn.scrollLeft, css".match($.rword).sort(),
+        attr: "fn.addClass, fn.hasClass, fn.removeClass, fn.toggleClass, fn.replaceClass, fn.val, fn.removeAttr, fn.removeProp, fn.attr, fn.prop, attr, prop".match($.rword).sort(),
+        event: ("fn.on,fn.bind,fn.off,fn.unbind,fn.toggle,fn.delegate,fn.live,Event,eventSupport" +
+                "fn.one,fn.undelegate,fn.die,fn.fire,fn.contextmenu,fn.click,fn.dblclick," +
+                "fn.mouseout,fn.mouseover,fn.mouseenter,fn.mouseleave,fn.mousemove," +
+                "fn.mousedown,fn.mouseup,fn.mousewheel,fn.abort,fn.error,fn.load,fn.unload," +
+                "fn.resize,fn.scroll,fn.change,fn.select,fn.reset,fn.submit,fn.blur," +
+                "fn.focus,fn.focusin,fn.focusout,fn.keypress,fn.keydown,fn.keyup").match($.rword).sort(),
+        flow: [],
+        ajax: [],
+        fx: ["fn.fx", "fn.stop", "fn.fadeToggle", "fn.fadeIn", "fn.fadeOut",
+            "fn.slideDown", "fn.slideUp", "fn.slideToggle", "fn.show", "fn.hide", "fn.toggle", "fn.delay", "fn.pause", "fn.resume"].sort()
+    };
 
 
 
-})
+});

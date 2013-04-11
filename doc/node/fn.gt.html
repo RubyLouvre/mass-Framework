@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.gt</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.gt(index)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>
+                <a href="$.fn.slice.html">$.fn.slice</a>方法的一个变种，取得原实例中索引值大于i的元素节点组成新实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>index</dt>
+                <dd>必需。Number。一个正整数。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新的mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    var a = $("article *");
+    $.log(a, true);
+    $.log(a.gt(2), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

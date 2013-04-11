@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.parseData</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.parseData(elem, name)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得元素的某一属性，转换为JSON数据。此API是框架用于转换HTML5的data-*属性的。</p>
+            <p>
+                <span class="stress">转换规则：</span>
+            </p>
+            <ul>
+                <li>"true", "false", "null" 转换true,false,null</li>
+                <li>形如数字的字符串转为数字</li>
+                <li>如果是用花括号包起来的尝试转换为对象</li>
+                <li>其他原样输出</li>
+            </ul>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>elem</dt>
+                <dd>必需。元素节点。</dd>
+                <dt>name</dt>
+                <dd>必需。String。属性名。注意，无需带data-前缀，它会自行添加的。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>经转换后的数据。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+        <div id="test" data-obj="{a:'a',b:'b',c:'c'}" data-arr="[1,2,3,4]" data-nan="NaN" data-str="aaa"></div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,data", function() {
+    var el = $("#test")[0]
+    var data = $.parseData(el, "obj");
+    $.log($.type(data), true);
+    $.log($.dump(data), true);
+    var array = $.parseData(el, "arr");
+    $.log($.type(array), true);
+    $.log($.dump(array), true);
+    var nan = $.parseData(el, "nan");
+    $.log($.type(nan), true);
+    $.log($.dump(nan), true);
+    var str = $.parseData(el, "str");
+    $.log($.type(str), true);
+    $.log($.dump(str), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="test" data-obj="{a:'a',b:'b',c:'c'}" data-arr="[1,2,3,4]"
+                data-nan="NaN" data-str="aaa"></div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

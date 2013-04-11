@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.removeData</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.removeData(obj,[ name ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>如果指定了name，则移除这个数据， 否则清空所有与之相关的数据。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>obj</dt>
+                <dd>必需。不为属性节点或文本节点的其他类型节点，文档对象，window对象，自定义对象等等。</dd>
+                <dt>name</dt>
+                <dd>可选。String。数据的名字。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>如果指定了name，则会返回与之对应的值，否则为undefined。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,data", function() {
+    var a = {};
+    $.data(a, "name", "司徒正美");
+    $.log($.dump(a), true);
+    $.log($.removeData(a, "name"), true);
+    $.log($.dump(a), true);
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

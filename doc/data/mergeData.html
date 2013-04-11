@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.mergeData</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.mergeData(target,src)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>合并src的缓存数据到target的缓存数据上。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>target</dt>
+                <dd>必需。目标对象。</dd>
+                <dt>src</dt>
+                <dd>可选。被合并数据的对象。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+require("data,ready", function($) {
+    var obj1 = {};
+    //写入数揣
+    $.data(obj1, "name", "司徒正美");
+    //读取数据
+    $.log($.data(obj1, "name"), true); //司徒正美
+    $._data(obj1, "inner", "私有数据");
+    var obj2 = {};
+    $.data(obj2, "sex", "man");
+    //合并数据
+    $.mergeData(obj1, obj2);
+    $.log( $.dump($._data(obj1)), true); 
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

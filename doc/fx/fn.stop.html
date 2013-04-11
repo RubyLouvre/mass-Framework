@@ -32,20 +32,6 @@
         </dl>
         <p><span class="stress">返回值：</span></p>
         <p>mass实例</p>
-        <p><span class="stress">源码：</span></p>
-        <pre class="brush:js;gutter:false;toolbar:true;collapse:true;">
-        $.fn.stop =function(clearQueue,jumpToEnd){
-            clearQueue = clearQueue ? "1" : "";
-            jumpToEnd =  jumpToEnd ? "1" : "0";
-            var stopCode = parseInt(clearQueue+jumpToEnd,2);//返回0 1 2 3
-            return this.each(function(node){
-                var fxs = $._data( node,"fx");
-                if(fxs && fxs.run){
-                    fxs.stopCode = stopCode;
-                }
-            });
-        }
-        </pre>
         <fieldset><legend>例子</legend>
             <p>当点击开始按钮,然后立即点击其他任一停止按钮!</p>
             <p><button id="start" type="button">开始</button>
@@ -53,8 +39,9 @@
                 <button id="stop1" type="button">停止false,true</button>
                 <button id="stop2" type="button">停止true,false</button>
                 <button id="stop3" type="button">停止true,true</button>
+                 <button id="pause" type="button">暂停</button>
+                <button id="resume" type="button">继续</button>
                 <button id="reset" type="button">重置</button></p>
-
             <div class="container">
                 <div class="test">
                     TEXT
@@ -92,10 +79,17 @@
                 $("#stop3").click(function(){
                     box.stop(true,true);
                 });
+                $("#pause").click(function() {
+                    box.pause()
+                });
+                $("#resume").click(function() {
+                    box.resume()
+                });
             });
             </pre>
              <button class="doc_btn" type="button">点我，执行代码</button>
         </fieldset>
+        <p><a href="ex.stop.html">对比通过CSS animation实现的效果</a></p>
     </article>
 </body>
 </html>

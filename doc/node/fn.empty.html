@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.empty</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.empty()</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>清空匹配的每一个节点的内部。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <ul class="container">
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表2</li>
+                    <li class="inner">列表3</li>
+                    <li class="inner">列表4</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="container">
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表2</li>
+        <li class="inner" >列表3</li>
+        <li class="inner" >列表4</li>
+    </ul>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node", function() {
+    $(".container li").empty()
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

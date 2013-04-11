@@ -190,8 +190,7 @@ define("node", ["support", "class", "data"]
             $.fn.init.prototype = $.fn;
             "push,unshift,pop,shift,splice,sort,reverse".replace($.rword, function(method) {
                 $.fn[method] = function() {
-                    Array.prototype[method].apply(this, arguments);
-                    return this;
+                   return prefixes[method].apply(this, arguments);
                 }
             });
             "remove,empty,detach".replace($.rword, function(method) {

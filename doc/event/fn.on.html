@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.on</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.on(types， [ selector ], [ fn ], [ times ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>mass Framework实现事件绑定的入口函数, 通过它实现bind, live， delegate， one方法， 进而实现hover,
+                toggle, click, mouseover等方法……</p>
+            <p>我们只要将传参减去一个就是$.fn.bind方法了，$.fn.on(types , [ fn ], [ times ])，可点击
+                <a href="$.fn.bind">这里</a>，查看《bind，live，delegate方法的区别》。</p>
+            <p>或者将传参的位置调一调,就装成是$.fn.delegate方法,$.fn.on(selector, types,[ fn ], [ times
+                ]).
+                <p>
+                    <p>
+                        <span class="stress">参数：</span>
+                    </p>
+                    <dl>
+                        <dt>types</dt>
+                        <dd>
+                            <div>必需。String.事件类型,想同时绑定多个事件，可心用空格或逗号隔开，如"error load"或"DOMMouseScroll,mousewheel"。</div>
+                            <div>必需。Object.上面同时绑定多个事件，它们的回调都是相同的，如果相独自指定回调， 则使用此法，如{ click:clickFn, mouseover:mouseFn}。</div>
+                        </dd>
+                        <dt>fn</dt>
+                        <dd>
+                            <div>如果第一个参数为字符串，那么第二个参数则是必需的，如果是对象则它变为可选。</div>
+                            <div>第二个参数在必需的情况下为回调函数。</div>
+                            <div>在可选的情况下，则可为字符串或数字。</div>
+                        </dd>
+                        <dt>selector</dt>
+                        <dd>可选，String，CSS选择器，用于事件代理。</dd>
+                        <dt>times</dt>
+                        <dd>可选，正整数，表示可调用的次数。</dd>
+                    </dl>
+                    <fieldset>
+                        <legend>例子</legend>
+                        <ul class="container">
+                            <li class="inner">列表1</li>
+                            <li class="inner">列表2</li>
+                            <li class="inner">列表3</li>
+                            <li class="inner">列表4</li>
+                        </ul>
+                        <p class="show" style="background: #8b0000;padding:5px;">请点击上面的列表。</p>
+                        <pre class="brush:xml;gutter:false;toolbar:false">
+
+      &lt;ul class="container"&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+        &lt;li class="inner" &gt;列表2&lt;/li&gt;
+        &lt;li class="inner" &gt;列表3&lt;/li&gt;
+        &lt;li class="inner" &gt;列表4&lt;/li&gt;
+      &lt;/ul&gt;
+    
+</pre>
+                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,event", function() {
+    $(".container li").on("click", function(e) {
+        $(".show").html(e.target.innerHTML);
+    })
+});
+</pre>
+                        <button class="doc_btn" type="button">点我，执行代码</button>
+                    </fieldset>
+                    <fieldset>
+                        <legend>例子</legend>
+                        <p>同时绑定多个事件</p>
+                        <style>
+                            .sample2 { background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000; }
+                            .sample2.over { background: #ccc; }
+                            .show_b { color:red; }
+                        </style>
+                        <p class="sample2">请单击或双击这里</p>
+                        <span class="show_b"></span>
+                        <pre class="brush:xml;gutter:false;toolbar:false">
+
+                &lt;style&gt;
+                    .sample2 { background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000; }
+                    .sample2.over { background: #ccc; }
+                    .show_b { color:red; }
+                &lt;/style&gt;
+                &lt;p class="sample2" &gt;请单击或双击这里&lt;/p&gt;
+                &lt;span class="show_b" &gt;&lt;/span&gt;
+    
+</pre>
+                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,event", function() {
+    $(".sample2").bind({
+        click: function(event) {
+            var str = "( " + event.pageX + ", " + event.pageY + " )";
+            $(".show_b").text("Click happened! " + str);
+        },
+        dblclick: function() {
+            $(".show_b").text("Double-click happened in " + this.nodeName);
+        }
+    }).bind("mouseenter mouseleave", function() {
+        $(this).toggleClass("over");
+    });
+});
+</pre>
+                        <button class="doc_btn" type="button">点我，执行代码</button>
+                    </fieldset>
+                    <fieldset>
+                        <legend>例子</legend>
+                        <p>绑定带有调用次数限制的事件</p>
+                        <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,event", function() {
+    var i = 0;
+    $(".sample3").on("submit", function() {
+        this.number.value = ++i
+    }, 1);
+});
+</pre>
+                        <button class="doc_btn" type="button">点我，执行代码</button>
+                        <form action="javascript:void(0)" class="sample3">
+                            <p>
+                                <input name="number" />随便填点什么</p>
+                            <button type="submit">只允许提交一次</button>
+                        </form>
+                    </fieldset>
+        </article>
+    </body>
+
+</html>

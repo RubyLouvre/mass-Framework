@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.children</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.children([ expr ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>把匹配元素的所有子元素收集起来，去重排序组成新mass实例返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>可选，String，用于进一步过滤的CSS选择器。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>新mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p id="aaa">
+                    <strong>Ruby Louvre</strong>
+                </p>
+                <style>
+                    .hilite { border-color:red; }
+                        #results { display:block; color:red; }
+                       .sample1 { width:auto; height:105px; margin:0; float:none;
+                                     border:none; }
+                         .sample1 div { width:130px; height:82px; margin:10px; float:left;
+                                         border:1px solid blue; padding:4px; }
+                        .sample1 p { margin:10px; border:1px solid transparent; }
+                        .sample1 span { color:blue; border:1px solid transparent; }
+                        .sample1 input { width:100px; }
+                        .sample1 em { border:1px solid transparent; }
+                        .sample1 a { border:1px solid transparent; }
+                        .sample1 b { border:1px solid transparent; }
+                        .sample1 button { border:1px solid transparent; }
+                </style>
+                <div class="sample1" style="background:#ffe0bb;color:#000;">
+                    <div>
+                        <p>This
+                            <span>is the
+                                <em>way</em>we</span>write
+                            <em>the</em>demo,</p>
+                    </div>
+                    <div>
+                        <a href="#"><b>w</b>rit<b>e</b></a>the
+                        <span>demo,</span>
+                        <button>write the</button>demo,</div>
+                    <div>This
+                        <span>the way we
+                            <em>write</em>the
+                            <em>demo</em>so</span>
+                        <input type="text" value="early" />in</div>
+                    <p>
+                        <span>t</span>he
+                        <span>m</span>orning.
+                        <span id="results">Found
+                            <span>0</span>children in
+                            <span>TAG</span>.</span>
+                    </p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1" style="background:#ffe0bb;color:#000;">
+        <div>
+            <p>This <span>is the <em>way</em> we</span>
+                write <em>the</em> demo,</p>
+        </div>
+        <div>
+            <a href="#"><b>w</b>rit<b>e</b></a> the <span>demo,</span> <button>write
+                the</button> demo,
+        </div>
+
+        <div>
+            This <span>the way we <em>write</em> the <em>demo</em> so</span>
+
+            <input type="text" value="early" /> in
+        </div>
+        <p>
+            <span>t</span>he <span>m</span>orning.
+            <span id="results">Found <span>0</span> children in <span>TAG</span>.</span>
+
+        </p>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,attr,event", function() {
+    $(".sample1").click(function(e) {
+        $(".hilite").removeClass("hilite");
+        var $kids = $(e.target).children();
+        var len = $kids.addClass("hilite").length;
+        $("#results span").first().text(len);
+        $("#results span").last().text(e.target.tagName);
+        e.preventDefault();
+        return false;
+    });
+});
+</pre>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <form class="sample2" style="background:#ffe0bb;color:#000;">
+                    <p>Hello (this is a paragraph)</p>
+                    <div>
+                        <span>Hello Again (this span is a child of the a div)</span>
+                    </div>
+                    <p>And
+                        <span>Again</span>(in another paragraph)</p>
+                    <div>And One Last
+                        <span>Time</span>(most text directly in a div)</div>
+                </form>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <form class="sample1" style="background:#ffe0bb;color:#000;">
+        <p>Hello (this is a paragraph)</p>
+
+        <div><span>Hello Again (this span is a child of the a div)</span></div>
+        <p>And <span>Again</span> (in another paragraph)</p>
+
+        <div>And One Last <span>Time</span> (most text directly in a div)</div>
+    </form>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css", function() {
+    $(".sample1 div").children().css("border-bottom", "3px double red")
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <div class="sample2" style="background:#ffe0bb;color:#000;">
+                    <span>Hello</span>
+                    <p class="selected">Hello Again</p>
+                    <div class="selected">And Again</div>
+                    <p>And One Last Time</p>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample2" style="background:#ffe0bb;color:#000;">
+        <span>Hello</span>
+        <p class="selected">Hello Again</p>
+        <div class="selected">And Again</div>
+        <p>And One Last Time</p>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,css", function() {
+    $(".sample2").children(".selected").css("color", "blue");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

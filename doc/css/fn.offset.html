@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.offset</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.offset()</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得第一个元素位于页面上的坐标或设置所有匹配元素节点在页面上的坐标。和.position()的差别在于：.position()是取得相对于其offsetParent的坐标。</p>
+            <p>比如说$("xxx").offset.top是从此元素的上边框的上边沿一直到页面的顶部。</p>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>一个包含top与left属性的对象。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <div id="getoffset" style="margin:5px;padding:5px;background: #FF6347"></div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    var el = $("#getoffset");
+    var coords = el.offset();
+    el.html("left : " + coords.left + "&lt;br/&gt;top : " + coords.top)
+})
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>小知识:$.fn.offset的实现</legend>
+                <p>框架内部是使用getBoundingClientRect() 来获取页面元素的位置。</p>
+                <p>getBoundingClientRect用于获得页面中某个元素的左，上，右和下分别相对浏览器视窗的位置。该函数返回一个Object对象，该对象有6个属性：top,lef,right,bottom,width,height；这里的top、left和css中的理解很相似，width、height是元素自身的宽高，但是right，bottom和css中的理解有点不一样。right是指元素右边界距窗口最左边的距离，bottom是指元素下边界距窗口最上面的距离。
+                    具体看示意图：</p>
+                <div>
+                    <script>
+                        document.write('<img src="' + $$path + '/doc/images/css/css_offset_getBoundingClientRect.gif" />');
+                    </script>
+                </div>
+                <p>getBoundingClientRect()最先是IE的私有属性，现在已经是一个W3C标准。所以你不用当心浏览器兼容问题，不过还是有区别的。
+                    IE只返回top,lef,right,bottom四个值，不够可以通过以下方法来获取width,height的值：</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var ro = object.getBoundingClientRect();
+var Width = ro.right - ro.left;
+var Height = ro.bottom - ro.top;
+                </pre>
+                <p>有了这个方法，获取页面元素的位置就简单多了</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var X = this.getBoundingClientRect().left + document.documentElement.scrollLeft;
+var Y = this.getBoundingClientRect().top + document.documentElement.scrollTop;
+                </pre>
+                <p>其他一些参考资源:
+                    <a href="http://help.dottoro.com/ljvmcrrn.php">http://help.dottoro.com/ljvmcrrn.php</a>
+                </p>
+            </fieldset>
+            <fieldset>
+                <legend>小知识: margin的合并</legend>
+                <p>可能有人对getBoundingClientRect获取的结果产生疑问，这是因为margin发生了合并。 但margin合并的发生要求很多必要的条件：</p>
+                <ol>
+                    <li>水平margin不会合并。</li>
+                    <li>两个上下渲染相邻（不一定是兄弟节点）的块状元素在正常页面流情况下会发生 margin 合并。</li>
+                    <li>浮动元素不会和任何元素（包括子孙节点）发生 margin 合并。</li>
+                    <li>overflow！=visible的元素不和任何元素发生margin合并。</li>
+                    <li>绝对定位的元素不和任何元素发生margin合并。</li>
+                    <li>inline-block 的元素不和任何元素发生margin合并。</li>
+                    <li>设置 clear 属性的元素不和任何元素发生margin合并。</li>
+                    <li>根元素不和任何元素发生margin合并。</li>
+                    <li>父节点和第一个子节点发生margin-top合并。</li>
+                    <li>如果最后一个子节点没有border以及padding，则和其父节点发生margin-bottom合并。</li>
+                </ol>
+                <p>除了标准，还得注意 IE ，特别是 hasLayout 对于 margin 合并也有影响，从而也造成了包含的绝对定位元素的位置差异。</p>
+                <p>一般来说,浏览器的body的marginTop,marginLeft都默认是8px;如果它的第一个孩子为DIV，设置了其margin为10px，那么根据以上规则，取得的结果是
+                    top:8px,left:18px;</p>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

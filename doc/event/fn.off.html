@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.off</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.off(types,[selector],[ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>mass Framework实现事件卸载的入口函数, 通过它实现unbind, die, undelegate。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>types</dt>
+                <dd>
+                    <div>可选。String.事件类型,想同时卸载多个事件，可心用空格或逗号隔开，如"error load"或"DOMMouseScroll,mousewheel"。</div>
+                    <div>可选。Object.上面同时卸载多个事件，它们的回调都是相同的，如果相独自指定回调， 则使用此法，如{ click:clickFn, mouseover:mouseFn}。</div>
+                </dd>
+                <dt>selector</dt>
+                <dd>可选，String，用于移除事件代理的回调。</dd>
+                <dt>fn</dt>
+                <dd>可选，Function，要移除的回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <ul class="container">
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表2</li>
+                    <li class="inner">列表3</li>
+                    <li class="inner">列表4</li>
+                </ul>
+                <div class="show" style="background: #8b0000;padding:5px;">请点击上面的列表。
+                    <br/>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+      &lt;ul class="container"&gt;
+        &lt;li class="inner" &gt;列表1&lt;/li&gt;
+        &lt;li class="inner" &gt;列表2&lt;/li&gt;
+        &lt;li class="inner" &gt;列表3&lt;/li&gt;
+        &lt;li class="inner" &gt;列表4&lt;/li&gt;
+      &lt;/ul&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,event", function() {
+    $(".container li").on("click", function(e) {
+        $(".show").append(e.target.innerHTML + "&lt;br/&gt;");
+    }).fire("click").off("click");
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

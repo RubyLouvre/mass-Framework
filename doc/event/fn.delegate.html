@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.delegate</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #sample1{
+                    border-collapse: collapse;
+                    border: 1px solid #fff;
+                    width: 80%;
+                }
+                #sample1 caption{
+                    color:#ff7b26;
+                }
+                #sample1 td{
+                    padding: 5px;
+                    border: 1px solid #fff;
+                    text-align: center;
+                }
+                #sample1 .odd{
+                    background: #000;
+                    color:#fff;
+                }
+                #sample1 .even{
+                    background: #558405;
+                    color:#000;
+                }
+                #sample1 .hover{
+                    background: #4B0082;
+                }
+                .sample2{
+                    margin:0 5px 5px;
+                    padding: 5px;
+                    background: #47aed7;
+                }
+                .test_submit{
+                    background:#00cc00;
+                    height:200px;
+                }
+            </style>
+            <h3>$.fn.delegate( selectorOnFilter, types, fn, [times] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>此方法提供强大的事件代理支持。它对匹配节点的所有孩子进行监听，当孩子的相同类型事件冒泡上来时，会判定事件源是否匹配给定的CSS表达式或过滤函数，
+                如果符合，则执行回调函数fn。</p>
+            <p>
+                <span class="note">此方法不但能对当前孩子有效，还能监听以后加入的新节点。</span>
+            </p>
+            <p>可点击
+                <a href="$.fn.bind">这里</a>，查看《bind，live，delegate方法的区别》。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>selectorOnFilter</dt>
+                <dd>必需，如果是字符串则是用于匹配的CSS表达式，如果是函数则一个用于过滤的函数，其参数为事件源元素，返回true表示可以执行回调。</dd>
+                <dt>types</dt>
+                <dd>必需。String。一个包含一个或多个JavaScript事件类型的字符串，比如"click"或"keydown,"或自定义事件的名称。</dd>
+                <dt>fn</dt>
+                <dd>必需。Funcion。回调函数。</dd>
+                <dt>times</dt>
+                <dd>可选。正整数。限制此回调执行多少次就自动卸载。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <table id="sample1">
+                    <caption>江山代有才人出　　各领风骚数百年</caption>
+                    <thead>
+                        <tr>
+                            <th>三代</th>
+                            <th>汉朝</th>
+                            <th>晋朝</th>
+                            <th>唐朝</th>
+                            <th>宋朝</th>
+                            <th>明朝</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>孔子</td>
+                            <td>董仲舒</td>
+                            <td>阮籍</td>
+                            <td>李白</td>
+                            <td>苏轼</td>
+                            <td>王阳明</td>
+                        </tr>
+                        <tr>
+                            <td>孟子</td>
+                            <td>东方朔</td>
+                            <td>嵇康</td>
+                            <td>杜甫</td>
+                            <td>辛弃疾</td>
+                            <td>唐寅</td>
+                        </tr>
+                        <tr>
+                            <td>老子</td>
+                            <td>扬雄</td>
+                            <td>陶渊明</td>
+                            <td>李商隐</td>
+                            <td>陆游</td>
+                            <td>徐渭</td>
+                        </tr>
+                        <tr>
+                            <td>庄子</td>
+                            <td>左思</td>
+                            <td>王羲之</td>
+                            <td>李贺</td>
+                            <td>范仲淹</td>
+                            <td>杨慎</td>
+                        </tr>
+                        <tr>
+                            <td>荀子</td>
+                            <td>司马迁</td>
+                            <td>庾信</td>
+                            <td>王维</td>
+                            <td>欧阳修</td>
+                            <td>吕坤</td>
+                        </tr>
+                        <tr>
+                            <td>韩非子</td>
+                            <td>班固</td>
+                            <td>鲍照</td>
+                            <td>白居易</td>
+                            <td>苏洵</td>
+                            <td>宋濂</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,node,event,css", function() {
+    $("#sample1 tbody tr").each(function() { //隔行变色
+        if (this.rowIndex % 2) {
+            this.className = "even"
+        } else {
+            this.className = "odd"
+        }
+    });
+    //不能监听TR元素，只能怎么也选不中TR元素，只能监听TD，进而反选TR
+    $("#sample1").delegate("tbody td", "hover", function(e) { //掠过变色
+        $(this).closest("tr").toggleClass("hover"); //this为匹配"tbody td"这个CSS表达式的元素节点
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>监听那些新节点的点击事件。</p>
+                <p class="sample2">请点击我</p>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,node,event,css", function() {
+    $("fieldset").delegate(".sample2", "click", function(e) {
+        $(this).after('&lt;p class="sample2"&gt;这是动态生成的段落！&lt;/p&gt;');
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>监听表单元素的submit, change, reset事件。</p>
+                <div class="sample3">
+                    <form class="test_submit" action="javascript:void(0)">
+                        <input class="textinputchange" value="文本域" />
+                        <input class="passwordchange" type="password" value="123456" />
+                        <br/>
+                        <textarea class="textareachange">文本区</textarea>
+                        <br/>
+                        <select class="selectchange" type="select-multiple">
+                            <option>11111</option>
+                            <option>22222</option>
+                            <option>33333</option>
+                            <option>44444</option>
+                            <option>55555</option>
+                        </select>
+                        <input class="addoption" type="button" value="为select控件添加option" />
+                        <br/>
+                        <input type="radio" name="radio" class="radiochange" />XXX
+                        <input type="radio" name="radio" class="radiochange" />YYY
+                        <br/>
+                        <input type="checkbox" name="checked" value="11" class="checkboxchange"
+                        />
+                        <input type="checkbox" name="checked" value="22" class="checkboxchange"
+                        />
+                        <input type="submit" value="submit" />
+                        <input type="reset" value="reset" />
+                    </form>
+                    <div class="show_c"></div>
+                </div>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event,css", function() {
+    function log(first, type) {
+        if (arguments.length == 1) {
+            type = first;
+            first = "";
+        }
+        $(".show_c").append(first + "测试" + type + "的事件代理&lt;br/&gt;");
+    }
+    $("body").delegate(".test_submit", "submit", function(e) {
+        log(e.type);
+        return false;
+    });
+    $("body").delegate(".test_submit", "reset", function(e) {
+        log(e.type);
+        return false;
+    });
+    $("body").delegate(".textinputchange", "change", function(e) {
+        log('text', e.type);
+    });
+    $("body").delegate(".passwordchange", "change", function(e) {
+        log('password', e.type);
+    });
+    $("body").delegate(".textareachange", "change", function(e) {
+        log('textarea', e.type);
+    });
+    $("body").delegate(".selectchange", "change", function(e) {
+        log('select', e.type);
+    });
+    $("body").delegate(".radiochange", "change", function(e) {
+        log('radio', e.type);
+    });
+    $("body").delegate(".checkboxchange", "change", function(e) {
+        log('checkbox', e.type);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.valuechange</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                #show_result { color:red; }
+            </style>
+            <h3>$.fn.valuechange([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>行为有点类似change事件，不过change是在失去焦点才拿输入前的值与现在的值作比较，而valuechange则在整个输入过程都在比较。它有点类似于input事件，
+                但它比input更厉害之外在于，它能在监控使用el.setAttribute("value","zz"),el.value = "xxx"及使用语音输入手段引发的值改变。</p>
+            <p>回调函数的第一值参数为事件对象，比一般的事件对象多出三个属性：</p>
+            <ul>
+                <li>oldValue: 旧的值。</li>
+                <li>newValue: 当前值。</li>
+                <li>realType: 是由哪种原生事件触发的。</li>
+            </ul>
+            <p>需要注意的是,它并不在event.js文件,而在more/valuechange.js中。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset id="first_example">
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,more/valuechange", function() {
+    $("#aaa").valuechange(function(e) {
+        var str = e.oldValue + " " + e.newValue + " " + e.realType
+        $("#show_result").text(str);
+    })
+});;
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <input type="text" id="aaa" />
+                <div id="show_result"></div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

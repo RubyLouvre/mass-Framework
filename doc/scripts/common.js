@@ -38,7 +38,12 @@
                 var self = $(this), btn = self.next("button.doc_btn");
                 if (/brush:\s*j/i.test(this.className) && btn.length) {
                     var code = $.String.unescapeHTML(this.innerHTML);
-                    var fn = Function(code);
+                    try {
+                        var fn = Function(code);
+                    } catch (e) {
+                        alert(e);
+                        alert(code)
+                    }
                     btn[0].exec = fn;
                 }
             }

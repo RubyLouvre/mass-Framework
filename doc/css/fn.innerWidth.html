@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.innerWidth</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <h3>$.fn.innerWidth( )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得第一个元素的当前宽度,包括padding，但是不包括border。</p>
+            <p>
+                <span class="note">此方法是个只读文法。</span>
+            </p>
+            <p>
+                <span class="note">此方法不适用于window 与 document对象，可以使用.width()代替。</span>
+            </p>
+            <p>w3c的盒子模型</p>
+            <script>
+                document.write('<img src="' + $$path + '/doc/images/css/innerheight.png" />');
+            </script>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <style>
+                        .innerWidth { margin:10px;padding:5px;border:2px solid #666; }
+    </style>
+    <div class="innerWidth">&nbsp;</div>
+    
+                </pre>
+                <style>
+                    .innerWidth { margin:10px;padding:5px;border:2px solid #666; }
+                </style>
+                <div class="innerWidth">&nbsp;</div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css", function() {
+    var a = $(".innerWidth");
+    a.html("它的innerWidth为" + a.innerWidth() + "px");
+});
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

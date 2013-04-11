@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.beforeTo</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$.fn.beforeTo(content)</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>把匹配的元素插入到另一个指定的元素集合的前面。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>content</dt>
+                <dd>必需，可以为元素节点，符合套嵌关系的HTML片断，CSS选择器或dom对象。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>原mass实例</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p id="aaa">
+                    <strong>Ruby Louvre</strong>
+                </p>
+                <div class="container">
+                    <div class="inner">司徒正美</div>
+                    <div class="inner">司徒正美</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <p id="aaa"><strong>Ruby Louvre</strong></p>
+    <div class="container">
+        <div class="inner">司徒正美</div>
+        <div class="inner">司徒正美</div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$('&lt;strong&gt;(しとうなさみ)&lt;/strong&gt;').beforeTo($(".inner").first());
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#aaa").beforeTo($(".inner").first());
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <table class="table1">
+                    <tbody>
+                        <tr>
+                            <td>append</td>
+                            <td>appendTo</td>
+                        </tr>
+                        <tr>
+                            <td>prepend</td>
+                            <td>prependTo</td>
+                        </tr>
+                        <tr>
+                            <td>before</td>
+                            <td>insertBefore</td>
+                        </tr>
+                        <tr>
+                            <td>after</td>
+                            <td>insertAfter</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <table class="table1">
+        <tbody>
+            <tr><td>append</td><td>appendTo</td></tr>
+            <tr><td>prepend</td><td>prependTo</td></tr>
+            <tr><td>before</td><td>insertBefore</td></tr>
+            <tr><td>after</td><td>insertAfter</td></tr>
+        </tbody>
+    </table>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("&lt;thead&gt;&lt;tr&gt;&lt;th&gt;表头&lt;/th&gt;&lt;th&gt;表头&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;").beforeTo($(".table1 tbody"));
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

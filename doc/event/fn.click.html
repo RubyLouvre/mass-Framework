@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.click</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample1 {background: #ffe0bb;  }
+                .sample2 {background:yellow; font-weight:bold; cursor:pointer; padding:5px;color:#000;}
+                .button1 { margin:10px; }
+                .sample1 div { color:blue; font-weight:bold; }
+                .sample1 span { color:red; }
+                #red {
+                    width: 100px;
+                    height: 100px;
+                    background: red;
+                }
+                #blue {
+                    width: 100px;
+                    height: 100px;
+                    background: blue;
+                }
+            </style>
+            <h3>$.fn.click([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 click 事件绑定一个处理函数，或者触发元素上的 click 事件。</p>
+            <p>这个函数的第一种用法是 .bind('click', handler) 的快捷方式，第二种用法是 .fire('click') 的快捷方式。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <p>点击第一个按钮只会为自己加1，点击第二个按钮会为两者加1</p>
+                <div class="sample1">
+                    <button>Button #1</button>
+                    <button>Button #2</button>
+                    <div>
+                        <span>0</span>button #1 clicks.</div>
+                    <div>
+                        <span>0</span>button #2 clicks.</div>
+                </div>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <div class="sample1">
+        <button>Button #1</button>
+        <button>Button #2</button>
+        <div><span>0</span> button #1 clicks.</div>
+        <div><span>0</span> button #2 clicks.</div>
+    </div>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var spans = $(".sample1 span")
+    var firstBtn = $(".sample1 button").first().click(function() {
+        update(spans.first());
+    });
+    $(".sample1 button").last().click(function() {
+        firstBtn.fire('click');
+        update(spans.last());
+    });
+
+    function update(el) {
+        var n = parseInt(el.text(), 10);
+        el.text(n + 1);
+    }
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>附加参数。</p>
+                <p class="sample2">请单击这里
+                    <br/>
+                </p>
+                <span class="show_b"></span>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+                 &lt;p class="sample2" &gt;请单击这里&lt;br/&gt;&lt;/p&gt;
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    $(".sample2").click(function(e, a, b) {
+        $(this).append(e.type + "  " + String(a) + "   " + String(b) + "&lt;br/&gt;")
+    }).fire("click", "foo", "bar");
+});
+</pre>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+
+    $("#red").bind("click", function(e) {
+        $.log("111111111111", true)
+    });
+    $("#red").bind("click", function(e) {
+        $.log("222222222222", true)
+    });
+    $("#red").bind("click", function(e) {
+        $.log("3333333333333", true)
+    });
+    $("#blue").bind("click", function(e) {
+        $.log("4444444444444", true)
+    });
+})
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div id="red"></div>
+                <div id="blue"></div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

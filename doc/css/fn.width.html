@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.width</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+
+    <body>
+        <article>
+            <style type="text/css">
+                #sample2{
+                    height:130px;
+                }
+                #sample2 div {
+                    width:50px;
+                    height:70px;
+                    float:left;
+                    margin:5px;
+                    background:rgb(255,140,0);
+                    cursor:pointer;
+                }
+                #sample3{
+                    height:130px;
+                    overflow:auto;
+                }
+                #sample3 div {
+                    width:50px;
+                    height:70px;
+                    float:left;
+                    margin:5px;
+                    display:none;
+                }
+                #sample3 p {
+                    width:400px;
+                    height:20px;
+                    background:orange;
+                }
+                .box_sizing{
+                    width:180px;
+                    padding:40px 20px;
+                    background:#a0b3d6;
+                    overflow:hidden;
+                }
+                .box_sizing .in{
+                    width:100%;
+                    border:5px solid #34538b;
+                    background:white;
+                    padding:5px;
+                    margin:5px;
+                    zoom:1;
+                    box-sizing:border-box;
+                    -o-box-sizing:border-box;
+                    -ms-box-sizing:border-box;
+                    -moz-box-sizing:border-box;
+                    -webkit-box-sizing:border-box;
+                }
+            </style>
+            <h3>$.fn.width( [val])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>取得或设置匹配节点的宽。</p>
+            <p>此方法是属性于get one set all操作，根据传入参数决定其是读操作还是写操作。</p>
+            <p>如果没有参数，则读取第一个元素的width，并返回。</p>
+            <p>如果存在参数，通过它设置所有元素的width,并返回原实例。</p>
+            <p>.css(width) 和 .width()之间的区别是后者返回一个没有单位的数值（例如，400），前者是返回带有完整单位的字符串（例如，400px）。当一个元素的宽度需要数学计算的时候推荐使用.width()
+                方法 。</p>
+            <p>
+                <span class="note">如果没有设置单位，默认为px。</span>
+            </p>
+            <p>
+                <span class="note">它可以获取隐藏元素的宽。</span>
+            </p>
+            <p>w3c的盒子模型</p>
+            <script>
+                document.write('<img src="' + $$path + '/doc/images/css/w3c_width.png" />');
+            </script>
+            <fieldset>
+                <legend>例子</legend>
+                <button id="getp">取得测试段落的宽</button>
+                <button id="getd">取得当前文档对象（页面）的宽</button>
+                <button id="getw">取得当前窗口的宽</button>
+                <div id="show_result">&nbsp;</div>
+                <p id="test_p">这是测试的小白鼠</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.require("ready,node,css,event", function() {
+    function showHeight(ele, h) {
+        $("#show_result").text(ele + h + "px.");
+    }
+    $("#getp").click(function() {
+        showHeight("段落的宽为", $("#test_p").width());
+    });
+    $("#getd").click(function() {
+        showHeight("页面的宽为", $(document).width());
+    });
+    $("#getw").click(function() {
+        showHeight("窗口的宽为", $(window).width());
+    });
+})
+                </pre>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>点击每个div时设置该div宽度为200px，并改变颜色。</p>
+                <div id="sample2">
+                    <div></div>
+                    <div class="div2"></div>
+                    <div class="div3"></div>
+                </div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("#sample2 div").width(60).css("backgroundColor", "#a9ea00");
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <p>显示隐藏元素的宽。</p>
+                <div id="sample3">
+                    <div></div>
+                </div>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var a = $("#sample3 div").width() + "px";
+$("#sample3").append("&lt;p&gt;" + a + "&lt;/p&gt;")
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,node,css", function() {
+    var node = $(".box_sizing .in");
+    var el = node[0]
+    var r = el.getBoundingClientRect();
+    $.log("r.right - r.left " + (r.right - r.left))
+    $.log("node.offsetWidth " + el.offsetWidth)
+    $.log("node.clientWidth " + el.clientWidth)
+    $.log("node.width() " + node.width())
+    $.log("node.innerWidth() " + node.innerWidth())
+    $.log("node.outerWidth() " + node.outerWidth())
+    $.log("node.outerWidth(true) " + node.outerWidth(true))
+    if (window.getComputedStyle) {
+        $.log("window.getComputedStyle(el, null).width " + window.getComputedStyle(el, null).width)
+    }
+})
+                </pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="box_sizing">
+                    <div class="in">与盒子模型有关</div>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.mousemove</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <style type="text/css">
+                .sample {
+                    height: 140px;
+                    background: #f5f1d4;
+                    color:#000;
+                    overflow: scroll;
+                }
+                .sample div { width:220px; height:170px; margin:10px; margin-right:50px;
+                              background:yellow; border:2px groove; float:right; }
+                .sample p { margin:0; margin-left:10px; color:red; width:270px;
+                            height:120px; padding-top:70px;
+                            float:left; font-size:14px; }
+                .sample span { display:block;color:#000; }
+            </style>
+            <h3>$.fn.mousemove( [ fn ] )</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 mousemove 事件绑定一个处理函数，或者触发元素上的 mousemove 事件。</p>
+            <p>这个函数的第一种用法是 .bind('mousemove', handler) 的快捷方式，第二种用法是 .fire('mousemove')
+                的快捷方式。</p>
+            <p>当鼠标指针在元素内移动时，mousemove事件就会被发送到这个元素，任何HTML元素都可以接受此事件。</p>
+            <p>当鼠标在某个元素上移动时，我们通常需要知道鼠标指针的坐标，事件对象提供了两组坐标属性，pageX与pageY是相对整个页面的坐标系，clientX与clientY是相对屏幕可视区的坐标系。</p>
+            <p>值得注意的是，mousemove事件是当鼠标指针移动时触发的，即使是一个像素。这意味着数百个事件在短时间内产生。 因此我们必须简化mousemove回调里面的DOM操作，比如加一个变量，当其余9时才执行DOM操作。另一个方案是，使用事件代理，减少mousemove监听器的数量。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+            <fieldset>
+                <legend>例子</legend>
+                <pre class="brush:js;gutter:false;toolbar:false">
+$.require("ready,event", function() {
+    var first = $(".first")
+    var last = $(".last")
+    $(".move").mousemove(function(e) {
+        var pageCoords = "( " + e.pageX + ", " + e.pageY + " )";
+        var clientCoords = "( " + e.clientX + ", " + e.clientY + " )";
+        first.text("( e.pageX, e.pageY ) - " + pageCoords);
+        last.text("( e.clientX, e.clientY ) - " + clientCoords);
+    });
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <div class="sample">
+                    <p>请移动滚动条
+                        <span class="first">&nbsp;</span>
+                        <span class="last">&nbsp;</span>
+                    </p>
+                    <div class="move"></div>
+                </div>
+            </fieldset>
+        </article>
+    </body>
+
+</html>

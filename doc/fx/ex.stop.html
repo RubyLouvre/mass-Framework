@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />        
+        <title>$.fn.fx</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+        <style type="text/css">
+            .test{
+                background: #a9ea00;
+                width:100px;
+                height:100px;
+                margin: 5px;
+            }
+        </style>
+        
+    </head>
+    <body>
+    <article>
+      
+        <fieldset><legend>例子</legend>
+            <p>当点击开始按钮,然后立即点击其他任一停止按钮!</p>
+            <p><button id="start" type="button">开始</button>
+                <button id="stop0" type="button">停止false,false</button>
+                <button id="stop1" type="button">停止false,true</button>
+                <button id="stop2" type="button">停止true,false</button>
+                <button id="stop3" type="button">停止true,true</button>
+                <button id="pause" type="button">暂停</button>
+                <button id="resume" type="button">继续</button>
+                <button id="reset" type="button">重置</button></p>
+            <div class="container">
+                <br/>
+                <div class="test">
+                    TEXT2
+                </div>
+            </div>
+            <p>由上面的演示我们可以看到以下效果： </p>
+            <ul>
+                <li>false,false:跳过了宽的渐变动画，直接执行高的渐变动画。</li>
+                <li>false,true:立即把宽设为最终值，然后执行高的渐变动画。</li>
+                <li>true,false:停止了宽与高的动画。</li>
+                <li>true,true:停止了宽与高的动画，并把它们的值设到最终值。</li>
+            </ul>
+            <pre class="brush:javascript;gutter:false;toolbar:false">
+              require("ready,event,fx_neo",function($){
+                var box = $(".test");
+                $("#start").click(function(){
+                    box.fx({width:"+=100"},2000).fx({height:"+=100"},2000)
+                });
+                $("#reset").click(function(){
+                    box.width(100).height(100)
+                });
+                $("#stop0").click(function(){
+                    box.stop(false,false);
+                });
+                $("#stop1").click(function(){
+                    box.stop(false,true);
+                });
+                $("#stop2").click(function(){
+                    box.stop(true,false);
+                });
+                $("#stop3").click(function(){
+                    box.stop(true,true);
+                });
+                $("#pause").click(function() {
+                    box.pause()
+                });
+                $("#resume").click(function() {
+                    box.resume()
+                });
+            });
+            </pre>
+             <button class="doc_btn" type="button">点我，执行代码</button>
+        </fieldset>
+        <p><a href="fn.stop.html">对比使用纯JS实现的效果</a></p>
+    </article>
+</body>
+</html>

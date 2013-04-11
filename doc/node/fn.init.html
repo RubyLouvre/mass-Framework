@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$</title>
+        <script>
+            window.$$path = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>')
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>')
+        </script>
+    </head>
+    
+    <body>
+        <article>
+            <h3>$(expr, [scope])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>整个框架的入口函数，使用多态参数，根据第一个参数的类型决定其行为：</p>
+            <p>如果第一个参数是函数，那么它是一个加载器，回调会在domReady后执行。</p>
+            <p>如果第一个参数是以&lt;开始的HTML标签字符串，那么它是一个htmlParser，参数会转换成一个文档碎片，然后抽取里面的节点，封装成mass对象返回。</p>
+            <p>如果第一个参数是CSS表达式，那么它是一个selector，会在DOM树中找到匹配的节点，封装成mass对象返回。</p>
+            <p>如果第一个参数是文本节点或者元素节点或文档节点或window对象或NodeList，它们会直接封装成mass对象返回。</p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>expr</dt>
+                <dd>必需。可以为CSS表达式，document, window，元素节点，符合HTML嵌套结构的字符串，mass实例， 函数。</dd>
+                <dt>scope</dt>
+                <dd>可选。document或元素节点。</dd>
+            </dl>
+            <p>
+                <span class="stress">返回值：</span>
+            </p>
+            <p>如果expr不为函数，则返回mass实例。</p>
+            <fieldset>
+                <legend>例子</legend>
+                <p>通过dom创建HTML插入到页面</p>
+                <ul class="container">
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表1</li>
+                    <li class="inner">列表1</li>
+                </ul>
+                <pre class="brush:xml;gutter:false;toolbar:false">
+
+    <ul class="container">
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表1</li>
+        <li class="inner" >列表1</li>
+    </ul>
+    
+</pre>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("&lt;li&gt;&lt;strong&gt;司徒正美&lt;/strong&gt;&lt;/li&gt;").beforeTo(".container li:first-child");
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$("&lt;li&gt;&lt;em&gt;司徒正美&lt;/em&gt;&lt;script&gt;alert('动态执行代码！')&lt;\/script&gt;&lt;/li&gt;").after(".container:last-child");
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <p>选择某个元素再进操作</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$(".container").append("&lt;div&gt;append上去。&lt;/div&gt;");
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <p>传入某个元素再进操作</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var $body = $(document.body).data("aaa", "CCC");
+$.log($body.data("aaa"), true)
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <p>传入NodeList进行操作</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+var all = $(document.body.childNodes);
+$.log([all[0], all[2], all.length], true); //因mass实例已类数组对象，可以像数组那样操作
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <p>传入函数，相当于$.require("ready,node,event,fx",fn)</p>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$(function() {
+    $.log("执行ready回调", true)
+});
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+                <pre class="brush:javascript;gutter:false;toolbar:false">
+$.log($("body")[0], true);
+</pre>
+                <button class="doc_btn" type="button">点我，执行代码</button>
+            </fieldset>
+        </article>
+    </body>
+
+</html>
