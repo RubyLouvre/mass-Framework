@@ -41,7 +41,7 @@ define(!!this.FormData, ["flow"], function($) {
             return ret;
         }
         //https://github.com/codenothing/Pure-Javascript-Upload/blob/master/src/upload.js
-        $.AjaxTransports.upload = {
+        $.ajaxTransports.upload = {
             request: function() {
                 var self = this;
                 var opts = this.options;

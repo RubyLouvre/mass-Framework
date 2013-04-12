@@ -4,6 +4,7 @@
 define(!!document.dispatchEvent, ["node"], function($) {
     //模拟IE678的reset,submit,change的事件代理
     $.fixEvent = function() {
+       var  facade =  $.event, eventHooks = facade.special
         var rformElems = /^(?:input|select|textarea)$/i;
         facade.fixMouse = function(event) {
             // 重置fixMouse http://www.w3help.org/zh-cn/causes/BX9008

@@ -89,7 +89,8 @@ define("support", ["mass"], function($) {
         return;
         try {
             var range = DOC.createRange();
-            range.selectNodeContents(body); //fix opera(9.2~11.51) bug,必须对文档进行选取
+            range.selectNodeContents(body.firstChild || body); 
+            //fix opera(9.2~11.51) bug,必须对文档进行选取，尽量只选择一个很小范围
             support.fastFragment = !! range.createContextualFragment("<a>");
             $.cachedRange = range;
         } catch(e) {};
