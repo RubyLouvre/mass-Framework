@@ -24,6 +24,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             get: function() {
             }
         });
+        $.supportDefineProperty = true;
     } catch (e) {
         method = function(obj, name, method) {
             if (!obj[name]) {
