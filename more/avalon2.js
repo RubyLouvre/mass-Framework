@@ -109,7 +109,15 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             var element = data.element;
             var tagName = element.tagName;
             if (typeof  modelBinding[tagName] === "function") {
-                modelBinding[tagName](data, scope, scopes, element);
+                var array = [scope].concat(scopes);
+                var name = data.node.value, model;
+                array.forEach(function(obj) {
+                    if (!model && obj.hasOwnProperty(name)) {
+                        model = obj;
+                    }
+                });
+                model = model || {};
+                modelBinding[tagName](element, model, name);
             }
         },
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
@@ -181,20 +189,110 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         "skip": function() {
             arguments[3].stopBinding = true;
         },
+        "if": function(data, scope, scopes, flags) {
+            var element = data.element;
+            var fragment = element.ownerDocument.createDocumentFragment();
+            watchView(data.value, scope, scopes, function(val) {
+                if (val) {
+                    while (fragment.firstChild) {
+                        element.appendChild(fragment.firstChild);
+                    }
+                } else {
+                    while (element.firstChild) {
+                        fragment.appendChild(element.firstChild);
+                    }
+                }
+            });
+
+
+        },
         "each": function(data, scope, scopes, flags) {
             var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
             var parent = data.element;
             var list = evalExpr(data.value, scope, scopes);
             var doc = parent.ownerDocument;
             var fragment = doc.createDocumentFragment();
-            var parentScopes = [scope].concat(scopes)
+            var parentScopes = [scope].concat(scopes);
             while (parent.firstChild) {
                 fragment.appendChild(parent.firstChild);
             }
-            forEach(list, function(index, item, clone) {
+            function updateListView(method, args, len) {
+                var listName = list.name;
+                switch (method) {
+                    case "push":
+                        $.each(args, function(index, item) {
+                            updateView(len + index, item);
+                        });
+                        break;
+                    case "unshift"  :
+                        list.insertBefore = parent.firstChild;
+                        $.each(args, function(index, item) {
+                            updateView(index, item);
+                        });
+                        resetIndex(parent, listName);
+                        delete list.insertBefore;
+                        break;
+                    case "pop":
+                        var node = findIndex(parent, listName, len - 1);
+                        if (node) {
+                            removeView(parent, listName, node);
+                        }
+                        break;
+                    case "shift":
+                        removeView(parent, listName, 0, parent.firstChild);
+                        resetIndex(parent, listName);
+                        break;
+                    case "clear":
+                        while (parent.firstChild) {
+                            parent.removeChild(parent.firstChild);
+                        }
+                        break;
+                    case "splice":
+                        var start = args[0], second = args[1], adds = [].slice.call(args, 2);
+                        var deleteCount = second >= 0 ? second : len - start;
+                        var node = findIndex(parent, listName, start);
+                        if (node) {
+                            removeViews(parent, listName, node, deleteCount);
+                            resetIndex(parent, listName);
+                            if (adds.length) {
+                                node = findIndex(parent, listName, start);
+                                list.insertBefore = node;
+                                $.each(adds, function(index, item) {
+                                    updateView(index, item);
+                                });
+                                resetIndex(parent, listName);
+                                delete list.insertBefore;
+                            }
+                        }
+                        break;
+                    case "reverse":
+                    case "sort":
+                        while (parent.firstChild) {
+                            parent.removeChild(parent.firstChild);
+                        }
+                        $.each(list, function(index, item) {
+                            updateView(index, item);
+                        });
+                        break;
+                }
+            }
+            var isList = Array.isArray(list[ subscribers ]);
+            if (isList) {
+                list[ subscribers ].push(updateListView);
+            }
+
+            function updateView(index, item, clone, insertBefore) {
                 var newScope = {}, textNodes = [];
                 newScope[itemName] = item;
                 newScope[indexName] = index;
+                if (isList) {
+                    var comment = doc.createComment(list.name + index);
+                    if (list.insertBefore) {
+                        parent.insertBefore(comment, list.insertBefore);
+                    } else {
+                        parent.appendChild(comment);
+                    }
+                }
                 for (var node = fragment.firstChild; node; node = node.nextSibling) {
                     clone = node.cloneNode(true);
                     if (clone.nodeType === 1) {
@@ -202,15 +300,75 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                     } else if (clone.nodeType === 3) {
                         textNodes.push(clone);
                     }
-                    parent.appendChild(clone);
+                    if (list.insertBefore) {
+                        parent.insertBefore(clone, list.insertBefore);
+                    } else {
+                        parent.appendChild(clone);
+                    }
                 }
                 for (var i = 0; node = textNodes[i++]; ) {
                     scanText(node, newScope, parentScopes, doc);//扫描文本节点
                 }
-            });
+            }
+            forEach(list, updateView);
             flags.stopBinding = true;
         }
     };
+
+    function resetIndex(elem, name) {
+        var index = 0;
+        for (var node = elem.firstChild; node; node = node.nextSibling) {
+            if (node.nodeType === 8) {
+                if (node.nodeValue.indexOf(name) === 0) {
+                    if (node.nodeValue !== name + index) {
+                        node.nodeValue = name + index;
+                    }
+                    index++;
+                }
+            }
+        }
+    }
+    function removeView(elem, name, node) {
+        var nodes = [], doc = elem.ownerDocument, view = doc.createDocumentFragment();
+        for (var check = node; check; check = check.nextSibling) {
+            //如果到达下一个路标,则断开,将收集到的节点放到文档碎片与下一个路标返回
+            if (check.nodeType === 8 && check.nodeValue.indexOf(name) === 0
+                    && check !== node) {
+                break
+            }
+            nodes.push(check);
+        }
+        for (var i = 0; node = nodes[i++]; ) {
+            view.appendChild(node);
+        }
+        return [view, check];
+    }
+    function removeViews(elem, name, node, number) {
+        var ret = [];
+        do {
+            var array = removeView(elem, name, node);
+            if (array[1]) {
+                node = array[1];
+                ret.push(array[0]);
+            } else {
+                break
+            }
+        } while (ret.length !== number);
+        return ret;
+    }
+    function findIndex(elem, name, target) {
+        var index = 0;
+        for (var node = elem.firstChild; node; node = node.nextSibling) {
+            if (node.nodeType === 8) {
+                if (node.nodeValue.indexOf(name) === 0) {
+                    if (node.nodeValue == name + target) {
+                        return node;
+                    }
+                    index++;
+                }
+            }
+        }
+    }
     //循环绑定其他布尔属性
     var bools = "autofocus,autoplay,async,checked,controls,declare,defer,"
             + "contenteditable,ismap,loop,multiple,noshade,open,noresize,readonly,selected";
@@ -226,50 +384,88 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     //如果一个input标签添加了model绑定。那么它对应的字段将与元素的value连结在一起
     //字段变，value就变；value变，字段也跟着变。默认是绑定input事件，
     //我们也可以使用ng-event="change"改成change事件
-    modelBinding.INPUT = function(data, scope, scopes) {
-        var element = data.element;
-        var array = [scope].concat(scopes);
-        var name = data.node.value, model;
-        array.forEach(function(obj) {
-            if (!model && obj.hasOwnProperty(name)) {
-                model = obj;
-            }
-        });
-        model = model || {};
+    modelBinding.INPUT = function(element, model, name) {
+        if (element.name === void 0) {
+            element.name = name;
+        }
+        var type = element.type, ok;
         function updateModel() {
             model[name] = element.value;
         }
         function updateView() {
             element.value = model[name];
         }
-        updateView();//怎么也要执行一次
-        var list = getSubscribers(model.__modelName__ + name);
-        $.Array.ensure(list, updateView);
-        var event = element.attributes[prefix + "event"] || {};
-        event = event.value;
-        if (event === "change") {
-            $.bind(element, event, updateModel);
-        } else {
-            if (window.addEventListener) { //先执行W3C
-                element.addEventListener("input", updateModel, false);
+        if (/^(password|textarea|text)$/.test(type)) {
+            ok = true;
+            updateModel = function() {
+                model[name] = element.value;
+            };
+            updateView = function() {
+                element.value = model[name];
+            };
+            var event = element.attributes[prefix + "event"] || {};
+            event = event.value;
+            if (event === "change") {
+                $.bind(element, event, updateModel);
             } else {
-                element.attachEvent("onpropertychange", updateModel);
+                if (window.addEventListener) { //先执行W3C
+                    element.addEventListener("input", updateModel, false);
+                } else {
+                    element.attachEvent("onpropertychange", updateModel);
+                }
+                if (window.VBArray && window.addEventListener) { //IE9
+                    element.attachEvent("onkeydown", function(e) {
+                        var key = e.keyCode;
+                        if (key === 8 || key === 46) {
+                            updateModel(); //处理回退与删除
+                        }
+                    });
+                    element.attachEvent("oncut", updateModel); //处理粘贴
+                }
             }
-            if (window.VBArray && window.addEventListener) { //IE9
-                element.attachEvent("onkeydown", function(e) {
-                    var key = e.keyCode;
-                    if (key === 8 || key === 46) {
-                        updateModel(); //处理回退与删除
-                    }
-                });
-                element.attachEvent("oncut", updateModel); //处理粘贴
-            }
+
+        } else if (type === "radio") {
+            ok = true;
+            updateView = function() {
+                element.checked = model[name] === element.value;
+            };
+            $.bind(element, "click", updateModel);//IE6-8
+        } else if (type === "checkbox") {
+            ok = true;
+            updateModel = function() {
+                if (element.checked) {
+                    $.Array.ensure(model[name], element.value);
+                } else {
+                    $.Array.remove(model[name], element.value);
+                }
+            };
+            updateView = function() {
+                element.checked = !!~model[name].indexOf(element.value);
+            };
+            $.bind(element, "click", updateModel);//IE6-8
         }
+//WinJS.Binding.List
+
+        bridge[ expando ] = updateView;
+        updateView();
+        delete bridge[ expando ];
+    };
+    modelBinding.SELECT = function(element, model, name) {
+        var select = $(element);
+        function updateModel() {
+            model[name] = select.val();
+        }
+        function updateView() {
+            select.val(model[name]);
+        }
+        $.bind(element, "change", updateModel);
+        bridge[ expando ] = updateView;
+        updateView();
+        delete bridge[ expando ];
     };
     modelBinding.TEXTAREA = modelBinding.INPUT;
     function notifySubscribers(accessor) {//通知依赖于这个域的函数们更新自身
         var list = getSubscribers(accessor);
-        //console.log(accessor +" notifySubscribers" + list.length)
         if (list && list.length) {
             var safelist = list.concat();
             for (var i = 0, fn; fn = safelist[i++]; ) {
@@ -296,10 +492,12 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         skipArray = skipArray || [];
         var model = {}, first = [], second = [];
         forEach(obj, function(key, val) {
-            if (skipArray.indexOf(key)) {
+            if (skipArray.indexOf(key) == -1) {
                 //相依赖的computed
                 var accessor = name + key, old;
-                if (typeof val === "object" && "set" in val) {
+                if (Array.isArray(val) && !val[subscribers]) {
+                    model[key] = observableArray(val, accessor);
+                } else if (typeof val === "object" && "set" in val) {
                     Object.defineProperty(model, key, {
                         set: function(neo) {
                             if (typeof val.set === "function") {
@@ -397,6 +595,60 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         }
     }
 
+
+    //http://msdn.microsoft.com/en-us/library/windows/apps/hh700774.aspx
+    //http://msdn.microsoft.com/zh-cn/magazine/jj651576.aspx
+    function observableArray(list, name) {
+        var accessor = list.concat();
+        accessor[ subscribers ] = [];
+        accessor.name = "#" + name;
+        String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method) {
+            var nativeMethod = accessor[ method ];
+            accessor[ method ] = function() {
+                var old = this.length;
+                var viewFns = this[ subscribers ];
+                nativeMethod.apply(this, arguments);
+                for (var i = 0, fn; fn = viewFns[i++]; ) {
+                    fn(method, arguments, old);
+                }
+            };
+        });
+        accessor.clear = function() {
+            this.length = 0;
+            var viewFns = this[ subscribers ]
+            for (var i = 0, fn; fn = viewFns[i++]; ) {
+                fn("clear", []);
+            }
+        };
+        accessor.sortBy = function(fn, scope) {
+            $.Array.sortBy(this, fn, scope);
+            var viewFns = this[ subscribers ];
+            for (var i = 0, fn; fn = viewFns[i++]; ) {
+                fn("sort", []);
+            }
+        };
+        accessor.ensure = function(el) {
+            var old = this.length;
+            $.Array.ensure(this, el);
+            if (this.length > old) {
+                var viewFns = this[ subscribers ] || [];
+                for (var i = 0, fn; fn = viewFns[i++]; ) {
+                    fn("push", [el], old);
+                }
+            }
+        };
+        accessor.removeAt = function(index) {//移除指定索引上的元素
+            this.splice(index, 1);
+        };
+        accessor.remove = function(item) {//移除第一个等于给定值的元素
+            var index = this.indexOf(item);
+            if (index !== -1) {
+                this.removeAt(index);
+            }
+        };
+        return accessor;
+    }
+
     function scanAttr(el, scope, scopes, flags) {
         var bindings = [];
         for (var i = 0, attr; attr = el.attributes[i++]; ) {
@@ -465,7 +717,11 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     var model = $.model("app", {
         firstName: "xxx",
         lastName: "oooo",
-        array: [1, 2, 3, 4],
+        bool: false,
+        array: [1, 2, 3, 4, 5, 6, 7, 8],
+        select: "test1",
+        color: "green",
+        vehicle: ["car"],
         fullName: {
             set: function(val) {
                 var array = val.split(" ");
@@ -478,13 +734,17 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         }
     });
     $.model("son", {
-        firstName: "yyyy",
+        firstName: "yyyy"
     });
     $.model("aaa", {
-        firstName: "6666",
+        firstName: "6666"
     });
     scanTag(document.body, model, [], document);
     setTimeout(function() {
         model.firstName = "setTimeout";
     }, 2000);
+
+    setTimeout(function() {
+        model.array.reverse()
+    }, 3000);
 });

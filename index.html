@@ -33,10 +33,40 @@
         <div>Normal: {{1 + 2}}</div>
         <div ms-skip>Ignored: {{1 + 2}}</div>
         <hr/>
-        <ul ms-each-el='array'>
+        <ul ms-each-el='array' id="array">
             <li>这是动态生成的{{el}}</li>
         </ul>
+        <div ms-if="bool">sssss</div>
+        <form name="myForm" >
+            <input type="radio" ms-model="color" value="red">  <br/>
+            <input type="radio" ms-model="color" value="green">  <br/>
+            <input type="radio" ms-model="color" value="blue">  <br/>
+            <input type="checkbox"  ms-model="vehicle" value="bike"><br>
+            <input type="checkbox"  ms-model="vehicle" value="car"> <br>
+            <input type="checkbox"  ms-model="vehicle" value="ship">
+            <p> I have a {{vehicle}}</p>
+            <tt>color = {{color}}</tt><br/>
+        </form>
+        <select ms-model="select">
+            <option>
+                test0
+            </option>
+            <option>
+                test1
+            </option>
+            <option>
+                test2
+            </option>
+        </select>
+        <div ms-switch="number">
+
+        </div>
+
+
         <script src="mass.js" type="text/javascript"></script>
+
+
+
         <script type="text/javascript">
             require("more/avalon2", function() {
             })
