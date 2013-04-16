@@ -15,9 +15,25 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         var index = value.indexOf("{{");
         return index !== -1 && index < value.indexOf("}}");
     }
-
-    function evalExpr(scope, text, callback, tokens) {
-        return function updateView( ) {
+    function forEach(obj, fn) {
+        if (obj) {//不能传个null, undefined进来
+            var isArray = isFinite(obj.length), i = 0
+            if (isArray) {
+                for (var n = obj.length; i < n; i++) {
+                    fn(i, obj[i]);
+                }
+            } else {
+                for (i in obj) {
+                    if (obj.hasOwnProperty(i)) {
+                        fn(i, obj[i]);
+                    }
+                }
+            }
+        }
+    }
+    //eval一个或多个表达式
+    function watchView(text, scope, scopes, callback, tokens) {
+        function updateView() {
             var flagDelete = false, val;
             if (!updateView.checkDeps) {//在第一次执行时，将自己放到其依赖的订阅者列表中
                 flagDelete = true;
@@ -26,25 +42,33 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             }
             if (tokens) {
                 val = tokens.map(function(obj) {
-                    return obj.expr ? _evalExpr(scope, obj.value) : obj.value;
+                    return obj.expr ? evalExpr(obj.value, scope, scopes) : obj.value;
                 }).join("");
             } else {
-                val = _evalExpr(scope, text);
+                val = evalExpr(text, scope, scopes);
             }
             callback(val);
             if (flagDelete) {
                 delete bridge[ expando ];
             }
-        };
+        }
+        updateView();
     }
-    function _evalExpr(scope, text) {
-        var names = [], args = [];
-        $.each(scope, function(key, val) {
-            names.push(key);
-            args.push(val);
+    function evalExpr(text, scope, scopes) {
+        var list = [scope].concat(scopes), uniq = {}, names = [], args = [];
+        list.forEach(function(obj) {
+            forEach(obj, function(key, val) {
+                if (!uniq[key]) {
+                    names.push(key);
+                    args.push(val);
+                    uniq[key] = 1;
+                }
+            });
         });
         var fn = Function.apply(Function, names.concat(" return " + text));
-        return  fn.apply(fn, args);
+        var val = fn.apply(fn, args);
+        array = uniq = null;
+        return val;
     }
     function extractExpr(value) {
         var tokens = [];
@@ -79,36 +103,34 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         }
         return tokens;
     }
-    avalon.bindings = {
+    var bindingHandlers = avalon.bindingHandlers = {
         //将模型中的字段与input, textarea的value值关联在一起
-        "model": function(data) {
+        "model": function(data, scope, scopes) {
             var element = data.element;
             var tagName = element.tagName;
             if (typeof  modelBinding[tagName] === "function") {
-                modelBinding[tagName](model, element, data);
+                modelBinding[tagName](data, scope, scopes, element);
             }
         },
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
         //<div>{{firstName}} + java</div>，如果model.firstName为ruby， 那么变成
         //<div>ruby + java</div>
-        "text": function(data) {
+        "text": function(data, scope, scopes) {
             var node = data.node;
-            var updateView = evalExpr(data.scope, data.value, function(val) {
+            watchView(data.value, scope, scopes, function(val) {
                 node.nodeValue = val;
             });
-            updateView();
         },
         //控制元素显示或隐藏
-        "toggle": function(data) {
+        "toggle": function(data, scope, scopes) {
             var element = $(data.element);
-            var updateView = evalExpr(data.scope, data.value, function(val) {
+            watchView(data.value, scope, scopes, function(val) {
                 element.toggle(!!val);
             });
-            updateView();
         },
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
         //<a href="{{url.hostname}}/{{url.pathname}}.html">
-        "href": function(data) {
+        "href": function(data, scope, scopes) {
             //如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
             var node = data.node;
@@ -118,36 +140,34 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                 simple = true;
                 text = RegExp.$1;
             }
-            var updateView = evalExpr(data.scope, text, function(val) {
+            watchView(text, scope, scopes, function(val) {
                 data.element[name] = val;
             }, simple ? null : extractExpr(data.value));
-            updateView();
         },
         //这是一个布尔属性绑定的范本，布尔属性插值要求整个都是一个插值表达式，用{{}}包起来
         //布尔属性在IE下无法取得原来的字符串值，变成一个布尔，因此需要用ng-disabled
         //text.slice(2, text.lastIndexOf("}}"))
-        disabled: function(data) {
+        "disabled": function(data, scope, scopes) {
             var element = data.element, name = data.type,
                     propName = $.propMap[name] || name;
-            var updateView = evalExpr(data.scope, data.value, function(val) {
+            watchView(data.value, scope, scopes, function(val) {
                 element[propName] = !!val;
             });
-            updateView();
         },
         //切换类名，有三种形式
         //1、ms-class-xxx="flag" 根据flag的值决定是添加或删除类名xxx 
         //2、ms-class=obj obj为一个{xxx:true, yyy:false}的对象，根据其值添加或删除其键名
         //3、ms-class=str str是一个类名或多个类名的集合，全部添加
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
-        "class": function(data) {
+        "class": function(data, scope, scopes) {
             var element = $(data.element);
-            var updateView = evalExpr(data.scope, data.value, function(val) {
+            watchView(data.value, scope, scopes, function(val) {
                 if (data.args) {//第一种形式
                     element.toggleClass(data.args.join(""), !!val);
                 } else if (typeof val === "string") {
                     element.addClass(val);
                 } else if (val && typeof val === "object") {
-                    $.each(val, function(cls, flag) {
+                    forEach(val, function(cls, flag) {
                         if (flag) {
                             element.addClass(cls);
                         } else {
@@ -156,62 +176,73 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                     });
                 }
             });
-            updateView();
         },
         //控制流程绑定
-        "skip": function(data, directives) {
-            directives.stopBinding = true;
+        "skip": function() {
+            arguments[3].stopBinding = true;
         },
-        "each": function(data, directives) {
-            console.log(data);
+        "each": function(data, scope, scopes, flags) {
             var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
-            var elem = data.element;
-            var array = _evalExpr(data.scope, data.value);
-            $.each(array, function(index, el) {
-                var scope = {};
-                scope[itemName] = el;
-                scope[indexName] = index;
-                console.log(el)
-                if (elem.canHaveChildren === false || !noScanText[elem.tagName]) {
-                    scanText(elem, scope);
-                }
-                for (var node = elem.firstChild; node; node = node.nextSibling) {
-                    if (node.nodeType === 1) {
-                        scan(node, scope);
+            var parent = data.element;
+            var list = evalExpr(data.value, scope, scopes);
+            var doc = parent.ownerDocument;
+            var fragment = doc.createDocumentFragment();
+            var parentScopes = [scope].concat(scopes)
+            while (parent.firstChild) {
+                fragment.appendChild(parent.firstChild);
+            }
+            forEach(list, function(index, item, clone) {
+                var newScope = {}, textNodes = [];
+                newScope[itemName] = item;
+                newScope[indexName] = index;
+                for (var node = fragment.firstChild; node; node = node.nextSibling) {
+                    clone = node.cloneNode(true);
+                    if (clone.nodeType === 1) {
+                        scanTag(clone, newScope, parentScopes, doc);//扫描元素节点
+                    } else if (clone.nodeType === 3) {
+                        textNodes.push(clone);
                     }
+                    parent.appendChild(clone);
                 }
-            })
-
-
-
-
-
-            directives.stopBinding = true;
+                for (var i = 0; node = textNodes[i++]; ) {
+                    scanText(node, newScope, parentScopes, doc);//扫描文本节点
+                }
+            });
+            flags.stopBinding = true;
         }
     };
     //循环绑定其他布尔属性
     var bools = "autofocus,autoplay,async,checked,controls,declare,defer,"
             + "contenteditable,ismap,loop,multiple,noshade,open,noresize,readonly,selected";
     bools.replace($.rword, function(name) {
-        avalon.bindings[name] = avalon.bindings.disabled;
+        bindingHandlers[name] = bindingHandlers.disabled;
     });
     //建议不要直接在src属性上修改，因此这样会发出无效的请求，使用ms-src
     "title, alt, src".replace($.rword, function(name) {
-        avalon.bindings[name] = avalon.bindings.href;
+        bindingHandlers[name] = bindingHandlers.href;
     });
 
-    var modelBinding = avalon.bindings.model;
+    var modelBinding = bindingHandlers.model;
     //如果一个input标签添加了model绑定。那么它对应的字段将与元素的value连结在一起
     //字段变，value就变；value变，字段也跟着变。默认是绑定input事件，
     //我们也可以使用ng-event="change"改成change事件
-    modelBinding.INPUT = function(model, element, data) {
-        var name = data.node.value;
+    modelBinding.INPUT = function(data, scope, scopes) {
+        var element = data.element;
+        var array = [scope].concat(scopes);
+        var name = data.node.value, model;
+        array.forEach(function(obj) {
+            if (!model && obj.hasOwnProperty(name)) {
+                model = obj;
+            }
+        });
+        model = model || {};
         function updateModel() {
             model[name] = element.value;
         }
         function updateView() {
             element.value = model[name];
         }
+        updateView();//怎么也要执行一次
         var list = getSubscribers(model.__modelName__ + name);
         $.Array.ensure(list, updateView);
         var event = element.attributes[prefix + "event"] || {};
@@ -263,11 +294,11 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     }
     $.model = function(name, obj, skipArray) {
         skipArray = skipArray || [];
-        var model = {}, first = [], second = []
-        $.each(obj, function(key, val) {
+        var model = {}, first = [], second = [];
+        forEach(obj, function(key, val) {
             if (skipArray.indexOf(key)) {
                 //相依赖的computed
-                var accessor = name + key, old
+                var accessor = name + key, old;
                 if (typeof val === "object" && "set" in val) {
                     Object.defineProperty(model, key, {
                         set: function(neo) {
@@ -311,7 +342,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                             }
                         },
                         get: function() {
-//如果中层把方法放在bridge[ expando ]中
+                            //如果中层把方法放在bridge[ expando ]中
                             collectSubscribers(accessor);
                             return obj[key];
                         },
@@ -328,98 +359,107 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             first = model[key];
         });
         model.__modelName__ = name;
-        return $.avalon.models[blank + name] = model;
+        return avalon.models[blank + name] = model;
     };
-    function scanTag(el, scope, directives) {
-        var bindings = [], newScope;
+    //=============================================================
+    function scanTag(elem, scope, scopes, doc) {
+        scopes = scopes || [];
+        var flags = {};
+        scanAttr(elem, scope, scopes, flags);//扫描特点节点
+        if (flags.stopBinding) {//是否要停止扫描
+            return false;
+        }
+        if (flags.newScope) {//更换作用域， 复制父作用域堆栈，防止互相影响
+            scopes = scopes.slice(0);
+            scope = flags.newScope;
+        }
+        if (elem.canHaveChildren === false || !stopScan[elem.tagName]) {
+            var textNodes = [];
+            for (var node = elem.firstChild; node; node = node.nextSibling) {
+                if (node.nodeType === 1) {
+                    scanTag(node, scope, scopes, doc);//扫描元素节点
+                } else if (node.nodeType === 3) {
+                    textNodes.push(node);
+                }
+            }
+            for (var i = 0; node = textNodes[i++]; ) {//延后执行
+                scanText(node, scope, scopes, doc);//扫描文本节点
+            }
+        }
+    }
+
+    var stopScan = $.oneObject("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr,script,style".toUpperCase());
+    //扫描元素节点中直属的文本节点，并进行抽取
+    function scanText(textNode, scope, scopes, doc) {
+        var bindings = extractTextBindings(textNode, doc);
+        if (bindings.length) {
+            executeBindings(bindings, scope, scopes);
+        }
+    }
+
+    function scanAttr(el, scope, scopes, flags) {
+        var bindings = [];
         for (var i = 0, attr; attr = el.attributes[i++]; ) {
             if (attr.specified) {
-                var directive = false;
+                var isBinding = false;
                 if (attr.name.indexOf(prefix) !== -1) {//如果是以指定前缀命名的
                     var type = attr.name.replace(prefix, "");
                     if (type.indexOf("-") > 0) {
                         var args = type.split("-");
                         type = args.shift();
                     }
-                    directive = !!avalon.bindings[type];
-                } else if (avalon.bindings[attr.name] && hasExpr(attr.value)) {
+                    isBinding = typeof bindingHandlers[type] === "function";
+                } else if (bindingHandlers[attr.name] && hasExpr(attr.value)) {
                     type = attr.name; //如果只是普通属性，但其值是个插值表达式
-                    directive = true;
+                    isBinding = true;
                 }
-                if (directive) {
+                if (isBinding) {
                     bindings.push({
                         type: type,
-                        scopes: [],
                         args: args,
-                        scope: scope,
                         element: el,
                         node: attr,
                         value: attr.nodeValue
                     });
                 }
-                if (!newScope && type === "controller") {
-                    newScope = $.avalon.models[blank + attr.value] || {};
+                if (!flags.newScope && type === "controller") {//更换作用域
+                    var temp = avalon.models[blank + attr.value];
+                    if (typeof temp === "object" && temp !== scope) {
+                        scopes.unshift(scope);
+                        flags.newScope = scope = temp;
+                    }
                 }
             }
         }
-        if (newScope) {
-            bindings.forEach(function(obj) {
-                obj.scopes.push(obj.scope);
-                obj.scope = newScope;
-            });
-            directives.scope = newScope
-        }
-        executeBindings(bindings, directives);
+        executeBindings(bindings, scope, scopes, flags);
     }
-    function createText(doc, text) {
-        return  doc.createTextNode(text);
-    }
-    function executeBindings(bindings, directives) {
+
+    function executeBindings(bindings, scope, scopes, flags) {
         bindings.forEach(function(data) {
-            var fn = $.avalon.bindings[data.type];
-            fn(data, directives);
+            bindingHandlers[data.type](data, scope, scopes, flags);
         });
     }
-    var noScanText = $.oneObject("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr,script,style".toUpperCase());
-    //扫描元素节点中直属的文本节点，并进行抽取
-    function scanText(el, scope) {
-        var textNodes = [];
-        for (var node = el.firstChild; node; node = node.nextSibling) {
-            if (node.nodeType === 3) {
-                textNodes.push(node);
-            }
-        }
-        if (textNodes.length) {
-            var bindings = [];
-            textNodes.forEach(function(node) {
-                extractTextBindings(node, scope, bindings);
-            });
-            executeBindings(bindings);
-        }
-    }
 
-
-
-    function extractTextBindings(node, scope, bindings) {
-        var doc = node.ownerDocument, tokens = extractExpr(node.nodeValue);
+    function extractTextBindings(textNode, doc) {
+        var bindings = [], tokens = extractExpr(textNode.nodeValue);
         if (tokens.length) {
             var fragment = doc.createDocumentFragment();
             while (tokens.length) {//将文本转换为文本节点，并替换原来的文本节点
-                var data = tokens.shift();
-                var textNode = createText(doc, data.value);
-                if (data.expr) {
+                var token = tokens.shift();
+                var node = doc.createTextNode(token.value);
+                if (token.expr) {
                     bindings.push({
                         type: "text",
-                        node: textNode,
-                        element: node.parentNode,
-                        scope: scope,
-                        value: data.value
-                    }); //收集带指令的文本
+                        node: node,
+                        element: textNode.parentNode,
+                        value: token.value
+                    }); //收集带有插值表达式的文本
                 }
-                fragment.appendChild(textNode);
+                fragment.appendChild(node);
             }
-            node.parentNode.replaceChild(fragment, node);
+            textNode.parentNode.replaceChild(fragment, textNode);
         }
+        return bindings;
     }
 
     var model = $.model("app", {
@@ -437,23 +477,13 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             }
         }
     });
-    function scan(el, scope) {
-        var helper = {}
-        scanTag(el, scope, helper);
-        if (helper.stopBinding) {//停止渲染子节点
-            return false;
-        }
-        scope = helper.scope || scope;
-        if (el.canHaveChildren === false || !noScanText[el.tagName]) {
-            scanText(el, scope);
-        }
-        for (var node = el.firstChild; node; node = node.nextSibling) {
-            if (node.nodeType === 1) {
-                scan(node, scope);
-            }
-        }
-    }
-    scan(document.documentElement, model);
+    $.model("son", {
+        firstName: "yyyy",
+    });
+    $.model("aaa", {
+        firstName: "6666",
+    });
+    scanTag(document.body, model, [], document);
     setTimeout(function() {
         model.firstName = "setTimeout";
     }, 2000);
