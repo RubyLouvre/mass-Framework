@@ -2,7 +2,21 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
 
     var prefix = "ms-";
     var avalon = $.avalon = {
-        models: {}
+        models: {},
+        filters: {
+            uppercase: function(str) {
+                return str.toUpperCase()
+            },
+            lowercase: function(str) {
+                return str.toLowerCase();
+            },
+            number: function(str) {
+                return isFinite(str) ? str : "";
+            },
+            aaa: function(str) {
+                return str + "AAA"
+            }
+        }
     };
     var blank = " ";
     var obsevers = {};
@@ -36,17 +50,15 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     }
     //eval一个或多个表达式
     function watchView(text, scope, scopes, data, callback, tokens) {
-        var updateView, target
-        if (!data.filters) {
-            var scopeList = [scope].concat(scopes);
+        var updateView, target, filters = data.filters;
+        var scopeList = [scope].concat(scopes);
+        if (!filters) {
             for (var i = 0, obj; obj = scopeList[i++]; ) {
-                if (scope.hasOwnProperty(text)) {
-                    target = scope;
-                    console.log("xxxxxxxxxxx")
+                if (obj.hasOwnProperty(text)) {
+                    target = obj;//如果能在作用域上直接找到,我们就不需要eval了
                     break;
                 }
             }
-              
         }
         if (target) {
             updateView = function() {
@@ -54,13 +66,15 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             };
         } else {
             updateView = function() {
+
                 if (tokens) {
                     var val = tokens.map(function(obj) {
-                        return obj.expr ? evalExpr(obj.value, scopeList, obj.filters) : obj.value;
+                        return obj.expr ? evalExpr(obj.value, scopeList, data) : obj.value;
                     }).join("");
                 } else {
-                    val = evalExpr(text, scopeList, data.filters);
+                    val = evalExpr(text, scopeList, data);
                 }
+
                 callback(val);
             };
         }
@@ -68,9 +82,14 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         updateView();
         delete  Publish[ expando ];
     }
-    function evalExpr(text, scopeList, filters) {
-        var uniq = {}, names = [], args = [];
+    function evalExpr(text, scopeList, data) {
+        console.log(text)
+        var uniq = {
+            $occoecatio: 1
+        }, names = [], args = [];
+        
         scopeList.forEach(function(scope) {
+            scope.$occoecatio = true;
             forEach(scope, function(key, val) {
                 if (!uniq[key]) {
                     names.push(key);
@@ -78,10 +97,48 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                     uniq[key] = 1;
                 }
             });
+            delete scope.$occoecatio;
         });
-        var fn = Function.apply(Function, names.concat(" return " + text));
-        var val = fn.apply(fn, args);
-        uniq = null;
+      
+        if (data.compileFn) {
+            console.log(data.compileFn+"")
+            args.push(avalon.filters)
+            return data.compileFn.apply(data.compileFn, args);
+        }
+        if (data.filters) {
+            var random = new Date - 0, textBuffer = [], fargs;
+            textBuffer.push("var ret", random, "=", text, "\r\n");
+            for (var i = 0, f; f = data.filters[i++]; ) {
+                var start = f.indexOf("(");
+                if (start !== -1) {
+                    fargs = f.slice(start + 1, f.lastIndexOf(")")).trim();
+                    fargs = "," + fargs;
+                    f = f.slice(0, start).trim();
+                } else {
+                    fargs = "";
+                }
+                textBuffer.push(" if(filters", random, ".", f, "){\r\n\ttry{ret", random,
+                        " = filters", random, ".", f, "(ret", random, fargs, ")}catch(e){};\r\n}\r\n");
+            }
+            textBuffer.push("\treturn ret", random);
+            text = textBuffer.join("");
+            names.push("filters" + random);
+            args.push(avalon.filters);
+            delete data.filters;//释放内存
+        } else {
+            text = "\treturn " + text;
+        }
+        try {
+            var fn = Function.apply(Function, names.concat(text));
+            var val = fn.apply(fn, args);
+            data.compileFn = fn;//缓存,防止二次编译
+        } catch (e) {
+            data.compileFn = function() {
+                return "";
+            };
+            val = "";
+        }
+        uniq = textBuffer = names = null;//释放内存
         return val;
     }
 
@@ -191,7 +248,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
             var parent = data.element;
             var scopeList = [scope].concat(scopes);
-            var list = evalExpr(data.value, scopeList);
+            var list = evalExpr(data.value, scopeList, data);
             var doc = parent.ownerDocument;
             var fragment = doc.createDocumentFragment();
             while (parent.firstChild) {
@@ -233,7 +290,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                         var deleteCount = second >= 0 ? second : len - start;
                         var node = findIndex(parent, listName, start);
                         if (node) {
-                            removeViews(parent, listName, node, scopeList);
+                            removeViews(parent, listName, node, deleteCount);
                             resetIndex(parent, listName);
                             if (adds.length) {
                                 node = findIndex(parent, listName, start);
@@ -257,7 +314,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                         break;
                 }
             }
-            var isList = Array.isArray(list[ subscribers ]);
+            var isList = Array.isArray(list[ subscribers ] || {});
             if (isList) {
                 list[ subscribers ].push(updateListView);
             }
@@ -295,7 +352,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             flags.stopBinding = true;
         }
     };
-
+    //重置所有路标
     function resetIndex(elem, name) {
         var index = 0;
         for (var node = elem.firstChild; node; node = node.nextSibling) {
@@ -564,13 +621,6 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         } else {
             var model = modelFactory(name, obj, $.skipArray || []);
             model.$modelName = name;
-            model.$filters = {
-                upperCase: function(str) {
-                    return str.toUpperCase();
-                }
-            };
-            model.$addFilter = function() {
-            };
             return avalon.models[name] = model
         }
     };
@@ -632,7 +682,10 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                         },
                         get: function() {
                             //如果中层把方法放在Publish[ expando ]中
-                            collectSubscribers(accessor);
+                            if (!obj.$occoecatio){//为了防止它在不合适的时候收集订阅者,添加$occoecatio标识让它瞎掉
+                                collectSubscribers(accessor);
+                            }
+                            
                             return obj[key];
                         },
                         enumerable: true
@@ -787,7 +840,8 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                         type: "text",
                         node: node,
                         element: textNode.parentNode,
-                        value: token.value
+                        value: token.value,
+                        filters: token.filters
                     }); //收集带有插值表达式的文本
                 }
                 fragment.appendChild(node);
@@ -829,5 +883,6 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
 
     setTimeout(function() {
         model.array.reverse()
+        // console.log(obsevers.applastName.join("\r\n"))
     }, 3000);
 });
