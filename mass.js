@@ -312,6 +312,9 @@
     });
     (function() {
         var cur = getCurrentScript(true);
+        if(!cur){//处理window safari的Error没有stack的问题
+           cur = $.slice(document.scripts).pop().src;
+        }
         var url = cur.replace(/[?#].*/, "");
         kernel = $.config;
         kernel.plugin = {};
@@ -324,7 +327,6 @@
                 break;
             }
         }
-
         kernel.level = 9;
     })();
 

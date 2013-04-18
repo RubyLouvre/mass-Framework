@@ -4,6 +4,7 @@
     define.lang = lang === "zh-cn" ? lang : lang.split("-")[0];
 })();
 define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(locale, $) {
+    window.console = window.console || $;
     var prefix = $.config.bindingPrefix || "ms-";
     var formats = locale.NUMBER_FORMATS;
     var avalon = $.avalon = {
@@ -501,7 +502,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                 list[ subscribers ].push(updateListView);
             }
 
-            function updateView(index, item, clone, insertBefore) {
+            function updateView(index, item, clone) {
                 var newScope = {}, textNodes = [];
                 newScope[itemName] = item;
                 newScope[indexName] = index;
@@ -807,6 +808,14 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         }
     };
     var startWithDollar = /^\$/;
+
+    if (!Object.defineProperty) {
+        alert({}.__defineGetter__)
+        Object.defineProperty = function(obj, name, defines) {
+            obj.__defineGetter__(name, defines.get)
+            obj.__defineSetter__(name, defines.set)
+        };
+    }
     function modelFactory(name, obj, skipArray) {
         var model = {}, first = [], second = [];
         forEach(obj, function(key, val) {
@@ -1081,10 +1090,26 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         } else {
             ok = e instanceof TypeError;
         }
+        //opera9.61
+        //message: Statement on line 810: Undefined variable: nickName
+        //opera12
+        //Undefined variable: nickName
+        //safari 5
+        //Can't find variable: nickName
+        //firefox3-20  chrome
+        //ReferenceError: nickName is not defined
+        //IE10
+        //“nickName”未定义 
+        //IE6 
+        //'eee' 未定义 
         if (ok) {
-            var varName = e.message;
-            varName = varName.charAt(0) === "“" ? varName.slice(1) : varName;//处理IE下的引号
-            varName = (varName.match(/^[\w$]+/)|| [""])[0];//取得未定义的变量名
+            if (window.opera) {
+                var varName = e.message.split("Undefined variable: ")[1];
+            } else {
+                varName = e.message.replace("Can't find variable: ", "")
+                        .replace("“", "").replace("'", "");
+            }
+            varName = (varName.match(/^[\w$]+/) || [""])[0];//取得未定义的变量名
             for (var i = 0, scope; scope = scopeList[i++]; ) {
                 if (scope.hasOwnProperty(varName)) {
                     var modelName = scope.$modelName + random;
@@ -1200,27 +1225,27 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     var model = $.model("app", {
         firstName: "xxx",
         lastName: "oooo",
-        bool: false,
-        user: {
-            name: "userName"
-        },
         array: [1, 2, 3, 4, 5, 6, 7, 8],
-        select: "test1",
-        color: "green",
-        vehicle: ["car"],
-        nickName: function() {
-            return this.firstName + "!!!!!!"
-        },
-        fullName: {
-            set: function(val) {
-                var array = val.split(" ");
-                this.firstName = array[0] || "";
-                this.lastName = array[1] || "";
-            },
-            get: function() {
-                return this.firstName + " " + this.lastName;
-            }
-        }
+//        select: "test1",
+//        color: "green",
+//        vehicle: ["car"],
+//        bool: false,
+//        user: {
+//            name: "userName"
+//        },
+//        nickName: function() {
+//            return this.firstName + "!!!!!!";
+//        },
+//        fullName: {
+//            set: function(val) {
+//                var array = val.split(" ");
+//                this.firstName = array[0] || "";
+//                this.lastName = array[1] || "";
+//            },
+//            get: function() {
+//                return this.firstName + " " + this.lastName;
+//            }
+//        }
     });
     $.model("son", {
         firstName: "yyyy"
@@ -1231,14 +1256,14 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     scanTag(document.body, model, [], document);
     setTimeout(function() {
         model.firstName = "setTimeout";
-        model.user.name = "eee"
+        //    model.user.name = "eee"
         //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
     }, 2000);
     setTimeout(function() {
         model.array.reverse()
         model.firstName = "3333";
         model.lastName = "2333";
-        model.user = {name: "uuu"}
+        //   model.user = {name: "uuu"}
         //  console.log("xxxxxxxxxxxxxxxxx")
 
         //console.log(obsevers.applastName == obsevers.appfirstName)
