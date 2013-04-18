@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+        <title>$.fn.abort</title>
+        <script>
+            window.$$path  = location.protocol + "//" + location.host;
+            document.write('<script src="' + $$path + '/mass_merge.js"><\/script>');
+            document.write('<script src="' + $$path + '/doc/scripts/common.js"><\/script>');
+        </script>
+    </head>
+    
+    <body>
+        <article>
+
+            <h3>$.fn.abort([ fn ])</h3>
+            <p>
+                <span class="stress">描述：</span>
+            </p>
+            <p>为 abort 事件绑定一个处理函数，或者触发元素上的 abort 事件。</p>
+            <p>这个函数的第一种用法是 .bind('abort', handler) 的快捷方式，第二种用法是 .fire('abort') 的快捷方式。</p>
+            <p>此事件并不是所有元素都支持，只有image才有（XMLHTTPRequest也有，但它不是节点） </p>
+            <p>
+                <span class="stress">参数：</span>
+            </p>
+            <dl>
+                <dt>fn</dt>
+                <dd>可选。Funcion。回调函数。</dd>
+            </dl>
+          
+        </article>
+    </body>
+
+</html>
