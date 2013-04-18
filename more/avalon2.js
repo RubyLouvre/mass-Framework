@@ -307,7 +307,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             };
         } else {
             updateView = function() {
-                var fn = data.compileFn
+                var fn = data.compileFn;
                 if (typeof fn === "function") {
                     val = fn.apply(fn, data.compileArgs || []);
                 } else {
@@ -814,20 +814,21 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             //如果不在忽略列表内,并且没有以$开头($开头的属性名留着框架使用)
             if (skipArray.indexOf(key) === -1 && !startWithDollar.test(key)) {
                 //相依赖的computed
-                var accessor = name + key, old;
+                var accessor = name + "." + key;
                 if (Array.isArray(val) && !val[subscribers]) {
                     model[key] = Collection(val, accessor);
                 } else if (typeof val === "object") {
                     if ("set" in val && Object.keys(val).length <= 2) {
+                        var computedProperty;
                         Object.defineProperty(model, key, {
                             set: function(neo) {
                                 if (typeof val.set === "function") {
                                     val.set.call(model, neo); //通知底层改变
                                 } else {
-                                    obj[key] = neo;
+                                    computedProperty = neo;
                                 }
-                                if (old !== neo) {
-                                    old = neo;
+                                if (computedProperty !== neo) {
+                                    computedProperty = neo;
                                     notifySubscribers(accessor); //通知顶层改变
                                 }
                             },
@@ -841,24 +842,39 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                                     };
                                     obsevers[accessor] = [];
                                 }
-                                old = val.get.call(model);
-                                obj[name] = old;
+                                computedProperty = val.get.call(model);
                                 if (flagDelete) {
                                     delete Publish[ expando ];
                                 }
-                                return old;
+                                return computedProperty;
                             },
                             enumerable: true
                         });
                         second.push(key);
                     } else {
-
+                        var objectProperty = {};
+                        Object.defineProperty(model, key, {
+                            set: function(neo) {
+                                if (objectProperty !== neo) {
+                                    objectProperty = modelFactory(accessor, neo, neo.$skipArray || []);
+                                    notifySubscribers(accessor);
+                                }
+                            },
+                            get: function() {
+                                //如果中层把方法放在Publish[ expando ]中
+                                collectSubscribers(accessor);
+                                return objectProperty;
+                            },
+                            enumerable: true
+                        });
+                        first.push(key);
                     }
                 } else if (typeof val !== "function") {
+                    var simpleProperty = obj[key]
                     Object.defineProperty(model, key, {
                         set: function(neo) {
-                            if (obj[key] !== neo) {
-                                obj[key] = neo;
+                            if (simpleProperty !== neo) {
+                                simpleProperty = neo;
                                 //通知中层,顶层改变
                                 notifySubscribers(accessor);
                             }
@@ -866,7 +882,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                         get: function() {
                             //如果中层把方法放在Publish[ expando ]中
                             collectSubscribers(accessor);
-                            return obj[key];
+                            return simpleProperty;
                         },
                         enumerable: true
                     });
@@ -935,11 +951,11 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                 });
                 value = value.replace(regCloseTag, function(a, b) {
                     if (b) {
-                        var filters = []
+                        var filters = [];
                         if (b.indexOf("|") > 0) {
                             b = b.replace(/\|\s*(\w+)\s*(\([^)]+\))?/g, function(c, d, e) {
-                                filters.push(d + e)
-                                return ""
+                                filters.push(d + e);
+                                return "";
                             });
                         }
                         tokens.push({
@@ -1060,7 +1076,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                     var modelName = scope.$modelName + random;
                     if (names.indexOf(modelName) === -1) {
                         names.push(modelName);
-                        args.push(scope)
+                        args.push(scope);
                     }
                     //这里实际还要做更严格的处理
                     var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(variableName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
@@ -1171,6 +1187,9 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         firstName: "xxx",
         lastName: "oooo",
         bool: false,
+        user:{
+           name: "userName"  
+        },
         array: [1, 2, 3, 4, 5, 6, 7, 8],
         select: "test1",
         color: "green",
@@ -1195,12 +1214,14 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     scanTag(document.body, model, [], document);
     setTimeout(function() {
         model.firstName = "setTimeout";
+          model.user.name = "eee"
         //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
     }, 2000);
     setTimeout(function() {
         model.array.reverse()
         model.firstName = "3333";
         model.lastName = "2333";
+        model.user = {name:"uuu"}
         //  console.log("xxxxxxxxxxxxxxxxx")
 
         //console.log(obsevers.applastName == obsevers.appfirstName)

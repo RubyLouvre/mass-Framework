@@ -25,6 +25,7 @@
         </style>
     </head>
     <body>
+        ddd
         <p>First name: <input ms-model="firstName" /></p>
         <p>Last name: <input ms-model="lastName" ms-disabled='false' disabled='disabled' /></p>
         <h2>Hello, <input ms-event="change" ms-model="fullName">!</h2>
@@ -71,7 +72,8 @@
 
 
 
-            require("more/avalon2", function() {
+            require("more/avalon2,ready", function() {
+                alert($.getText(document.body))
             })
         </script>
 

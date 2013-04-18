@@ -30,6 +30,7 @@ define("query", ["mass"], function($) {
         getText: function() {
             //获取某个节点的文本，如果此节点为元素节点，则取其childNodes的所有文本
             return function getText(nodes) {
+                nodes = nodes.nodeType ? [nodes] : nodes;
                 for (var i = 0, ret = "", node; node = nodes[i++];) {
                     // 对得文本节点与CDATA的内容
                     if (node.nodeType === 3 || node.nodeType === 4) {
