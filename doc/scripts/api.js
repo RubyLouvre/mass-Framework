@@ -22,7 +22,7 @@ define("api", ["mass"], function() {
         data: ["data", "parseData", "removeData", "mergeData"],
         css: "fn.css, fn.width, fn.height, fn.innerWidth, fn.innerHeight, fn.outerWidth, fn.outerHeight, fn.offset, fn.position, fn.offsetParent, fn.scrollParent, fn.scrollTop, fn.scrollLeft, css".match($.rword).sort(),
         attr: "fn.addClass, fn.hasClass, fn.removeClass, fn.toggleClass, fn.replaceClass, fn.val, fn.removeAttr, fn.removeProp, fn.attr, fn.prop, attr, prop".match($.rword).sort(),
-        event: ("fn.on,fn.bind,fn.off,fn.unbind,fn.toggle,fn.delegate,fn.live,Event,eventSupport" +
+        event: ("fn.on,fn.bind,fn.off,fn.unbind,fn.delegate,fn.live,Event,eventSupport" +
                 "fn.one,fn.undelegate,fn.die,fn.fire,fn.contextmenu,fn.click,fn.dblclick," +
                 "fn.mouseout,fn.mouseover,fn.mouseenter,fn.mouseleave,fn.mousemove," +
                 "fn.mousedown,fn.mouseup,fn.mousewheel,fn.abort,fn.error,fn.load,fn.unload," +

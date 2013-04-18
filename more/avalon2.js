@@ -1,12 +1,11 @@
 (function() {
     //加载用户当前浏览器所有的语言
     var lang = (navigator.language || navigator.browserLanguage || "zh-cn").toLowerCase();
-    define.lang = lang === "zh-cn" ? lang : lang.split("-")[0]
+    define.lang = lang === "zh-cn" ? lang : lang.split("-")[0];
 })();
 define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(locale, $) {
-    console.log(locale)
-    var prefix = "ms-";
-    var formats = locale.NUMBER_FORMATS
+    var prefix = $.config.bindingPrefix || "ms-";
+    var formats = locale.NUMBER_FORMATS;
     var avalon = $.avalon = {
         models: {},
         obsevers: {},
@@ -869,8 +868,25 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                         });
                         first.push(key);
                     }
-                } else if (typeof val !== "function") {
-                    var simpleProperty = obj[key]
+                } else if (typeof val === "function") {
+                    model[key] = function() {
+//                        var flagDelete = false;
+//                        if (!obsevers[accessor]) {
+//                            flagDelete = true;
+//                            Publish[ expando ] = function() {
+//                                notifySubscribers(accessor); //通知顶层改变
+//                            };
+//                            obsevers[accessor] = [];
+//                        }
+//                        collectSubscribers(accessor);
+                        var ret = val.apply(model, arguments);
+//                        if (flagDelete) {
+//                            delete Publish[ expando ];
+//                        }
+                        return ret;
+                    };
+                } else {
+                    var simpleProperty = obj[key];
                     Object.defineProperty(model, key, {
                         set: function(neo) {
                             if (simpleProperty !== neo) {
@@ -1066,20 +1082,18 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             ok = e instanceof TypeError;
         }
         if (ok) {
-            var variableName = e.message.split(/\s+/).shift();//取得未定义的变量名
-            if (variableName.charAt(0) === "'" || variableName.charAt(0) === '"') {
-                //处理IE下的引号
-                variableName = variableName.slice(1, variableName.length - 1);
-            }
+            var varName = e.message;
+            varName = varName.charAt(0) === "“" ? varName.slice(1) : varName;//处理IE下的引号
+            varName = (varName.match(/^[\w$]+/)|| [""])[0];//取得未定义的变量名
             for (var i = 0, scope; scope = scopeList[i++]; ) {
-                if (scope.hasOwnProperty(variableName)) {
+                if (scope.hasOwnProperty(varName)) {
                     var modelName = scope.$modelName + random;
                     if (names.indexOf(modelName) === -1) {
                         names.push(modelName);
                         args.push(scope);
                     }
                     //这里实际还要做更严格的处理
-                    var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(variableName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
+                    var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(varName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
                     return  text.replace(reg, function(a, b, c, d) {
                         return b + modelName + "." + c + d;//添加作用域
                     });
@@ -1092,7 +1106,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
     function parseExpr(text, scopeList, data) {
         var names = [], args = [], random = new Date - 0, val;
-        if (true) {
+        if (false) {
             //取得模块的名字
             scopeList.forEach(function(scope) {
                 var scopeName = scope.$modelName + random;
@@ -1187,13 +1201,16 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         firstName: "xxx",
         lastName: "oooo",
         bool: false,
-        user:{
-           name: "userName"  
+        user: {
+            name: "userName"
         },
         array: [1, 2, 3, 4, 5, 6, 7, 8],
         select: "test1",
         color: "green",
         vehicle: ["car"],
+        nickName: function() {
+            return this.firstName + "!!!!!!"
+        },
         fullName: {
             set: function(val) {
                 var array = val.split(" ");
@@ -1214,14 +1231,14 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     scanTag(document.body, model, [], document);
     setTimeout(function() {
         model.firstName = "setTimeout";
-          model.user.name = "eee"
+        model.user.name = "eee"
         //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
     }, 2000);
     setTimeout(function() {
         model.array.reverse()
         model.firstName = "3333";
         model.lastName = "2333";
-        model.user = {name:"uuu"}
+        model.user = {name: "uuu"}
         //  console.log("xxxxxxxxxxxxxxxxx")
 
         //console.log(obsevers.applastName == obsevers.appfirstName)

@@ -30,11 +30,11 @@
         <p>Last name: <input ms-model="lastName" ms-disabled='false' disabled='disabled' /></p>
         <h2>Hello, <input ms-event="change" ms-model="fullName">!</h2>
         <div>{{firstName +" | "+ lastName }}</div>
-
         <div>{{firstName | uppercase | aaa }}</div>
         <a href='{{2252}}/{{lastName}}' title='{{firstName}}'>这是链接</a>
         <div id="eee">Normal: {{1 + 8}}</div>
         <div ms-skip>Ignored: {{1 + 2}}</div>
+        <div>{{nickName()}}555555555</div>
         <hr/>
         <ul ms-each-el='array' id="array">
             <li>这是动态生成的{{el}}</li>
@@ -73,7 +73,7 @@
 
 
             require("more/avalon2,ready", function() {
-                alert($.getText(document.body))
+             
             })
         </script>
 
