@@ -3,9 +3,10 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     var prefix = "ms-";
     var avalon = $.avalon = {
         models: {},
+        obsevers: {},
         filters: {
             uppercase: function(str) {
-                return str.toUpperCase()
+                return str.toUpperCase();
             },
             lowercase: function(str) {
                 return str.toLowerCase();
@@ -19,8 +20,8 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         }
     };
     var blank = " ";
-    var obsevers = {};
-    var Publish = {};//将函数放到发布对象上，让依赖它的函数
+    var obsevers = avalon.obsevers
+    var Publish = {}; //将函数放到发布对象上，让依赖它的函数
     var expando = new Date - 0;
     var subscribers = "$" + expando;
     /*********************************************************************
@@ -48,33 +49,37 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             }
         }
     }
-    //eval一个或多个表达式
+//eval一个或多个表达式
     function watchView(text, scope, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
         var scopeList = [scope].concat(scopes);
+        var trimText = text.trim();
         if (!filters) {
             for (var i = 0, obj; obj = scopeList[i++]; ) {
-                if (obj.hasOwnProperty(text)) {
-                    target = obj;//如果能在作用域上直接找到,我们就不需要eval了
+                if (obj.hasOwnProperty(trimText)) {
+                    target = obj; //如果能在作用域上直接找到,我们就不需要eval了
                     break;
                 }
             }
         }
         if (target) {
             updateView = function() {
-                callback(target[text]);
+                callback(target[trimText]);
             };
         } else {
             updateView = function() {
-
-                if (tokens) {
-                    var val = tokens.map(function(obj) {
-                        return obj.expr ? evalExpr(obj.value, scopeList, data) : obj.value;
-                    }).join("");
+                var fn = data.compileFn
+                if (typeof fn === "function") {
+                    val = fn.apply(fn, data.compileArgs || []);
                 } else {
-                    val = evalExpr(text, scopeList, data);
+                    if (tokens) {
+                        var val = tokens.map(function(obj) {
+                            return obj.expr ? evalExpr(obj.value, scopeList, data) : obj.value;
+                        }).join("");
+                    } else {
+                        val = evalExpr(text, scopeList, data);
+                    }
                 }
-
                 callback(val);
             };
         }
@@ -82,32 +87,107 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         updateView();
         delete  Publish[ expando ];
     }
+    var regEscape = /([-.*+?^${}()|[\]\/\\])/g;
+    function escapeRegExp(target) {
+        //将字符串安全格式化为正则表达式的源码
+        return target.replace(regEscape, "\\$1");
+    }
+    var isStrict = (function() {
+        return !this;
+    })();
+    function insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random) {
+        var ok = false;
+        if (window.dispatchEvent) {//判定是否IE9-11或者为标准浏览器
+            ok = e instanceof ReferenceError;
+        } else {
+            ok = e instanceof TypeError;
+        }
+        if (ok) {
+            var variableName = e.message.split(/\s+/).shift();//取得未定义的变量名
+            if (variableName.charAt(0) === "'" || variableName.charAt(0) === '"') {
+                //处理IE下的引号
+                variableName = variableName.slice(1, variableName.length - 1);
+            }
+            for (var i = 0, scope; scope = scopeList[i++]; ) {
+                if (scope.hasOwnProperty(variableName)) {
+                    var modelName = scope.$modelName + random;
+                    if (names.indexOf(modelName) === -1) {
+                        names.push(modelName);
+                        args.push(scope)
+                    }
+                    //这里实际还要做更严格的处理
+                    var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(variableName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
+                    return  text.replace(reg, function(a, b, c, d) {
+                        return b + modelName + "." + c + d;//添加作用域
+                    });
+                }
+            }
+
+        }
+    }
+    var doubleQuotedString = /"([^\\"\n]|\\.)*"/g;
+    var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
     function evalExpr(text, scopeList, data) {
-        console.log(text)
-        var uniq = {
-            $occoecatio: 1
-        }, names = [], args = [];
-        
-        scopeList.forEach(function(scope) {
-            scope.$occoecatio = true;
-            forEach(scope, function(key, val) {
-                if (!uniq[key]) {
-                    names.push(key);
-                    args.push(val);
-                    uniq[key] = 1;
+        var names = [], args = [], random = new Date - 0, val;
+        if (true) {
+            //取得模块的名字
+            scopeList.forEach(function(scope) {
+                var scopeName = scope.$modelName + random;
+                if (names.indexOf(scopeName) === -1) {
+                    names.push(scopeName);
+                    args.push(model);
                 }
             });
-            delete scope.$occoecatio;
-        });
-      
-        if (data.compileFn) {
-            console.log(data.compileFn+"")
-            args.push(avalon.filters)
-            return data.compileFn.apply(data.compileFn, args);
+            text = "var ret" + random + " = " + text + "\r\n";
+            for (var i = 0, name; name = names[i++]; ) {
+                text = "with(" + name + "){\r\n" + text + "\r\n}\r\n";
+            }
+        } else {
+            var single = random + 1;
+            var double = single + 1;
+            var singleHolder = [];
+            var doubleHolder = [];
+            var loop = true;
+            //抽取掉所有字符串
+            text = text.replace(singleQuotedString, function(a) {
+                singleHolder.push(a);
+                return single;
+            }).replace(doubleQuotedString, function(b) {
+                doubleHolder.push(b);
+                return double;
+            });
+            do {//开始循环
+                try {
+                    var fn = Function.apply(Function, names.concat("return " + text));
+                    var val = fn.apply(fn, args);
+                    loop = false;
+                } catch (e) {
+                    text = insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random);
+                    loop = typeof text === "string";
+                }
+            } while (loop);
+            if (text) {
+                if (singleHolder.length) {
+                    text = text.replace(new RegExp(single, "g"), function() {
+                        return singleHolder.shift();
+                    });
+                }
+                if (doubleHolder.length) {
+                    text = text.replace(new RegExp(double, "g"), function() {
+                        return doubleHolder.shift();
+                    });
+                }
+                text = "var ret" + random + " = " + text;
+            } else {
+                data.compileFn = function() {
+                    return "";
+                };
+                return "";
+            }
         }
         if (data.filters) {
-            var random = new Date - 0, textBuffer = [], fargs;
-            textBuffer.push("var ret", random, "=", text, "\r\n");
+            var textBuffer = [], fargs;
+            textBuffer.push(text, "\r\n");
             for (var i = 0, f; f = data.filters[i++]; ) {
                 var start = f.indexOf("(");
                 if (start !== -1) {
@@ -120,30 +200,29 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                 textBuffer.push(" if(filters", random, ".", f, "){\r\n\ttry{ret", random,
                         " = filters", random, ".", f, "(ret", random, fargs, ")}catch(e){};\r\n}\r\n");
             }
-            textBuffer.push("\treturn ret", random);
             text = textBuffer.join("");
             names.push("filters" + random);
             args.push(avalon.filters);
-            delete data.filters;//释放内存
-        } else {
-            text = "\treturn " + text;
+            delete data.filters; //释放内存
         }
+        data.compileArgs = args;
         try {
+            text += "\r\nreturn ret" + random;
             var fn = Function.apply(Function, names.concat(text));
-            var val = fn.apply(fn, args);
-            data.compileFn = fn;//缓存,防止二次编译
+            val = fn.apply(fn, args);
+            data.compileFn = fn; //缓存,防止二次编译
         } catch (e) {
             data.compileFn = function() {
                 return "";
             };
             val = "";
         }
-        uniq = textBuffer = names = null;//释放内存
+        textBuffer = names = null; //释放内存
         return val;
     }
 
     var bindingHandlers = avalon.bindingHandlers = {
-        //将模型中的字段与input, textarea的value值关联在一起
+//将模型中的字段与input, textarea的value值关联在一起
         "model": function(data, scope, scopes) {
             var element = data.element;
             var tagName = element.tagName;
@@ -242,7 +321,6 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                     }
                 }
             });
-
         },
         "each": function(data, scope, scopes, flags) {
             var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
@@ -334,7 +412,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                 for (var node = fragment.firstChild; node; node = node.nextSibling) {
                     clone = node.cloneNode(true);
                     if (clone.nodeType === 1) {
-                        scanTag(clone, newScope, scopeList, doc);//扫描元素节点
+                        scanTag(clone, newScope, scopeList, doc); //扫描元素节点
                     } else if (clone.nodeType === 3) {
                         textNodes.push(clone);
                     }
@@ -345,7 +423,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                     }
                 }
                 for (var i = 0; node = textNodes[i++]; ) {
-                    scanText(node, newScope, scopeList, doc);//扫描文本节点
+                    scanText(node, newScope, scopeList, doc); //扫描文本节点
                 }
             }
             forEach(list, updateView);
@@ -417,7 +495,6 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     "title, alt, src".replace($.rword, function(name) {
         bindingHandlers[name] = bindingHandlers.href;
     });
-
     var modelBinding = bindingHandlers.model;
     //如果一个input标签添加了model绑定。那么它对应的字段将与元素的value连结在一起
     //字段变，value就变；value变，字段也跟着变。默认是绑定input事件，
@@ -467,7 +544,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             updateView = function() {
                 element.checked = model[name] === element.value;
             };
-            $.bind(element, "click", updateModel);//IE6-8
+            $.bind(element, "click", updateModel); //IE6-8
         } else if (type === "checkbox") {
             ok = true;
             updateModel = function() {
@@ -480,7 +557,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             updateView = function() {
                 element.checked = !!~model[name].indexOf(element.value);
             };
-            $.bind(element, "click", updateModel);//IE6-8
+            $.bind(element, "click", updateModel); //IE6-8
         }
         Publish[ expando ] = updateView;
         updateView();
@@ -593,13 +670,13 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             return accessor[ subscribers ];
         }
     }
-    function collectSubscribers(accessor) {//收集依赖于这个域的函数
+    function collectSubscribers(accessor) {//收集依赖于这个域的订阅者
         if (Publish[ expando ]) {
             var list = getSubscribers(accessor);
-            $.Array.ensure(list, Publish[ expando ]);
+            $.Array.ensure(list, Publish[ expando ]);//只有数组不存在此元素才push进去
         }
     }
-    function notifySubscribers(accessor) {//通知依赖于这个域的函数们更新自身
+    function notifySubscribers(accessor) {//通知依赖于这个域的订阅者更新自身
         var list = getSubscribers(accessor);
         if (list && list.length) {
             var args = [].slice.call(arguments, 1);
@@ -611,6 +688,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             }
         }
     }
+    //http://www.cnblogs.com/whitewolf/archive/2013/04/16/3024843.html
     /*********************************************************************
      *                            Model                                   *
      **********************************************************************/
@@ -621,7 +699,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         } else {
             var model = modelFactory(name, obj, $.skipArray || []);
             model.$modelName = name;
-            return avalon.models[name] = model
+            return avalon.models[name] = model;
         }
     };
     var startWithDollar = /^\$/;
@@ -654,6 +732,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                                 if (!obsevers[accessor]) {
                                     flagDelete = true;
                                     Publish[ expando ] = function() {
+
                                         notifySubscribers(accessor); //通知顶层改变
                                     };
                                     obsevers[accessor] = [];
@@ -682,10 +761,9 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                         },
                         get: function() {
                             //如果中层把方法放在Publish[ expando ]中
-                            if (!obj.$occoecatio){//为了防止它在不合适的时候收集订阅者,添加$occoecatio标识让它瞎掉
+                            if (!model.$occoecatio) {//为了防止它在不合适的时候收集订阅者,添加$occoecatio标识让它瞎掉
                                 collectSubscribers(accessor);
                             }
-                            
                             return obj[key];
                         },
                         enumerable: true
@@ -705,10 +783,11 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     /*********************************************************************
      *                           Scan                                     *
      **********************************************************************/
+    //扫描整个DOM树,最开始是从某个元素节点扫起
     function scanTag(elem, scope, scopes, doc) {
         scopes = scopes || [];
         var flags = {};
-        scanAttr(elem, scope, scopes, flags);//扫描特点节点
+        scanAttr(elem, scope, scopes, flags); //扫描特点节点
         if (flags.stopBinding) {//是否要停止扫描
             return false;
         }
@@ -720,13 +799,13 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             var textNodes = [];
             for (var node = elem.firstChild; node; node = node.nextSibling) {
                 if (node.nodeType === 1) {
-                    scanTag(node, scope, scopes, doc);//扫描元素节点
+                    scanTag(node, scope, scopes, doc); //扫描元素节点
                 } else if (node.nodeType === 3) {
                     textNodes.push(node);
                 }
             }
             for (var i = 0; node = textNodes[i++]; ) {//延后执行
-                scanText(node, scope, scopes, doc);//扫描文本节点
+                scanText(node, scope, scopes, doc); //扫描文本节点
             }
         }
     }
@@ -821,7 +900,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
 
     function executeBindings(bindings, scope, scopes, flags) {
         bindings.forEach(function(data) {
-            bindingHandlers[data.type](data, scope, scopes, flags);
+            bindingHandlers[data.type]($.mix({}, data), scope, scopes, flags);
             if (data.remove) {//移除数据绑定，防止被二次解析
                 data.element.removeAttribute(data.node.name);
             }
@@ -879,10 +958,14 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     scanTag(document.body, model, [], document);
     setTimeout(function() {
         model.firstName = "setTimeout";
+        //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
     }, 2000);
-
     setTimeout(function() {
         model.array.reverse()
-        // console.log(obsevers.applastName.join("\r\n"))
+        model.firstName = "3333";
+        model.lastName = "2333";
+        //  console.log("xxxxxxxxxxxxxxxxx")
+
+        //console.log(obsevers.applastName == obsevers.appfirstName)
     }, 3000);
 });

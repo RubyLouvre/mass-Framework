@@ -29,13 +29,13 @@
         <p>Last name: <input ms-model="lastName" ms-disabled='false' disabled='disabled' /></p>
         <h2>Hello, <input ms-event="change" ms-model="fullName">!</h2>
         <div>{{firstName +" | "+ lastName }}</div>
-       
-         <div>{{firstName | uppercase | aaa }}</div>
+
+        <div>{{firstName | uppercase | aaa }}</div>
         <a href='{{2252}}/{{lastName}}' title='{{firstName}}'>这是链接</a>
-        <div>Normal: {{1 + 8}}</div>
+        <div id="eee">Normal: {{1 + 8}}</div>
         <div ms-skip>Ignored: {{1 + 2}}</div>
         <hr/>
-      <!--   <ul ms-each-el='array' id="array">
+        <ul ms-each-el='array' id="array">
             <li>这是动态生成的{{el}}</li>
         </ul>
         <div ms-if="bool">sssss</div>
@@ -60,17 +60,20 @@
                 test2
             </option>
         </select>{{select}}
-  <div ms-class="{ 'my-class':true, 'your-class':true, 'his-class':true }">xxxxxxxxx</div>
--->
+        <div ms-class="{ 'my-class':true, 'your-class':true, 'his-class':true }">xxxxxxxxx</div>
+
 
         <script src="mass.js" type="text/javascript"></script>
 
 
 
         <script type="text/javascript">
+
+
+
             require("more/avalon2", function() {
             })
         </script>
-      
+
     </body>
 </html>
