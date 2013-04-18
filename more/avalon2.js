@@ -1,6 +1,12 @@
-define("mvvm", "$event,$css,$attr".split(","), function($) {
-
+(function() {
+    //加载用户当前浏览器所有的语言
+    var lang = (navigator.language || navigator.browserLanguage || "zh-cn").toLowerCase();
+    define.lang = lang === "zh-cn" ? lang : lang.split("-")[0]
+})();
+define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(locale, $) {
+    console.log(locale)
     var prefix = "ms-";
+    var formats = locale.NUMBER_FORMATS
     var avalon = $.avalon = {
         models: {},
         obsevers: {},
@@ -11,19 +17,252 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             lowercase: function(str) {
                 return str.toLowerCase();
             },
-            number: function(str) {
-                return isFinite(str) ? str : "";
+            contains: $.String.contains,
+            truncate: $.String.truncate,
+            camelize: $.String.camelize,
+            escape: $.String.escapeHTML,
+            currency: function(number, symbol) {
+                symbol = symbol || formats.CURRENCY_SYM;
+                return symbol + avalon.filters.number(number);
+            },
+            number: function(number, decimals, dec_point, thousands_sep) {
+                //与PHP的number_format完全兼容
+                //number	必需，要格式化的数字
+                //decimals	可选，规定多少个小数位。
+                //dec_point	可选，规定用作小数点的字符串（默认为 . ）。
+                //thousands_sep	可选，规定用作千位分隔符的字符串（默认为 , ），如果设置了该参数，那么所有其他参数都是必需的。
+                // http://kevin.vanzonneveld.net
+                // *     example 1: number_format(1234.56);
+                // *     returns 1: '1,235'
+                // *     example 2: number_format(1234.56, 2, ',', ' ');
+                // *     returns 2: '1 234,56'
+                // *     example 3: number_format(1234.5678, 2, '.', '');
+                // *     returns 3: '1234.57'
+                // *     example 4: number_format(67, 2, ',', '.');
+                // *     returns 4: '67,00'
+                // *     example 5: number_format(1000);
+                // *     returns 5: '1,000'
+                // *     example 6: number_format(67.311, 2);
+                // *     returns 6: '67.31'
+                // *     example 7: number_format(1000.55, 1);
+                // *     returns 7: '1,000.6'
+                // *     example 8: number_format(67000, 5, ',', '.');
+                // *     returns 8: '67.000,00000'
+                // *     example 9: number_format(0.9, 0);
+                // *     returns 9: '1'
+                // *     example 10: number_format('1.20', 2);
+                // *     returns 10: '1.20'
+                // *     example 11: number_format('1.20', 4);
+                // *     returns 11: '1.2000'
+                // *     example 12: number_format('1.2000', 3);
+                // *     returns 12: '1.200'
+                // *     example 13: number_format('1 000,50', 2, '.', ' ');
+                // *     returns 13: '100 050.00'
+                // Strip all characters but numerical ones.
+                number = (number + "").replace(/[^0-9+\-Ee.]/g, '');
+                var n = !isFinite(+number) ? 0 : +number,
+                        prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
+                        sep = (typeof thousands_sep === 'undefined') ? formats.GROUP_SEP : thousands_sep,
+                        dec = (typeof dec_point === 'undefined') ? formats.DECIMAL_SEP : dec_point,
+                        s = '',
+                        toFixedFix = function(n, prec) {
+                    var k = Math.pow(10, prec);
+                    return '' + Math.round(n * k) / k;
+                };
+                // Fix for IE parseFloat(0.55).toFixed(0) = 0;
+                s = (prec ? toFixedFix(n, prec) : '' + Math.round(n)).split('.');
+                if (s[0].length > 3) {
+                    s[0] = s[0].replace(/\B(?=(?:\d{3})+(?!\d))/g, sep);
+                }
+                if ((s[1] || '').length < prec) {
+                    s[1] = s[1] || '';
+                    s[1] += new Array(prec - s[1].length + 1).join('0');
+                }
+                return s.join(dec);
             },
             aaa: function(str) {
                 return str + "AAA"
             }
         }
     };
-    var blank = " ";
     var obsevers = avalon.obsevers
     var Publish = {}; //将函数放到发布对象上，让依赖它的函数
     var expando = new Date - 0;
     var subscribers = "$" + expando;
+    /*********************************************************************
+     *                            DateFormat                              *
+     **********************************************************************/
+    /*
+     'yyyy': 4 digit representation of year (e.g. AD 1 => 0001, AD 2010 => 2010)
+     'yy': 2 digit representation of year, padded (00-99). (e.g. AD 2001 => 01, AD 2010 => 10)
+     'y': 1 digit representation of year, e.g. (AD 1 => 1, AD 199 => 199)
+     'MMMM': Month in year (January-December)
+     'MMM': Month in year (Jan-Dec)
+     'MM': Month in year, padded (01-12)
+     'M': Month in year (1-12)
+     'dd': Day in month, padded (01-31)
+     'd': Day in month (1-31)
+     'EEEE': Day in Week,(Sunday-Saturday)
+     'EEE': Day in Week, (Sun-Sat)
+     'HH': Hour in day, padded (00-23)
+     'H': Hour in day (0-23)
+     'hh': Hour in am/pm, padded (01-12)
+     'h': Hour in am/pm, (1-12)
+     'mm': Minute in hour, padded (00-59)
+     'm': Minute in hour (0-59)
+     'ss': Second in minute, padded (00-59)
+     's': Second in minute (0-59)
+     'a': am/pm marker
+     'Z': 4 digit (+sign) representation of the timezone offset (-1200-+1200)
+     format string can also be one of the following predefined localizable formats:
+     
+     'medium': equivalent to 'MMM d, y h:mm:ss a' for en_US locale (e.g. Sep 3, 2010 12:05:08 pm)
+     'short': equivalent to 'M/d/yy h:mm a' for en_US locale (e.g. 9/3/10 12:05 pm)
+     'fullDate': equivalent to 'EEEE, MMMM d,y' for en_US locale (e.g. Friday, September 3, 2010)
+     'longDate': equivalent to 'MMMM d, y' for en_US locale (e.g. September 3, 2010
+     'mediumDate': equivalent to 'MMM d, y' for en_US locale (e.g. Sep 3, 2010)
+     'shortDate': equivalent to 'M/d/yy' for en_US locale (e.g. 9/3/10)
+     'mediumTime': equivalent to 'h:mm:ss a' for en_US locale (e.g. 12:05:08 pm)
+     'shortTime': equivalent to 'h:mm a' for en_US locale (e.g. 12:05 pm)
+     */
+    avalon.filters.dateFormat = (function(formats) {
+        function padNumber(num, digits, trim) {
+            var neg = '';
+            if (num < 0) {
+                neg = '-';
+                num = -num;
+            }
+            num = '' + num;
+            while (num.length < digits)
+                num = '0' + num;
+            if (trim)
+                num = num.substr(num.length - digits);
+            return neg + num;
+        }
+        function dateGetter(name, size, offset, trim) {
+            return function(date) {
+                var value = date['get' + name]();
+                if (offset > 0 || value > -offset)
+                    value += offset;
+                if (value === 0 && offset === -12) {
+                    value = 12;
+                }
+                return padNumber(value, size, trim);
+            };
+        }
+        function dateStrGetter(name, shortForm) {
+            return function(date, formats) {
+                var value = date['get' + name]();
+                var get = uppercase(shortForm ? ('SHORT' + name) : name);
+
+                return formats[get][value];
+            };
+        }
+
+        function timeZoneGetter(date) {
+            var zone = -1 * date.getTimezoneOffset();
+            var paddedZone = (zone >= 0) ? "+" : "";
+
+            paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) +
+                    padNumber(Math.abs(zone % 60), 2);
+
+            return paddedZone;
+        }
+        //取得上午下午
+        function ampmGetter(date, formats) {
+            return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
+        }
+        var DATE_FORMATS = {
+            yyyy: dateGetter('FullYear', 4),
+            yy: dateGetter('FullYear', 2, 0, true),
+            y: dateGetter('FullYear', 1),
+            MMMM: dateStrGetter('Month'),
+            MMM: dateStrGetter('Month', true),
+            MM: dateGetter('Month', 2, 1),
+            M: dateGetter('Month', 1, 1),
+            dd: dateGetter('Date', 2),
+            d: dateGetter('Date', 1),
+            HH: dateGetter('Hours', 2),
+            H: dateGetter('Hours', 1),
+            hh: dateGetter('Hours', 2, -12),
+            h: dateGetter('Hours', 1, -12),
+            mm: dateGetter('Minutes', 2),
+            m: dateGetter('Minutes', 1),
+            ss: dateGetter('Seconds', 2),
+            s: dateGetter('Seconds', 1),
+            // while ISO 8601 requires fractions to be prefixed with `.` or `,` 
+            // we can be just safely rely on using `sss` since we currently don't support single or two digit fractions
+            sss: dateGetter('Milliseconds', 3),
+            EEEE: dateStrGetter('Day'),
+            EEE: dateStrGetter('Day', true),
+            a: ampmGetter,
+            Z: timeZoneGetter
+        };
+        var DATE_FORMATS_SPLIT = /((?:[^yMdHhmsaZE']+)|(?:'(?:[^']|'')*')|(?:E+|y+|M+|d+|H+|h+|m+|s+|a|Z))(.*)/,
+                NUMBER_STRING = /^\d+$/;
+        var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
+        // 1        2       3         4          5          6          7          8  9     10      11
+        function jsonStringToDate(string) {
+            var match;
+            if (match = string.match(R_ISO8601_STR)) {
+                var date = new Date(0),
+                        tzHour = 0,
+                        tzMin = 0,
+                        dateSetter = match[8] ? date.setUTCFullYear : date.setFullYear,
+                        timeSetter = match[8] ? date.setUTCHours : date.setHours;
+
+                if (match[9]) {
+                    tzHour = int(match[9] + match[10]);
+                    tzMin = int(match[9] + match[11]);
+                }
+                dateSetter.call(date, int(match[1]), int(match[2]) - 1, int(match[3]));
+                timeSetter.call(date, int(match[4] || 0) - tzHour, int(match[5] || 0) - tzMin, int(match[6] || 0), int(match[7] || 0));
+                return date;
+            }
+            return string;
+        }
+        return function(date, format) {
+            var text = '',
+                    parts = [],
+                    fn, match;
+
+            format = format || 'mediumDate';
+            format = formats[format] || format;
+            if (isString(date)) {
+                if (NUMBER_STRING.test(date)) {
+                    date = int(date);
+                } else {
+                    date = jsonStringToDate(date);
+                }
+            }
+
+            if (isNumber(date)) {
+                date = new Date(date);
+            }
+
+            if (!isDate(date)) {
+                return date;
+            }
+
+            while (format) {
+                match = DATE_FORMATS_SPLIT.exec(format);
+                if (match) {
+                    parts = concat(parts, match, 1);
+                    format = parts.pop();
+                } else {
+                    parts.push(format);
+                    format = null;
+                }
+            }
+
+            forEach(parts, function(value) {
+                fn = DATE_FORMATS[value];
+                text += fn ? fn(date, formats)
+                        : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
+            });
+            return text;
+        };
+    })(locale.DATETIME_FORMATS);
     /*********************************************************************
      *                            View                                    *
      **********************************************************************/
@@ -35,7 +274,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
     }
     function forEach(obj, fn) {
         if (obj) {//不能传个null, undefined进来
-            var isArray = isFinite(obj.length), i = 0
+            var isArray = isFinite(obj.length), i = 0;
             if (isArray) {
                 for (var n = obj.length; i < n; i++) {
                     fn(i, obj[i]);
@@ -74,10 +313,10 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                 } else {
                     if (tokens) {
                         var val = tokens.map(function(obj) {
-                            return obj.expr ? evalExpr(obj.value, scopeList, data) : obj.value;
+                            return obj.expr ? parseExpr(obj.value, scopeList, data) : obj.value;
                         }).join("");
                     } else {
-                        val = evalExpr(text, scopeList, data);
+                        val = parseExpr(text, scopeList, data);
                     }
                 }
                 callback(val);
@@ -87,140 +326,6 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         updateView();
         delete  Publish[ expando ];
     }
-    var regEscape = /([-.*+?^${}()|[\]\/\\])/g;
-    function escapeRegExp(target) {
-        //将字符串安全格式化为正则表达式的源码
-        return target.replace(regEscape, "\\$1");
-    }
-    var isStrict = (function() {
-        return !this;
-    })();
-    function insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random) {
-        var ok = false;
-        if (window.dispatchEvent) {//判定是否IE9-11或者为标准浏览器
-            ok = e instanceof ReferenceError;
-        } else {
-            ok = e instanceof TypeError;
-        }
-        if (ok) {
-            var variableName = e.message.split(/\s+/).shift();//取得未定义的变量名
-            if (variableName.charAt(0) === "'" || variableName.charAt(0) === '"') {
-                //处理IE下的引号
-                variableName = variableName.slice(1, variableName.length - 1);
-            }
-            for (var i = 0, scope; scope = scopeList[i++]; ) {
-                if (scope.hasOwnProperty(variableName)) {
-                    var modelName = scope.$modelName + random;
-                    if (names.indexOf(modelName) === -1) {
-                        names.push(modelName);
-                        args.push(scope)
-                    }
-                    //这里实际还要做更严格的处理
-                    var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(variableName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
-                    return  text.replace(reg, function(a, b, c, d) {
-                        return b + modelName + "." + c + d;//添加作用域
-                    });
-                }
-            }
-
-        }
-    }
-    var doubleQuotedString = /"([^\\"\n]|\\.)*"/g;
-    var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
-    function evalExpr(text, scopeList, data) {
-        var names = [], args = [], random = new Date - 0, val;
-        if (true) {
-            //取得模块的名字
-            scopeList.forEach(function(scope) {
-                var scopeName = scope.$modelName + random;
-                if (names.indexOf(scopeName) === -1) {
-                    names.push(scopeName);
-                    args.push(model);
-                }
-            });
-            text = "var ret" + random + " = " + text + "\r\n";
-            for (var i = 0, name; name = names[i++]; ) {
-                text = "with(" + name + "){\r\n" + text + "\r\n}\r\n";
-            }
-        } else {
-            var single = random + 1;
-            var double = single + 1;
-            var singleHolder = [];
-            var doubleHolder = [];
-            var loop = true;
-            //抽取掉所有字符串
-            text = text.replace(singleQuotedString, function(a) {
-                singleHolder.push(a);
-                return single;
-            }).replace(doubleQuotedString, function(b) {
-                doubleHolder.push(b);
-                return double;
-            });
-            do {//开始循环
-                try {
-                    var fn = Function.apply(Function, names.concat("return " + text));
-                    var val = fn.apply(fn, args);
-                    loop = false;
-                } catch (e) {
-                    text = insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random);
-                    loop = typeof text === "string";
-                }
-            } while (loop);
-            if (text) {
-                if (singleHolder.length) {
-                    text = text.replace(new RegExp(single, "g"), function() {
-                        return singleHolder.shift();
-                    });
-                }
-                if (doubleHolder.length) {
-                    text = text.replace(new RegExp(double, "g"), function() {
-                        return doubleHolder.shift();
-                    });
-                }
-                text = "var ret" + random + " = " + text;
-            } else {
-                data.compileFn = function() {
-                    return "";
-                };
-                return "";
-            }
-        }
-        if (data.filters) {
-            var textBuffer = [], fargs;
-            textBuffer.push(text, "\r\n");
-            for (var i = 0, f; f = data.filters[i++]; ) {
-                var start = f.indexOf("(");
-                if (start !== -1) {
-                    fargs = f.slice(start + 1, f.lastIndexOf(")")).trim();
-                    fargs = "," + fargs;
-                    f = f.slice(0, start).trim();
-                } else {
-                    fargs = "";
-                }
-                textBuffer.push(" if(filters", random, ".", f, "){\r\n\ttry{ret", random,
-                        " = filters", random, ".", f, "(ret", random, fargs, ")}catch(e){};\r\n}\r\n");
-            }
-            text = textBuffer.join("");
-            names.push("filters" + random);
-            args.push(avalon.filters);
-            delete data.filters; //释放内存
-        }
-        data.compileArgs = args;
-        try {
-            text += "\r\nreturn ret" + random;
-            var fn = Function.apply(Function, names.concat(text));
-            val = fn.apply(fn, args);
-            data.compileFn = fn; //缓存,防止二次编译
-        } catch (e) {
-            data.compileFn = function() {
-                return "";
-            };
-            val = "";
-        }
-        textBuffer = names = null; //释放内存
-        return val;
-    }
-
     var bindingHandlers = avalon.bindingHandlers = {
 //将模型中的字段与input, textarea的value值关联在一起
         "model": function(data, scope, scopes) {
@@ -326,7 +431,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
             var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
             var parent = data.element;
             var scopeList = [scope].concat(scopes);
-            var list = evalExpr(data.value, scopeList, data);
+            var list = parseExpr(data.value, scopeList, data);
             var doc = parent.ownerDocument;
             var fragment = doc.createDocumentFragment();
             while (parent.firstChild) {
@@ -732,7 +837,6 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                                 if (!obsevers[accessor]) {
                                     flagDelete = true;
                                     Publish[ expando ] = function() {
-
                                         notifySubscribers(accessor); //通知顶层改变
                                     };
                                     obsevers[accessor] = [];
@@ -761,9 +865,7 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
                         },
                         get: function() {
                             //如果中层把方法放在Publish[ expando ]中
-                            if (!model.$occoecatio) {//为了防止它在不合适的时候收集订阅者,添加$occoecatio标识让它瞎掉
-                                collectSubscribers(accessor);
-                            }
+                            collectSubscribers(accessor);
                             return obj[key];
                         },
                         enumerable: true
@@ -929,7 +1031,142 @@ define("mvvm", "$event,$css,$attr".split(","), function($) {
         }
         return bindings;
     }
+    /*********************************************************************
+     *                           parse                                    *
+     **********************************************************************/
+    var regEscape = /([-.*+?^${}()|[\]\/\\])/g;
+    function escapeRegExp(target) {
+        //将字符串安全格式化为正则表达式的源码
+        return target.replace(regEscape, "\\$1");
+    }
+    var isStrict = (function() {
+        return !this;
+    })();
+    function insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random) {
+        var ok = false;
+        if (window.dispatchEvent) {//判定是否IE9-11或者为标准浏览器
+            ok = e instanceof ReferenceError;
+        } else {
+            ok = e instanceof TypeError;
+        }
+        if (ok) {
+            var variableName = e.message.split(/\s+/).shift();//取得未定义的变量名
+            if (variableName.charAt(0) === "'" || variableName.charAt(0) === '"') {
+                //处理IE下的引号
+                variableName = variableName.slice(1, variableName.length - 1);
+            }
+            for (var i = 0, scope; scope = scopeList[i++]; ) {
+                if (scope.hasOwnProperty(variableName)) {
+                    var modelName = scope.$modelName + random;
+                    if (names.indexOf(modelName) === -1) {
+                        names.push(modelName);
+                        args.push(scope)
+                    }
+                    //这里实际还要做更严格的处理
+                    var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(variableName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
+                    return  text.replace(reg, function(a, b, c, d) {
+                        return b + modelName + "." + c + d;//添加作用域
+                    });
+                }
+            }
 
+        }
+    }
+    var doubleQuotedString = /"([^\\"\n]|\\.)*"/g;
+    var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
+    function parseExpr(text, scopeList, data) {
+        var names = [], args = [], random = new Date - 0, val;
+        if (true) {
+            //取得模块的名字
+            scopeList.forEach(function(scope) {
+                var scopeName = scope.$modelName + random;
+                if (names.indexOf(scopeName) === -1) {
+                    names.push(scopeName);
+                    args.push(model);
+                }
+            });
+            text = "var ret" + random + " = " + text + "\r\n";
+            for (var i = 0, name; name = names[i++]; ) {
+                text = "with(" + name + "){\r\n" + text + "\r\n}\r\n";
+            }
+        } else {
+            var single = random + 1;
+            var double = single + 1;
+            var singleHolder = [];
+            var doubleHolder = [];
+            var loop = true;
+            //抽取掉所有字符串
+            text = text.replace(singleQuotedString, function(a) {
+                singleHolder.push(a);
+                return single;
+            }).replace(doubleQuotedString, function(b) {
+                doubleHolder.push(b);
+                return double;
+            });
+            do {//开始循环
+                try {
+                    var fn = Function.apply(Function, names.concat("return " + text));
+                    var val = fn.apply(fn, args);
+                    loop = false;
+                } catch (e) {
+                    text = insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random);
+                    loop = typeof text === "string";
+                }
+            } while (loop);
+            if (text) {
+                if (singleHolder.length) {
+                    text = text.replace(new RegExp(single, "g"), function() {
+                        return singleHolder.shift();
+                    });
+                }
+                if (doubleHolder.length) {
+                    text = text.replace(new RegExp(double, "g"), function() {
+                        return doubleHolder.shift();
+                    });
+                }
+                text = "var ret" + random + " = " + text;
+            } else {
+                data.compileFn = function() {
+                    return "";
+                };
+                return "";
+            }
+        }
+        if (data.filters) {
+            var textBuffer = [], fargs;
+            textBuffer.push(text, "\r\n");
+            for (var i = 0, f; f = data.filters[i++]; ) {
+                var start = f.indexOf("(");
+                if (start !== -1) {
+                    fargs = f.slice(start + 1, f.lastIndexOf(")")).trim();
+                    fargs = "," + fargs;
+                    f = f.slice(0, start).trim();
+                } else {
+                    fargs = "";
+                }
+                textBuffer.push(" if(filters", random, ".", f, "){\r\n\ttry{ret", random,
+                        " = filters", random, ".", f, "(ret", random, fargs, ")}catch(e){};\r\n}\r\n");
+            }
+            text = textBuffer.join("");
+            names.push("filters" + random);
+            args.push(avalon.filters);
+            delete data.filters; //释放内存
+        }
+        data.compileArgs = args;
+        try {
+            text += "\r\nreturn ret" + random;
+            var fn = Function.apply(Function, names.concat(text));
+            val = fn.apply(fn, args);
+            data.compileFn = fn; //缓存,防止二次编译
+        } catch (e) {
+            data.compileFn = function() {
+                return "";
+            };
+            val = "";
+        }
+        textBuffer = names = null; //释放内存
+        return val;
+    }
     var model = $.model("app", {
         firstName: "xxx",
         lastName: "oooo",
