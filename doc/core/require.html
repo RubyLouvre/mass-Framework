@@ -163,9 +163,11 @@ require("aaa,bbb,ready", function(a,b,$) {
             </fieldset>
               <fieldset>
                 <legend>例子</legend>
-                <p>加载不按规范编写的JS文件。</p>
+                <p>加载不按规范编写的JS文件，可以让你不用改jQuery的源码就加载它。相当于其他加载器的shim插件。
+                与别名机制不同的是，现在它对应一个对象，src为完整路径，deps为依赖列表，exports为其他模块引用它时，传送给它们的参数
+                </p>
                 <pre class="brush:javascript;gutter:false;toolbar:false">
-+function() {
+     +function() {
             var path = "http://files.cnblogs.com/shuicaituya/"
             require.config({
                 alias: {
