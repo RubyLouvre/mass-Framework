@@ -1278,26 +1278,54 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     }
     var startWithDollar = /^\$/;
     function modelFactory(scope) {
-        var delay = [], descs = {}, props = [];
+        var delay = [], descs = {}, props = [], model
         $.each(scope, function(name, value) {
             if (Array.isArray(value) || typeof value === "function") {
                 delay.push(name);
             } else {
                 props.push(name);
-                var oldValue;
-                function accessor(neo) {//创建访问器
-                    console.log("======================================" + neo)
-                    if (arguments.length) {
-                        if (oldValue !== neo) {
-                            accessor = typeof neo === "object" ? modelFactory(neo) : neo;
-                            notifySubscribers(accessor);
+                var accessor, oldValue, oldArgs
+                if (typeof value === "object" && "get" in value && Object.keys(value).length <= 2) {
+                    accessor = function(neo) {//创建访问器
+                        if (arguments.length) {
+                            if (typeof value.set === "function") {
+                                value.set.call(model, neo); //通知底层改变
+                            }
+                            if (oldArgs !== neo) {
+                                oldArgs = neo;
+                                notifySubscribers(accessor); //通知顶层改变
+                            }
+                        } else {
+                            var flagDelete = false;
+                            if (!accessor[accessor]) {
+                                flagDelete = true;
+                                Publish[ expando ] = function() {
+                                    notifySubscribers(accessor); //通知顶层改变
+                                };
+                                accessor[accessor] = [];
+                            }
+                            oldValue = value.get.call(model);
+                            if (flagDelete) {
+                                delete Publish[ expando ];
+                            }
+                            return oldValue;
                         }
-                    } else {
-                        collectSubscribers(accessor);
-                        return accessor;
+                    };
+                } else {
+                    accessor = function(neo) {//创建访问器
+                        if (arguments.length) {
+                            if (oldValue !== neo) {
+                                accessor = typeof neo === "object" ? modelFactory(neo) : neo;
+                                notifySubscribers(accessor);
+                            }
+                        } else {
+                            collectSubscribers(accessor);
+                            return accessor;
+                        }
                     }
+                    accessor[subscribers] = [];
                 }
-                accessor[subscribers] = [];
+
                 descs[name] = {
                     set: accessor,
                     get: accessor,
@@ -1306,7 +1334,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             }
         });
         if (defineProperties) {
-            var model = {};
+            model = {};
             defineProperties(model, descs);
         } else {
             model = definePropertiesVB(descs, props, delay);
@@ -1320,17 +1348,20 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             }
         });
         props.forEach(function(prop) {
-            console.log(scope[prop])
             model[prop] = scope[prop];
         });
         return model;
     }
     console.log("xxxxxxxxxx")
     var model = modelFactory({
-        firstName: "x9xx",
-        lastName: {},
+        firstName: "8888",
+        lastName: "xxx",
         getName: function() {
             return this.firstName;
+        },
+        fullName: {get: function() {
+                return this.firstName + this.lastName;
+            }
         }
     });
 
@@ -1339,7 +1370,8 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         console.log(i)
     }
     alert(model.firstName)
-    alert(model.lastName)
+    alert(model.lastName);
+    alert(model.fullName)
 });
 //数组与函数及其他延后处理
                                   
