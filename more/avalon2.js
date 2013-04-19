@@ -1,5 +1,5 @@
 (function() {
-    //加载用户当前浏览器所有的语言
+//加载用户当前浏览器所有的语言
     var lang = (navigator.language || navigator.browserLanguage || "zh-cn").toLowerCase();
     define.lang = lang === "zh-cn" ? lang : lang.split("-")[0];
 })();
@@ -26,39 +26,39 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                 return symbol + avalon.filters.number(number);
             },
             number: function(number, decimals, dec_point, thousands_sep) {
-                //与PHP的number_format完全兼容
-                //number	必需，要格式化的数字
-                //decimals	可选，规定多少个小数位。
-                //dec_point	可选，规定用作小数点的字符串（默认为 . ）。
-                //thousands_sep	可选，规定用作千位分隔符的字符串（默认为 , ），如果设置了该参数，那么所有其他参数都是必需的。
-                // http://kevin.vanzonneveld.net
-                // *     example 1: number_format(1234.56);
-                // *     returns 1: '1,235'
-                // *     example 2: number_format(1234.56, 2, ',', ' ');
-                // *     returns 2: '1 234,56'
-                // *     example 3: number_format(1234.5678, 2, '.', '');
-                // *     returns 3: '1234.57'
-                // *     example 4: number_format(67, 2, ',', '.');
-                // *     returns 4: '67,00'
-                // *     example 5: number_format(1000);
-                // *     returns 5: '1,000'
-                // *     example 6: number_format(67.311, 2);
-                // *     returns 6: '67.31'
-                // *     example 7: number_format(1000.55, 1);
-                // *     returns 7: '1,000.6'
-                // *     example 8: number_format(67000, 5, ',', '.');
-                // *     returns 8: '67.000,00000'
-                // *     example 9: number_format(0.9, 0);
-                // *     returns 9: '1'
-                // *     example 10: number_format('1.20', 2);
-                // *     returns 10: '1.20'
-                // *     example 11: number_format('1.20', 4);
-                // *     returns 11: '1.2000'
-                // *     example 12: number_format('1.2000', 3);
-                // *     returns 12: '1.200'
-                // *     example 13: number_format('1 000,50', 2, '.', ' ');
-                // *     returns 13: '100 050.00'
-                // Strip all characters but numerical ones.
+//与PHP的number_format完全兼容
+//number	必需，要格式化的数字
+//decimals	可选，规定多少个小数位。
+//dec_point	可选，规定用作小数点的字符串（默认为 . ）。
+//thousands_sep	可选，规定用作千位分隔符的字符串（默认为 , ），如果设置了该参数，那么所有其他参数都是必需的。
+// http://kevin.vanzonneveld.net
+// *     example 1: number_format(1234.56);
+// *     returns 1: '1,235'
+// *     example 2: number_format(1234.56, 2, ',', ' ');
+// *     returns 2: '1 234,56'
+// *     example 3: number_format(1234.5678, 2, '.', '');
+// *     returns 3: '1234.57'
+// *     example 4: number_format(67, 2, ',', '.');
+// *     returns 4: '67,00'
+// *     example 5: number_format(1000);
+// *     returns 5: '1,000'
+// *     example 6: number_format(67.311, 2);
+// *     returns 6: '67.31'
+// *     example 7: number_format(1000.55, 1);
+// *     returns 7: '1,000.6'
+// *     example 8: number_format(67000, 5, ',', '.');
+// *     returns 8: '67.000,00000'
+// *     example 9: number_format(0.9, 0);
+// *     returns 9: '1'
+// *     example 10: number_format('1.20', 2);
+// *     returns 10: '1.20'
+// *     example 11: number_format('1.20', 4);
+// *     returns 11: '1.2000'
+// *     example 12: number_format('1.2000', 3);
+// *     returns 12: '1.200'
+// *     example 13: number_format('1 000,50', 2, '.', ' ');
+// *     returns 13: '100 050.00'
+// Strip all characters but numerical ones.
                 number = (number + "").replace(/[^0-9+\-Ee.]/g, '');
                 var n = !isFinite(+number) ? 0 : +number,
                         prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
@@ -154,7 +154,6 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             return function(date, formats) {
                 var value = date['get' + name]();
                 var get = uppercase(shortForm ? ('SHORT' + name) : name);
-
                 return formats[get][value];
             };
         }
@@ -162,13 +161,11 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         function timeZoneGetter(date) {
             var zone = -1 * date.getTimezoneOffset();
             var paddedZone = (zone >= 0) ? "+" : "";
-
             paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) +
                     padNumber(Math.abs(zone % 60), 2);
-
             return paddedZone;
         }
-        //取得上午下午
+//取得上午下午
         function ampmGetter(date, formats) {
             return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
         }
@@ -210,7 +207,6 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                         tzMin = 0,
                         dateSetter = match[8] ? date.setUTCFullYear : date.setFullYear,
                         timeSetter = match[8] ? date.setUTCHours : date.setHours;
-
                 if (match[9]) {
                     tzHour = int(match[9] + match[10]);
                     tzMin = int(match[9] + match[11]);
@@ -225,7 +221,6 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             var text = '',
                     parts = [],
                     fn, match;
-
             format = format || 'mediumDate';
             format = formats[format] || format;
             if (isString(date)) {
@@ -362,7 +357,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
         //<a href="{{url.hostname}}/{{url.pathname}}.html">
         "href": function(data, scope, scopes) {
-            //如果没有则说明是使用ng-href的形式
+//如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
             var node = data.node;
             var simple = node.name.indexOf(prefix) === 0;
@@ -428,7 +423,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             });
         },
         "each": function(data, scope, scopes, flags) {
-            var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
+
             var parent = data.element;
             var scopeList = [scope].concat(scopes);
             var list = parseExpr(data.value, scopeList, data);
@@ -501,7 +496,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             if (isList) {
                 list[ subscribers ].push(updateListView);
             }
-
+            var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
             function updateView(index, item, clone) {
                 var newScope = {}, textNodes = [];
                 newScope[itemName] = item;
@@ -685,16 +680,41 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     /*********************************************************************
      *                    Collection                                    *
      **********************************************************************/
+//    function push(obj) {
+//        var array = this, model = typeof obj === "object" ? modelFactory(obj) : {};
+//        Object.defineProperty(model, "$index", {
+//            get: function() {
+//                return array.indexOf(model);
+//            },
+//            enumerable: true
+//        });
+//        Object.defineProperty(model, "$data", {
+//            get: function() {
+//                return model || {}
+//            },
+//            set: function() {
+//            },
+//            enumerable: true
+//        });
+//        array.push(model)
+//    }
+//    function ObserverArray(list) {
+//        var array = []
+//
+//        //  list.forEach(push, array);
+//        return array
+//
+//    }
     //http://msdn.microsoft.com/en-us/library/windows/apps/hh700774.aspx
     //http://msdn.microsoft.com/zh-cn/magazine/jj651576.aspx
+    //http://api.rubyonrails.org/classes/ActiveModel/ObserverArray.html
     //Data bindings 数据／界面绑定
     //Compatibility 兼容其他
     //Extensibility 可扩充性
     //No direct DOM manipulations 不直接对DOM操作
-    function Collection(list, name) {
+    function Collection(list) {
         var collection = list.concat();
         collection[ subscribers ] = [];
-        collection.name = "#" + name;
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method) {
             var nativeMethod = collection[ method ];
             collection[ method ] = function() {
@@ -768,21 +788,15 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
      
      */
     //http://www.cnblogs.com/whitewolf/archive/2012/07/07/2580630.html
-    function getSubscribers(accessor) {
-        if (typeof accessor === "string") {
-            return obsevers[accessor] || (obsevers[accessor] = []);
-        } else {
-            return accessor[ subscribers ];
-        }
-    }
+
     function collectSubscribers(accessor) {//收集依赖于这个域的订阅者
         if (Publish[ expando ]) {
-            var list = getSubscribers(accessor);
-            $.Array.ensure(list, Publish[ expando ]);//只有数组不存在此元素才push进去
+            var list = accessor[ subscribers ];
+            list && $.Array.ensure(list, Publish[ expando ]); //只有数组不存在此元素才push进去
         }
     }
     function notifySubscribers(accessor) {//通知依赖于这个域的订阅者更新自身
-        var list = getSubscribers(accessor);
+        var list = accessor[ subscribers ];
         if (list && list.length) {
             var args = [].slice.call(arguments, 1);
             var safelist = list.concat();
@@ -793,7 +807,9 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             }
         }
     }
-    //http://www.cnblogs.com/whitewolf/archive/2013/04/16/3024843.html
+    // 比如视图刷新函数C依赖于firstName, lastName这两个访问器，当访问器更新时，就会通知C执行。
+    // 因此firstName上有个subscribers列表，里面装着C， lastName同理
+    // http://www.cnblogs.com/whitewolf/archive/2013/04/16/3024843.html
     /*********************************************************************
      *                            Model                                   *
      **********************************************************************/
@@ -802,127 +818,13 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         if (avalon.models[name]) {
             $.error('已经存在"' + name + '"模块');
         } else {
-            var model = modelFactory(name, obj, $.skipArray || []);
+            var model = modelFactory(obj);
             model.$modelName = name;
             return avalon.models[name] = model;
         }
     };
-    var startWithDollar = /^\$/;
 
-    if (!Object.defineProperty) {
-        alert({}.__defineGetter__)
-        Object.defineProperty = function(obj, name, defines) {
-            obj.__defineGetter__(name, defines.get)
-            obj.__defineSetter__(name, defines.set)
-        };
-    }
-    function modelFactory(name, obj, skipArray) {
-        var model = {}, first = [], second = [];
-        forEach(obj, function(key, val) {
-            //如果不在忽略列表内,并且没有以$开头($开头的属性名留着框架使用)
-            if (skipArray.indexOf(key) === -1 && !startWithDollar.test(key)) {
-                //相依赖的computed
-                var accessor = name + "." + key;
-                if (Array.isArray(val) && !val[subscribers]) {
-                    model[key] = Collection(val, accessor);
-                } else if (typeof val === "object") {
-                    if ("set" in val && Object.keys(val).length <= 2) {
-                        var computedProperty;
-                        Object.defineProperty(model, key, {
-                            set: function(neo) {
-                                if (typeof val.set === "function") {
-                                    val.set.call(model, neo); //通知底层改变
-                                } else {
-                                    computedProperty = neo;
-                                }
-                                if (computedProperty !== neo) {
-                                    computedProperty = neo;
-                                    notifySubscribers(accessor); //通知顶层改变
-                                }
-                            },
-                            //get方法肯定存在,那么肯定在这里告诉它的依赖,把它的setter放到依赖的订阅列表中
-                            get: function() {
-                                var flagDelete = false;
-                                if (!obsevers[accessor]) {
-                                    flagDelete = true;
-                                    Publish[ expando ] = function() {
-                                        notifySubscribers(accessor); //通知顶层改变
-                                    };
-                                    obsevers[accessor] = [];
-                                }
-                                computedProperty = val.get.call(model);
-                                if (flagDelete) {
-                                    delete Publish[ expando ];
-                                }
-                                return computedProperty;
-                            },
-                            enumerable: true
-                        });
-                        second.push(key);
-                    } else {
-                        var objectProperty = {};
-                        Object.defineProperty(model, key, {
-                            set: function(neo) {
-                                if (objectProperty !== neo) {
-                                    objectProperty = modelFactory(accessor, neo, neo.$skipArray || []);
-                                    notifySubscribers(accessor);
-                                }
-                            },
-                            get: function() {
-                                //如果中层把方法放在Publish[ expando ]中
-                                collectSubscribers(accessor);
-                                return objectProperty;
-                            },
-                            enumerable: true
-                        });
-                        first.push(key);
-                    }
-                } else if (typeof val === "function") {
-                    model[key] = function() {
-//                        var flagDelete = false;
-//                        if (!obsevers[accessor]) {
-//                            flagDelete = true;
-//                            Publish[ expando ] = function() {
-//                                notifySubscribers(accessor); //通知顶层改变
-//                            };
-//                            obsevers[accessor] = [];
-//                        }
-//                        collectSubscribers(accessor);
-                        var ret = val.apply(model, arguments);
-//                        if (flagDelete) {
-//                            delete Publish[ expando ];
-//                        }
-                        return ret;
-                    };
-                } else {
-                    var simpleProperty = obj[key];
-                    Object.defineProperty(model, key, {
-                        set: function(neo) {
-                            if (simpleProperty !== neo) {
-                                simpleProperty = neo;
-                                //通知中层,顶层改变
-                                notifySubscribers(accessor);
-                            }
-                        },
-                        get: function() {
-                            //如果中层把方法放在Publish[ expando ]中
-                            collectSubscribers(accessor);
-                            return simpleProperty;
-                        },
-                        enumerable: true
-                    });
-                    first.push(key);
-                }
-            }
-        });
-        first.forEach(function(key) {
-            model[key] = obj[key];
-        });
-        second.forEach(function(key) {
-            first = model[key];
-        });
-        return  model;
-    }
+
     /*********************************************************************
      *                           Scan                                     *
      **********************************************************************/
@@ -1109,7 +1011,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                 varName = e.message.replace("Can't find variable: ", "")
                         .replace("“", "").replace("'", "");
             }
-            varName = (varName.match(/^[\w$]+/) || [""])[0];//取得未定义的变量名
+            varName = (varName.match(/^[\w$]+/) || [""])[0]; //取得未定义的变量名
             for (var i = 0, scope; scope = scopeList[i++]; ) {
                 if (scope.hasOwnProperty(varName)) {
                     var modelName = scope.$modelName + random;
@@ -1120,7 +1022,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                     //这里实际还要做更严格的处理
                     var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(varName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
                     return  text.replace(reg, function(a, b, c, d) {
-                        return b + modelName + "." + c + d;//添加作用域
+                        return b + modelName + "." + c + d; //添加作用域
                     });
                 }
             }
@@ -1222,17 +1124,17 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         textBuffer = names = null; //释放内存
         return val;
     }
-    var model = $.model("app", {
-        firstName: "xxx",
-        lastName: "oooo",
-        array: [1, 2, 3, 4, 5, 6, 7, 8],
-//        select: "test1",
-//        color: "green",
-//        vehicle: ["car"],
-//        bool: false,
-//        user: {
-//            name: "userName"
-//        },
+//    var model = $.model("app", {
+//        firstName: "姓氏",
+//        lastName: "名字",
+//        array: "ABCDEFGHIJK".split(""),
+////        select: "test1",
+////        color: "green",
+////        vehicle: ["car"],
+////        bool: false,
+////        user: {
+////            name: "userName"
+////        },
 //        nickName: function() {
 //            return this.firstName + "!!!!!!";
 //        },
@@ -1246,26 +1148,198 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
 //                return this.firstName + " " + this.lastName;
 //            }
 //        }
+//    });
+//    $.model("son", {
+//        firstName: "yyyy"
+//    });
+//    $.model("aaa", {
+//        firstName: "6666"
+//    });
+//    scanTag(document.body, model, [], document);
+//    setTimeout(function() {
+//        model.firstName = "setTimeout";
+//        //    model.user.name = "eee"
+//        //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
+//    }, 2000);
+//    setTimeout(function() {
+//        model.array.reverse()
+//        model.firstName = "3333";
+//        model.lastName = "2333";
+//        //   model.user = {name: "uuu"}
+//    }, 3000);
+//    setTimeout(function() {
+//        model.array.splice(2, 4, "T", "O", "P")
+//        //   model.user = {name: "uuu"}
+//    }, 3000);
+    //==================================================================
+    var defineProperty = Object.defineProperty;
+    try {
+        defineProperty(avalon, "_", {
+            value: "x"
+        });
+        var defineProperties = Object.defineProperties;
+    } catch (e) {
+        if ("__defineGetter__" in avalon) {
+            defineProperty = function(obj, prop, desc) {
+                if ('value' in desc) {
+                    obj[prop] = desc.value;
+                }
+                if ('get' in desc) {
+                    obj.__defineGetter__(prop, desc.get);
+                }
+                if ('set' in desc) {
+                    obj.__defineSetter__(prop, desc.set);
+                }
+                return obj;
+            };
+            defineProperties = function(obj, descs) {
+                for (var prop in descs) {
+                    if (descs.hasOwnProperty(prop)) {
+                        defineProperty(obj, prop, descs[prop]);
+                    }
+                }
+                return obj;
+            };
+        }
+    }
+    if (!defineProperties && window.VBArray) {
+        window.execScript([
+            "Function parseVB(code)",
+            "\tExecuteGlobal(code)",
+            "End Function"
+        ].join("\n"), "VBScript");
+        function mediatorVB(descs, name, value) {
+            var fn = descs[name] && descs[name].set;
+            if (typeof fn === "function") {
+                if (arguments.length === 3) {
+                    fn(value);
+                } else {
+                    return fn();
+                }
+            }
+        }
+        function definePropertiesVB(object, attrs, more) {
+            if (more.indexOf("hasOwnProperty") === -1) {
+                more.push("hasOwnProperty");
+            }
+            if (more.indexOf("$modelName") === -1) {
+                more.push("$modelName");
+            }
+            var className = "VBClass" + setTimeout("1"), owner = {}, buffer = [];
+            buffer.push(
+                    "Class " + className,
+                    "\tPrivate [__data__], [__proxy__]",
+                    "\tPublic Function AAA(rr)",
+                    "\t\tAAA = rr",
+                    "\tEnd Function",
+                    "\tPublic Default Function [__const__](d, p)",
+                    "\t\tSet [__data__] = d: set [__proxy__] = p",
+                    "\t\tSet [__const__] = Me",
+                    "\tEnd Function");
+            more.forEach(function(prop) {//添加公共属性,越多越好,因为VBScript对象不能像JS那样添加属性
+                owner[prop] = true;
+                buffer.push("\tPublic [" + prop + "]");
+            });
+            attrs.forEach(function(attr) {
+                owner[attrs] = true;// [__proxy__]([__data__], \"" + attr + "\", val)",
+                buffer.push(
+                        //由于不知对方会传入什么,因此set, let都用上
+                        "\tPublic Property Let [" + attr + "](val)", //setter
+                        "\t\tCall [__proxy__]([__data__], \"" + attr + "\", val)",
+                        "\tEnd Property",
+                        "\tPublic Property Set [" + attr + "](val)", //setter
+                        "\t\tCall [__proxy__]([__data__], \"" + attr + "\", val)",
+                        "\tEnd Property",
+                        "\tPublic Property Get [" + attr + "]", //getter
+                        "\tOn Error Resume Next",
+                        "\t\t[" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
+                        "\tIf Err.Number <> 0 Then",
+                        "\t\tSet [" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
+                        "\tEnd If",
+                        "\tOn Error Goto 0",
+                        "\tEnd Property");
+            });
+            buffer.push("End Class");//类定义完毕
+            buffer.push(
+                    "Function " + className + "Factory(a, b)",
+                    "\tDim o",
+                    "\tSet o = (New " + className + ")(a, b)",
+                    "\tSet " + className + "Factory = o",
+                    "End Function");
+            $.log(buffer.join("\r\n"));
+            window.parseVB(buffer.join("\r\n"));
+            var model = window[className + "Factory"](object, mediatorVB);
+            $.log(typeof model);
+            model.hasOwnProperty = function(name) {
+                return owner.hasOwnProperty(name);
+            };
+            return model;
+        }
+    }
+    var startWithDollar = /^\$/;
+    function modelFactory(scope) {
+        var delay = [], descs = {}, props = [];
+        $.each(scope, function(name, value) {
+            if (Array.isArray(value) || typeof value === "function") {
+                delay.push(name);
+            } else {
+                props.push(name);
+                var oldValue;
+                function accessor(neo) {//创建访问器
+                    console.log("======================================" + neo)
+                    if (arguments.length) {
+                        if (oldValue !== neo) {
+                            accessor = typeof neo === "object" ? modelFactory(neo) : neo;
+                            notifySubscribers(accessor);
+                        }
+                    } else {
+                        collectSubscribers(accessor);
+                        return accessor;
+                    }
+                }
+                accessor[subscribers] = [];
+                descs[name] = {
+                    set: accessor,
+                    get: accessor,
+                    enumerable: true
+                };
+            }
+        });
+        if (defineProperties) {
+            var model = {};
+            defineProperties(model, descs);
+        } else {
+            model = definePropertiesVB(descs, props, delay);
+        }
+        delay.forEach(function(name) {
+            var fn = scope[name];
+            if (typeof fn === "function") {
+                model[name] = function() {
+                    return  fn.apply(model, arguments);
+                };
+            }
+        });
+        props.forEach(function(prop) {
+            console.log(scope[prop])
+            model[prop] = scope[prop];
+        });
+        return model;
+    }
+    console.log("xxxxxxxxxx")
+    var model = modelFactory({
+        firstName: "x9xx",
+        lastName: {},
+        getName: function() {
+            return this.firstName;
+        }
     });
-    $.model("son", {
-        firstName: "yyyy"
-    });
-    $.model("aaa", {
-        firstName: "6666"
-    });
-    scanTag(document.body, model, [], document);
-    setTimeout(function() {
-        model.firstName = "setTimeout";
-        //    model.user.name = "eee"
-        //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
-    }, 2000);
-    setTimeout(function() {
-        model.array.reverse()
-        model.firstName = "3333";
-        model.lastName = "2333";
-        //   model.user = {name: "uuu"}
-        //  console.log("xxxxxxxxxxxxxxxxx")
 
-        //console.log(obsevers.applastName == obsevers.appfirstName)
-    }, 3000);
+    //alert(model.AAA({}))
+    for (var i in model) {
+        console.log(i)
+    }
+    alert(model.firstName)
+    alert(model.lastName)
 });
+//数组与函数及其他延后处理
+                                  
