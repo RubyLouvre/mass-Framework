@@ -1219,10 +1219,10 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                         "\t\tCall [__proxy__]([__data__], \"" + attr + "\", val)",
                         "\tEnd Property",
                         "\tPublic Property Get [" + attr + "]", //getter
-                        "\tOn Error Resume Next",
-                        "\t\t[" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
+                        "\tOn Error Resume Next", //必须优先使用set语句,否则它会误将数组当字符串返回
+                        "\t\tSet[" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
                         "\tIf Err.Number <> 0 Then",
-                        "\t\tSet [" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
+                        "\t\t[" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
                         "\tEnd If",
                         "\tOn Error Goto 0",
                         "\tEnd Property");
@@ -1252,7 +1252,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                 fns.push(name);
             } else {
                 props.push(name);
-                var accessor, oldValue = value, oldArgs = value;
+                var accessor, oldValue, oldArgs ;
                 if (typeof value === "object" && typeof value.get === "function"
                         && Object.keys(value).length <= 2) {
                     skipCall[name] = true;//这个不用立即赋值
@@ -1284,28 +1284,22 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                         }
                     };
                 } else {
-                    console.log("ddddddddddddddddddddddddddd" + name)
                     accessor = function(neo) {//创建访问器
                         if (arguments.length) {
-                            if (accessor.val !== neo) {
+                            if (oldValue !== neo) {
                                 if (typeof neo === "object") {
-                                    //   skipCall[name] = true;//这个不用立即赋值
                                     if (Array.isArray(neo)) {
-                                        //   neo = ObserverArray(neo)
+                                        neo = ObserverArray(neo)
                                     } else {
-                                       alert(Array.isArray(neo))
-                               alert($.isArrayLike)
-                                        alert($.isArrayLike(neo)) //非负整数
                                         neo = modelFactory(neo)
                                     }
                                 }
-                                accessor.val = neo;
+                                oldValue = neo;
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
-
                             collectSubscribers(accessor);//收集视图函数
-                            return accessor.val;
+                            return oldValue;
                         }
                     };
                     accessor[subscribers] = [];
@@ -1332,19 +1326,17 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             };
         });
         //现在model只是个空对象，需要给它赋值
-
         props.forEach(function(prop) {
-            if (!skipCall[prop]) {
+            if (!skipCall[prop]) {//除了函数与指定了setter, getter的属性都在这里先赋值
                 model[prop] = scope[prop];
-                console.log(prop + " " + (typeof model[prop]))
             }
         });
         return model;
     }
     var model = modelFactory({
-        firstName: {length: 3},
+        firstName: "ddddd",
         //   lastName: "xxx",
-        // namelist: [5, 6, 4],
+        namelist: [5, 6, 4],
 //        user: {name: "司徒正美", ooo: {xxx: "999"}},
 //        getName: function() {
 //            return this.firstName;
