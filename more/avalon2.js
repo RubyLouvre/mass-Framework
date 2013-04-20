@@ -427,6 +427,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             var parent = data.element;
             var scopeList = [scope].concat(scopes);
             var list = parseExpr(data.value, scopeList, data);
+            console.log(list)
             var doc = parent.ownerDocument;
             var fragment = doc.createDocumentFragment();
             while (parent.firstChild) {
@@ -498,6 +499,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             }
             var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
             function updateView(index, item, clone) {
+                console.log("add array element " + index)
                 var newScope = {}, textNodes = [];
                 newScope[itemName] = item;
                 newScope[indexName] = index;
@@ -526,7 +528,13 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                     scanText(node, newScope, scopeList, doc); //扫描文本节点
                 }
             }
-            forEach(list, updateView);
+            try {
+                console.log(list.length)
+                forEach(list, updateView);
+            } catch (e) {
+                alert(e);
+                alert(list)
+            }
             flags.stopBinding = true;
         }
     };
@@ -616,6 +624,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                 model[name] = element.value;
             };
             updateView = function() {
+                $.log(name + " updateView")
                 element.value = model[name];
             };
             var event = element.attributes[prefix + "event"] || {};
@@ -680,41 +689,14 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     /*********************************************************************
      *                    Collection                                    *
      **********************************************************************/
-//    function push(obj) {
-//        var array = this, model = typeof obj === "object" ? modelFactory(obj) : {};
-//        Object.defineProperty(model, "$index", {
-//            get: function() {
-//                return array.indexOf(model);
-//            },
-//            enumerable: true
-//        });
-//        Object.defineProperty(model, "$data", {
-//            get: function() {
-//                return model || {}
-//            },
-//            set: function() {
-//            },
-//            enumerable: true
-//        });
-//        array.push(model)
-//    }
-//    function ObserverArray(list) {
-//        var array = []
-//
-//        //  list.forEach(push, array);
-//        return array
-//
-//    }
-    //http://msdn.microsoft.com/en-us/library/windows/apps/hh700774.aspx
-    //http://msdn.microsoft.com/zh-cn/magazine/jj651576.aspx
-    //http://api.rubyonrails.org/classes/ActiveModel/ObserverArray.html
-    //Data bindings 数据／界面绑定
-    //Compatibility 兼容其他
-    //Extensibility 可扩充性
-    //No direct DOM manipulations 不直接对DOM操作
-    function Collection(list) {
-        var collection = list.concat();
-        collection[ subscribers ] = [];
+
+    //注意VBscript对象不会自动调用toString与valueOf方法
+    function ObserverArray(list) {
+        var collection = list.map(function(val) {
+            return val && typeof val === "object" ? modelFactory(val) : val;
+        });
+        console.log("=========================")
+        console.log(typeof collection)
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method) {
             var nativeMethod = collection[ method ];
             collection[ method ] = function() {
@@ -757,6 +739,13 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         };
         return collection;
     }
+    //http://msdn.microsoft.com/en-us/library/windows/apps/hh700774.aspx
+    //http://msdn.microsoft.com/zh-cn/magazine/jj651576.aspx
+    //http://api.rubyonrails.org/classes/ActiveModel/ObserverArray.html
+    //Data bindings 数据／界面绑定
+    //Compatibility 兼容其他
+    //Extensibility 可扩充性
+    //No direct DOM manipulations 不直接对DOM操作
     /*********************************************************************
      *                            Subscription                           *
      **********************************************************************/
@@ -1033,7 +1022,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
     var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
     function parseExpr(text, scopeList, data) {
         var names = [], args = [], random = new Date - 0, val;
-        if (false) {
+        if (isStrict) {
             //取得模块的名字
             scopeList.forEach(function(scope) {
                 var scopeName = scope.$modelName + random;
@@ -1138,16 +1127,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
 //        nickName: function() {
 //            return this.firstName + "!!!!!!";
 //        },
-//        fullName: {
-//            set: function(val) {
-//                var array = val.split(" ");
-//                this.firstName = array[0] || "";
-//                this.lastName = array[1] || "";
-//            },
-//            get: function() {
-//                return this.firstName + " " + this.lastName;
-//            }
-//        }
+
 //    });
 //    $.model("son", {
 //        firstName: "yyyy"
@@ -1155,18 +1135,7 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
 //    $.model("aaa", {
 //        firstName: "6666"
 //    });
-//    scanTag(document.body, model, [], document);
-//    setTimeout(function() {
-//        model.firstName = "setTimeout";
-//        //    model.user.name = "eee"
-//        //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
-//    }, 2000);
-//    setTimeout(function() {
-//        model.array.reverse()
-//        model.firstName = "3333";
-//        model.lastName = "2333";
-//        //   model.user = {name: "uuu"}
-//    }, 3000);
+//   
 //    setTimeout(function() {
 //        model.array.splice(2, 4, "T", "O", "P")
 //        //   model.user = {name: "uuu"}
@@ -1210,15 +1179,17 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
         ].join("\n"), "VBScript");
         function mediatorVB(descs, name, value) {
             var fn = descs[name] && descs[name].set;
-            if (typeof fn === "function") {
-                if (arguments.length === 3) {
-                    fn(value);
-                } else {
-                    return fn();
-                }
+            if (arguments.length === 3) {
+                fn(value);
+            } else {
+                console.log(arguments.length + "mediatorVB " + name)
+                var ret = fn()
+                console.log(typeof ret)
+                return ret;
             }
         }
-        function definePropertiesVB(object, attrs, more) {
+        function definePropertiesVB(object, attrs, delay) {
+            var more = (delay || []).concat();
             if (more.indexOf("hasOwnProperty") === -1) {
                 more.push("hasOwnProperty");
             }
@@ -1229,19 +1200,16 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             buffer.push(
                     "Class " + className,
                     "\tPrivate [__data__], [__proxy__]",
-                    "\tPublic Function AAA(rr)",
-                    "\t\tAAA = rr",
-                    "\tEnd Function",
                     "\tPublic Default Function [__const__](d, p)",
                     "\t\tSet [__data__] = d: set [__proxy__] = p",
-                    "\t\tSet [__const__] = Me",
+                    "\t\tSet [__const__] = Me", //链式调用
                     "\tEnd Function");
             more.forEach(function(prop) {//添加公共属性,越多越好,因为VBScript对象不能像JS那样添加属性
                 owner[prop] = true;
                 buffer.push("\tPublic [" + prop + "]");
             });
             attrs.forEach(function(attr) {
-                owner[attrs] = true;// [__proxy__]([__data__], \"" + attr + "\", val)",
+                owner[attr] = true;// [__proxy__]([__data__], \"" + attr + "\", val)",
                 buffer.push(
                         //由于不知对方会传入什么,因此set, let都用上
                         "\tPublic Property Let [" + attr + "](val)", //setter
@@ -1261,36 +1229,37 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             });
             buffer.push("End Class");//类定义完毕
             buffer.push(
-                    "Function " + className + "Factory(a, b)",
+                    "Function " + className + "Factory(a, b)", //创建实例并传入两个关键的参数
                     "\tDim o",
                     "\tSet o = (New " + className + ")(a, b)",
                     "\tSet " + className + "Factory = o",
                     "End Function");
-            $.log(buffer.join("\r\n"));
+            // $.log(buffer.join("\r\n"));
             window.parseVB(buffer.join("\r\n"));
             var model = window[className + "Factory"](object, mediatorVB);
-            $.log(typeof model);
             model.hasOwnProperty = function(name) {
-                return owner.hasOwnProperty(name);
+                return owner[name] === true;
             };
             return model;
         }
     }
     var startWithDollar = /^\$/;
     function modelFactory(scope) {
-        var delay = [], descs = {}, props = [], model
+        var fns = [], descs = {}, props = [], model = {}, skipCall = {};
+        console.log("modelFactory" + $.isArrayLike(scope) + scope.length)
         $.each(scope, function(name, value) {
-            if (Array.isArray(value) || typeof value === "function") {
-                delay.push(name);
+            if (typeof value === "function") {
+                fns.push(name);
             } else {
                 props.push(name);
-                var accessor, oldValue, oldArgs;
-                if (typeof value === "object" && typeof value.get === "function" 
+                var accessor, oldValue = value, oldArgs = value;
+                if (typeof value === "object" && typeof value.get === "function"
                         && Object.keys(value).length <= 2) {
+                    skipCall[name] = true;//这个不用立即赋值
                     accessor = function(neo) {//创建访问器
                         if (arguments.length) {
                             if (typeof value.set === "function") {
-                                value.set.call(model, neo); 
+                                value.set.call(model, neo);
                             }
                             if (oldArgs !== neo) {
                                 oldArgs = neo;
@@ -1305,7 +1274,9 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                                 };
                                 accessor[accessor] = [];
                             }
-                            oldValue = value.get.call(model);
+                            if (typeof value.get === "function") {
+                                oldValue = value.get.call(model);
+                            }
                             if (flagDelete) {
                                 delete Publish[ expando ];
                             }
@@ -1313,15 +1284,28 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
                         }
                     };
                 } else {
+                    console.log("ddddddddddddddddddddddddddd" + name)
                     accessor = function(neo) {//创建访问器
                         if (arguments.length) {
-                            if (oldValue !== neo) {
-                                accessor = typeof neo === "object" ? modelFactory(neo) : neo;
+                            if (accessor.val !== neo) {
+                                if (typeof neo === "object") {
+                                    //   skipCall[name] = true;//这个不用立即赋值
+                                    if (Array.isArray(neo)) {
+                                        //   neo = ObserverArray(neo)
+                                    } else {
+                                       alert(Array.isArray(neo))
+                               alert($.isArrayLike)
+                                        alert($.isArrayLike(neo)) //非负整数
+                                        neo = modelFactory(neo)
+                                    }
+                                }
+                                accessor.val = neo;
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
-                            collectSubscribers(accessor);
-                            return accessor;
+
+                            collectSubscribers(accessor);//收集视图函数
+                            return accessor.val;
                         }
                     };
                     accessor[subscribers] = [];
@@ -1334,43 +1318,56 @@ define("mvvm", ["/locale/" + define.lang, "event", "css", "attr", ], function(lo
             }
         });
         if (defineProperties) {
-            model = {};
             defineProperties(model, descs);
         } else {
-            model = definePropertiesVB(descs, props, delay);
+            model = definePropertiesVB(descs, props, fns);
         }
-        delay.forEach(function(name) {
+        fns.forEach(function(name) {
             var fn = scope[name];
-            if (typeof fn === "function") {
-                model[name] = function() {
-                    return  fn.apply(model, arguments);
-                };
-            }
+            model[name] = function() {
+                return  fn.apply(model, arguments);
+            };
+            model[name].toString = function() {
+                return fn + "";//还原toString，方便调试
+            };
         });
+        //现在model只是个空对象，需要给它赋值
+
         props.forEach(function(prop) {
-            model[prop] = scope[prop];
+            if (!skipCall[prop]) {
+                model[prop] = scope[prop];
+                console.log(prop + " " + (typeof model[prop]))
+            }
         });
         return model;
     }
     var model = modelFactory({
-        firstName: "8888",
-        lastName: "xxx",
-        getName: function() {
-            return this.firstName;
-        },
-        fullName: {get: function() {
-                return this.firstName + this.lastName;
-            }
-        }
+        firstName: {length: 3},
+        //   lastName: "xxx",
+        // namelist: [5, 6, 4],
+//        user: {name: "司徒正美", ooo: {xxx: "999"}},
+//        getName: function() {
+//            return this.firstName;
+//        },
+//        fullName: {
+//            set: function(val) {
+//                var array = (val || "").split(" ");
+//                this.firstName = array[0] || "";
+//                this.lastName = array[1] || "";
+//            },
+//            get: function() {
+//                return this.firstName + " " + this.lastName;
+//            }
+//        }
     });
 
-    //alert(model.AAA({}))
-    for (var i in model) {
-        console.log(i);
-    }
-    alert(model.firstName);
-    alert(model.lastName);
-    alert(model.fullName);
+    scanTag(document.body, model, [], document);
+//    setTimeout(function() {
+//        console.log("==============")
+//        model.firstName = "setTimeout";
+//        model.user.name = "eee"
+////        //  document.querySelector("#eee").firstChild.nextSibling.nodeValue = "!!!!!!!!!!!!"
+//    }, 2000);
 });
 //数组与函数及其他延后处理
                                   

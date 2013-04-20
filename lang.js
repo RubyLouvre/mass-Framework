@@ -94,7 +94,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
             }
             if (type === "Object") {
                 var i = obj.length;
-                return i >= 0 && i % 1 === 0; //非负整数
+                return (i >= 0) && (i % 1 === 0) && obj.hasOwnProperty("0"); //非负整数
             }
             return false;
         },
