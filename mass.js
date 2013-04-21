@@ -226,6 +226,8 @@
                     });
                 } else if (window.opera) {
                     opera.postError(str)
+                    //http://www.cnblogs.com/zoho/archive/2013/01/31/2886651.html
+                    //http://www.dotblogs.com.tw/littlebtc/archive/2009/04/06/ie8-ajax-2-debug.aspx
                 } else if (global.console && console.info && console.log) {
                     console.log(str);
                 }
@@ -333,7 +335,7 @@
         }
     };
 
-    "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList,Error".replace($.rword, function(name) {
+    "Boolean,Number,String,Function,Array,Date,RegExp,Window,Document,Arguments,NodeList".replace($.rword, function(name) {
         class2type["[object " + name + "]"] = name;
     });
     //============================加载系统===========================
