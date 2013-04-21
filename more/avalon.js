@@ -814,7 +814,6 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         } else {
             var model = modelFactory(obj);
             model.$modelName = name;
-            console.log(name)
             return avalon.models[name] = model;
         }
     };

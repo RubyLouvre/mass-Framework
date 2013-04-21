@@ -1,4 +1,4 @@
-! function(global, DOC) {
+!function(global, DOC) {
     var $$ = global.$; //保存已有同名变量
     var rmakeid = /(#.+|\W)/g; //用于处理掉href中的hash与所有特殊符号，生成长命名空间
     var NsKey = DOC.URL.replace(rmakeid, ""); //长命名空间（字符串）
@@ -18,7 +18,6 @@
         "[object HTMLDocument]": "Document",
         "[object HTMLCollection]": "NodeList",
         "[object StaticNodeList]": "NodeList",
-        "[object IXMLDOMNodeList]": "NodeList",
         "[object DOMWindow]": "Window",
         "[object global]": "Window",
         "null": "Null",
@@ -26,7 +25,7 @@
         "undefined": "Undefined"
     };
     var serialize = class2type.toString,
-        basepath, kernel;
+            basepath, kernel;
     /**
      * 命名空间
      * @namespace 可变的短命名空间
@@ -34,12 +33,15 @@
      * @param  {Node|NodeList|Array|Mass} context ？ 上下文对象
      * @return {Mass}
      */
-
+    function sliceArgs(nodes, start, end) {
+        return parsings.slice.call(nodes, start, end);
+    }
     function $(expr, context) { //新版本的基石
         if (typeof expr === "function" && expr.call) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return $.require(all + ",ready", expr);
         }
-        if (!$.fn) $.error("必须加载node模块");
+        if (!$.fn)
+            $.error("必须加载node模块");
         return new $.fn.init(expr, context);
     }
     //多版本共存
@@ -64,10 +66,10 @@
      */
 
     function mix(receiver, supplier) {
-        var args = [].slice.call(arguments),
-            i = 1,
-            key, //如果最后参数是布尔，判定是否覆写同名属性
-            ride = typeof args[args.length - 1] === "boolean" ? args.pop() : true;
+        var args = sliceArgs(arguments),
+                i = 1,
+                key, //如果最后参数是布尔，判定是否覆写同名属性
+                ride = typeof args[args.length - 1] === "boolean" ? args.pop() : true;
         if (args.length === 1) { //处理$.mix(hash)的情形
             receiver = !this.window ? this : {};
             i = 0;
@@ -102,28 +104,13 @@
          * @return {Array}
          * @api public
          */
-        slice: W3C ? function(nodes, start, end) {
-            return parsings.slice.call(nodes, start, end);
-        } : function(nodes, start, end) {
+        slice: W3C ? sliceArgs : function(nodes, start, end) {
             var ret = [],
-                n = nodes.length;
-            if (end === void 0 || typeof end === "number" && isFinite(end)) {
-                start = parseInt(start, 10) || 0;
-                end = end == void 0 ? n : parseInt(end, 10);
-                if (start < 0) {
-                    start += n;
-                }
-                if (end > n) {
-                    end = n;
-                }
-                if (end < 0) {
-                    end += n;
-                }
-                for (var i = start; i < end; ++i) {
-                    ret[i - start] = nodes[i];
-                }
+                    n = nodes.length;
+            while (n--) {
+                ret[n] = nodes[n];
             }
-            return ret;
+            return sliceArgs[ret, start, end];
         },
         /**
          * 用于建立一个从元素到数据的关联，应用于事件绑定，元素去重
@@ -152,7 +139,7 @@
          * @return {Function} fn 刚才绑定的回调
          */
         bind: W3C ? function(el, type, fn, phase) {
-            el.addEventListener(type, fn, !! phase);
+            el.addEventListener(type, fn, !!phase);
             return fn;
         } : function(el, type, fn) {
             el.attachEvent && el.attachEvent("on" + type, fn);
@@ -166,7 +153,7 @@
          * @param {Boolean} phase ? 是否捕获，默认false
          */
         unbind: W3C ? function(el, type, fn, phase) {
-            el.removeEventListener(type, fn || $.noop, !! phase);
+            el.removeEventListener(type, fn || $.noop, !!phase);
         } : function(el, type, fn) {
             if (el.detachEvent) {
                 el.detachEvent("on" + type, fn || $.noop);
@@ -239,7 +226,7 @@
                     });
                 } else if (window.opera) {
                     opera.postError(str)
-                } else if (global.console) {
+                } else if (global.console && console.info && console.log) {
                     console.log(str);
                 }
 
@@ -257,7 +244,7 @@
                 array = array.match($.rword) || [];
             }
             var result = {},
-            value = val !== void 0 ? val : 1;
+                    value = val !== void 0 ? val : 1;
             for (var i = 0, n = array.length; i < n; i++) {
                 result[array[i]] = value;
             }
@@ -270,7 +257,8 @@
          */
         config: function(settings) {
             for (var p in settings) {
-                if (!hasOwn.call(settings, p)) continue;
+                if (!hasOwn.call(settings, p))
+                    continue;
                 var val = settings[p];
                 if (typeof kernel.plugin[p] === "function") {
                     kernel.plugin[p](val);
@@ -294,7 +282,8 @@
             return global[name] = this;
         },
         //一个空函数
-        noop: function() {},
+        noop: function() {
+        },
         /**
          * 抛出错误,方便调试
          * @param {String} str
@@ -307,13 +296,13 @@
          * URIError: 错误发生在encodeURI()或decodeURI()中
          */
         error: function(str, e) {
-            throw new(e || Error)(str);
+            throw new (e || Error)(str);
         }
     });
     (function() {
         var cur = getCurrentScript(true);
-        if(!cur){//处理window safari的Error没有stack的问题
-           cur = $.slice(document.scripts).pop().src;
+        if (!cur) {//处理window safari的Error没有stack的问题
+            cur = $.slice(document.scripts).pop().src;
         }
         var url = cur.replace(/[?#].*/, "");
         kernel = $.config;
@@ -321,7 +310,7 @@
         kernel.alias = {};
         basepath = kernel.base = url.slice(0, url.lastIndexOf("/") + 1);
         var scripts = DOC.getElementsByTagName("script");
-        for (var i = 0, el; el = scripts[i++];) {
+        for (var i = 0, el; el = scripts[i++]; ) {
             if (el.src === cur) {
                 kernel.nick = el.getAttribute("nick") || "$";
                 break;
@@ -387,7 +376,7 @@
             return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
         }
         var nodes = (base ? document : head).getElementsByTagName("script"); //只在head标签中寻找
-        for (var i = 0, node; node = nodes[i++];) {
+        for (var i = 0, node; node = nodes[i++]; ) {
             if ((base || node.className === moduleClass) && node.readyState === "interactive") {
                 return node.className = node.src;
             }
@@ -405,9 +394,9 @@
 
     function checkDeps() {
         //检测此JS模块的依赖是否都已安装完毕,是则安装自身
-        loop: for (var i = loadings.length, id; id = loadings[--i];) {
+        loop: for (var i = loadings.length, id; id = loadings[--i]; ) {
             var obj = modules[id],
-                deps = obj.deps;
+                    deps = obj.deps;
             for (var key in deps) {
                 if (hasOwn.call(deps, key) && modules[key].state !== 2) {
                     continue loop;
@@ -473,7 +462,7 @@
             }
         }
         var src = ret.replace(/[?#].*/, ""),
-            ext;
+                ext;
         if (/\.(css|js)$/.test(src)) { // 处理"http://113.93.55.202/mass.draggable"的情况
             ext = RegExp.$1;
         }
@@ -553,13 +542,13 @@
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-        // 用于依赖列表中的模块的返回值
-        args = [],
-            // 需要安装的模块数
-            dn = 0,
-            // 已安装完的模块数
-            cn = 0,
-            id = parent || "cb" + (cbi++).toString(32);
+                // 用于依赖列表中的模块的返回值
+                args = [],
+                // 需要安装的模块数
+                dn = 0,
+                // 已安装完的模块数
+                cn = 0,
+                id = parent || "cb" + (cbi++).toString(32);
         parent = parent || basepath;
         String(list).replace($.rword, function(el) {
             var url = loadJSCSS(el, parent)
@@ -600,7 +589,7 @@
      * @api public
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = $.slice(arguments);
+        var args = sliceArgs(arguments);
         if (typeof id === "string") {
             var _id = args.shift();
         }
@@ -641,11 +630,11 @@
      */
 
     function fireFactory(id, deps, factory) {
-        for (var i = 0, array = [], d; d = deps[i++];) {
+        for (var i = 0, array = [], d; d = deps[i++]; ) {
             array.push(modules[d].exports);
         }
         var module = Object(modules[id]),
-            ret = factory.apply(global, array);
+                ret = factory.apply(global, array);
         module.state = 2;
         if (ret !== void 0) {
             modules[id].exports = ret;
@@ -674,7 +663,8 @@
         } catch (e) {
             setTimeout(doScrollCheck);
         }
-    };
+    }
+    ;
     //在firefox3.6之前，不存在readyState属性
     //http://www.cnblogs.com/rubylouvre/archive/2012/12/18/2822912.html
     if (!DOC.readyState) {
@@ -787,7 +777,7 @@
  2013.1.22 处理动态插入script节点的BUG, 对让getCurrentScript进行加强
  2013.4.1 升级支v23 支持动态添加加载器，正确取得加载器所在的节点的路径
  2013.4.3 升级支v24 支持不按AMD规范编写的JS文件加载
-
+ 
  http://stackoverflow.com/questions/326596/how-do-i-wrap-a-function-in-javascript
  https://github.com/eriwen/javascript-stacktrace
  不知道什么时候开始，"不要重新发明轮子"这个谚语被传成了"不要重新造轮子"，于是一些人，连造轮子都不肯了。
