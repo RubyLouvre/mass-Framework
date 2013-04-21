@@ -17,7 +17,6 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             lowercase: function(str) {
                 return str.toLowerCase();
             },
-            contains: $.String.contains,
             truncate: $.String.truncate,
             camelize: $.String.camelize,
             escape: $.String.escapeHTML,

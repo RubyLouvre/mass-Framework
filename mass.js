@@ -33,9 +33,6 @@
      * @param  {Node|NodeList|Array|Mass} context ？ 上下文对象
      * @return {Mass}
      */
-    function sliceArgs(nodes, start, end) {
-        return parsings.slice.call(nodes, start, end);
-    }
     function $(expr, context) { //新版本的基石
         if (typeof expr === "function" && expr.call) { //注意在safari下,typeof nodeList的类型为function,因此必须使用$.type
             return $.require(all + ",ready", expr);
@@ -66,7 +63,7 @@
      */
 
     function mix(receiver, supplier) {
-        var args = sliceArgs(arguments),
+        var args = [].slice.call(arguments),
                 i = 1,
                 key, //如果最后参数是布尔，判定是否覆写同名属性
                 ride = typeof args[args.length - 1] === "boolean" ? args.pop() : true;
@@ -104,13 +101,28 @@
          * @return {Array}
          * @api public
          */
-        slice: W3C ? sliceArgs : function(nodes, start, end) {
+        slice: W3C ? function(nodes, start, end) {
+            return parsings.slice.call(nodes, start, end);
+        } : function(nodes, start, end) {
             var ret = [],
                     n = nodes.length;
-            while (n--) {
-                ret[n] = nodes[n];
+            if (end === void 0 || typeof end === "number" && isFinite(end)) {
+                start = parseInt(start, 10) || 0;
+                end = end == void 0 ? n : parseInt(end, 10);
+                if (start < 0) {
+                    start += n;
+                }
+                if (end > n) {
+                    end = n;
+                }
+                if (end < 0) {
+                    end += n;
+                }
+                for (var i = start; i < end; ++i) {
+                    ret[i - start] = nodes[i];
+                }
             }
-            return sliceArgs[ret, start, end];
+            return ret;
         },
         /**
          * 用于建立一个从元素到数据的关联，应用于事件绑定，元素去重
@@ -591,7 +603,7 @@
      * @api public
      */
     window.define = $.define = function(id, deps, factory) { //模块名,依赖列表,模块本身
-        var args = sliceArgs(arguments);
+        var args = $.slice(arguments);
         if (typeof id === "string") {
             var _id = args.shift();
         }
