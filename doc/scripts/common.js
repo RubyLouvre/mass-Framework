@@ -35,16 +35,17 @@
     require("ready,event", function($) {
         $("pre").each(function() {
             if (this.exec !== "function") {
-                var self = $(this), btn = self.next("button.doc_btn");
-                if (/brush:\s*j/i.test(this.className) && btn.length) {
-                    var code = $.String.unescapeHTML(this.innerHTML);
-                    try {
+                try {
+                    var self = $(this), btn = self.next("button.doc_btn");
+                    if (/brush:\s*j/i.test(this.className) && btn.length) {
+                        var code = $.String.unescapeHTML(this.innerHTML);
                         var fn = Function(code);
-                    } catch (e) {
-                        alert(e);
-                        alert(code)
+                        btn[0].exec = fn;
                     }
-                    btn[0].exec = fn;
+                } catch (e) {
+                    $.log(this)
+                    $.log(e);
+                    $.log(code)
                 }
             }
         });

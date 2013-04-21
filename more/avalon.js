@@ -1,10 +1,10 @@
 (function() {
-//加载用户当前浏览器所有的语言
+    //加载用户当前浏览器所有的语言
     var lang = (navigator.language || navigator.browserLanguage || "zh-cn").toLowerCase();
     define.lang = lang === "zh-cn" ? lang : lang.split("-")[0];
 })();
 define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(locale, $) {
-   // window.console = window.console || $;
+    // window.console = window.console || $;
     var prefix = $.config.bindingPrefix || "ms-";
     var formats = locale.NUMBER_FORMATS;
     var avalon = $.avalon = {
@@ -25,39 +25,39 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 return symbol + avalon.filters.number(number);
             },
             number: function(number, decimals, dec_point, thousands_sep) {
-//与PHP的number_format完全兼容
-//number	必需，要格式化的数字
-//decimals	可选，规定多少个小数位。
-//dec_point	可选，规定用作小数点的字符串（默认为 . ）。
-//thousands_sep	可选，规定用作千位分隔符的字符串（默认为 , ），如果设置了该参数，那么所有其他参数都是必需的。
-// http://kevin.vanzonneveld.net
-// *     example 1: number_format(1234.56);
-// *     returns 1: '1,235'
-// *     example 2: number_format(1234.56, 2, ',', ' ');
-// *     returns 2: '1 234,56'
-// *     example 3: number_format(1234.5678, 2, '.', '');
-// *     returns 3: '1234.57'
-// *     example 4: number_format(67, 2, ',', '.');
-// *     returns 4: '67,00'
-// *     example 5: number_format(1000);
-// *     returns 5: '1,000'
-// *     example 6: number_format(67.311, 2);
-// *     returns 6: '67.31'
-// *     example 7: number_format(1000.55, 1);
-// *     returns 7: '1,000.6'
-// *     example 8: number_format(67000, 5, ',', '.');
-// *     returns 8: '67.000,00000'
-// *     example 9: number_format(0.9, 0);
-// *     returns 9: '1'
-// *     example 10: number_format('1.20', 2);
-// *     returns 10: '1.20'
-// *     example 11: number_format('1.20', 4);
-// *     returns 11: '1.2000'
-// *     example 12: number_format('1.2000', 3);
-// *     returns 12: '1.200'
-// *     example 13: number_format('1 000,50', 2, '.', ' ');
-// *     returns 13: '100 050.00'
-// Strip all characters but numerical ones.
+                //与PHP的number_format完全兼容
+                //number	必需，要格式化的数字
+                //decimals	可选，规定多少个小数位。
+                //dec_point	可选，规定用作小数点的字符串（默认为 . ）。
+                //thousands_sep	可选，规定用作千位分隔符的字符串（默认为 , ），如果设置了该参数，那么所有其他参数都是必需的。
+                // http://kevin.vanzonneveld.net
+                // *     example 1: number_format(1234.56);
+                // *     returns 1: '1,235'
+                // *     example 2: number_format(1234.56, 2, ',', ' ');
+                // *     returns 2: '1 234,56'
+                // *     example 3: number_format(1234.5678, 2, '.', '');
+                // *     returns 3: '1234.57'
+                // *     example 4: number_format(67, 2, ',', '.');
+                // *     returns 4: '67,00'
+                // *     example 5: number_format(1000);
+                // *     returns 5: '1,000'
+                // *     example 6: number_format(67.311, 2);
+                // *     returns 6: '67.31'
+                // *     example 7: number_format(1000.55, 1);
+                // *     returns 7: '1,000.6'
+                // *     example 8: number_format(67000, 5, ',', '.');
+                // *     returns 8: '67.000,00000'
+                // *     example 9: number_format(0.9, 0);
+                // *     returns 9: '1'
+                // *     example 10: number_format('1.20', 2);
+                // *     returns 10: '1.20'
+                // *     example 11: number_format('1.20', 4);
+                // *     returns 11: '1.2000'
+                // *     example 12: number_format('1.2000', 3);
+                // *     returns 12: '1.200'
+                // *     example 13: number_format('1 000,50', 2, '.', ' ');
+                // *     returns 13: '100 050.00'
+                // Strip all characters but numerical ones.
                 number = (number + "").replace(/[^0-9+\-Ee.]/g, '');
                 var n = !isFinite(+number) ? 0 : +number,
                         prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
@@ -81,10 +81,11 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
         }
     };
- 
+
     var Publish = {}; //将函数放到发布对象上，让依赖它的函数
     var expando = new Date - 0;
     var mid = expando;
+
     function modleID() {
         return (mid++).toString(36);
     }
@@ -139,6 +140,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 num = num.substr(num.length - digits);
             return neg + num;
         }
+
         function dateGetter(name, size, offset, trim) {
             return function(date) {
                 var value = date['get' + name]();
@@ -150,6 +152,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 return padNumber(value, size, trim);
             };
         }
+
         function dateStrGetter(name, shortForm) {
             return function(date, formats) {
                 var value = date['get' + name]();
@@ -161,11 +164,11 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         function timeZoneGetter(date) {
             var zone = -1 * date.getTimezoneOffset();
             var paddedZone = (zone >= 0) ? "+" : "";
-            paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) +
-                    padNumber(Math.abs(zone % 60), 2);
+            paddedZone += padNumber(Math[zone > 0 ? 'floor' : 'ceil'](zone / 60), 2) + padNumber(Math.abs(zone % 60), 2);
             return paddedZone;
         }
-//取得上午下午
+        //取得上午下午
+
         function ampmGetter(date, formats) {
             return date.getHours() < 12 ? formats.AMPMS[0] : formats.AMPMS[1];
         }
@@ -199,6 +202,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 NUMBER_STRING = /^\d+$/;
         var R_ISO8601_STR = /^(\d{4})-?(\d\d)-?(\d\d)(?:T(\d\d)(?::?(\d\d)(?::?(\d\d)(?:\.(\d+))?)?)?(Z|([+-])(\d\d):?(\d\d))?)?$/;
         // 1        2       3         4          5          6          7          8  9     10      11
+
         function jsonStringToDate(string) {
             var match;
             if (match = string.match(R_ISO8601_STR)) {
@@ -223,7 +227,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                     fn, match;
             format = format || 'mediumDate';
             format = formats[format] || format;
-            if (typeof (date) === "string") {
+            if (typeof(date) === "string") {
                 if (NUMBER_STRING.test(date)) {
                     date = int(date);
                 } else {
@@ -231,7 +235,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 }
             }
 
-            if ($.type(date,"Number")) {
+            if ($.type(date, "Number")) {
                 date = new Date(date);
             }
 
@@ -252,8 +256,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
 
             forEach(parts, function(value) {
                 fn = DATE_FORMATS[value];
-                text += fn ? fn(date, formats)
-                        : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
+                text += fn ? fn(date, formats) : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
             });
             return text;
         };
@@ -263,13 +266,16 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      **********************************************************************/
     var regOpenTag = /([^{]*)\{\{/;
     var regCloseTag = /([^}]*)\}\}/;
+
     function hasExpr(value) {
         var index = value.indexOf("{{");
         return index !== -1 && index < value.indexOf("}}");
     }
+
     function forEach(obj, fn) {
-        if (obj) {//不能传个null, undefined进来
-            var isArray = isFinite(obj.length), i = 0;
+        if (obj) { //不能传个null, undefined进来
+            var isArray = isFinite(obj.length),
+                    i = 0;
             if (isArray) {
                 for (var n = obj.length; i < n; i++) {
                     fn(i, obj[i]);
@@ -283,7 +289,8 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
         }
     }
-//eval一个或多个表达式
+    //eval一个或多个表达式
+
     function watchView(text, scope, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
         var scopeList = [scope].concat(scopes);
@@ -317,18 +324,20 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 callback(val);
             };
         }
-        Publish[ expando ] = updateView;
+        updateView.element = data.element;
+        Publish[expando] = updateView;
         updateView();
-        delete  Publish[ expando ];
+        delete Publish[expando];
     }
     var bindingHandlers = avalon.bindingHandlers = {
-//将模型中的字段与input, textarea的value值关联在一起
+        //将模型中的字段与input, textarea的value值关联在一起
         "model": function(data, scope, scopes) {
             var element = data.element;
             var tagName = element.tagName;
-            if (typeof  modelBinding[tagName] === "function") {
+            if (typeof modelBinding[tagName] === "function") {
                 var array = [scope].concat(scopes);
-                var name = data.node.value, model;
+                var name = data.node.value,
+                        model;
                 array.forEach(function(obj) {
                     if (!model && obj.hasOwnProperty(name)) {
                         model = obj;
@@ -337,6 +346,19 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 model = model || {};
                 modelBinding[tagName](element, model, name);
             }
+        },
+        event: function(data, scope, scopes) {
+            var element = $(data.element);
+            watchView(data.value, scope, scopes, data, function(val) {
+                var type = data.args && data.args[0];
+                if (type && typeof val === "function") { //第一种形式
+                    element.on(type, val);
+                }
+            });
+        },
+        click: function(data) {
+            data.args = ["click"];
+            bindingHandlers.event.apply(0, arguments);
         },
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
         //<div>{{firstName}} + java</div>，如果model.firstName为ruby， 那么变成
@@ -348,7 +370,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             });
         },
         //控制元素显示或隐藏
-        "toggle": function(data, scope, scopes) {
+        "visible": function(data, scope, scopes) {
             var element = $(data.element);
             watchView(data.value, scope, scopes, data, function(val) {
                 element.toggle(!!val);
@@ -357,7 +379,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
         //<a href="{{url.hostname}}/{{url.pathname}}.html">
         "href": function(data, scope, scopes) {
-//如果没有则说明是使用ng-href的形式
+            //如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
             var node = data.node;
             var simple = node.name.indexOf(prefix) === 0;
@@ -374,7 +396,8 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         //布尔属性在IE下无法取得原来的字符串值，变成一个布尔，因此需要用ng-disabled
         //text.slice(2, text.lastIndexOf("}}"))
         "disabled": function(data, scope, scopes) {
-            var element = data.element, name = data.type,
+            var element = data.element,
+                    name = data.type,
                     propName = $.propMap[name] || name;
             watchView(data.value, scope, scopes, data, function(val) {
                 element[propName] = !!val;
@@ -388,7 +411,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         "class": function(data, scope, scopes) {
             var element = $(data.element);
             watchView(data.value, scope, scopes, data, function(val) {
-                if (data.args) {//第一种形式
+                if (data.args) { //第一种形式
                     element.toggleClass(data.args.join(""), !!val);
                 } else if (typeof val === "string") {
                     element.addClass(val);
@@ -431,15 +454,16 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             while (parent.firstChild) {
                 fragment.appendChild(parent.firstChild);
             }
+
             function updateListView(method, args, len) {
-                var listName = list.$modelName;
+                var listName = list.$id;
                 switch (method) {
                     case "push":
                         $.each(args, function(index, item) {
                             updateView(len + index, item);
                         });
                         break;
-                    case "unshift"  :
+                    case "unshift":
                         list.insertBefore = parent.firstChild;
                         $.each(args, function(index, item) {
                             updateView(index, item);
@@ -463,7 +487,9 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                         }
                         break;
                     case "splice":
-                        var start = args[0], second = args[1], adds = [].slice.call(args, 2);
+                        var start = args[0],
+                                second = args[1],
+                                adds = [].slice.call(args, 2);
                         var deleteCount = second >= 0 ? second : len - start;
                         var node = findIndex(parent, listName, start);
                         if (node) {
@@ -491,14 +517,18 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                         break;
                 }
             }
-            var isList = Array.isArray(list[ subscribers ] || {});
+            var isList = Array.isArray(list[subscribers] || {});
             if (isList) {
-                list[ subscribers ].push(updateListView);
+                list[subscribers].push(updateListView);
             }
 
-            var args = data.args, itemName = args[0] || "$data", indexName = args[1] || "$index";
+            var args = data.args,
+                    itemName = args[0] || "$data",
+                    indexName = args[1] || "$index";
+
             function updateView(index, item, clone) {
-                var newScope, textNodes = [], source = {};
+                var newScope, textNodes = [],
+                        source = {};
                 source[itemName] = {
                     get: function() {
                         return item;
@@ -511,7 +541,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 };
                 newScope = modelFactory(source);
                 if (isList) {
-                    var comment = doc.createComment(list.$modelName + index);
+                    var comment = doc.createComment(list.$id + index);
                     if (list.insertBefore) {
                         parent.insertBefore(comment, list.insertBefore);
                     } else {
@@ -523,7 +553,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                     if (clone.nodeType === 1) {
                         scanTag(clone, newScope, scopeList, doc); //扫描元素节点
                     } else if (clone.nodeType === 3) {
-                        textNodes.push(clone);//插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
+                        textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
                     }
                     if (list.insertBefore) {
                         parent.insertBefore(clone, list.insertBefore);
@@ -546,6 +576,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     };
 
     //重置所有路标
+
     function resetIndex(elem, name) {
         var index = 0;
         for (var node = elem.firstChild; node; node = node.nextSibling) {
@@ -559,12 +590,14 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
         }
     }
+
     function removeView(elem, name, node) {
-        var nodes = [], doc = elem.ownerDocument, view = doc.createDocumentFragment();
+        var nodes = [],
+                doc = elem.ownerDocument,
+                view = doc.createDocumentFragment();
         for (var check = node; check; check = check.nextSibling) {
             //如果到达下一个路标,则断开,将收集到的节点放到文档碎片与下一个路标返回
-            if (check.nodeType === 8 && check.nodeValue.indexOf(name) === 0
-                    && check !== node) {
+            if (check.nodeType === 8 && check.nodeValue.indexOf(name) === 0 && check !== node) {
                 break
             }
             nodes.push(check);
@@ -574,6 +607,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         }
         return [view, check];
     }
+
     function removeViews(elem, name, node, number) {
         var ret = [];
         do {
@@ -587,6 +621,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         } while (ret.length !== number);
         return ret;
     }
+
     function findIndex(elem, name, target) {
         var index = 0;
         for (var node = elem.firstChild; node; node = node.nextSibling) {
@@ -601,8 +636,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         }
     }
     //循环绑定其他布尔属性
-    var bools = "autofocus,autoplay,async,checked,controls,declare,defer,"
-            + "contenteditable,ismap,loop,multiple,noshade,open,noresize,readonly,selected";
+    var bools = "autofocus,autoplay,async,checked,controls,declare,defer," + "contenteditable,ismap,loop,multiple,noshade,open,noresize,readonly,selected";
     bools.replace($.rword, function(name) {
         bindingHandlers[name] = bindingHandlers.disabled;
     });
@@ -618,13 +652,18 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         if (element.name === void 0) {
             element.name = name;
         }
-        var type = element.type, ok;
+        var type = element.type,
+                ok;
+
         function updateModel() {
             model[name] = element.value;
         }
+
         function updateView() {
             var val = model[name];
-            element.value = val === void 0 ? "" : val;
+            if (val !== element.value) {
+                element.value = val === void 0 ? "" : val;
+            }
         }
         if (/^(password|textarea|text)$/.test(type)) {
             ok = true;
@@ -669,22 +708,26 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             };
             $.bind(element, "click", updateModel); //IE6-8
         }
-        Publish[ expando ] = updateView;
+        Publish[expando] = updateView;
+        updateView.element = element;
         updateView();
-        delete Publish[ expando ];
+        delete Publish[expando];
     };
     modelBinding.SELECT = function(element, model, name) {
         var select = $(element);
+
         function updateModel() {
             model[name] = select.val();
         }
+
         function updateView() {
             select.val(model[name]);
         }
         $.bind(element, "change", updateModel);
-        Publish[ expando ] = updateView;
+        Publish[expando] = updateView;
+        updateView.element = element;
         updateView();
-        delete Publish[ expando ];
+        delete Publish[expando];
     };
     modelBinding.TEXTAREA = modelBinding.INPUT;
     /*********************************************************************
@@ -692,15 +735,16 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      **********************************************************************/
 
     //注意VBscript对象不会自动调用toString与valueOf方法
+
     function ObserverArray(list) {
         var collection = list.map(function(val) {
             return val && typeof val === "object" ? modelFactory(val) : val;
         });
-        collection.$modelName = modleID();
+        collection.$id = modleID();
         collection[subscribers] = [];
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method) {
-            var nativeMethod = collection[ method ];
-            collection[ method ] = function() {
+            var nativeMethod = collection[method];
+            collection[method] = function() {
                 var len = this.length;
                 var ret = nativeMethod.apply(this, arguments);
                 notifySubscribers(this, method, arguments, len);
@@ -725,14 +769,14 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
             return ret;
         };
-        collection.update = function() {//强制刷新页面
+        collection.update = function() { //强制刷新页面
             notifySubscribers(this, "sort", []);
             return this;
         };
-        collection.removeAt = function(index) {//移除指定索引上的元素
+        collection.removeAt = function(index) { //移除指定索引上的元素
             this.splice(index, 1);
         };
-        collection.remove = function(item) {//移除第一个等于给定值的元素
+        collection.remove = function(item) { //移除第一个等于给定值的元素
             var index = this.indexOf(item);
             if (index !== -1) {
                 this.removeAt(index);
@@ -779,19 +823,24 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      */
     //http://www.cnblogs.com/whitewolf/archive/2012/07/07/2580630.html
 
-    function collectSubscribers(accessor) {//收集依赖于这个域的订阅者
-        if (Publish[ expando ]) {
-            var list = accessor[ subscribers ];
-            list && $.Array.ensure(list, Publish[ expando ]); //只有数组不存在此元素才push进去
+    function collectSubscribers(accessor) { //收集依赖于这个域的订阅者
+        if (Publish[expando]) {
+            var list = accessor[subscribers];
+            list && $.Array.ensure(list, Publish[expando]); //只有数组不存在此元素才push进去
         }
     }
-    function notifySubscribers(accessor) {//通知依赖于这个域的订阅者更新自身
-        var list = accessor[ subscribers ];
+
+    function notifySubscribers(accessor) { //通知依赖于这个域的订阅者更新自身
+        var list = accessor[subscribers];
         if (list && list.length) {
             var args = [].slice.call(arguments, 1);
-            var safelist = list.concat();
+            var safelist = list.concat(),
+                    el;
             for (var i = 0, fn; fn = safelist[i++]; ) {
-                if (typeof fn === "function") {
+                el = fn.element;
+                if (el && (el.sourceIndex === 0 || el.parentNode === null)) {
+                    $.Array.remove(list, fn);
+                } else {
                     fn.apply(0, args); //强制重新计算自身
                 }
             }
@@ -804,7 +853,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      *                            Model                                   *
      **********************************************************************/
     avalon.controller = function(name, obj) {
-        if(arguments.length === 1){
+        if (arguments.length === 1) {
             obj = name;
             name = "root";
         }
@@ -812,7 +861,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             $.error('已经存在"' + name + '" controller');
         } else {
             var model = modelFactory(obj);
-            model.$modelName = name;
+            model.$id = name;
             return avalon.models[name] = model;
         }
     };
@@ -820,23 +869,24 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      *                           Scan                                     *
      **********************************************************************/
     //扫描整个DOM树,最开始是从某个元素节点扫起
-    avalon.scan = function(elem){
+    avalon.scan = function(elem) {
         elem = elem || document.documentElement;
-        var scopeName = elem.getAttribute(prefix+"app") || "root";
+        var scopeName = elem.getAttribute(prefix + "app") || "root";
         var scope = avalon.models[scopeName];
-        if(!scope){
-            $.error("不存在此控制器{"+scopeName+"},请必须指定根控制器");
+        if (!scope) {
+            $.error("不存在此控制器{" + scopeName + "},请必须指定根控制器");
         }
-        scanTag(elem, scope, [],  elem.ownerDocument || document); 
+        scanTag(elem, scope, [], elem.ownerDocument || document);
     }
-    function scanTag(elem, scope, scopes, doc) {  
+
+    function scanTag(elem, scope, scopes, doc) {
         scopes = scopes || [];
         var flags = {};
         scanAttr(elem, scope, scopes, flags); //扫描特点节点
-        if (flags.stopBinding) {//是否要停止扫描
+        if (flags.stopBinding) { //是否要停止扫描
             return false;
         }
-        if (flags.newScope) {//更换作用域， 复制父作用域堆栈，防止互相影响
+        if (flags.newScope) { //更换作用域， 复制父作用域堆栈，防止互相影响
             scopes = scopes.slice(0);
             scope = flags.newScope;
         }
@@ -849,19 +899,21 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                     textNodes.push(node);
                 }
             }
-            for (var i = 0; node = textNodes[i++]; ) {//延后执行
+            for (var i = 0; node = textNodes[i++]; ) { //延后执行
                 scanText(node, scope, scopes, doc); //扫描文本节点
             }
         }
     }
     var stopScan = $.oneObject("area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr,script,style".toUpperCase());
     //扫描元素节点中直属的文本节点，并进行抽取
+
     function scanText(textNode, scope, scopes, doc) {
         var bindings = extractTextBindings(textNode, doc);
         if (bindings.length) {
             executeBindings(bindings, scope, scopes);
         }
     }
+
     function scanExpr(value) {
         var tokens = [];
         if (hasExpr(value)) {
@@ -908,8 +960,9 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         var bindings = [];
         for (var i = 0, attr; attr = el.attributes[i++]; ) {
             if (attr.specified) {
-                var isBinding = false, remove = false;
-                if (attr.name.indexOf(prefix) !== -1) {//如果是以指定前缀命名的
+                var isBinding = false,
+                        remove = false;
+                if (attr.name.indexOf(prefix) !== -1) { //如果是以指定前缀命名的
                     var type = attr.name.replace(prefix, "");
                     if (type.indexOf("-") > 0) {
                         var args = type.split("-");
@@ -931,7 +984,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                         value: attr.nodeValue
                     });
                 }
-                if (!flags.newScope && type === "controller") {//更换作用域
+                if (!flags.newScope && type === "controller") { //更换作用域
                     var temp = avalon.models[attr.value];
                     if (typeof temp === "object" && temp !== scope) {
                         scopes.unshift(scope);
@@ -946,17 +999,18 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     function executeBindings(bindings, scope, scopes, flags) {
         bindings.forEach(function(data) {
             bindingHandlers[data.type]($.mix({}, data), scope, scopes, flags);
-            if (data.remove) {//移除数据绑定，防止被二次解析
+            if (data.remove) { //移除数据绑定，防止被二次解析
                 data.element.removeAttribute(data.node.name);
             }
         });
     }
 
     function extractTextBindings(textNode, doc) {
-        var bindings = [], tokens = scanExpr(textNode.nodeValue);
+        var bindings = [],
+                tokens = scanExpr(textNode.nodeValue);
         if (tokens.length) {
             var fragment = doc.createDocumentFragment();
-            while (tokens.length) {//将文本转换为文本节点，并替换原来的文本节点
+            while (tokens.length) { //将文本转换为文本节点，并替换原来的文本节点
                 var token = tokens.shift();
                 var node = doc.createTextNode(token.value);
                 if (token.expr) {
@@ -978,6 +1032,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      *                           parse                                    *
      **********************************************************************/
     var regEscape = /([-.*+?^${}()|[\]\/\\])/g;
+
     function escapeRegExp(target) {
         //将字符串安全格式化为正则表达式的源码
         return target.replace(regEscape, "\\$1");
@@ -985,9 +1040,10 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     var isStrict = (function() {
         return !this;
     })();
+
     function insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random) {
         var ok = false;
-        if (window.dispatchEvent) {//判定是否IE9-11或者为标准浏览器
+        if (window.dispatchEvent) { //判定是否IE9-11或者为标准浏览器
             ok = e instanceof ReferenceError;
         } else {
             ok = e instanceof TypeError;
@@ -1014,15 +1070,15 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             varName = (varName.match(/^[\w$]+/) || [""])[0]; //取得未定义的变量名
             for (var i = 0, scope; scope = scopeList[i++]; ) {
                 if (scope.hasOwnProperty(varName)) {
-                    var modelName = scope.$modelName + random;
-                    if (names.indexOf(modelName) === -1) {
-                        names.push(modelName);
+                    var scopeName = scope.$id + random;
+                    if (names.indexOf(scopeName) === -1) {
+                        names.push(scopeName);
                         args.push(scope);
                     }
                     //这里实际还要做更严格的处理
                     var reg = new RegExp("(^|[^\\w\\u00c0-\\uFFFF_])(" + escapeRegExp(varName) + ")($|[^\\w\\u00c0-\\uFFFF_])", "g");
-                    return  text.replace(reg, function(a, b, c, d) {
-                        return b + modelName + "." + c + d; //添加作用域
+                    return text.replace(reg, function(a, b, c, d) {
+                        return b + scopeName + "." + c + d; //添加作用域
                     });
                 }
             }
@@ -1031,15 +1087,19 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     }
     var doubleQuotedString = /"([^\\"\n]|\\.)*"/g;
     var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
+
     function parseExpr(text, scopeList, data) {
-        var names = [], args = [], random = new Date - 0, val;
+        var names = [],
+                args = [],
+                random = new Date - 0,
+                val;
         if (isStrict) {
             //取得模块的名字
             scopeList.forEach(function(scope) {
-                var scopeName = scope.$modelName + random;
+                var scopeName = scope.$id + random;
                 if (names.indexOf(scopeName) === -1) {
                     names.push(scopeName);
-                    args.push(model);
+                    args.push(scope);
                 }
             });
             text = "var ret" + random + " = " + text + "\r\n";
@@ -1060,7 +1120,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 doubleHolder.push(b);
                 return double;
             });
-            do {//开始循环
+            do { //开始循环
                 try {
                     var fn = Function.apply(Function, names.concat("return " + text));
                     var val = fn.apply(fn, args);
@@ -1090,7 +1150,8 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
         }
         if (data.filters) {
-            var textBuffer = [], fargs;
+            var textBuffer = [],
+                    fargs;
             textBuffer.push(text, "\r\n");
             for (var i = 0, f; f = data.filters[i++]; ) {
                 var start = f.indexOf("(");
@@ -1159,26 +1220,24 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         window.execScript([
             "Function parseVB(code)",
             "\tExecuteGlobal(code)",
-            "End Function"
-        ].join("\n"), "VBScript");
-        function mediatorVB(descs, name, value) {
-            var fn = descs[name] && descs[name].set;
+            "End Function"].join("\n"), "VBScript");
+
+        function VBMediator(description, name, value) {
+            var fn = description[name] && description[name].set;
             if (arguments.length === 3) {
                 fn(value);
             } else {
-                var ret = fn()
+                var ret = fn();
                 return ret;
             }
         }
-        function definePropertiesVB(object, attrs, delay) {
-            var more = (delay || []).concat();
-            if (more.indexOf("hasOwnProperty") === -1) {
-                more.push("hasOwnProperty");
-            }
-            if (more.indexOf("$modelName") === -1) {
-                more.push("$modelName");
-            }
-            var className = "VBClass" + setTimeout("1"), owner = {}, buffer = [];
+
+        function VBDefineProperties(description, publics) {
+            publics = publics.concat();
+            $.Array.ensure(publics, "hasOwnProperty");
+            $.Array.ensure(publics, "$id");
+            var className = "VBClass" + setTimeout("1"),
+                    owner = {}, buffer = [];
             buffer.push(
                     "Class " + className,
                     "\tPrivate [__data__], [__proxy__]",
@@ -1186,30 +1245,30 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                     "\t\tSet [__data__] = d: set [__proxy__] = p",
                     "\t\tSet [__const__] = Me", //链式调用
                     "\tEnd Function");
-            more.forEach(function(prop) {//添加公共属性,越多越好,因为VBScript对象不能像JS那样添加属性
-                owner[prop] = true;
-                buffer.push("\tPublic [" + prop + "]");
+            publics.forEach(function(name) { //添加公共属性,越多越好,因为VBScript对象不能像JS那样添加属性
+                owner[name] = true;
+                buffer.push("\tPublic [" + name + "]");
             });
-            attrs.forEach(function(attr) {
-                owner[attr] = true;// [__proxy__]([__data__], \"" + attr + "\", val)",
+            Object.keys(description).forEach(function(name) {
+                owner[name] = true; // [__proxy__]([__data__], \"" + attr + "\", val)",
                 buffer.push(
                         //由于不知对方会传入什么,因此set, let都用上
-                        "\tPublic Property Let [" + attr + "](val)", //setter
-                        "\t\tCall [__proxy__]([__data__], \"" + attr + "\", val)",
+                        "\tPublic Property Let [" + name + "](val)", //setter
+                        "\t\tCall [__proxy__]([__data__], \"" + name + "\", val)",
                         "\tEnd Property",
-                        "\tPublic Property Set [" + attr + "](val)", //setter
-                        "\t\tCall [__proxy__]([__data__], \"" + attr + "\", val)",
+                        "\tPublic Property Set [" + name + "](val)", //setter
+                        "\t\tCall [__proxy__]([__data__], \"" + name + "\", val)",
                         "\tEnd Property",
-                        "\tPublic Property Get [" + attr + "]", //getter
+                        "\tPublic Property Get [" + name + "]", //getter
                         "\tOn Error Resume Next", //必须优先使用set语句,否则它会误将数组当字符串返回
-                        "\t\tSet[" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
+                        "\t\tSet[" + name + "] = [__proxy__]([__data__],\"" + name + "\")",
                         "\tIf Err.Number <> 0 Then",
-                        "\t\t[" + attr + "] = [__proxy__]([__data__],\"" + attr + "\")",
+                        "\t\t[" + name + "] = [__proxy__]([__data__],\"" + name + "\")",
                         "\tEnd If",
                         "\tOn Error Goto 0",
                         "\tEnd Property");
             });
-            buffer.push("End Class");//类定义完毕
+            buffer.push("End Class"); //类定义完毕
             buffer.push(
                     "Function " + className + "Factory(a, b)", //创建实例并传入两个关键的参数
                     "\tDim o",
@@ -1218,7 +1277,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                     "End Function");
             // $.log(buffer.join("\r\n"));
             window.parseVB(buffer.join("\r\n"));
-            var model = window[className + "Factory"](object, mediatorVB);
+            var model = window[className + "Factory"](description, VBMediator);
             model.hasOwnProperty = function(name) {
                 return owner[name] === true;
             };
@@ -1227,17 +1286,25 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     }
 
     function modelFactory(scope) {
-        var fns = [], descs = {}, props = [], model = {}, skipCall = {};
+        var skipArray = scope.$skipArray,
+                description = {},
+                model = {},
+                callSetters = [],
+                callGetters = [],
+                VBPublics = [];
+        skipArray = Array.isArray(skipArray) ? skipArray : [];
+        $.Array.ensure(skipArray, "$skipArray");
         $.each(scope, function(name, value) {
             if (typeof value === "function") {
-                fns.push(name);
+                VBPublics.push(name);
             } else {
-                props.push(name);
+                if (skipArray.indexOf(name) !== -1) {
+                    return VBPublics.push(name);
+                }
                 var accessor, oldValue, oldArgs;
-                if (typeof value === "object" && typeof value.get === "function"
-                        && Object.keys(value).length <= 2) {
-                    skipCall[name] = true;//这个不用立即赋值
-                    accessor = function(neo) {//创建访问器
+                if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
+                    callGetters.push(name);
+                    accessor = function(neo) { //创建computed
                         if (arguments.length) {
                             if (typeof value.set === "function") {
                                 value.set.call(model, neo);
@@ -1250,8 +1317,8 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                             var flagDelete = false;
                             if (!accessor[accessor]) {
                                 flagDelete = true;
-                                Publish[ expando ] = function() {
-                                    notifySubscribers(accessor);//通知顶层改变
+                                Publish[expando] = function() {
+                                    notifySubscribers(accessor); //通知顶层改变
                                 };
                                 accessor[accessor] = [];
                             }
@@ -1259,33 +1326,30 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                                 oldValue = value.get.call(model);
                             }
                             if (flagDelete) {
-                                delete Publish[ expando ];
+                                delete Publish[expando];
                             }
                             return oldValue;
                         }
                     };
                 } else {
-                    accessor = function(neo) {//创建访问器
+                    callSetters.push(name);
+                    accessor = function(neo) { //创建访问器
                         if (arguments.length) {
                             if (oldValue !== neo) {
                                 if (typeof neo === "object") {
-                                    if (Array.isArray(neo)) {
-                                        neo = ObserverArray(neo)
-                                    } else {
-                                        neo = modelFactory(neo)
-                                    }
+                                    neo = Array.isArray(neo) ? ObserverArray(neo) : modelFactory(neo);
                                 }
                                 oldValue = neo;
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
-                            collectSubscribers(accessor);//收集视图函数
+                            collectSubscribers(accessor); //收集视图函数
                             return oldValue;
                         }
                     };
                     accessor[subscribers] = [];
                 }
-                descs[name] = {
+                description[name] = {
                     set: accessor,
                     get: accessor,
                     enumerable: true
@@ -1293,83 +1357,34 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
         });
         if (defineProperties) {
-            defineProperties(model, descs);
+            defineProperties(model, description);
         } else {
-            model = definePropertiesVB(descs, props, fns);
+            model = VBDefineProperties(description, VBPublics);
         }
-        fns.forEach(function(name) {
+        VBPublics.forEach(function(name) {
             var fn = scope[name];
-            model[name] = function() {
-                return  fn.apply(model, arguments);
-            };
-            model[name].toString = function() {
-                return fn + "";//还原toString，方便调试
-            };
-        });
-        //现在model只是个空对象，需要给它赋值
-        props.forEach(function(prop) {
-            if (!skipCall[prop]) {//除了函数与指定了setter, getter的属性都在这里先赋值
-                model[prop] = scope[prop];
+            if (typeof fn === "function") {
+                if (skipArray.indexOf(fn) !== -1) {
+                    model[name] = fn;
+                } else {
+                    model[name] = function() {
+                        return fn.apply(model, arguments);
+                    };
+                    model[name].toString = function() {
+                        return fn + ""; //还原toString，方便调试
+                    };
+                }
+            } else {
+                model[name] = fn;
             }
+        });
+        callSetters.forEach(function(prop) {
+            model[prop] = scope[prop];//为空对象赋值
+        });
+        callGetters.forEach(function(prop) {
+            callSetters = model[prop]; //让computed计算自身
         });
         return model;
     }
     return $;
-//    var model = modelFactory({
-//        firstName: "ddddd",
-//        lastName: "xxx",
-//        namelist: [5, 6, 4, 7, 8, 9],
-//        user: {name: "司徒正美", ooo: {xxx: "999"}},
-//        getName: function() {
-//            return this.firstName;
-//        },
-//        fullName: {
-//            set: function(val) {
-//                var array = (val || "").split(" ");
-//                this.firstName = array[0] || "";
-//                this.lastName = array[1] || "";
-//            },
-//            get: function() {
-//                return this.firstName + " " + this.lastName;
-//            }
-//        }
-//    });
-
-//    scanTag(document.body, model, [], document);
-//    setTimeout(function() {
-//        model.firstName = "setTimeout";
-//        model.user.name = "eee"
-//    }, 2000);
-//    setTimeout(function() {
-//        model.namelist.splice(2, 4, "T", "O", "P")
-//        model.user = {name: "uuu",ooo: {xxx: "nnn"}}
-//    }, 3000);
-//     setTimeout(function() {
-//        model.namelist.reverse()
-//      
-//    }, 5000);
 });
-//数组与函数及其他延后处理
-                 //    var model = $.model("app", {
-//        firstName: "姓氏",
-//        lastName: "名字",
-//        array: "ABCDEFGHIJK".split(""),
-////        select: "test1",
-////        color: "green",
-////        vehicle: ["car"],
-////        bool: false,
-////        user: {
-////            name: "userName"
-////        },
-//        nickName: function() {
-//            return this.firstName + "!!!!!!";
-//        },
-
-//    });
-//    $.model("son", {
-//        firstName: "yyyy"
-//    });
-//    $.model("aaa", {
-//        firstName: "6666"
-//    });
-//                    

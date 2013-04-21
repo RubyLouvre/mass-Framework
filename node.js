@@ -127,7 +127,10 @@ define("node", ["support", "class", "data"]
                     }));
                 },
                 each: function(fn) {
-                    return $.each(this, fn);
+                   for(var i = 0, n = this.length; i < n; i++){
+                       fn.call(this[i], i, this[i]);
+                   }
+                   return this;
                 },
                 map: function(fn) {
                     return this.labor($.map(this, fn));

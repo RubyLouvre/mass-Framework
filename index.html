@@ -37,26 +37,32 @@
 
 
         <script type="text/javascript">
-
             require("more/avalon, ready", function($) {
-                var model = $.avalon.controller({
-                    toggle: true,
-                    timestamp: new Date - 0
-                })
-                $.avalon.scan()
-                //现在我们可以通过操作数据来操作节点了
-                setTimeout(function() {
-                    model.toggle = false
-                }, 1500);
-                setInterval(function(){
-                    model.timestamp = new Date - 0
-                },200)
-                //现在我们可以通过操作数据来操作节点了
+                $.avalon.controller({
+                    numberOfClicks: 0,
+                    registerClick: function() {
+                        this.numberOfClicks++;
+                    },
+                    resetClicks: function() {
+                        this.numberOfClicks = 0
+                    },
+                    hasClickedTooManyTimes: {
+                        get: function() {
+                            return this.numberOfClicks >= 5;
+                        }
+                    }
+                });
+                $.avalon.scan();
             });
 
+
         </script>
-        <div ms-class="{ 'my-class':true, 'your-class':true, 'his-class':true }">多个类名</div>
-        <div ms-class-blink="timestamp % 2">这个不断在闪</div>
-         <div ms-class-toggle="toggle">这个类名会改变</div>
+
+        <div>你已经点击了{{numberOfClicks}} 次</div>
+        <button ms-click="registerClick" ms-disabled="hasClickedTooManyTimes">点我</button>
+        <div ms-visible="hasClickedTooManyTimes">
+            你已经点击了许多次,不能再说了,请<button ms-click="resetClicks">重置</button>
+        </div>
+
     </body>
 </html>
