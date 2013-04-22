@@ -17,17 +17,14 @@
                 text-indent:2em;
                 font-size:14px;
             }
-            .toggle{
-                width:200px;
-                height:100px;
-                background:lightgreen;
-            }
+
             .blink{
                 width:200px;
                 height:100px;
                 background:yellow
             }
         </style>
+        <link rel="stylesheet" href="http://files.cnblogs.com/rubylouvre/todos.css"/>
     </head>
     <body>
 
@@ -38,31 +35,40 @@
 
         <script type="text/javascript">
             require("more/avalon, ready", function($) {
-                $.avalon.controller({
-                    numberOfClicks: 0,
-                    registerClick: function() {
-                        this.numberOfClicks++;
-                    },
-                    resetClicks: function() {
-                        this.numberOfClicks = 0
-                    },
-                    hasClickedTooManyTimes: {
-                        get: function() {
-                            return this.numberOfClicks >= 5;
-                        }
+              var model =  $.avalon.controller(function(a) {
+                    a.firstName = 1;
+                    a.lastName = 2;
+                    a.array = [1,2,3,4]
+                    a.remove = function(){
+                      a.array.remove(4);
+                      console.log(a)
                     }
-                });
+//                    a.fullName = {
+//                        get: function() {
+//                            return this.firstName + " " + this.lastName
+//                        },
+//                        set: function(val) {
+//                            var array = (val || "").split(" ");
+//                            this.firstName = array[0] || "";
+//                            this.lastName = array[1] || "";
+//                        },
+//                    }
+                })
                 $.avalon.scan();
+                setTimeout(function(){
+                console.log("-------------")
+                    model.remove()
+                },1000)
             });
-
-
         </script>
+        <p>First name: <input ms-model="firstName" /></p>
+        <p>Last name: <input ms-model="lastName"  /></p>
+        <p>Hello,    <input ms-model="fullName"></p>
+        <div>{{firstName +" | "+ lastName }}</div>
+        <ul ms-each-el="array">
+            <li>{{el}}</li>
+        </ul>
 
-        <div>你已经点击了{{numberOfClicks}} 次</div>
-        <button ms-click="registerClick" ms-disabled="hasClickedTooManyTimes">点我</button>
-        <div ms-visible="hasClickedTooManyTimes">
-            你已经点击了许多次,不能再说了,请<button ms-click="resetClicks">重置</button>
-        </div>
 
     </body>
 </html>

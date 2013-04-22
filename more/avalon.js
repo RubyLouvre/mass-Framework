@@ -331,7 +331,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     }
     var bindingHandlers = avalon.bindingHandlers = {
         //将模型中的字段与input, textarea的value值关联在一起
-        "model": function(data, scope, scopes) {
+        model: function(data, scope, scopes) {
             var element = data.element;
             var tagName = element.tagName;
             if (typeof modelBinding[tagName] === "function") {
@@ -347,30 +347,32 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 modelBinding[tagName](element, model, name);
             }
         },
-        event: function(data, scope, scopes) {
-            var element = $(data.element);
+        on: function(data, scope, scopes) {
+            var element = data.element;
             watchView(data.value, scope, scopes, data, function(val) {
                 var type = data.args && data.args[0];
                 if (type && typeof val === "function") { //第一种形式
-                    element.on(type, val);
+                    element.$scope = scope;
+                    element.$scopes = scopes;
+                    $(element).on(type, val);
                 }
             });
         },
         click: function(data) {
             data.args = ["click"];
-            bindingHandlers.event.apply(0, arguments);
+            bindingHandlers.on.apply(0, arguments);
         },
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
         //<div>{{firstName}} + java</div>，如果model.firstName为ruby， 那么变成
         //<div>ruby + java</div>
-        "text": function(data, scope, scopes) {
+        text: function(data, scope, scopes) {
             var node = data.node;
             watchView(data.value, scope, scopes, data, function(val) {
                 node.nodeValue = val;
             });
         },
         //控制元素显示或隐藏
-        "visible": function(data, scope, scopes) {
+        visible: function(data, scope, scopes) {
             var element = $(data.element);
             watchView(data.value, scope, scopes, data, function(val) {
                 element.toggle(!!val);
@@ -378,7 +380,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         },
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
         //<a href="{{url.hostname}}/{{url.pathname}}.html">
-        "href": function(data, scope, scopes) {
+        href: function(data, scope, scopes) {
             //如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
             var node = data.node;
@@ -395,7 +397,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         //这是一个布尔属性绑定的范本，布尔属性插值要求整个都是一个插值表达式，用{{}}包起来
         //布尔属性在IE下无法取得原来的字符串值，变成一个布尔，因此需要用ng-disabled
         //text.slice(2, text.lastIndexOf("}}"))
-        "disabled": function(data, scope, scopes) {
+        disabled: function(data, scope, scopes) {
             var element = data.element,
                     name = data.type,
                     propName = $.propMap[name] || name;
@@ -410,8 +412,10 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
         "class": function(data, scope, scopes) {
             var element = $(data.element);
+            console.log(data.value)
             watchView(data.value, scope, scopes, data, function(val) {
                 if (data.args) { //第一种形式
+                    console.log(val)
                     element.toggleClass(data.args.join(""), !!val);
                 } else if (typeof val === "string") {
                     element.addClass(val);
@@ -426,7 +430,50 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 }
             });
         },
-        //控制流程绑定
+        selecting: function fn(data, scope, scopes) {
+            var select = data.element;
+            if (select.tagName !== "SELECT") {
+                $.error("options绑定只能绑在SELECT元素");
+            }
+            watchView(data.value, scope, scopes, data, function(val) {
+                if (Array.isArray(val)) {
+                    setTimeout(function() {
+                        $(select).val(val);
+                        $.bind(select, "change", function() {
+                            var array = $(select).val();
+                            val.clear();
+                            val.push.apply(val, array);
+                        });
+                    }, 30);
+                } else {
+                    $.error("selectedOptions绑定必须对应一个字符串数组");
+                }
+            });
+        },
+        options: function(data, scope, scopes) {
+            var select = data.element;
+            if (select.tagName !== "SELECT") {
+                $.error("options绑定只能绑在SELECT元素");
+            }
+            while (select.length > 0) {
+                select.remove(0);
+            }
+            watchView(data.value, scope, scopes, data, function(val) {
+                if (Array.isArray(val)) {
+                    setTimeout(function() {
+                        select.setAttribute(prefix + "each-option", data.value);
+                        select.trySelect = 0;
+                        var op = new Option("{{option}}", "");
+                        op.setAttribute("ms-value", "option");
+                        select.options[0] = op;
+                        avalon.scan(select);
+                    }, 0);
+                } else {
+                    $.error("options绑定必须对应一个字符串数组");
+                }
+            });
+        },
+        //跳过流程绑定
         "skip": function() {
             arguments[3].stopBinding = true;
         },
@@ -524,12 +571,15 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
 
             var args = data.args,
                     itemName = args[0] || "$data",
-                    indexName = args[1] || "$index";
-
+                    indexName = args[1] || "$index",
+                    removeName = args[2] || "$remove";
             function updateView(index, item, clone) {
                 var newScope, textNodes = [],
                         source = {};
-                source[itemName] = {
+                source[removeName] = function() {
+                    list.remove(item)
+                },
+                        source[itemName] = {
                     get: function() {
                         return item;
                     }
@@ -641,7 +691,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         bindingHandlers[name] = bindingHandlers.disabled;
     });
     //建议不要直接在src属性上修改，因此这样会发出无效的请求，使用ms-src
-    "title, alt, src".replace($.rword, function(name) {
+    "title, alt, src, value".replace($.rword, function(name) {
         bindingHandlers[name] = bindingHandlers.href;
     });
     var modelBinding = bindingHandlers.model;
@@ -742,18 +792,35 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         });
         collection.$id = modleID();
         collection[subscribers] = [];
+        var dynamic = modelFactory({
+            length: list.length
+        });
         String("push,pop,shift,unshift,splice,sort,reverse").replace($.rword, function(method) {
             var nativeMethod = collection[method];
             collection[method] = function() {
                 var len = this.length;
-                var ret = nativeMethod.apply(this, arguments);
-                notifySubscribers(this, method, arguments, len);
+                var args = $.slice(arguments)
+                if (/push|unshift|splice/.test(method)) {
+                    args = args.map(function(el) {
+                        if (el && typeof el === "object" && !el.hasOwnProperty("$id")) {
+                            return  modelFactory(el)
+                        } else {
+                            return el
+                        }
+                    })
+                }
+                var ret = nativeMethod.apply(this, args);
+                notifySubscribers(this, method, args, len);
+                if (method !== "sort" || method !== "reverse") {
+                    dynamic.length = this.length;
+                }
                 return ret;
             };
         });
         collection.clear = function() {
             this.length = 0;
             notifySubscribers(this, "clear", []);
+            dynamic.length = 0;
             return this;
         };
         collection.sortBy = function(fn, scope) {
@@ -761,11 +828,15 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             notifySubscribers(this, "sort", []);
             return ret;
         };
+        collection.contains = function(el) {
+            return this.indexOf(el) !== -1;
+        };
         collection.ensure = function(el) {
             var len = this.length;
             var ret = $.Array.ensure(this, el);
             if (this.length > len) {
                 notifySubscribers(this, "push", [el], len);
+                dynamic.length = this.length;
             }
             return ret;
         };
@@ -773,8 +844,26 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             notifySubscribers(this, "sort", []);
             return this;
         };
+        collection.size = function() {
+            return dynamic.length;
+        };
         collection.removeAt = function(index) { //移除指定索引上的元素
             this.splice(index, 1);
+        };
+        collection.removeAll = function(all) { //移除指定索引上的元素
+            if (Array.isArray(all)) {
+                all.forEach(function(el) {
+                    collection.remove(el);
+                });
+            } else if (typeof all === "function") {
+                collection.forEach(function(el, index) {
+                    if (all(el, index)) {
+                        collection.remove(el);
+                    }
+                });
+            } else {
+                collection.clear();
+            }
         };
         collection.remove = function(item) { //移除第一个等于给定值的元素
             var index = this.indexOf(item);
@@ -860,8 +949,18 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         if (avalon.models[name]) {
             $.error('已经存在"' + name + '" controller');
         } else {
-            var model = modelFactory(obj);
+            if (typeof obj == "function") {
+                var scope = {}
+                obj(scope);
+                var model = modelFactory(scope);
+                obj(model);
+                console.log(model)
+            } else {
+                var model = modelFactory(obj);
+            }
+
             model.$id = name;
+
             return avalon.models[name] = model;
         }
     };
@@ -869,15 +968,25 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
      *                           Scan                                     *
      **********************************************************************/
     //扫描整个DOM树,最开始是从某个元素节点扫起
-    avalon.scan = function(elem) {
+    avalon.scan = function(elem, scope) {
         elem = elem || document.documentElement;
-        var scopeName = elem.getAttribute(prefix + "app") || "root";
-        var scope = avalon.models[scopeName];
+        if (typeof scope !== "object") {
+            var models = avalon.models, scopeName = elem.getAttribute(prefix + "app") || "root";
+            scope = models[scopeName];
+        }
         if (!scope) {
-            $.error("不存在此控制器{" + scopeName + "},请必须指定根控制器");
+            for (var i in models) {
+                if (models.hasOwnProperty(i)) {
+                    scope = models[i];
+                    break;
+                }
+            }
+            if (!scope) {
+                $.error("至少定义一个控制器");
+            }
         }
         scanTag(elem, scope, [], elem.ownerDocument || document);
-    }
+    };
 
     function scanTag(elem, scope, scopes, doc) {
         scopes = scopes || [];
@@ -998,7 +1107,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
 
     function executeBindings(bindings, scope, scopes, flags) {
         bindings.forEach(function(data) {
-            bindingHandlers[data.type]($.mix({}, data), scope, scopes, flags);
+            bindingHandlers[data.type]($.mix({}, data), scope, scopes, flags);//$.mix({}, data)
             if (data.remove) { //移除数据绑定，防止被二次解析
                 data.element.removeAttribute(data.node.name);
             }
@@ -1331,6 +1440,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                             return oldValue;
                         }
                     };
+                    // accessor[accessor] = [];
                 } else {
                     callSetters.push(name);
                     accessor = function(neo) { //创建访问器
@@ -1364,7 +1474,7 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         VBPublics.forEach(function(name) {
             var fn = scope[name];
             if (typeof fn === "function") {
-                if (skipArray.indexOf(fn) !== -1) {
+                if (skipArray.indexOf(name) !== -1) {
                     model[name] = fn;
                 } else {
                     model[name] = function() {
