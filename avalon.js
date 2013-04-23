@@ -7,7 +7,7 @@
     var expando = new Date - 0;
     var mid = expando;
     function modleID() {
-        return (mid++).toString(36);
+        return (mid++).toString(36) + "";
     }
     var subscribers = "$" + expando;
     var propMap = {};
@@ -27,6 +27,9 @@
         models: {},
         error: function(str, e) {
             throw new (e || Error)(str);
+        },
+        log: function log(a) {
+            window.console && console.log(a);
         },
         ready: function(fn) {
             if (readyList) {
@@ -66,8 +69,8 @@
                 avalon.removeClass(element, className);
             });
         },
-        type: function(obj, str) { //取得或判定类型
-            return serialize.call(obj).slice(8, -1) === str;
+        type: function(obj) { //取得类型
+            return serialize.call(obj).slice(8, -1);
         },
         forEach: function(obj, fn) {
             if (obj) { //不能传个null, undefined进来
@@ -133,7 +136,7 @@
     }
     if (!Array.isArray) {
         Array.isArray = function(a) {
-            return avalon.type(a, "Array");
+            return avalon.type(a) === "Array";
         };
     }
 
@@ -345,6 +348,7 @@
         callGetters.forEach(function(prop) {
             callSetters = model[prop]; //让computed计算自身
         });
+        model.$id = modleID();
         return model;
     }
     var defineProperty = Object.defineProperty;
@@ -462,7 +466,7 @@
             for (var i = 0, fn; fn = safelist[i++]; ) {
                 el = fn.element;
                 if (el && (el.sourceIndex === 0 || el.parentNode === null)) {
-                    window.console && console.log("remove " + el)
+                    avalon.log("remove " + el)
                     avalon.Array.remove(list, fn);
                 } else {
                     fn.apply(0, args); //强制重新计算自身
@@ -588,6 +592,7 @@
                     }
                     remove = true;
                     isBinding = typeof bindingHandlers[type] === "function";
+
                 } else if (bindingHandlers[attr.name] && hasExpr(attr.value)) {
                     type = attr.name; //如果只是普通属性，但其值是个插值表达式
                     isBinding = true;
@@ -714,10 +719,10 @@
                 args = [],
                 random = new Date - 0,
                 val;
-        if (isStrict) {
+        if (!isStrict) {//如果不是严格模式
             //取得模块的名字
             scopeList.forEach(function(scope) {
-                var scopeName = scope.$id + random;
+                var scopeName = scope.$id + "" + random;
                 if (names.indexOf(scopeName) === -1) {
                     names.push(scopeName);
                     args.push(scope);
@@ -728,6 +733,7 @@
                 text = "with(" + name + "){\r\n" + text + "\r\n}\r\n";
             }
         } else {
+            avalon.log("use strict")
             var singleFix = random + 1;
             var doubleFix = singleFix + 1;
             var singleHolder = [];
@@ -878,6 +884,7 @@
         event.stopPropagation = function() { //阻止事件在DOM树中的传播
             event.cancelBubble = true;
         };
+        return event
     }
     var bindingHandlers = avalon.bindingHandlers = {
         //跳过流程绑定
@@ -907,7 +914,7 @@
                     element.$scope = scope;
                     element.$scopes = scopes;
                     avalon.bind(element, type, function(e) {
-                        e = e ? e : fixEvent(event);//修正IE的参数
+                        e = e && e.timeStamp ? e : fixEvent(event);//修正IE的参数  
                         fn.call(element, e)
                     });
                 }
@@ -1198,6 +1205,7 @@
             bindingHandlers.on.apply(0, arguments);
         }
     });
+
     /*********************************************************************
      *                      each binding                              *
      **********************************************************************/
@@ -1288,7 +1296,7 @@
         if (isList) {
             list[subscribers].push(updateListView);
         }
-       // flags.stopBinding = true;
+        // flags.stopBinding = true;
     };
     //找到目标视图最开头的那个注释节点
     //<!--xxx1--><tag><tag><text><!--xxx2--><tag><tag><text><!--xxx3--><tag><tag><text>
@@ -1404,7 +1412,7 @@
         var collection = list.map(function(val) {
             return val && typeof val === "object" ? modelFactory(val) : val;
         });
-        collection.$id = modleID();
+        //   collection.$id = modleID();
         collection[subscribers] = [];
         var dynamic = modelFactory({
             length: list.length
@@ -1712,11 +1720,11 @@
                 }
             }
 
-            if (avalon.type(date, "Number")) {
+            if (avalon.type(date) === "Number") {
                 date = new Date(date);
             }
 
-            if (avalon.type(date, "Date")) {
+            if (avalon.type(date) === "Date") {
                 return date;
             }
 

@@ -34,11 +34,12 @@
 
         <script type="text/javascript">
 //document.getElementById("arrayexample").removeAttribute("ms-skip")
-avalon.ready(function() {
+setTimeout(function(){
     var model = avalon.define(function(vm) {
         vm.array = ["1", "2", "3", "4"]
         "push,unshift,remove,ensure".replace(/\w+/g, function(method) {
             vm[method] = function(e) {
+                console.log(e.which)
                 if (this.value && e.which == 13) {//this为input元素
                     vm.array[method](this.value);
                     this.value = "";
@@ -61,7 +62,7 @@ avalon.ready(function() {
     setTimeout(function() {
         model.array.clear();
     }, 5000)
-})
+},3000)
 
         </script>
         <fieldset id="arrayexample" >
@@ -69,6 +70,7 @@ avalon.ready(function() {
 <ul ms-each-el="array" >
     <li>数组的第{{$index+1}}个元素为{{el}}</li>
 </ul>
+          
 <p>对数组进行push操作，并回车<input ms-keypress="push"></p>
 <p>对数组进行unshift操作，并回车<input ms-keypress="unshift"></p>
 <p>对数组进行ensure操作，并回车<input ms-keypress="ensure"><br/>
