@@ -35,7 +35,6 @@
         <script type="text/javascript">
 //document.getElementById("arrayexample").removeAttribute("ms-skip")
 avalon.ready(function() {
-    document.getElementById("arrayexample").removeAttribute("ms-skip")
     var model = avalon.define(function(vm) {
         vm.array = ["1", "2", "3", "4"]
         "push,unshift,remove,ensure".replace(/\w+/g, function(method) {
@@ -65,7 +64,7 @@ avalon.ready(function() {
 })
 
         </script>
-        <fieldset id="arrayexample" ms-skip>
+        <fieldset id="arrayexample" >
             <legend>例子</legend>
 <ul ms-each-el="array" >
     <li>数组的第{{$index+1}}个元素为{{el}}</li>

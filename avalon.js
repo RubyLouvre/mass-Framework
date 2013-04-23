@@ -6,7 +6,6 @@
     var Publish = {}; //将函数放到发布对象上，让依赖它的函数
     var expando = new Date - 0;
     var mid = expando;
-
     function modleID() {
         return (mid++).toString(36);
     }
@@ -18,23 +17,6 @@
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
     var hasOwn = Object.prototype.hasOwnProperty;
     var readyList = []
-    function fixEvent(event) {
-        var target = event.target = event.srcElement;
-        event.which = event.charCode != null ? event.charCode : event.keyCode;
-        event.timeStamp = new Date - 0;
-        if (/mouse|click/.test(event.type)) {
-            var doc = target.ownerDocument || document;
-            var box = doc.compatMode == "BackCompat" ? doc.body : doc.documentElement;
-            event.pageX = event.clientX + (box.scrollLeft >> 0) - (box.clientLeft >> 0);
-            event.pageY = event.clientY + (box.scrollTop >> 0) - (box.clientTop >> 0);
-        }
-        event.preventDefault = function() { //阻止默认行为
-            event.returnValue = false;
-        };
-        event.stopPropagation = function() { //阻止事件在DOM树中的传播
-            event.cancelBubble = true;
-        };
-    }
     var avalon = window.avalon = {
         mix: function(a, b) {
             for (var i in b) {
@@ -60,9 +42,7 @@
             el.addEventListener(type, fn, !!phase);
             return fn;
         } : function(el, type, fn) {
-            el.attachEvent && el.attachEvent("on" + type, function() {
-                fn.call(el, fixEvent(event));
-            });
+            el.attachEvent && el.attachEvent("on" + type, fn);
             return fn;
         },
         addClass: function(element, className) {
@@ -126,7 +106,7 @@
      **********************************************************************/
     if (!"司徒正美".trim) {
         String.prototype.trim = function(value) {
-            return (value ||"" ).replace(/^\s*/, '').replace(/\s*$/, '');
+            return (value || "").replace(/^\s*/, '').replace(/\s*$/, '');
         };
     }
     for (var i in {
@@ -606,7 +586,7 @@
                         var args = type.split("-");
                         type = args.shift();
                     }
-                      remove = true;
+                    remove = true;
                     isBinding = typeof bindingHandlers[type] === "function";
                 } else if (bindingHandlers[attr.name] && hasExpr(attr.value)) {
                     type = attr.name; //如果只是普通属性，但其值是个插值表达式
@@ -882,6 +862,23 @@
         updateView();
         delete Publish[expando];
     }
+    function fixEvent(event) {
+        var target = event.target = event.srcElement;
+        event.which = event.charCode != null ? event.charCode : event.keyCode;
+        event.timeStamp = new Date - 0;
+        if (/mouse|click/.test(event.type)) {
+            var doc = target.ownerDocument || document;
+            var box = doc.compatMode == "BackCompat" ? doc.body : doc.documentElement;
+            event.pageX = event.clientX + (box.scrollLeft >> 0) - (box.clientLeft >> 0);
+            event.pageY = event.clientY + (box.scrollTop >> 0) - (box.clientTop >> 0);
+        }
+        event.preventDefault = function() { //阻止默认行为
+            event.returnValue = false;
+        };
+        event.stopPropagation = function() { //阻止事件在DOM树中的传播
+            event.cancelBubble = true;
+        };
+    }
     var bindingHandlers = avalon.bindingHandlers = {
         //跳过流程绑定
         skip: function() {
@@ -909,7 +906,10 @@
                 if (type && typeof fn === "function") { //第一种形式
                     element.$scope = scope;
                     element.$scopes = scopes;
-                    avalon.bind(element, type, fn);
+                    avalon.bind(element, type, function(e) {
+                        e = e ? e : fixEvent(event);//修正IE的参数
+                        fn.call(element, e)
+                    });
                 }
             });
         },
@@ -1288,7 +1288,7 @@
         if (isList) {
             list[subscribers].push(updateListView);
         }
-        flags.stopBinding = true;
+       // flags.stopBinding = true;
     };
     //找到目标视图最开头的那个注释节点
     //<!--xxx1--><tag><tag><text><!--xxx2--><tag><tag><text><!--xxx3--><tag><tag><text>
