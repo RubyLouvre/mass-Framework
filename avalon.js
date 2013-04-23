@@ -70,7 +70,7 @@
             });
         },
         type: function(obj) { //取得类型
-            return serialize.call(obj).slice(8, -1);
+            return obj === null ? "Null" : obj === void 0 ? "Undefined" : serialize.call(obj).slice(8, -1);
         },
         forEach: function(obj, fn) {
             if (obj) { //不能传个null, undefined进来
@@ -1215,7 +1215,7 @@
         var list = parseExpr(data.value, scopeList, data);
         var doc = parent.ownerDocument;
         var view = doc.createDocumentFragment();
-        var comment = doc.createComment(list.$id);
+        var comment = doc.createComment(list.$name);
         view.appendChild(comment);
         while (parent.firstChild) {
             view.appendChild(parent.firstChild);
@@ -1231,7 +1231,7 @@
             avalon.error(e.message);
         }
         function updateListView(method, args, len) {
-            var listName = list.$id;
+            var listName = list.$name;
             switch (method) {
                 case "push":
                     forEach(list.slice(len), function(index, item) {
@@ -1317,7 +1317,7 @@
                 if (node.nodeValue.indexOf(name) === 0) {
                     if (node.nodeValue !== name + index) {
                         node.nodeValue = name + index;
-                        var indexName = node.$indexName;
+                        var indexName = node.$indexName
                         node.$scope[indexName] = index;
                     }
                     index++;
@@ -1352,21 +1352,23 @@
         var $scope = createItemModel(index, item, collection, data.args);
         for (var node = data.view.firstChild; node; node = node.nextSibling) {
             var clone = node.cloneNode(true);
+            if (collection.insertBefore) {//必须插入DOM树,否则下为注释节点添加自定义属性会失败
+                parent.insertBefore(clone, collection.insertBefore);
+            } else {
+                parent.appendChild(clone);
+            }
             if (clone.nodeType === 1) {
                 scanTag(clone, $scope, scopeList, doc); //扫描元素节点
             } else if (clone.nodeType === 3) {
                 textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
             } else if (clone.nodeType === 8) {
                 clone.nodeValue = node.nodeValue + "" + index;
-                clone.$indexName = data.args[1] || "$index";
+                var indexName = data.args[1] || "$index";
+                clone.$indexName = indexName;
                 clone.$scope = $scope;
                 clone.$view = doc.createDocumentFragment();
             }
-            if (collection.insertBefore) {
-                parent.insertBefore(clone, collection.insertBefore);
-            } else {
-                parent.appendChild(clone);
-            }
+
         }
         for (var i = 0; node = textNodes[i++]; ) {
             scanText(node, $scope, scopeList, doc); //扫描文本节点
@@ -1412,7 +1414,7 @@
         var collection = list.map(function(val) {
             return val && typeof val === "object" ? modelFactory(val) : val;
         });
-        //   collection.$id = modleID();
+        collection.$name = modleID();
         collection[subscribers] = [];
         var dynamic = modelFactory({
             length: list.length

@@ -39,7 +39,6 @@ setTimeout(function(){
         vm.array = ["1", "2", "3", "4"]
         "push,unshift,remove,ensure".replace(/\w+/g, function(method) {
             vm[method] = function(e) {
-                console.log(e.which)
                 if (this.value && e.which == 13) {//this为input元素
                     vm.array[method](this.value);
                     this.value = "";
@@ -60,9 +59,9 @@ setTimeout(function(){
     });
     avalon.scan();
     setTimeout(function() {
-        model.array.clear();
+      //  model.array.clear();
     }, 5000)
-},3000)
+},2000)
 
         </script>
         <fieldset id="arrayexample" >
