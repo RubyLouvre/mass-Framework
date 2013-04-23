@@ -1201,28 +1201,39 @@
     /*********************************************************************
      *                      each binding                              *
      **********************************************************************/
-   bindingHandlers.each = function(data, scope, scopes, flags) {
+    bindingHandlers.each = function(data, scope, scopes, flags) {
         var parent = data.element;
         var scopeList = [scope].concat(scopes);
         var list = parseExpr(data.value, scopeList, data);
         var doc = parent.ownerDocument;
         var fragment = doc.createDocumentFragment();
+        var comment = doc.createComment(list.$id);
+        fragment.appendChild(comment);
         while (parent.firstChild) {
             fragment.appendChild(parent.firstChild);
         }
-
+        data.fragment = fragment;
+        data.collection = list;
+        data.scopeList = scopeList;
+        try {
+            forEach(list, function(index, item) {
+                addItemView(index, item, data);
+            });
+        } catch (e) {
+            avalon.error(e.message);
+        }
         function updateListView(method, args, len) {
             var listName = list.$id;
             switch (method) {
                 case "push":
                     forEach(list.slice(len), function(index, item) {
-                        updateView(len + index, item);
+                        addItemView(len + index, item, data);
                     });
                     break;
                 case "unshift":
                     list.insertBefore = parent.firstChild;
-                    forEach(args, function(index, item) {
-                        updateView(index, item);
+                    forEach(list.slice(0, list.length - len), function(index, item) {
+                        addItemView(index, item, data);
                     });
                     resetIndex(parent, listName);
                     delete list.insertBefore;
@@ -1230,11 +1241,11 @@
                 case "pop":
                     var node = findIndex(parent, listName, len - 1);
                     if (node) {
-                        removeView(parent, listName, node);
+                        removeItemView(node, listName);
                     }
                     break;
                 case "shift":
-                    removeView(parent, listName, 0, parent.firstChild);
+                    removeItemView(parent.firstChild, listName);
                     resetIndex(parent, listName);
                     break;
                 case "clear":
@@ -1249,13 +1260,13 @@
                     var deleteCount = second >= 0 ? second : len - start;
                     var node = findIndex(parent, listName, start);
                     if (node) {
-                        removeViews(parent, listName, node, deleteCount);
+                        removeItemViews(node, listName, deleteCount);
                         resetIndex(parent, listName);
                         if (adds.length) {
-                            node = findIndex(parent, listName, start);
+                            node = findIndex(node, listName, start);
                             list.insertBefore = node;
                             forEach(adds, function(index, item) {
-                                updateView(index, item);
+                                addItemView(index, item, data);
                             });
                             resetIndex(parent, listName);
                             delete list.insertBefore;
@@ -1268,7 +1279,7 @@
                         parent.removeChild(parent.firstChild);
                     }
                     forEach(list, function(index, item) {
-                        updateView(index, item);
+                        addItemView(index, item, data);
                     });
                     break;
             }
@@ -1277,78 +1288,21 @@
         if (isList) {
             list[subscribers].push(updateListView);
         }
-        var args = data.args,
-                itemName = args[0] || "$data",
-                indexName = args[1] || "$index",
-                removeName = args[2] || "$remove";
 
-        function updateView(index, item, clone) {
-            var newScope, textNodes = [],
-                    source = {};
-            source[removeName] = function() {
-                list.remove(item);
-            };
-            source[itemName] = {
-                get: function() {
-                    return item;
-                }
-            };
-            source[indexName] = {
-                get: function() {
-                    return list.indexOf(item);
-                }
-            };
-            newScope = modelFactory(source);
-            if (isList) {
-                var comment = doc.createComment(list.$id + index);
-                if (list.insertBefore) {
-                    parent.insertBefore(comment, list.insertBefore);
-                } else {
-                    parent.appendChild(comment);
-                }
-            }
-            for (var node = fragment.firstChild; node; node = node.nextSibling) {
-                clone = node.cloneNode(true);
-                if (clone.nodeType === 1) {
-                    scanTag(clone, newScope, scopeList, doc); //扫描元素节点
-                } else if (clone.nodeType === 3) {
-                    textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
-                }
-                if (list.insertBefore) {
-                    parent.insertBefore(clone, list.insertBefore);
-                } else {
-                    parent.appendChild(clone);
-                }
-            }
-            for (var i = 0; node = textNodes[i++]; ) {
-                scanText(node, newScope, scopeList, doc); //扫描文本节点
-            }
-        }
-        try {
-            forEach(list, updateView);
-        } catch (e) {
-            avalon.error(e.message);
-        }
         flags.stopBinding = true;
     };
-
-    //查找路标，每个模板之前都插入一个注释节点
-
-    function findIndex(elem, name, target) {
-        var index = 0;
+    //找到目标视图最开头的那个注释节点
+    //<!--xxx1--><tag><tag><text><!--xxx2--><tag><tag><text><!--xxx3--><tag><tag><text>
+    // 假若 index == 2, 返回<!--xxx2-->
+    function findIndex(elem, listName, index) {
         for (var node = elem.firstChild; node; node = node.nextSibling) {
-            if (node.nodeType === 8) {
-                if (node.nodeValue.indexOf(name) === 0) {
-                    if (node.nodeValue == name + target) {
-                        return node;
-                    }
-                    index++;
-                }
+            if (node.nodeType === 8 && (node.nodeValue === listName + index)) {
+                return node;
             }
         }
     }
-    //重置所有路标
 
+    //重置所有路标
     function resetIndex(elem, name) {
         var index = 0;
         for (var node = elem.firstChild; node; node = node.nextSibling) {
@@ -1356,21 +1310,69 @@
                 if (node.nodeValue.indexOf(name) === 0) {
                     if (node.nodeValue !== name + index) {
                         node.nodeValue = name + index;
+                        var indexName = node.$indexName;
+                        node.$scope[indexName] = index;
                     }
                     index++;
                 }
             }
         }
     }
-    //移除each中的单个模板
+    //为子视图创建一个ViewModel
+    function createItemModel(index, item, list, args) {
+        var itemName = args[0] || "$data";
+        var indexName = args[1] || "$index";
+        var removeName = args[2] || "$remove";
+        var source = {};
+        source[indexName] = index;
+        source[itemName] = {
+            get: function() {
+                return item;
+            }
+        };
+        source[removeName] = function() {
+            list.remove(item);
+        };
+        return modelFactory(source);
+    }
 
-    function removeView(elem, name, node) {
-        var nodes = [],
-                doc = elem.ownerDocument,
-                view = doc.createDocumentFragment();
-        for (var check = node; check; check = check.nextSibling) {
-            //如果到达下一个路标,则断开,将收集到的节点放到文档碎片与下一个路标返回
-            if (check.nodeType === 8 && check.nodeValue.indexOf(name) === 0 && check !== node) {
+    function addItemView(index, item, data) {
+        var scopeList = data.scopeList;
+        var collection = data.collection;
+        var parent = data.element;
+        var doc = parent.ownerDocument;
+        var textNodes = [];
+        var $scope = createItemModel(index, item, collection, data.args);
+        for (var node = data.fragment.firstChild; node; node = node.nextSibling) {
+            var clone = node.cloneNode(true);
+            if (clone.nodeType === 1) {
+                scanTag(clone, $scope, scopeList, doc); //扫描元素节点
+            } else if (clone.nodeType === 3) {
+                textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
+            } else if (clone.nodeType === 8) {
+                clone.nodeValue = node.nodeValue + "" + index;
+                clone.$indexName = data.args[1] || "$index"
+                clone.$scope = $scope;
+                clone.$view = doc.createDocumentFragment();
+            }
+            if (collection.insertBefore) {
+                parent.insertBefore(clone, collection.insertBefore);
+            } else {
+                parent.appendChild(clone);
+            }
+        }
+        for (var i = 0; node = textNodes[i++]; ) {
+            scanText(node, $scope, scopeList, doc); //扫描文本节点
+        }
+    }
+
+    //将上面的<!--xxx2--><tag><tag><text>放进文档碎片中返回
+    function removeItemView(node, listName) {
+        var nodes = [node];
+        var view = node.$view;
+        for (var check = node.nextSibling; check; check = check.nextSibling) {
+            //遇到下个路标时就断开
+            if (check.nodeType === 8 && check.nodeValue.indexOf(listName) === 0) {
                 break
             }
             nodes.push(check);
@@ -1378,22 +1380,22 @@
         for (var i = 0; node = nodes[i++]; ) {
             view.appendChild(node);
         }
-        return [view, check];
+        return [view, check];//返回被移除的文档碎片及下一个路标
     }
-    //移除each中的多个模板
+    //移除each中的多个子视图,返回它们对应的文档碎片集合
 
-    function removeViews(elem, name, node, number) {
-        var ret = [];
+    function removeItemViews(node, listName, number) {
+        var views = [];
         do {
-            var array = removeView(elem, name, node);
+            var array = removeItemView(node, listName);
             if (array[1]) {
+                views.push(array[0]);
                 node = array[1];
-                ret.push(array[0]);
             } else {
                 break
             }
-        } while (ret.length !== number);
-        return ret;
+        } while (views.length !== number);
+        return views;
     }
     /*********************************************************************
      *                 与each绑定息息相关的 Collection类              *
