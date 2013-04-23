@@ -60,8 +60,8 @@
             el.addEventListener(type, fn, !!phase);
             return fn;
         } : function(el, type, fn) {
-            el.attachEvent && el.attachEvent("on" + type, function(e) {
-                fn.call(el, fixEvent(e));
+            el.attachEvent && el.attachEvent("on" + type, function() {
+                fn.call(el, fixEvent(event));
             });
             return fn;
         },
@@ -126,7 +126,7 @@
      **********************************************************************/
     if (!"司徒正美".trim) {
         String.prototype.trim = function(value) {
-            return value.replace(/^\s*/, '').replace(/\s*$/, '');
+            return (value ||"" ).replace(/^\s*/, '').replace(/\s*$/, '');
         };
     }
     for (var i in {
