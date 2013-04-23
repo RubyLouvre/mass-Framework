@@ -4,9 +4,10 @@
     define.lang = lang === "zh-cn" ? lang : lang.split("-")[0];
 })();
 define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(locale, $) {
-    // window.console = window.console || $;
+    // window.remole = window.console || $;
     var prefix = $.config.bindingPrefix || "ms-";
     var formats = locale.NUMBER_FORMATS;
+    var $invalidate = false;
     var avalon = $.avalon = {
         models: {},
         obsevers: {},
@@ -412,10 +413,8 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
         "class": function(data, scope, scopes) {
             var element = $(data.element);
-            console.log(data.value)
             watchView(data.value, scope, scopes, data, function(val) {
                 if (data.args) { //第一种形式
-                    console.log(val)
                     element.toggleClass(data.args.join(""), !!val);
                 } else if (typeof val === "string") {
                     element.addClass(val);
@@ -799,15 +798,15 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             var nativeMethod = collection[method];
             collection[method] = function() {
                 var len = this.length;
-                var args = $.slice(arguments)
+                var args = $.slice(arguments);
                 if (/push|unshift|splice/.test(method)) {
                     args = args.map(function(el) {
                         if (el && typeof el === "object" && !el.hasOwnProperty("$id")) {
-                            return  modelFactory(el)
+                            return  modelFactory(el);
                         } else {
-                            return el
+                            return el;
                         }
-                    })
+                    });
                 }
                 var ret = nativeMethod.apply(this, args);
                 notifySubscribers(this, method, args, len);
@@ -856,11 +855,12 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                     collection.remove(el);
                 });
             } else if (typeof all === "function") {
-                collection.forEach(function(el, index) {
-                    if (all(el, index)) {
-                        collection.remove(el);
+                for (var i = collection.length - 1; i >= 0; i--) {
+                    var el = collection[i];
+                    if (all(el, i)) {
+                        collection.splice(i, 1);
                     }
-                });
+                }
             } else {
                 collection.clear();
             }
@@ -883,35 +883,6 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
     /*********************************************************************
      *                            Subscription                           *
      **********************************************************************/
-    /*
-     为简单起见，我们把双向绑定链分成三层， 顶层， 中层， 底层。顶层是updateView, updateListView等需要撷取底层的值来更新自身的局部刷新函数， 中层是监控数组与依赖于其他属性的计算监控属性，底层是监控属性。高层总是依赖于低层，但高层该如何知道它是依赖哪些底层呢？
-     
-     在emberjs中，作为计算监控属性的fullName通过property方法，得知自己是依赖于firstName, lastName。
-     App.Person = Ember.Object.extend({
-     firstName: null,
-     lastName: null,
-     
-     fullName: function() {
-     return this.get('firstName') +
-     " " + this.get('lastName');
-     }.property('firstName', 'lastName')
-     });
-     
-     在knockout中，用了一个取巧方法，将所有要监控的属性转换为一个函数。当fullName第一次求值时，它将自己的名字放到一个地方X，值为一个数组。然后函数体内的firstName与lastName在自身求值时，也会访问X，发现上面有数组时，就放进去。当fullName执行完毕，就得知它依赖于哪个了，并从X删掉数组。
-     var ViewModel = function(first, last) {
-     this.firstName = ko.observable(first);
-     this.lastName = ko.observable(last);
-     
-     this.fullName = ko.computed(function() {
-     // Knockout tracks dependencies automatically. It knows that fullName depends on firstName and lastName, because these get called when evaluating fullName.
-     return this.firstName() + " " + this.lastName();
-     }, this);
-     };
-     详见 subscribables/observable.js subscribables/dependentObservable.js
-     
-     */
-    //http://www.cnblogs.com/whitewolf/archive/2012/07/07/2580630.html
-
     function collectSubscribers(accessor) { //收集依赖于这个域的订阅者
         if (Publish[expando]) {
             var list = accessor[subscribers];
@@ -935,35 +906,6 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             }
         }
     }
-    // 比如视图刷新函数C依赖于firstName, lastName这两个访问器，当访问器更新时，就会通知C执行。
-    // 因此firstName上有个subscribers列表，里面装着C， lastName同理
-    // http://www.cnblogs.com/whitewolf/archive/2013/04/16/3024843.html
-    /*********************************************************************
-     *                            Model                                   *
-     **********************************************************************/
-    avalon.controller = function(name, obj) {
-        if (arguments.length === 1) {
-            obj = name;
-            name = "root";
-        }
-        if (avalon.models[name]) {
-            $.error('已经存在"' + name + '" controller');
-        } else {
-            if (typeof obj == "function") {
-                var scope = {}
-                obj(scope);
-                var model = modelFactory(scope);
-                obj(model);
-                console.log(model)
-            } else {
-                var model = modelFactory(obj);
-            }
-
-            model.$id = name;
-
-            return avalon.models[name] = model;
-        }
-    };
     /*********************************************************************
      *                           Scan                                     *
      **********************************************************************/
@@ -1294,7 +1236,127 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
         textBuffer = names = null; //释放内存
         return val;
     }
-    //==================================================================
+
+    /*********************************************************************
+     *                            Model                                   *
+     **********************************************************************/
+
+    avalon.define = function(name, deps, factory) {
+        var args = $.slice(arguments);
+        if (typeof name !== "string") {
+            name = !avalon.models["root"] ? "root" : modleID();
+            args.unshift(name);
+        }
+        if (!Array.isArray(args[1])) {
+            args.splice(1, 0, []);
+        }
+        deps = args[1];
+        if (typeof args[2] !== "function") {
+            $.error("factory必须是函数");
+        }
+        factory = args[2];
+        var scope = {};
+        deps.unshift(scope);
+        factory(scope);//得到所有东西
+        var model = modelFactory(scope);
+        $invalidate = true;
+        deps[0] = model;
+        factory.apply(0, deps);
+        deps.shift();
+        $invalidate = false;
+        model.$id = name;
+        return avalon.models[name] = model;
+    };
+    function modelFactory(scope) {
+        var skipArray = scope.$skipArray,
+                description = {},
+                model = {},
+                callSetters = [],
+                callGetters = [],
+                VBPublics = [];
+        skipArray = Array.isArray(skipArray) ? skipArray : [];
+        $.Array.ensure(skipArray, "$skipArray");
+        $.each(scope, function(name, value) {
+            if (typeof value === "function") {
+                VBPublics.push(name);
+            } else {
+                if (skipArray.indexOf(name) !== -1) {
+                    return VBPublics.push(name);
+                }
+                var accessor, oldValue, oldArgs;
+                if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
+                    callGetters.push(name);
+                    accessor = function(neo) { //创建computed
+                        if (arguments.length) {
+                            if ($invalidate) {
+                                return;
+                            }
+                            if (typeof value.set === "function") {
+                                value.set.call(model, neo);
+                            }
+                            if (oldArgs !== neo) {
+                                oldArgs = neo;
+                                notifySubscribers(accessor); //通知顶层改变
+                            }
+                        } else {
+                            var flagDelete = false;
+                            if (!accessor[accessor]) {
+                                flagDelete = true;
+                                Publish[expando] = function() {
+                                    notifySubscribers(accessor); //通知顶层改变
+                                };
+                                accessor[accessor] = [];
+                            }
+                            if (typeof value.get === "function") {
+                                oldValue = value.get.call(model);
+                            }
+                            if (flagDelete) {
+                                delete Publish[expando];
+                            }
+                            return oldValue;
+                        }
+                    };
+                } else {
+                    callSetters.push(name);
+                    accessor = function(neo) { //创建访问器
+                        if (arguments.length) {
+                            if (oldValue !== neo) {
+                                if (typeof neo === "object") {
+                                    neo = Array.isArray(neo) ? ObserverArray(neo) : modelFactory(neo);
+                                }
+                                oldValue = neo;
+                                notifySubscribers(accessor); //通知顶层改变
+                            }
+                        } else {
+                            collectSubscribers(accessor); //收集视图函数
+                            return oldValue;
+                        }
+                    };
+                    accessor[subscribers] = [];
+                }
+                description[name] = {
+                    set: accessor,
+                    get: accessor,
+                    enumerable: true
+                };
+            }
+        });
+        if (defineProperties) {
+            defineProperties(model, description);
+        } else {
+            model = VBDefineProperties(description, VBPublics);
+        }
+        VBPublics.forEach(function(name) {
+            model[name] = scope[name];
+        });
+        callSetters.forEach(function(prop) {
+            model[prop] = scope[prop];//为空对象赋值
+        });
+        callGetters.forEach(function(prop) {
+            callSetters = model[prop]; //让computed计算自身
+        });
+        return model;
+    }
     var defineProperty = Object.defineProperty;
     try {
         defineProperty(avalon, "_", {
@@ -1340,7 +1402,6 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
                 return ret;
             }
         }
-
         function VBDefineProperties(description, publics) {
             publics = publics.concat();
             $.Array.ensure(publics, "hasOwnProperty");
@@ -1392,109 +1453,6 @@ define("avalon", ["/locale/" + define.lang, "event", "css", "attr", ], function(
             };
             return model;
         }
-    }
-
-    function modelFactory(scope) {
-        var skipArray = scope.$skipArray,
-                description = {},
-                model = {},
-                callSetters = [],
-                callGetters = [],
-                VBPublics = [];
-        skipArray = Array.isArray(skipArray) ? skipArray : [];
-        $.Array.ensure(skipArray, "$skipArray");
-        $.each(scope, function(name, value) {
-            if (typeof value === "function") {
-                VBPublics.push(name);
-            } else {
-                if (skipArray.indexOf(name) !== -1) {
-                    return VBPublics.push(name);
-                }
-                var accessor, oldValue, oldArgs;
-                if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
-                    callGetters.push(name);
-                    accessor = function(neo) { //创建computed
-                        if (arguments.length) {
-                            if (typeof value.set === "function") {
-                                value.set.call(model, neo);
-                            }
-                            if (oldArgs !== neo) {
-                                oldArgs = neo;
-                                notifySubscribers(accessor); //通知顶层改变
-                            }
-                        } else {
-                            var flagDelete = false;
-                            if (!accessor[accessor]) {
-                                flagDelete = true;
-                                Publish[expando] = function() {
-                                    notifySubscribers(accessor); //通知顶层改变
-                                };
-                                accessor[accessor] = [];
-                            }
-                            if (typeof value.get === "function") {
-                                oldValue = value.get.call(model);
-                            }
-                            if (flagDelete) {
-                                delete Publish[expando];
-                            }
-                            return oldValue;
-                        }
-                    };
-                    // accessor[accessor] = [];
-                } else {
-                    callSetters.push(name);
-                    accessor = function(neo) { //创建访问器
-                        if (arguments.length) {
-                            if (oldValue !== neo) {
-                                if (typeof neo === "object") {
-                                    neo = Array.isArray(neo) ? ObserverArray(neo) : modelFactory(neo);
-                                }
-                                oldValue = neo;
-                                notifySubscribers(accessor); //通知顶层改变
-                            }
-                        } else {
-                            collectSubscribers(accessor); //收集视图函数
-                            return oldValue;
-                        }
-                    };
-                    accessor[subscribers] = [];
-                }
-                description[name] = {
-                    set: accessor,
-                    get: accessor,
-                    enumerable: true
-                };
-            }
-        });
-        if (defineProperties) {
-            defineProperties(model, description);
-        } else {
-            model = VBDefineProperties(description, VBPublics);
-        }
-        VBPublics.forEach(function(name) {
-            var fn = scope[name];
-            if (typeof fn === "function") {
-                if (skipArray.indexOf(name) !== -1) {
-                    model[name] = fn;
-                } else {
-                    model[name] = function() {
-                        return fn.apply(model, arguments);
-                    };
-                    model[name].toString = function() {
-                        return fn + ""; //还原toString，方便调试
-                    };
-                }
-            } else {
-                model[name] = fn;
-            }
-        });
-        callSetters.forEach(function(prop) {
-            model[prop] = scope[prop];//为空对象赋值
-        });
-        callGetters.forEach(function(prop) {
-            callSetters = model[prop]; //让computed计算自身
-        });
-        return model;
     }
     return $;
 });

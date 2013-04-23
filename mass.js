@@ -622,7 +622,11 @@
         factory.id = _id; //用于调试
         factory.delay = function(id) {
             args.push(id);
+            try{
             if (checkCycle(modules[id].deps, id)) {
+                $.error(id + "模块与之前的某些模块存在循环依赖");
+            }
+            }catch(e){
                 $.error(id + "模块与之前的某些模块存在循环依赖");
             }
             delete factory.delay; //释放内存
