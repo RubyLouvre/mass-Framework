@@ -606,7 +606,7 @@
                         var args = type.split("-");
                         type = args.shift();
                     }
-                    remove = true;
+                      remove = true;
                     isBinding = typeof bindingHandlers[type] === "function";
                 } else if (bindingHandlers[attr.name] && hasExpr(attr.value)) {
                     type = attr.name; //如果只是普通属性，但其值是个插值表达式
@@ -617,8 +617,8 @@
                         type: type,
                         args: args,
                         element: el,
-                        node: attr,
                         remove: remove,
+                        node: attr,
                         value: attr.nodeValue
                     });
                 }
@@ -1206,13 +1206,13 @@
         var scopeList = [scope].concat(scopes);
         var list = parseExpr(data.value, scopeList, data);
         var doc = parent.ownerDocument;
-        var fragment = doc.createDocumentFragment();
+        var view = doc.createDocumentFragment();
         var comment = doc.createComment(list.$id);
-        fragment.appendChild(comment);
+        view.appendChild(comment);
         while (parent.firstChild) {
-            fragment.appendChild(parent.firstChild);
+            view.appendChild(parent.firstChild);
         }
-        data.fragment = fragment;
+        data.view = view;
         data.collection = list;
         data.scopeList = scopeList;
         try {
@@ -1248,11 +1248,7 @@
                     removeItemView(parent.firstChild, listName);
                     resetIndex(parent, listName);
                     break;
-                case "clear":
-                    while (parent.firstChild) {
-                        parent.removeChild(parent.firstChild);
-                    }
-                    break;
+
                 case "splice":
                     var start = args[0],
                             second = args[1],
@@ -1273,8 +1269,12 @@
                         }
                     }
                     break;
-                case "reverse":
-                case "sort":
+                case "clear":
+                    while (parent.firstChild) {
+                        parent.removeChild(parent.firstChild);
+                    }
+                    break;
+                case "update":
                     while (parent.firstChild) {
                         parent.removeChild(parent.firstChild);
                     }
@@ -1288,7 +1288,6 @@
         if (isList) {
             list[subscribers].push(updateListView);
         }
-
         flags.stopBinding = true;
     };
     //找到目标视图最开头的那个注释节点
@@ -1343,7 +1342,7 @@
         var doc = parent.ownerDocument;
         var textNodes = [];
         var $scope = createItemModel(index, item, collection, data.args);
-        for (var node = data.fragment.firstChild; node; node = node.nextSibling) {
+        for (var node = data.view.firstChild; node; node = node.nextSibling) {
             var clone = node.cloneNode(true);
             if (clone.nodeType === 1) {
                 scanTag(clone, $scope, scopeList, doc); //扫描元素节点
@@ -1351,7 +1350,7 @@
                 textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
             } else if (clone.nodeType === 8) {
                 clone.nodeValue = node.nodeValue + "" + index;
-                clone.$indexName = data.args[1] || "$index"
+                clone.$indexName = data.args[1] || "$index";
                 clone.$scope = $scope;
                 clone.$view = doc.createDocumentFragment();
             }
@@ -1410,8 +1409,9 @@
         var dynamic = modelFactory({
             length: list.length
         });
-        String("push,pop,shift,unshift,splice,sort,reverse").replace(rword, function(method) {
-            var nativeMethod = collection[method];
+
+        "push,pop,shift,unshift,splice".replace(rword, function(method) {
+            var nativeMethod = Array.prototype[method];
             collection[method] = function() {
                 var len = this.length;
                 var args = [].slice.call(arguments);
@@ -1426,12 +1426,28 @@
                 }
                 var ret = nativeMethod.apply(this, args);
                 notifySubscribers(this, method, args, len);
-                if (method !== "sort" || method !== "reverse") {
-                    dynamic.length = this.length;
+                dynamic.length = this.length;
+                return ret;
+            };
+        });
+        "sort,reverse".replace(rword, function(method) {
+            var nativeMethod = Array.prototype[method];
+            collection[method] = function() {
+                var isComplex = typeof this[0] === "object";
+                var before = isComplex ? this.map(function(obj) {
+                    return obj.$id;
+                }).join("") : this.join("");
+                var ret = nativeMethod.apply(this, arguments);
+                var after = isComplex ? this.map(function(obj) {
+                    return obj.$id;
+                }).join("") : this.join("");
+                if (before !== after) {
+                    notifySubscribers(this, "update", []);
                 }
                 return ret;
             };
         });
+
         collection.clear = function() {
             this.length = 0;
             notifySubscribers(this, "clear", []);
@@ -1447,39 +1463,17 @@
             return this.indexOf(el) !== -1;
         };
         collection.ensure = function(el) {
-            var len = this.length;
-            var ret = avalon.Array.ensure(this, el);
-            if (this.length > len) {
-                notifySubscribers(this, "push", [el], len);
-                dynamic.length = this.length;
+            if (!this.contains(el)) {
+                this.push(el);
             }
-            return ret;
+            return this;
         };
         collection.update = function() { //强制刷新页面
-            notifySubscribers(this, "sort", []);
+            notifySubscribers(this, "update", []);
             return this;
         };
         collection.size = function() {
             return dynamic.length;
-        };
-        collection.removeAt = function(index) { //移除指定索引上的元素
-            this.splice(index, 1);
-        };
-        collection.removeAll = function(all) { //移除指定索引上的元素
-            if (Array.isArray(all)) {
-                all.forEach(function(el) {
-                    collection.remove(el);
-                });
-            } else if (typeof all === "function") {
-                for (var i = collection.length - 1; i >= 0; i--) {
-                    var el = collection[i];
-                    if (all(el, i)) {
-                        collection.splice(i, 1);
-                    }
-                }
-            } else {
-                collection.clear();
-            }
         };
         collection.remove = function(item) { //移除第一个等于给定值的元素
             var index = this.indexOf(item);
@@ -1487,6 +1481,28 @@
                 this.removeAt(index);
             }
         };
+        collection.removeAt = function(index) { //移除指定索引上的元素
+            if (index >= 0 && (index % 1 === 0)) {
+                this.splice(index, 1);//DOM操作非常重,因此只有非负整数才删除
+            }
+        };
+        collection.removeAll = function(all) { //移除指定索引上的元素
+            if (Array.isArray(all)) {
+                all.forEach(function(el) {
+                    collection.remove(el);
+                });
+            } else if (typeof all === "function") {
+                for (var i = this.length - 1; i >= 0; i--) {
+                    var el = this[i];
+                    if (all(el, i)) {
+                        this.splice(i, 1);
+                    }
+                }
+            } else {
+                this.clear();
+            }
+        };
+
         return collection;
     }
     /*********************************************************************
