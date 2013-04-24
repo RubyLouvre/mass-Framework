@@ -73,7 +73,7 @@
                     scope.getShowItems = function() {
                         var i = scope.pageIndex, c = scope.pageCount;
                         scope.showItems = scope.items.slice(i * c, (i + 1) * c)
-                        console.log(scope.showItems.length)
+                       
                     }
                     scope.addItem = function() {
                         var a = {name: "New item", sales: 0, price: 100};
@@ -87,9 +87,6 @@
                         if (scope.showItems.length == 0) {
                             scope.getShowItems();
                         }
-                        //  setTimeout(function(){
-                        //        console.log(scope.items.length)
-                        //   },1000)
                         scope.getPages();
                     };
                     scope.getPages = function() {

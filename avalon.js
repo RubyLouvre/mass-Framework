@@ -655,17 +655,17 @@
                 });
                 value = value.replace(regCloseTag, function(a, b) {
                     if (b) {
-                        var filters = [];
+                        var leach = [];
                         if (b.indexOf("|") > 0) {
                             b = b.replace(/\|\s*(\w+)\s*(\([^)]+\))?/g, function(c, d, e) {
-                                filters.push(d + e);
+                                leach.push(d + (e||""));
                                 return "";
                             });
                         }
                         tokens.push({
                             value: b,
                             expr: true,
-                            filters: filters.length ? filters : void 0
+                            filters: leach.length ? leach : void 0
                         });
                     }
                     return "";
@@ -836,7 +836,6 @@
                 text = "with(" + name + "){\r\n" + text + "\r\n}\r\n";
             }
         } else {
-            avalon.log("use strict")
             var singleFix = random + 1;
             var doubleFix = singleFix + 1;
             var singleHolder = [];
