@@ -16,7 +16,7 @@
     var $invalidate = false;
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
     var hasOwn = Object.prototype.hasOwnProperty;
-    var readyList = []
+    var readyList = [];
     var avalon = window.avalon = {
         mix: function(a, b) {
             for (var i in b) {
@@ -98,7 +98,7 @@
             readyList = null;
         }
         try {
-            document.readyState = "complete"
+            document.readyState = "complete";
         } catch (e) {
         }
     }
@@ -492,9 +492,10 @@
                 }
             }
             if (!scope) {
-                avalon.error("至少定义一个控制器");
+                avalon.error("至少定义一个ViewModel");
             }
         }
+
         scanTag(elem, scope, [], elem.ownerDocument || document);
     };
 
@@ -874,7 +875,7 @@
         event.timeStamp = new Date - 0;
         if (/mouse|click/.test(event.type)) {
             var doc = target.ownerDocument || document;
-            var box = doc.compatMode == "BackCompat" ? doc.body : doc.documentElement;
+            var box = doc.compatMode === "BackCompat" ? doc.body : doc.documentElement;
             event.pageX = event.clientX + (box.scrollLeft >> 0) - (box.clientLeft >> 0);
             event.pageY = event.clientY + (box.scrollTop >> 0) - (box.clientTop >> 0);
         }
@@ -1223,13 +1224,11 @@
         data.view = view;
         data.collection = list;
         data.scopeList = scopeList;
-        try {
+        setTimeout(function() {
             forEach(list, function(index, item) {
                 addItemView(index, item, data);
             });
-        } catch (e) {
-            avalon.error(e.message);
-        }
+        }, 0)
         function updateListView(method, args, len) {
             var listName = list.$name;
             switch (method) {
@@ -1296,7 +1295,6 @@
         if (isList) {
             list[subscribers].push(updateListView);
         }
-        // flags.stopBinding = true;
     };
     //找到目标视图最开头的那个注释节点
     //<!--xxx1--><tag><tag><text><!--xxx2--><tag><tag><text><!--xxx3--><tag><tag><text>
@@ -1317,7 +1315,7 @@
                 if (node.nodeValue.indexOf(name) === 0) {
                     if (node.nodeValue !== name + index) {
                         node.nodeValue = name + index;
-                        var indexName = node.$indexName
+                        var indexName = node.$indexName;
                         node.$scope[indexName] = index;
                     }
                     index++;
