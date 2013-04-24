@@ -24,6 +24,7 @@
             }
             return a;
         },
+        subscribers: subscribers,
         models: {},
         error: function(str, e) {
             throw new (e || Error)(str);
@@ -72,9 +73,25 @@
         type: function(obj) { //取得类型
             return obj === null ? "Null" : obj === void 0 ? "Undefined" : serialize.call(obj).slice(8, -1);
         },
+        range: function(start, end, step) {//返回一个[)
+            step || (step = 1);
+            if (end == null) {
+                end = start || 0;
+                start = 0;
+            }
+            var index = -1,
+                    length = Math.max(0, Math.ceil((end - start) / step)),
+                    result = Array(length);
+
+            while (++index < length) {
+                result[index] = start;
+                start += step;
+            }
+            return result;
+        },
         forEach: function(obj, fn) {
             if (obj) { //不能传个null, undefined进来
-                var isArray = isFinite(obj.length) && obj[0],
+                var isArray = Array.isArray(obj) || isFinite(obj.length) && obj[0],
                         i = 0;
                 if (isArray) {
                     for (var n = obj.length; i < n; i++) {
@@ -229,7 +246,81 @@
         }
     }
     forEach = avalon.forEach;
+    /*********************************************************************
+     *                           定时器                  *
+     **********************************************************************/
+    var nextTick;
+    if (typeof setImmediate === "function") {
+        // In IE10, Node.js 0.9+, or https://github.com/NobleJS/setImmediate
+        nextTick = setImmediate.bind(window);
+    } else {
+        (function() {
+            // linked list of tasks (single, with head node)
+            var head = {task: void 0, next: null};
+            var tail = head;
+            var maxPendingTicks = 2;
+            var pendingTicks = 0;
+            var queuedTasks = 0;
+            var usedTicks = 0;
+            var requestTick = void 0;
 
+            function onTick() {
+                // In case of multiple tasks ensure at least one subsequent tick
+                // to handle remaining tasks in case one throws.
+                --pendingTicks;
+
+                if (++usedTicks >= maxPendingTicks) {
+                    // Amortize latency after thrown exceptions.
+                    usedTicks = 0;
+                    maxPendingTicks *= 4; // fast grow!
+                    var expectedTicks = queuedTasks && Math.min(
+                            queuedTasks - 1,
+                            maxPendingTicks
+                            );
+                    while (pendingTicks < expectedTicks) {
+                        ++pendingTicks;
+                        requestTick();
+                    }
+                }
+
+                while (queuedTasks) {
+                    --queuedTasks; // decrement here to ensure it's never negative
+                    head = head.next;
+                    var task = head.task;
+                    head.task = void 0;
+                    task();
+                }
+
+                usedTicks = 0;
+            }
+
+            nextTick = function(task) {
+                tail = tail.next = {task: task, next: null};
+                if (
+                        pendingTicks < ++queuedTasks &&
+                        pendingTicks < maxPendingTicks
+                        ) {
+                    ++pendingTicks;
+                    requestTick();
+                }
+            };
+
+            if (typeof MessageChannel !== "undefined") {
+                // modern browsers
+                // http://www.nonblocking.io/2011/06/windownexttick.html
+                var channel = new MessageChannel();
+                channel.port1.onmessage = onTick;
+                requestTick = function() {
+                    channel.port2.postMessage(0);
+                };
+            } else {
+                requestTick = function() {//旧式IE
+                    setTimeout(onTick, 0);
+                };
+            }
+        })();
+    }
+    avalon.requestTick = nextTick;
     /*********************************************************************
      *                           Define                                 *
      **********************************************************************/
@@ -315,9 +406,20 @@
                         if (arguments.length) {
                             if (oldValue !== neo) {
                                 if (typeof neo === "object") {
-                                    neo = Array.isArray(neo) ? Collection(neo) : modelFactory(neo);
+                                    if (Array.isArray(neo)) {
+                                        if (oldValue && oldValue.isCollection) {
+                                            var args = [0, oldValue.length].concat(neo);
+                                            oldValue.splice.apply(oldValue, args);
+                                            oldValue.update();
+                                        } else {
+                                            oldValue = Collection(neo);
+                                        }
+                                    } else {
+                                        oldValue = modelFactory(neo);
+                                    }
+                                } else {
+                                    oldValue = neo;
                                 }
-                                oldValue = neo;
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
@@ -955,7 +1057,6 @@
         },
         //这是一个布尔属性绑定的范本，布尔属性插值要求整个都是一个插值表达式，用{{}}包起来
         //布尔属性在IE下无法取得原来的字符串值，变成一个布尔，因此需要用ng-disabled
-        //text.slice(2, text.lastIndexOf("}}"))
         disabled: function(data, scope, scopes) {
             var element = data.element,
                     name = data.type,
@@ -1022,13 +1123,13 @@
             }
             watchView(data.value, scope, scopes, data, function(val) {
                 if (Array.isArray(val)) {
-                    setTimeout(function() {
+                    nextTick(function() {
                         select.setAttribute(prefix + "each-option", data.value);
                         var op = new Option("{{option}}", "");
                         op.setAttribute("ms-value", "option");
                         select.options[0] = op;
                         avalon.scan(select);
-                    }, 0);
+                    });
                 } else {
                     avalon.error("options绑定必须对应一个字符串数组");
                 }
@@ -1184,6 +1285,12 @@
     bools.replace(rword, function(name) {
         bindingHandlers[name] = bindingHandlers.disabled;
     });
+    bindingHandlers.enabled = function(data, scope, scopes) {
+        var element = data.element;
+        watchView(data.value, scope, scopes, data, function(val) {
+            element.disabled = !val;
+        });
+    }
     /*********************************************************************
      *                         string preperty binding              *
      **********************************************************************/
@@ -1220,75 +1327,76 @@
         data.view = view;
         data.collection = list;
         data.scopeList = scopeList;
-        setTimeout(function() {
+        nextTick(function() {
             forEach(list, function(index, item) {
                 addItemView(index, item, data);
             });
-        }, 0)
+        })
         function updateListView(method, args, len) {
-            var listName = list.$name;
-            switch (method) {
-                case "push":
-                    forEach(list.slice(len), function(index, item) {
-                        addItemView(len + index, item, data);
-                    });
-                    break;
-                case "unshift":
-                    list.insertBefore = parent.firstChild;
-                    forEach(list.slice(0, list.length - len), function(index, item) {
-                        addItemView(index, item, data);
-                    });
-                    resetIndex(parent, listName);
-                    delete list.insertBefore;
-                    break;
-                case "pop":
-                    var node = findIndex(parent, listName, len - 1);
-                    if (node) {
-                        removeItemView(node, listName);
-                    }
-                    break;
-                case "shift":
-                    removeItemView(parent.firstChild, listName);
-                    resetIndex(parent, listName);
-                    break;
-
-                case "splice":
-                    var start = args[0],
-                            second = args[1],
-                            adds = [].slice.call(args, 2);
-                    var deleteCount = second >= 0 ? second : len - start;
-                    var node = findIndex(parent, listName, start);
-                    if (node) {
-                        removeItemViews(node, listName, deleteCount);
+            nextTick(function() {
+                var listName = list.$name;
+                switch (method) {
+                    case "push":
+                        forEach(list.slice(len), function(index, item) {
+                            addItemView(len + index, item, data);
+                        });
+                        break;
+                    case "unshift":
+                        list.insertBefore = parent.firstChild;
+                        forEach(list.slice(0, list.length - len), function(index, item) {
+                            addItemView(index, item, data);
+                        });
                         resetIndex(parent, listName);
-                        if (adds.length) {
-                            node = findIndex(node, listName, start);
-                            list.insertBefore = node;
-                            forEach(adds, function(index, item) {
-                                addItemView(index, item, data);
-                            });
-                            resetIndex(parent, listName);
-                            delete list.insertBefore;
+                        delete list.insertBefore;
+                        break;
+                    case "pop":
+                        var node = findIndex(parent, listName, len - 1);
+                        if (node) {
+                            removeItemView(node, listName);
                         }
-                    }
-                    break;
-                case "clear":
-                    while (parent.firstChild) {
-                        parent.removeChild(parent.firstChild);
-                    }
-                    break;
-                case "update":
-                    while (parent.firstChild) {
-                        parent.removeChild(parent.firstChild);
-                    }
-                    forEach(list, function(index, item) {
-                        addItemView(index, item, data);
-                    });
-                    break;
-            }
+                        break;
+                    case "shift":
+                        removeItemView(parent.firstChild, listName);
+                        resetIndex(parent, listName);
+                        break;
+
+                    case "splice":
+                        var start = args[0],
+                                second = args[1],
+                                adds = [].slice.call(args, 2);
+                        var deleteCount = second >= 0 ? second : len - start;
+                        var node = findIndex(parent, listName, start);
+                        if (node) {
+                            removeItemViews(node, listName, deleteCount);
+                            resetIndex(parent, listName);
+                            if (adds.length) {
+                                node = findIndex(node, listName, start);
+                                list.insertBefore = node;
+                                forEach(adds, function(index, item) {
+                                    addItemView(index, item, data);
+                                });
+                                resetIndex(parent, listName);
+                                delete list.insertBefore;
+                            }
+                        }
+                        break;
+                    case "clear":
+                        while (parent.firstChild) {
+                            parent.removeChild(parent.firstChild);
+                        }
+                        break;
+                    case "update":
+                        while (parent.firstChild) {
+                            parent.removeChild(parent.firstChild);
+                        }
+                        forEach(list, function(index, item) {
+                            addItemView(index, item, data);
+                        });
+                        break;
+                }
+            })
         }
-        var isList = Array.isArray(list[subscribers] || {});
-        if (isList) {
+        if ((list || {}).isCollection) {
             list[subscribers].push(updateListView);
         }
     };
@@ -1333,6 +1441,7 @@
         };
         source[removeName] = function() {
             list.remove(item);
+            return item;
         };
         return modelFactory(source);
     }
@@ -1451,7 +1560,7 @@
                 return ret;
             };
         });
-
+        collection.isCollection = true;
         collection.clear = function() {
             this.length = 0;
             notifySubscribers(this, "clear", []);
@@ -1481,7 +1590,7 @@
         };
         collection.remove = function(item) { //移除第一个等于给定值的元素
             var index = this.indexOf(item);
-            if (index !== -1) {
+            if (index >= 0) {
                 this.removeAt(index);
             }
         };
@@ -1552,8 +1661,8 @@
             number = (number + "").replace(/[^0-9+\-Ee.]/g, '');
             var n = !isFinite(+number) ? 0 : +number,
                     prec = !isFinite(+decimals) ? 0 : Math.abs(decimals),
-                    sep = thousands_sep,
-                    dec = dec_point,
+                    sep = thousands_sep || ",",
+                    dec = dec_point || ".",
                     s = '',
                     toFixedFix = function(n, prec) {
                 var k = Math.pow(10, prec);
