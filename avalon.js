@@ -1062,8 +1062,7 @@
         if (element.name === void 0) {
             element.name = name;
         }
-        var type = element.type,
-                ok;
+        var type = element.type;
 
         function updateModel() {
             model[name] = element.value;
@@ -1076,7 +1075,6 @@
             }
         }
         if (/^(password|textarea|text)$/.test(type)) {
-            ok = true;
             var event = element.attributes[prefix + "event"] || {};
             event = event.value;
             if (event === "change") {
@@ -1098,13 +1096,11 @@
                 }
             }
         } else if (type === "radio") {
-            ok = true;
             updateView = function() {
                 element.checked = model[name] === element.value;
             };
             avalon.bind(element, "click", updateModel); //IE6-8
         } else if (type === "checkbox") {
-            ok = true;
             updateModel = function() {
                 if (element.checked) {
                     avalon.Array.ensure(model[name], element.value);
