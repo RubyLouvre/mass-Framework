@@ -13,7 +13,9 @@
     var propMap = {};
     var rword = /[^, ]+/g;
     var prefix = "ms-";
-    var $invalidate = false;
+    //这两个都与计算属性息息相关
+    var stopComputedAssign = false;
+    var openComputedCollect = false;
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
     var hasOwn = Object.prototype.hasOwnProperty;
     var readyList = [];
@@ -342,11 +344,11 @@
         deps.unshift(scope);
         factory(scope); //得到所有定义
         var model = modelFactory(scope);//转为一个ViewModel
-        $invalidate = true;
+        stopComputedAssign = true;
         deps[0] = model;
         factory.apply(0, deps);//重置它的上下文
         deps.shift();
-        $invalidate = false;
+        stopComputedAssign = false;
         model.$id = name;
         return avalon.models[name] = model;
     };
@@ -372,24 +374,28 @@
                     callGetters.push(name);
                     accessor = function(neo) { //创建computed
                         if (arguments.length) {
-                            if ($invalidate) {
-                                return;
+                            if (stopComputedAssign) {
+                                return;//阻止computed在factory(model)中被赋值
                             }
                             if (typeof value.set === "function") {
                                 value.set.call(model, neo);
                             }
                             if (oldArgs !== neo) {
                                 oldArgs = neo;
+                               // console.log(accessor[subscribers][2]())
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
                             var flagDelete = false;
-                            if (!accessor[accessor]) {
+                            if (!accessor[subscribers]) {
                                 flagDelete = true;
                                 Publish[expando] = function() {
                                     notifySubscribers(accessor); //通知顶层改变
-                                };
-                                accessor[accessor] = [];
+                                };//这里是方便监控属性来通知它
+                                accessor[subscribers] = [];
+                            }
+                            if (openComputedCollect) {
+                                collectSubscribers(accessor);
                             }
                             if (typeof value.get === "function") {
                                 oldValue = value.get.call(model);
@@ -658,7 +664,7 @@
                         var leach = [];
                         if (b.indexOf("|") > 0) {
                             b = b.replace(/\|\s*(\w+)\s*(\([^)]+\))?/g, function(c, d, e) {
-                                leach.push(d + (e||""));
+                                leach.push(d + (e || ""));
                                 return "";
                             });
                         }
@@ -965,11 +971,17 @@
                 callback(val);
             };
         }
+        updateView.toString = function() {
+            return "eval(" + text + ")";
+        };//方便调试
         updateView.element = data.element;
         Publish[expando] = updateView;
+        openComputedCollect = true;
         updateView();
+        openComputedCollect = false
         delete Publish[expando];
     }
+
     function fixEvent(event) {
         var target = event.target = event.srcElement;
         event.which = event.charCode != null ? event.charCode : event.keyCode;
