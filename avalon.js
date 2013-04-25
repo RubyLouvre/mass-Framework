@@ -1,5 +1,9 @@
 //==================================================
-// avalon v4 独立版 没有任何依赖，可自由搭配jQuery, mass等使用 by 司徒正美 2013.4.23
+// avalon v4 独立版  by 司徒正美 2013.4.23
+// 疑问:
+//     是否成熟? 成熟
+//     什么协议? MIT, (五种开源协议的比较(BSD,Apache,GPL,LGPL,MIThttp://www.awflasher.com/blog/archives/939)
+//     依赖情况? 没有任何依赖，可自由搭配jQuery, mass等使用,并会引发冲突问题
 //==================================================
 (function() {
     var serialize = Object.prototype.toString;
