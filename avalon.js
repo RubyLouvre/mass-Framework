@@ -127,8 +127,8 @@
      *                           ecma262 v5语法补丁                   *
      **********************************************************************/
     if (!"司徒正美".trim) {
-        String.prototype.trim = function(value) {
-            return (value || "").replace(/^\s*/, '').replace(/\s*$/, '');
+        String.prototype.trim = function() {
+            return this.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, '')
         };
     }
     for (var i in {
@@ -1059,7 +1059,7 @@
             var name = data.type;
             if (!simple && /^\{\{([^}]+)\}\}$/.test(text)) {
                 simple = true;
-                text = RegExp.$1;
+                text = RegExp.$1;  
             }
             watchView(text, scope, scopes, data, function(val) {
                 data.element[name] = val;
