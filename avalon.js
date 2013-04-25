@@ -1,5 +1,5 @@
 //==================================================
-// avalon v4 独立版 by 司徒正美 2013.4.23
+// avalon v4 独立版 没有任何依赖，可自由搭配jQuery, mass等使用 by 司徒正美 2013.4.23
 //==================================================
 (function() {
     var serialize = Object.prototype.toString;
@@ -382,7 +382,6 @@
                             }
                             if (oldArgs !== neo) {
                                 oldArgs = neo;
-                               // console.log(accessor[subscribers][2]())
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
