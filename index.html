@@ -70,7 +70,7 @@
                 display: block;
             }
             .todo-list li input{
-               color:#000;
+                color:#000;
             }
             .todo-list li.done label{
                 text-decoration: line-through;
@@ -121,7 +121,22 @@
 
         <script type="text/javascript">
             avalon.ready(function() {
-                avalon.define(function(a) {
+                avalon.define("user",function(vm) {
+                    vm.firstName = "司徒"
+                    vm.lastName = "正美"
+                    vm.fullName = {//一个包含set或get的对象会被当成PropertyDescriptor，
+                        set: function(val) {//里面必须用this指向scope，不能使用scope
+                            var array = (val || "").split(" ");
+                            this.firstName = array[0] || "";
+                            this.lastName = array[1] || "";
+                        },
+                        get: function() {
+                            return this.firstName + " " + this.lastName;
+                        }
+                    }
+                });
+
+                avalon.define("app",function(a) {
                     a.posts = [{text: "aaa", done: false, edit: false}, {text: "bbb", done: false, edit: false}];
                     a.left = {//创建一个compued
                         get: function() {
@@ -195,7 +210,7 @@
     </head>
     <body>
 
-        <div id="app">
+        <div id="app" ms-controller="app">
             <h1>todos</h1>
             <div class="left"> 
                 <input class="new-todo" placeholder="What needs to be done?" autofocus ms-keypress="newIt">
@@ -219,5 +234,11 @@
                 <div id="todo-count"> <b> {{left}}<b> {{left <= 1 ? "item" : "items"}} left </div>
                             </div>
                             </div>
+        <div ms-controller="user">
+                            <p>First name: <input ms-model="firstName" /></p>
+                            <p>Last name: <input ms-model="lastName"  /></p>
+                            <p>Hello, <input ms-model="fullName"></p>
+                            <div>{{firstName +" | "+ lastName }}</div>
+</div>
                             </body>
                             </html>

@@ -7,18 +7,18 @@
 //==================================================
 (function() {
     var serialize = Object.prototype.toString;
-    var Publish = {}; //将函数放到发布对象上，让依赖它的函数
-    var expando = new Date - 0;
-    var mid = expando;
+    var Publish = {}; //将函数曝光到此对象上，方便访问器收集依赖
+    var expose = new Date - 0;
+    var mid = expose;
     function modleID() {
         return (mid++).toString(36) + "";
     }
-    var subscribers = "$" + expando;
+    var subscribers = "$" + expose;
     var propMap = {};
     var rword = /[^, ]+/g;
     var prefix = "ms-";
     //这两个都与计算属性息息相关
-    var stopComputedAssign = false;
+    var stopRepeatAssign = false;
     var openComputedCollect = false;
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
     var hasOwn = Object.prototype.hasOwnProperty;
@@ -348,11 +348,11 @@
         deps.unshift(scope);
         factory(scope); //得到所有定义
         var model = modelFactory(scope);//转为一个ViewModel
-        stopComputedAssign = true;
+        stopRepeatAssign = true;
         deps[0] = model;
         factory.apply(0, deps);//重置它的上下文
         deps.shift();
-        stopComputedAssign = false;
+        stopRepeatAssign = false;
         model.$id = name;
         return avalon.models[name] = model;
     };
@@ -373,13 +373,17 @@
                 if (skipArray.indexOf(name) !== -1) {
                     return VBPublics.push(name);
                 }
+                if (name.charAt(0) === "_") {
+                    if (skipArray.indexOf(name) !== -1) {
+                        return VBPublics.push(name);
+                    }
+                }
                 var accessor, oldValue, oldArgs;
                 if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
-                    callGetters.push(name);
-                    accessor = function(neo) { //创建computed
+                    accessor = function(neo) { //创建计算属性
                         if (arguments.length) {
-                            if (stopComputedAssign) {
-                                return;//阻止computed在factory(model)中被赋值
+                            if (stopRepeatAssign) {
+                                return;//阻止重复赋值
                             }
                             if (typeof value.set === "function") {
                                 value.set.call(model, neo);
@@ -389,30 +393,27 @@
                                 notifySubscribers(accessor); //通知顶层改变
                             }
                         } else {
-                            var flagDelete = false;
-                            if (!accessor[subscribers]) {
-                                flagDelete = true;
-                                Publish[expando] = function() {
-                                    notifySubscribers(accessor); //通知顶层改变
-                                };//这里是方便监控属性来通知它
-                                accessor[subscribers] = [];
-                            }
                             if (openComputedCollect) {
                                 collectSubscribers(accessor);
                             }
-                            if (typeof value.get === "function") {
-                                oldValue = value.get.call(model);
-                            }
-                            if (flagDelete) {
-                                delete Publish[expando];
-                            }
+                            oldValue = value.get.call(model);
                             return oldValue;
                         }
                     };
+                    callGetters.push((function(fn) {
+                        return function() {
+                            Publish[expose] = fn;
+                            fn();
+                            delete Publish[expose];
+                        };
+                    })(accessor));
                 } else {
                     callSetters.push(name);
-                    accessor = function(neo) { //创建访问器
+                    accessor = function(neo) { //创建监控属性或数组
                         if (arguments.length) {
+                            if (stopRepeatAssign) {
+                                return;//阻止重复赋值
+                            }
                             if (oldValue !== neo) {
                                 if (typeof neo === "object") {
                                     if (Array.isArray(neo)) {
@@ -436,8 +437,9 @@
                             return oldValue;
                         }
                     };
-                    accessor[subscribers] = [];
+
                 }
+                accessor[subscribers] = [];
                 description[name] = {
                     set: accessor,
                     get: accessor,
@@ -456,8 +458,8 @@
         callSetters.forEach(function(prop) {
             model[prop] = scope[prop]; //为空对象赋值
         });
-        callGetters.forEach(function(prop) {
-            callSetters = model[prop]; //让computed计算自身
+        callGetters.forEach(function(fn) {
+            fn(); //为空对象赋值
         });
         model.$id = modleID();
         return model;
@@ -562,9 +564,9 @@
     }
 
     function collectSubscribers(accessor) { //收集依赖于这个访问器的订阅者
-        if (Publish[expando]) {
+        if (Publish[expose]) {
             var list = accessor[subscribers];
-            list && avalon.Array.ensure(list, Publish[expando]); //只有数组不存在此元素才push进去
+            list && avalon.Array.ensure(list, Publish[expose]); //只有数组不存在此元素才push进去
         }
     }
 
@@ -577,7 +579,7 @@
             for (var i = 0, fn; fn = safelist[i++]; ) {
                 el = fn.element;
                 if (el && (el.sourceIndex === 0 || el.parentNode === null)) {
-                    avalon.log("remove " + el)
+                    avalon.log("remove " + el);
                     avalon.Array.remove(list, fn);
                 } else {
                     fn.apply(0, args); //强制重新计算自身
@@ -978,11 +980,11 @@
             return "eval(" + text + ")";
         };//方便调试
         updateView.element = data.element;
-        Publish[expando] = updateView;
+        Publish[expose] = updateView;
         openComputedCollect = true;
         updateView();
         openComputedCollect = false
-        delete Publish[expando];
+        delete Publish[expose];
     }
 
     function fixEvent(event) {
@@ -1063,7 +1065,7 @@
             var name = data.type;
             if (!simple && /^\{\{([^}]+)\}\}$/.test(text)) {
                 simple = true;
-                text = RegExp.$1;  
+                text = RegExp.$1;
             }
             watchView(text, scope, scopes, data, function(val) {
                 data.element[name] = val;
@@ -1228,10 +1230,10 @@
             };
             avalon.bind(element, "click", updateModel); //IE6-8
         }
-        Publish[expando] = updateView;
+        Publish[expose] = updateView;
         updateView.element = element;
         updateView();
-        delete Publish[expando];
+        delete Publish[expose];
     };
     modelBinding.SELECT = function(element, model, name) {
         var select = element;
@@ -1244,10 +1246,10 @@
             setSelectVal(element, model[name]);
         }
         avalon.bind(element, "change", updateModel);
-        Publish[expando] = updateView;
+        Publish[expose] = updateView;
         updateView.element = element;
         updateView();
-        delete Publish[expando];
+        delete Publish[expose];
     };
     modelBinding.TEXTAREA = modelBinding.INPUT;
 
@@ -1305,10 +1307,10 @@
             element.disabled = !val;
         });
     };
-     bindingHandlers.html = function(data, scope, scopes) {
+    bindingHandlers.html = function(data, scope, scopes) {
         var element = data.element;
         watchView(data.value, scope, scopes, data, function(val) {
-            element.innerHTML = val ==  null ? "" : val+"";
+            element.innerHTML = val == null ? "" : val + "";
         });
     };
     /*********************************************************************
@@ -1353,7 +1355,7 @@
             });
         })
         function updateListView(method, args, len) {
-            nextTick(function() {
+         //   function() {
                 var listName = list.$name;
                 switch (method) {
                     case "push":
@@ -1379,11 +1381,11 @@
                         removeItemView(parent.firstChild, listName);
                         resetIndex(parent, listName);
                         break;
-
                     case "splice":
                         var start = args[0],
                                 second = args[1],
                                 adds = [].slice.call(args, 2);
+                       
                         var deleteCount = second >= 0 ? second : len - start;
                         var node = findIndex(parent, listName, start);
                         if (node) {
@@ -1414,7 +1416,7 @@
                         });
                         break;
                 }
-            })
+           // }
         }
         if ((list || {}).isCollection) {
             list[subscribers].push(updateListView);
@@ -1435,7 +1437,7 @@
     function resetIndex(elem, name) {
         var index = 0;
         for (var node = elem.firstChild; node; node = node.nextSibling) {
-            if (node.nodeType === 8) {
+            if ( node.nodeType === 8 ) {
                 if (node.nodeValue.indexOf(name) === 0) {
                     if (node.nodeValue !== name + index) {
                         node.nodeValue = name + index;
@@ -1532,7 +1534,6 @@
     /*********************************************************************
      *                 与each绑定息息相关的 Collection类              *
      **********************************************************************/
-
     function Collection(list) {
         var collection = list.map(function(val) {
             return val && typeof val === "object" ? modelFactory(val) : val;
