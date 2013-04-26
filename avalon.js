@@ -3,7 +3,7 @@
 // 疑问:
 //    是否成熟? 成熟
 //    什么协议? MIT, (五种开源协议的比较(BSD,Apache,GPL,LGPL,MIThttp://www.awflasher.com/blog/archives/939)
-//    依赖情况? 没有任何依赖，可自由搭配jQuery, mass等使用,并会引发冲突问题
+//    依赖情况? 没有任何依赖，可自由搭配jQuery, mass等使用,并不会引发冲突问题
 //==================================================
 (function() {
     var serialize = Object.prototype.toString;
@@ -126,13 +126,13 @@
         }
     }
     avalon.bind(window, "load", fireReady);
-    avalon.bind(window, "DOMContentLoaded", fireReady)
+    avalon.bind(window, "DOMContentLoaded", fireReady);
     /*********************************************************************
      *                           ecma262 v5语法补丁                   *
      **********************************************************************/
     if (!"司徒正美".trim) {
         String.prototype.trim = function() {
-            return this.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, '')
+            return this.replace(/^[\s\xA0]+/, "").replace(/[\s\xA0]+$/, '');
         };
     }
     for (var i in {
@@ -165,7 +165,7 @@
 
     function iterator(vars, body, ret) {
         var fun = 'for(var ' + vars + 'i=0,n = this.length;i < n;i++){'
-                + body.replace('_', '((i in this) && fn.call(scope,this[i],i,this))') + '}' + ret
+                + body.replace('_', '((i in this) && fn.call(scope,this[i],i,this))') + '}' + ret;
         return Function("fn,scope", fun);
     }
 
@@ -1308,7 +1308,7 @@
      bindingHandlers.html = function(data, scope, scopes) {
         var element = data.element;
         watchView(data.value, scope, scopes, data, function(val) {
-            element.innerHTML = (val || "")+"";
+            element.innerHTML = val ==  null ? "" : val+"";
         });
     };
     /*********************************************************************
