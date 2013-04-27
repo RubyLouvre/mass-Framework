@@ -638,7 +638,7 @@ define("node", ["support", "class", "data"]
                 }
                 return ret;
             }
-            var uniqOne = $.oneObject("children", "contents", "next", "prev");
+            var uniqOne = $.oneObject(["children", "contents", "next", "prev"]);
 
             function travel(el, prop, expr) {
                 var result = [],
