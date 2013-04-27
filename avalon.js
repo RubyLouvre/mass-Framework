@@ -61,7 +61,6 @@
         addClasses: function(element, classList) {
             classList.replace(/\w+/g, function(className) {
                 avalon.addClass(element, className);
-
             });
         },
         removeClass: function(element, className) {
@@ -88,7 +87,6 @@
             var index = -1,
                     length = Math.max(0, Math.ceil((end - start) / step)),
                     result = Array(length);
-
             while (++index < length) {
                 result[index] = start;
                 start += step;
@@ -97,7 +95,8 @@
         },
         forEach: function(obj, fn) {
             if (obj) { //不能传个null, undefined进来
-                var isArray = Array.isArray(obj) || isFinite(obj.length) && obj[0],
+                var isArray = Array.isArray(obj) || avalon.type(obj) === "Object"
+                        && !obj.document && !obj.setTimeout && isFinite(obj.length) && obj[0],
                         i = 0;
                 if (isArray) {
                     for (var n = obj.length; i < n; i++) {
@@ -170,7 +169,7 @@
     }
 
     avalon.mix(Array.prototype, {
-        //定位操作，返回数组中第一个等于给定参数的元素的索引值。
+//定位操作，返回数组中第一个等于给定参数的元素的索引值。
         indexOf: function(item, index) {
             var n = this.length,
                     i = ~~index;
@@ -208,7 +207,7 @@
      **********************************************************************/
     avalon.Array = {
         sortBy: function(target, fn, scope) {
-            //根据指定条件进行排序，通常用于对象数组。
+//根据指定条件进行排序，通常用于对象数组。
             var array = target.map(function(item, index) {
                 return {
                     el: item,
@@ -222,7 +221,7 @@
             return avalon.Array.pluck(array, 'el');
         },
         pluck: function(target, name) {
-            //取得对象数组的每个元素的指定属性，组成数组返回。
+//取得对象数组的每个元素的指定属性，组成数组返回。
             var result = [],
                     prop;
             target.forEach(function(item) {
@@ -233,18 +232,18 @@
             return result;
         },
         ensure: function(target, el) {
-            //只有当前数组不存在此元素时只添加它
+//只有当前数组不存在此元素时只添加它
             if (!~target.indexOf(el)) {
                 target.push(el);
             }
             return target;
         },
         removeAt: function(target, index) {
-            //移除数组中指定位置的元素，返回布尔表示成功与否。
+//移除数组中指定位置的元素，返回布尔表示成功与否。
             return !!target.splice(index, 1).length;
         },
         remove: function(target, item) {
-            //移除数组中第一个匹配传参的那个元素，返回布尔表示成功与否。
+//移除数组中第一个匹配传参的那个元素，返回布尔表示成功与否。
             var index = target.indexOf(item);
             if (~index)
                 return avalon.Array.removeAt(target, index);
@@ -253,15 +252,14 @@
     }
     forEach = avalon.forEach;
     /*********************************************************************
-     *                           定时器                  *
+     *                            UI缓冲处理                     *
      **********************************************************************/
     var nextTick;
     if (typeof setImmediate === "function") {
-        // In IE10, Node.js 0.9+, or https://github.com/NobleJS/setImmediate
+// In IE10, Node.js 0.9+, or https://github.com/NobleJS/setImmediate
         nextTick = setImmediate.bind(window);
     } else {
-        (function() {
-            // linked list of tasks (single, with head node)
+        (function() {//否则用一个链表来维护所有待执行的回调
             var head = {task: void 0, next: null};
             var tail = head;
             var maxPendingTicks = 2;
@@ -269,16 +267,11 @@
             var queuedTasks = 0;
             var usedTicks = 0;
             var requestTick = void 0;
-
             function onTick() {
-                // In case of multiple tasks ensure at least one subsequent tick
-                // to handle remaining tasks in case one throws.
                 --pendingTicks;
-
                 if (++usedTicks >= maxPendingTicks) {
-                    // Amortize latency after thrown exceptions.
                     usedTicks = 0;
-                    maxPendingTicks *= 4; // fast grow!
+                    maxPendingTicks *= 4;
                     var expectedTicks = queuedTasks && Math.min(
                             queuedTasks - 1,
                             maxPendingTicks
@@ -290,7 +283,7 @@
                 }
 
                 while (queuedTasks) {
-                    --queuedTasks; // decrement here to ensure it's never negative
+                    --queuedTasks;
                     head = head.next;
                     var task = head.task;
                     head.task = void 0;
@@ -299,7 +292,6 @@
 
                 usedTicks = 0;
             }
-
             nextTick = function(task) {
                 tail = tail.next = {task: task, next: null};
                 if (
@@ -310,17 +302,17 @@
                     requestTick();
                 }
             };
-
-            if (typeof MessageChannel !== "undefined") {
-                // modern browsers
-                // http://www.nonblocking.io/2011/06/windownexttick.html
+            //然后找一个最快响应的异步API来执行这个链表,像烧爆竹那样收拾它们
+            //你可以用postMessage, image.onerror, xhr.onreadystatechange, MutationObserver 
+            //最差还有个setTimeout 0殿后 http://jsperf.com/postmessage
+            if (typeof MessageChannel !== "undefined") {//管道通信API
                 var channel = new MessageChannel();
                 channel.port1.onmessage = onTick;
                 requestTick = function() {
                     channel.port2.postMessage(0);
                 };
             } else {
-                requestTick = function() {//旧式IE
+                requestTick = function() {//IE6-8
                     setTimeout(onTick, 0);
                 };
             }
@@ -347,16 +339,26 @@
         var scope = {};
         deps.unshift(scope);
         factory(scope); //得到所有定义
-        var model = modelFactory(scope);//转为一个ViewModel
+        var model = modelFactory(scope); //转为一个ViewModel
         stopRepeatAssign = true;
         deps[0] = model;
-        factory.apply(0, deps);//重置它的上下文
+        factory.apply(0, deps); //重置它的上下文
         deps.shift();
         stopRepeatAssign = false;
         model.$id = name;
         return avalon.models[name] = model;
     };
-
+    function updateCollection(oldArray, newArray) {
+        oldArray.clear();
+        oldArray.push.apply(oldArray, newArray);
+    }
+    function updateModel(oldObj, newObj) {
+        for (var i in newObj) {
+            if (newObj.hasOwnProperty(i) && oldObj.hasOwnProperty(i) && i !== "$id") {
+                oldObj[i] = newObj[i];
+            }
+        }
+    }
     function modelFactory(scope) {
         var skipArray = scope.$skipArray,
                 description = {},
@@ -373,17 +375,21 @@
                 if (skipArray.indexOf(name) !== -1) {
                     return VBPublics.push(name);
                 }
-                if (name.charAt(0) === "_") {
-                    if (skipArray.indexOf(name) !== -1) {
-                        return VBPublics.push(name);
+                try {
+                    if (name.charAt(0) === "_") {
+                        if (skipArray.indexOf(name) !== -1) {
+                            return VBPublics.push(name);
+                        }
                     }
+                } catch (e) {
+                    avalon.log(typeof name + " !!!!!!!")
                 }
                 var accessor, oldValue, oldArgs;
                 if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
                     accessor = function(neo) { //创建计算属性
                         if (arguments.length) {
                             if (stopRepeatAssign) {
-                                return;//阻止重复赋值
+                                return; //阻止重复赋值
                             }
                             if (typeof value.set === "function") {
                                 value.set.call(model, neo);
@@ -412,21 +418,23 @@
                     accessor = function(neo) { //创建监控属性或数组
                         if (arguments.length) {
                             if (stopRepeatAssign) {
-                                return;//阻止重复赋值
+                                return; //阻止重复赋值
                             }
                             if (oldValue !== neo) {
-                                if (typeof neo === "object") {
-                                    if (Array.isArray(neo)) {
-                                        if (oldValue && oldValue.isCollection) {
-                                            var args = [0, oldValue.length].concat(neo);
-                                            oldValue.splice.apply(oldValue, args);
-                                            oldValue.update();
-                                        } else {
-                                            oldValue = Collection(neo);
-                                        }
+                                if (Array.isArray(neo)) {
+                                    if (oldValue && oldValue.isCollection) {
+                                        updateCollection(oldValue, neo)
+                                        //   oldValue.update();
+                                    } else {
+                                        oldValue = Collection(neo);
+                                    }
+                                } else if (avalon.type(neo) === "Object") {
+                                    if (oldValue && oldValue.$id) {
+                                        updateModel(oldValue, neo);
                                     } else {
                                         oldValue = modelFactory(neo);
                                     }
+
                                 } else {
                                     oldValue = neo;
                                 }
@@ -437,7 +445,6 @@
                             return oldValue;
                         }
                     };
-
                 }
                 accessor[subscribers] = [];
                 description[name] = {
@@ -499,7 +506,6 @@
             "Function parseVB(code)",
             "\tExecuteGlobal(code)",
             "End Function"].join("\n"), "VBScript");
-
         function VBMediator(description, name, value) {
             var fn = description[name] && description[name].set;
             if (arguments.length === 3) {
@@ -524,8 +530,8 @@
                     "\t\tSet [__const__] = Me", //链式调用
                     "\tEnd Function");
             publics.forEach(function(name) { //添加公共属性,如果此时不加以后就没机会了
-                owner[name] = true;//因为VBScript对象不能像JS那样随意增删属性
-                buffer.push("\tPublic [" + name + "]");//你可以预先放到skipArray中
+                owner[name] = true; //因为VBScript对象不能像JS那样随意增删属性
+                buffer.push("\tPublic [" + name + "]"); //你可以预先放到skipArray中
             });
             Object.keys(description).forEach(function(name) {
                 owner[name] = true;
@@ -611,7 +617,6 @@
 
         scanTag(elem, scope, [], elem.ownerDocument || document);
     };
-
     function scanTag(elem, scope, scopes, doc) {
         scopes = scopes || [];
         var flags = {};
@@ -706,7 +711,6 @@
                     }
                     remove = true;
                     isBinding = typeof bindingHandlers[type] === "function";
-
                 } else if (bindingHandlers[attr.name] && hasExpr(attr.value)) {
                     type = attr.name; //如果只是普通属性，但其值是个插值表达式
                     isBinding = true;
@@ -772,7 +776,6 @@
     //将绑定属性的值或插值表达式里面部分转换一个函数compileFn,里面或包含ViewModel的某些属性
     //而它们分分种都是setter, getter，成为双向绑定链的一部分
     var regEscape = /([-.*+?^${}()|[\]\/\\])/g;
-
     function escapeRegExp(target) {
         //将字符串安全格式化为正则表达式的源码
         return target.replace(regEscape, "\\$1");
@@ -780,7 +783,6 @@
     var isStrict = (function() {
         return !this;
     })();
-
     function insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random) {
         var ok = false;
         if (window.dispatchEvent) { //判定是否IE9-11或者为标准浏览器
@@ -827,7 +829,6 @@
     }
     var doubleQuotedString = /"([^\\"\n]|\\.)*"/g;
     var singleQuotedString = /'([^\\'\n]|\\.)*'/g;
-
     function parseExpr(text, scopeList, data) {
         var names = [],
                 args = [],
@@ -932,7 +933,6 @@
     //而它内部调用着之前编译好的函数compileFn，双向产生依赖，成为双向绑定链的最顶层
     var regOpenTag = /([^{]*)\{\{/;
     var regCloseTag = /([^}]*)\}\}/;
-
     function hasExpr(value) {
         var index = value.indexOf("{{");
         return index !== -1 && index < value.indexOf("}}");
@@ -978,12 +978,13 @@
         }
         updateView.toString = function() {
             return "eval(" + text + ")";
-        };//方便调试
-        updateView.element = data.element;
+        }; //方便调试
+        var el = data.element;
+        updateView.element = el;
         Publish[expose] = updateView;
         openComputedCollect = true;
         updateView();
-        openComputedCollect = false
+        openComputedCollect = false;
         delete Publish[expose];
     }
 
@@ -1033,7 +1034,7 @@
                     element.$scope = scope;
                     element.$scopes = scopes;
                     avalon.bind(element, type, function(e) {
-                        e = e && e.timeStamp ? e : fixEvent(event);//修正IE的参数  
+                        e = e && e.timeStamp ? e : fixEvent(event); //修正IE的参数  
                         fn.call(element, e)
                     });
                 }
@@ -1091,6 +1092,11 @@
             watchView(data.value, scope, scopes, data, function(val) {
                 if (data.args) { //第一种形式
                     var classList = data.args.join(" ");
+                    if (typeof val == "function") {
+                        element.$scope = scope;
+                        element.$scopes = scopes;
+                        val = val.call(element)
+                    }
                     if (val) {
                         avalon.addClasses(element, classList);
                     } else {
@@ -1180,7 +1186,6 @@
             element.name = name;
         }
         var type = element.type;
-
         function updateModel() {
             model[name] = element.value;
         }
@@ -1237,7 +1242,6 @@
     };
     modelBinding.SELECT = function(element, model, name) {
         var select = element;
-
         function updateModel() {
             model[name] = select.val();
         }
@@ -1252,7 +1256,6 @@
         delete Publish[expose];
     };
     modelBinding.TEXTAREA = modelBinding.INPUT;
-
     function getOptionVal(node) {
         var val = node.attributes.value;
         //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
@@ -1331,7 +1334,6 @@
             bindingHandlers.on.apply(0, arguments);
         }
     });
-
     /*********************************************************************
      *                      each binding                              *
      **********************************************************************/
@@ -1355,68 +1357,69 @@
             });
         })
         function updateListView(method, args, len) {
-         //   function() {
-                var listName = list.$name;
-                switch (method) {
-                    case "push":
-                        forEach(list.slice(len), function(index, item) {
-                            addItemView(len + index, item, data);
-                        });
-                        break;
-                    case "unshift":
-                        list.insertBefore = parent.firstChild;
-                        forEach(list.slice(0, list.length - len), function(index, item) {
-                            addItemView(index, item, data);
-                        });
-                        resetIndex(parent, listName);
-                        delete list.insertBefore;
-                        break;
-                    case "pop":
-                        var node = findIndex(parent, listName, len - 1);
-                        if (node) {
-                            removeItemView(node, listName);
-                        }
-                        break;
-                    case "shift":
-                        removeItemView(parent.firstChild, listName);
-                        resetIndex(parent, listName);
-                        break;
-                    case "splice":
-                        var start = args[0],
-                                second = args[1],
-                                adds = [].slice.call(args, 2);
-                       
-                        var deleteCount = second >= 0 ? second : len - start;
+            //   function() {
+            var listName = list.$name;
+            switch (method) {
+                case "push":
+                    forEach(list.slice(len), function(index, item) {
+                        addItemView(len + index, item, data);
+                    });
+                    break;
+                case "unshift":
+                    list.insertBefore = parent.firstChild;
+                    forEach(list.slice(0, list.length - len), function(index, item) {
+                        addItemView(index, item, data);
+                    });
+                    resetIndex(parent, listName);
+                    delete list.insertBefore;
+                    break;
+                case "pop":
+                    var node = findIndex(parent, listName, len - 1);
+                    if (node) {
+                        removeItemView(node, listName);
+                    }
+                    break;
+                case "shift":
+                    removeItemView(parent.firstChild, listName);
+                    resetIndex(parent, listName);
+                    break;
+                case "splice":
+                    var start = args[0],
+                            second = args[1],
+                            adds = [].slice.call(args, 2);
+                    var deleteCount = second >= 0 ? second : len - start;
+                    if (deleteCount) {
                         var node = findIndex(parent, listName, start);
                         if (node) {
                             removeItemViews(node, listName, deleteCount);
                             resetIndex(parent, listName);
-                            if (adds.length) {
-                                node = findIndex(node, listName, start);
-                                list.insertBefore = node;
-                                forEach(adds, function(index, item) {
-                                    addItemView(index, item, data);
-                                });
-                                resetIndex(parent, listName);
-                                delete list.insertBefore;
-                            }
                         }
-                        break;
-                    case "clear":
-                        while (parent.firstChild) {
-                            parent.removeChild(parent.firstChild);
-                        }
-                        break;
-                    case "update":
-                        while (parent.firstChild) {
-                            parent.removeChild(parent.firstChild);
-                        }
-                        forEach(list, function(index, item) {
+                    }
+                    if (adds.length) {
+                        node = findIndex(parent, listName, start);
+                        list.insertBefore = node;
+                        forEach(adds, function(index, item) {
                             addItemView(index, item, data);
                         });
-                        break;
-                }
-           // }
+                        resetIndex(parent, listName);
+                        delete list.insertBefore;
+                    }
+                    break;
+                case "clear":
+                    while (parent.firstChild) {
+                        parent.removeChild(parent.firstChild);
+                    }
+                    break;
+                case "update":
+                    while (parent.firstChild) {
+                        parent.removeChild(parent.firstChild);
+                    }
+                    forEach(list, function(index, item) {
+                        addItemView(index, item, data);
+                    });
+                    break;
+            }
+            // }
         }
         if ((list || {}).isCollection) {
             list[subscribers].push(updateListView);
@@ -1437,7 +1440,7 @@
     function resetIndex(elem, name) {
         var index = 0;
         for (var node = elem.firstChild; node; node = node.nextSibling) {
-            if ( node.nodeType === 8 ) {
+            if (node.nodeType === 8) {
                 if (node.nodeValue.indexOf(name) === 0) {
                     if (node.nodeValue !== name + index) {
                         node.nodeValue = name + index;
@@ -1514,7 +1517,7 @@
         for (var i = 0; node = nodes[i++]; ) {
             view.appendChild(node);
         }
-        return [view, check];//返回被移除的文档碎片及下一个路标
+        return [view, check]; //返回被移除的文档碎片及下一个路标
     }
     //移除each中的多个子视图,返回它们对应的文档碎片集合
 
@@ -1534,29 +1537,29 @@
     /*********************************************************************
      *                 与each绑定息息相关的 Collection类              *
      **********************************************************************/
+    function convert(val) {
+        if (Array.isArray(val)) {
+            return val.$name ? val : Collection(val);
+        } else if (avalon.type(val) === "Object") {
+            return val.$id ? val : modelFactory(val);
+        } else {
+            return val;
+        }
+    }
     function Collection(list) {
-        var collection = list.map(function(val) {
-            return val && typeof val === "object" ? modelFactory(val) : val;
-        });
+        var collection = list.map(convert);
         collection.$name = modleID();
         collection[subscribers] = [];
         var dynamic = modelFactory({
             length: list.length
         });
-
         "push,pop,shift,unshift,splice".replace(rword, function(method) {
             var nativeMethod = Array.prototype[method];
             collection[method] = function() {
                 var len = this.length;
                 var args = [].slice.call(arguments);
                 if (/push|unshift|splice/.test(method)) {
-                    args = args.map(function(el) {
-                        if (el && typeof el === "object" && !el.hasOwnProperty("$id")) {
-                            return modelFactory(el);
-                        } else {
-                            return el;
-                        }
-                    });
+                    args = args.map(convert);
                 }
                 var ret = nativeMethod.apply(this, args);
                 notifySubscribers(this, method, args, len);
@@ -1617,7 +1620,7 @@
         };
         collection.removeAt = function(index) { //移除指定索引上的元素
             if (index >= 0 && (index % 1 === 0)) {
-                this.splice(index, 1);//DOM操作非常重,因此只有非负整数才删除
+                this.splice(index, 1); //DOM操作非常重,因此只有非负整数才删除
             }
         };
         collection.removeAll = function(all) { //移除指定索引上的元素
@@ -1636,7 +1639,6 @@
                 this.clear();
             }
         };
-
         return collection;
     }
     /*********************************************************************
@@ -1767,7 +1769,7 @@
         function dateStrGetter(name, shortForm) {
             return function(date, formats) {
                 var value = date['get' + name]();
-                var get = uppercase(shortForm ? ('SHORT' + name) : name);
+                var get = (shortForm ? ('SHORT' + name) : name).toUpperCase();
                 return formats[get][value];
             };
         }
@@ -1849,23 +1851,23 @@
             if (avalon.type(date) === "Number") {
                 date = new Date(date);
             }
-
-            if (avalon.type(date) === "Date") {
-                return date;
+            //   console.log(date)
+            if (avalon.type(date) !== "Date") {
+                return
             }
 
             while (format) {
                 match = DATE_FORMATS_SPLIT.exec(format);
                 if (match) {
-                    parts = concat(parts, match, 1);
+                    // console.log(match)
+                    parts = parts.concat(match.slice(1));
                     format = parts.pop();
                 } else {
                     parts.push(format);
                     format = null;
                 }
             }
-
-            forEach(parts, function(value) {
+            parts.forEach(function(value) {
                 fn = DATE_FORMATS[value];
                 text += fn ? fn(date, formats) : value.replace(/(^'|'$)/g, '').replace(/''/g, "'");
             });
@@ -1931,6 +1933,4 @@
         "shortDate": "yy-M-d",
         "shortTime": "ah:mm"
     });
-
-
 })()

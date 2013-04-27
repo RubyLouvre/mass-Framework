@@ -1,0 +1,259 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>scope</title>
+        <style>
+            #app{
+                background:#dfdfdf;
+                width:580px;
+                color:#000;
+                margin-bottom: 1em;
+                -margin-bottom:2em;
+            }
+            #app h1{
+                font-size: 34px;
+               	font-weight: bold;
+                text-align: center;
+                padding: 10px 0 0 0;
+                margin: 0px;
+                color:#000;
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            }
+            #app .new-todo {
+                text-align: left;
+                width:500px;
+                font-size: 24px;
+                height:30px;
+                line-height: 30px;
+            }
+            #app .left{
+                padding-left: 2em;
+            }
+            #app .todo-list {
+                margin: 10px 0;
+                padding: 0;
+                list-style: none;
+            }
+            #app .todo-list li {
+                padding: 18px 20px 18px 0;
+                position: relative;
+                width: 480px;
+                font-size: 24px;
+                height: 30px;
+                line-height: 30px;
+                text-align: left;
+                background:#f5f5f5;
+                border-bottom: 1px solid #dfdfdf;
+            }
+            #app .todo-list .destroy {
+                position: absolute;
+                right: 5px;
+                top: 20px;
+                text-align: center;
+                text-decoration: none;
+                cursor: pointer;
+                width: 30px;
+                height: 30px;
+                color:#000;
+            }
+            #app .editing{
+                position:absolute;
+                top: 0;
+                width: 480px;
+                height: 30px;
+                font-size: 25px;
+                padding: 13px 15px 15px 0px;
+                margin: 0;
+            }
+            #app .todo-list li a{
+                display: none;
+            }
+            #app .todo-list li.hover a{
+                display: block;
+            }
+            #app .todo-list li.done label{
+                text-decoration: line-through;
+            }
+            #app .todo-list li label {
+                width:444px;
+            }
+            #app #footer{
+                width: 540px;
+                overflow: hidden;
+                color: #fff;
+                background: #4d6366;
+                border-top: 1px solid #ededed;
+                padding-left: 2em;
+                line-height: 40px;
+                margin-bottom:-20px;
+                -webkit-border-radius: 0 0 5px 5px;
+                -moz-border-radius: 0 0 5px 5px;
+                -ms-border-radius: 0 0 5px 5px;
+                -o-border-radius: 0 0 5px 5px;
+                border-radius: 0 0 5px 5px;
+            }
+            #app  #clear-completed {
+                float: right;
+                line-height: 20px;
+                text-decoration: none;
+                background: rgba(0, 0, 0, 0.1);
+                color: #000;
+                font-size: 11px;
+                margin-top: 8px;
+                margin-bottom: 8px;
+                padding: 0 10px 1px;
+                cursor: pointer;
+                -webkit-border-radius: 12px;
+                -moz-border-radius: 12px;
+                -ms-border-radius: 12px;
+                -o-border-radius: 12px;
+                border-radius: 12px;
+                -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0 0;
+                -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0 0;
+                -ms-box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0 0;
+                -o-box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0 0;
+                box-shadow: rgba(0, 0, 0, 0.2) 0 -1px 0 0;
+            }
+        </style>
+        <script src="avalon.js" type="text/javascript"></script>
+
+
+
+        <script type="text/javascript">
+
+
+            avalon.ready(function() {
+                avalon.define(function(a) {
+                    a.posts = [{text: "aaa", done: false, edit: false}, {text: "bbb", done: false, edit: false}];
+                    a.left = {//创建一个只读计算属性
+                        get: function() {
+                            return  this.posts.filter(function(post) {
+                                return !post.done;
+                            }).length;
+                        }
+                    };
+                    a.newIt = function(e) {
+                        if (e.which === 13 && this.value) {
+                            a.posts.push({
+                                text: this.value,
+                                done: false,
+                                edit: false
+                            });
+                            this.value = "";
+                            a.left = new Date;//只有setter才能通知上层,而通知上层的条件是传参不同
+                            //由于left是只读的,传什么也无所谓
+                        }
+                    };
+
+                    a.enterIt = function() {
+                        avalon.addClass(this, "hover");
+                    };
+                    a.leaveIt = function() {
+                        avalon.removeClass(this, "hover");
+                    };
+                    a.checkIt = function() {
+                        this.$scope.post.done = this.checked;
+                        a.left = new Date;//强制刷新
+                    };
+                    a.removeIt = function() {
+                        this.$scope.$remove();
+                        a.left = new Date;//强制刷新
+                    };
+                    a.removeThem = function() {
+                        a.posts.removeAll(function(post) {
+                            return post.done;
+                        });
+                        a.left = new Date;//强制刷新
+                    };
+                    a.checkThem = function() {
+                        var done = this.checked;
+                        var len = a.posts.length;
+                        a.posts.forEach(function(post) {
+                            post.done = done;
+                            if (done) {
+                                len--;
+                            }
+                        });
+                        a.left = len;
+                    };
+                    a.editIt = function() {//让那条评论可编辑
+                        a.posts.forEach(function(post) {
+                            post.edit = false;
+                        });
+                        this.$scope.post.edit = true;
+                    };
+                    a.updateIt = function() {
+                        var post = this.$scope.post;
+                        post.text = this.value;
+                        post.edit = false;
+                    };
+                });
+                avalon.scan();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="app">
+            <h1>todos</h1>
+            <div class="left">
+                <input class="new-todo" placeholder="What needs to be done?" autofocus ms-keypress="newIt">
+            </div>
+            <div class="left" ms-visible="posts.size()" >
+                <input id="toggle-all" type="checkbox" ms-click="checkThem">
+                <label for="toggle-all">Mark all as complete</label>
+                <ul class="todo-list" ms-each-post="posts">
+                    <li  ms-class-done="post.done" ms-mouseover="enterIt" ms-mouseout="leaveIt" >
+                        <div ms-visible="!post.edit" ms-dblclick="editIt">
+                            <input type="checkbox" ms-checked="post.done" ms-click="checkIt" width="10px"  />
+                            <label>{{post.text}}</label>
+                            <a href="###" ms-click="removeIt" class="destroy">●</a>
+                        </div>
+                        <input class="editing" ms-visible="post.edit" ms-value="post.text" ms-blur="updateIt" />
+                    </li>
+                </ul>
+            </div>
+            <div data-ms-visible="posts.size()" id="footer">
+                <a href="###" id="clear-completed"  ms-click="removeThem" ms-visible="posts.size() - left">Clear completed</a>
+                <div id="todo-count"> <b> {{left}}</b> {{left <= 1 ? "item" : "items"}} left </div>
+            </div>
+        </div>
+
+
+
+        /*
+        //==================================================================
+
+        // 比如视图刷新函数C依赖于firstName, lastName这两个访问器，当访问器更新时，就会通知C执行。
+        // 因此firstName上有个subscribers列表，里面装着C， lastName同理
+        // http://www.cnblogs.com/whitewolf/archive/2013/04/16/3024843.html
+        为简单起见，我们把双向绑定链分成三层， 顶层， 中层， 底层。顶层是updateView, updateListView等需要撷取底层的值来更新自身的局部刷新函数， 中层是监控数组与依赖于其他属性的计算监控属性，底层是监控属性。高层总是依赖于低层，但高层该如何知道它是依赖哪些底层呢？
+
+        在emberjs中，作为计算监控属性的fullName通过property方法，得知自己是依赖于firstName, lastName。
+        App.Person = Ember.Object.extend({
+        firstName: null,
+        lastName: null,
+
+        fullName: function() {
+        return this.get('firstName') +
+        " " + this.get('lastName');
+        }.property('firstName', 'lastName')
+        });
+
+        在knockout中，用了一个取巧方法，将所有要监控的属性转换为一个函数。当fullName第一次求值时，它将自己的名字放到一个地方X，值为一个数组。然后函数体内的firstName与lastName在自身求值时，也会访问X，发现上面有数组时，就放进去。当fullName执行完毕，就得知它依赖于哪个了，并从X删掉数组。
+        var ViewModel = function(first, last) {
+        this.firstName = ko.observable(first);
+        this.lastName = ko.observable(last);
+
+        this.fullName = ko.computed(function() {
+        // Knockout tracks dependencies automatically. It knows that fullName depends on firstName and lastName, because these get called when evaluating fullName.
+        return this.firstName() + " " + this.lastName();
+        }, this);
+        };
+        详见 subscribables/observable.js subscribables/dependentObservable.js
+        http://stackoverflow.com/questions/12463902/how-does-the-binding-and-digesting-work-in-angularjs?lq=1
+
+        */
+        //http://www.cnblogs.com/whitewolf/archive/2012/07/07/2580630.html
+    </body>
+</html>
