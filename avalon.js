@@ -303,7 +303,7 @@
                 }
             };
             //然后找一个最快响应的异步API来执行这个链表,像烧爆竹那样收拾它们
-            //你可以用postMessage, image.onerror, xhr.onreadystatechange, MutationObserver 
+            //你可以用postMessage, image.onerror, xhr.onreadychange, MutationObserver 
             //最差还有个setTimeout 0殿后 http://jsperf.com/postmessage
             if (typeof MessageChannel !== "undefined") {//管道通信API
                 var channel = new MessageChannel();
@@ -359,6 +359,32 @@
             }
         }
     }
+    function equal(x, y) {
+        if (x === y) {
+            return true;
+        }
+
+        var xtype = avalon.type(x), ytype = avalon.type(y), field;
+
+        if (xtype !== ytype) {
+            return false;
+        }
+
+        if (xtype === "Date") {
+            return x.getTime() === y.getTime();
+        }
+        if (xtype !== "Object" && xtype !== "Array") {
+            return false;
+        }
+
+        for (field in x) {
+            if (!equal(x[field], y[field])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
     function modelFactory(scope) {
         var skipArray = scope.$skipArray,
                 description = {},
@@ -375,14 +401,10 @@
                 if (skipArray.indexOf(name) !== -1) {
                     return VBPublics.push(name);
                 }
-                try {
-                    if (name.charAt(0) === "_") {
-                        if (skipArray.indexOf(name) !== -1) {
-                            return VBPublics.push(name);
-                        }
+                if (name.charAt(0) === "_") {
+                    if (skipArray.indexOf(name) !== -1) {
+                        return VBPublics.push(name);
                     }
-                } catch (e) {
-                    avalon.log(typeof name + " !!!!!!!")
                 }
                 var accessor, oldValue, oldArgs;
                 if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
@@ -394,7 +416,7 @@
                             if (typeof value.set === "function") {
                                 value.set.call(model, neo);
                             }
-                            if (oldArgs !== neo) {
+                            if (!equal(oldArgs, neo)) {
                                 oldArgs = neo;
                                 notifySubscribers(accessor); //通知顶层改变
                             }
@@ -420,7 +442,7 @@
                             if (stopRepeatAssign) {
                                 return; //阻止重复赋值
                             }
-                            if (oldValue !== neo) {
+                            if (!equal(oldValue, neo)) {
                                 if (Array.isArray(neo)) {
                                     if (oldValue && oldValue.isCollection) {
                                         updateCollection(oldValue, neo)
@@ -584,8 +606,8 @@
                     el;
             for (var i = 0, fn; fn = safelist[i++]; ) {
                 el = fn.element;
-                if (el && (el.sourceIndex === 0 || el.parentNode === null)) {
-                    avalon.log("remove " + el);
+                if (el && (!el.noRemove) && (el.sourceIndex === 0 || el.parentNode === null)) {
+                    avalon.log("remove " + el);//|| el.sourceIndex === 0
                     avalon.Array.remove(list, fn);
                 } else {
                     fn.apply(0, args); //强制重新计算自身
@@ -1013,15 +1035,17 @@
         },
         "if": function(data, scope, scopes) {
             var element = data.element;
-            var fragment = element.ownerDocument.createDocumentFragment();
+            var el = element.ownerDocument.createComment("placehoder");
             watchView(data.value, scope, scopes, data, function(val) {
-                if (val) {
-                    while (fragment.firstChild) {
-                        element.appendChild(fragment.firstChild);
+                if (val) {//添加 如果它不在DOM树中
+                    if (!element.parentNode || element.parentNode.nodeType === 11) {
+                        el.parentNode.replaceChild(element, el);
+                        element.noRemove = void 0;
                     }
-                } else {
-                    while (element.firstChild) {
-                        fragment.appendChild(element.firstChild);
+                } else {//移除  如果它还在DOM树中
+                    if (element.parentNode.nodeType === 1) {
+                        element.parentNode.replaceChild(el, element);
+                        element.noRemove = true;
                     }
                 }
             });
@@ -1243,7 +1267,7 @@
     modelBinding.SELECT = function(element, model, name) {
         var select = element;
         function updateModel() {
-            model[name] = select.val();
+            model[name] = getSelectVal(select);
         }
 
         function updateView() {
@@ -1327,7 +1351,7 @@
     /*********************************************************************
      *                         常用事件 binding              *
      **********************************************************************/
-    "dblclick,mouseout,click,mouseover,mousemove,mousedown,mouseup,keypress,keydown,keyup,blur,focus".
+    "dblclick,mouseout,click,mouseover,mousemove,mousedown,mouseup,keypress,keydown,keyup,blur,focus,change".
             replace(rword, function(name) {
         bindingHandlers[name] = function(data) {
             data.args = [name];
@@ -1851,7 +1875,6 @@
             if (avalon.type(date) === "Number") {
                 date = new Date(date);
             }
-            //   console.log(date)
             if (avalon.type(date) !== "Date") {
                 return
             }
@@ -1859,7 +1882,6 @@
             while (format) {
                 match = DATE_FORMATS_SPLIT.exec(format);
                 if (match) {
-                    // console.log(match)
                     parts = parts.concat(match.slice(1));
                     format = parts.pop();
                 } else {

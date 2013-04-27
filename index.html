@@ -11,31 +11,41 @@
 
         <script type="text/javascript">
             avalon.ready(function() {
-                var model = avalon.define(function(vm) {
-                    vm.array = [{
-                            name: "aaa",
-                            sex: "bbb"
-                        }]
-                })
-                avalon.scan();
-                setTimeout(function() {
-                    model.array = [{
-                            name: "ccc",
-                            sex: "4444444"
-                        },{
-                            name: "ccc",
-                            sex: "4444444"
-                        }]
-                }, 3000);
 
+                var model = avalon.define(function(vm) {
+                    vm.firstName = "司徒"
+                    vm.lastName = "正美"
+                    vm.fullName = {//一个包含set或get的对象会被当成PropertyDescriptor，
+//                        set: function(val) {//里面必须用this指向scope，不能使用scope
+//                            var array = (val || "").split(" ");
+//                            this.firstName = array[0] || "";
+//                            this.lastName = array[1] || "";
+//                        },
+                        get: function() {
+                            return this.firstName + " " + this.lastName;
+                        }
+                    }
+                });
+                window.console && console.log(model)
+                avalon.scan()
+                setTimeout(function() {
+                    model.firstName = "ccccccccccc"
+                }, 2000)
             })
+
+
+
 
 
 
         </script>
     </head>
     <body>
-        <ul ms-each-el="array"><li>{{el.name}}  {{el.sex}}</li></ul>
+        <p>First name: <input ms-model="firstName" /></p>
+        <p>Last name: <input ms-model="lastName"  /></p>
+        <p>Hello, <input ms-model="fullName"></p>
+        <div>{{firstName +" | "+ lastName }}</div>
+
 
     </body>
 </html>
