@@ -441,14 +441,12 @@
         $fire: function(type) {
             var callbacks = this.$events[type] || []; //防止影响原数组
             var all = this.$events.$all || [];
-            var target = this,
-                    args = [].slice.call(arguments);
+            var args = [].slice.call(arguments, 1);
             for (var i = 0, callback; callback = callbacks[i++]; ) {
-                callback.apply(target, args);
+                callback.apply(this, args);
             }
-            args[0] = "$all";
             for (var i = 0, callback; callback = all[i++]; ) {
-                callback.apply(target, args);
+                callback.apply(this, args);
             }
         }
     };
@@ -456,8 +454,7 @@
     function modelFactory(scope) {
         var skipArray = scope.$skipArray,
                 description = {},
-                model = {
-        },
+                model = {},
                 callSetters = [],
                 callGetters = [],
                 VBPublics = [];
@@ -515,7 +512,7 @@
                             if (!equal(oldValue, neo)) {
                                 if (Array.isArray(neo)) {
                                     if (oldValue && oldValue.isCollection) {
-                                        updateCollection(oldValue, neo)
+                                        updateCollection(oldValue, neo);
                                     } else {
                                         oldValue = Collection(neo);
                                     }
@@ -559,8 +556,8 @@
         callGetters.forEach(function(fn) {
             fn(); //为空对象赋值
         });
-        if ( model.$watch ) {
-            model.$event = {};
+        if (model.$watch) {
+            model.$events = {};//VB对象的方法里的this并不指向自身，需要使用bind处理一下
             model.$watch = Observable.$watch.bind(model);
             model.$unwatch = Observable.$unwatch.bind(model);
             model.$fire = Observable.$fire.bind(model);
@@ -608,8 +605,7 @@
             if (arguments.length === 3) {
                 fn(value);
             } else {
-                var ret = fn();
-                return ret;
+                return fn();
             }
         }
 
@@ -1110,19 +1106,22 @@
         },
         "if": function(data, scope, scopes) {
             var element = data.element;
-            var el = element.ownerDocument.createComment("placehoder");
+            var placehoder = element.ownerDocument.createComment("placehoder");
+            var parent = element.parentNode;
             watchView(data.value, scope, scopes, data, function(val) {
-                if (val) {//添加 如果它不在DOM树中
-                    if (!element.parentNode || element.parentNode.nodeType === 11) {
-                        el.parentNode.replaceChild(element, el);
-                        element.noRemove = void 0;
+                nextTick(function() {//必要延后处理，否则会中断scanText中的循环
+                    if (val) {//添加 如果它不在DOM树中
+                        if (!element.parentNode || element.parentNode.nodeType === 11) {
+                            parent.replaceChild(element, placehoder);
+                            element.noRemove = void 0;
+                        }
+                    } else {//移除  如果它还在DOM树中
+                        if (element.parentNode.nodeType === 1) {
+                            parent.replaceChild(placehoder, element);
+                            element.noRemove = true;
+                        }
                     }
-                } else {//移除  如果它还在DOM树中
-                    if (element.parentNode.nodeType === 1) {
-                        element.parentNode.replaceChild(el, element);
-                        element.noRemove = true;
-                    }
-                }
+                })
             });
         },
         on: function(data, scope, scopes) {
@@ -1320,7 +1319,20 @@
             updateView = function() {
                 element.checked = model[name] === element.value;
             };
-            avalon.bind(element, "click", updateModel); //IE6-8
+            function updateModel() {
+                var val = !element.beforeChecked;
+                model[name] = val;
+                element.beforeChecked = element.checked = val;
+            }
+            function beforeChecked() {
+                element.beforeChecked = element.checked;
+            }
+            if (element.onbeforeactivate === null) {
+                avalon.bind(element, "beforeactivate", beforeChecked);
+            } else {
+                avalon.bind(element, "mouseover", beforeChecked);
+            }
+            avalon.bind(element, "click", updateModel);
         } else if (type === "checkbox") {
             updateModel = function() {
                 if (element.checked) {
@@ -1330,7 +1342,9 @@
                 }
             };
             updateView = function() {
-                element.checked = !!~model[name].indexOf(element.value);
+                console.log(name)
+                var array = [].concat(model[name]);//强制转换为数组
+                element.checked = array.indexOf(element.value) >= 0;
             };
             avalon.bind(element, "click", updateModel); //IE6-8
         }
@@ -1455,7 +1469,7 @@
             forEach(list, function(index, item) {
                 addItemView(index, item, data);
             });
-        })
+        });
         function updateListView(method, args, len) {
             //   function() {
             var listName = list.$name;

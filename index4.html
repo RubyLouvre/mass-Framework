@@ -101,6 +101,11 @@
                 -moz-border-radius: 3px;
                 border-radius: 3px;
             }
+            .ui-datepicker td .disabled{
+                opacity:0.5;
+                filter:alpha(opacity=50);
+                *zoom:1;
+            }
             .ui-datepicker td span:hover{
                 background: #D4d4d4;
             }
@@ -128,35 +133,32 @@
         <script type="text/javascript">
             avalon.ready(function() {
                 var model = avalon.define("datepicker", function(vm) {
+                    vm.changeYear = false
+                    vm.changeMonth = false
+                    vm.minDate = new Date(2013, 4, 25)
+                    
+                    //当前时间
                     vm.current = new Date;
-                    vm.options = {
-                        changeYear: true,
-                        changeMonth: true,
-                        minDate: new Date(2013, 4, 25)
-                    }
                     vm.currentMonth = vm.current.getMonth();
                     vm.currentYear = vm.current.getFullYear();
+                    vm.selectedDate = new Date;
+                    
                     vm.title = {
                         get: function() {
                             var format = "";
-                            if (!this.options.changeYear && this.options.changeMonth) {
+                            if (!this.changeYear && this.changeMonth) {
                                 format = "yyyy年";
-                            } else if (this.options.changeYear && !this.options.changeMonth) {
+                            } else if (this.changeYear && !this.changeMonth) {
                                 format = "MMMM";
-                            } else if (!this.options.changeYear && !this.options.changeMonth) {
+                            } else if (!this.changeYear && !this.changeMonth) {
                                 format = "MMMM yyyy年";
                             }
                             return format && avalon.filters.date(this.current, format);
                         }
                     };
-                    vm._theadWeeks = "日一二三四五六".split("");
-                    vm.months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+                    vm.$weeks = "日一二三四五六".split("");
+                    vm.$months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-                    function getYears() {
-                        var y = vm.currentYear;
-                        return avalon.range(y - 10, y + 10);
-                    }
-                    vm.candidateYears = getYears();
                     function  getWeeks() {
                         var cur = vm.current;
                         var year = cur.getFullYear();
@@ -167,10 +169,15 @@
                         var num = cur.getDate();
                         var dates = avalon.range(1, num + 1);
                         dates = dates.map(function(d) {
-                           
-                            
-                            
-                            return [d, month, year];
+                            var timestamp = new Date(year, month + 1, d) - 0
+                            var disabled = false;
+                            if (vm.minDate) {
+                                disabled = timestamp < vm.minDate - 0;
+                            }
+                            if (disabled && vm.maxDate) {
+                                disabled = timestamp > vm.maxDate - 0;
+                            }
+                            return [ year, month, d, disabled];
                         });
                         cur.setMonth(month);
                         cur.setDate(1);
@@ -180,68 +187,67 @@
                         cur.setDate(date);//还原
                         var ret = [];
                         while (dates.length) {
-                            ret.push(dates.splice(0, 7))
+                            ret.push(dates.splice(0, 7));
                         }
                         return ret;
                     }
-
                     vm.candidateWeeks = getWeeks();
-                    var today = new Date;
-                    vm._today = [today.getDate(), today.getMonth(), today.getFullYear()].join();
-                    vm.select = function(e) {
-                        var el = e.target;
-                        if (el.tagName === "SPAN" && el.parentNode.tagName === "TD") {
-                            vm.selected = el.innerHTML;
-                        }
-                    };
+
+                    function getYears() {
+                        var y = vm.currentYear;
+                        return avalon.range(y - 10, y + 10);
+                    }
+                    vm.candidateYears = getYears();
 
                     vm.nextMonth = function() {
                         var date = vm.current;
-                        vm.current = 0;//防止自己与自己比较
                         var m = date.getMonth();
-                        vm.currentMonth = m;
-                        date.setMonth(m + 1);
-                        vm.current = date;
-                        vm.candidateWeeks = getWeeks()
+                        vm.$fire("currentMonth", m + 1)
                     };
                     vm.prevMonth = function() {
                         var date = vm.current;
-                        vm.current = 0;//防止自己与自己比较
                         var m = date.getMonth();
-                        vm.currentMonth = m;
-                        date.setMonth(m - 1);
-                        vm.current = date;
-                        vm.candidateWeeks = getWeeks()
+                        vm.$fire("currentMonth", m - 1);
                     };
-                    vm.onMonthChange = function() {
+                    vm.$watch("currentMonth", function(month) {
                         var date = vm.current;
-                        vm.current = 0;//防止自己与自己比较
-                        date.setMonth(vm.currentMonth);
-                        vm.current = date;
+                        date.setMonth(month);
                         vm.candidateWeeks = getWeeks();
-                    }
-                    vm.onYearChange = function() {
+                        vm.title = date - 0;
+                    });
+                    vm.$watch("currentYear", function(year) {
                         var date = vm.current;
-                        vm.current = 0;//防止自己与自己比较
-                        date.setFullYear(vm.currentYear);
-                        vm.current = date;
-                        vm.candidateWeeks = getWeeks();
-                    }
+                        date.setFullYear(year);
+                        vm.$fire("currentMonth", date.getMonth());
+                    });
 
-                    vm.selected = "a";
+
+                    //高亮当前选中的事件
+                    vm.select = function(e) {
+                        var el = e.target;
+                        if (el.tagName === "SPAN" && el.parentNode.tagName === "TD" && !/disabled/.test(el.className)) {
+                            vm.selected = el.innerHTML;
+                            var d = el.$scope.day.slice(0, 3);
+                            vm.selectedDate = new Date(d[0],d[1],d[2]);
+                        }
+                    };
+                    vm.selected = "";
                     vm.isSelected = function() {
                         return  this.innerHTML === vm.selected;
                     };
+
+                    var today = new Date;
+                    today = [ today.getFullYear(), today.getMonth(), today.getDate() ].join();
                     vm.isToday = function() {
                         var day = this.$scope && this.$scope.day;
-                        return day && day.join() === vm._today;
+                        return day && day.slice(0, 3).join() === today;
                     };
 
                 });
 
                 setTimeout(function() {
-                    // model.options.changeYear = false;
-                }, 1000)
+                  //  model.changeYear = true;
+                }, 4000)
 
                 avalon.scan();
             });
@@ -260,10 +266,10 @@
                     >
                 </a >
                 <div class="ui-datepicker-title" >
-                    <select ms-each-month="months" ms-if="options.changeMonth" ms-model="currentMonth" ms-change="onMonthChange">
+                    <select ms-each-month="$months" ms-if="changeMonth" ms-model="currentMonth" >
                         <option value="{{month}}" ms-selected="currentMonth === month">{{month+1}}月</option>
                     </select>
-                    <select ms-each-year="candidateYears" ms-if="options.changeYear" ms-model="currentYear" ms-change="onYearChange">
+                    <select ms-each-year="candidateYears" ms-if="changeYear" ms-model="currentYear" >
                         <option value="{{year}}" ms-selected="currentYear === year">{{year}}年</option>
                     </select>
                     {{title}}
@@ -272,19 +278,21 @@
             </div>
             <table ms-click="select">
                 <thead>
-                    <tr ms-each-date="_theadWeeks">
+                    <tr ms-each-date="$weeks">
                         <th>{{date}}</th>
                     </tr>
                 </thead>
                 <tbody ms-each-week="candidateWeeks">
                     <tr ms-each-day="week" >
-                        <td><span ms-visible="day" ms-class-selected="isSelected"  ms-class-today="isToday" >{{ day[0] }}</span></td>
+                        <td><span ms-visible="day" ms-class-selected="isSelected" ms-class-disabled="day && day[3]" ms-class-today="isToday" >{{ day[2] }}</span></td>
                     </tr>
                 </tbody>
             </table>
 
         </div>
-        <div class="font">{{currentMonth}}</div>
+        <p><input type="radio" ms-model="changeMonth" />可选择月份</br/>
+            <input type="radio" ms-model="changeYear" />可选择年份</p>
+        <div class="font">{{selectedDate | date("yyyy-MM-d")}}</div>
         <div class="font">abcdefghijklmnopqrstuvwxyz</div>
         <div class="font">ABCDFGHIJKLMNOPQRSTUVWXYZ</div>
     </body>
