@@ -1284,11 +1284,11 @@
             element.name = name;
         }
         var type = element.type;
-        function updateModel() {
+        var updateModel = function() {
             model[name] = element.value;
         }
 
-        function updateView() {
+        var updateView = function() {
             var val = model[name];
             if (val !== element.value) {
                 element.value = val === void 0 ? "" : val;
@@ -1319,7 +1319,7 @@
             updateView = function() {
                 element.checked = model[name] === element.value;
             };
-            function updateModel() {
+            updateModel = function() {
                 var val = !element.beforeChecked;
                 model[name] = val;
                 element.beforeChecked = element.checked = val;
@@ -1342,7 +1342,6 @@
                 }
             };
             updateView = function() {
-                console.log(name)
                 var array = [].concat(model[name]);//强制转换为数组
                 element.checked = array.indexOf(element.value) >= 0;
             };
