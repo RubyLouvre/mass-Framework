@@ -161,7 +161,23 @@
             return avalon.type(a) === "Array";
         };
     }
-
+    if (!Function.prototype.bind) {
+        Function.prototype.bind = function(scope) {
+            if (arguments.length < 2 && scope === void 0)
+                return this;
+            var fn = this,
+                    argv = arguments;
+            return function() {
+                var args = [],
+                        i;
+                for (i = 1; i < argv.length; i++)
+                    args.push(argv[i]);
+                for (i = 0; i < arguments.length; i++)
+                    args.push(arguments[i]);
+                return fn.apply(scope, args);
+            };
+        }
+    }
     function iterator(vars, body, ret) {
         var fun = 'for(var ' + vars + 'i=0,n = this.length;i < n;i++){'
                 + body.replace('_', '((i in this) && fn.call(scope,this[i],i,this))') + '}' + ret;
@@ -231,11 +247,14 @@
             });
             return result;
         },
-        ensure: function(target, el) {
+        ensure: function(target) {
 //只有当前数组不存在此元素时只添加它
-            if (!~target.indexOf(el)) {
-                target.push(el);
-            }
+            var args = [].slice.call(arguments, 1);
+            args.forEach(function(el) {
+                if (!~target.indexOf(el)) {
+                    target.push(el);
+                }
+            });
             return target;
         },
         removeAt: function(target, index) {
@@ -322,6 +341,8 @@
     /*********************************************************************
      *                           Define                                 *
      **********************************************************************/
+    function noop() {
+    }
     avalon.define = function(name, deps, factory) {
         var args = [].slice.call(arguments);
         if (typeof name !== "string") {
@@ -336,7 +357,12 @@
             avalon.error("factory必须是函数");
         }
         factory = args[2];
-        var scope = {};
+        var scope = {
+            $events: {},
+            $watch: noop,
+            $unwatch: noop,
+            $fire: noop
+        };
         deps.unshift(scope);
         factory(scope); //得到所有定义
         var model = modelFactory(scope); //转为一个ViewModel
@@ -385,15 +411,58 @@
 
         return true;
     }
+    var Observable = {
+        $watch: function(type, callback) {
+            var callbacks = this.$events[type];
+            if (callbacks) {
+                callbacks.push(callback);
+            } else {
+                this.$events[type] = [callback];
+            }
+            return this;
+        },
+        $unwatch: function(type, callback) {
+            var n = arguments.length;
+            if (n === 0) {
+                this.$events = {};
+            } else if (n === 1) {
+                this.$events[type] = [];
+            } else {
+                var callbacks = this.$events[type] || [];
+                var i = callbacks.length;
+                while (--i > -1) {
+                    if (callbacks[i] === callback) {
+                        return callbacks.splice(i, 1);
+                    }
+                }
+            }
+            return this;
+        },
+        $fire: function(type) {
+            var callbacks = this.$events[type] || []; //防止影响原数组
+            var all = this.$events.$all || [];
+            var target = this,
+                    args = [].slice.call(arguments);
+            for (var i = 0, callback; callback = callbacks[i++]; ) {
+                callback.apply(target, args);
+            }
+            args[0] = "$all";
+            for (var i = 0, callback; callback = all[i++]; ) {
+                callback.apply(target, args);
+            }
+        }
+    };
+
     function modelFactory(scope) {
         var skipArray = scope.$skipArray,
                 description = {},
-                model = {},
+                model = {
+        },
                 callSetters = [],
                 callGetters = [],
                 VBPublics = [];
         skipArray = Array.isArray(skipArray) ? skipArray : [];
-        avalon.Array.ensure(skipArray, "$skipArray");
+        avalon.Array.ensure(skipArray, "$skipArray", "$watch", "$unwatch", "$fire", "$events");
         forEach(scope, function(name, value) {
             if (typeof value === "function") {
                 VBPublics.push(name);
@@ -401,7 +470,7 @@
                 if (skipArray.indexOf(name) !== -1) {
                     return VBPublics.push(name);
                 }
-                if (name.charAt(0) === "_") {
+                if (name.charAt(0) === "$") {
                     if (skipArray.indexOf(name) !== -1) {
                         return VBPublics.push(name);
                     }
@@ -419,6 +488,7 @@
                             if (!equal(oldArgs, neo)) {
                                 oldArgs = neo;
                                 notifySubscribers(accessor); //通知顶层改变
+                                model.$events && model.$fire(name, neo, oldValue);
                             }
                         } else {
                             if (openComputedCollect) {
@@ -428,13 +498,13 @@
                             return oldValue;
                         }
                     };
-                    callGetters.push((function(fn) {
-                        return function() {
-                            Publish[expose] = fn;
-                            fn();
-                            delete Publish[expose];
-                        };
-                    })(accessor));
+                    //这里用到ecma262v5的Function.prototype.bind
+                    callGetters.push(function() {
+                        var fn = this;
+                        Publish[expose] = fn;
+                        fn();
+                        delete Publish[expose];
+                    }.bind(accessor));
                 } else {
                     callSetters.push(name);
                     accessor = function(neo) { //创建监控属性或数组
@@ -446,7 +516,6 @@
                                 if (Array.isArray(neo)) {
                                     if (oldValue && oldValue.isCollection) {
                                         updateCollection(oldValue, neo)
-                                        //   oldValue.update();
                                     } else {
                                         oldValue = Collection(neo);
                                     }
@@ -456,11 +525,11 @@
                                     } else {
                                         oldValue = modelFactory(neo);
                                     }
-
                                 } else {
                                     oldValue = neo;
                                 }
                                 notifySubscribers(accessor); //通知顶层改变
+                                model.$events && model.$fire(name, neo, oldValue);
                             }
                         } else {
                             collectSubscribers(accessor); //收集视图函数
@@ -490,6 +559,12 @@
         callGetters.forEach(function(fn) {
             fn(); //为空对象赋值
         });
+        if ( model.$watch ) {
+            model.$event = {};
+            model.$watch = Observable.$watch.bind(model);
+            model.$unwatch = Observable.$unwatch.bind(model);
+            model.$fire = Observable.$fire.bind(model);
+        }
         model.$id = modleID();
         return model;
     }
@@ -1268,6 +1343,7 @@
         var select = element;
         function updateModel() {
             model[name] = getSelectVal(select);
+            setSelectVal(element, model[name]);
         }
 
         function updateView() {

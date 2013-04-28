@@ -131,9 +131,11 @@
                     vm.current = new Date;
                     vm.options = {
                         changeYear: true,
-                        changeMonth: true
+                        changeMonth: true,
+                        minDate: new Date(2013, 4, 25)
                     }
-                    vm.curMonth = vm.current.getMonth();
+                    vm.currentMonth = vm.current.getMonth();
+                    vm.currentYear = vm.current.getFullYear();
                     vm.title = {
                         get: function() {
                             var format = "";
@@ -147,8 +149,14 @@
                             return format && avalon.filters.date(this.current, format);
                         }
                     };
-                    vm._weeks = "日一二三四五六".split("");
+                    vm._theadWeeks = "日一二三四五六".split("");
                     vm.months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+                    function getYears() {
+                        var y = vm.currentYear;
+                        return avalon.range(y - 10, y + 10);
+                    }
+                    vm.candidateYears = getYears();
                     function  getWeeks() {
                         var cur = vm.current;
                         var year = cur.getFullYear();
@@ -159,6 +167,9 @@
                         var num = cur.getDate();
                         var dates = avalon.range(1, num + 1);
                         dates = dates.map(function(d) {
+                           
+                            
+                            
                             return [d, month, year];
                         });
                         cur.setMonth(month);
@@ -174,7 +185,7 @@
                         return ret;
                     }
 
-                    vm.weeks = getWeeks();
+                    vm.candidateWeeks = getWeeks();
                     var today = new Date;
                     vm._today = [today.getDate(), today.getMonth(), today.getFullYear()].join();
                     vm.select = function(e) {
@@ -183,34 +194,39 @@
                             vm.selected = el.innerHTML;
                         }
                     };
+
                     vm.nextMonth = function() {
                         var date = vm.current;
                         vm.current = 0;//防止自己与自己比较
                         var m = date.getMonth();
-                        vm.curMonth = m;
+                        vm.currentMonth = m;
                         date.setMonth(m + 1);
                         vm.current = date;
-                        vm.weeks = getWeeks()
+                        vm.candidateWeeks = getWeeks()
                     };
                     vm.prevMonth = function() {
                         var date = vm.current;
                         vm.current = 0;//防止自己与自己比较
                         var m = date.getMonth();
-                        vm.curMonth = m;
+                        vm.currentMonth = m;
                         date.setMonth(m - 1);
                         vm.current = date;
-                        vm.weeks = getWeeks()
+                        vm.candidateWeeks = getWeeks()
                     };
-//                    vm.onMonthChange = function() {
-//                        setTimeout(function(){
-//                              var date = vm.current;
-//                        vm.current = 0;//防止自己与自己比较
-//                        date.setMonth(vm.curMonth);
-//                        vm.current = date;
-//                        vm.weeks = getWeeks();
-//                        },0)
-//                      
-//                    }
+                    vm.onMonthChange = function() {
+                        var date = vm.current;
+                        vm.current = 0;//防止自己与自己比较
+                        date.setMonth(vm.currentMonth);
+                        vm.current = date;
+                        vm.candidateWeeks = getWeeks();
+                    }
+                    vm.onYearChange = function() {
+                        var date = vm.current;
+                        vm.current = 0;//防止自己与自己比较
+                        date.setFullYear(vm.currentYear);
+                        vm.current = date;
+                        vm.candidateWeeks = getWeeks();
+                    }
 
                     vm.selected = "a";
                     vm.isSelected = function() {
@@ -243,22 +259,24 @@
                 <a href="###"title="Next" class="ui-datepicker-month ui-datepicker-next" ms-click="nextMonth">
                     >
                 </a >
-                <div class="ui-datepicker-title" ms-if="options.changeYear">
-                    <select ms-each-month="months" ms-model="curMonth" >
-                        <option value="{{month}}" ms-selected="curMonth === month">{{month+1}}月</option>
+                <div class="ui-datepicker-title" >
+                    <select ms-each-month="months" ms-if="options.changeMonth" ms-model="currentMonth" ms-change="onMonthChange">
+                        <option value="{{month}}" ms-selected="currentMonth === month">{{month+1}}月</option>
                     </select>
-                </div>
-                <div class="ui-datepicker-title" ms-if="!options.changeYear">
+                    <select ms-each-year="candidateYears" ms-if="options.changeYear" ms-model="currentYear" ms-change="onYearChange">
+                        <option value="{{year}}" ms-selected="currentYear === year">{{year}}年</option>
+                    </select>
                     {{title}}
                 </div>
+
             </div>
             <table ms-click="select">
                 <thead>
-                    <tr ms-each-date="_weeks">
+                    <tr ms-each-date="_theadWeeks">
                         <th>{{date}}</th>
                     </tr>
                 </thead>
-                <tbody ms-each-week="weeks">
+                <tbody ms-each-week="candidateWeeks">
                     <tr ms-each-day="week" >
                         <td><span ms-visible="day" ms-class-selected="isSelected"  ms-class-today="isToday" >{{ day[0] }}</span></td>
                     </tr>
@@ -266,7 +284,7 @@
             </table>
 
         </div>
-        <div class="font">{{curMonth}}</div>
+        <div class="font">{{currentMonth}}</div>
         <div class="font">abcdefghijklmnopqrstuvwxyz</div>
         <div class="font">ABCDFGHIJKLMNOPQRSTUVWXYZ</div>
     </body>

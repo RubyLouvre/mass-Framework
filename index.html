@@ -16,20 +16,24 @@
                     vm.firstName = "司徒"
                     vm.lastName = "正美"
                     vm.fullName = {//一个包含set或get的对象会被当成PropertyDescriptor，
-//                        set: function(val) {//里面必须用this指向scope，不能使用scope
-//                            var array = (val || "").split(" ");
-//                            this.firstName = array[0] || "";
-//                            this.lastName = array[1] || "";
-//                        },
+                        set: function(val) {//里面必须用this指向scope，不能使用scope
+                            var array = (val || "").split(" ");
+                            this.firstName = array[0] || "";
+                            this.lastName = array[1] || "";
+                        },
                         get: function() {
                             return this.firstName + " " + this.lastName;
                         }
                     }
+                    console.log(vm)
+                    vm.$watch("firstName", function(a,b,c){
+                        console.log(a)
+                    })
                 });
                 window.console && console.log(model)
                 avalon.scan()
                 setTimeout(function() {
-                    model.firstName = "ccccccccccc"
+                    model.firstName = "vvvvvvvvvvvvvvvvvvv"
                 }, 2000)
             })
 
