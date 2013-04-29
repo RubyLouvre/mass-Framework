@@ -212,12 +212,14 @@
                     vm.$watch("currentMonth", function(month) {
                         var date = vm.current;
                         date.setMonth(month);
+                        vm.currentMonth = month;
                         vm.candidateWeeks = getWeeks();
                         vm.title = date - 0;
                     });
                     vm.$watch("currentYear", function(year) {
                         var date = vm.current;
                         date.setFullYear(year);
+                        vm.currentYear = year;
                         vm.$fire("currentMonth", date.getMonth());
                     });
 
@@ -242,13 +244,7 @@
                         var day = this.$scope && this.$scope.day;
                         return day && day.slice(0, 3).join() === today;
                     };
-
                 });
-
-                setTimeout(function() {
-                  //  model.changeYear = true;
-                }, 4000)
-
                 avalon.scan();
             });
 

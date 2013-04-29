@@ -9,10 +9,11 @@
     var serialize = Object.prototype.toString;
     var Publish = {}; //将函数曝光到此对象上，方便访问器收集依赖
     var expose = new Date - 0;
-    var mid = expose;
-    function modleID() {
-        return (mid++).toString(36) + "";
-    }
+    //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+    function generateID() {
+        return Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
+    };
     var subscribers = "$" + expose;
     var propMap = {};
     var rword = /[^, ]+/g;
@@ -346,7 +347,7 @@
     avalon.define = function(name, deps, factory) {
         var args = [].slice.call(arguments);
         if (typeof name !== "string") {
-            name = !avalon.models["root"] ? "root" : modleID();
+            name = !avalon.models["root"] ? "root" : generateID();
             args.unshift(name);
         }
         if (!Array.isArray(args[1])) {
@@ -453,7 +454,7 @@
 
     function modelFactory(scope) {
         var skipArray = scope.$skipArray,
-                description = {},
+                Descriptions = {},
                 model = {},
                 callSetters = [],
                 callGetters = [],
@@ -535,7 +536,7 @@
                     };
                 }
                 accessor[subscribers] = [];
-                description[name] = {
+                Descriptions[name] = {
                     set: accessor,
                     get: accessor,
                     enumerable: true
@@ -543,9 +544,9 @@
             }
         });
         if (defineProperties) {
-            defineProperties(model, description);
+            defineProperties(model, Descriptions);
         } else {
-            model = VBDefineProperties(description, VBPublics);
+            model = VBDefineProperties(Descriptions, VBPublics);
         }
         VBPublics.forEach(function(name) {
             model[name] = scope[name];
@@ -562,7 +563,7 @@
             model.$unwatch = Observable.$unwatch.bind(model);
             model.$fire = Observable.$fire.bind(model);
         }
-        model.$id = modleID();
+        model.$id = generateID();
         return model;
     }
     var defineProperty = Object.defineProperty;
@@ -1661,7 +1662,7 @@
     }
     function Collection(list) {
         var collection = list.map(convert);
-        collection.$name = modleID();
+        collection.$name = generateID();
         collection[subscribers] = [];
         var dynamic = modelFactory({
             length: list.length
