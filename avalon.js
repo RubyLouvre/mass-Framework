@@ -2060,3 +2060,5 @@
         "shortTime": "ah:mm"
     });
 })()
+//2013.4.29 合并options与selecting绑定，为each绑定产生的子ViewModel添加$first, $last属性，
+//写死它的$index, $remove属性，优化generateID
