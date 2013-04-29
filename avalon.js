@@ -12,8 +12,9 @@
     //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     function generateID() {
         return Math.random().toString(36).substring(2, 15) +
-        Math.random().toString(36).substring(2, 15);
-    };
+                Math.random().toString(36).substring(2, 15);
+    }
+    ;
     var subscribers = "$" + expose;
     var propMap = {};
     var rword = /[^, ]+/g;
@@ -39,6 +40,7 @@
         log: function log(a) {
             window.console && console.log(a);
         },
+        ui: {},
         ready: function(fn) {
             if (readyList) {
                 readyList.push(fn);
@@ -239,14 +241,9 @@
         },
         pluck: function(target, name) {
 //取得对象数组的每个元素的指定属性，组成数组返回。
-            var result = [],
-                    prop;
-            target.forEach(function(item) {
-                prop = item[name];
-                if (prop != null)
-                    result.push(prop);
+            return target.filter(function(item) {
+                return item[name] != null;
             });
-            return result;
         },
         ensure: function(target) {
 //只有当前数组不存在此元素时只添加它
@@ -1037,6 +1034,7 @@
     });
     //eval一个或多个表达式
 
+
     function watchView(text, scope, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
         var scopeList = [scope].concat(scopes);
@@ -1214,25 +1212,19 @@
                 }
             });
         },
-        selecting: function fn(data, scope, scopes) {
-            var element = data.element;
-            if (element.tagName !== "SELECT") {
-                avalon.error("options绑定只能绑在SELECT元素");
-            }
-            watchView(data.value, scope, scopes, data, function(val) {
-                if (Array.isArray(val)) {
-                    setTimeout(function() {
-                        setSelectVal(element, val);
-                        avalon.bind(element, "change", function() {
-                            var array = getSelectVal(element);
-                            val.clear();
-                            val.push.apply(val, array);
-                        });
-                    }, 30); //必须等于options绑定渲染完
-                } else {
-                    avalon.error("selectedOptions绑定必须对应一个字符串数组");
+        ui: function(data, scope, scopes) {
+            var optsName = data.args && data.args[0], opts;
+            var scopeList = [scope].concat(scopes);
+            for (var i = 0, obj; obj = scopeList[i++]; ) {
+                if (obj.hasOwnProperty(optsName)) {
+                    opts = obj[optsName];
+                    break;
                 }
-            });
+            }
+            var uiName = data.value.trim();
+            if (typeof avalon.ui[uiName] === "function") {
+                avalon.ui[uiName](data.element, opts);
+            }
         },
         options: function(data, scope, scopes) {
             var select = data.element;
@@ -1242,6 +1234,7 @@
             while (select.length > 0) {
                 select.remove(0);
             }
+            var index = data.args && data.args[0];
             watchView(data.value, scope, scopes, data, function(val) {
                 if (Array.isArray(val)) {
                     nextTick(function() {
@@ -1250,6 +1243,21 @@
                         op.setAttribute("ms-value", "option");
                         select.options[0] = op;
                         avalon.scan(select);
+                        if (isFinite(index)) {
+                            op = select.options[index];
+                            if (op) {
+                                op.selected = true;
+                            }
+                        }
+                        if (index && Array.isArray(scope[index])) {
+                            var array = scope[index];
+                            setSelectVal(select, array);
+                            avalon.bind(select, "change", function() {
+                                array = getSelectVal(select);
+                                val.clear();
+                                val.push.apply(val, array);
+                            });
+                        }
                     });
                 } else {
                     avalon.error("options绑定必须对应一个字符串数组");
@@ -1324,7 +1332,7 @@
                 var val = !element.beforeChecked;
                 model[name] = val;
                 element.beforeChecked = element.checked = val;
-            }
+            };
             function beforeChecked() {
                 element.beforeChecked = element.checked;
             }
@@ -1471,7 +1479,6 @@
             });
         });
         function updateListView(method, args, len) {
-            //   function() {
             var listName = list.$name;
             switch (method) {
                 case "push":
@@ -1533,7 +1540,6 @@
                     });
                     break;
             }
-            // }
         }
         if ((list || {}).isCollection) {
             list[subscribers].push(updateListView);
@@ -1569,16 +1575,24 @@
     //为子视图创建一个ViewModel
     function createItemModel(index, item, list, args) {
         var itemName = args[0] || "$data";
-        var indexName = args[1] || "$index";
-        var removeName = args[2] || "$remove";
         var source = {};
-        source[indexName] = index;
+        source.$index = index;
         source[itemName] = {
             get: function() {
                 return item;
             }
         };
-        source[removeName] = function() {
+        source.$first = {
+            get: function() {
+                return this.$index === 0;
+            }
+        };
+        source.$last = {
+            get: function() {
+                return this.$index === list.size() - 1;
+            }
+        };
+        source.$remove = function() {
             list.remove(item);
             return item;
         };
