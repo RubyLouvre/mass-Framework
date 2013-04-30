@@ -704,7 +704,6 @@
 
     function scanTag(elem, scope, scopes, doc) {
         scopes = scopes || [];
-        var flags = {};
         var a = elem.getAttribute(prefix + "skip");
         var b = elem.getAttribute(prefix + "important");
         var c = elem.getAttribute(prefix + "controller");
@@ -727,10 +726,7 @@
             }
             elem.removeAttribute(prefix + "controller");
         }
-        scanAttr(elem, scope, scopes, flags); //扫描特点节点
-        if (flags.stopBinding) { //是否要停止扫描
-            return;
-        }
+        scanAttr(elem, scope, scopes); //扫描特点节点
         if (elem.canHaveChildren === false || !stopScan[elem.tagName]) {
             var textNodes = [];
             for (var node = elem.firstChild; node; node = node.nextSibling) {
@@ -800,7 +796,7 @@
         return tokens;
     }
 
-    function scanAttr(el, scope, scopes, flags) {
+    function scanAttr(el, scope, scopes) {
         var bindings = [];
         for (var i = 0, attr; attr = el.attributes[i++]; ) {
             if (attr.specified) {
@@ -830,12 +826,12 @@
                 }
             }
         }
-        executeBindings(bindings, scope, scopes, flags);
+        executeBindings(bindings, scope, scopes);
     }
 
-    function executeBindings(bindings, scope, scopes, flags) {
+    function executeBindings(bindings, scope, scopes) {
         bindings.forEach(function(data) {
-            bindingHandlers[data.type](avalon.mix({}, data), scope, scopes, flags);
+            bindingHandlers[data.type](avalon.mix({}, data), scope, scopes);
             if (data.remove) { //移除数据绑定，防止被二次解析
                 data.element.removeAttribute(data.node.name);
             }
@@ -1075,10 +1071,11 @@
         updateView.toString = function() {
             return "eval(" + text + ")";
         }; //方便调试
-        var el = data.element;
-        updateView.element = el;
-        Publish[expose] = updateView;
-        openComputedCollect = true;
+        //这里非常重要,我们通过判定视图刷新函数的element是否在DOM树决定
+        //将它移出订阅者列表
+        updateView.element = data.element;
+        Publish[expose] = updateView;//暴光此函数,方便collectSubscribers收集
+        openComputedCollect = true;  
         updateView();
         openComputedCollect = false;
         delete Publish[expose];
@@ -1104,10 +1101,6 @@
     }
     avalon.fixEvent = fixEvent;
     var bindingHandlers = avalon.bindingHandlers = {
-        //跳过流程绑定
-        skip: function() {
-            arguments[3].stopBinding = true;
-        },
         "if": function(data, scope, scopes) {
             var element = data.element;
             var placehoder = element.ownerDocument.createComment("placehoder");
@@ -1465,7 +1458,7 @@
     /*********************************************************************
      *                      each binding                              *
      **********************************************************************/
-    bindingHandlers.each = function(data, scope, scopes, flags) {
+    bindingHandlers.each = function(data, scope, scopes) {
         var parent = data.element;
         var scopeList = [scope].concat(scopes);
         var list = parseExpr(data.value, scopeList, data);
