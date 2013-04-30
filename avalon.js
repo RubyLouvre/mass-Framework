@@ -11,10 +11,8 @@
     var expose = new Date - 0;
     //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     function generateID() {
-        return Math.random().toString(36).substring(2, 15) +
-                Math.random().toString(36).substring(2, 15);
+        return "avalon" + Math.random().toString(36).substring(2, 15)
     }
-    ;
     var subscribers = "$" + expose;
     var propMap = {};
     var rword = /[^, ]+/g;
@@ -40,7 +38,6 @@
         log: function log(a) {
             window.console && console.log(a);
         },
-        ui: {},
         ready: function(fn) {
             if (readyList) {
                 readyList.push(fn);
@@ -687,13 +684,9 @@
     /*********************************************************************
      *                           Scan                                     *
      **********************************************************************/
-    avalon.scan = function(elem, scope) {
+   avalon.scan = function(elem, scope) {
         elem = elem || document.documentElement;
-        if (typeof scope !== "object") {
-            var models = avalon.models,
-                    scopeName = elem.getAttribute(prefix + "app") || "root";
-            scope = models[scopeName];
-        }
+        var models = avalon.models;
         if (!scope) {
             for (var i in models) {
                 if (models.hasOwnProperty(i)) {
@@ -705,19 +698,37 @@
                 avalon.error("至少定义一个ViewModel");
             }
         }
-
         scanTag(elem, scope, [], elem.ownerDocument || document);
     };
+
     function scanTag(elem, scope, scopes, doc) {
         scopes = scopes || [];
         var flags = {};
+        var a = elem.getAttribute(prefix + "skip");
+        var b = elem.getAttribute(prefix + "important");
+        var c = elem.getAttribute(prefix + "controller");
+        //这三个绑定优先处理，其中a > b > c
+        if (typeof a === "string") {
+            return;
+        } else if (b) {
+            if (!avalon.models[b]) {
+                return;
+            } else {
+                scope = avalon.models[b];
+                scopes = [];
+                elem.removeAttribute(prefix + "important");
+            }
+        } else if (c) {
+            var newScope = avalon.models[c];
+            if (newScope && newScope !== scope) {
+                scopes = [scope].concat(scopes);//更换作用域， 复制父作用域堆栈，防止互相影响
+                scope = newScope;
+            }
+            elem.removeAttribute(prefix + "controller");
+        }
         scanAttr(elem, scope, scopes, flags); //扫描特点节点
         if (flags.stopBinding) { //是否要停止扫描
-            return false;
-        }
-        if (flags.newScope) { //更换作用域， 复制父作用域堆栈，防止互相影响
-            scopes = scopes.slice(0);
-            scope = flags.newScope;
+            return;
         }
         if (elem.canHaveChildren === false || !stopScan[elem.tagName]) {
             var textNodes = [];
@@ -815,13 +826,6 @@
                         node: attr,
                         value: attr.nodeValue
                     });
-                }
-                if (!flags.newScope && type === "controller") { //更换作用域
-                    var temp = avalon.models[attr.value];
-                    if (typeof temp === "object" && temp !== scope) {
-                        scopes.unshift(scope);
-                        flags.newScope = scope = temp;
-                    }
                 }
             }
         }
@@ -1034,7 +1038,6 @@
     });
     //eval一个或多个表达式
 
-
     function watchView(text, scope, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
         var scopeList = [scope].concat(scopes);
@@ -1096,8 +1099,9 @@
         event.stopPropagation = function() { //阻止事件在DOM树中的传播
             event.cancelBubble = true;
         };
-        return event
+        return event;
     }
+    avalon.fixEvent = fixEvent;
     var bindingHandlers = avalon.bindingHandlers = {
         //跳过流程绑定
         skip: function() {
@@ -1131,8 +1135,8 @@
                     element.$scope = scope;
                     element.$scopes = scopes;
                     avalon.bind(element, type, function(e) {
-                        e = e && e.timeStamp ? e : fixEvent(event); //修正IE的参数  
-                        fn.call(element, e)
+                        e = e && e.target ? e : fixEvent(event); //修正IE的参数  
+                        fn.call(element, e);
                     });
                 }
             });
@@ -1189,10 +1193,10 @@
             watchView(data.value, scope, scopes, data, function(val) {
                 if (data.args) { //第一种形式
                     var classList = data.args.join(" ");
-                    if (typeof val == "function") {
+                    if (typeof val === "function") {
                         element.$scope = scope;
                         element.$scopes = scopes;
-                        val = val.call(element)
+                        val = val.call(element);
                     }
                     if (val) {
                         avalon.addClasses(element, classList);
@@ -1213,7 +1217,8 @@
             });
         },
         ui: function(data, scope, scopes) {
-            var optsName = data.args && data.args[0], opts;
+            var optsName = data.args && data.args[0],
+                    opts;
             var scopeList = [scope].concat(scopes);
             for (var i = 0, obj; obj = scopeList[i++]; ) {
                 if (obj.hasOwnProperty(optsName)) {
@@ -1332,7 +1337,7 @@
                 var val = !element.beforeChecked;
                 model[name] = val;
                 element.beforeChecked = element.checked = val;
-            };
+            }
             function beforeChecked() {
                 element.beforeChecked = element.checked;
             }
@@ -1479,6 +1484,7 @@
             });
         });
         function updateListView(method, args, len) {
+            //   function() {
             var listName = list.$name;
             switch (method) {
                 case "push":
@@ -1540,6 +1546,7 @@
                     });
                     break;
             }
+            // }
         }
         if ((list || {}).isCollection) {
             list[subscribers].push(updateListView);
@@ -2061,4 +2068,6 @@
     });
 })()
 //2013.4.29 合并options与selecting绑定，为each绑定产生的子ViewModel添加$first, $last属性，
-//写死它的$index, $remove属性，优化generateID
+//写死它的$index, $remove属性，重构generateID
+
+//2013.4.30 重构scanTag, generateID，更改fixEvent的条件

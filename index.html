@@ -4,52 +4,57 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>todos</title>
         <style>
-
+            body{
+                font-size: 16px;
+            }
         </style>
+        <!--        <link href="http://www.eyecon.ro/bootstrap-slider/css/bootstrap.css" rel="stylesheet">
+        <link href="http://www.eyecon.ro/bootstrap-slider/css/slider.css" rel="stylesheet">-->
+        <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="stylesheet">
         <script src="avalon.js" type="text/javascript"></script>
 
+        <script src="avalon.slider.js" type="text/javascript"></script>
 
         <script type="text/javascript">
-            avalon.ready(function() {
-
-                var model = avalon.define(function(vm) {
-                    vm.firstName = "司徒"
-                    vm.lastName = "正美"
-                    vm.fullName = {//一个包含set或get的对象会被当成PropertyDescriptor，
-                        set: function(val) {//里面必须用this指向scope，不能使用scope
-                            var array = (val || "").split(" ");
-                            this.firstName = array[0] || "";
-                            this.lastName = array[1] || "";
-                        },
-                        get: function() {
-                            return this.firstName + " " + this.lastName;
-                        }
-                    }
-                    console.log(vm)
-                    vm.$watch("firstName", function(a,b,c){
-                        console.log(a)
-                    })
-                });
-                window.console && console.log(model)
-                avalon.scan()
-                setTimeout(function() {
-                    model.firstName = "vvvvvvvvvvvvvvvvvvv"
-                }, 2000)
-            })
-
-
-
-
-
-
+avalon.ready(function() {
+    avalon.define("AAA", function(vm) {
+        vm.name = "liger"
+        vm.color = "green"
+    });
+    avalon.define("BBB", function(vm) {
+        vm.name = "sphinx"
+        vm.color = "red"
+    });
+    avalon.define("CCC", function(vm) {
+        vm.name = "dragon"
+    });
+    avalon.define("DDD", function(vm) {
+        vm.name = "sirenia"
+    });
+    avalon.scan()
+})
         </script>
+
     </head>
     <body>
-        <p>First name: <input ms-model="firstName" /></p>
-        <p>Last name: <input ms-model="lastName"  /></p>
-        <p>Hello, <input ms-model="fullName"></p>
-        <div>{{firstName +" | "+ lastName }}</div>
+        
+        
+        
+<div ms-controller="AAA">
+    <div>{{name}} :  {{color}}</div>
+    <div ms-controller="BBB">
+        <div>{{name}} :  {{color}}</div>
+        <div ms-controller="CCC">
+            <div>{{name}} :  {{color}}</div>
+        </div>
+        <div ms-important="DDD">
+            <div>{{name}} :  {{color}}</div>
+        </div>
+    </div>
+</div>
 
 
+        
+        
     </body>
 </html>
