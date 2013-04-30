@@ -742,7 +742,7 @@
         }
     }
     var stopScan = {};
-    "area,base,basefont,br,col,frame,hr,img,input,isindex,link,meta,param,embed,wbr,script,style".replace(rword, function(a) {
+    "area,base,basefont,br,col,hr,img,input,link,meta,param,embed,wbr,script,style,textarea".replace(rword, function(a) {
         stopScan[a.toLowerCase()] = 1;
     });
     //扫描元素节点中直属的文本节点，并进行抽取
