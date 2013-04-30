@@ -11,7 +11,8 @@
     var expose = new Date - 0;
     //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     function generateID() {
-        return "avalon" + Math.random().toString(36).substring(2, 15)
+        return "avalon" + Math.random().toString(36).substring(2, 15)+
+                Math.random().toString(36).substring(2, 15);
     }
     var subscribers = "$" + expose;
     var propMap = {};
