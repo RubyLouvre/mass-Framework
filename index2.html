@@ -123,7 +123,7 @@
         <script type="text/javascript">
 
             avalon.ready(function() {
-                avalon.define(function(a) {
+                avalon.define("app", function(a) {
                     a.posts = [{text: "aaa", done: false, edit: false}, {text: "bbb", done: false, edit: false}];
                     a.left = {//创建一个只读计算属性
                         get: function() {
@@ -193,7 +193,7 @@
         </script>
     </head>
     <body>
-        <div id="app">
+        <div id="app" ms-controller="app">
             <h1>todos</h1>
             <div class="left">
                 <input class="new-todo" placeholder="What needs to be done?" autofocus ms-keypress="newIt">

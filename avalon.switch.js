@@ -2,11 +2,12 @@
 //http://www.bootcss.com/p/bootstrap-switch/
 //判定是否触摸界面
     var isTouch = "ontouchstart" in window || "onmsgesturechange" in window;
-    avalon.ui["switch"] = function(element, id, opt) {
+    avalon.ui["switch"] = function(element, id, opts) {
         var onLabel = "ON";
         var offLabel = "OFF";
         var classList = element.className, sizeClass = "";
         var sizeOne = avalon.oneObject("switch-mini, switch-small, switch-large");
+        
         classList.replace(/[\n\t]/g, " ").replace(avalon.rword, function(a) {
             if (sizeOne[a]) {
                 sizeClass = a;//取得负责尺寸的类名
@@ -66,6 +67,7 @@
 
         var animated = $element.data("animated") !== false;
         var disabled = input.disabled;
+       
         var checked = !!input.checked;
         //各种绑定
         wrapper.setAttribute("ms-class-switch-animate", "animated");
@@ -76,7 +78,7 @@
         rightSpan.setAttribute("ms-click", "changeStatus");
         input.setAttribute("ms-checked", "checked");
         var model = avalon.define(id, function(vm) {
-            vm.disabled = disabled;
+            vm.disabled = disabled===true;
             vm.checked = checked;
             vm.animated = animated;
             vm.changeStatus = function() {
@@ -90,8 +92,7 @@
         });
         avalon.nextTick(function() {
             element.appendChild(wrapper);
-            element.setAttribute("ms-important", id);
-
+          
             avalon.scan(element.parentNode, model);
 
             var dragEvent = isTouch ? "touchmove" : "mousemove";

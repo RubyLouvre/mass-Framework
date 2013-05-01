@@ -127,7 +127,7 @@
             }
         }
 
-        var disabled = $element.data("disabled") === true;
+        var disabled = $element.data("disabled") === false;
 
         //各种绑定
         $element.attr("ms-class-ui-state-disabled", "disabled");
@@ -139,7 +139,7 @@
 
         avalon.nextTick(function() {
             _refreshRange();
-            element.setAttribute("ms-important", id);
+         
             avalon.scan(element.parentNode, model);
 
             var dragEvent = isTouch ? "touchmove" : "mousemove";
