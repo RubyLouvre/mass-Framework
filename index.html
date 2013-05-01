@@ -7,54 +7,93 @@
             body{
                 font-size: 16px;
             }
+            .example{
+
+                margin-left:2em;
+                padding:1em;
+                width: 70%;
+                border:1px solid #ccc;
+                background: #eee;
+            }
         </style>
-        <!--        <link href="http://www.eyecon.ro/bootstrap-slider/css/bootstrap.css" rel="stylesheet">
-        <link href="http://www.eyecon.ro/bootstrap-slider/css/slider.css" rel="stylesheet">-->
-        <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="stylesheet">
+        <!-- Le styles -->
+        <!--        <link rel="stylesheet" href="http://addyosmani.github.io/jquery-ui-bootstrap/assets/css/bootstrap.min.css">
+                <link rel="stylesheet" href="http://addyosmani.github.io/jquery-ui-bootstrap/css/custom-theme/jquery-ui-1.10.2.custom.css">
+                <link rel="stylesheet" href="http://addyosmani.github.io/jquery-ui-bootstrap/assets/css/font-awesome.min.css">-->
+        <!--[if IE 7]>
+        <link rel="stylesheet" href="http://addyosmani.github.io/jquery-ui-bootstrap/assets/css/font-awesome-ie7.min.css">
+        <![endif]-->
+        <!--[if lt IE 9]>
+        <link rel="stylesheet" href="http://addyosmani.github.io/jquery-ui-bootstrap/css/custom-theme/jquery.ui.1.10.2.ie.css">
+        <![endif]-->
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">
+
         <script src="avalon.js" type="text/javascript"></script>
 
         <script src="avalon.slider.js" type="text/javascript"></script>
 
         <script type="text/javascript">
-avalon.ready(function() {
-    avalon.define("AAA", function(vm) {
-        vm.name = "liger"
-        vm.color = "green"
-    });
-    avalon.define("BBB", function(vm) {
-        vm.name = "sphinx"
-        vm.color = "red"
-    });
-    avalon.define("CCC", function(vm) {
-        vm.name = "dragon"
-    });
-    avalon.define("DDD", function(vm) {
-        vm.name = "sirenia"
-    });
-    avalon.scan()
-})
+            avalon.ready(function() {
+                avalon.scan()
+            })
         </script>
 
     </head>
     <body>
-        
-        
-        
-<div ms-controller="AAA">
-    <div>{{name}} :  {{color}}</div>
-    <div ms-controller="BBB">
-        <div>{{name}} :  {{color}}</div>
-        <div ms-controller="CCC">
-            <div>{{name}} :  {{color}}</div>
-        </div>
-        <div ms-important="DDD">
-            <div>{{name}} :  {{color}}</div>
-        </div>
-    </div>
-</div>
+        <fieldset class="example"><legend>Default functionality</legend>
+            <div ms-ui="slider" data-id="aaa"  >
 
+            </div>
+            <span ms-important="aaa"> {{value}}</span>
+        </fieldset>
+        <fieldset class="example"><legend>指定了最大值</legend>
+            <div ms-ui="slider" data-id="bbb" data-max="255" data-value="127" data-range="min">
 
-        
-        
+            </div>
+            <span ms-important="bbb"> {{value}}</span>
+        </fieldset>
+        <fieldset class="example"><legend>Range slider</legend>
+            <div  ms-ui="slider" data-id="ccc" data-min="0" data-max="500" data-values="[75,300]" data-range="true">
+
+            </div>
+            <span ms-important="ccc"> {{value}} </span>
+        </fieldset>
+        <fieldset class="example"><legend>Range with fixed maximum</legend>
+            <div  ms-ui="slider" data-min="1" data-max="10" data-value="2" data-range="max">
+
+            </div>
+        </fieldset>
+        <fieldset class="example"><legend>Range with fixed minimum</legend>
+            <div  ms-ui="slider" data-min="1" data-max="700" data-value="37" data-range="min">
+
+            </div>
+        </fieldset>
+
+        <fieldset class="example"><legend>Snap to increments</legend>
+            <div  ms-ui="slider" data-min="0" data-max="500" data-value="100" data-step="50" >
+
+            </div>
+        </fieldset>
+        <fieldset class="example" style="height:250px;padding:10px;"><legend>Snap to increments</legend>
+            <div style="height:200px" ms-ui="slider" data-values="[17,67]" data-range="true" data-orientation="vertical" >
+
+            </div>
+        </fieldset>
+        <fieldset class="example" style="height:250px;padding:10px;"><legend>Snap to increments</legend>
+            <div style="height:200px" ms-ui="slider" data-min="0" data-max="100" data-value="60" data-range="min" data-orientation="vertical" >
+
+            </div>
+        </fieldset>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
+        <br/>
     </body>
 </html>

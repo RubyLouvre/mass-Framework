@@ -1,5 +1,5 @@
 //==================================================
-// avalon v4 独立版  by 司徒正美 2013.4.23
+// avalon v5 独立版  by 司徒正美 2013.5.1
 // 疑问:
 //    是否成熟? 成熟
 //    什么协议? MIT, (五种开源协议的比较(BSD,Apache,GPL,LGPL,MIThttp://www.awflasher.com/blog/archives/939)
@@ -11,75 +11,70 @@
     var expose = new Date - 0;
     //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     function generateID() {
-        return "avalon" + Math.random().toString(36).substring(2, 15)+
+        return "avalon" + Math.random().toString(36).substring(2, 15) +
                 Math.random().toString(36).substring(2, 15);
     }
     var subscribers = "$" + expose;
     var propMap = {};
     var rword = /[^, ]+/g;
     var prefix = "ms-";
+    var W3C = window.dispatchEvent;
     //这两个都与计算属性息息相关
     var stopRepeatAssign = false;
     var openComputedCollect = false;
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
     var hasOwn = Object.prototype.hasOwnProperty;
     var readyList = [];
-    var avalon = window.avalon = {
-        mix: function(a, b) {
-            for (var i in b) {
-                a[i] = b[i];
-            }
-            return a;
-        },
+    avalon = function(el) {
+        return new avalon.init(el);
+    };
+    function mix(a, b) {
+        for (var i in b) {
+            a[i] = b[i];
+        }
+        return a;
+    }
+    avalon.init = function(el) {
+        this[0] = this.element = el;
+    };
+    avalon.fn = avalon.prototype = avalon.init.prototype;
+    mix(avalon, {
+        mix: mix,
         subscribers: subscribers,
         models: {},
+        rword: rword,
         error: function(str, e) {
             throw new (e || Error)(str);
         },
         log: function log(a) {
             window.console && console.log(a);
         },
+        ui: {},
         ready: function(fn) {
             if (readyList) {
                 readyList.push(fn);
-                if (document.readyState == "complete") {
+                if (document.readyState === "complete") {
                     fireReady();
                 }
             } else {
                 fn();
             }
         },
-        bind: window.dispatchEvent ? function(el, type, fn, phase) {
-            el.addEventListener(type, fn, !!phase);
-            return fn;
-        } : function(el, type, fn) {
-            el.attachEvent && el.attachEvent("on" + type, fn);
-            return fn;
-        },
-        addClass: function(element, className) {
-            element.className = (element.className.trim() + ' ' + className).trim();
-        },
-        addClasses: function(element, classList) {
-            classList.replace(/\w+/g, function(className) {
-                avalon.addClass(element, className);
-            });
-        },
-        removeClass: function(element, className) {
-            if (element.className) {
-                element.className = (" " + element.className + " ")
-                        .replace(/[\n\t]/g, " ")
-                        .replace(" " + className.trim() + " ", " ").trim();
+        oneObject: function(array, val) {
+            if (typeof array === "string") {
+                array = array.match(rword) || [];
             }
-        },
-        removeClasses: function(element, classList) {
-            classList.replace(/\w+/g, function(className) {
-                avalon.removeClass(element, className);
-            });
+            var result = {},
+                    value = val !== void 0 ? val : 1;
+            for (var i = 0, n = array.length; i < n; i++) {
+                result[array[i]] = value;
+            }
+            return result;
         },
         type: function(obj) { //取得类型
             return obj === null ? "Null" : obj === void 0 ? "Undefined" : serialize.call(obj).slice(8, -1);
         },
-        range: function(start, end, step) {//返回一个[)
+        range: function(start, end, step) {
             step || (step = 1);
             if (end == null) {
                 end = start || 0;
@@ -93,6 +88,21 @@
                 start += step;
             }
             return result;
+        },
+        bind: W3C ? function(el, type, fn, phase) {
+            el.addEventListener(type, fn, !!phase);
+            return fn;
+        } : function(el, type, fn) {
+            function callback(e) {
+                return fn.call(el, fixEvent(e));
+            }
+            el.attachEvent("on" + type, callback);
+            return callback;
+        },
+        unbind: W3C ? function(el, type, fn, phase) {
+            el.removeEventListener(type, fn || noop, !!phase);
+        } : function(el, type, fn) {
+            el.detachEvent("on" + type, fn || noop);
         },
         forEach: function(obj, fn) {
             if (obj) { //不能传个null, undefined进来
@@ -112,7 +122,9 @@
                 }
             }
         }
-    };
+    });
+    var forEach = avalon.forEach;
+
     function fireReady() {
         if (readyList) {
             for (var i = 0, fn; fn = readyList[i++]; ) {
@@ -127,6 +139,313 @@
     }
     avalon.bind(window, "load", fireReady);
     avalon.bind(window, "DOMContentLoaded", fireReady);
+
+    /*********************************************************************
+     *                          原型链式操作                      *
+     **********************************************************************/
+    function hyphen(target) {
+        //转换为连字符线风格
+        return target.replace(/([a-z\d])([A-Z]+)/g, "$1-$2").toLowerCase();
+    }
+    function camelize(target) {
+        //转换为驼峰风格
+        if (target.indexOf("-") < 0 && target.indexOf("_") < 0) {
+            return target; //提前判断，提高getStyle等的效率
+        }
+        return target.replace(/[-_][^-_]/g, function(match) {
+            return match.charAt(1).toUpperCase();
+        });
+    }
+    var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
+    mix(avalon.fn, {
+        hasClass: function(cls) {
+            if (this[0] && this[0].nodeType === 1) {
+                return -1 < (" " + (this[0] || {}).className + " ").indexOf(" " + cls + " ");
+            }
+        },
+        addClass: function(cls) {
+            if (this.hasClass(cls) === false)
+                this[0].className += " " + cls;
+            return this;
+        },
+        removeClass: function(cls) {
+            if (this.hasClass(cls) === true) {
+                var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');
+                this[0].className = this[0].className.replace(reg, ' ');
+            }
+            return this;
+        },
+        toggleClass: function(cls, stateVal) {
+            var state = stateVal;
+            var isBool = typeof stateVal === "boolean";
+            state = isBool ? state : !this.hasClass(cls);
+            return this[state ? "addClass" : "removeClass"](cls);
+        },
+        attr: function(name, value) {
+            if (arguments.length === 2) {
+                this[0].setAttribute(name, value);
+                return this;
+            } else {
+                return this[0].getAttribute(name);
+            }
+        },
+        data: function(name, value) {
+            name = "data-" + hyphen(name);
+            if (arguments.length === 2) {
+                this[0].setAttribute(name, value);
+                return this;
+            } else {
+                var val = this[0].getAttribute(name), _eval = false;
+                if (rparse.test(val) || +val + "" === val) {
+                    _eval = true;
+                }
+                try {
+                    return _eval ? eval("0," + val) : val;
+                } catch (e) {
+                    return val;
+                }
+            }
+        },
+        removeData: function(name) {
+            name = "data-" + hyphen(name);
+            this[0].removeAttribute(name);
+            return this;
+        },
+        css: function(name, value) {
+            var node = this[0];
+            if (node && node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
+                var prop = /\_/.test(name) ? camelize(name) : name;
+                name = cssName(prop) || prop;
+                if (arguments.length === 1) { //获取样式
+                    var fn = cssHooks[prop + ":get"] || cssHooks["_default:get"];
+                    return fn(node, name);
+                } else { //设置样式
+                    var type = typeof value;
+                    if (type === "number" && !isFinite(value + "")) {
+                        return;
+                    }
+                    if (type === "number" && !cssNumber[prop]) {
+                        value += "px";
+                    }
+                    fn = cssHooks[prop + ":set"] || cssHooks["_default:set"];
+                    fn(node, name, value);
+                    return this;
+                }
+            }
+        },
+        bind: function(type, fn, phase) {
+            if (this[0]) {//此方法不会链
+                return avalon.bind(this[0], type, fn, phase);
+            }
+        },
+        unbind: function(type, fn, phase) {
+            if (this[0]) {//此方法不会链
+                avalon.unbind(this[0], type, fn, phase);
+            }
+            return this;
+        },
+        val: function(value) {
+            var node = this[0];
+            if (node && node.nodeType === 1) {
+                var get = arguments.length === 0;
+                var access = get ? ":get" : ":set";
+                var fn = valHooks[getValType(node) + access];
+                if (fn) {
+                    var val = fn(node, value);
+                } else if (get) {
+                    return (node.value || "").replace(/\r/g, "");
+                } else {
+                    node.value = value;
+                }
+            }
+            return get ? val : this;
+        }
+    });
+    /*********************************************************************
+     *                           样式处理                          *
+     **********************************************************************/
+    var cssHooks = {};
+    var root = document.documentElement;
+    var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-', 'WebKit-', 'moz-', "webkit-", 'ms-', '-khtml-'];
+    var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
+        "float": 'cssFloat' in root.style ? 'cssFloat' : 'styleFloat',
+        background: "backgroundColor"
+    };
+    var cssNumber = avalon.oneObject("columnCount,fillOpacity,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom");
+    function cssName(name, host, camelCase) {
+        if (cssMap[name]) {
+            return cssMap[name];
+        }
+        host = host || root.style; //$.html为document.documentElement
+        for (var i = 0, n = prefixes.length; i < n; i++) {
+            camelCase = camelize(prefixes[i] + name);
+            if (camelCase in host) {
+                return (cssMap[name] = camelCase);
+            }
+        }
+        return null;
+    }
+    cssHooks["_default:set"] = function(node, name, value) {
+        node.style[name] = value;
+    };
+    if (window.getComputedStyle) {
+        cssHooks["_default:get"] = function(node, name) {
+            var ret, styles = window.getComputedStyle(node, null);
+            if (styles) {
+                ret = name === "filter" ? styles.getPropertyValue(name) : styles[name];
+                if (ret === "") {
+                    ret = node.style[name]; //其他浏览器需要我们手动取内联样式
+                }
+            }
+            return ret;
+        };
+    } else {
+        var rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i;
+        var rposition = /^(top|right|bottom|left)$/;
+        var ie8 = !!window.XDomainRequest;
+        var salpha = "DXImageTransform.Microsoft.Alpha";
+        var border = {
+            thin: ie8 ? '1px' : '2px',
+            medium: ie8 ? '3px' : '4px',
+            thick: ie8 ? '5px' : '6px'
+        };
+        cssHooks["_default:get"] = function(node, name) {
+            //取得精确值，不过它有可能是带em,pc,mm,pt,%等单位
+            var currentStyle = node.currentStyle;
+            var ret = currentStyle[name];
+            if ((rnumnonpx.test(ret) && !rposition.test(ret))) {
+                //①，保存原有的style.left, runtimeStyle.left,
+                var style = node.style,
+                        left = style.left,
+                        rsLeft = node.runtimeStyle.left;
+                //②由于③处的style.left = xxx会影响到currentStyle.left，
+                //因此把它currentStyle.left放到runtimeStyle.left，
+                //runtimeStyle.left拥有最高优先级，不会style.left影响
+                node.runtimeStyle.left = currentStyle.left;
+                //③将精确值赋给到style.left，然后通过IE的另一个私有属性 style.pixelLeft
+                //得到单位为px的结果；fontSize的分支见http://bugs.jquery.com/ticket/760
+                style.left = name === 'fontSize' ? '1em' : (ret || 0);
+                ret = style.pixelLeft + "px";
+                //④还原 style.left，runtimeStyle.left
+                style.left = left;
+                node.runtimeStyle.left = rsLeft;
+            }
+            if (ret === "medium") {
+                name = name.replace("Width", "Style");
+                //border width 默认值为medium，即使其为0"
+                if (currentStyle[name] === "none") {
+                    ret = "0px";
+                }
+            }
+            return ret === "" ? "auto" : border[ret] || ret;
+        };
+        cssHooks["opacity:set"] = function(node, value) {
+            node.style.filter = 'alpha(opacity=' + value * 100 + ')';
+        };
+        cssHooks["opacity:get"] = function(node) {
+            //这是最快的获取IE透明值的方式，不需要动用正则了！
+            var alpha = node.filters.alpha || node.filters[salpha],
+                    op = alpha ? alpha.opacity : 100;
+            return(op / 100) + ""; //确保返回的是字符串
+        };
+    }
+    "Width,Height".replace(rword, function(name) {
+        var method = name.toLowerCase(),
+                clientProp = "client" + name,
+                scrollProp = "scroll" + name,
+                offsetProp = "offset" + name;
+        avalon.fn[method] = function(value) {
+            var node = this[0];
+            if (arguments.length === 0) {
+                if (node.setTimeout) { //取得窗口尺寸,IE9后可以用node.innerWidth /innerHeight代替
+                    return node["inner" + name] || node.document.documentElement[clientProp];
+                }
+                if (node.nodeType === 9) { //取得页面尺寸
+                    var doc = node.documentElement;
+                    //FF chrome    html.scrollHeight< body.scrollHeight
+                    //IE 标准模式 : html.scrollHeight> body.scrollHeight
+                    //IE 怪异模式 : html.scrollHeight 最大等于可视窗口多一点？
+                    return Math.max(node.body[scrollProp], doc[scrollProp], node.body[offsetProp], doc[offsetProp], doc[clientProp]);
+                }
+                return parseFloat(this.css(method)) || 0;
+            } else {
+                return this.css(method, value);
+            }
+        };
+    });
+
+    avalon.fn.offset = function() {//取得距离页面左右角的坐标
+        var node = this[0], doc = node && node.ownerDocument;
+        var pos = {
+            left: 0,
+            top: 0
+        };
+        if (!doc) {
+            return pos;
+        }
+        //http://hkom.blog1.fc2.com/?mode=m&no=750 body的偏移量是不包含margin的
+        //我们可以通过getBoundingClientRect来获得元素相对于client的rect.
+        //http://msdn.microsoft.com/en-us/library/ms536433.aspx
+        var box = node.getBoundingClientRect(),
+                //chrome1+, firefox3+, ie4+, opera(yes) safari4+    
+                win = doc.defaultView || doc.parentWindow,
+                root = (navigator.vendor || doc.compatMode === "BackCompat") ? doc.body : doc.documentElement,
+                clientTop = root.clientTop >> 0,
+                clientLeft = root.clientLeft >> 0,
+                scrollTop = win.pageYOffset || root.scrollTop,
+                scrollLeft = win.pageXOffset || root.scrollLeft;
+        // 把滚动距离加到left,top中去。
+        // IE一些版本中会自动为HTML元素加上2px的border，我们需要去掉它
+        // http://msdn.microsoft.com/en-us/library/ms533564(VS.85).aspx
+        pos.top = box.top + scrollTop - clientTop, pos.left = box.left + scrollLeft - clientLeft;
+        return pos;
+    };
+    //=============================val相关=======================
+    function getValType(el) {
+        var ret = el.tagName.toLowerCase();
+        return ret === "input" && /checkbox|radio/.test(el.type) ? "checked" : ret;
+    }
+    var valHooks = {
+        "option:get": function(node) {
+            var val = node.attributes.value;
+            //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
+            return !val || val.specified ? node.value : node.text;
+        },
+        "select:get": function(node, value) {
+            var option, options = node.options,
+                    index = node.selectedIndex,
+                    getter = valHooks["option:get"],
+                    one = node.type === "select-one" || index < 0,
+                    values = one ? null : [],
+                    max = one ? index + 1 : options.length,
+                    i = index < 0 ? max : one ? index : 0;
+            for (; i < max; i++) {
+                option = options[i];
+                //旧式IE在reset后不会改变selected，需要改用i === index判定
+                //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
+                //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
+                if ((option.selected || i === index) && !option.disabled) {
+                    value = getter(option);
+                    if (one) {
+                        return value;
+                    }
+                    //收集所有selected值组成数组返回
+                    values.push(value);
+                }
+            }
+            return values;
+        },
+        "select:set": function(node, values) {
+            values = [].concat(values); //强制转换为数组
+            var getter = valHooks["option:get"];
+            for (var i = 0, el; el = node.options[i++]; ) {
+                el.selected = !!~values.indexOf(getter(el));
+            }
+            if (!values.length) {
+                node.selectedIndex = -1;
+            }
+        }
+    };
     /*********************************************************************
      *                           ecma262 v5语法补丁                   *
      **********************************************************************/
@@ -177,7 +496,7 @@
                     args.push(arguments[i]);
                 return fn.apply(scope, args);
             };
-        }
+        };
     }
     function iterator(vars, body, ret) {
         var fun = 'for(var ' + vars + 'i=0,n = this.length;i < n;i++){'
@@ -185,7 +504,7 @@
         return Function("fn,scope", fun);
     }
 
-    avalon.mix(Array.prototype, {
+    mix(Array.prototype, {
 //定位操作，返回数组中第一个等于给定参数的元素的索引值。
         indexOf: function(item, index) {
             var n = this.length,
@@ -264,8 +583,8 @@
                 return avalon.Array.removeAt(target, index);
             return false;
         }
-    }
-    forEach = avalon.forEach;
+    };
+
     /*********************************************************************
      *                            UI缓冲处理                     *
      **********************************************************************/
@@ -685,7 +1004,7 @@
     /*********************************************************************
      *                           Scan                                     *
      **********************************************************************/
-   avalon.scan = function(elem, scope) {
+    avalon.scan = function(elem, scope) {
         elem = elem || document.documentElement;
         var models = avalon.models;
         if (!scope) {
@@ -694,9 +1013,6 @@
                     scope = models[i];
                     break;
                 }
-            }
-            if (!scope) {
-                avalon.error("至少定义一个ViewModel");
             }
         }
         scanTag(elem, scope, [], elem.ownerDocument || document);
@@ -715,6 +1031,8 @@
                 return;
             } else {
                 scope = avalon.models[b];
+                console.log(b);
+                   console.log(scope)
                 scopes = [];
                 elem.removeAttribute(prefix + "important");
             }
@@ -1037,7 +1355,7 @@
 
     function watchView(text, scope, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
-        var scopeList = [scope].concat(scopes);
+        var scopeList = !scope ? [] : [scope].concat(scopes);
         var trimText = text.trim();
         if (!filters) {
             for (var i = 0, obj; obj = scopeList[i++]; ) {
@@ -1075,7 +1393,7 @@
         //将它移出订阅者列表
         updateView.element = data.element;
         Publish[expose] = updateView;//暴光此函数,方便collectSubscribers收集
-        openComputedCollect = true;  
+        openComputedCollect = true;
         updateView();
         openComputedCollect = false;
         delete Publish[expose];
@@ -1099,7 +1417,6 @@
         };
         return event;
     }
-    avalon.fixEvent = fixEvent;
     var bindingHandlers = avalon.bindingHandlers = {
         "if": function(data, scope, scopes) {
             var element = data.element;
@@ -1129,7 +1446,6 @@
                     element.$scope = scope;
                     element.$scopes = scopes;
                     avalon.bind(element, type, function(e) {
-                        e = e && e.target ? e : fixEvent(event); //修正IE的参数  
                         fn.call(element, e);
                     });
                 }
@@ -1183,76 +1499,74 @@
         //3、ms-class=str str是一个类名或多个类名的集合，全部添加
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
         "class": function(data, scope, scopes) {
-            var element = data.element;
+            var element = data.element, god = avalon(element);
             watchView(data.value, scope, scopes, data, function(val) {
                 if (data.args) { //第一种形式
-                    var classList = data.args.join(" ");
+                    var cls = data.args.join("-");
                     if (typeof val === "function") {
                         element.$scope = scope;
                         element.$scopes = scopes;
                         val = val.call(element);
                     }
-                    if (val) {
-                        avalon.addClasses(element, classList);
-                    } else {
-                        avalon.removeClasses(element, classList);
-                    }
+                    god.toggleClass(cls, val);
                 } else if (typeof val === "string") {
-                    avalon.addClasses(element, val);
+                    val.replace(rword, function(cls) {
+                        god.addClass(cls);
+                    });
                 } else if (val && typeof val === "object") {
                     forEach(val, function(cls, flag) {
-                        if (flag) {
-                            avalon.addClass(element, cls);
-                        } else {
-                            avalon.removeClass(element, cls);
-                        }
+                        god.toggleClass(cls, flag);
                     });
                 }
             });
         },
-        ui: function(data, scope, scopes) {
-            var optsName = data.args && data.args[0],
-                    opts;
-            var scopeList = [scope].concat(scopes);
-            for (var i = 0, obj; obj = scopeList[i++]; ) {
-                if (obj.hasOwnProperty(optsName)) {
-                    opts = obj[optsName];
-                    break;
+        "ui": function(data, scope, scopes) {
+            var vmName = data.args && data.args[0];
+            var optsName = data.args && data.args[1];
+            if (optsName) {
+                var scopeList = [scope].concat(scopes), opts;
+                for (var i = 0, obj; obj = scopeList[i++]; ) {
+                    if (obj.hasOwnProperty(optsName)) {
+                        opts = obj[optsName];
+                        break;
+                    }
                 }
             }
             var uiName = data.value.trim();
+            var id = avalon(data.element).data("id")
+            vmName = vmName || id || uiName + setTimeout("1");
             if (typeof avalon.ui[uiName] === "function") {
-                avalon.ui[uiName](data.element, opts);
+                avalon.ui[uiName](data.element, vmName, opts);
             }
         },
         options: function(data, scope, scopes) {
-            var select = data.element;
-            if (select.tagName !== "SELECT") {
+            var elem = data.element;
+            if (elem.tagName !== "SELECT") {
                 avalon.error("options绑定只能绑在SELECT元素");
             }
-            while (select.length > 0) {
-                select.remove(0);
+            while (elem.length > 0) {
+                elem.remove(0);
             }
             var index = data.args && data.args[0];
             watchView(data.value, scope, scopes, data, function(val) {
                 if (Array.isArray(val)) {
                     nextTick(function() {
-                        select.setAttribute(prefix + "each-option", data.value);
+                        elem.setAttribute(prefix + "each-option", data.value);
                         var op = new Option("{{option}}", "");
                         op.setAttribute("ms-value", "option");
-                        select.options[0] = op;
-                        avalon.scan(select);
+                        elem.options[0] = op;
+                        avalon.scan(elem);
                         if (isFinite(index)) {
-                            op = select.options[index];
+                            op = elem.options[index];
                             if (op) {
                                 op.selected = true;
                             }
                         }
                         if (index && Array.isArray(scope[index])) {
-                            var array = scope[index];
-                            setSelectVal(select, array);
-                            avalon.bind(select, "change", function() {
-                                array = getSelectVal(select);
+                            var god = avalon(elem);
+                            god.val(scope[index]);
+                            god.bind("change", function() {
+                                var array = god.val();
                                 val.clear();
                                 val.push.apply(val, array);
                             });
@@ -1294,14 +1608,13 @@
         var type = element.type;
         var updateModel = function() {
             model[name] = element.value;
-        }
-
+        };
         var updateView = function() {
             var val = model[name];
             if (val !== element.value) {
                 element.value = val === void 0 ? "" : val;
             }
-        }
+        };
         if (/^(password|textarea|text)$/.test(type)) {
             var event = element.attributes[prefix + "event"] || {};
             event = event.value;
@@ -1331,7 +1644,7 @@
                 var val = !element.beforeChecked;
                 model[name] = val;
                 element.beforeChecked = element.checked = val;
-            }
+            };
             function beforeChecked() {
                 element.beforeChecked = element.checked;
             }
@@ -1361,61 +1674,23 @@
         delete Publish[expose];
     };
     modelBinding.SELECT = function(element, model, name) {
-        var select = element;
+        var god = avalon(element);
         function updateModel() {
-            model[name] = getSelectVal(select);
-            setSelectVal(element, model[name]);
+            model[name] = god.val();
+            god.val(model[name]);
         }
 
         function updateView() {
-            setSelectVal(element, model[name]);
+            god.val(model[name]);
         }
-        avalon.bind(element, "change", updateModel);
+        god.bind("change", updateModel);
         Publish[expose] = updateView;
         updateView.element = element;
         updateView();
         delete Publish[expose];
     };
     modelBinding.TEXTAREA = modelBinding.INPUT;
-    function getOptionVal(node) {
-        var val = node.attributes.value;
-        //黑莓手机4.7下val会返回undefined,但我们依然可用node.value取值
-        return !val || val.specified ? node.value : node.text;
-    }
 
-    function getSelectVal(node, values, value) {
-        var option, options = node.options,
-                index = node.selectedIndex,
-                one = node.type === "select-one" || index < 0,
-                values = one ? null : [],
-                max = one ? index + 1 : options.length,
-                i = index < 0 ? max : one ? index : 0;
-        for (; i < max; i++) {
-            option = options[i];
-            //旧式IE在reset后不会改变selected，需要改用i === index判定
-            //我们过滤所有disabled的option元素，但在safari5下，如果设置select为disable，那么其所有孩子都disable
-            //因此当一个元素为disable，需要检测其是否显式设置了disable及其父节点的disable情况
-            if ((option.selected || i === index) && !option.disabled) {
-                value = getOptionVal(option);
-                if (one) {
-                    return value;
-                }
-                //收集所有selected值组成数组返回
-                values.push(value);
-            }
-        }
-        return values;
-    }
-
-    function setSelectVal(node, values) {
-        values = [].concat(values); //强制转换为数组
-        for (var i = 0, el; el = node.options[i++]; ) {
-            el.selected = !!~values.indexOf(getOptionVal(el));
-        }
-        if (!values.length) {
-            node.selectedIndex = -1;
-        }
-    }
     /*********************************************************************
      *                         boolean preperty binding            *
      **********************************************************************/
@@ -1478,7 +1753,6 @@
             });
         });
         function updateListView(method, args, len) {
-            //   function() {
             var listName = list.$name;
             switch (method) {
                 case "push":
@@ -1540,7 +1814,6 @@
                     });
                     break;
             }
-            // }
         }
         if ((list || {}).isCollection) {
             list[subscribers].push(updateListView);
@@ -1786,15 +2059,7 @@
             truncation = truncation === void(0) ? "..." : truncation;
             return target.length > length ? target.slice(0, length - truncation.length) + truncation : String(target);
         },
-        camelize: function(target) {
-            //转换为驼峰风格
-            if (target.indexOf("-") < 0 && target.indexOf("_") < 0) {
-                return target; //提前判断，提高getStyle等的效率
-            }
-            return target.replace(/[-_][^-_]/g, function(match) {
-                return match.charAt(1).toUpperCase();
-            });
-        },
+        camelize: camelize,
         escape: function(target) {
             //将字符串经过 html 转义得到适合在页面中显示的内容, 例如替换 < 为 &lt;
             return target.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -2061,7 +2326,14 @@
         "shortTime": "ah:mm"
     });
 })()
+//2012.8.31 完成 v1
+//https://github.com/RubyLouvre/mass-Framework/commit/708e203a0e274b69729d08de8fe1cde2722520d2
+//2012.9.22 完成 v2 90%代码重写，使用新的思路收集依赖完成双向绑定链
+//2012.12.11 完成 v3 50% 代码重写 数据绑定部分焕然一新，属性名得到绑定器，
+//2012.12.13 把所有公开API放到MVVM二级命名空间上
+//2012.12.15 添加toJS方法，为collection补上sort erase reverse方法
+//2013.4,23 v4 https://github.com/RubyLouvre/mass-Framework/blob/1.3/avalon.js
 //2013.4.29 合并options与selecting绑定，为each绑定产生的子ViewModel添加$first, $last属性，
 //写死它的$index, $remove属性，重构generateID
-
 //2013.4.30 重构scanTag, generateID，更改fixEvent的条件
+//2013.5.1 添加一个jquery like对象

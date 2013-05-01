@@ -122,7 +122,6 @@
 
         <script type="text/javascript">
 
-
             avalon.ready(function() {
                 avalon.define(function(a) {
                     a.posts = [{text: "aaa", done: false, edit: false}, {text: "bbb", done: false, edit: false}];
@@ -147,10 +146,10 @@
                     };
 
                     a.enterIt = function() {
-                        avalon.addClass(this, "hover");
+                        avalon(this).addClass( "hover");
                     };
                     a.leaveIt = function() {
-                        avalon.removeClass(this, "hover");
+                        avalon(this).removeClass( "hover");
                     };
                     a.checkIt = function() {
                         this.$scope.post.done = this.checked;
