@@ -136,13 +136,13 @@
                     vm.changeYear = false
                     vm.changeMonth = false
                     vm.minDate = new Date(2013, 4, 25)
-                    
+
                     //当前时间
                     vm.current = new Date;
                     vm.currentMonth = vm.current.getMonth();
                     vm.currentYear = vm.current.getFullYear();
                     vm.selectedDate = new Date;
-                    
+
                     vm.title = {
                         get: function() {
                             var format = "";
@@ -177,7 +177,7 @@
                             if (disabled && vm.maxDate) {
                                 disabled = timestamp > vm.maxDate - 0;
                             }
-                            return [ year, month, d, disabled];
+                            return [year, month, d, disabled];
                         });
                         cur.setMonth(month);
                         cur.setDate(1);
@@ -230,7 +230,7 @@
                         if (el.tagName === "SPAN" && el.parentNode.tagName === "TD" && !/disabled/.test(el.className)) {
                             vm.selected = el.innerHTML;
                             var d = el.$scope.day.slice(0, 3);
-                            vm.selectedDate = new Date(d[0],d[1],d[2]);
+                            vm.selectedDate = new Date(d[0], d[1], d[2]);
                         }
                     };
                     vm.selected = "";
@@ -239,7 +239,7 @@
                     };
 
                     var today = new Date;
-                    today = [ today.getFullYear(), today.getMonth(), today.getDate() ].join();
+                    today = [today.getFullYear(), today.getMonth(), today.getDate()].join();
                     vm.isToday = function() {
                         var day = this.$scope && this.$scope.day;
                         return day && day.slice(0, 3).join() === today;
@@ -251,9 +251,9 @@
 
         </script>
     </head>
-    <body>
+    <body ms-controller="datepicker">
 
-        <div class="ui-datepicker" ms-controller="datepicker">
+        <div class="ui-datepicker" >
             <div class="ui-datepicker-header">
                 <a href="###" title="Prev" class="ui-datepicker-month ui-datepicker-prev" ms-click="prevMonth">
                     <

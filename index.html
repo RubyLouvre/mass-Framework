@@ -25,8 +25,12 @@
         <script type="text/javascript">
 
             avalon.ready(function() {
-                avalon.define("fruits", [], function(vm) {
-                    vm.fruits = ["苹果", "香蕉", "梨", "火龙果", "西红柿", "榴梿", "人心果", "樱桃", "哈蜜瓜", "黄皮"]
+                avalon.define("form", [], function(vm) {
+                    vm.name = "aaa"
+                    vm.password = "xxxx"
+                    vm.$watch("name",function(newValue, oldValue){
+                        //然后这里就最适合做表单检测工作，不通过就打回原貌
+                    })
                 });
                 avalon.scan();
             })
@@ -44,8 +48,8 @@
 </html>
 
 
-　　        <div ms-each-el="array">
-　　            <h3>{{el}}</h3>
-　　            <p>这是第{{$index}}个了</p>
-　　            <hr/>
-　　        </div>
+<div ms-each-el="array">
+    <h3>{{el}}</h3>
+    <p>这是第{{$index}}个了</p>
+    <hr/>
+</div>

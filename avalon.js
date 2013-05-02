@@ -702,8 +702,10 @@
     };
 
     function updateCollection(oldArray, newArray) {
-        oldArray.clear();
-        oldArray.push.apply(oldArray, newArray);
+        oldArray.length && oldArray.clear();
+        newArray.forEach(function(el) {
+            oldArray.push(el);
+        });
     }
 
     function updateModel(oldObj, newObj) {
@@ -1011,7 +1013,6 @@
             for (var i = 0, fn; fn = safelist[i++]; ) {
                 el = fn.element;
                 if (el && (!el.noRemove) && (el.sourceIndex === 0 || el.parentNode === null)) {
-                    avalon.log("remove " + el); //|| el.sourceIndex === 0
                     avalon.Array.remove(list, fn);
                 } else {
                     fn.apply(0, args); //强制重新计算自身
@@ -1024,10 +1025,11 @@
      **********************************************************************/
     avalon.scan = function(elem, scope) {
         elem = elem || document.documentElement;
-        scanTag(elem, scope, [], elem.ownerDocument || document);
+        var scopes = scope ? [scope] : []
+        scanTag(elem, scopes, elem.ownerDocument || document);
     };
 
-    function scanTag(elem, scope, scopes, doc) {
+    function scanTag(elem, scopes, doc) {
         scopes = scopes || [];
         var a = elem.getAttribute(prefix + "skip");
         var b = elem.getAttribute(prefix + "important");
@@ -1039,8 +1041,7 @@
             if (!avalon.models[b]) {
                 return;
             } else {
-                scope = avalon.models[b];
-                scopes = [];
+                scopes = [avalon.models[b]];
                 elem.removeAttribute(prefix + "important");
             }
         } else if (c) {
@@ -1048,24 +1049,21 @@
             if (!newScope) {
                 return;
             }
-            scopes = [scope].concat(scopes).filter(function(a) {
-                return !!a; //防止scope为undefined
-            }); //更换作用域， 复制父作用域堆栈，防止互相影响
-            scope = newScope;
+            scopes = [newScope].concat(scopes)
             elem.removeAttribute(prefix + "controller");
         }
-        scanAttr(elem, scope, scopes); //扫描特点节点
+        scanAttr(elem, scopes); //扫描特点节点
         if (elem.canHaveChildren === false || !stopScan[elem.tagName]) {
             var textNodes = [];
             for (var node = elem.firstChild; node; node = node.nextSibling) {
                 if (node.nodeType === 1) {
-                    scanTag(node, scope, scopes, doc); //扫描元素节点
+                    scanTag(node, scopes, doc); //扫描元素节点
                 } else if (node.nodeType === 3) {
                     textNodes.push(node);
                 }
             }
             for (var i = 0; node = textNodes[i++]; ) { //延后执行
-                scanText(node, scope, scopes, doc); //扫描文本节点
+                scanText(node, scopes, doc); //扫描文本节点
             }
         }
     }
@@ -1075,10 +1073,10 @@
     });
     //扫描元素节点中直属的文本节点，并进行抽取
 
-    function scanText(textNode, scope, scopes, doc) {
+    function scanText(textNode, scopes, doc) {
         var bindings = extractTextBindings(textNode, doc);
         if (bindings.length) {
-            executeBindings(bindings, scope, scopes);
+            executeBindings(bindings, scopes);
         }
     }
 
@@ -1124,7 +1122,7 @@
         return tokens;
     }
 
-    function scanAttr(el, scope, scopes) {
+    function scanAttr(el, scopes) {
         var bindings = [];
         for (var i = 0, attr; attr = el.attributes[i++]; ) {
             if (attr.specified) {
@@ -1154,12 +1152,12 @@
                 }
             }
         }
-        executeBindings(bindings, scope, scopes);
+        executeBindings(bindings, scopes);
     }
 
-    function executeBindings(bindings, scope, scopes) {
+    function executeBindings(bindings, scopes) {
         bindings.forEach(function(data) {
-            bindingHandlers[data.type](avalon.mix({}, data), scope, scopes);
+            bindingHandlers[data.type](avalon.mix({}, data), scopes);
             if (data.remove) { //移除数据绑定，防止被二次解析
                 data.element.removeAttribute(data.node.name);
             }
@@ -1367,9 +1365,8 @@
     });
     //eval一个或多个表达式
 
-    function watchView(text, scope, scopes, data, callback, tokens) {
+    function watchView(text, scopeList, data, callback, tokens) {
         var updateView, target, filters = data.filters;
-        var scopeList = !scope ? [] : [scope].concat(scopes);
         var trimText = text.trim();
         if (!filters) {
             for (var i = 0, obj; obj = scopeList[i++]; ) {
@@ -1432,11 +1429,11 @@
         return event;
     }
     var bindingHandlers = avalon.bindingHandlers = {
-        "if": function(data, scope, scopes) {
+        "if": function(data, scopes) {
             var element = data.element;
             var placehoder = element.ownerDocument.createComment("placehoder");
             var parent = element.parentNode;
-            watchView(data.value, scope, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val) {
                 nextTick(function() { //必要延后处理，否则会中断scanText中的循环
                     if (val) { //添加 如果它不在DOM树中
                         if (!element.parentNode || element.parentNode.nodeType === 11) {
@@ -1452,38 +1449,36 @@
                 })
             });
         },
-        on: function(data, scope, scopes) {
+        "on": function(data, scopes) {
             var element = data.element;
-            watchView(data.value, scope, scopes, data, function(fn) {
+            watchView(data.value, scopes, data, function(fn) {
                 var type = data.args && data.args[0];
                 if (type && typeof fn === "function") { //第一种形式
-                    element.$scope = scope;
+                    element.$scope = element.$scope ||scopes[0] 
                     element.$scopes = scopes;
-                    avalon.bind(element, type, function(e) {
-                        fn.call(element, e);
-                    });
+                    avalon.bind(element, type, fn);
                 }
             });
         },
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
         //<div>{{firstName}} + java</div>，如果model.firstName为ruby， 那么变成
         //<div>ruby + java</div>
-        text: function(data, scope, scopes) {
+        text: function(data, scopes) {
             var node = data.node;
-            watchView(data.value, scope, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val) {
                 node.nodeValue = val;
             });
         },
         //控制元素显示或隐藏
-        visible: function(data, scope, scopes) {
+        visible: function(data, scopes) {
             var element = data.element;
-            watchView(data.value, scope, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val) {
                 element.style.display = val ? "block" : "none";
             });
         },
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
         //<a href="{{url.hostname}}/{{url.pathname}}.html">
-        href: function(data, scope, scopes) {
+        href: function(data, scopes) {
             //如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
             var node = data.node;
@@ -1493,17 +1488,17 @@
                 simple = true;
                 text = RegExp.$1;
             }
-            watchView(text, scope, scopes, data, function(val) {
+            watchView(text, scopes, data, function(val) {
                 data.element[name] = val;
             }, simple ? null : scanExpr(data.value));
         },
         //这是一个布尔属性绑定的范本，布尔属性插值要求整个都是一个插值表达式，用{{}}包起来
         //布尔属性在IE下无法取得原来的字符串值，变成一个布尔，因此需要用ng-disabled
-        disabled: function(data, scope, scopes) {
+        disabled: function(data, scopes) {
             var element = data.element,
                     name = data.type,
                     propName = propMap[name] || name;
-            watchView(data.value, scope, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val) {
                 element[propName] = !!val;
             });
         },
@@ -1512,14 +1507,14 @@
         //2、ms-class=obj obj为一个{xxx:true, yyy:false}的对象，根据其值添加或删除其键名
         //3、ms-class=str str是一个类名或多个类名的集合，全部添加
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
-        "class": function(data, scope, scopes) {
+        "class": function(data, scopes) {
             var element = data.element,
                     god = avalon(element);
-            watchView(data.value, scope, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val) {
                 if (data.args) { //第一种形式
                     var cls = data.args.join("-");
                     if (typeof val === "function") {
-                        element.$scope = scope;
+                        element.$scope = scopes[0] || {};
                         element.$scopes = scopes;
                         val = val.call(element);
                     }
@@ -1535,7 +1530,7 @@
                 }
             });
         },
-        "ui": function(data, scope, scopes) {
+        "ui": function(data, scopes) {
             var uiName = data.value.trim(); //此UI的名字
             if (typeof avalon.ui[uiName] === "function") {
                 var id = (avalon(data.element).data("id") || "").trim();
@@ -1543,9 +1538,8 @@
                 data.element.setAttribute(prefix + "controller", id)
                 var optsName = data.args && data.args[0]; //它的参数对象
                 if (optsName) {
-                    var scopeList = [scope].concat(scopes),
-                            opts;
-                    for (var i = 0, obj; obj = scopeList[i++]; ) {
+                    var opts;
+                    for (var i = 0, obj; obj = scopes[i++]; ) {
                         if (obj.hasOwnProperty(optsName)) {
                             opts = obj[optsName];
                             break;
@@ -1555,7 +1549,7 @@
                 avalon.ui[uiName](data.element, id, opts);
             }
         },
-        options: function(data, scope, scopes) {
+        options: function(data, scopes) {
             var elem = data.element;
             if (elem.tagName !== "SELECT") {
                 avalon.error("options绑定只能绑在SELECT元素");
@@ -1564,7 +1558,7 @@
                 elem.remove(0);
             }
             var index = data.args && data.args[0];
-            watchView(data.value, scope, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val) {
                 if (Array.isArray(val)) {
                     nextTick(function() {
                         elem.setAttribute(prefix + "each-option", data.value);
@@ -1578,6 +1572,7 @@
                                 op.selected = true;
                             }
                         }
+                        var scope = scopes[0];
                         if (index && Array.isArray(scope[index])) {
                             var god = avalon(elem);
                             god.val(scope[index]);
@@ -1598,20 +1593,19 @@
      *                         model binding                               *
      **********************************************************************/
     //将模型中的字段与input, textarea的value值关联在一起
-    var modelBinding = bindingHandlers.model = function(data, scope, scopes) {
+    var modelBinding = bindingHandlers.model = function(data, scopes) {
         var element = data.element;
         var tagName = element.tagName;
         if (typeof modelBinding[tagName] === "function") {
-            var array = scope ? [scope].concat(scopes) : [];
             var name = data.node.value,
-                    model;
-            array.forEach(function(obj) {
-                if (!model && obj.hasOwnProperty(name)) {
-                    model = obj;
+                    scope;
+            scopes.forEach(function(obj) {
+                if (!scope && obj.hasOwnProperty(name)) {
+                    scope = obj;
                 }
             });
-            model = model || {};
-            modelBinding[tagName](element, model, name);
+            scope = scope || {};
+            modelBinding[tagName](element, scope, name);
         }
     };
     //如果一个input标签添加了model绑定。那么它对应的字段将与元素的value连结在一起
@@ -1718,15 +1712,15 @@
     bools.replace(rword, function(name) {
         bindingHandlers[name] = bindingHandlers.disabled;
     });
-    bindingHandlers.enabled = function(data, scope, scopes) {
+    bindingHandlers.enabled = function(data, scopes) {
         var element = data.element;
-        watchView(data.value, scope, scopes, data, function(val) {
+        watchView(data.value, scopes, data, function(val) {
             element.disabled = !val;
         });
     };
-    bindingHandlers.html = function(data, scope, scopes) {
+    bindingHandlers.html = function(data, scopes) {
         var element = data.element;
-        watchView(data.value, scope, scopes, data, function(val) {
+        watchView(data.value, scopes, data, function(val) {
             element.innerHTML = val == null ? "" : val + "";
         });
     };
@@ -1746,25 +1740,30 @@
         bindingHandlers[name] = function(data) {
             data.args = [name];
             bindingHandlers.on.apply(0, arguments);
-        }
+        };
     });
     /*********************************************************************
      *                      each binding                              *
      **********************************************************************/
-    bindingHandlers.each = function(data, scope, scopes) {
+    bindingHandlers["each"] = function(data, scopes) {
         var parent = data.element;
-        var scopeList = scope ? [scope].concat(scopes) : [];
-        var list = parseExpr(data.value, scopeList, data);
+       
+        var value = data.value;
+        if (scopes.length === 1) {
+            var list = scopes[0][value]
+        } else {
+            var list = parseExpr(value, scopes, data);
+        }
         var doc = parent.ownerDocument;
         var view = doc.createDocumentFragment();
-        var comment = doc.createComment(list.$name);
+        var comment = doc.createComment(list.$id);
         view.appendChild(comment);
         while (parent.firstChild) {
             view.appendChild(parent.firstChild);
         }
         data.view = view;
         data.collection = list;
-        data.scopeList = scopeList;
+        data.scopeList = scopes;
         nextTick(function() {
             forEach(list, function(index, item) {
                 addItemView(index, item, data);
@@ -1772,7 +1771,7 @@
         });
 
         function updateListView(method, args, len) {
-            var listName = list.$name;
+            var listName = list.$id;
             switch (method) {
                 case "push":
                     forEach(list.slice(len), function(index, item) {
@@ -1896,12 +1895,13 @@
     }
 
     function addItemView(index, item, data) {
-        var scopeList = data.scopeList;
+        var scopes = data.scopeList;
         var collection = data.collection;
         var parent = data.element;
         var doc = parent.ownerDocument;
         var textNodes = [];
-        var $scope = createItemModel(index, item, collection, data.args);
+        var scope = createItemModel(index, item, collection, data.args);
+        scopes = [scope].concat(scopes)
         for (var node = data.view.firstChild; node; node = node.nextSibling) {
             var clone = node.cloneNode(true);
             if (collection.insertBefore) { //必须插入DOM树,否则下为注释节点添加自定义属性会失败
@@ -1910,20 +1910,20 @@
                 parent.appendChild(clone);
             }
             if (clone.nodeType === 1) {
-                scanTag(clone, $scope, scopeList, doc); //扫描元素节点
+                scanTag(clone, scopes.concat(), doc); //扫描元素节点
             } else if (clone.nodeType === 3) {
                 textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
             } else if (clone.nodeType === 8) {
                 clone.nodeValue = node.nodeValue + "" + index;
                 var indexName = data.args[1] || "$index";
                 clone.$indexName = indexName;
-                clone.$scope = $scope;
+                clone.$scope = clone.$scope || scope;
                 clone.$view = doc.createDocumentFragment();
             }
 
         }
         for (var i = 0; node = textNodes[i++]; ) {
-            scanText(node, $scope, scopeList, doc); //扫描文本节点
+            scanText(node, scopes.concat(), doc); //扫描文本节点
         }
     }
 
@@ -1965,7 +1965,7 @@
 
     function convert(val) {
         if (Array.isArray(val)) {
-            return val.$name ? val : Collection(val);
+            return val.$id ? val : Collection(val);
         } else if (avalon.type(val) === "Object") {
             return val.$id ? val : modelFactory(val);
         } else {
@@ -1975,7 +1975,7 @@
 
     function Collection(list) {
         var collection = list.map(convert);
-        collection.$name = generateID();
+        collection.$id = generateID();
         collection[subscribers] = [];
         var dynamic = modelFactory({
             length: list.length
