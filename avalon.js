@@ -1937,7 +1937,7 @@
     function convert(val) {
         if (Array.isArray(val)) {
             return val.$id ? val : Collection(val);
-        } else if (avalon.type(val) === "Object") {
+        } else if (typeof val === "object") {
             return val.$id ? val : modelFactory(val);
         } else {
             return val;
