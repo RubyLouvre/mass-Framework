@@ -26,11 +26,8 @@
 
             avalon.ready(function() {
                 avalon.define("form", [], function(vm) {
-                    vm.name = "aaa"
-                    vm.password = "xxxx"
-                    vm.$watch("name",function(newValue, oldValue){
-                        //然后这里就最适合做表单检测工作，不通过就打回原貌
-                    })
+                    vm.fruits = [{name:"xxx"},{name:"yyy"},{name:"ooo"},{name:"ppp"}]
+                   
                 });
                 avalon.scan();
             })
@@ -40,7 +37,7 @@
     </head>
     <body>
         <div ms-each-el="fruits" ms-controller="fruits">
-            <h3>{{el}}</h3>
+            <h3>{{el.name}}</h3>
             <p>这是第{{$index}}个了</p>
             <hr/>
         </div>
@@ -48,8 +45,3 @@
 </html>
 
 
-<div ms-each-el="array">
-    <h3>{{el}}</h3>
-    <p>这是第{{$index}}个了</p>
-    <hr/>
-</div>
