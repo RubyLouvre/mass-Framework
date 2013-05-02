@@ -47,15 +47,18 @@
                         scope.getPages();
                     };
                     scope.removeItem = function() {
-                        var item = this.$scope.$remove();
-                        scope.items.remove(item);
-                        if (!scope.showItems.length) {
-                            if (Math.ceil(scope.items.length / scope.pageCount) === scope.pageIndex) {
-                                scope.pageIndex--;
+
+                      
+                            var item = this.$scope.$remove();
+                            scope.items.remove(item);
+                            if (!scope.showItems.length) {
+                                if (Math.ceil(scope.items.length / scope.pageCount) === scope.pageIndex) {
+                                    scope.pageIndex--;
+                                }
+                                scope.getShowItems();//如果删光了,尝试到items取
                             }
-                            scope.getShowItems();//如果删光了,尝试到items取
-                        }
-                        scope.getPages();
+                            scope.getPages();
+
                     };
                     scope.getPages = function() {
                         var total = Math.ceil(scope.items.size() / scope.pageCount);

@@ -95,9 +95,9 @@
             return fn;
         } : function(el, type, fn) {
             function callback(e) {
-                return fn.call(el, fixEvent(e));
+                return fn.call(el, fixEvent(e ||window.event));
             }
-            el.attachEvent("on" + type, callback);
+            el.attachEvent && el.attachEvent("on" + type, callback);
             return callback;
         },
         unbind: W3C ? function(el, type, fn, phase) {
@@ -1426,8 +1426,11 @@
             watchView(data.value, scopes, data, function(fn) {
                 var type = data.args && data.args[0];
                 if (type && typeof fn === "function") { //第一种形式
-                    element.$scope = element.$scope || scopes[0]
-                    element.$scopes = scopes;
+                    if (!element.addScope) {
+                        element.$scope = scopes[0] || {};
+                        element.$scopes = scopes;
+                        element.addScope = "on";
+                    }
                     avalon.bind(element, type, fn);
                 }
             });
@@ -1486,8 +1489,11 @@
                 if (data.args) { //第一种形式
                     var cls = data.args.join("-");
                     if (typeof val === "function") {
-                        element.$scope = scopes[0] || {};
-                        element.$scopes = scopes;
+                        if (!element.addScope) {
+                            element.$scope = scopes[0]
+                            element.$scopes = scopes;
+                            element.addScope = "class";
+                        }
                         val = val.call(element);
                     }
                     god.toggleClass(cls, val);
@@ -1887,8 +1893,11 @@
                 textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
             } else if (clone.nodeType === 8) {
                 clone.nodeValue = node.nodeValue + "" + index;
-                clone.$scope = clone.$scope || scope;
-                clone.$view = doc.createDocumentFragment();
+                if (!clone.addScope) {
+                    clone.$scope = scope;
+                    clone.addScope = "addItemView";
+                }
+                clone.$view = data.view.cloneNode(false);
             }
         }
         avalon.nextTick(function() {
