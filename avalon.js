@@ -1454,7 +1454,7 @@
             watchView(data.value, scopes, data, function(fn) {
                 var type = data.args && data.args[0];
                 if (type && typeof fn === "function") { //第一种形式
-                    element.$scope = element.$scope ||scopes[0] 
+                    element.$scope = element.$scope || scopes[0]
                     element.$scopes = scopes;
                     avalon.bind(element, type, fn);
                 }
@@ -1747,7 +1747,7 @@
      **********************************************************************/
     bindingHandlers["each"] = function(data, scopes) {
         var parent = data.element;
-       
+
         var value = data.value;
         if (scopes.length === 1) {
             var list = scopes[0][value]
@@ -1858,8 +1858,8 @@
                 if (node.nodeValue.indexOf(name) === 0) {
                     if (node.nodeValue !== name + index) {
                         node.nodeValue = name + index;
-                        var indexName = node.$indexName;
-                        node.$scope[indexName] = index;
+                        var scope = node.$scope || {};
+                        scope.$index = index;
                     }
                     index++;
                 }
@@ -1915,8 +1915,6 @@
                 textNodes.push(clone); //插值表达式所在的文本节点会被移除,创建循环中断(node.nextSibling===null)
             } else if (clone.nodeType === 8) {
                 clone.nodeValue = node.nodeValue + "" + index;
-                var indexName = data.args[1] || "$index";
-                clone.$indexName = indexName;
                 clone.$scope = clone.$scope || scope;
                 clone.$view = doc.createDocumentFragment();
             }
