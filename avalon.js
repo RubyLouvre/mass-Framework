@@ -1890,11 +1890,12 @@
                 clone.$scope = clone.$scope || scope;
                 clone.$view = doc.createDocumentFragment();
             }
-
         }
-        for (var i = 0; node = textNodes[i++]; ) {
-            scanText(node, scopes.concat(), doc); //扫描文本节点
-        }
+        avalon.nextTick(function() {
+            for (var i = 0; node = textNodes[i++]; ) {
+                scanText(node, scopes.concat(), doc); //扫描文本节点
+            }
+        })
     }
 
     //将上面的<!--xxx2--><tag><tag><text>放进文档碎片中返回
