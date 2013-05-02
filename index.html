@@ -17,20 +17,27 @@
             }
         </style>
 
-<!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">-->
+        <!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">-->
         <script>
-           
-            document.write('<script src="mass.js"><\/script>');
-          
+
+
+
         </script>
 
-
+        <script src="avalon.js"></script>
 
         <script type="text/javascript">
-            require("ajax,node", function($) {
-                $.log("加载完成!")
-            })
-            /*
+            window.onload = function() {
+                var div = document.createComment("div");
+                div.id = "ddd";
+                //   div.innerHTML = "xxxxxxxxxxxxxxx"
+                document.body.insertBefore(div, null);
+                // alert(document.getElementById("ddd"))
+                //  range = document.createRange();
+                //     range.selectNode(document.body);
+                // range.deleteContents();
+            }
+
             avalon.ready(function() {
                 avalon.define("form", [], function(vm) {
                     vm.fruits = [{name: "xxx"}, {name: "yyy"}, {name: "ooo"}, {name: "ppp"}]
@@ -46,9 +53,43 @@
                         //  vm.fruits.clear().push({name:1},{name:2})
                     }
                 });
+
+                avalon.define("array", function(vm) {
+                    vm.array = ["1", "2", "3", "4"]
+                    "push,unshift,remove,ensure".replace(/\w+/g, function(method) {
+                        vm[method] = function(e) {
+                        //    e.preventDefault()
+                            if (this.value && e.which == 13) {//this为input元素
+                                vm.array[method](this.value);
+                                this.value = "";
+                            }
+                        }
+                    })
+                    vm.removeAt = function(e) {
+                      //    e.preventDefault()
+                        if (isFinite(this.value) && e.which == 13) {//this为input元素
+                            vm.array.removeAt(Number(this.value))
+                            this.value = "";
+                        }
+                    }
+                     vm.splice = function(e) {
+                 
+                  
+                            vm.array.splice(1,3,"a","b","c")
+                         
+                    }
+                    "pop,shift,sort,reverse".replace(/\w+/g, function(method) {
+                        vm[method] = function(e) {
+                          //    e.preventDefault()
+                            vm.array[method]();
+                        }
+                    })
+                });
+
+
                 avalon.scan();
             })
-*/
+
         </script>
 
     </head>
@@ -61,6 +102,24 @@
         <button ms-click="push">push</button>
         <button ms-click="pop">pop</button>
         <button ms-click="replace">replace</button>
+
+        <div ms-controller="array">
+            <ul ms-each-el="array">
+                <li>数组的第{{$index+1}}个元素为{{el}}</li>
+            </ul>
+            <p>对数组进行push操作，并回车<input ms-keypress="push"></p>
+            <p>对数组进行unshift操作，并回车<input ms-keypress="unshift"></p>
+            <p>对数组进行ensure操作，并回车<input ms-keypress="ensure"><br/>
+                (只有数组不存在此元素才push进去)</p>
+            <p>对数组进行remove操作，并回车<input ms-keypress="remove"></p>
+            <p>对数组进行removeAt操作，并回车<input ms-keypress="removeAt"></p>
+            <p><button type="button" ms-click="sort">对数组进行sort操作</button></p>
+            <p><button type="button" ms-click="reverse">对数组进行reverse操作</button></p>
+            <p><button type="button" ms-click="shift">对数组进行shift操作</button></p>
+            <p><button type="button" ms-click="pop">对数组进行pop操作</button></p>
+              <p><button type="button" ms-click="splice">对数组进行splice操作</button></p>
+            <p>当前数组的长度为{{array.size()}}，……</p>
+        </div>
     </body>
 </html>
 

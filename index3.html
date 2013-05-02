@@ -46,18 +46,17 @@
                         scope.showItems.push(a);
                         scope.getPages();
                     };
-                    scope.removeItem = function() {
-
-                      
-                            var item = this.$scope.$remove();
-                            scope.items.remove(item);
-                            if (!scope.showItems.length) {
-                                if (Math.ceil(scope.items.length / scope.pageCount) === scope.pageIndex) {
-                                    scope.pageIndex--;
-                                }
-                                scope.getShowItems();//如果删光了,尝试到items取
+                    scope.removeItem = function(e) {
+                        e.preventDefault()
+                        var item = this.$scope.$remove();
+                        scope.items.remove(item);
+                        if (!scope.showItems.length) {
+                            if (Math.ceil(scope.items.length / scope.pageCount) === scope.pageIndex) {
+                                scope.pageIndex--;
                             }
-                            scope.getPages();
+                            scope.getShowItems();//如果删光了,尝试到items取
+                        }
+                        scope.getPages();
 
                     };
                     scope.getPages = function() {
@@ -75,7 +74,8 @@
                         scope.pageIndex = 0;
                         scope.getShowItems();
                     };
-                    scope.jumpPage = function() {
+                    scope.jumpPage = function(e) {
+                          e.preventDefault()
                         scope.pageIndex = this.$scope.$index;
                         scope.getShowItems();
                     }
@@ -102,7 +102,7 @@
                         <td>{{row.name}}</td> 
                         <td>{{row.sales | number}}</td>                                                           
                         <td>${{row.price }}</td>  
-                        <td><a href="###" ms-click="removeItem">删除</a></td>   
+                        <td><a href="javascript:void(0)" ms-click="removeItem">删除</a></td>   
                     </tr>                                                
                 </tbody>                   
             </table>                    
