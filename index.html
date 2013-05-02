@@ -17,13 +17,20 @@
             }
         </style>
 
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">
+<!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">-->
+        <script>
+           
+            document.write('<script src="mass.js"><\/script>');
+          
+        </script>
 
-        <script src="avalon.js" type="text/javascript"></script>
 
 
         <script type="text/javascript">
-
+            require("ajax,node", function($) {
+                $.log("加载完成!")
+            })
+            /*
             avalon.ready(function() {
                 avalon.define("form", [], function(vm) {
                     vm.fruits = [{name: "xxx"}, {name: "yyy"}, {name: "ooo"}, {name: "ppp"}]
@@ -34,14 +41,14 @@
                     vm.pop = function() {
                         vm.fruits.pop()
                     }
-                     vm.replace = function() {
-                         vm.fruits = [{name:1},{name:2}]
-                      //  vm.fruits.clear().push({name:1},{name:2})
+                    vm.replace = function() {
+                        vm.fruits = [{name: 1}, {name: 2}]
+                        //  vm.fruits.clear().push({name:1},{name:2})
                     }
                 });
                 avalon.scan();
             })
-
+*/
         </script>
 
     </head>
@@ -53,7 +60,7 @@
         </div>
         <button ms-click="push">push</button>
         <button ms-click="pop">pop</button>
-          <button ms-click="replace">replace</button>
+        <button ms-click="replace">replace</button>
     </body>
 </html>
 
