@@ -1,7 +1,7 @@
 //=========================================
 // 语言扩展模块v6 by 司徒正美
 //=========================================
-define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
+define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], function($) {
     var global = this,
             seval = global.execScript ? "execScript" : "eval",
             rformat = /\\?\#{([^{}]+)\}/gm,
