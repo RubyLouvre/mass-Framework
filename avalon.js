@@ -716,34 +716,6 @@
         }
     }
 
-    function equal(x, y) {
-        if (x === y) {
-            return true;
-        }
-
-        var xtype = avalon.type(x),
-                ytype = avalon.type(y),
-                field;
-
-        if (xtype !== ytype) {
-            return false;
-        }
-
-        if (xtype === "Date") {
-            return x.getTime() === y.getTime();
-        }
-        if (xtype !== "Object" && xtype !== "Array") {
-            return false;
-        }
-
-        for (field in x) {
-            if (!equal(x[field], y[field])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
     var Observable = {
         $watch: function(type, callback) {
             var callbacks = this.$events[type];
@@ -816,7 +788,7 @@
                             if (typeof value.set === "function") {
                                 value.set.call(model, neo);
                             }
-                            if (!equal(oldArgs, neo)) {
+                            if (oldArgs !== neo) {//由于VBS对象不能用Object.prototype.toString来判定类型，我们就不做严密的检测
                                 oldArgs = neo;
                                 notifySubscribers(accessor); //通知顶层改变
                                 model.$events && model.$fire(name, neo, oldValue);
@@ -843,7 +815,7 @@
                             if (stopRepeatAssign) {
                                 return; //阻止重复赋值
                             }
-                            if (!equal(oldValue, neo)) {
+                            if (oldArgs !== neo) {
                                 if (Array.isArray(neo)) {
                                     if (oldValue && oldValue.isCollection) {
                                         updateCollection(oldValue, neo);

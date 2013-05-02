@@ -26,8 +26,18 @@
 
             avalon.ready(function() {
                 avalon.define("form", [], function(vm) {
-                    vm.fruits = [{name:"xxx"},{name:"yyy"},{name:"ooo"},{name:"ppp"}]
-                   
+                    vm.fruits = [{name: "xxx"}, {name: "yyy"}, {name: "ooo"}, {name: "ppp"}]
+                    vm.push = function() {
+                        vm.fruits.push({name: "ccccccccc"})
+
+                    }
+                    vm.pop = function() {
+                        vm.fruits.pop()
+                    }
+                     vm.replace = function() {
+                         vm.fruits = [{name:1},{name:2}]
+                      //  vm.fruits.clear().push({name:1},{name:2})
+                    }
                 });
                 avalon.scan();
             })
@@ -35,12 +45,15 @@
         </script>
 
     </head>
-    <body>
-        <div ms-each-el="fruits" ms-controller="fruits">
+    <body ms-controller="form">
+        <div ms-each-el="fruits" >
             <h3>{{el.name}}</h3>
             <p>这是第{{$index}}个了</p>
             <hr/>
         </div>
+        <button ms-click="push">push</button>
+        <button ms-click="pop">pop</button>
+          <button ms-click="replace">replace</button>
     </body>
 </html>
 
