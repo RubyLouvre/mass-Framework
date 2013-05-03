@@ -209,17 +209,19 @@
                         var m = date.getMonth();
                         vm.$fire("currentMonth", m - 1);
                     };
-                    vm.$watch("currentMonth", function(month) {
+                    vm.$watch("currentMonth", function(val) {
                         var date = vm.current;
-                        date.setMonth(month);
-                        vm.currentMonth = month;
+                        date.setMonth(val);
+                        if (vm.currentMonth != val)
+                            vm.currentMonth = val;
                         vm.candidateWeeks = getWeeks();
                         vm.title = date - 0;
                     });
-                    vm.$watch("currentYear", function(year) {
+                    vm.$watch("currentYear", function(val) {
                         var date = vm.current;
-                        date.setFullYear(year);
-                        vm.currentYear = year;
+                        date.setFullYear(val);
+                        if (vm.currentYear != val)
+                            vm.currentYear = val;
                         vm.$fire("currentMonth", date.getMonth());
                     });
 

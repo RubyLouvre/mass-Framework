@@ -107,7 +107,7 @@
         },
         forEach: function(obj, fn) {
             if (obj) { //不能传个null, undefined进来
-                var isArray = Array.isArray(obj) || avalon.type(obj) === "Object" && !obj.document && !obj.setTimeout && isFinite(obj.length) && obj[0],
+                var isArray = Array.isArray(obj) || avalon.type(obj) === "Object" && !obj.setTimeout && isFinite(obj.length) && obj[0],
                     i = 0;
                 if (isArray) {
                     for (var n = obj.length; i < n; i++) {
@@ -218,7 +218,7 @@
                 var prop = /\_/.test(name) ? camelize(name) : name;
                 name = cssName(prop) || prop;
                 if (arguments.length === 1) { //获取样式
-                    var fn = cssHooks[prop + ":get"] || cssHooks["_default:get"];
+                    var fn = cssHooks[prop + ":get"] || cssHooks["@:get"];
                     return fn(node, name);
                 } else { //设置样式
                     var type = typeof value;
@@ -228,7 +228,7 @@
                     if (type === "number" && !cssNumber[prop]) {
                         value += "px";
                     }
-                    fn = cssHooks[prop + ":set"] || cssHooks["_default:set"];
+                    fn = cssHooks[prop + ":set"] || cssHooks["@:set"];
                     fn(node, name, value);
                     return this;
                 }
@@ -287,11 +287,11 @@
         }
         return null;
     }
-    cssHooks["_default:set"] = function(node, name, value) {
+    cssHooks["@:set"] = function(node, name, value) {
         node.style[name] = value;
     };
     if (window.getComputedStyle) {
-        cssHooks["_default:get"] = function(node, name) {
+        cssHooks["@:get"] = function(node, name) {
             var ret, styles = window.getComputedStyle(node, null);
             if (styles) {
                 ret = name === "filter" ? styles.getPropertyValue(name) : styles[name];
@@ -311,7 +311,7 @@
             medium: ie8 ? '3px' : '4px',
             thick: ie8 ? '5px' : '6px'
         };
-        cssHooks["_default:get"] = function(node, name) {
+        cssHooks["@:get"] = function(node, name) {
             //取得精确值，不过它有可能是带em,pc,mm,pt,%等单位
             var currentStyle = node.currentStyle;
             var ret = currentStyle[name];
@@ -746,6 +746,7 @@
             }
         }
     };
+
     var systemOne = avalon.oneObject("$index,$remove,$first,$last");
 
     function modelFactory(scope) {
@@ -1136,6 +1137,7 @@
                     bindings.push({
                         type: "text",
                         node: node,
+                        args: [],
                         element: textNode.parentNode,
                         value: token.value,
                         filters: token.filters
@@ -1144,6 +1146,7 @@
                 fragment.appendChild(node);
             }
             textNode.parentNode.replaceChild(fragment, textNode);
+
         }
         return bindings;
     }
@@ -1163,7 +1166,7 @@
         return !this;
     })();
 
-    function insertScopeNameBeforeVariableName(e, text, scopeList, names, args, random) {
+    function insertScopeNameBeforeVariableName(e, text, scopes, names, args, random) {
         var ok = false;
         if (window.dispatchEvent) { //判定是否IE9-11或者为标准浏览器
             ok = e instanceof ReferenceError;
@@ -1190,7 +1193,7 @@
                     .replace("“", "").replace("'", "");
             }
             varName = (varName.match(/^[\w$]+/) || [""])[0]; //取得未定义的变量名
-            for (var i = 0, scope; scope = scopeList[i++];) {
+            for (var i = 0, scope; scope = scopes[i++];) {
                 if (scope.hasOwnProperty(varName)) {
                     var scopeName = scope.$id + random;
                     if (names.indexOf(scopeName) === -1) {
@@ -1325,13 +1328,13 @@
     });
     //eval一个或多个表达式
 
-    function watchView(text, scopeList, data, callback, tokens) {
+    function watchView(text, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
         var trimText = text.trim();
         if (!filters) {
-            for (var i = 0, obj; obj = scopeList[i++];) {
-                if (obj.hasOwnProperty(trimText)) {
-                    target = obj; //如果能在作用域上直接找到,我们就不需要eval了
+            for (var i = 0, scope; scope = scopes[i++];) {
+                if (scope.hasOwnProperty(trimText)) {
+                    target = scope; //如果能在作用域上直接找到,我们就不需要eval了
                     break;
                 }
             }
@@ -1348,10 +1351,10 @@
                 } else {
                     if (tokens) {
                         var val = tokens.map(function(obj) {
-                            return obj.expr ? parseExpr(obj.value, scopeList, data) : obj.value;
+                            return obj.expr ? parseExpr(obj.value, scopes, data) : obj.value;
                         }).join("");
                     } else {
-                        val = parseExpr(text, scopeList, data);
+                        val = parseExpr(text, scopes, data);
                     }
                 }
                 callback(val);
@@ -1406,7 +1409,7 @@
                             element.noRemove = true;
                         }
                     }
-                })
+                });
             });
         },
         "on": function(data, scopes) {
@@ -1415,7 +1418,7 @@
                 var type = data.args[0];
                 if (type && typeof fn === "function") { //第一种形式
                     if (!element.$scopes) {
-                        element.$scope = scopes[0] || {};
+                        element.$scope = scopes[0];
                         element.$scopes = scopes;
                     }
                     avalon.bind(element, type, fn);
@@ -1512,7 +1515,7 @@
                 avalon.ui[uiName](data.element, id, opts);
             }
         },
-        options: function(data, scopes) {
+        "options": function(data, scopes) {
             var elem = data.element;
             if (elem.tagName !== "SELECT") {
                 avalon.error("options绑定只能绑在SELECT元素");
@@ -1599,7 +1602,7 @@
                 } else {
                     element.attachEvent("onpropertychange", updateModel);
                 }
-                if (window.VBArray && window.addEventListener) { //IE9
+                if (document.documentMode >= 9) { //IE9 10
                     element.attachEvent("onkeydown", function(e) {
                         var key = e.keyCode;
                         if (key === 8 || key === 46) {
@@ -1649,14 +1652,22 @@
     };
     modelBinding.SELECT = function(element, model, name) {
         var god = avalon(element);
+        var oldValue = model[name] + "";
 
         function updateModel() {
-            model[name] = god.val();
-            god.val(model[name]);
+            var neo = god.val();
+            if (neo + "" !== oldValue) {
+                model[name] = neo;
+                oldValue = neo + "";
+            }
         }
 
         function updateView() {
-            god.val(model[name]);
+            var neo = model[name];
+            if (neo + "" !== oldValue) {
+                god.val(neo);
+                oldValue = neo + "";
+            }
         }
         god.bind("change", updateModel);
         Publish[expose] = updateView;
@@ -1733,8 +1744,8 @@
             view.appendChild(parent.firstChild);
         }
         data.view = view;
-        data.collection = list;
-        data.scopeList = scopes;
+        data.list = list;
+        data.scopes = scopes;
         nextTick(function() {
             forEach(list, function(index, item) {
                 addItemView(index, item, data);
@@ -1844,11 +1855,11 @@
     }
 
     function addItemView(index, item, data) {
-        var scopes = data.scopeList;
-        var collection = data.collection;
+        var scopes = data.scopes;
+        var list = data.list;
         var parent = data.element;
         var doc = parent.ownerDocument;
-        var scope = createItemModel(index, item, collection, data.args);
+        var scope = createItemModel(index, item, list, data.args);
         scopes = [scope].concat(scopes);
         var view = data.view.cloneNode(true);
         var textNodes = [];
@@ -1865,15 +1876,25 @@
             }
         }
         // parent.insertBefore(el, null) === parent.appendChild(el)
-        parent.insertBefore(view, collection.place || null);
+        parent.insertBefore(view, list.place || null);
+
+        for (var i = 0; node = elements[i++];) {
+            scanTag(node, scopes.concat(), doc); //扫描文本节点
+        }
         avalon.nextTick(function() {
-            for (var i = 0; node = elements[i++];) {
-                scanTag(node, scopes, doc); //扫描文本节点
+            if (!parent.inprocess) {
+                parent.inprocess = 1; //作用类似于display:none
+                var hidden = parent.hidden; //http://html5accessibility.com/
+                parent.hidden = true;
             }
             for (var i = 0; node = textNodes[i++];) {
-                scanText(node, scopes, doc); //扫描文本节点
+                scanText(node, scopes.concat(), doc); //扫描文本节点
             }
-        });
+            if (parent.inprocess) {
+                parent.hidden = hidden;
+                parent.inprocess = 0;
+            }
+        })
     }
 
     //为子视图创建一个ViewModel
@@ -1926,7 +1947,7 @@
             length: list.length
         });
         "push,pop,shift,unshift,splice".replace(rword, function(method) {
-            var nativeMethod = Array.prototype[method];
+            var nativeMethod = [][method];
             collection[method] = function() {
                 var len = this.length;
                 var args = [].slice.call(arguments);
@@ -1940,7 +1961,7 @@
             };
         });
         "sort,reverse".replace(rword, function(method) {
-            var nativeMethod = Array.prototype[method];
+            var nativeMethod = [][method];
             collection[method] = function() {
                 var isComplex = typeof this[0] === "object";
                 var before = isComplex ? this.map(function(obj) {
@@ -2308,4 +2329,4 @@
 //写死它的$index, $remove属性，重构generateID
 //2013.4.30 重构scanTag, generateID，更改fixEvent的条件
 //2013.5.1 v5添加一个jquery like对象
-//2013.5.3 v5.1 性能大幅提升
+//2013.5.3 v5.1 性能大幅提升 新的路标系统 hidden的运用 重构model绑定的select 重构addItemView
