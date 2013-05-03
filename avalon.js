@@ -1,5 +1,5 @@
 //==================================================
-// avalon v5 独立版  by 司徒正美 2013.5.1
+// avalon v5.1 独立版  by 司徒正美 2013.5.3
 // 疑问:
 //    是否成熟? 成熟
 //    什么协议? MIT, (五种开源协议的比较(BSD,Apache,GPL,LGPL,MIThttp://www.awflasher.com/blog/archives/939)
@@ -2328,5 +2328,5 @@
 //2013.4.29 合并options与selecting绑定，为each绑定产生的子ViewModel添加$first, $last属性，
 //写死它的$index, $remove属性，重构generateID
 //2013.4.30 重构scanTag, generateID，更改fixEvent的条件
-//2013.5.1 v5添加一个jquery like对象
+//2013.5.1 v5 发布 https://github.com/RubyLouvre/mass-Framework/blob/1.4/avalon.js 添加一个jquery like对象
 //2013.5.3 v5.1 性能大幅提升 新的路标系统 hidden的运用 重构model绑定的select 重构addItemView
