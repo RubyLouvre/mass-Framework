@@ -6,24 +6,27 @@
 //    依赖情况? 没有任何依赖，可自由搭配jQuery, mass等使用,并不会引发冲突问题
 //==================================================
 (function() {
-    var serialize = Object.prototype.toString;
     var Publish = {}; //将函数曝光到此对象上，方便访问器收集依赖
+    var propMap = {};
+    var readyList = [];
     var expose = new Date - 0;
+    var subscribers = "$" + expose;
+    //这两个都与计算属性息息相关
+    var stopRepeatAssign = false;
+    var openComputedCollect = false;
+    var rword = /[^, ]+/g;
+    var prefix = "ms-";
+    var W3C = window.dispatchEvent;
+    var serialize = Object.prototype.toString;
+    var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
 
     function generateID() {
         //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         return "avalon" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
-    var subscribers = "$" + expose;
-    var propMap = {};
-    var rword = /[^, ]+/g;
-    var prefix = "ms-";
-    var W3C = window.dispatchEvent;
-    //这两个都与计算属性息息相关
-    var stopRepeatAssign = false;
-    var openComputedCollect = false;
-    var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
-    var readyList = [];
+    /*********************************************************************
+     *                 命名空间                                            *
+     **********************************************************************/
     avalon = function(el) {
         return new avalon.init(el);
     };
@@ -40,16 +43,16 @@
     avalon.fn = avalon.prototype = avalon.init.prototype;
     mix(avalon, {
         mix: mix,
-        subscribers: subscribers,
-        models: {},
         rword: rword,
-        error: function(str, e) {
-            throw new(e || Error)(str);
-        },
+        subscribers: subscribers,
+        ui: {},
+        models: {},
         log: function log(a) {
             window.console && console.log(a);
         },
-        ui: {},
+        error: function(str, e) {
+            throw new(e || Error)(str);
+        },
         ready: function(fn) {
             if (readyList) {
                 readyList.push(fn);
@@ -59,6 +62,9 @@
             } else {
                 fn();
             }
+        },
+        type: function(obj) { //取得类型
+            return obj === null ? "Null" : obj === void 0 ? "Undefined" : serialize.call(obj).slice(8, -1);
         },
         oneObject: function(array, val) {
             if (typeof array === "string") {
@@ -70,9 +76,6 @@
                 result[array[i]] = value;
             }
             return result;
-        },
-        type: function(obj) { //取得类型
-            return obj === null ? "Null" : obj === void 0 ? "Undefined" : serialize.call(obj).slice(8, -1);
         },
         range: function(start, end, step) {
             step || (step = 1);
@@ -139,7 +142,7 @@
     avalon.bind(window, "DOMContentLoaded", fireReady);
 
     /*********************************************************************
-     *                          原型链式操作                      *
+     *                      迷你jQuery对象的原型方法                    *
      **********************************************************************/
 
     function hyphen(target) {
@@ -261,9 +264,7 @@
             return get ? val : this;
         }
     });
-    /*********************************************************************
-     *                           样式处理                          *
-     **********************************************************************/
+    //=============================css相关=======================
     var cssHooks = {};
     var root = document.documentElement;
     var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-'];
@@ -1707,7 +1708,7 @@
      **********************************************************************/
     //与href绑定器 用法差不多的其他字符串属性的绑定器
     //建议不要直接在src属性上修改，这样会发出无效的请求，请使用ms-src
-    "title, alt, src, value".replace(rword, function(name) {
+    "title,alt,src,value".replace(rword, function(name) {
         bindingHandlers[name] = bindingHandlers.href;
     });
     /*********************************************************************
@@ -1747,14 +1748,12 @@
 
     bindingHandlers["each"] = function(data, scopes) {
         var parent = data.element;
-
         var value = data.value;
         if (scopes.length === 1 && value.indexOf(".") === -1) {
             var list = scopes[0][value];
         } else {
             var list = parseExpr(value, scopes, data);
         }
-        console.log(list)
         var doc = parent.ownerDocument;
         var view = doc.createDocumentFragment();
         var comment = doc.createComment(list.$id);
@@ -1945,7 +1944,7 @@
     }
 
     /*********************************************************************
-     *                 与each绑定息息相关的 Collection类              *
+     *                 与each绑定息息相关的监控数组              *
      **********************************************************************/
 
     function convert(val) {

@@ -36,14 +36,14 @@
         </script>
 
         <script src="avalon.js"></script>
-        <script src="http://knockoutjs.com/downloads/knockout-2.2.1.js"></script>
+
         <script type="text/javascript">
 
 
             avalon.ready(function() {
-               var model = avalon.define("class", [], function(vm) {
+                var model = avalon.define("class", [], function(vm) {
                     vm.rows = avalon.range(0, 15)
-                    vm.hover = NaN;//第几行高亮
+                    vm.hover = NaN; //第几行高亮
                     vm.hander = function(e) {
                         var el = e.target;
                         while (el.tagName !== "TR") {
@@ -51,7 +51,8 @@
                         }
                         vm.hover = el.$scope.$index;
                     }
-                    vm.rows= [
+                    vm.data = {
+                        rows: [
                             {
                                 "d": [
                                     "PO00000078",
@@ -65,30 +66,31 @@
                                 ]
                             }
                         ]
-               })
-                setTimeout(function(){
-                    model.rows[0].d.set(0,"PO00000080")
-                },3000)
+                    }
+                })
+                setTimeout(function() {
+                    model.rows[0].d.set(0, "PO00000080")
+                }, 3000)
                 avalon.scan();
             })
 
         </script>
-<script type="text/javascript">
-    var viewModel = {
-        shouldShowMessage: ko.observable(true) // Message initially visible
-    };
-    viewModel.shouldShowMessage(false); // ... now it's hidden
-    viewModel.shouldShowMessage(true); // ... now it's visible again
-</script>
+        <script type="text/javascript">
+            var viewModel = {
+                shouldShowMessage: ko.observable(true) // Message initially visible
+            };
+            viewModel.shouldShowMessage(false); // ... now it's hidden
+            viewModel.shouldShowMessage(true); // ... now it's visible again
+        </script>
     </head>
     <body ms-controller="class"   >
-       
-        <ul ms-each-row="rows">
+        
+        <ul ms-each-row="rows" ms-controller="class">
             <li ms-each-td="row.d">
                 {{td}}
             </li>
         </ul>
-         <ul ms-each-row="rows">
+        <ul ms-each-row="rows">
             <li>
                 {{row.d[0]}}
             </li>
