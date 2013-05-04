@@ -242,7 +242,7 @@
             }
         },
         unbind: function(type, fn, phase) {
-            if (this[0]) { //此方法不会链
+            if (this[0]) { 
                 avalon.unbind(this[0], type, fn, phase);
             }
             return this;
@@ -278,7 +278,7 @@
         if (cssMap[name]) {
             return cssMap[name];
         }
-        host = host || root.style; //$.html为document.documentElement
+        host = host || root.style; 
         for (var i = 0, n = prefixes.length; i < n; i++) {
             camelCase = camelize(prefixes[i] + name);
             if (camelCase in host) {
@@ -343,6 +343,7 @@
         };
         cssHooks["opacity:set"] = function(node, value) {
             node.style.filter = 'alpha(opacity=' + value * 100 + ')';
+            node.style.zoom = 1;
         };
         cssHooks["opacity:get"] = function(node) {
             //这是最快的获取IE透明值的方式，不需要动用正则了！
@@ -1168,7 +1169,7 @@
 
     function insertScopeNameBeforeVariableName(e, text, scopes, names, args, random) {
         var ok = false;
-        if (window.dispatchEvent) { //判定是否IE9-11或者为标准浏览器
+        if (W3C) { //判定是否IE9-11或者为标准浏览器
             ok = e instanceof ReferenceError;
         } else {
             ok = e instanceof TypeError;
