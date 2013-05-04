@@ -4,17 +4,28 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>todos</title>
         <style>
-            body{
-                font-size: 16px;
+            #classtable{
+                border: 1px solid #333;
+                border-collapse: collapse;
+                width: 90%;
             }
-            .example{
+            #classtable td,#classtable th{
+                border: 1px solid #333;
+                padding:4px;;
+            }
+            /*第一种颜色*/
+            tr.odd{
+                background: #fff;
+            }
+            /*第二种颜色*/
+            tr.even{
+                background: #F8F8F8;
+            }
+            tr.hover{
+                background: #FCF9D8!important;
+                color:red;
+            }
 
-                margin-left:2em;
-                padding:1em;
-                width: 70%;
-                border:1px solid #ccc;
-                background: #eee;
-            }
         </style>
 
         <!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">-->
@@ -25,59 +36,64 @@
         </script>
 
         <script src="avalon.js"></script>
-
+        <script src="http://knockoutjs.com/downloads/knockout-2.2.1.js"></script>
         <script type="text/javascript">
-            window.onload = function() {
-                var div = document.createComment("div");
-                div.id = "ddd";
-                //   div.innerHTML = "xxxxxxxxxxxxxxx"
-                document.body.insertBefore(div, null);
-                // alert(document.getElementById("ddd"))
-                //  range = document.createRange();
-                //     range.selectNode(document.body);
-                // range.deleteContents();
-            }
+
 
             avalon.ready(function() {
-                var model = avalon.define("form", [], function(vm) {
-                    vm.fruits = [{name: "xxx"}, {name: "yyy"}, {name: "ooo"}, {name: "ppp"}]
-                    vm.numbers = [1, 2, 3, 4]
-                    vm.push = function() {
-                        vm.fruits.push({name: "ccccccccc"})
+               var model = avalon.define("class", [], function(vm) {
+                    vm.rows = avalon.range(0, 15)
+                    vm.hover = NaN;//第几行高亮
+                    vm.hander = function(e) {
+                        var el = e.target;
+                        while (el.tagName !== "TR") {
+                            el = el.parentNode;
+                        }
+                        vm.hover = el.$scope.$index;
                     }
-                    vm.pop = function() {
-                        vm.fruits.pop()
-                    }
-                    vm.replace = function() {
-                        vm.fruits = [{name: 1}, {name: 2}]
-                    }
-                });
-                setTimeout(function() {
-                    model.fruits.set(1, {name: "5555"})
-                    model.numbers.set(3, 20)
-                }, 4000)
-                setTimeout(function() {
-                    model.numbers.set(2, 40)
-                }, 6000)
+                    vm.rows= [
+                            {
+                                "d": [
+                                    "PO00000078",
+                                    "ABC"
+                                ]
+                            },
+                            {
+                                "d": [
+                                    "PO00000079",
+                                    "DEF"
+                                ]
+                            }
+                        ]
+               })
+                setTimeout(function(){
+                    model.rows[0].d.set(0,"PO00000080")
+                },3000)
                 avalon.scan();
             })
 
         </script>
-
+<script type="text/javascript">
+    var viewModel = {
+        shouldShowMessage: ko.observable(true) // Message initially visible
+    };
+    viewModel.shouldShowMessage(false); // ... now it's hidden
+    viewModel.shouldShowMessage(true); // ... now it's visible again
+</script>
     </head>
-    <body ms-controller="form">
-        <div ms-each-el="fruits" >
-            <h3>{{el.name}}</h3>
-            <p>这是第{{$index}}个了</p>
-            <hr/>
-        </div>
-        <button ms-click="push">push</button>
-        <button ms-click="pop">pop</button>
-        <button ms-click="replace">replace</button>
-        <ol ms-each-number="numbers" >
-            <li>{{number}}</li>
-        </div>
-</body>
+    <body ms-controller="class"   >
+       
+        <ul ms-each-row="rows">
+            <li ms-each-td="row.d">
+                {{td}}
+            </li>
+        </ul>
+         <ul ms-each-row="rows">
+            <li>
+                {{row.d[0]}}
+            </li>
+        </ul>
+    </body>
 </html>
 
 
