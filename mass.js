@@ -7,10 +7,9 @@
     var html = DOC.documentElement; //HTML元素
     var head = DOC.head || DOC.getElementsByTagName("head")[0]; //HEAD元素
     var loadings = []; //正在加载中的模块列表
-    var parsings = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
+    var factorys = []; //储存需要绑定ID与factory对应关系的模块（标准浏览器下，先parse的script节点会先onload）
     var mass = 1; //当前框架的版本号
     var postfix = ""; //用于强制别名
-    var cbi = 1e5; //用于生成回调函数的名字
     var all = "mass,lang,class,flow,data,support,query,node,attr,css,event,ajax,fx";
     var moduleClass = "mass" + (new Date - 0);
     var hasOwn = Object.prototype.hasOwnProperty;
@@ -102,7 +101,7 @@
          * @api public
          */
         slice: W3C ? function(nodes, start, end) {
-            return parsings.slice.call(nodes, start, end);
+            return factorys.slice.call(nodes, start, end);
         } : function(nodes, start, end) {
             var ret = [],
                     n = nodes.length;
@@ -390,7 +389,7 @@
             return stack.replace(/(:\d+)?:\d+$/i, ""); //去掉行号与或许存在的出错字符起始位置
         }
         var nodes = (base ? document : head).getElementsByTagName("script"); //只在head标签中寻找
-        for (var i = 0, node; node = nodes[i++]; ) {
+        for (var i = nodes.length, node; node = nodes[--i]; ) {
             if ((base || node.className === moduleClass) && node.readyState === "interactive") {
                 return node.className = node.src;
             }
@@ -420,16 +419,15 @@
             if (obj.state !== 2) {
                 loadings.splice(i, 1); //必须先移除再安装，防止在IE下DOM树建完后手动刷新页面，会多次执行它
                 fireFactory(obj.id, obj.args, obj.factory);
-                checkDeps();
+                checkDeps();//如果成功,则再执行一次,以防有些模块就差本模块没有安装好
             }
         }
     }
 
-    function checkFail(node, onError, testState) {
-        //检测是否死链
-        var id = node.src;
+    function checkFail(node, onError, fuckIE) {
+        var id = node.src;//检测是否死链
         node.onload = node.onreadystatechange = node.onerror = null;
-        if (onError || (testState && !modules[id].state)) {
+        if (onError || (fuckIE && !modules[id].state)) {
             setTimeout(function() {
                 head.removeChild(node);
             });
@@ -440,19 +438,19 @@
     }
 
     function loadJSCSS(url, parent, ret, shim) {
-        //1. 特别处理ready标识符
+        //1. 特别处理mass|ready标识符
         if (/^(mass|ready)$/.test(url)) {
             return url;
         }
         //2. 转化为完整路径
-        if ($.config.alias[url]) {
+        if ($.config.alias[url]) {//别名机制
             ret = $.config.alias[url];
             if (typeof ret === "object") {
                 shim = ret;
                 ret = ret.src;
             }
         } else {
-            if (/^(\w+)(\d)?:.*/.test(url)) { //如果用户路径包含协议
+            if (/^(\w+)(\d)?:.*/.test(url)) { //如果本来就是完整路径
                 ret = url;
             } else {
                 parent = parent.substr(0, parent.lastIndexOf('/'));
@@ -469,7 +467,7 @@
                     });
                     ret = arr.join("/") + "/" + tmp;
                 } else if (tmp === "/") {
-                    ret = parent + url;
+                    ret = parent + url;//相对于兄弟路径
                 } else {
                     $.error("不符合模块标识规则: " + url);
                 }
@@ -492,11 +490,12 @@
                     parent: parent,
                     exports: {}
                 };
-                if (shim) {
+                if (shim) {//shim机制
                     require(shim.deps || "", function() {
                         loadJS(src, function() {
                             modules[src].state = 2;
-                            modules[src].exports = window[shim.exports];
+                            modules[src].exports = typeof shim.exports === "function" ?
+                                    shim.exports() : window[shim.exports];
                             checkDeps();
                         });
                     });
@@ -517,7 +516,7 @@
         node[W3C ? "onload" : "onreadystatechange"] = function() {
             if (W3C || /loaded|complete/i.test(node.readyState)) {
                 //mass Framework会在_checkFail把它上面的回调清掉，尽可能释放回存，尽管DOM0事件写法在IE6下GC无望
-                var factory = parsings.pop();
+                var factory = factorys.pop();
                 factory && factory.delay(node.src);
                 if (callback) {
                     callback();
@@ -556,13 +555,13 @@
     window.require = $.require = function(list, factory, parent) {
         // 用于检测它的依赖是否都为2
         var deps = {},
-                // 用于依赖列表中的模块的返回值
+                // 用于保存依赖模块的返回值
                 args = [],
                 // 需要安装的模块数
                 dn = 0,
                 // 已安装完的模块数
                 cn = 0,
-                id = parent || "cb" + (cbi++).toString(32);
+                id = parent || "callback" + setTimeout("1");
         parent = parent || basepath;
         String(list).replace($.rword, function(el) {
             var url = loadJSCSS(el, parent)
@@ -577,8 +576,7 @@
                 }
             }
         });
-        //创建或更新模块的状态
-        modules[id] = {
+        modules[id] = {//创建一个对象,记录模块的加载情况与其他信息
             id: id,
             factory: factory,
             deps: deps,
@@ -586,9 +584,9 @@
             state: 1
         };
         if (dn === cn) { //如果需要安装的等于已安装好的
-            fireFactory(id, args, factory); //装配到框架中
+            fireFactory(id, args, factory); //安装到框架中
         } else {
-            //在正常情况下模块只能通过_checkDeps执行
+            //放到检测列队中,等待checkDeps处理
             loadings.unshift(id);
         }
         checkDeps();
@@ -616,17 +614,19 @@
         if (typeof args[0] === "function") {
             args.unshift([]);
         } //上线合并后能直接得到模块ID,否则寻找当前正在解析中的script节点的src作为模块ID
-        //现在除了safari外，我们都能直接通过getCurrentScript一步到位得到当前执行的script节点，safari可通过onload+delay闭包组合解决
+        //现在除了safari外，我们都能直接通过getCurrentScript一步到位得到当前执行的script节点，
+        //safari可通过onload+delay闭包组合解决
         id = modules[id] && modules[id].state >= 1 ? _id : getCurrentScript();
         factory = args[1];
         factory.id = _id; //用于调试
         factory.delay = function(id) {
             args.push(id);
-            try{
-            if (checkCycle(modules[id].deps, id)) {
-                $.error(id + "模块与之前的某些模块存在循环依赖");
+            var isCycle = true;
+            try {
+               isCycle = checkCycle(modules[id].deps, id);
+            } catch (e) {
             }
-            }catch(e){
+            if (isCycle) {
                 $.error(id + "模块与之前的某些模块存在循环依赖");
             }
             delete factory.delay; //释放内存
@@ -635,7 +635,7 @@
         if (id) {
             factory.delay(id, args);
         } else { //先进先出
-            parsings.push(factory);
+            factorys.push(factory);
         }
     };
     $.define.amd = modules;

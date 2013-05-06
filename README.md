@@ -125,6 +125,7 @@ node.exe combo
 <p>使用compiler.jar( GCC，需要有JAVA运行环境)</p>
 <pre>
 java -jar compiler.jar --js mass_merge.js --js_output_file mass_min.js
+java -jar compiler.jar --js avalon.js --js_output_file avalon_min.js
 </pre>
 
 <h3>BUG提交与插件的友情贡献。</h3>

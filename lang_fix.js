@@ -1,7 +1,7 @@
 //=========================================
 //  lang_fix 语言补丁模块
 //==========================================
-define("lang_fix", !!Array.isArray, ["mass"], function($) {
+define("lang_fix", /native code/.test(Array.isArray), ["mass"], function($) {
     //fix ie for..in bug
     var DONT_ENUM = $.DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(","),
             P = "prototype",

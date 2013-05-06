@@ -1,7 +1,7 @@
 //=========================================
 // 语言扩展模块v6 by 司徒正美
 //=========================================
-define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
+define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], function($) {
     var global = this,
             seval = global.execScript ? "execScript" : "eval",
             rformat = /\\?\#{([^{}]+)\}/gm,
@@ -226,7 +226,7 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
          */
         dump: function(obj) {
             var space = $.isNative("parse", window.JSON) ? 4 : "\r\t", cache = [],
-            text = JSON.stringify(obj, function(key, value) {
+                    text = JSON.stringify(obj, function(key, value) {
                 if (typeof value === 'object' && value !== null) {//防止环引用
                     if (cache.indexOf(value) !== -1) {
                         return;
@@ -492,14 +492,9 @@ define("lang", Array.isArray ? ["mass"] : ["lang_fix"], function($) {
         },
         pluck: function(target, name) {
             //取得对象数组的每个元素的指定属性，组成数组返回。
-            var result = [],
-                    prop;
-            target.forEach(function(item) {
-                prop = item[name];
-                if (prop != null)
-                    result.push(prop);
+            return target.filter(function(item) {
+                return item[name] != null;
             });
-            return result;
         },
         unique: function(target) {
             // 对数组进行去重操作，返回一个没有重复元素的新数组。
