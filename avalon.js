@@ -770,7 +770,7 @@
                     return VBPublics.push(name);
                 }
                 var accessor, oldValue, oldArgs;
-                if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
+                if (value && typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
                     accessor = function(neo) { //创建计算属性
                         if (arguments.length) {
                             if (stopRepeatAssign) {
