@@ -686,7 +686,7 @@
     //在firefox3.6之前，不存在readyState属性
     //http://www.cnblogs.com/rubylouvre/archive/2012/12/18/2822912.html
     if (!DOC.readyState) {
-        var readyState = DOC.readyState = "loading";
+        var readyState = DOC.readyState = DOC.body ? "complete" : "loading";
     }
     if (DOC.readyState === "complete") {
         fireReady(); //如果在domReady之外加载
