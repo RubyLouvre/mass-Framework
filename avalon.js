@@ -50,7 +50,7 @@
         log: function log(a) {
             window.console && console.log(a);
         },
-        error: function(str, e) {
+        error: function(str, e) { //如果不用Error对象封装一下，str在控制台下可能会乱码
             throw new(e || Error)(str);
         },
         ready: function(fn) {
@@ -162,12 +162,12 @@
     var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
     mix(avalon.fn, {
         hasClass: function(cls) {
-            if (this[0] && this[0].nodeType === 1) {
+            if (this[0] && this[0].nodeType === 1 ) {
                 return -1 < (" " + (this[0] || {}).className + " ").indexOf(" " + cls + " ");
             }
         },
         addClass: function(cls) {
-            if (this.hasClass(cls) === false) this[0].className += " " + cls;
+            if (this.hasClass(cls) === false) this[0].className = (this[0].className + " " + cls).trim();
             return this;
         },
         removeClass: function(cls) {
@@ -194,10 +194,10 @@
         data: function(name, value) {
             name = "data-" + hyphen(name);
             if (arguments.length === 2) {
-                this[0].setAttribute(name, value);
+                this.attr(name, value);
                 return this;
             } else {
-                var val = this[0].getAttribute(name),
+                var val = this.attr(name),
                     _eval = false;
                 if (rparse.test(val) || +val + "" === val) {
                     _eval = true;
@@ -242,7 +242,7 @@
             }
         },
         unbind: function(type, fn, phase) {
-            if (this[0]) { 
+            if (this[0]) {
                 avalon.unbind(this[0], type, fn, phase);
             }
             return this;
@@ -278,7 +278,7 @@
         if (cssMap[name]) {
             return cssMap[name];
         }
-        host = host || root.style; 
+        host = host || root.style;
         for (var i = 0, n = prefixes.length; i < n; i++) {
             camelCase = camelize(prefixes[i] + name);
             if (camelCase in host) {
@@ -767,9 +767,7 @@
                     return VBPublics.push(name);
                 }
                 if (name.charAt(0) === "$" && !systemOne[name]) {
-                    if (skipArray.indexOf(name) !== -1) {
-                        return VBPublics.push(name);
-                    }
+                    return VBPublics.push(name);
                 }
                 var accessor, oldValue, oldArgs;
                 if (typeof value === "object" && typeof value.get === "function" && Object.keys(value).length <= 2) {
@@ -1407,7 +1405,7 @@
                     } else { //移除  如果它还在DOM树中
                         if (element.parentNode.nodeType === 1) {
                             parent.replaceChild(placehoder, element);
-                            element.noRemove = true;
+                            element.noRemove = 1;
                         }
                     }
                 });
@@ -1998,21 +1996,21 @@
         });
         collection.isCollection = true;
         collection.clear = function() {
-            this.length = 0;
+            this.length = 0; //清空数组
             notifySubscribers(this, "clear", []);
             dynamic.length = 0;
             return this;
         };
-        collection.sortBy = function(fn, scope) {
+        collection.sortBy = function(fn, scope) { //按某属性排序
             var ret = avalon.Array.sortBy(this, fn, scope);
             notifySubscribers(this, "sort", []);
             return ret;
         };
-        collection.contains = function(el) {
+        collection.contains = function(el) { //判定是否包含
             return this.indexOf(el) !== -1;
         };
         collection.ensure = function(el) {
-            if (!this.contains(el)) {
+            if (!this.contains(el)) { //只有不存在才push
                 this.push(el);
             }
             return this;
@@ -2021,7 +2019,7 @@
             notifySubscribers(this, "update", []);
             return this;
         };
-        collection.size = function() {
+        collection.size = function() { //取得数组长度，这个函数可以同步视图，length不能
             return dynamic.length;
         };
         collection.remove = function(item) { //移除第一个等于给定值的元素
@@ -2030,7 +2028,7 @@
                 this.removeAt(index);
             }
         };
-        collection.set = function(index, val) { //修改当前数组
+        collection.set = function(index, val) { //修改数组元素并同步
             if (index >= 0 && index < this.length) {
                 this.splice(index, 1, val);
             }
@@ -2041,7 +2039,7 @@
                 this.splice(index, 1); //DOM操作非常重,因此只有非负整数才删除
             }
         };
-        collection.removeAll = function(all) { //移除指定索引上的元素
+        collection.removeAll = function(all) { //移除N个元素
             if (Array.isArray(all)) {
                 all.forEach(function(el) {
                     collection.remove(el);
