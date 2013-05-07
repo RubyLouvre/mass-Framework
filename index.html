@@ -3,7 +3,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>todos</title>
-        <style>
+<!--        <style>
             #classtable{
                 border: 1px solid #333;
                 border-collapse: collapse;
@@ -26,7 +26,7 @@
                 color:red;
             }
 
-        </style>
+        </style>-->
 
         <!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">-->
         <script>
@@ -36,66 +36,66 @@
         </script>
 
         <script src="avalon.js"></script>
+<!--        <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js"></script>-->
 
         <script type="text/javascript">
-
 
             avalon.ready(function() {
                 var model = avalon.define("class", [], function(vm) {
-                    vm.rows = avalon.range(0, 15)
-                    vm.hover = NaN; //第几行高亮
-                    vm.hander = function(e) {
-                        var el = e.target;
-                        while (el.tagName !== "TR") {
-                            el = el.parentNode;
-                        }
-                        vm.hover = el.$scope.$index;
-                    }
-                    vm.data = {
-                        rows: [
-                            {
-                                "d": [
-                                    "PO00000078",
-                                    "ABC"
-                                ]
-                            },
-                            {
-                                "d": [
-                                    "PO00000079",
-                                    "DEF"
-                                ]
-                            }
-                        ]
-                    }
+                    vm.rows = avalon.range(0, 10)
                 })
-                setTimeout(function() {
-                    model.rows[0].d.set(0, "PO00000080")
-                }, 3000)
-                avalon.scan();
+                var now = new Date - 0
+              //  avalon.scan();
+                //     alert("avalon " + (new Date - now))
+
             })
+            setTimeout(function() {
+  
+//                var el = document.getElementById("aaa");
+//                document.body.removeChild(el);
+//                var array = avalon.range(0, 1000);
+//                var now = new Date - 0
+//                ko.applyBindings({
+//                    array: array
+//                }, document.documentElement)
+//                alert("knockout " + (new Date - now))
+            }, 1000)
+
+
+
 
         </script>
-        <script type="text/javascript">
-            var viewModel = {
-                shouldShowMessage: ko.observable(true) // Message initially visible
-            };
-            viewModel.shouldShowMessage(false); // ... now it's hidden
-            viewModel.shouldShowMessage(true); // ... now it's visible again
-        </script>
+
     </head>
-    <body ms-controller="class"   >
-        
-        <ul ms-each-row="rows" ms-controller="class">
-            <li ms-each-td="row.d">
-                {{td}}
+    <body >
+        <table width="60%">
+            <tr><th></th><th>avalon</th><th>knockout</th></tr>
+            <tr><td>IE10</td><td>10</td><td>538</td></tr>
+            <tr><td>chrome28</td><td>1</td><td>523</td></tr>
+            <tr><td>firefox19</td><td>3</td><td>928</td></tr>
+        </table>
+        <ul data-bind="foreach: array">
+            <li data-bind="text: $data">
             </li>
         </ul>
-        <ul ms-each-row="rows">
+        <ul ms-each-row="rows" ms-controller="class" id="aaa">
             <li>
-                {{row.d[0]}}
+                {{row}}
             </li>
         </ul>
+<select id="optSelected">
+</select>
+<script type="text/javascript">
+    var select = document.getElementById('optSelected');
+    var option = document.createElement('option');
+    select.appendChild(option);
+    alert(option.selected);
+    select.selectedIndex;
+    //处理optgroup时的情况
+    alert(option.selected);
+</script>
     </body>
+
 </html>
 
 
