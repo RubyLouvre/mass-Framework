@@ -1,5 +1,5 @@
 //==================================================
-// avalon v5.1 独立版  by 司徒正美 2013.5.3
+// avalon v6 独立版  by 司徒正美 2013.5.9
 // 疑问:
 //    是否成熟? 成熟
 //    什么协议? MIT, (五种开源协议的比较(BSD,Apache,GPL,LGPL,MIThttp://www.awflasher.com/blog/archives/939)
@@ -162,8 +162,9 @@
     var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
     mix(avalon.fn, {
         hasClass: function(cls) {
-            if (this[0] && this[0].nodeType === 1 ) {
-                return -1 < (" " + (this[0] || {}).className + " ").indexOf(" " + cls + " ");
+            var el = this[0] || {};
+            if (el.nodeType === 1) {
+                return !!el.className && (" " + el.className + " ").indexOf(" " + cls + " ") > -1;
             }
         },
         addClass: function(cls) {
@@ -193,20 +194,24 @@
         },
         data: function(name, value) {
             name = "data-" + hyphen(name);
-            if (arguments.length === 2) {
-                this.attr(name, value);
-                return this;
-            } else {
-                var val = this.attr(name),
-                    _eval = false;
-                if (rparse.test(val) || +val + "" === val) {
-                    _eval = true;
-                }
-                try {
-                    return _eval ? eval("0," + val) : val;
-                } catch (e) {
-                    return val;
-                }
+            switch (arguments.length) {
+                case 2:
+                    this.attr(name, value);
+                    return this;
+                case 1:
+                    var val = this.attr(name);
+                    return parseData(val);
+                case 0:
+                    var attrs = this[0].attributes,
+                        ret = {};
+                    for (var i = 0, attr; attr = attrs[i++];) {
+                        name = attr.name;
+                        if (!name.indexOf("data-")) {
+                            name = camelize(name.slice(5));
+                            ret[name] = parseData(attr.value);
+                        }
+                    }
+                    return ret;
             }
         },
         removeData: function(name) {
@@ -264,6 +269,18 @@
             return get ? val : this;
         }
     });
+
+    function parseData(val) {
+        var _eval = false;
+        if (rparse.test(val) || +val + "" === val) {
+            _eval = true;
+        }
+        try {
+            return _eval ? eval("0," + val) : val;
+        } catch (e) {
+            return val;
+        }
+    }
     //=============================css相关=======================
     var cssHooks = {};
     var root = document.documentElement;
@@ -1420,12 +1437,7 @@
                         elem.$scope = scopes[0];
                         elem.$scopes = scopes;
                     }
-                    var hook = bindingHandlers.on[type];
-                    if (hook) {
-                        hook(elem, fn)
-                    } else {
-                        avalon.bind(elem, type, fn);
-                    }
+                    avalon.bind(elem, type, fn);
                 }
             });
         },
@@ -1499,6 +1511,20 @@
                         god.toggleClass(cls, !! flag);
                     });
                 }
+            });
+        },
+        "hover": function(data, scopes, opts) {
+            var element = data.element,
+                className = data.value,
+                god = avalon(element);
+            god.bind("mouseenter", function() {
+                god.addClass(className);
+            });
+            god.bind("mouseleave", function() {
+                god.removeClass(className);
+            });
+            watchView("", scopes, data, function() {
+
             });
         },
         "ui": function(data, scopes, opts) {
@@ -1721,18 +1747,25 @@
         };
     });
     if (!("onmouseenter" in document.documentElement)) {
-        "mouseenter_mouseover,mouseleave_mouseout".replace(/(\w+)_(\w+)/g, function(_, type, fix) {
-            bindingHandlers.on[type] = function(elem, fn) {
-                avalon.bind(elem, fix, function(e) {
+        var oldBind = avalon.bind;
+        var events = {
+            mouseenter: "mouseover",
+            mouseleave: "mouseout"
+        };
+        avalon.bind = function(elem, type, fn) {
+            if (events[type]) {
+                return oldBind(elem, events[type], function(e) {
                     var t = e.relatedTarget;
-                    if (!t || (t !== elem && !(t.compareDocumentPosition(elem) & 16))) {
+                    if (!t || (t !== elem && !(elem.compareDocumentPosition(t) & 16))) {
                         delete e.type;
                         e.type = type;
                         fn.call(elem, e);
                     }
                 });
-            };
-        });
+            } else {
+                return oldBind(elem, type, fn);
+            }
+        }
     }
     /*********************************************************************
      *                      each binding                              *
@@ -1931,8 +1964,8 @@
             }
         };
         source.$last = {
-            get: function() {
-                return this.$index === list.size() - 1;
+            get: function() { //有时用户是传个普通数组
+                return this.$index === list.length - 1;
             }
         };
         source.$remove = function() {
@@ -2353,3 +2386,4 @@
 //2013.4.30 重构scanTag, generateID，更改fixEvent的条件
 //2013.5.1 v5 发布 https://github.com/RubyLouvre/mass-Framework/blob/1.4/avalon.js 添加一个jquery like对象
 //2013.5.3 v5.1 性能大幅提升 新的路标系统 hidden的运用 重构model绑定的select 重构addItemView
+//2013.5.9 v6 添加ms-hover绑定, 重构mouseenter, mouseleave事件，对data方法进行增强

@@ -3,99 +3,210 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>todos</title>
-<!--        <style>
-            #classtable{
-                border: 1px solid #333;
-                border-collapse: collapse;
-                width: 90%;
-            }
-            #classtable td,#classtable th{
-                border: 1px solid #333;
-                padding:4px;;
-            }
-            /*第一种颜色*/
-            tr.odd{
-                background: #fff;
-            }
-            /*第二种颜色*/
-            tr.even{
-                background: #F8F8F8;
-            }
-            tr.hover{
-                background: #FCF9D8!important;
-                color:red;
-            }
-
-        </style>-->
-
-        <!--        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css">-->
-        <script>
-
-
-
-        </script>
-
         <script src="avalon.js"></script>
-<!--        <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js"></script>-->
-
-        <script type="text/javascript">
-
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <script>
             avalon.ready(function() {
-                var model = avalon.define("class", [], function(vm) {
-                    vm.rows = avalon.range(0, 10)
-                })
-                var now = new Date - 0
-              //  avalon.scan();
-                //     alert("avalon " + (new Date - now))
+                var model = avalon.define("datepicker", function(vm) {
+                    //配置
+                    vm.changeYear = true
+                    vm.changeMonth = false
+                    vm.minDate = new Date(2013, 3, 25)
 
-            })
-            setTimeout(function() {
-  
-//                var el = document.getElementById("aaa");
-//                document.body.removeChild(el);
-//                var array = avalon.range(0, 1000);
-//                var now = new Date - 0
-//                ko.applyBindings({
-//                    array: array
-//                }, document.documentElement)
-//                alert("knockout " + (new Date - now))
-            }, 1000)
-
-
-
-
+                    //当前时间
+                    vm.current = new Date;
+                    vm.currentMonth = vm.current.getMonth();
+                    vm.currentYear = vm.current.getFullYear();
+                    vm.selectedDate = new Date;
+                    //显示顶部的年份与月份
+                    vm.title = {
+                        get: function() {
+                            var format = "";
+                            if (!this.changeYear && this.changeMonth) {
+                                format = "yyyy年";
+                            } else if (this.changeYear && !this.changeMonth) {
+                                format = "MMMM";
+                            } else if (!this.changeYear && !this.changeMonth) {
+                                format = "MMMM yyyy年";
+                            }
+                            return format && avalon.filters.date(this.current, format);
+                        }
+                    };
+                    //星期显示
+                    vm.$weeks = "日一二三四五六".split("");
+                    //月份下拉菜单
+                    vm.$months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+                    //当月的日期
+                    function isDisabled(time) {
+                        var disabled = false;
+                        if (vm.minDate) {
+                            disabled = time < vm.minDate;
+                        }
+                        if (disabled && vm.maxDate) {
+                            disabled = time > vm.maxDate ;
+                        }
+                        return disabled;
+                    }
+                    function  getWeeks() {
+                        var cur = vm.current;
+                        var year = cur.getFullYear();
+                        var month = cur.getMonth();//得到今天是几月（0 ~ 11）
+                        var date = cur.getDate();  //得到今天是几号 （1 ~ 31）
+                        cur.setMonth(month + 1);//改为下一个月，
+                        //由于日期是1 ~ 31， 0则是退到上一个月的最后一天，于是得到这个月的总天数
+                        cur.setDate(0);
+                        var num = cur.getDate();
+                        var next = 6 - cur.getDay();
+                        var dates = avalon.range(1, num + 1);
+                        dates = dates.map(function(d) {
+                            var time = new Date(year, month, d)
+                            return [year, month, d, isDisabled(time)];
+                        });
+                        cur.setMonth(month);
+                        cur.setDate(1);//得到当月的第一天
+                        var prev = cur.getDay();//0 ~ 6
+                        cur.setDate(date);//还原
+                        for (var i = 0; i < prev; i++) {//补上上一个月的日期
+                            cur = new Date(year, month, -1 * i)
+                            dates.unshift([year, cur.getMonth(), cur.getDate(),isDisabled(cur) ])
+                        }
+                        for (var i = 0; i < next; i++) {//补上下一个月的日期
+                            cur = new Date(year, month + 1, i + 1)
+                            dates.push([year, cur.getMonth(), cur.getDate(), isDisabled(cur)])
+                        }
+                        var ret = [];
+                        while (dates.length) {//每行七个分组
+                            ret.push(dates.splice(0, 7));
+                        }
+                        return ret;
+                    }
+                    vm.candidateWeeks = getWeeks();
+                    //取得当年的前后20年
+                    function getYears() {
+                        var y = vm.currentYear;
+                        return avalon.range(y - 10, y + 10);
+                    }
+                    vm.candidateYears = getYears();
+                    //点击事件
+                    vm.nextMonth = function() {
+                        var date = vm.current;
+                        var m = date.getMonth();
+                        vm.$fire("currentMonth", m + 1)
+                    };
+                    //点击事件
+                    vm.prevMonth = function() {
+                        var date = vm.current;
+                        var m = date.getMonth();
+                        vm.$fire("currentMonth", m - 1);
+                    };
+//侦听
+                    vm.$watch("currentMonth", function(val) {
+                        var date = vm.current;
+                        date.setMonth(val);
+                        if (vm.currentMonth != val)
+                            vm.currentMonth = val;
+                        vm.candidateWeeks = getWeeks();
+                        vm.title = date - 0;
+                    });
+                    vm.$watch("currentYear", function(val) {
+                        var date = vm.current;
+                        date.setFullYear(val);
+                        if (vm.currentYear != val)
+                            vm.currentYear = val;
+                        vm.$fire("currentMonth", date.getMonth());
+                    });
+                    //高亮当前选中的日期
+                    vm.select = function(e) {
+                        var el = e.target;
+                        if (el.tagName === "SPAN" && el.parentNode.tagName === "TD" && !/disabled/.test(el.className)) {
+                            vm.selected = el.innerHTML;
+                            var d = el.$scope.day.slice(0, 3);
+                            vm.selectedDate = new Date(d[0], d[1], d[2]);
+                        }
+                    };
+                    vm.selected = "";
+                    vm.isSelected = function() {
+                        return  this.innerHTML === vm.selected;
+                    };
+                    vm.showButtonPanel = true;
+                    //高亮今天的日期
+                    var today = new Date;
+                    today = [today.getFullYear(), today.getMonth(), today.getDate()].join();
+                    vm.isToday = function() {
+                        var day = this.$scope && this.$scope.day;
+                        return day && day.slice(0, 3).join() === today;
+                    };
+                });
+                console.log(model)
+                avalon.scan();
+            });
+//showButtonPanel
         </script>
+
+
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js"></script>
 
     </head>
-    <body >
-        <table width="60%">
-            <tr><th></th><th>avalon</th><th>knockout</th></tr>
-            <tr><td>IE10</td><td>10</td><td>538</td></tr>
-            <tr><td>chrome28</td><td>1</td><td>523</td></tr>
-            <tr><td>firefox19</td><td>3</td><td>928</td></tr>
-        </table>
-        <ul data-bind="foreach: array">
-            <li data-bind="text: $data">
-            </li>
-        </ul>
-        <ul ms-each-row="rows" ms-controller="class" id="aaa">
-            <li>
-                {{row}}
-            </li>
-        </ul>
-<select id="optSelected">
-</select>
-<script type="text/javascript">
-    var select = document.getElementById('optSelected');
-    var option = document.createElement('option');
-    select.appendChild(option);
-    alert(option.selected);
-    select.selectedIndex;
-    //处理optgroup时的情况
-    alert(option.selected);
-</script>
+    <body ms-controller="datepicker">
+        <div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" style="display:block"> 
+            <div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all">
+                <a class="ui-datepicker-prev ui-corner-all" title="Prev" 
+                   ms-click="prevMonth"
+                   ms-hover="ui-state-hover"
+                   ms-hover-1="ui-datepicker-prev-hover"
+                   >
+                    <span class="ui-icon ui-icon-circle-triangle-w">Prev</span></a>
+                <a class="ui-datepicker-next ui-corner-all"  title="Next" 
+                   ms-click="nextMonth"
+                   ms-hover="ui-state-hover"
+                   ms-hover-1="ui-datepicker-next-hover"
+                   >
+                    <span class="ui-icon ui-icon-circle-triangle-e">Next</span></a>
+                <div class="ui-datepicker-title">
+                    <select class="ui-datepicker-month" ms-each-month="$months" ms-if="changeMonth" ms-model="currentMonth" >
+                        <option value="{{month}}" ms-selected="currentMonth === month">{{month+1}}月</option>
+                    </select>
+                    <select class="ui-datepicker-year" ms-each-year="candidateYears" ms-if="changeYear" ms-model="currentYear" >
+                        <option value="{{year}}" ms-selected="currentYear === year">{{year}}年</option>
+                    </select>
+                    {{title}}
+                </div>
+            </div>
+            <table class="ui-datepicker-calendar" >
+                <thead>
+                    <tr ms-each-date="$weeks">
+                        <th ms-class-ui-datepicker-week-end="$first">
+                            <span title="星期{{date}}">{{date}}</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody ms-each-week="candidateWeeks">
+                    <tr ms-each-day="week">
+                        <td ms-class-ui-datepicker-other-month="day[1] == currentMonth"
+                            ms-class-ui-datepicker-week-end="$first || $last"
+                            ms-class-ui-state-disabled="day && day[3]" 
+                            ms-class-ui-datepicker-unselectable="day && day[3]"
+                            >
+                            <a class="ui-state-default"   href="#"
+                               ms-if="day" 
+                               ms-hover="ui-state-hover"
+                               ms-class-ui-state-highlight="isToday"
+                               >{{day[2]}}</a>
+                        </td>
+                </tbody>
+            </table>
+            <div class="ui-datepicker-buttonpane ui-widget-content" ms-if="showButtonPanel">
+                <button type="button" class="ui-datepicker-current ui-state-default ui-priority-secondary ui-corner-all"
+                        ms-hover="ui-state-hover"
+                        >Today</button>
+                <button type="button" class="ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all"
+                        ms-hover="ui-state-hover"
+                        >Done</button>
+            </div>
+        </div>
+
+
+
     </body>
 
-</html>
-
-
+</html> 
