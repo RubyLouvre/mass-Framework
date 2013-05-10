@@ -15,29 +15,27 @@
     }
 
 
-    avalon.ui["slider"] = function(element, id, opts) {
+    avalon.ui["slider"] = function(element, id) {
         var $element = avalon(element);
         var options = avalon.mix({}, defaults);
-
-        options = avalon.mix(options, opts);
-        var orientation = $element.data("orientation") || options.orientation;//"vertical" ? "vertical" : "horizontal";
-        var isHorizontal = orientation === "horizontal";
-
+        avalon.mix(options, $element.data());
+        var isHorizontal = options.orientation === "horizontal";
         //将整个slider划分为N等分, 比如100, 227
-        var valueMin = $element.data("min") || options.min;
-        var valueMax = $element.data("max") || options.max;
-        var step = $element.data("step") || options.step;
-        var oRange = $element.data("range") || options.range;//true min max
-        var values = $element.data("values") || options.values;
+        var valueMin = options.min;
+        var valueMax = options.max;
+        var step = options.step;
+        var oRange = options.range;//true min max
+        var values = options.values;
+        var twohandlebars = oRange === true;
         //处理
-        var value = $element.data("value") || options.value;//第几等份
+        var value = options.value;//第几等份
         var model; //ViewModel;
         if (oRange === "min" && values) {
             var value = values[0];
         } else if (oRange === "max" && values) {
             value = values[1];
         }
-        if (oRange === true) {
+        if (twohandlebars) {
             if (Array.isArray(values)) {
                 values = values.length === 1 ? [values[0], values[0]] : values.concat();
             } else {
@@ -49,7 +47,8 @@
         //   avalon.log(typeof values)
         //   avalon.log("valueMax " + valueMax);
         //   avalon.log("range " + oRange);
-        $element.addClass("ui-slider").addClass(" ui-slider-" + orientation)
+        //ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all
+        $element.addClass("ui-slider").addClass(" ui-slider-" + options.orientation)
                 .addClass("ui-widget").addClass("ui-widget-content").addClass("ui-corner-all");
         var rangeDIV = document.createElement("div");
         avalon(rangeDIV).addClass("ui-slider-range").addClass("ui-widget-header").addClass("ui-corner-all");
@@ -59,13 +58,11 @@
         }
         var handlers = [];//拖柄
         //创建拖柄
-        rangeDIV.innerHTML = "<a class='ui-slider-handle ui-state-default ui-corner-all' href='###' ></a>";
-        handlers.push(rangeDIV.firstChild);
-        element.appendChild(handlers[0]);
-        if (oRange === true) {
-            rangeDIV.innerHTML = "<a class='ui-slider-handle ui-state-default ui-corner-all' href='###'></a>";
+        var handleHTML = "<a class='ui-slider-handle ui-state-default ui-corner-all' ms-hover='ui-state-hover' href='javascript:void(0)' ></a>";
+        for (var i = 0, n = twohandlebars ? 2 : 1; i < n; i++) {
+            rangeDIV.innerHTML = handleHTML;
             handlers.push(rangeDIV.firstChild);
-            element.appendChild(handlers[1]);
+            element.appendChild(handlers[i]);
         }
         function _trimAlignValue(val) {
             if (val <= valueMin) {
@@ -85,11 +82,11 @@
 
         function _refreshRange() {
             var valPercent, lastValPercent;
-            if (oRange === true) {
+            if (twohandlebars) {
                 handlers.forEach(function(handler, i) {
                     valPercent = (values[i] - valueMin) / (valueMax - valueMin) * 100;
                     handler.style[ isHorizontal ? "left" : "bottom" ] = valPercent + "%";
-                    if (oRange === true) {
+                    if (twohandlebars) {
                         if (isHorizontal) {
                             if (i === 0) {
                                 rangeDIV.style.left = valPercent + "%";
@@ -139,7 +136,7 @@
 
         avalon.nextTick(function() {
             _refreshRange();
-         
+
             avalon.scan(element.parentNode, model);
 
             var dragEvent = isTouch ? "touchmove" : "mousemove";
@@ -156,14 +153,52 @@
                     e.preventDefault();
                 }
             });
+            var uiLeft = $element.offset().left;
+            var uiTop = $element.offset().top;
+            var pixels;
+            if (twohandlebars) {
+                if (isHorizontal) {
+                    pixels = [avalon(handlers[0]).offset().left - uiLeft, avalon(handlers[1]).offset().left - uiLeft]
+                } else {
+                    pixels = [avalon(handlers[0]).offset().top - uiTop, avalon(handlers[1]).offset().top - uiTop]
+                }
+            }
+
             function drag(e) {
                 var pixelMouse = 0;
-                if (isHorizontal) {
-                    pixelMouse = (isTouch ? e.targetTouches[0].pageX : e.pageX) - $element.offset().left;
+                if (isHorizontal) {//水平，垂直
+                    pixelMouse = (isTouch ? e.targetTouches[0].pageX : e.pageX) - uiLeft;
                 } else {
-                    pixelMouse = (isTouch ? e.targetTouches[0].pageY : e.pageY) - $element.offset().top;
+                    pixelMouse = (isTouch ? e.targetTouches[0].pageY : e.pageY) - uiTop;
                 }
 
+                if (twohandlebars) {//水平时，小的0在左边，大的1在右边，垂直时，大的0在下边，小的1在上边
+                    if (isHorizontal) {
+                        if (Index === 0) {
+                            if (pixelMouse > pixels[1]) {
+                                pixelMouse = pixels[1]
+                            }
+                            pixels[0] = pixelMouse;
+                        } else {
+                            if (pixelMouse < pixels[0]) {
+                                pixelMouse = pixels[0]
+                            }
+                            pixels[1] = pixelMouse
+                        }
+                    } else {
+                        if (Index === 0) {
+                            if (pixelMouse < pixels[1]) {
+                                pixelMouse = pixels[1]
+                            }
+                            pixels[0] = pixelMouse
+                        } else {
+                            if (pixelMouse > pixels[0]) {
+                                pixelMouse = pixels[0];
+                            }
+                            pixels[1] = pixelMouse;
+                        }
+                    }
+                }
                 var percentMouse = (pixelMouse / pixelTotal);//求出当前handler在slider的位置
 
                 if (percentMouse > 1) {
@@ -184,7 +219,7 @@
                         return;
                     }
                 }
-                if (oRange === true) {
+                if (twohandlebars) {
                     lastValue = values[Index] = valueMouse;
                     model.value = values.join(",")
                 } else {

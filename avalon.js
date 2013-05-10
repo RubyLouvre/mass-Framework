@@ -193,7 +193,7 @@
             }
         },
         data: function(name, value) {
-            name = "data-" + hyphen(name);
+            name = "data-" + hyphen(name || "");
             switch (arguments.length) {
                 case 2:
                     this.attr(name, value);

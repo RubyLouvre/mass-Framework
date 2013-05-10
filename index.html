@@ -4,91 +4,148 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js"></script>
+        <script src="avalon.slider.js"></script>
         <script>
             avalon.ready(function() {
-                var model = avalon.define("array", function(vm) {
-                    vm.array = ["1", "2", "3", "4"]
-                    "push,unshift,remove,ensure".replace(/\w+/g, function(method) {
-                        vm[method] = function(e) {
-                            if (this.value && e.which == 13) {//this为input元素
-                                vm.array[method](this.value);
-                                this.value = "";
-                            }
-                        }
-                    })
-                    vm.removeAt = function(e) {
-                        if (isFinite(this.value) && e.which == 13) {//this为input元素
-                            vm.array.removeAt(Number(this.value))
-                            this.value = "";
-                        }
-                    }
-                    "pop,shift,sort,reverse".replace(/\w+/g, function(method) {
-                        vm[method] = function(e) {
-                            vm.array[method]();
-                        }
-                    })
-                    vm.people = [
-                        {firstName: 'Bert', lastName: 'Bertington'},
-                        {firstName: 'Charles', lastName: 'Charlesforth'},
-                        {firstName: 'Denise', lastName: 'Dentiste'}
-                    ]
-                    vm.third = [["a","b"],["c","d"]];
-                    
-                });
+                avalon.define("sliderbar", function(vm) {
+                    vm.ss = "start"
+                })
                 avalon.scan();
-                setTimeout(function() {
-                    //console.log(avalon.type(model))
-                 //   model.third = [[["1","2"],["3","4"]]]
-                  console.log(model.third[0][0])
-                  model.third[0].set(0, "ppppppppppp")
-                    model.array.splice(1, 2, "a", "b", "c")
-                    model.people = [{
-                            firstName: "999",
-                            lastName: "pppp"
-                        }]
-                }, 1000)
             })
+
 
         </script>
     </head>
     <body>
-        <div ms-controller="array">
-            
-            <div ms-each-s="third">
-                <div ms-each-i="s">
-                    <p> <b>{{i}}</b> </p>
-                </div>
+
+        <fieldset class="example"><legend>no options</legend>  
+
+            <div ms-ui="slider" data-id="aaa"  >  
+
+            </div>  
+
+            <span ms-important="aaa"> {{value}}</span>  
+
+        </fieldset>  
+
+        <fieldset class="example"><legend>has options</legend>  
+
+            <div ms-ui="slider" data-id="bbb" data-max="255" data-value="127" data-range="min">  
+
+            </div>  
+
+            <span ms-important="bbb"> {{value}}</span>  
+
+        </fieldset>  
+
+        <fieldset class="example"><legend>Range slider</legend>  
+
+            <div  ms-ui="slider" data-id="ccc" data-min="0" data-max="500" data-values="[75,300]" data-range="true">  
+
+
+
+            </div>  
+
+            <span ms-important="ccc"> {{value}} </span>  
+
+        </fieldset> 
+
+        <fieldset class="example"><legend>Range with fixed maximum</legend>  
+
+            <div  ms-ui="slider" data-min="1" data-max="10" data-value="2" data-step="0" data-range="max">  
+
+            </div>  
+
+        </fieldset>  
+        <fieldset class="example"><legend>Range with fixed maximum</legend>  
+
+            <div  ms-ui="slider" class="red" data-values="[17,67]"  data-range="true">  
+
+            </div>   <br/>
+            <div  ms-ui="slider" class="blue" data-values="[17,67]"  data-range="true">  
+
+            </div>   <br/>
+            <div  ms-ui="slider" class="green" data-values="[17,67]"  data-range="true">  
+
+            </div>   <br/>
+            <div  ms-ui="slider" class="yellow" data-values="[17,67]"  data-range="true">  
+
+            </div>   <br/>
+            <div  ms-ui="slider" class="orange" data-values="[17,67]"  data-range="true">  
+
+            </div> <br/>
+            <div  ms-ui="slider" class="violet" data-values="[17,67]"  data-range="true">  
+
             </div>
-            
-            
-            
-<!--            <ul ms-each-el="array" >
-                <li>数组的第{{$index+1}}个元素为{{el}}</li>
-            </ul>
-            <p>对数组进行push操作，并回车<input ms-keypress="push"></p>
-            <p>对数组进行unshift操作，并回车<input ms-keypress="unshift"></p>
-            <p>对数组进行ensure操作，并回车<input ms-keypress="ensure"><br/>
-                (只有数组不存在此元素才push进去)</p>
-            <p>对数组进行remove操作，并回车<input ms-keypress="remove"></p>
-            <p>对数组进行removeAt操作，并回车<input ms-keypress="removeAt"></p>
-            <p><button type="button" ms-click="sort">对数组进行sort操作</button></p>
-            <p><button type="button" ms-click="reverse">对数组进行reverse操作</button></p>
-            <p><button type="button" ms-click="shift">对数组进行shift操作</button></p>
-            <p><button type="button" ms-click="pop">对数组进行pop操作</button></p>
-            <p>当前数组的长度为{{array.size()}}，……</p>
-            <table>
-                <thead>
-                    <tr><th>First name</th><th>Last name</th></tr>
-                </thead>
-                <tbody ms-each-p="people">
-                    <tr>
-                        <td>{{p.firstName}}!!!!!</td>
-                        <td>{{p.lastName}}</td>
-                    </tr>
-                </tbody>
-            </table>-->
+        </fieldset>  
+
+        <fieldset class="example"><legend>Range with fixed minimum</legend>  
+
+            <div  ms-ui="slider" data-min="1" data-max="700" data-value="37" data-range="min">  
+
+
+
+            </div>  
+
+        </fieldset>  
+
+
+
+        <fieldset class="example"><legend>Snap to increments</legend>  
+
+            <div  ms-ui="slider" data-min="0" data-max="500" data-value="100" data-step="50" >  
+
+
+
+            </div>  
+
+        </fieldset>  
+
+        <fieldset class="example" style="height:250px;padding:10px;"><legend>Snap to increments</legend>  
+
+            <div style="height:200px" ms-ui="slider" data-values="[17,67]" data-range="true" data-orientation="vertical" >  
+
+
+
+            </div>  
+
+        </fieldset>  
+
+        <fieldset class="example" style="height:250px;padding:10px;"><legend>Snap to increments</legend>  
+
+            <div style="height:200px" ms-ui="slider" data-min="0" data-max="100" data-value="60" data-range="min" data-orientation="vertical" >  
+
+
+
+            </div>  
+
+        </fieldset> 
+
+        <div ms-controller="sliderbar">
+            <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/{{ss}}/jquery-ui.css" >
+            <div>
+                <select ms-model="ss" name="sss" >
+                    <option value='start'>start</option>
+                    <option value='smoothness'>smoothness</option>
+                    <option value='flick'>flick</option>
+                    <option value='sunny'>sunny</option>
+                    <option value='excite-bike'>excite bike</option>
+                    <option value='black-tie'>black tie</option>
+                    <option value='trontastic'>trontastic</option>
+                    <option value='swanky-purse'>swanky purse</option>
+                    <option value='le-frog'>le frog</option>
+                    <option value='blitzer'>blitzer</option>
+                    <option value='dot-luv'>dot luv</option>
+                    <option value='mint-choc'>mint-choc</option>
+                    <option value='hot-sneaks'>hot sneaks</option>
+                    <option value='south-street'> south street</option>
+                    <option value='humanity'>humanity</option>
+                    <option value='vader'>vader</option>
+                    <option value='eggplant'>eggplant</option>
+                    <option value='cupertino'>cupertino</option>
+                    <option value='overcast'>overcast</option>
+                </select>你喜欢的皮肤
+            </div>
         </div>
-
-
     </body>
 </html>
