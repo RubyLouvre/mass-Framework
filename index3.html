@@ -13,14 +13,14 @@
             .ms-grid-pageLinks a { padding: 0.5em; }
             .ms-grid-pageLinks a.selected { background: black; color: White; }
         </style>
-        <script src="avalon2.js" type="text/javascript"></script>
+        <script src="avalon.js" type="text/javascript"></script>
 
 
 
         <script type="text/javascript">
 
 
-            avalon.ready(function() {
+        
 
                 var grid = avalon.define("grid", function(scope) {
                     scope.items = [
@@ -82,8 +82,7 @@
                 });
                 grid.getShowItems();
                 grid.getPages()
-                avalon.scan();
-            });
+            
         </script>
     </head>
     <body>

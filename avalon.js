@@ -710,20 +710,7 @@
         return avalon.models[name] = model;
     };
 
-    function updateCollection(oldArray, newArray) {
-        oldArray.length && oldArray.clear();
-        newArray.forEach(function(el) {
-            oldArray.push(el);
-        });
-    }
 
-    function updateModel(oldObj, newObj) {
-        for (var i in newObj) {
-            if (newObj.hasOwnProperty(i) && oldObj.hasOwnProperty(i) && i !== "$id") {
-                oldObj[i] = newObj[i];
-            }
-        }
-    }
 
     var Observable = {
         $watch: function(type, callback) {
@@ -765,6 +752,27 @@
         }
     };
 
+    function updateViewModel(a, b, isArray) {
+        if (isArray) {
+            var an = a.length,
+                bn = b.length;
+            if (an > bn) {
+                a.splice(bn, an - bn);
+            } else if (bn > an) {
+                a.push.apply(a, b.slice(an));
+            }
+            var n = Math.min(an, bn);
+            for (var i = 0; i < n; i++) {
+                a.set(i, b[i]);
+            }
+        } else {
+            for (var i in b) {
+                if (b.hasOwnProperty(i) && a.hasOwnProperty(i) && i !== "$id") {
+                    a[i] = b[i];
+                }
+            }
+        }
+    }
     var systemOne = avalon.oneObject("$index,$remove,$first,$last");
 
     function modelFactory(scope) {
@@ -824,15 +832,11 @@
                                 return; //阻止重复赋值
                             }
                             if (oldArgs !== neo) {
-                                if (Array.isArray(neo)) {
-                                    if (oldValue && oldValue.isCollection) {
-                                        updateCollection(oldValue, neo);
-                                    } else {
-                                        oldValue = Collection(neo);
-                                    }
-                                } else if (avalon.type(neo) === "Object") {
+                                if (/Array|Object/.test(avalon.type(neo))) {
                                     if (oldValue && oldValue.$id) {
-                                        updateModel(oldValue, neo);
+                                        updateViewModel(oldValue, neo, Array.isArray(neo));
+                                    } else if (Array.isArray(neo)) {
+                                        oldValue = Collection(neo);
                                     } else {
                                         oldValue = modelFactory(neo);
                                     }
@@ -1347,7 +1351,7 @@
     function watchView(text, scopes, data, callback, tokens) {
         var updateView, target, filters = data.filters;
         var trimText = text.trim();
-        if (!filters) {
+        if (!filters && !tokens) {
             for (var i = 0, scope; scope = scopes[i++];) {
                 if (scope.hasOwnProperty(trimText)) {
                     target = scope; //如果能在作用域上直接找到,我们就不需要eval了
@@ -1369,6 +1373,7 @@
                         var val = tokens.map(function(obj) {
                             return obj.expr ? parseExpr(obj.value, scopes, data) : obj.value;
                         }).join("");
+                       delete data.compileFn;
                     } else {
                         val = parseExpr(text, scopes, data);
                     }
@@ -1420,7 +1425,7 @@
                             element.noRemove = 0;
                         }
                     } else { //移除  如果它还在DOM树中
-                        if (element.parentNode.nodeType === 1) {
+                        if (element.parentNode && element.parentNode.nodeType === 1) {
                             parent.replaceChild(placehoder, element);
                             element.noRemove = 1;
                         }
@@ -1522,9 +1527,6 @@
             });
             god.bind("mouseleave", function() {
                 god.removeClass(className);
-            });
-            watchView("", scopes, data, function() {
-
             });
         },
         "ui": function(data, scopes, opts) {
@@ -1768,221 +1770,13 @@
         }
     }
     /*********************************************************************
-     *                      each binding                              *
-     **********************************************************************/
-    //https://developer.mozilla.org/en-US/docs/DOM/range.deleteContents
-
-    function emptyNode(parent) {
-        while (parent.firstChild) {
-            parent.removeChild(parent.firstChild);
-        }
-    }
-
-    bindingHandlers["each"] = function(data, scopes) {
-        var parent = data.element;
-        var value = data.value;
-        if (scopes.length === 1 && value.indexOf(".") === -1) {
-            var list = scopes[0][value];
-        } else {
-            var list = parseExpr(value, scopes, data);
-        }
-        var doc = parent.ownerDocument;
-        var view = doc.createDocumentFragment();
-        var comment = doc.createComment(list.$id);
-        view.appendChild(comment);
-        while (parent.firstChild) {
-            view.appendChild(parent.firstChild);
-        }
-        data.view = view;
-        data.list = list;
-        data.scopes = scopes;
-        nextTick(function() {
-            forEach(list, function(index, item) {
-                addItemView(index, item, data);
-            });
-        });
-
-        function updateListView(method, args, len) {
-            var listName = list.$id;
-            switch (method) {
-                case "push":
-                    forEach(list.slice(len), function(index, item) {
-                        addItemView(len + index, item, data);
-                    });
-                    break;
-                case "unshift":
-                    list.place = parent.firstChild;
-                    forEach(list.slice(0, list.length - len), function(index, item) {
-                        addItemView(index, item, data);
-                    });
-                    resetIndex(parent, listName);
-                    list.place = null;
-                    break;
-                case "pop":
-                    var node = findIndex(parent, len - 1);
-                    if (node) {
-                        removeItemView(node, listName + len);
-                    }
-                    break;
-                case "shift":
-                    removeItemView(parent.firstChild, listName + 1);
-                    resetIndex(parent, listName);
-                    break;
-                case "splice":
-                    var start = args[0],
-                        second = args[1],
-                        adds = [].slice.call(args, 2);
-                    var deleteCount = second >= 0 ? second : len - start;
-                    if (deleteCount) {
-                        var node = findIndex(parent, start);
-                        if (node) {
-                            removeItemView(node, listName + (start + second));
-                            resetIndex(parent, listName);
-                        }
-                    }
-                    if (adds.length) {
-                        node = findIndex(parent, start);
-                        list.place = node;
-                        forEach(adds, function(index, item) {
-                            addItemView(index, item, data);
-                        });
-                        resetIndex(parent, listName);
-                        list.place = null;
-                    }
-                    break;
-                case "clear":
-                    emptyNode(parent);
-                    break;
-                case "update":
-                    emptyNode(parent);
-                    forEach(list, function(index, item) {
-                        addItemView(index, item, data);
-                    });
-                    break;
-            }
-        }
-        if ((list || {}).isCollection) {
-            list[subscribers].push(updateListView);
-        }
-    };
-
-
-    function findIndex(elem, index) { //寻找路标
-        for (var node = elem.firstChild; node; node = node.nextSibling) {
-            if (node.id === node.nodeValue + index) {
-                return node;
-            }
-        }
-    }
-
-    function resetIndex(elem, name) { //重置路标
-        var index = 0;
-        for (var node = elem.firstChild; node; node = node.nextSibling) {
-            if (node.nodeType === 8 && node.nodeValue === name) {
-                if (node.id !== name + index) {
-                    node.id = name + index;
-                    node.$scope.$index = index;
-                }
-                index++;
-            }
-        }
-    }
-
-    function removeItemView(node, id) { //previousSibling
-        var nodes = [node];
-        var view = node.$view;
-        for (var check = node.nextSibling; check; check = check.nextSibling) {
-            if (check.nodeType === 8 && check.id === id) {
-                break
-            }
-            nodes.push(check);
-        }
-        for (var i = 0; node = nodes[i++];) {
-            view.appendChild(node);
-        }
-        emptyNode(view);
-        view = null;
-    }
-
-    function addItemView(index, item, data) {
-        var scopes = data.scopes;
-        var list = data.list;
-        var parent = data.element;
-        var doc = parent.ownerDocument;
-        var scope = createItemModel(index, item, list, data.args);
-        scopes = [scope].concat(scopes);
-        var view = data.view.cloneNode(true);
-        var textNodes = [];
-        var elements = [];
-        for (var node = view.firstChild; node; node = node.nextSibling) {
-            if (node.nodeType === 1) {
-                elements.push(node);
-            } else if (node.nodeType === 3) {
-                textNodes.push(node);
-            } else if (node.nodeType === 8) {
-                node.id = node.nodeValue + index; //设置路标
-                node.$scope = scope;
-                node.$view = view.cloneNode(false);
-            }
-        }
-        // parent.insertBefore(el, null) === parent.appendChild(el)
-        parent.insertBefore(view, list.place || null);
-
-        for (var i = 0; node = elements[i++];) {
-            scanTag(node, scopes.concat(), doc); //扫描文本节点
-        }
-        avalon.nextTick(function() {
-            if (!parent.inprocess) {
-                parent.inprocess = 1; //作用类似于display:none
-                var hidden = parent.hidden; //http://html5accessibility.com/
-                parent.hidden = true;
-            }
-            for (var i = 0; node = textNodes[i++];) {
-                scanText(node, scopes.concat(), doc); //扫描文本节点
-            }
-            if (parent.inprocess) {
-                parent.hidden = hidden;
-                parent.inprocess = 0;
-            }
-        })
-    }
-
-    //为子视图创建一个ViewModel
-
-    function createItemModel(index, item, list, args) {
-        var itemName = args[0] || "$data";
-        var source = {};
-        source.$index = index;
-        source[itemName] = {
-            get: function() {
-                return item;
-            }
-        };
-        source.$first = {
-            get: function() {
-                return this.$index === 0;
-            }
-        };
-        source.$last = {
-            get: function() { //有时用户是传个普通数组
-                return this.$index === list.length - 1;
-            }
-        };
-        source.$remove = function() {
-            list.remove(item);
-            return item;
-        };
-        return modelFactory(source);
-    }
-
-    /*********************************************************************
      *                 与each绑定息息相关的监控数组              *
      **********************************************************************/
 
     function convert(val) {
         if (Array.isArray(val)) {
             return val.$id ? val : Collection(val);
-        } else if (typeof val === "object") {
+        } else if (avalon.type(val) === "Object") {
             return val.$id ? val : modelFactory(val);
         } else {
             return val;
@@ -2013,17 +1807,10 @@
         "sort,reverse".replace(rword, function(method) {
             var nativeMethod = [][method];
             collection[method] = function() {
-                var isComplex = typeof this[0] === "object";
-                var before = isComplex ? this.map(function(obj) {
-                    return obj.$id;
-                }).join("") : this.join("");
-                var ret = nativeMethod.apply(this, arguments);
-                var after = isComplex ? this.map(function(obj) {
-                    return obj.$id;
-                }).join("") : this.join("");
-                if (before !== after) {
-                    notifySubscribers(this, "update", []);
-                }
+                var ret = nativeMethod.apply(this.concat(), arguments);
+                ret.forEach(function(el, i) {
+                    this.set(i, el);
+                }, this);
                 return ret;
             };
         });
@@ -2034,10 +1821,13 @@
             dynamic.length = 0;
             return this;
         };
+        collection.update = function(val) {
+            Array.isArray(val) && updateViewModel(this, val, true);
+            return this;
+        };
         collection.sortBy = function(fn, scope) { //按某属性排序
-            var ret = avalon.Array.sortBy(this, fn, scope);
-            notifySubscribers(this, "sort", []);
-            return ret;
+            this.update(avalon.Array.sortBy(this.concat(), fn, scope));
+            return this;
         };
         collection.contains = function(el) { //判定是否包含
             return this.indexOf(el) !== -1;
@@ -2048,8 +1838,21 @@
             }
             return this;
         };
-        collection.update = function() { //强制刷新页面
-            notifySubscribers(this, "update", []);
+        collection.set = function(index, val) {
+            if (index >= 0 && index < this.length) {
+                if (/Array|Object/.test(avalon.type(val))) {
+                    updateViewModel(this[index], val, Array.isArray(val));
+                } else if (this[index] !== val) {
+                    this[index] = val;
+                    for (var i = 0, fn; fn = this[subscribers][i++];) {
+                        var vm = fn.$vms && fn.$vms[index];
+                        if (vm) {
+                            var n = vm.$itemName;
+                            vm[n] = val;
+                        }
+                    }
+                }
+            }
             return this;
         };
         collection.size = function() { //取得数组长度，这个函数可以同步视图，length不能
@@ -2057,19 +1860,11 @@
         };
         collection.remove = function(item) { //移除第一个等于给定值的元素
             var index = this.indexOf(item);
-            if (index >= 0) {
-                this.removeAt(index);
-            }
+            return this.removeAt(index);
         };
-        collection.set = function(index, val) { //修改数组元素并同步
-            if (index >= 0 && index < this.length) {
-                this.splice(index, 1, val);
-            }
-            return collection;
-        }
         collection.removeAt = function(index) { //移除指定索引上的元素
             if (index >= 0 && (index % 1 === 0)) {
-                this.splice(index, 1); //DOM操作非常重,因此只有非负整数才删除
+                return this.splice(index, 1)[0]; //DOM操作非常重,因此只有非负整数才删除
             }
         };
         collection.removeAll = function(all) { //移除N个元素
@@ -2090,6 +1885,214 @@
         };
         return collection;
     }
+    /*********************************************************************
+     *                      each binding                              *
+     **********************************************************************/
+    //https://developer.mozilla.org/en-US/docs/DOM/range.deleteContents
+
+    function emptyNode(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild);
+        }
+    }
+    bindingHandlers["each"] = function(data, scopes) {
+        var parent = data.element;
+        var value = data.value;
+        if (scopes.length === 1 && value.indexOf(".") === -1) {
+            var list = scopes[0][value];
+        } else {
+            var list = parseExpr(value, scopes, data);
+        }
+        var doc = parent.ownerDocument;
+        var view = doc.createDocumentFragment();
+        var comment = doc.createComment(list.$id);
+        view.appendChild(comment);
+        while (parent.firstChild) {
+            view.appendChild(parent.firstChild);
+        }
+        data.view = view;
+        data.scopes = scopes;
+
+        function updateListView(method, args, len) {
+            var listName = list.$id;
+            var vms = updateListView.$vms;
+            switch (method) {
+                case "push":
+                    //在后面添加
+                    forEach(args, function(index,item) {
+                        addItemView(len + index, item, list, data, vms);
+                    });
+                    break;
+                case "unshift":
+                    //在前面添加
+                    resetIndex(parent, listName, list.length - len);
+                    list.place = parent.firstChild;
+                    forEach(args, function(index, item) {
+                        addItemView(index, item, list, data, vms);
+                    });
+                    list.place = null;
+                    break;
+                case "pop":
+                    //去掉最后一个
+                    var node = findIndex(parent, len - 1);
+                    if (node) {
+                        removeItemView(node, listName + len);
+                        vms.pop();
+                    }
+                    break;
+                case "shift":
+                    //去掉前面一个
+                    removeItemView(parent.firstChild, listName + 1);
+                    resetIndex(parent, listName);
+                    vms.shift();
+                    break;
+                case "splice":
+                    var start = args[0],
+                        second = args[1],
+                        adds = [].slice.call(args, 2);
+                    var deleteCount = second >= 0 ? second : len - start;
+                    if (deleteCount) {
+                        var node = findIndex(parent, start);
+                        if (node) {
+                            vms.splice(start, deleteCount);
+                            removeItemView(node, listName + (start + second));
+                            resetIndex(parent, listName);
+                        }
+                    }
+                    if (adds.length) {
+                        list.place = findIndex(parent, start);
+                        updateListView("push", adds, start);
+                        resetIndex(parent, listName);
+                        list.place = null;
+                    }
+                    break;
+                case "clear":
+                    vms.length = 0;
+                    emptyNode(parent);
+                    break;
+            }
+        }
+        updateListView.$vms = [];
+        if ((list || {}).isCollection) {
+            list[subscribers].push(updateListView);
+        }
+        nextTick(function() {
+            updateListView("push", list, 0);
+        });
+    };
+
+
+    function findIndex(elem, index) { //寻找路标
+        for (var node = elem.firstChild; node; node = node.nextSibling) {
+            if (node.id === node.nodeValue + index) {
+                return node;
+            }
+        }
+    }
+
+    function resetIndex(elem, name, add) { //重置路标
+        var index = add || 0;
+        for (var node = elem.firstChild; node; node = node.nextSibling) {
+            if (node.nodeType === 8 && node.nodeValue === name) {
+                if (node.id !== name + index) {
+                    node.id = name + index;
+                    node.$scope.$index = index;
+                }
+                index++;
+            }
+        }
+    }
+
+    function removeItemView(node, id) {
+        var nodes = [node];
+        var view = node.$view;
+        for (var check = node.nextSibling; check; check = check.nextSibling) {
+            if (check.nodeType === 8 && check.id === id) {
+                break
+            }
+            nodes.push(check);
+        }
+        for (var i = 0; node = nodes[i++];) {
+            view.appendChild(node);
+        }
+        emptyNode(view);
+        view = null;
+    }
+
+    function addItemView(index,item, list, data, vms) {
+        var scopes = data.scopes;
+        var parent = data.element;
+        var doc = parent.ownerDocument;
+        var scope = createItemModel(index, item, list, data.args);
+        scopes = [scope].concat(scopes);
+        vms.splice(index, 0, scope);
+        var view = data.view.cloneNode(true);
+        var textNodes = [];
+        var elements = [];
+        for (var node = view.firstChild; node; node = node.nextSibling) {
+            if (node.nodeType === 1) {
+                elements.push(node);
+            } else if (node.nodeType === 3) {
+                textNodes.push(node);
+            } else if (node.nodeType === 8) {
+                node.id = node.nodeValue + index; //设置路标
+                node.$scope = scope;
+                node.$view = view.cloneNode(false);
+            }
+        }
+        // parent.insertBefore(el, null) === parent.appendChild(el)
+        parent.insertBefore(view, list.place || null);
+        for (var i = 0; node = elements[i++];) {
+            scanTag(node, scopes.concat(), doc); //扫描文本节点
+        }
+        avalon.nextTick(function() {
+            if (!parent.inprocess) {
+                parent.inprocess = 1; //作用类似于display:none
+                var hidden = parent.hidden; //http://html5accessibility.com/
+                parent.hidden = true;
+            }
+            for (var i = 0; node = textNodes[i++];) {
+                scanText(node, scopes.concat(), doc); //扫描文本节点
+            }
+            if (parent.inprocess) {
+                parent.hidden = hidden;
+                parent.inprocess = 0;
+            }
+        });
+    }
+
+    //为子视图创建一个ViewModel
+
+    function createItemModel(index, item, list, args) {
+        var itemName = args[0] || "$data";
+        var source = {};
+        source.$index = index;
+        source.$itemName = itemName;
+        source[itemName] = {
+            get: function() {
+                return item;
+            },
+            set: function(val) {
+                item = val;
+            }
+        };
+        source.$first = {
+            get: function() {
+                return this.$index === 0;
+            }
+        };
+        source.$last = {
+            get: function() { //有时用户是传个普通数组
+                return this.$index === list.length - 1;
+            }
+        };
+        source.$remove = function() {
+            return list.remove(item);
+        };
+        return modelFactory(source);
+    }
+
+
     /*********************************************************************
      *                            Filters                              *
      **********************************************************************/
