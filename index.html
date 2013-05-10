@@ -1,212 +1,94 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html>
     <head>
+        <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>todos</title>
-        <script src="avalon.js"></script>
-        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <script src="avalon2.js"></script>
         <script>
             avalon.ready(function() {
-                var model = avalon.define("datepicker", function(vm) {
-                    //配置
-                    vm.changeYear = true
-                    vm.changeMonth = false
-                    vm.minDate = new Date(2013, 3, 25)
-
-                    //当前时间
-                    vm.current = new Date;
-                    vm.currentMonth = vm.current.getMonth();
-                    vm.currentYear = vm.current.getFullYear();
-                    vm.selectedDate = new Date;
-                    //显示顶部的年份与月份
-                    vm.title = {
-                        get: function() {
-                            var format = "";
-                            if (!this.changeYear && this.changeMonth) {
-                                format = "yyyy年";
-                            } else if (this.changeYear && !this.changeMonth) {
-                                format = "MMMM";
-                            } else if (!this.changeYear && !this.changeMonth) {
-                                format = "MMMM yyyy年";
+                var model = avalon.define("array", function(vm) {
+                    vm.array = ["1", "2", "3", "4"]
+                    "push,unshift,remove,ensure".replace(/\w+/g, function(method) {
+                        vm[method] = function(e) {
+                            if (this.value && e.which == 13) {//this为input元素
+                                vm.array[method](this.value);
+                                this.value = "";
                             }
-                            return format && avalon.filters.date(this.current, format);
                         }
-                    };
-                    //星期显示
-                    vm.$weeks = "日一二三四五六".split("");
-                    //月份下拉菜单
-                    vm.$months = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-                    //当月的日期
-                    function isDisabled(time) {
-                        var disabled = false;
-                        if (vm.minDate) {
-                            disabled = time < vm.minDate;
+                    })
+                    vm.removeAt = function(e) {
+                        if (isFinite(this.value) && e.which == 13) {//this为input元素
+                            vm.array.removeAt(Number(this.value))
+                            this.value = "";
                         }
-                        if (disabled && vm.maxDate) {
-                            disabled = time > vm.maxDate ;
-                        }
-                        return disabled;
                     }
-                    function  getWeeks() {
-                        var cur = vm.current;
-                        var year = cur.getFullYear();
-                        var month = cur.getMonth();//得到今天是几月（0 ~ 11）
-                        var date = cur.getDate();  //得到今天是几号 （1 ~ 31）
-                        cur.setMonth(month + 1);//改为下一个月，
-                        //由于日期是1 ~ 31， 0则是退到上一个月的最后一天，于是得到这个月的总天数
-                        cur.setDate(0);
-                        var num = cur.getDate();
-                        var next = 6 - cur.getDay();
-                        var dates = avalon.range(1, num + 1);
-                        dates = dates.map(function(d) {
-                            var time = new Date(year, month, d)
-                            return [year, month, d, isDisabled(time)];
-                        });
-                        cur.setMonth(month);
-                        cur.setDate(1);//得到当月的第一天
-                        var prev = cur.getDay();//0 ~ 6
-                        cur.setDate(date);//还原
-                        for (var i = 0; i < prev; i++) {//补上上一个月的日期
-                            cur = new Date(year, month, -1 * i)
-                            dates.unshift([year, cur.getMonth(), cur.getDate(),isDisabled(cur) ])
+                    "pop,shift,sort,reverse".replace(/\w+/g, function(method) {
+                        vm[method] = function(e) {
+                            vm.array[method]();
                         }
-                        for (var i = 0; i < next; i++) {//补上下一个月的日期
-                            cur = new Date(year, month + 1, i + 1)
-                            dates.push([year, cur.getMonth(), cur.getDate(), isDisabled(cur)])
-                        }
-                        var ret = [];
-                        while (dates.length) {//每行七个分组
-                            ret.push(dates.splice(0, 7));
-                        }
-                        return ret;
-                    }
-                    vm.candidateWeeks = getWeeks();
-                    //取得当年的前后20年
-                    function getYears() {
-                        var y = vm.currentYear;
-                        return avalon.range(y - 10, y + 10);
-                    }
-                    vm.candidateYears = getYears();
-                    //点击事件
-                    vm.nextMonth = function() {
-                        var date = vm.current;
-                        var m = date.getMonth();
-                        vm.$fire("currentMonth", m + 1)
-                    };
-                    //点击事件
-                    vm.prevMonth = function() {
-                        var date = vm.current;
-                        var m = date.getMonth();
-                        vm.$fire("currentMonth", m - 1);
-                    };
-//侦听
-                    vm.$watch("currentMonth", function(val) {
-                        var date = vm.current;
-                        date.setMonth(val);
-                        if (vm.currentMonth != val)
-                            vm.currentMonth = val;
-                        vm.candidateWeeks = getWeeks();
-                        vm.title = date - 0;
-                    });
-                    vm.$watch("currentYear", function(val) {
-                        var date = vm.current;
-                        date.setFullYear(val);
-                        if (vm.currentYear != val)
-                            vm.currentYear = val;
-                        vm.$fire("currentMonth", date.getMonth());
-                    });
-                    //高亮当前选中的日期
-                    vm.select = function(e) {
-                        var el = e.target;
-                        if (el.tagName === "SPAN" && el.parentNode.tagName === "TD" && !/disabled/.test(el.className)) {
-                            vm.selected = el.innerHTML;
-                            var d = el.$scope.day.slice(0, 3);
-                            vm.selectedDate = new Date(d[0], d[1], d[2]);
-                        }
-                    };
-                    vm.selected = "";
-                    vm.isSelected = function() {
-                        return  this.innerHTML === vm.selected;
-                    };
-                    vm.showButtonPanel = true;
-                    //高亮今天的日期
-                    var today = new Date;
-                    today = [today.getFullYear(), today.getMonth(), today.getDate()].join();
-                    vm.isToday = function() {
-                        var day = this.$scope && this.$scope.day;
-                        return day && day.slice(0, 3).join() === today;
-                    };
+                    })
+                    vm.people = [
+                        {firstName: 'Bert', lastName: 'Bertington'},
+                        {firstName: 'Charles', lastName: 'Charlesforth'},
+                        {firstName: 'Denise', lastName: 'Dentiste'}
+                    ]
+                    vm.third = [["a","b"],["c","d"]];
+                    
                 });
-                console.log(model)
                 avalon.scan();
-            });
-//showButtonPanel
+                setTimeout(function() {
+                    //console.log(avalon.type(model))
+                 //   model.third = [[["1","2"],["3","4"]]]
+                  console.log(model.third[0][0])
+                  model.third[0].set(0, "ppppppppppp")
+                    model.array.splice(1, 2, "a", "b", "c")
+                    model.people = [{
+                            firstName: "999",
+                            lastName: "pppp"
+                        }]
+                }, 1000)
+            })
+
         </script>
-
-
-        <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js"></script>
-
     </head>
-    <body ms-controller="datepicker">
-        <div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all" style="display:block"> 
-            <div class="ui-datepicker-header ui-widget-header ui-helper-clearfix ui-corner-all">
-                <a class="ui-datepicker-prev ui-corner-all" title="Prev" 
-                   ms-click="prevMonth"
-                   ms-hover="ui-state-hover"
-                   ms-hover-1="ui-datepicker-prev-hover"
-                   >
-                    <span class="ui-icon ui-icon-circle-triangle-w">Prev</span></a>
-                <a class="ui-datepicker-next ui-corner-all"  title="Next" 
-                   ms-click="nextMonth"
-                   ms-hover="ui-state-hover"
-                   ms-hover-1="ui-datepicker-next-hover"
-                   >
-                    <span class="ui-icon ui-icon-circle-triangle-e">Next</span></a>
-                <div class="ui-datepicker-title">
-                    <select class="ui-datepicker-month" ms-each-month="$months" ms-if="changeMonth" ms-model="currentMonth" >
-                        <option value="{{month}}" ms-selected="currentMonth === month">{{month+1}}月</option>
-                    </select>
-                    <select class="ui-datepicker-year" ms-each-year="candidateYears" ms-if="changeYear" ms-model="currentYear" >
-                        <option value="{{year}}" ms-selected="currentYear === year">{{year}}年</option>
-                    </select>
-                    {{title}}
+    <body>
+        <div ms-controller="array">
+            
+            <div ms-each-s="third">
+                <div ms-each-i="s">
+                    <p> <b>{{i}}</b> </p>
                 </div>
             </div>
-            <table class="ui-datepicker-calendar" >
+            
+            
+            
+<!--            <ul ms-each-el="array" >
+                <li>数组的第{{$index+1}}个元素为{{el}}</li>
+            </ul>
+            <p>对数组进行push操作，并回车<input ms-keypress="push"></p>
+            <p>对数组进行unshift操作，并回车<input ms-keypress="unshift"></p>
+            <p>对数组进行ensure操作，并回车<input ms-keypress="ensure"><br/>
+                (只有数组不存在此元素才push进去)</p>
+            <p>对数组进行remove操作，并回车<input ms-keypress="remove"></p>
+            <p>对数组进行removeAt操作，并回车<input ms-keypress="removeAt"></p>
+            <p><button type="button" ms-click="sort">对数组进行sort操作</button></p>
+            <p><button type="button" ms-click="reverse">对数组进行reverse操作</button></p>
+            <p><button type="button" ms-click="shift">对数组进行shift操作</button></p>
+            <p><button type="button" ms-click="pop">对数组进行pop操作</button></p>
+            <p>当前数组的长度为{{array.size()}}，……</p>
+            <table>
                 <thead>
-                    <tr ms-each-date="$weeks">
-                        <th ms-class-ui-datepicker-week-end="$first">
-                            <span title="星期{{date}}">{{date}}</span>
-                        </th>
-                    </tr>
+                    <tr><th>First name</th><th>Last name</th></tr>
                 </thead>
-                <tbody ms-each-week="candidateWeeks">
-                    <tr ms-each-day="week">
-                        <td ms-class-ui-datepicker-other-month="day[1] == currentMonth"
-                            ms-class-ui-datepicker-week-end="$first || $last"
-                            ms-class-ui-state-disabled="day && day[3]" 
-                            ms-class-ui-datepicker-unselectable="day && day[3]"
-                            >
-                            <a class="ui-state-default"   href="#"
-                               ms-if="day" 
-                               ms-hover="ui-state-hover"
-                               ms-class-ui-state-highlight="isToday"
-                               >{{day[2]}}</a>
-                        </td>
+                <tbody ms-each-p="people">
+                    <tr>
+                        <td>{{p.firstName}}!!!!!</td>
+                        <td>{{p.lastName}}</td>
+                    </tr>
                 </tbody>
-            </table>
-            <div class="ui-datepicker-buttonpane ui-widget-content" ms-if="showButtonPanel">
-                <button type="button" class="ui-datepicker-current ui-state-default ui-priority-secondary ui-corner-all"
-                        ms-hover="ui-state-hover"
-                        >Today</button>
-                <button type="button" class="ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all"
-                        ms-hover="ui-state-hover"
-                        >Done</button>
-            </div>
+            </table>-->
         </div>
 
 
-
     </body>
-
-</html> 
+</html>
