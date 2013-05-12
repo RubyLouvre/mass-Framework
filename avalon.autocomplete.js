@@ -99,7 +99,7 @@
                 }
             });
         });
-        avalon.nextTick(function() {
+        avalon.ready(function() {
             element.setAttribute("ms-model", "value");
             document.body.appendChild(sourceList);
             adjustPosition();
@@ -107,6 +107,7 @@
             avalon.scan(sourceList, model);
         });
         function adjustPosition() {
+
             var offset = $element.offset();
             sourceList.style.width = element.clientWidth + "px";
             sourceList.style.left = offset.left + "px";

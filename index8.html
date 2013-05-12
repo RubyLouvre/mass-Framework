@@ -4,8 +4,8 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js"></script>
-        <script src="avalon.tabs2.js"></script> 
-
+        <script src="avalon.tabs.js"></script> 
+        <script src="avalon.autocomplete.js"></script> 
         <style>
             body{
                 font-size:13px;
@@ -15,8 +15,9 @@
         <script>
             avalon.define("theme", function(vm) {
                 vm.theme = "start";
+                vm.$skipArray = ["source"]
                 vm.tabs = [];
-                vm.$source = [
+                vm.source = [
                     "ActionScript",
                     "AppleScript",
                     "Asp",
@@ -72,13 +73,16 @@
                 while (div.firstChild) {
                     documentFragment.appendChild(div.firstChild)
                 }
-                document.body.replaceChild(documentFragment,document.body.lastChild);
+                document.body.replaceChild(documentFragment, document.body.lastChild);
                 console.log(documentFragment.childNodes.length)
             }
 
         </script>
     </head>
     <body>
+        <br/> <br/>
+        <input type="text" ms-ui-source="autocomplete" />请在此搜索主流的计算机语言
+        <br/> <br/>
         <div id="tabs" ms-ui="tabs" data-removable="true" style="width:50%;">
             <ul role="tablist">
                 <li><a href="#">Nunc tincidunt</a></li>
@@ -102,7 +106,7 @@
 
         <div ms-controller="theme">
 
-             <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css" >
+            <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css" >
             <select ms-model="theme">
                 <option value='start'>start</option>
                 <option value='smoothness'>smoothness</option>

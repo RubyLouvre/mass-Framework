@@ -41,7 +41,7 @@
                 ' ms-hover="ui-state-hover"' +
                 ' >{{tab|html}}<span class="ui-icon ui-icon-close" ms-if="true" ms-click="remove"></span></li></ul>';
         var panels = '<div ms-each-panel="tabpanels" ><div class="ui-tabs-panel ui-widget-content"' +
-                ' ms-class-ui-corner-bottom="bottom"' +
+                ' ms-class-ui-corner-bottom="!bottom"' +
                 ' ms-visible="active == $index" >{{panel|html}}</div></div>'
         var model = avalon.define(id, function(vm) {
             vm.active = options.active;

@@ -41,7 +41,7 @@
         });
         avalon.nextTick(function() {
             element.appendChild(fragment);
-            avalon.scan(element.parentNode, model);
+            avalon.scan(element, model);
         });
     }
 })(this.avalon)
