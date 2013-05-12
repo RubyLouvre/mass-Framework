@@ -7,80 +7,68 @@
         removable: false
     };
     avalon.ui.tabs = function(element, id) {
-        var fragment = document.createDocumentFragment();
-        var el, tablist, tabs = [],
-            tabpanels = [];
-        while (el = element.firstChild) {
-            if (!tablist && el.tagName === "UL") {
-                tablist = el;
-            }
-            if (el.tagName === "DIV") {
-                tabpanels.push(el);
-            }
-            fragment.appendChild(el);
-        }
+        var el, tabsParent, tabs = [], tabpanels = [];
         var $element = avalon(element);
         var options = avalon.mix({}, defaults);
         avalon.mix(options, $element.data());
-        if (options.bottom) {
-            fragment.appendChild(tablist);
-        }
         $element.addClass("ui-tabs ui-widget ui-widget-content ui-corner-all");
-        element.setAttribute("ms-class-ui-tabs-collapsible", "collapsible");
-        element.setAttribute("ms-class-tabs-bottom", "bottom");
-        avalon(tablist).addClass("ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header");
-        tablist.setAttribute("ms-class-ui-corner-all", "!bottom");
-        tablist.setAttribute("ms-class-ui-corner-bottom", "bottom");
-        for (var i = 0, tab; tab = tablist.children[i]; i++) {
-            avalon(tab).addClass("ui-state-default");
-            tab.setAttribute("ms-class-ui-corner-top", "!bottom");
-            tab.setAttribute("ms-class-ui-corner-bottom", "bottom");
-            tab.setAttribute("ms-class-ui-tabs-active", "active == " + i);
-            tab.setAttribute("ms-class-ui-state-active", "active == " + i);
-            tab.setAttribute("ms-" + options.event, "activate");
-            tab.setAttribute("ms-hover", "ui-state-hover");
-            if (options.removable) {
-                var span = document.createElement("span");
-                span.className = "ui-icon ui-icon-close";
-                span.setAttribute("ms-click", "remove");
-                tab.appendChild(span);
+
+        //清空它内部所有节点，并收集其内容，构建成tabs与tabpanels两个数组
+        while (el = element.firstChild) {
+            if (!tablist && (el.tagName === "UL" || el.tagName === "OL")) {
+                tabsParent = el;
             }
-            tabs.push(tab);
+            if (el.tagName === "DIV") {
+
+                tabpanels.push(el.innerHTML);
+            }
+            element.removeChild(el);
         }
-        for (var i = 0, panel; panel = tabpanels[i]; i++) {
-            avalon(panel).addClass("ui-tabs-panel ui-widget-content");
-            panel.setAttribute("ms-visible", "active ==" + i);
-            panel.setAttribute("ms-class-ui-corner-bottom", "bottom");
+
+        for (var i = 0; el = tabsParent.children[i++]; ) {
+
+            tabs.push(el.innerHTML);
         }
+        //动态模板
+        var tablist = '<ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header"' +
+                ' ms-class-ui-corner-all="!bottom"  ms-class-ui-corner-bottom="bottom" ms-each-tab="tabs">' +
+                '<li class="ui-state-default" ' +
+                ' ms-class-ui-corner-top="!bottom"' +
+                ' ms-class-ui-corner-bottom="bottom"' +
+                ' ms-class-ui-tabs-active="active == $index"' +
+                ' ms-class-ui-state-active="active == $index"' +
+                ' ms-' + options.event + '="activate"' +
+                ' ms-hover="ui-state-hover"' +
+                ' >{{tab|html}}<span class="ui-icon ui-icon-close" ms-if="true" ms-click="remove"></span></li></ul>';
+        var panels = '<div ms-each-panel="tabpanels" ><div class="ui-tabs-panel ui-widget-content"' +
+                ' ms-class-ui-corner-bottom="bottom"' +
+                ' ms-visible="active == $index" >{{panel|html}}</div></div>'
         var model = avalon.define(id, function(vm) {
             vm.active = options.active;
             vm.collapsible = options.collapsible;
             vm.activate = function(e) {
-                var index = tabs.indexOf(this);
-                if (index >= 0) {
-                    vm.active = index;
-                }
+                e.preventDefault();
+                vm.active = this.$scope.$index;
             };
+            vm.tabs = tabs;
+            vm.tabpanels = tabpanels;
+            vm.removable = options.removable;
             vm.remove = function(e) {
                 e.preventDefault();
-                var tab = this.parentNode;
-                var index = tabs.indexOf(tab);
-                var panel = tabpanels[index];
-                tablist.removeChild(tab);
-                element.removeChild(panel);
+                var index = this.$scope.$index;
+                vm.tabs.removeAt(index);
+                vm.tabpanels.removeAt(index);
+                avalon.nextTick(function() {
+                    vm.active = 0;
+                });
             };
             vm.bottom = options.bottom;
-            vm.$watch("bottom", function(val) {
-                if (val) {
-                    element.appendChild(tablist);
-                } else {
-                    element.insertBefore(tablist, element.firstChild);
-                }
-            });
         });
         avalon.nextTick(function() {
-            element.appendChild(fragment);
-            avalon.scan(element.parentNode, model);
+            element.innerHTML = options.bottom ? panels + tablist : tablist + panels;
+            element.setAttribute("ms-class-ui-tabs-collapsible", "collapsible");
+            element.setAttribute("ms-class-tabs-bottom", "bottom");
+            avalon.scan(element, model);
         });
     };
 })(window.avalon);

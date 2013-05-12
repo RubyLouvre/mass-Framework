@@ -5,13 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js"></script>
         <script src="avalon.tabs2.js"></script> 
-       <script src="avalon.button.js"></script>
-        <script src="avalon.progressbar.js"></script>
-        <script src="avalon.accordion.js"></script>
-        <script src="avalon.spinner.js"></script>
-        
-        <script src="avalon.slider.js"></script>
-        <script src="avalon.autocomplete.js"></script>
+
         <style>
             body{
                 font-size:13px;
@@ -21,6 +15,7 @@
         <script>
             avalon.define("theme", function(vm) {
                 vm.theme = "start";
+                vm.tabs = [];
                 vm.$source = [
                     "ActionScript",
                     "AppleScript",
@@ -64,6 +59,23 @@
                     "Scheme"];
             });
 
+            window.onload = function() {
+                var div = document.createElement("div");
+                div.innerHTML = "<span>xxxxxxxxx</span><span>xxxxxxxxx</span>"
+                var documentFragment = document.createDocumentFragment();
+                while (div.firstChild) {
+                    documentFragment.appendChild(div.firstChild)
+                }
+                document.body.appendChild(documentFragment);
+                console.log(documentFragment.childNodes.length)
+                div.innerHTML = "<p>xxxxxxxxx</p><span>xxxxxxxxx</span>"
+                while (div.firstChild) {
+                    documentFragment.appendChild(div.firstChild)
+                }
+                document.body.replaceChild(documentFragment,document.body.lastChild);
+                console.log(documentFragment.childNodes.length)
+            }
+
         </script>
     </head>
     <body>
@@ -87,113 +99,10 @@
             </div>
         </div>
 
-        <div>
-            <button ms-ui="button">A button element</button>
-
-            <input type="submit" value="A submit button" ms-ui="button" />
-
-            <a href="#" ms-ui="button">An anchor</a>
-
-            <input type="checkbox" id="check" data-label="toggle" ms-ui="button" />
-            <div id="format" ms-ui="buttonset">
-                <input type="checkbox" id="check1" value="B" ms-ui="button" />
-                <input type="checkbox" id="check2" value="I" ms-ui="button" />
-                <input type="checkbox" id="check3" value="U" ms-ui="button" />
-            </div>
-            <div class="icons">
-                <button  
-                    ms-ui="button" 
-                    data-primary="ui-icon-locked" 
-                    data-text="false">Button with icon only</button>
-                <button
-                    ms-ui="button" 
-                    data-primary="ui-icon-locked"
-                    >Button with icon on the left</button>
-                <button
-                    ms-ui="button" 
-                    data-primary="ui-icon-gear"
-                    data-secondary="ui-icon-triangle-1-s"
-                    >Button with two icons</button>
-                <button
-                    ms-ui="button" 
-                    data-primary="ui-icon-gear"
-                    data-secondary="ui-icon-triangle-1-s"
-                    data-text="false"
-                    >Button with two icons and no text</button>
-            </div>
-             <br/> <br/>
-                <input type="text" ms-ui-$source="autocomplete" />请在此搜索主流的计算机语言
-                       <br/> <br/>
-           
-            <div  ms-ui="buttonset">
-                <input type="radio" id="check1" name="radio" value="Choice 1" ms-ui="button" />
-                <input type="radio" id="check2" name="radio" value="Choice 1" ms-ui="button" />
-                <input type="radio" id="check3" name="radio" value="Choice 1" ms-ui="button" />
-            </div>
-            <div ms-ui="progressbar" data-value="37" style="width:50%"></div>
-            <div>
-                <input ms-ui="spinner" name="value" />
-            </div>
-           
-            <div  ms-ui="accordion" style="width:50%">
-                <h3>Section 1</h3>
-                <div>
-                    <p>
-                        Mauris mauris ante, blandit et, ultrices a, suscipit eget, quam. Integer
-                        ut neque. Vivamus nisi metus, molestie vel, gravida in, condimentum sit
-                        amet, nunc. Nam a nibh. Donec suscipit eros. Nam mi. Proin viverra leo ut
-                        odio. Curabitur malesuada. Vestibulum a velit eu ante scelerisque vulputate.
-                    </p>
-                </div>
-                <h3>Section 2</h3>
-                <div>
-                    <p>
-                        Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-                        purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-                        velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-                        suscipit faucibus urna.
-                    </p>
-                </div>
-                <h3>Section 3</h3>
-                <div>
-                    <p>
-                        Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
-                        Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
-                        ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
-                        lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
-                    </p>
-                    <ul>
-                        <li>List item one</li>
-                        <li>List item two</li>
-                        <li>List item three</li>
-                    </ul>
-                </div>
-                <h3>Section 4</h3>
-                <div>
-                    <p>
-                        Cras dictum. Pellentesque habitant morbi tristique senectus et netus
-                        et malesuada fames ac turpis egestas. Vestibulum ante ipsum primis in
-                        faucibus orci luctus et ultrices posuere cubilia Curae; Aenean lacinia
-                        mauris vel est.
-                    </p>
-                    <p>
-                        Suspendisse eu nisl. Nullam ut libero. Integer dignissim consequat lectus.
-                        Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-                        inceptos himenaeos.
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div style="width:65%">
-            <div  ms-ui="slider" data-id="ccc" data-min="0" data-max="500" data-values="[75,300]" data-range="true">
-
-            </div>
-            <p ms-important="ccc"> {{value}} </p>
-        </div>
 
         <div ms-controller="theme">
 
-            <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/{{theme}}/jquery-ui.css" >
+             <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.css" >
             <select ms-model="theme">
                 <option value='start'>start</option>
                 <option value='smoothness'>smoothness</option>

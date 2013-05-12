@@ -1,7 +1,6 @@
 (function(avalon) {
-    //http://www.bootcss.com/p/bootstrap-switch/
     //判定是否触摸界面
-    var isTouch = "ontouchstart" in window || "onmsgesturechange" in window;
+    var isTouch = "ontouchend" in document;
     avalon.ui["switch"] = function(element, id, opts) {
         var onLabel = "ON";
         var offLabel = "OFF";

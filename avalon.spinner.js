@@ -15,9 +15,9 @@
         var span = document.createElement("span");
         span.className = "ui-spinner ui-widget ui-widget-content ui-corner-all";
         span.innerHTML = '<a class="ui-spinner-button ui-spinner-up ui-corner-tr ui-button ui-widget ui-state-default ui-button-text-only" tabindex="-1" >' +
-                '<span  class="ui-button-text"><span class="ui-icon ui-icon-triangle-1-n">▲</span></span></a>' +
+                '<span  class="ui-button-text"><span class="ui-icon ui-icon-triangle-1-n">&#9650;</span></span></a>' +
                 '<a  class="ui-spinner-button ui-spinner-down ui-corner-br ui-button ui-widget ui-state-default ui-button-text-only" tabindex="-1" >' +
-                '<span  class="ui-button-text"><span class="ui-icon ui-icon-triangle-1-s">▼</span></span></a>';
+                '<span  class="ui-button-text"><span class="ui-icon ui-icon-triangle-1-s">&#9660;</span></span></a>';
         $element.addClass("ui-spinner-input");
 
         element.autocomplete = "off";
