@@ -20,9 +20,9 @@
     var root = DOC.documentElement;
     var serialize = Object.prototype.toString;
     var domParser = document.createElement("div");
-    var documentFragment = DOC.createDocumentFragment()
+    var documentFragment = DOC.createDocumentFragment();
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
-
+    function noop(){}
     function generateID() {
         //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         return "avalon" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -53,6 +53,7 @@
         log: function log(a) {
             window.console && console.log(a);
         },
+        noop: noop,
         error: function(str, e) { //如果不用Error对象封装一下，str在控制台下可能会乱码
             throw new (e || Error)(str);
         },
@@ -710,8 +711,6 @@
      *                           Define                                 *
      **********************************************************************/
 
-    function noop() {
-    }
     avalon.define = function(name, deps, factory) {
         var args = [].slice.call(arguments);
         if (typeof name !== "string") {
@@ -1154,7 +1153,7 @@
                     type = attr.name; //如果只是普通属性，但其值是个插值表达式
                     isBinding = true;
                 }
-                
+
                 if (isBinding) {
                     bindings.push({
                         type: type,
@@ -1509,15 +1508,19 @@
         href: function(data, scopes) {
             //如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
-            var node = data.node;
-            var simple = node.name.indexOf(prefix) === 0;
+            var simple = false;
             var name = data.type;
-            if (!simple && /^\{\{([^}]+)\}\}$/.test(text)) {
+            var god = avalon(data.element);
+            if (/^\{\{([^}]+)\}\}$/.test(text)) {
                 simple = true;
                 text = RegExp.$1;
             }
             watchView(text, scopes, data, function(val) {
-                data.element[name] = val;
+                if (name === "css") {
+                    god.css(data.args[0], val);
+                } else {
+                    data.element[name] = val;
+                }
             }, simple ? null : scanExpr(data.value));
         },
         //这是一个布尔属性绑定的范本，布尔属性插值要求整个都是一个插值表达式，用{{}}包起来
@@ -1562,14 +1565,12 @@
             });
         },
         "hover": function(data) {
-            var element = data.element,
-                    className = data.value,
-                    god = avalon(element);
+            var god = avalon(data.element);
             god.bind("mouseenter", function() {
-                god.addClass(className);
+                god.addClass(data.value);
             });
             god.bind("mouseleave", function() {
-                god.removeClass(className);
+                god.removeClass(data.value);
             });
         },
         "html": function(data, scopes) {
@@ -1797,7 +1798,7 @@
      **********************************************************************/
     //与href绑定器 用法差不多的其他字符串属性的绑定器
     //建议不要直接在src属性上修改，这样会发出无效的请求，请使用ms-src
-    "title,alt,src,value".replace(rword, function(name) {
+    "title,alt,src,value,css".replace(rword, function(name) {
         bindingHandlers[name] = bindingHandlers.href;
     });
     /*********************************************************************
