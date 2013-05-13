@@ -1,11 +1,10 @@
 (function(avalon) {
     var root = avalon(document.documentElement),
-            //支持触模设备
-            supportTouch = "createTouch" in document || 'ontouchstart' in window ||
-            window.DocumentTouch && document instanceof DocumentTouch,
-            onstart = supportTouch ? "touchstart" : "mousedown",
-            ondrag = supportTouch ? "touchmove" : "mousemove",
-            onend = supportTouch ? "touchend" : "mouseup";
+        //支持触模设备
+        supportTouch = "createTouch" in document || 'ontouchstart' in window || window.DocumentTouch && document instanceof DocumentTouch,
+        onstart = supportTouch ? "touchstart" : "mousedown",
+        ondrag = supportTouch ? "touchmove" : "mousemove",
+        onend = supportTouch ? "touchend" : "mouseup";
     //在元素标签上添加ms-drag="dragcallback" 就能用了，dragcallback为你在VM在定义的函数，它会在拖动时执行它
     //更在制定请在同一元素上设置data-*来制定，其中
     //data-axis="x" //值可以为x, y, xy，"", 没有设置值默认为xy, x为水平移移动，y为垂直移动, xy任意移动，""不给移
@@ -26,7 +25,7 @@
 
         function get(name) {
             var ret;
-            for (var i = 0, scope; scope = scopes[i++]; ) {
+            for (var i = 0, scope; scope = scopes[i++];) {
                 if (scope.hasOwnProperty(name)) {
                     ret = scope[name];
                     break;
@@ -70,8 +69,7 @@
             data.offsetY = data.deltaY + data.originalY;
             if (data.axis.indexOf("x") !== -1) { //如果没有锁定X轴left,top,right,bottom
                 var left = data.range ? Math.min(data.range[2], Math.max(data.range[0], data.offsetX)) : data.offsetX;
-                if (data.movable)
-                    data.el.style.left = left + "px";
+                if (data.movable) data.el.style.left = left + "px";
                 data.left = left;
             }
             if (data.axis.indexOf("y") !== -1) { //如果没有锁定Y轴
@@ -123,9 +121,9 @@
                 } else { //如果是元素节点(比如从parent参数转换地来),或者是CSS表达式,或者是mass对象
                     var c = avalon(range);
                     var offset = c.offset();
-                    data.range = [offset.left + parseFloat(c.css("borderLeftWidth")) , offset.top + parseFloat(c.css("borderTopWidth")) ];
-                    data.range[2] = data.range[0] + range.offsetWidth ;
-                    data.range[3] = data.range[1] + range.offsetHeight ;
+                    data.range = [offset.left + parseFloat(c.css("borderLeftWidth")), offset.top + parseFloat(c.css("borderTopWidth"))];
+                    data.range[2] = data.range[0] + range.offsetWidth;
+                    data.range[3] = data.range[1] + range.offsetHeight;
                 }
             }
         }
@@ -133,13 +131,13 @@
     //使用事件代理提高性能
     root.bind(ondrag, function(e) {
         !+"\v1" ? document.selection.empty() : window.getSelection().removeAllRanges();
-        for (var i = 0, fn; fn = draggable.underway[i++]; ) {
+        for (var i = 0, fn; fn = draggable.underway[i++];) {
             var ret = fn(e);
         }
         return ret;
     });
     root.bind(onend, function(e) {
-        for (var i = 0, fn; fn = draggable.dropscene[i++]; ) {
+        for (var i = 0, fn; fn = draggable.dropscene[i++];) {
             var ret = fn(e);
         }
         return ret;

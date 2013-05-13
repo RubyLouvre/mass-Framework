@@ -6,17 +6,18 @@
 
     avalon.ui.autocomplete = function(element, id, opts) {
         var $element = avalon(element),
-                flagKeyup = false,
-                tempValue = "",
-                model;
+            flagKeyup = false,
+            tempValue = "",
+            model;
         //处理配置
         var options = avalon.mix({}, defaults);
         avalon.mix(options, $element.data());
         var source = Array.isArray(opts) ? opts.sort() : [];
         var sourceList = document.createElement("div");
         sourceList.innerHTML = '<ul ms-important="' + id + '" class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" ms-each-presentation="matcher" ms-visible="show" >' +
-                '<li class="ui-menu-item" ><a  class="ui-corner-all" tabindex="-1" ms-hover="ui-state-focus" ms-class-ui-state-focus="matcher[selectedIndex] === presentation "  >{{presentation}}</a></li>' +
-                '</ul>';
+            '<li class="ui-menu-item" ><a  class="ui-corner-all" tabindex="-1" ms-hover="ui-state-focus" ms-class-ui-state-focus="matcher[selectedIndex] === presentation "  >{{presentation}}</a></li>' +
+            '</ul>';
+
         sourceList = sourceList.firstChild;
         $element.bind("blur", function() {
             model.value = tempValue; //还原
@@ -101,24 +102,25 @@
         });
         avalon.ready(function() {
             element.setAttribute("ms-model", "value");
+            avalon.log("avalon.autocomplete");
             document.body.appendChild(sourceList);
             adjustPosition();
             avalon.scan(element, model);
             avalon.scan(sourceList, model);
         });
-        function adjustPosition() {
 
+        function adjustPosition() {
             var offset = $element.offset();
             sourceList.style.width = element.clientWidth + "px";
             sourceList.style.left = offset.left + "px";
             sourceList.style.top = offset.top + element.offsetHeight + "px";
             sourceList.style.zIndex = 9999;
-            var pageY = sourceList.offsetHeight + parseFloat(sourceList.style.top);
-            if (pageY > avalon(document).offset().top) {
-                window.scrollTo(pageY + 50, 0)
+            if (avalon(doucment).height() - 200 > offset.top) {
+                var pageY = sourceList.offsetHeight + parseFloat(sourceList.style.top);
+                window.scrollTo(pageY + 50, 0);
             }
         }
         $element.bind("focus", adjustPosition);
 
-    }
-})(window.avalon)
+    };
+})(window.avalon);
