@@ -115,7 +115,7 @@
             sourceList.style.left = offset.left + "px";
             sourceList.style.top = offset.top + element.offsetHeight + "px";
             sourceList.style.zIndex = 9999;
-            if (avalon(doucment).height() - 200 > offset.top) {
+            if (avalon(document).height() - 200 > offset.top) {
                 var pageY = sourceList.offsetHeight + parseFloat(sourceList.style.top);
                 window.scrollTo(pageY + 50, 0);
             }
