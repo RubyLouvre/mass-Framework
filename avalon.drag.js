@@ -130,7 +130,11 @@
     }
     //使用事件代理提高性能
     root.bind(ondrag, function(e) {
-        !+"\v1" ? document.selection.empty() : window.getSelection().removeAllRanges();
+        if(window.getSelection){
+            window.getSelection().removeAllRanges();
+        }else{
+            document.selection.empty();
+        }
         for (var i = 0, fn; fn = draggable.underway[i++];) {
             var ret = fn(e);
         }
