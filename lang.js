@@ -350,14 +350,16 @@ define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], func
         }
     });
     $.String({
-        byteLen: function(target) {
+        byteLen: function(target, fix) {
             /**取得一个字符串所有字节的长度。这是一个后端过来的方法，如果将一个英文字符插
              *入数据库 char、varchar、text 类型的字段时占用一个字节，而一个中文字符插入
              *时占用两个字节，为了避免插入溢出，就需要事先判断字符串的字节长度。在前端，
              *如果我们要用户填空的文本，需要字节上的长短限制，比如发短信，也要用到此方法。
              *随着浏览器普及对二进制的操作，这方法也越来越常用。
              */
-            return target.replace(/[^\x00-\xff]/g, 'ci').length;
+            fix = fix ? fix: 2;
+            var str = new Array(fix+1).join("-")
+            return target.replace(/[^\x00-\xff]/g, str).length;
         },
         truncate: function(target, length, truncation) {
             //length，新字符串长度，truncation，新字符串的结尾的字段,返回新字符串
@@ -455,7 +457,7 @@ define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], func
         },
         random: function(target) {
             //从数组中随机抽选一个元素出来。
-            return $.Array.shuffle(target.concat())[0];
+            return target[Math.floor(Math.random() * target.length)]
         },
         flatten: function(target) {
             //对数组进行平坦化处理，返回一个一维的新数组。
