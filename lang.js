@@ -457,7 +457,7 @@ define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], func
         },
         random: function(target) {
             //从数组中随机抽选一个元素出来。
-            return target[Math.floor(Math.random() * target.length)]
+            return target[Math.floor(Math.random() * target.length)];
         },
         flatten: function(target) {
             //对数组进行平坦化处理，返回一个一维的新数组。

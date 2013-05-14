@@ -4,19 +4,19 @@
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js"></script>
-        <script src="avalon.tabs.js"></script> 
+<!--        <script src="avalon.tabs.js"></script> -->
         <script src="avalon.button.js"></script>
-        <script src="avalon.progressbar.js"></script>
+<!--        <script src="avalon.progressbar.js"></script>
         <script src="avalon.accordion.js"></script>
         <script src="avalon.spinner.js"></script>
         <script src="avalon.drag.js"></script>
         <script src="avalon.slider.js"></script>
-        <script src="avalon.autocomplete.js"></script>
+        <script src="avalon.autocomplete.js"></script>-->
         <style>
             body{
                 font-size:13px;
             }
-
+            li .ui-icon-close { float: left; margin: 0.4em 0.2em 0 0; cursor: pointer; }
         </style>
         <script>
             avalon.define("theme", function(vm) {
@@ -68,6 +68,8 @@
         </script>
     </head>
     <body>
+        <script>
+        <!--
         <input name="eee" ms-ui-source="autocomplete"/><span>请在此搜索主流的计算机语言</span>
         <br/> 
         <div id="tabs" ms-ui="tabs" data-removable="true" style="width:50%;">
@@ -89,7 +91,7 @@
                 <p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
             </div>
         </div>
-
+-->
         <div>
             <button ms-ui="button">A button element</button>
 
@@ -97,6 +99,7 @@
             <a href="#" ms-ui="button">An anchor</a>
             <input type="checkbox" id="check" data-label="toggle" ms-ui="button" />
         </div>
+       
         <div id="format" ms-ui="buttonset">
             <input type="checkbox" id="check1" value="B" ms-ui="button" />
             <input type="checkbox" id="check2" value="I" ms-ui="button" />
@@ -130,7 +133,7 @@
             <input type="radio" id="check2" name="radio" value="Choice 1" ms-ui="button" />
             <input type="radio" id="check3" name="radio" value="Choice 1" ms-ui="button" />
         </div>
-
+<!--
         <div ms-ui="progressbar" data-value="37" style="width:50%"></div>
         <div>
             <input ms-ui="spinner" name="value" />
@@ -191,7 +194,7 @@
             <p ms-important="ccc"> {{value}} </p>
         </div>
         <br/> 
-
+-->
         <div ms-controller="theme">
 
             <link rel="stylesheet" ms-href="http://code.jquery.com/ui/1.10.3/themes/{{theme}}/jquery-ui.css" >

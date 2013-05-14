@@ -63,7 +63,7 @@
         '</div>';
         domParser.innerHTML = sliderHTML;
         var slider = domParser.firstChild;
-        var $slider = avalon(slider)
+        var $slider = avalon(slider);
         var a = slider.getElementsByTagName("a"), handlers = [];
         for (var i = 0, el; el = a[i++]; ) {
             handlers.push(el);
@@ -107,8 +107,8 @@
                 data.$el.removeClass("ui-state-active");
             };
             vm.drag = function(event, data) {
-                var prop = isHorizontal ? "left" : "top"
-                var pixelMouse = Math.abs($slider.offset()[prop] - data[prop])
+                var prop = isHorizontal ? "left" : "top";
+                var pixelMouse =   data[prop]
                 //如果是垂直时,往上拖,值就越大
                 var percent = (pixelMouse / pixelTotal); //求出当前handler在slider的位置
 

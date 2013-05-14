@@ -38,11 +38,11 @@
                 ' ms-class-ui-tabs-active="active == $index"' +
                 ' ms-class-ui-state-active="active == $index"' +
                 ' ms-' + options.event + '="activate"' +
-                ' ms-hover="ui-state-hover"' +
-                ' >{{tab|html}}<span class="ui-icon ui-icon-close" ms-if="true" ms-click="remove"></span></li></ul>';
+                ' ms-hover="ui-state-hover"' +// float: left; margin: 0.4em 0.2em 0 0; cursor: pointer;这样jquery ui没有封装进去
+                ' >{{tab|html}}<span class="ui-icon ui-icon-close" style="float: left; margin: 0.4em 0.2em 0 0; cursor: pointer;" ms-if="true" ms-click="remove"></span></li></ul>';
         var panels = '<div ms-each-panel="tabpanels" ><div class="ui-tabs-panel ui-widget-content"' +
                 ' ms-class-ui-corner-bottom="!bottom"' +
-                ' ms-visible="active == $index" >{{panel|html}}</div></div>'
+                ' ms-visible="active == $index" >{{panel|html}}</div></div>';
         var model = avalon.define(id, function(vm) {
             vm.active = options.active;
             vm.collapsible = options.collapsible;

@@ -26,7 +26,6 @@
         var activeClass = !toggleButton ? "ui-state-active" : "";
         if (toggleButton) { //偷天换日，用label代替原来的input[type=checkbox]，input[type=checkbox]
             var label = document.createElement("label");
-            label.htmlFor = element.id;
             checkbox = element;
             label.innerHTML = options.label || checkbox.value;
             checkbox.parentNode.insertBefore(label, checkbox.nextSibling);
@@ -38,8 +37,7 @@
             fragment.appendChild(el);
         }
         $element.addClass("ui-button ui-widget ui-state-default");
-        $element.attr("ms-hover", "ui-state-hover");
-        $element.attr("ms-class-ui-state-disabled", "disabled");
+
         element.title = title;
 
         //如果使用了buttonset
@@ -82,21 +80,20 @@
         }
 
         $element.bind("mousedown", function(e) {
-            if (model.disbaled) {
+            if (model.disabled) {
                 return false;
             }
             $element.addClass(activeClass);
         });
         $element.bind("mouseup", function(e) {
-            if (model.disbaled) {
+            if (model.disabled) {
                 return false;
             }
             $element.removeClass(activeClass);
         });
         if (isCheckbox) {
-            $element.toggleClass("ui-state-active", checkbox.checked);
             $element.bind("click", function() {
-                $element.toggleClass("ui-state-active", checkbox.checked);
+                model.checked = !model.checked
             });
         }
         if (isRadio) {
@@ -108,10 +105,10 @@
             model = avalon.define(id, function(vm) {
                 vm.disabled = options.disabled;
                 vm.radioActived = 0;
+                vm.checked = !! (checkbox || {}).checked;
                 vm.$radios = [];
             });
         }
-
         if (isRadio) {
             element.parentNode.$radio = model;
             model.$radios.push(element);
@@ -120,9 +117,18 @@
             if (element.tagName !== "INPUT") {
                 element.appendChild(fragment);
             }
+            element.setAttribute("ms-hover", "ui-state-hover");
+            element.setAttribute("ms-class-ui-state-disabled", "disabled");
+            if (isCheckbox) {
+                element.setAttribute("ms-class-ui-state-active", "checked");
+                checkbox.setAttribute("ms-checked", "checked");
+            }
             if (isRadio) {
                 element.setAttribute("ms-class-ui-state-active", "radioActived == " + radioIndex);
                 element.setAttribute("ms-checked", "radioActived == " + radioIndex);
+            }
+            if (toggleButton) {
+                avalon.scan(checkbox, model);
             }
             avalon.scan(element, model);
         });
