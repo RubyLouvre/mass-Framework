@@ -1,4 +1,4 @@
-!function(global, DOC) {
+void function(global, DOC) {
     var $$ = global.$; //保存已有同名变量
     var rmakeid = /(#.+|\W)/g; //用于处理掉href中的hash与所有特殊符号，生成长命名空间
     var NsKey = DOC.URL.replace(rmakeid, ""); //长命名空间（字符串）
@@ -725,8 +725,7 @@
     //============================合并核心模块支持===========================
     /*combine modules*/
 
-}
-(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
+}(self, self.document); //为了方便在VS系列实现智能提示,把这里的this改成self或window
 /**
  changelog:
  2011.7.11
