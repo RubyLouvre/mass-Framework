@@ -80,7 +80,6 @@
             data.originalY = toFloat($el.css("top"));
             data.scroll = data.scroll === false ? false : true
             if (data.scroll) {
-              
                 data.scrollSensitivity = data.scrollSensitivity >= 0 ? data.scrollSensitivity : 20;
                 data.scrollSpeed = data.scrollSensitivity >= 0 ? data.scrollSpeed : 20;
                 data.scrollParent = scrollParent(data.$el);
@@ -100,6 +99,7 @@
     draggable.dropscene = [];
 
     function drag(event) {
+        event.preventDefault();
         draggable.queue.forEach(function(data) {
             //当前元素移动了多少距离
             data.deltaX = event.clientX - data.startX;
@@ -189,9 +189,7 @@
                     data.range[3] = data.range[1] + avalon(isDoc ? document : window).height();
                 } else { //如果是元素节点(比如从parent参数转换地来),或者是CSS表达式,或者是mass对象
                     data.range = [0, 0, range.clientWidth, range.clientHeight]
-                    if (range == node.offsetParent) {
-                        return data.range;
-                    } else {
+                    if (range !== node.offsetParent) {
                         var p = avalon(range).offset();//parentNode
                         var o = avalon(node.offsetParent).offset();//offsetParent
                         var fixX = p.left - o.left;
