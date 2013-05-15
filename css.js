@@ -500,4 +500,24 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
  http://www.cnblogs.com/niuniu/archive/2010/06/07/1753035.html
  这里的阴影运用得不错
  http://www.soleilneon.com/blog/2010/10/add-css3-border-radius-and-box-shadow-to-your-design/
+
+    if (window.getComputedStyle)
+        avalon.ready(function() {
+            var div = document.createElement("div");
+            div.style.cssText = "position:absolute;left: 50%";
+            document.body.appendChild(div);
+            //http://web.archiveorange.com/archive/v/fwvdezWcTH6CxUqeMact
+            if (window.getComputedStyle(div, null).left === "50%") {
+                var cssHooks = avalon.cssHooks, getter = cssHooks["@:get"];
+                cssHooks["top:get"] = cssHooks["left:get"] = cssHooks["right:get"] = cssHooks["bottom:get"] = function(node, name) {
+                    var ret = getter(node, name);
+                    if (/%/.test(ret)) {
+                        var p = /^(top|bottom)$/.test(name) ? node.offsetParent.offsetHeight : node.offsetParent.offsetWidth;
+                        return p * parseFloat(ret) / 100 + "px";
+                    }
+                    return ret;
+                };
+            }
+            document.body.removeChild(div);
+        });
  */

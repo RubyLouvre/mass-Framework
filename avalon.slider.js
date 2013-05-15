@@ -108,14 +108,12 @@
             };
             vm.drag = function(event, data) {
                 var prop = isHorizontal ? "left" : "top";
-                var pixelMouse =   data[prop]
+                var pixelMouse = data[prop];
                 //如果是垂直时,往上拖,值就越大
                 var percent = (pixelMouse / pixelTotal); //求出当前handler在slider的位置
-
                 if (!isHorizontal) {
                     percent = Math.abs(1 - percent);
                 }
-
                 if (percent > 0.99) {
                     percent = 1;
                 }
@@ -126,7 +124,6 @@
                 if (twohandlebars) { //水平时，小的0在左边，大的1在右边，垂直时，大的0在下边，小的1在上边
                     if (Index === 0) {
                         var check = vm.values[1];
-
                         if (val > check) {
                             val = check;
                         }

@@ -309,7 +309,7 @@
         }
     }
     //=============================css相关=======================
-    var cssHooks = {};
+    var cssHooks = avalon.cssHooks = {};
     var prefixes = ['', '-webkit-', '-o-', '-moz-', '-ms-'];
     var cssMap = {//支持检测 WebKitMutationObserver WebKitCSSMatrix mozMatchesSelector ,webkitRequestAnimationFrame 
         "float": 'cssFloat' in root.style ? 'cssFloat' : 'styleFloat',

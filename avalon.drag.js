@@ -38,11 +38,20 @@
         parent = parent !== node[0] ? parent : null;
         return(/fixed/).test(pos) || !parent ? document : parent;
     };
+    var defaults = {
+        scrollSensitivity: 20,
+        scrollSpeed: 20,
+        movable: true,
+        dragstart: avalon.noop,
+        drag: avalon.noop,
+        dragend: avalon.noop,
+        scroll: true
+    }
     var draggable = avalon.bindingHandlers.drag = function(meta, scopes) {
         var el = meta.element;
         var $el = avalon(el);
-        var data = $el.data();
-
+        var data = avalon.mix({}, defaults);
+        avalon.mix(data, $el.data());
         var axis = data.axis;
         if (axis !== "" && !/^(x|y|xy)$/.test(axis)) {
             data.axis = "xy";
@@ -71,17 +80,16 @@
             setDragRange(data);
             data.startX = event.clientX;
             data.startY = event.clientY;
+
             if (/window|document/i.test(data.containment)) {
                 var offset = $el.offset();
                 $el.css("top", offset.top);
                 $el.css("left", offset.left);
             }
-            data.originalX = toFloat($el.css("left"));
-            data.originalY = toFloat($el.css("top"));
-            data.scroll = data.scroll === false ? false : true
+            var p = data.$el.position()
+            data.originalX = p.left
+            data.originalY = p.top
             if (data.scroll) {
-                data.scrollSensitivity = data.scrollSensitivity >= 0 ? data.scrollSensitivity : 20;
-                data.scrollSpeed = data.scrollSensitivity >= 0 ? data.scrollSpeed : 20;
                 data.scrollParent = scrollParent(data.$el);
                 data.overflowOffset = avalon(data.scrollParent).offset();
             }
@@ -107,20 +115,24 @@
             //现在的坐标
             data.offsetX = data.deltaX + data.originalX;
             data.offsetY = data.deltaY + data.originalY;
+            //     console.log(data.offsetX+"!!!!!!!"+  data.offsetY)
             if (data.axis.indexOf("x") !== -1) { //如果没有锁定X轴left,top,right,bottom
                 var left = data.range ? Math.min(data.range[2], Math.max(data.range[0], data.offsetX)) : data.offsetX;
-                if (data.movable)
+                if (data.movable) {
                     data.el.style.left = left + "px";
+                }
                 data.left = left;
             }
             if (data.axis.indexOf("y") !== -1) { //如果没有锁定Y轴
-                var top = data.range ? Math.min(data.range[3], Math.max(data.range[1], data.offsetY)) : data.offsetY;
+                //data.range ? Math.min(data.range[3], Math.max(data.range[1], data.offsetY)) :
+                var top = data.offsetY;
+
                 if (data.movable) {
                     data.el.style.top = top + "px";
                 }
                 data.top = top;
             }
-          //  setDragScroll(event, data)
+            setDragScroll(event, data);
             data.drag.call(data.el, event, data);
         });
     }
@@ -156,15 +168,16 @@
         } else {
             offset = this.offset(); //得到元素相对于视窗的距离（我们只有它的top与left）
             var offsetParent = avalon(node.offsetParent);
-            if (/body|html/i.test(node.offsetParent.tagName)) {
-                parentOffset = offsetParent.offset(); //得到它的offsetParent相对于视窗的距离
-            }
-            parentOffset.top += toFloat(offsetParent.css("borderTopWidth"));
-            parentOffset.left += toFloat(offsetParent.css("borderLeftWidth"));
+            //得到它的offsetParent相对于视窗的距离
+            parentOffset = /html|body/i.test(offsetParent[0].nodeName) ? parentOffset : offsetParent.offset();
+            offset.top -= toFloat(this.css("marginTop")) || 0;
+            offset.left -= toFloat(this.css("marginLeft")) || 0;
+            parentOffset.top += toFloat(offsetParent.css("borderTopWidth")) || 0;
+            parentOffset.left += toFloat(offsetParent.css("borderLeftWidth")) || 0;
         }
         return {
-            top: offset.top - parentOffset.top - toFloat(this.css("marginTop")),
-            left: offset.left - parentOffset.left - toFloat(this.css("marginLeft"))
+            top: offset.top - parentOffset.top,
+            left: offset.left - parentOffset.left
         };
     };
     function setDragRange(data) {
@@ -183,12 +196,12 @@
                         data.range = [0, 0];
                     } else {
                         data.range = "pageXOffset" in window ? [window.pageXOffset, window.pageYOffset] :
-                                [root.scrollLeft || document.body.scrollLeft, root.scrollTop || document.body.scrollTop];
+                                [root[0].scrollLeft || document.body.scrollLeft, root[0].scrollTop || document.body.scrollTop];
                     }
                     data.range[2] = data.range[0] + avalon(isDoc ? document : window).width();
                     data.range[3] = data.range[1] + avalon(isDoc ? document : window).height();
                 } else { //如果是元素节点(比如从parent参数转换地来),或者是CSS表达式,或者是mass对象
-                    data.range = [0, 0, range.clientWidth, range.clientHeight]
+                    data.range = [0, 0, range.clientWidth, range.clientHeight];
                     if (range !== node.offsetParent) {
                         var p = avalon(range).offset();//parentNode
                         var o = avalon(node.offsetParent).offset();//offsetParent
@@ -208,44 +221,44 @@
 
         }
     }
-//    function setDragScroll(event, data, docLeft, docTop) {
-//        if (data.scroll) {
-//            if (data.scrollParent != document && data.scrollParent.tagName != 'HTML') {
-//                if (data.axis.indexOf("x") !== -1) {
-//                    if ((data.overflowOffset.left + data.scrollParent.offsetWidth) - event.pageX < data.scrollSensitivity) {
-//                        data.scrollParent.scrollLeft = data.scrollParent.scrollLeft + data.scrollSpeed;
-//                    } else if (event.pageX - data.overflowOffset.left < data.scrollSensitivity) {
-//                        data.scrollParent.scrollLeft = data.scrollParent.scrollLeft - data.scrollSpeed;
-//                    }
-//                }
-//                if (data.axis.indexOf("y") !== -1) {
-//                    if ((data.overflowOffset.top + data.scrollParent.offsetHeight) - event.pageY < data.scrollSensitivity) {
-//                        data.scrollParent.scrollTop = data.scrollParent.scrollTop + data.scrollSpeed;
-//                    } else if (event.pageY - data.overflowOffset.top < data.scrollSensitivity) {
-//                        data.scrollParent.scrollTop = data.scrollParent.scrollTop - data.scrollSpeed;
-//                    }
-//                }
-//
-//            } else {
-//                docLeft = docLeft || root.scrollTop();
-//                docTop = docTop || root.scrollTop();
-//                if (data.axis.indexOf("x") !== -1) {
-//                    if (event.pageX - docLeft < data.scrollSensitivity) {
-//                        root.scrollLeft(docLeft - data.scrollSpeed);
-//                    } else if (avalon(window).width() - event.pageX + docLeft < data.scrollSensitivity) {
-//                        root.scrollLeft(docLeft + data.scrollSpeed);
-//                    }
-//                }
-//                if (data.axis.indexOf("y") !== -1) {
-//                    if (event.pageY - docTop < data.scrollSensitivity) {
-//                        root.scrollTop(docTop - data.scrollSpeed);
-//                    } else if (avalon(window).height() - event.pageY + docTop < data.scrollSensitivity) {
-//                        root.scrollTop(docTop + data.scrollSpeed);
-//                    }
-//                }
-//            }
-//        }
-//    }
+    function setDragScroll(event, data, docLeft, docTop) {
+        if (data.scroll) {
+            if (data.scrollParent != document && data.scrollParent.tagName !== 'HTML') {
+                if (data.axis.indexOf("x") !== -1) {
+                    if ((data.overflowOffset.left + data.scrollParent.offsetWidth) - event.pageX < data.scrollSensitivity) {
+                        data.scrollParent.scrollLeft = data.scrollParent.scrollLeft + data.scrollSpeed;
+                    } else if (event.pageX - data.overflowOffset.left < data.scrollSensitivity) {
+                        data.scrollParent.scrollLeft = data.scrollParent.scrollLeft - data.scrollSpeed;
+                    }
+                }
+                if (data.axis.indexOf("y") !== -1) {
+                    if ((data.overflowOffset.top + data.scrollParent.offsetHeight) - event.pageY < data.scrollSensitivity) {
+                        data.scrollParent.scrollTop = data.scrollParent.scrollTop + data.scrollSpeed;
+                    } else if (event.pageY - data.overflowOffset.top < data.scrollSensitivity) {
+                        data.scrollParent.scrollTop = data.scrollParent.scrollTop - data.scrollSpeed;
+                    }
+                }
+
+            } else {
+                docLeft = docLeft || root.scrollLeft();
+                docTop = docTop || root.scrollTop();
+                if (data.axis.indexOf("x") !== -1) {
+                    if (event.pageX - docLeft < data.scrollSensitivity) {
+                        root.scrollLeft(docLeft - data.scrollSpeed);
+                    } else if (avalon(window).width() - event.pageX + docLeft < data.scrollSensitivity) {
+                        root.scrollLeft(docLeft + data.scrollSpeed);
+                    }
+                }
+                if (data.axis.indexOf("y") !== -1) {
+                    if (event.pageY - docTop < data.scrollSensitivity) {
+                        root.scrollTop(docTop - data.scrollSpeed);
+                    } else if (avalon(window).height() - event.pageY + docTop < data.scrollSensitivity) {
+                        root.scrollTop(docTop + data.scrollSpeed);
+                    }
+                }
+            }
+        }
+    }
     function getWindow(elem) {//只对window与document取值
         return elem.window && elem.document ?
                 elem :
