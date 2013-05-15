@@ -132,6 +132,7 @@
             }
             avalon.scan(element, model);
         });
+        return model
     };
 })(window.avalon);
 

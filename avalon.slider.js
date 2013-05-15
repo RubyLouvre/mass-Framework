@@ -101,6 +101,8 @@
             vm.dragstart = function(event, data) {
                 Index = handlers.indexOf(data.el);
                 data.$el.addClass("ui-state-active");
+                data.range[2] += this.clientWidth;
+                data.range[3] += this.clientHeight;
                 pixelTotal = isHorizontal ? slider.offsetWidth : slider.offsetHeight;
             };
             vm.dragend = function(event, data) {
@@ -142,10 +144,11 @@
                     vm.percent = value2Percent(val);
                 }
             };
+			
         });
 
         avalon.scan(slider, model);
-
+        return model;
     };
 
 })(window.avalon);

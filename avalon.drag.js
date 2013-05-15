@@ -45,6 +45,7 @@
         dragstart: avalon.noop,
         drag: avalon.noop,
         dragend: avalon.noop,
+        beforestart: avalon.noop,
         scroll: true
     }
     var draggable = avalon.bindingHandlers.drag = function(meta, scopes) {
@@ -68,8 +69,12 @@
             return ret;
         }
         data.drag = get(meta.value) || avalon.noop;
-        data.dragstart = get(data.dragstart || "") || avalon.noop;
-        data.dragend = get(data.dragend || "") || avalon.noop;
+        "beforestart, dragstart, dragend".replace(avalon.rword, function(name) {
+            var fn = get(data[name] || "");
+            if (typeof fn === "function") {
+                data[name] = fn;
+            }
+        })
         data.movable = data.movable !== false;
         data.el = el;
         data.$el = $el;
@@ -78,17 +83,15 @@
         }
         $el.bind(onstart, function(event) {
             setDragRange(data);
+            data.beforestart.call(data.el, event, data);
             data.startX = event.clientX;
             data.startY = event.clientY;
-
-            if (/window|document/i.test(data.containment)) {
-                var offset = $el.offset();
-                $el.css("top", offset.top);
-                $el.css("left", offset.left);
+            var p = data.$el.position();
+            if (data.containment === "window") {
+                p = data.el.getBoundingClientRect()
             }
-            var p = data.$el.position()
-            data.originalX = p.left
-            data.originalY = p.top
+            data.originalX = data.originalX || p.left;
+            data.originalY = data.originalY || p.top;
             if (data.scroll) {
                 data.scrollParent = scrollParent(data.$el);
                 data.overflowOffset = avalon(data.scrollParent).offset();
@@ -107,7 +110,6 @@
     draggable.dropscene = [];
 
     function drag(event) {
-        event.preventDefault();
         draggable.queue.forEach(function(data) {
             //当前元素移动了多少距离
             data.deltaX = event.clientX - data.startX;
@@ -131,11 +133,18 @@
             }
             setDragScroll(event, data);
             data.drag.call(data.el, event, data);
+            if (window.getSelection) {
+                window.getSelection().removeAllRanges();
+            } else {
+                document.selection.empty();
+            }
         });
     }
 
     function dragEnd(event) {
         draggable.queue.forEach(function(data) {
+            data.originalX = data.left;
+            data.originalY = data.top;
             if (data.el.releaseCapture) {
                 data.el.releaseCapture();
             } else if (window.releaseEvents) {
@@ -167,14 +176,12 @@
             var offsetParent = avalon(node.offsetParent);
             //得到它的offsetParent相对于视窗的距离
             parentOffset = /html|body/i.test(offsetParent[0].nodeName) ? parentOffset : offsetParent.offset();
-            offset.top -= toFloat(this.css("marginTop")) || 0;
-            offset.left -= toFloat(this.css("marginLeft")) || 0;
-            parentOffset.top += toFloat(offsetParent.css("borderTopWidth")) || 0;
-            parentOffset.left += toFloat(offsetParent.css("borderLeftWidth")) || 0;
+            parentOffset.top += toFloat(offsetParent.css("borderTopWidth"));
+            parentOffset.left += toFloat(offsetParent.css("borderLeftWidth"));
         }
         return {
-            top: offset.top - parentOffset.top,
-            left: offset.left - parentOffset.left
+            top: offset.top - parentOffset.top - toFloat(this.css("marginTop")),
+            left: offset.left - parentOffset.left - toFloat(this.css("marginLeft"))
         };
     };
     function setDragRange(data) {
@@ -208,8 +215,6 @@
                         data.range[2] += fixX;
                         data.range[1] += fixY;
                         data.range[3] += fixY;
-                    } else {
-                        console.log(data.range)
                     }
                 }
             }
@@ -282,11 +287,7 @@
 
     //使用事件代理提高性能
     root.bind(ondrag, function(e) {
-        if (window.getSelection) {
-            window.getSelection().removeAllRanges();
-        } else {
-            document.selection.empty();
-        }
+
         for (var i = 0, fn; fn = draggable.underway[i++]; ) {
             var ret = fn(e);
         }

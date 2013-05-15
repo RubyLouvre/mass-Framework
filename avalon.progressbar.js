@@ -24,5 +24,6 @@
             element.appendChild(fragment);
             avalon.scan(element.parentNode, model);
         });
+		return model;
     }
 })(this.avalon);

@@ -1,4 +1,5 @@
-//http://www.digitalmagicpro.com/jPicker/
+
+//     http://www.knallgrau.at/code/colorpicker/demo
 (function(avalon) {
     var defaults = {
         IMAGE_BASE: "colorpicker/",
@@ -91,8 +92,6 @@
                     brightness: (vm.pickerHeight - y) / vm.pickerHeight
                 };
                 var rgb = UI.Color.hsv2rgb(vm.$hsv.hue, vm.$hsv.saturation, vm.$hsv.brightness);
-              //  element.style.backgroundColor = "rgb(" + rgb + ")";
-
                 element.value = UI.Color.rgb2hex(rgb[0], rgb[1], rgb[2]);
                 vm.hexValue = element.value;
               //  vm.hexColor = vm.$hsv.brightness > 0.65 ? "000000" : "FFFFFF";
