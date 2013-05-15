@@ -60,8 +60,8 @@
             vm.updateSelector = function(event, data) {
                 options.left = data.left;
                 options.top = data.top;
-                event.target.style.top = data.top + 6 + "px";
-                event.target.style.left = data.left + 6 + "px";
+                this.style.top = data.top + 6 + "px";
+                this.style.left = data.left + 6  + "px";
                 vm.update(data.left, data.top);
             };
             vm.updateHue = function(event, data) {

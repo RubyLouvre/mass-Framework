@@ -115,7 +115,6 @@
             //现在的坐标
             data.offsetX = data.deltaX + data.originalX;
             data.offsetY = data.deltaY + data.originalY;
-            //     console.log(data.offsetX+"!!!!!!!"+  data.offsetY)
             if (data.axis.indexOf("x") !== -1) { //如果没有锁定X轴left,top,right,bottom
                 var left = data.range ? Math.min(data.range[2], Math.max(data.range[0], data.offsetX)) : data.offsetX;
                 if (data.movable) {
@@ -124,9 +123,7 @@
                 data.left = left;
             }
             if (data.axis.indexOf("y") !== -1) { //如果没有锁定Y轴
-                //data.range ? Math.min(data.range[3], Math.max(data.range[1], data.offsetY)) :
-                var top = data.offsetY;
-
+                var top = data.range ? Math.min(data.range[3], Math.max(data.range[1], data.offsetY)) : data.offsetY;
                 if (data.movable) {
                     data.el.style.top = top + "px";
                 }
@@ -211,6 +208,8 @@
                         data.range[2] += fixX;
                         data.range[1] += fixY;
                         data.range[3] += fixY;
+                    } else {
+                        console.log(data.range)
                     }
                 }
             }
