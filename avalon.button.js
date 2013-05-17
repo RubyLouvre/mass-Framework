@@ -148,3 +148,4 @@
         children[children.length - 1].setAttribute("data-corner-class", "ui-corner-right");
     };
 })(window.avalon);
+//X-tag和Web组件帮你提速应用开发 http://mozilla.com.cn/post/51451/

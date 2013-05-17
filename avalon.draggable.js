@@ -47,12 +47,12 @@
         dragend: avalon.noop,
         beforestart: avalon.noop,
         scroll: true
-    }
-    var draggable = avalon.bindingHandlers.drag = function(meta, scopes) {
-        var el = meta.element;
-        var $el = avalon(el);
+    };
+    var draggable = avalon.bindingHandlers.draggable = function(meta, scopes) {
+        var element = meta.element;
+        var $element = avalon(element);
         var data = avalon.mix({}, defaults);
-        avalon.mix(data, $el.data());
+        avalon.mix(data, $element.data());
         var axis = data.axis;
         if (axis !== "" && !/^(x|y|xy)$/.test(axis)) {
             data.axis = "xy";
@@ -74,35 +74,40 @@
             if (typeof fn === "function") {
                 data[name] = fn;
             }
-        })
+        });
         data.movable = data.movable !== false;
-        data.el = el;
-        data.$el = $el;
+        data.element = element;
+        data.$element = $element;
         function toFloat(a) {
             return parseFloat(a) || 0;
         }
-        $el.bind(onstart, function(event) {
+        $element.bind(onstart, function(event) {
+            data.beforestart.call(data.element, event, data);
             setDragRange(data);
-            data.beforestart.call(data.el, event, data);
-            data.startX = event.clientX;
-            data.startY = event.clientY;
-            var p = data.$el.position();
+            textselect(true);
+            data.startX = event.pageX;
+            data.startY = event.pageY;
+            var position = data.$element.position();
+            var offset = data.$element.offset();
             if (data.containment === "window") {
-                p = data.el.getBoundingClientRect()
+                position = data.element.getBoundingClientRect();
+                data.originalX = position.left;
+                data.originalY = position.top;
+            } else {
+                data.originalX = data.originalX || position.left + data.startX - offset.left;
+                data.originalY = data.originalY || position.top + data.startY - offset.top;
             }
-            data.originalX = data.originalX || p.left;
-            data.originalY = data.originalY || p.top;
             if (data.scroll) {
-                data.scrollParent = scrollParent(data.$el);
+                data.scrollParent = scrollParent(data.$element);
                 data.overflowOffset = avalon(data.scrollParent).offset();
             }
-            if (el.setCapture) { //设置鼠标捕获
-                el.setCapture();
+            if (element.setCapture) { //设置鼠标捕获
+                element.setCapture();
             } else if (window.captureEvents) {
                 window.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);
             }
             draggable.queue.push(data);
-            data.dragstart.call(data.el, event, data);
+            data.dragstart.call(data.element, event, data);
         });
     };
     draggable.queue = [];
@@ -111,28 +116,29 @@
 
     function drag(event) {
         draggable.queue.forEach(function(data) {
+            event.preventDefault();
             //当前元素移动了多少距离
-            data.deltaX = event.clientX - data.startX;
-            data.deltaY = event.clientY - data.startY;
+            data.deltaX = event.pageX - data.startX;
+            data.deltaY = event.pageY - data.startY;
             //现在的坐标
             data.offsetX = data.deltaX + data.originalX;
             data.offsetY = data.deltaY + data.originalY;
             if (data.axis.indexOf("x") !== -1) { //如果没有锁定X轴left,top,right,bottom
                 var left = data.range ? Math.min(data.range[2], Math.max(data.range[0], data.offsetX)) : data.offsetX;
                 if (data.movable) {
-                    data.el.style.left = left + "px";
+                    data.element.style.left = left + "px";
                 }
                 data.left = left;
             }
             if (data.axis.indexOf("y") !== -1) { //如果没有锁定Y轴
                 var top = data.range ? Math.min(data.range[3], Math.max(data.range[1], data.offsetY)) : data.offsetY;
                 if (data.movable) {
-                    data.el.style.top = top + "px";
+                    data.element.style.top = top + "px";
                 }
                 data.top = top;
             }
             setDragScroll(event, data);
-            data.drag.call(data.el, event, data);
+            data.drag.call(data.element, event, data);
             if (window.getSelection) {
                 window.getSelection().removeAllRanges();
             } else {
@@ -145,12 +151,13 @@
         draggable.queue.forEach(function(data) {
             data.originalX = data.left;
             data.originalY = data.top;
-            if (data.el.releaseCapture) {
-                data.el.releaseCapture();
+            if (data.element.releaseCapture) {
+                data.element.releaseCapture();
             } else if (window.releaseEvents) {
                 window.releaseEvents(Event.MOUSEMOVE | Event.MOUSEUP);
             }
-            data.dragend.call(data.el, event, data);
+            textselect(false);
+            data.dragend.call(data.element, event, data);
         });
         draggable.queue.length = 0;
 
@@ -186,7 +193,7 @@
     };
     function setDragRange(data) {
         var range = data.containment; //处理区域鬼拽,确认可活动的范围
-        var node = data.el;
+        var node = data.element;
         var isDoc = range === "document";
         if (range) {
             if (Array.isArray(range) && range.length === 4) { //如果传入的是坐标 [x1,y1,x2,y2] left,top,right,bottom
@@ -196,12 +203,12 @@
                     range = node.parentNode;
                 }
                 if (isDoc || range === "window") { //如果是document|window参数
-                    if (isDoc) {
-                        data.range = [0, 0];
-                    } else {
-                        data.range = "pageXOffset" in window ? [window.pageXOffset, window.pageYOffset] :
-                                [root[0].scrollLeft || document.body.scrollLeft, root[0].scrollTop || document.body.scrollTop];
-                    }
+                    //   if (isDoc) {
+                    data.range = [0, 0];
+                    //   } else {
+                    //      data.range = "pageXOffset" in window ? [window.pageXOffset, window.pageYOffset] :
+                    //     [root[0].scrollLeft || document.body.scrollLeft, root[0].scrollTop || document.body.scrollTop];
+                    //  }
                     data.range[2] = data.range[0] + avalon(isDoc ? document : window).width();
                     data.range[3] = data.range[1] + avalon(isDoc ? document : window).height();
                 } else { //如果是元素节点(比如从parent参数转换地来),或者是CSS表达式,或者是mass对象
@@ -225,6 +232,11 @@
 
         }
     }
+    function textselect(bool) {
+        //放于鼠标按下或弹起处的回调中,用于开启或禁止文本选择
+        root.css("-user-select", bool ? "" : "none");
+        document.unselectable = bool ? "off" : "on";
+    };
     function setDragScroll(event, data, docLeft, docTop) {
         if (data.scroll) {
             if (data.scrollParent != document && data.scrollParent.tagName !== 'HTML') {

@@ -2,7 +2,7 @@
 //     http://www.knallgrau.at/code/colorpicker/demo
 (function(avalon) {
     var defaults = {
-        IMAGE_BASE: "colorpicker/",
+        imagesBase: "colorpicker/",
         toggle: false,
         top: 0,
         left: 0
@@ -14,13 +14,13 @@
         var domParser = document.createElement("div"), model;
         domParser.innerHTML = '<div ms-visible="toggle" ms-important="' + id + '" class="colorpicker ui-widget ui-widget-content ui-corner-all"><div class="colorpicker-div ui-corner-all" >' + (
                 (typeof document.documentElement.style.maxHeight === 'undefined') ? // apply png fix for ie 5.5 and 6.0
-                '<img class="colorpicker-bg" src="' + options.IMAGE_BASE + 'blank.gif" style="filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\'' + options.IMAGE_BASE + 'pickerbg.png\', sizingMethod=\'scale\')" alt="">' :
-                '<img class="colorpicker-bg" src="' + options.IMAGE_BASE + 'pickerbg.png" alt="">'
+                '<img class="colorpicker-bg" src="' + options.imagesBase + 'blank.gif" style="filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src=\'' + options.imagesBase + 'pickerbg.png\', sizingMethod=\'scale\')" alt="">' :
+                '<img class="colorpicker-bg" src="' + options.imagesBase + 'pickerbg.png" alt="">'
                 ) +
                 '<div class="colorpicker-bg-overlay" style="z-index: 1002;"></div>' +
-                '<div class="colorpicker-selector" ms-drag="updateSelector" data-containment="parent" ms-css-left="selectorLeft" ms-css-top="selectorTop" ><img src="' + options.IMAGE_BASE + 'select.gif" width="11" height="11" alt="" /></div></div>' +
-                '<div class="colorpicker-hue-container"><img src="' + options.IMAGE_BASE + 'hue.png" class="colorpicker-hue-bg-img"><div class="colorpicker-hue-slider">' +
-                '<div class="colorpicker-hue-thumb" ms-css-top="hueValue" ms-drag="updateHue" data-containment="parent" data-axis="y"><img src="' + options.IMAGE_BASE + 'hline.png"></div></div></div>' +
+                '<div class="colorpicker-selector" ms-draggable="updateSelector" data-containment="parent" ms-css-left="selectorLeft" ms-css-top="selectorTop" ><img src="' + options.imagesBase + 'select.gif" width="11" height="11" alt="" /></div></div>' +
+                '<div class="colorpicker-hue-container"><img src="' + options.imagesBase + 'hue.png" class="colorpicker-hue-bg-img"><div class="colorpicker-hue-slider">' +
+                '<div class="colorpicker-hue-thumb" ms-css-top="hueValue" ms-draggable="updateHue" data-containment="parent" data-axis="y"><img src="' + options.imagesBase + 'hline.png"></div></div></div>' +
                 '<div class="colorpicker-footer "><span class="colorpicker-value" ms-css-color="#{{hexValue}}">#{{hexValue}}</span>' +
                 '<button class="colorpicker-okbutton" ms-click="closePicker" ms-ui="button"  data-primary="ui-icon-close" data-text="false">OK</button></div></div>';
         var colorpicker = domParser.firstChild;

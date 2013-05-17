@@ -5,7 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js"></script>
          <script src="jquery.js"></script>
-        <script src="avalon.drag.js"></script>
+        <script src="avalon.draggable.js"></script>
         <script src="avalon.slider.js"></script>
         <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
         <style>
@@ -35,6 +35,7 @@
         <div style="width:70%">
             <input ms-ui="slider"data-id="aaa"  data-max="255" data-value="36">
         </div>
+      
         <p ms-controller="aaa">{{value}}  {{percent}}</p>
         <div style="width:70%">
             <input ms-ui="slider" data-range="min">
@@ -60,7 +61,7 @@
             <input  ms-ui="slider"  data-value="60" data-range="min" data-orientation="vertical" >
             <input  ms-ui="slider"  data-value="80" data-range="min" data-orientation="vertical" >
             <input  ms-ui="slider"  data-value="80" data-range="true" data-orientation="vertical" >
-            <!--            <input  ms-ui="slider"  data-value="60" data-range="max" data-orientation="vertical" >-->
+            <input  ms-ui="slider"  data-value="60" data-range="max" data-orientation="vertical" >
         </div>  
         <p ms-controller="bbb">{{ value }}</p>
         <div style="width:70%">
@@ -68,6 +69,7 @@
             <p ms-controller="ddd">{{ percent0 }}  {{ percent1 }}</p>
             <p ms-controller="ddd">{{ value }}</p>
         </div>
+        -->
         <select ms-model="theme">
             <option value='start'>start</option>
             <option value='smoothness'>smoothness</option>
