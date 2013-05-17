@@ -1531,6 +1531,21 @@
                 element[propName] = !!val;
             });
         },
+        //ms-bind-name="callback",绑定一个属性，当属性变化时执行对应的回调，this为绑定元素
+        "bind": function(data, scopes) {
+            var fn = data.value.trim(), name = data.args[0];
+            for (var i = 0, scope; scope = scopes[i++]; ) {
+                if (scope.hasOwnProperty(fn)) {
+                    fn = scope[fn];
+                    break;
+                }
+            }
+            if (typeof fn === "function") {
+                scope.$watch(name, function(neo, old) {
+                    fn.call(data.element, neo, old);
+                });
+            }
+        },
         //切换类名，有三种形式
         //1、ms-class-xxx="flag" 根据flag的值决定是添加或删除类名xxx 
         //2、ms-class=obj obj为一个{xxx:true, yyy:false}的对象，根据其值添加或删除其键名

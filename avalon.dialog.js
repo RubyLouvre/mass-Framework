@@ -178,3 +178,4 @@
     var overlayInstances = avalon.ui.dialog.overlayInstances = [];
 
 })(window.avalon);
+//http://www.slipjs.com/jz.html
