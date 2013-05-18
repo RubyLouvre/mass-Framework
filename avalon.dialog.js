@@ -37,7 +37,6 @@
             return !!(this.compareDocumentPosition(arg) & 16);
         };
     }
-    ;
     var domParser = document.createElement("div");
     domParser.innerHTML = '<div class="ui-widget-overlay ui-front">&nbsp;</div>';
     var overlay = domParser.firstChild;//全部dialog共用
@@ -45,7 +44,7 @@
         var $element = avalon(element);
         var options = avalon.mix({}, defaults);
         avalon.mix(options, $element.data());
-        options.toggle = !!options.autoOpen
+        options.toggle = !!options.autoOpen;
         if (!options.title) {
             options.title = element.title || "&nbsp;";
         }

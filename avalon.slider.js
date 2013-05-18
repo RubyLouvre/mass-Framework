@@ -1,6 +1,5 @@
 (function(avalon) {
     //判定是否触摸界面
-    var isTouch = "ontouchend" in document;
     var defaults = {
         distance: 0,
         max: 100,
@@ -11,7 +10,7 @@
         value: 0,
         values: null
     }
-
+    var domParser = document.createElement("div");
 
     avalon.ui["slider"] = function(element, id, opt, model) {
         var $element = avalon(element);
@@ -39,7 +38,7 @@
             }
         }
 
-        var domParser = document.createElement("div");
+
         var handleHTML = '<a class="ui-slider-handle ui-state-default ui-corner-all"' +
                 ' ms-css-' + (isHorizontal ? 'left' : 'bottom') + '="{{percent}}%"' +
                 ' data-axis=' + (isHorizontal ? 'x' : 'y') +
@@ -61,7 +60,7 @@
                 handleHTML.replace("percent", "percent1") : handleHTML) +
                 '</div>';
         domParser.innerHTML = sliderHTML;
-        var slider = domParser.firstChild;
+        var slider = domParser.removeChild(domParser.firstChild);
         var a = slider.getElementsByTagName("a"), handlers = [];
         for (var i = 0, el; el = a[i++]; ) {
             handlers.push(el);
@@ -90,7 +89,7 @@
         }
         model = avalon.define(id, function(vm) {
             vm.disabled = element.disabled;
-            vm.percent = twohandlebars ? value2Percent(values[1] - values[0]) : value2Percent(value)
+            vm.percent = twohandlebars ? value2Percent(values[1] - values[0]) : value2Percent(value);
             vm.percent0 = twohandlebars ? value2Percent(values[0]) : 0;
             vm.percent1 = twohandlebars ? value2Percent(values[1]) : 0;
             vm.value = twohandlebars ? values.join() : value;

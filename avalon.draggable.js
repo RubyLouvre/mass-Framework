@@ -48,6 +48,10 @@
         beforestart: avalon.noop,
         scroll: true
     };
+    function getXY(event, a) {
+        var prop = "page" + a;
+        return supportTouch ? event.targetTouches[0][prop] : event[prop];
+    }
     var draggable = avalon.bindingHandlers.draggable = function(meta, scopes) {
         var element = meta.element;
         var $element = avalon(element);
@@ -81,12 +85,13 @@
         function toFloat(a) {
             return parseFloat(a) || 0;
         }
+
         $element.bind(onstart, function(event) {
             data.beforestart.call(data.element, event, data);
             setDragRange(data);
             textselect(true);
-            data.startX = event.pageX;
-            data.startY = event.pageY;
+            data.startX = getXY(event, "X");
+            data.startY = getXY(event, "Y");
             var position = data.$element.position();
             var offset = data.$element.offset();
             if (data.containment === "window") {
@@ -118,8 +123,8 @@
         draggable.queue.forEach(function(data) {
             event.preventDefault();
             //当前元素移动了多少距离
-            data.deltaX = event.pageX - data.startX;
-            data.deltaY = event.pageY - data.startY;
+            data.deltaX = getXY(event, "X") - data.startX;
+            data.deltaY = getXY(event, "Y") - data.startY;
             //现在的坐标
             data.offsetX = data.deltaX + data.originalX;
             data.offsetY = data.deltaY + data.originalY;
@@ -236,7 +241,8 @@
         //放于鼠标按下或弹起处的回调中,用于开启或禁止文本选择
         root.css("-user-select", bool ? "" : "none");
         document.unselectable = bool ? "off" : "on";
-    };
+    }
+    ;
     function setDragScroll(event, data, docLeft, docTop) {
         if (data.scroll) {
             if (data.scrollParent != document && data.scrollParent.tagName !== 'HTML') {

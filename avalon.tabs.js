@@ -19,14 +19,12 @@
                 tabsParent = el;
             }
             if (el.tagName === "DIV") {
-
                 tabpanels.push(el.innerHTML);
             }
             element.removeChild(el);
         }
 
         for (var i = 0; el = tabsParent.children[i++]; ) {
-
             tabs.push(el.innerHTML);
         }
         //动态模板
@@ -38,7 +36,7 @@
                 ' ms-class-ui-tabs-active="active == $index"' +
                 ' ms-class-ui-state-active="active == $index"' +
                 ' ms-' + options.event + '="activate"' +
-                ' ms-hover="ui-state-hover"' +// float: left; margin: 0.4em 0.2em 0 0; cursor: pointer;这样jquery ui没有封装进去
+                ' ms-hover="ui-state-hover"' + // float: left; margin: 0.4em 0.2em 0 0; cursor: pointer;这样jquery ui没有封装进去
                 ' >{{tab|html}}<span class="ui-icon ui-icon-close" style="float: left; margin: 0.4em 0.2em 0 0; cursor: pointer;" ms-if="true" ms-click="remove"></span></li></ul>';
         var panels = '<div ms-each-panel="tabpanels" ><div class="ui-tabs-panel ui-widget-content"' +
                 ' ms-class-ui-corner-bottom="!bottom"' +
@@ -46,13 +44,13 @@
         var model = avalon.define(id, function(vm) {
             vm.active = options.active;
             vm.collapsible = options.collapsible;
+            vm.tabs = tabs;
+            vm.tabpanels = tabpanels;
+            vm.removable = options.removable;
             vm.activate = function(e) {
                 e.preventDefault();
                 vm.active = this.$scope.$index;
             };
-            vm.tabs = tabs;
-            vm.tabpanels = tabpanels;
-            vm.removable = options.removable;
             vm.remove = function(e) {
                 e.preventDefault();
                 var index = this.$scope.$index;
@@ -70,5 +68,6 @@
             element.setAttribute("ms-class-tabs-bottom", "bottom");
             avalon.scan(element, model);
         });
+        return model;
     };
 })(window.avalon);

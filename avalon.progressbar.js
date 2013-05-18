@@ -4,7 +4,7 @@
     };
     avalon.ui.progressbar = function(element, id) {
         var $element = avalon(element),
-            model, el
+                model, el
         var fragment = document.createDocumentFragment();
         //处理配置
         var options = avalon.mix({}, defaults);
@@ -24,6 +24,6 @@
             element.appendChild(fragment);
             avalon.scan(element.parentNode, model);
         });
-		return model;
+        return model;
     }
 })(this.avalon);

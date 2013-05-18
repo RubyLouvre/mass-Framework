@@ -1448,6 +1448,24 @@
         };
         return event;
     }
+    var cacheDisplay = avalon.oneObject("a,abbr,b,span,strong,em,font,i,kbd", "inline");
+    avalon.mix(cacheDisplay, avalon.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"));
+    function parseDisplay(nodeName, val) {
+        //用于取得此类标签的默认display值
+        nodeName = nodeName.toLowerCase();
+        if (!cacheDisplay[nodeName]) {
+            var node = DOC.createElement(nodeName);
+            root.appendChild(node);
+            if (window.getComputedStyle) {
+                val = window.getComputedStyle(node, null).display;
+            } else {
+                val = node.currentStyle.display;
+            }
+            root.removeChild(node);
+            cacheDisplay[nodeName] = val;
+        }
+        return cacheDisplay[nodeName];
+    }
     var bindingHandlers = avalon.bindingHandlers = {
         "if": function(data, scopes) {
             var element = data.element;
@@ -1495,7 +1513,7 @@
         visible: function(data, scopes) {
             var element = data.element;
             watchView(data.value, scopes, data, function(val) {
-                element.style.display = val ? "block" : "none";
+                element.style.display = val ?  parseDisplay(element.tagName) : "none";
             });
         },
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
