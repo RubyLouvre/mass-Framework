@@ -25,7 +25,7 @@
         domParser.innerHTML = '<button type="button" ms-hover="ui-state-hover" ms-active="ui-state-focus"  ms-click="toggleMenu" class="ui-multiselect ui-widget ui-state-default ui-corner-all" aria-haspopup="true" >' +
                 '<span class="ui-icon ui-icon-triangle-2-n-s"></span><span>{{caption}}</span></button>';
         var button = domParser.removeChild(domParser.firstChild);
-        button.style.minWidth = options.minWidth + "px"
+        button.style.minWidth = options.minWidth + "px";
         button.style.width = Math.max(options.minWidth, element.offsetWidth) + "px";
         button.title = element.title;
         $element.addClass("ui-helper-hidden-accessible");
@@ -36,7 +36,7 @@
                 + '<ul class="ui-helper-reset">'
                 + '<span ms-if="!multiple">' + options.caption + '</span>'
                 + '<li ms-if="multiple"><a class="ui-multiselect-all"  href="return false" ms-click="checkAll"><span class="ui-icon ui-icon-check"></span><span>{{checkAllText}}</span></a></li>'
-                + '<li ms-if="multiple"><a class="ui-multiselect-none" href="return false" ms-click="unCheckAll"><span class="ui-icon ui-icon-closethick"></span><span>{{checkAllText}}</span></a></li>'
+                + '<li ms-if="multiple"><a class="ui-multiselect-none" href="return false" ms-click="unCheckAll"><span class="ui-icon ui-icon-closethick"></span><span>{{unCheckAllText}}</span></a></li>'
                 + '<li class="ui-multiselect-close"><a href="#" class="ui-multiselect-close" ms-click="closeMenu"><span class="ui-icon ui-icon-circle-close"></span></a></li>'
                 + '</ul></div>'
                 + '<ul class="ui-multiselect-checkboxes ui-helper-reset" ms-css-height="height" ms-each-el="list" >'
@@ -101,7 +101,8 @@
                     menu.style.left = offset.left + "px";
                 }
             });
-            vm.closeMenu = function() {
+            vm.closeMenu = function(e) {
+                e.preventDefault();
                 vm.toggle = false;
             };
             vm.checkAll = function(e, val) {
