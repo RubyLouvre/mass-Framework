@@ -118,6 +118,7 @@
                 var isArray = Array.isArray(obj) || avalon.type(obj) === "Object" && !obj.setTimeout && isFinite(obj.length) && obj[0],
                         i = 0;
                 if (isArray) {
+                    console.log("ddd")
                     for (var n = obj.length; i < n; i++) {
                         fn(i, obj[i]);
                     }
@@ -1468,20 +1469,20 @@
     }
     var bindingHandlers = avalon.bindingHandlers = {
         "if": function(data, scopes) {
-            var element = data.element;
-            var placehoder = element.ownerDocument.createComment("@");
-            var parent = element.parentNode;
+            var elem = data.element;
+            var placehoder = DOC.createComment("@");
+            var parent = elem.parentNode;
             watchView(data.value, scopes, data, function(val) {
                 nextTick(function() { //必要延后处理，否则会中断scanText中的循环
                     if (val) { //添加 如果它不在DOM树中
-                        if (!element.parentNode || element.parentNode.nodeType === 11) {
-                            parent.replaceChild(element, placehoder);
-                            element.noRemove = 0;
+                        if (!elem.parentNode || elem.parentNode.nodeType === 11) {
+                            parent.replaceChild(elem, placehoder);
+                            elem.noRemove = 0;
                         }
                     } else { //移除  如果它还在DOM树中
-                        if (element.parentNode && element.parentNode.nodeType === 1) {
-                            parent.replaceChild(placehoder, element);
-                            element.noRemove = 1;
+                        if (elem.parentNode && elem.parentNode.nodeType === 1) {
+                            parent.replaceChild(placehoder, elem);
+                            elem.noRemove = 1;
                         }
                     }
                 });
@@ -1503,22 +1504,22 @@
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
         //<div>{{firstName}} + java</div>，如果model.firstName为ruby， 那么变成
         //<div>ruby + java</div>
-        text: function(data, scopes) {
+        "text": function(data, scopes) {
             var node = data.node;
             watchView(data.value, scopes, data, function(val) {
                 node.nodeValue = val;
             });
         },
         //控制元素显示或隐藏
-        visible: function(data, scopes) {
-            var element = data.element;
+        "visible": function(data, scopes) {
+            var elem = data.element;
             watchView(data.value, scopes, data, function(val) {
-                element.style.display = val ?  parseDisplay(element.tagName) : "none";
+                elem.style.display = val ? parseDisplay(elem.tagName) : "none";
             });
         },
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
         //<a href="{{url.hostname}}/{{url.pathname}}.html">
-        href: function(data, scopes) {
+        "href": function(data, scopes) {
             //如果没有则说明是使用ng-href的形式
             var text = data.value.trim();
             var simple = true;
@@ -1541,12 +1542,11 @@
         },
         //这是一个布尔属性绑定的范本，布尔属性插值要求整个都是一个插值表达式，用{{}}包起来
         //布尔属性在IE下无法取得原来的字符串值，变成一个布尔，因此需要用ng-disabled
-        disabled: function(data, scopes) {
-            var element = data.element,
-                    name = data.type,
+        "disabled": function(data, scopes) {
+            var name = data.type,
                     propName = propMap[name] || name;
             watchView(data.value, scopes, data, function(val) {
-                element[propName] = !!val;
+                data.element[propName] = !!val;
             });
         },
         //ms-bind-name="callback",绑定一个属性，当属性变化时执行对应的回调，this为绑定元素
@@ -1570,29 +1570,17 @@
         //3、ms-class=str str是一个类名或多个类名的集合，全部添加
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
         "class": function(data, scopes) {
-            var element = data.element,
-                    god = avalon(element);
-
+            var elem = data.element;
             watchView(data.value, scopes, data, function(val) {
-                if (data.args) { //第一种形式
-                    var cls = data.args.join("-");
-                    if (typeof val === "function") {
-                        if (!element.$scopes) {
-                            element.$scope = scopes[0];
-                            element.$scopes = scopes;
-                        }
-                        val = val.call(element);
+                var cls = (data.args||[]).join("-");
+                if (typeof val === "function") {
+                    if (!elem.$scopes) {
+                        elem.$scope = scopes[0];
+                        elem.$scopes = scopes;
                     }
-                    god.toggleClass(cls, !!val);
-                } else if (typeof val === "string") {
-                    val.replace(rword, function(cls) {
-                        god.addClass(cls);
-                    });
-                } else if (val && typeof val === "object") {
-                    forEach(val, function(cls, flag) {
-                        god.toggleClass(cls, !!flag);
-                    });
+                    val = val.call(elem);
                 }
+                avalon(elem).toggleClass(cls, !!val);
             });
         },
         "hover": function(data) {
@@ -1604,8 +1592,19 @@
                 god.removeClass(data.value);
             });
         },
+        "active": function(data) {
+            var elem = data.element;
+            var god = avalon(elem);
+            elem.tabIndex = elem.tabIndex || -1;
+            god.bind("focus", function() {
+                god.addClass(data.value);
+            });
+            god.bind("blur", function() {
+                god.removeClass(data.value);
+            });
+        },
         "html": function(data, scopes) {
-            var element = data.element;
+            var elem = data.element;
             watchView(data.value, scopes, data, function(val) {
                 var val = val == null ? "" : val + "";
                 if (data.replace) {
@@ -1613,9 +1612,9 @@
                     while (domParser.firstChild) {
                         documentFragment.appendChild(domParser.firstChild);
                     }
-                    element.replaceChild(documentFragment, data.node);
+                    elem.replaceChild(documentFragment, data.node);
                 } else {
-                    element.innerHTML = val;
+                    elem.innerHTML = val;
                 }
             });
         },

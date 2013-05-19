@@ -67,7 +67,7 @@
         });
         avalon.nextTick(function() {
             element.parentNode.insertBefore(switcher, element.previousSibling);
-            avalon.scan(element.parentNode, model);
+            avalon.scan(element, model);
             avalon.nextTick(function() {
                 var a = model.checked;
                 model.checked = NaN;

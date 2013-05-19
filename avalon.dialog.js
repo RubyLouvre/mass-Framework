@@ -94,9 +94,9 @@
             };
             vm.$watch("toggle", function(v) {
                 if (v === false) {
-                     avalon.Array.remove(overlayInstances, options);
+                    avalon.Array.remove(overlayInstances, options);
                     if (!overlayInstances.length) {
-                        if(overlay.parentNode){
+                        if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
                         }
                     }
@@ -108,10 +108,10 @@
                 dialog.style.top = data.top + "px";
                 dialog.style.left = data.left + "px";
             };
-             vm.beforestart = function(event, data) {
-               data.element = dialog;
-               data.$element = avalon(dialog);
-               
+            vm.beforestart = function(event, data) {
+                data.element = dialog;
+                data.$element = avalon(dialog);
+
             };
         });
         function keepFocus() {
@@ -169,8 +169,12 @@
             if (options.autoOpen) {
                 avalon.nextTick(resetCenter);
             }
-            avalon(document.body).bind("scroll", resetCenter);
-            avalon(window).bind("resize", resetCenter);
+            avalon(document.body).bind("scroll", function() {
+                options.autoOpen && resetCenter();
+            });
+            avalon(window).bind("resize", function() {
+                options.autoOpen && resetCenter();
+            });
         });
         return model;
     }
