@@ -1,13 +1,9 @@
-<!--
-To change this template, choose Tools | Templates
-and open the template in the editor.
--->
 <!DOCTYPE html>
 <html>
     <head>
         <title></title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <script src="avalon2.js" type="text/javascript"></script>
+        <script src="avalon.js" type="text/javascript"></script>
         <script>
             avalon.define("simple", function(vm) {
                 vm.firstName = "司徒"
@@ -22,28 +18,58 @@ and open the template in the editor.
                         return this.firstName + " " + this.lastName;
                     }
                 }
+                vm.fruits = [{name: "xxx"}, {name: "yyy"}, {name: "ooo"}, {name: "ppp"}];
+                vm.push = function() {
+                    vm.fruits.push({name: "ccccccccc"});
+                };
+                vm.pop = function() {
+                    vm.fruits.pop();
+                };
+                vm.reverse = function() {
+                    vm.fruits.reverse();
+                };
+                vm.replace = function() {
+                    vm.fruits = [{name: 1}, {name: 2}];
+                };
+                vm.reverseNumbers = function() {
+                    vm.numbers.reverse();
+                };
+                vm.numbers = ["1", "2", "3", "4"]
+
                 vm.nick = {
-                    kkk:{
+                    kkk: {
                         name: "暗黑之民"
                     }
-                    
+
                 }
                 vm.$watch("firstName", function(v, v2) {
-                    console.log(v + "  " + v2)
+                  window.JSON &&  console.log(JSON.stringify(vm.$json))
                 })
             });
 
         </script>
     </head>
     <body ms-controller="simple">
-      <p>First name: <input ms-model="firstName" /></p>
+        <p>First name: <input ms-model="firstName" /></p>
         <p>Last name: <input ms-model="lastName"  /></p>
-       
+
         <p>Hello, <input ms-model="fullName"></p>
         <div>{{firstName +" | "+ lastName  }}</div>
-         <p>nick name: <input ms-model="nick.kkk.name"  /></p>
+        <p>nick name: <input ms-model="nick.kkk.name"  /></p>
         <p>{{nick.kkk.name}}</p>
-<!--        -->
+        <div ms-each-el="fruits" >
+            <h3>{{el.name}}</h3>
+            <p>这是第{{$index}}个了</p>
+            <hr/>
+        </div>
+        <button ms-click="push">push</button>
+        <button ms-click="reverse">reverse</button>
+        <button ms-click="pop">pop</button>
+        <button ms-click="replace">replace</button>
 
+        <ol ms-each-number="numbers" >
+            <li>{{number}}</li>
+        </ol>
+        <button ms-click="reverseNumbers">reverseNumbers</button>
     </body>
 </html>

@@ -9,9 +9,10 @@
             .ms-grid td, th { padding: 0.4em; }
             .ms-grid tr:nth-child(odd) { background: #DDD;color:black; }
             .ms-grid-pageLinks { margin-bottom: 1em; }
-            .ms-grid td a{color:red;font-family:Microsoft YaHei,Georgia, 'Times New Roman', Times, serif}
-            .ms-grid-pageLinks a { padding: 0.5em; }
+            .ms-grid td a{color:red;font-family:Microsoft YaHei,Georgia, 'Times New Roman', Times, serif;}
+            .ms-grid-pageLinks a { padding: 0.5em;display: inline-block;zoom:1; }
             .ms-grid-pageLinks a.selected { background: black; color: White; }
+            
         </style>
         <script src="avalon.js" type="text/javascript"></script>
 
@@ -38,7 +39,8 @@
                     scope.pages = [];//装着所有页码,以零开始
                     scope.getShowItems = function() {
                         var i = scope.pageIndex, c = scope.pageCount;
-                        scope.showItems = scope.items.slice(i * c, (i + 1) * c);
+                        var array = scope.$json.items.slice(i * c, (i + 1) * c)
+                        scope.showItems = array;
                     }
                     scope.addItem = function() {
                         var a = {name: "New item", sales: 0, price: 100};
@@ -108,7 +110,7 @@
             <div class="ms-grid-pageLinks">                  
                 <span>Page:</span>                        
                 <span ms-each-page="pages">
-                    <a href="#{{page}}" ms-click="jumpPage"  ms-class-selected="$index==pageIndex"   >{{page+1}}</a>
+                    <a ms-href="#{{page}}" ms-click="jumpPage"  ms-class-selected="$index==pageIndex"   >{{page+1}}</a>
                 </span>      
             </div>
             <button ms-click='addItem'>
