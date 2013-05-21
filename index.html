@@ -5,7 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js" type="text/javascript"></script>
         <script>
-            avalon.define("simple", function(vm) {
+            var model = avalon.define("simple", function(vm) {
                 vm.firstName = "司徒"
                 vm.lastName = "正美"
                 vm.fullName = {//一个包含set或get的对象会被当成PropertyDescriptor，
@@ -39,22 +39,33 @@
                 vm.nick = {
                     name: "暗黑之民"
                 }
+                vm.radio = true;
+                vm.selectModel = ["bbb"];
+                vm.checkboxModel = ["aaa","bbb"]
+                
                 vm.$watch("firstName", function(v, v2) {
                     window.JSON && console.log(JSON.stringify(vm.$json))
-                })
+                });
+
+
             });
+           // model.checkboxModel.size
+//            setTimeout(function(){
+//                model.selectModel = ["333"]
+//                console.log(model.selectModel)
+//            },1000)
 
         </script>
     </head>
     <body ms-controller="simple">
-     <p>First name: <input ms-model="firstName" /></p>
+        <p>First name: <input ms-model="firstName" /></p>
         <p>Last name: <input ms-model="lastName"  /></p>
 
         <p>Hello, <input ms-model="fullName"></p>
         <div>{{firstName +" | "+ lastName  }}</div>
         <p>nick name: <input ms-model="nick.name"  /></p>
         <p>{{nick.name}}</p>
-      <div ms-each-el="fruits" >
+        <div ms-each-el="fruits" >
             <h3>{{el.name}}</h3>
             <p>这是第{{$index}}个了</p>
             <hr/>
@@ -68,5 +79,14 @@
             <li>{{number}}</li>
         </ol>
         <button ms-click="reverseNumbers">reverseNumbers</button>
+        <input type="radio" ms-model="radio">{{radio}}
+        <select ms-model="selectModel">
+            <option value="aaa" selected>aaa</option>
+            <option value="bbb">bbb</option>
+            <option value="ccc">ccc</option>
+        </select>
+        <input ms-model="checkboxModel" type="checkbox" value="aaa" />
+        <input ms-model="checkboxModel" type="checkbox" value="bbb" />
+        <input ms-model="checkboxModel" type="checkbox" value="ccc" />
     </body>
 </html>

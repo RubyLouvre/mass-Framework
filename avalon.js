@@ -795,6 +795,7 @@
                 a.push.apply(a, b.slice(an));
             }
             var n = Math.min(an, bn);
+
             for (var i = 0; i < n; i++) {
                 a.set(i, b[i]);
             }
@@ -877,7 +878,7 @@
                                     if (value && value.$id) {
                                         updateViewModel(value, neo, Array.isArray(neo));
                                     } else if (Array.isArray(neo)) {
-                                        value = Collection(neo);
+                                        value = Collection(neo, model, name);
                                     } else {
                                         value = modelFactory(neo);
                                     }
@@ -1279,7 +1280,7 @@
                             ret += fn.apply(fn, el[1]);
                         }
                     }
-                    return b(ret);
+                    return b(ret, data.element);
                 };
             })(array, callback);
         } else if (array) {
@@ -1287,7 +1288,7 @@
             var fn = array[0],
                     args = array[1];
             updateView = function() {
-                callback(fn.apply(fn, args));
+                callback(fn.apply(fn, args), data.element);
             };
         }
         updateView.toString = function() {
@@ -1405,10 +1406,9 @@
     }
     var bindingHandlers = avalon.bindingHandlers = {
         "if": function(data, scopes) {
-            var elem = data.element;
             var placehoder = DOC.createComment("@");
-            var parent = elem.parentNode;
-            watchView(data.value, scopes, data, function(val) {
+            var parent = data.element.parentNode;
+            watchView(data.value, scopes, data, function(val, elem) {
                 nextTick(function() { //必要延后处理，否则会中断scanText中的循环
                     if (val) { //添加 如果它不在DOM树中
                         if (!elem.parentNode || elem.parentNode.nodeType === 11) {
@@ -1425,8 +1425,7 @@
             });
         },
         "on": function(data, scopes) {
-            var elem = data.element;
-            watchView(data.value, scopes, data, function(fn) {
+            watchView(data.value, scopes, data, function(fn, elem) {
                 var type = data.args[0];
                 if (type && typeof fn === "function") { //第一种形式
                     if (!elem.$scopes) {
@@ -1437,19 +1436,23 @@
                 }
             });
         },
+        "data": function(data, scopes) {
+            watchView(data.value, scopes, data, function(val, elem) {
+                var key = "data-" + data.args.join("-");
+                elem.setAttribute(key, val);
+            });
+        },
         //抽取innerText中插入表达式，置换成真实数据放在它原来的位置
         //<div>{{firstName}} + java</div>，如果model.firstName为ruby， 那么变成
         //<div>ruby + java</div>
         "text": function(data, scopes) {
-            var node = data.node;
             watchView(data.value, scopes, data, function(val) {
-                node.nodeValue = val;
+                data.node.nodeValue = val;
             });
         },
         //控制元素显示或隐藏
         "visible": function(data, scopes) {
-            var elem = data.element;
-            watchView(data.value, scopes, data, function(val) {
+            watchView(data.value, scopes, data, function(val, elem) {
                 elem.style.display = val ? parseDisplay(elem.tagName) : "none";
             });
         },
@@ -1460,7 +1463,6 @@
             var text = data.value.trim();
             var simple = true;
             var name = data.type;
-            var god = avalon(data.element);
             if (text.indexOf("{{") > -1 && text.indexOf("}}") > 2) {
                 simple = false;
                 if (/^\{\{([^}]+)\}\}$/.test(text)) {
@@ -1468,11 +1470,11 @@
                     text = RegExp.$1;
                 }
             }
-            watchView(text, scopes, data, function(val) {
+            watchView(text, scopes, data, function(val, elem) {
                 if (name === "css") {
-                    god.css(data.args[0], val);
+                    avalon(elem).css(data.args[0], val);
                 } else {
-                    data.element[name] = val;
+                    elem[name] = val;
                 }
             }, simple ? null : scanExpr(data.value));
         },
@@ -1481,8 +1483,8 @@
         "disabled": function(data, scopes) {
             var name = data.type,
                     propName = propMap[name] || name;
-            watchView(data.value, scopes, data, function(val) {
-                data.element[propName] = !!val;
+            watchView(data.value, scopes, data, function(val, elem) {
+                elem[propName] = !!val;
             });
         },
         //ms-bind-name="callback",绑定一个属性，当属性变化时执行对应的回调，this为绑定元素
@@ -1507,9 +1509,8 @@
         //3、ms-class=str str是一个类名或多个类名的集合，全部添加
         //http://www.cnblogs.com/rubylouvre/archive/2012/12/17/2818540.html
         "class": function(data, scopes) {
-            var elem = data.element;
-            watchView(data.value, scopes, data, function(val) {
-                var cls = (data.args || []).join("-");
+            watchView(data.value, scopes, data, function(val, elem) {
+                var cls = data.args.join("-");
                 if (typeof val === "function") {
                     if (!elem.$scopes) {
                         elem.$scope = scopes[0];
@@ -1541,9 +1542,8 @@
             });
         },
         "html": function(data, scopes) {
-            var elem = data.element;
-            watchView(data.value, scopes, data, function(val) {
-                var val = val == null ? "" : val + "";
+            watchView(data.value, scopes, data, function(val, elem) {
+                val = val == null ? "" : val + "";
                 if (data.replace) {
                     domParser.innerHTML = val;
                     while (domParser.firstChild) {
@@ -1643,11 +1643,13 @@
         if (element.name === void 0) {
             element.name = generateID();
         }
-        var type = element.type
+        var type = element.type,
+                god = avalon(element)
         //当value变化时改变model的值
         var updateModel = function() {
-            fn(scope, element.value);
-
+            if (god.data("observe") !== false) {
+                fn(scope, element.value);
+            }
         };
 
         //当model变化时,它就会改变value的值
@@ -1657,10 +1659,6 @@
                 element.value = neo;
             }
         };
-        var neo = fn(scope);
-        if (neo !== element.value) {
-            element.value = neo;
-        }
         if (/^(password|textarea|text)$/.test(type)) {
             var event = element.attributes[prefix + "event"] || {};
             event = event.value;
@@ -1673,7 +1671,6 @@
                     element.attachEvent("onpropertychange", updateModel);
                 }
                 if (DOC.documentMode >= 9) { //IE9 10
-
                     element.attachEvent("onkeydown", function(e) {
                         var key = e.keyCode;
                         if (key === 8 || key === 46) {
@@ -1685,37 +1682,37 @@
             }
         } else if (type === "radio") {
             updateView = function() {
-                element.checked = fn(scope) === element.value;
+                element.checked = !!fn(scope);
             };
             updateModel = function() {
-                var val = !element.beforeChecked;
-                //scope[name] = val;
-                fn(scope, val);
-                element.beforeChecked = element.checked = val;
+                if (god.data("observe") !== false) {
+                    var val = !element.beforeChecked;
+                    fn(scope, val);
+                    element.beforeChecked = element.checked = val;
+                }
             };
 
             function beforeChecked() {
                 element.beforeChecked = element.checked;
             }
             if (element.onbeforeactivate === null) {
-                avalon.bind(element, "beforeactivate", beforeChecked);
+                god.bind("beforeactivate", beforeChecked);
             } else {
-                avalon.bind(element, "mouseover", beforeChecked);
+                god.bind("mouseover", beforeChecked);
             }
-            avalon.bind(element, "click", updateModel);
+            god.bind("click", updateModel);
         } else if (type === "checkbox") {
             updateModel = function() {
-                if (element.checked) {
-                    avalon.Array.ensure(fn(scope), element.value);
-                } else {
-                    avalon.Array.remove(fn(scope), element.value);
+                if (god.data("observe") !== false) {
+                    var method = element.checked ? "ensure" : "remove";
+                    avalon.Array[method](fn(scope), element.value);
                 }
             };
             updateView = function() {
                 var array = [].concat(fn(scope)); //强制转换为数组
                 element.checked = array.indexOf(element.value) >= 0;
             };
-            avalon.bind(element, "click", updateModel); //IE6-8
+            god.bind("click", updateModel); //IE6-8
         }
         Publish[expose] = updateView;
         updateView.element = element;
@@ -1724,15 +1721,17 @@
     };
 
     modelBinding.SELECT = function(element, fn, scope) {
-        var god = avalon(element);
-        var oldValue = fn(scope) + "";
+        var god = avalon(element),
+                oldValue;
 
         function updateModel() {
-            var neo = god.val();
-            if (neo + "" !== oldValue) {
-                fn(scope, neo)
-                //   scope[name] = neo;
-                oldValue = neo + "";
+            if (god.data("observe") !== false) {
+                var neo = god.val();
+                neo = [].concat(neo); //强制转换为数组
+                if (neo + "" !== oldValue) {
+                    fn(scope, neo);
+                    oldValue = neo + "";
+                }
             }
         }
 
@@ -1761,9 +1760,8 @@
         bindingHandlers[name] = bindingHandlers.disabled;
     });
     bindingHandlers.enabled = function(data, scopes) {
-        var element = data.element;
-        watchView(data.value, scopes, data, function(val) {
-            element.disabled = !val;
+        watchView(data.value, scopes, data, function(val, elem) {
+            elem.disabled = !val;
         });
     };
 
@@ -1820,12 +1818,15 @@
         }
     }
 
-    function Collection(list) {
+    function Collection(list, model, prop) {
         var collection = list.map(convert);
         collection.$id = generateID();
         collection[subscribers] = [];
         var dynamic = modelFactory({
             length: list.length
+        });
+        dynamic.$watch("length", function() {
+            model && model.$fire(prop + ".length");
         });
         "push,pop,shift,unshift,splice".replace(rword, function(method) {
             collection[method] = function() {
@@ -1876,9 +1877,11 @@
         collection.set = function(index, val) {
             if (index >= 0 && index < this.length) {
                 if (/Array|Object/.test(avalon.type(val))) {
+                    model && model.$fire(prop + ".changed");
                     updateViewModel(this[index], val, Array.isArray(val));
                 } else if (this[index] !== val) {
                     this[index] = val;
+                    model && model.$fire(prop + ".changed");
                     notifySubscribers(this, "set", arguments);
                 }
             }

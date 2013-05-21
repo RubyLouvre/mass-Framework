@@ -60,23 +60,6 @@
                     "Scheme"];
             });
 
-            window.onload = function() {
-                var div = document.createElement("div");
-                div.innerHTML = "<span>xxxxxxxxx</span><span>xxxxxxxxx</span>"
-                var documentFragment = document.createDocumentFragment();
-                while (div.firstChild) {
-                    documentFragment.appendChild(div.firstChild)
-                }
-                document.body.appendChild(documentFragment);
-                console.log(documentFragment.childNodes.length)
-                div.innerHTML = "<p>xxxxxxxxx</p><span>xxxxxxxxx</span>"
-                while (div.firstChild) {
-                    documentFragment.appendChild(div.firstChild)
-                }
-                document.body.replaceChild(documentFragment, document.body.lastChild);
-                console.log(documentFragment.childNodes.length)
-            }
-
         </script>
     </head>
     <body>
