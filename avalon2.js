@@ -796,7 +796,6 @@
             }
         } else {
             for (var i in b) {
-                console.log(i)
                 if (b.hasOwnProperty(i) && a.hasOwnProperty(i) && i !== "$id") {
                     a[i] = b[i];
                 }
@@ -875,7 +874,6 @@
                                     } else if (Array.isArray(neo)) {
                                         value = Collection(neo);
                                     } else {
-                                        console.log(neo)
                                         value = modelFactory(neo);
                                     }
                                 } else {

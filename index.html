@@ -23,7 +23,10 @@ and open the template in the editor.
                     }
                 }
                 vm.nick = {
-                    name: "暗黑之民"
+                    kkk:{
+                        name: "暗黑之民"
+                    }
+                    
                 }
                 vm.$watch("firstName", function(v, v2) {
                     console.log(v + "  " + v2)
@@ -38,8 +41,8 @@ and open the template in the editor.
        
         <p>Hello, <input ms-model="fullName"></p>
         <div>{{firstName +" | "+ lastName  }}</div>
-         <p>nick name: <input ms-model="nick.name"  /></p>
-        <p>{{nick.name}}</p>
+         <p>nick name: <input ms-model="nick.kkk.name"  /></p>
+        <p>{{nick.kkk.name}}</p>
 <!--        -->
 
     </body>
