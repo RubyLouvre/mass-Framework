@@ -112,23 +112,6 @@
             el.removeEventListener(type, fn || noop, !!phase);
         } : function(el, type, fn) {
             el.detachEvent("on" + type, fn || noop);
-        },
-        forEach: function(obj, fn) {
-            if (obj) { //不能传个null, undefined进来
-                var isArray = Array.isArray(obj) || avalon.type(obj) === "Object" && !obj.setTimeout && isFinite(obj.length) && obj[0],
-                        i = 0;
-                if (isArray) {
-                    for (var n = obj.length; i < n; i++) {
-                        fn(i, obj[i]);
-                    }
-                } else {
-                    for (i in obj) {
-                        if (obj.hasOwnProperty(i)) {
-                            fn(i, obj[i]);
-                        }
-                    }
-                }
-            }
         }
     });
 

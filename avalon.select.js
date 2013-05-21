@@ -118,30 +118,24 @@
             vm.unCheckAll = function(e) {
                 vm.checkAll(e, true);
             };
-        
+
             vm.changeState = function(e) {
-                 console.log("--------------")
-                if(this.locked){//一次点击可以引起此元素或此元素的孩子触发多个click(每个元素一次)
+                if (this.locked) {//一次点击可以引起此元素或此元素的孩子触发多个click(每个元素一次)
                     return;//为了只让当中的某一个click生效,我们需要一个锁
                 }
-               
+
                 this.locked = true;
-                setTimeout(function(){
+                setTimeout(function() {
                     this.locked = void 0
-                },4)
-            //    console.log("xxxxxxxxxxxxxx")
+                }, 4)
                 var obj = this.$scope.el;
-                if (!obj.disabled ) {//重要技巧,通过e.target == this排除冒泡上来的事件
+                if (!obj.disabled) {//重要技巧,通过e.target == this排除冒泡上来的事件
                     var index = obj.index;
                     var option = els[index];
                     if (vm.multiple) {
-                         var a = vm.list.$vms[index]
-                         a.selected = !a.selected;
-                         option.selected = a.selected 
-                    //    console.log("999999999")
-                   //     option.selected = obj.selected = !obj.selected;
-                    //   var a = vm.list[index]
-                    //    console.log("obj.selected")
+                        var a = vm.list.$vms[index]
+                        a.selected = !a.selected;
+                        option.selected = a.selected
                     } else {
                         element.selectedIndex = vm.selectedIndex = index;
                         option.selected = true;
