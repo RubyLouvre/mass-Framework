@@ -37,27 +37,24 @@
                 vm.numbers = ["1", "2", "3", "4"]
 
                 vm.nick = {
-                    kkk: {
-                        name: "暗黑之民"
-                    }
-
+                    name: "暗黑之民"
                 }
                 vm.$watch("firstName", function(v, v2) {
-                  window.JSON &&  console.log(JSON.stringify(vm.$json))
+                    window.JSON && console.log(JSON.stringify(vm.$json))
                 })
             });
 
         </script>
     </head>
     <body ms-controller="simple">
-        <p>First name: <input ms-model="firstName" /></p>
+     <p>First name: <input ms-model="firstName" /></p>
         <p>Last name: <input ms-model="lastName"  /></p>
 
         <p>Hello, <input ms-model="fullName"></p>
         <div>{{firstName +" | "+ lastName  }}</div>
-        <p>nick name: <input ms-model="nick.kkk.name"  /></p>
-        <p>{{nick.kkk.name}}</p>
-        <div ms-each-el="fruits" >
+        <p>nick name: <input ms-model="nick.name"  /></p>
+        <p>{{nick.name}}</p>
+      <div ms-each-el="fruits" >
             <h3>{{el.name}}</h3>
             <p>这是第{{$index}}个了</p>
             <hr/>
