@@ -106,9 +106,8 @@
                 data.scrollParent = scrollParent(data.$element);
                 data.overflowOffset = avalon(data.scrollParent).offset();
             }
-            if (element.setCapture) { //设置鼠标捕获
-                element.setCapture();
-            } else if (window.captureEvents) {
+             // element.setCapture();有副作用
+            if (window.captureEvents) {
                 window.captureEvents(Event.MOUSEMOVE | Event.MOUSEUP);
             }
             draggable.queue.push(data);
@@ -156,9 +155,8 @@
         draggable.queue.forEach(function(data) {
             data.originalX = data.left;
             data.originalY = data.top;
-            if (data.element.releaseCapture) {
-                data.element.releaseCapture();
-            } else if (window.releaseEvents) {
+            // data.element.releaseCapture();有副作用
+            if (window.releaseEvents) {
                 window.releaseEvents(Event.MOUSEMOVE | Event.MOUSEUP);
             }
             textselect(false);
