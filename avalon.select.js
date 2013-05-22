@@ -145,8 +145,8 @@
                     var index = obj.index;
                     var option = els[index];
                     if (vm.multiple) {
-                        var a = vm.list[index]
-                        option.selected = a.selected = !a.selected;
+                        var a = obj.selected;
+                        option.selected = obj.selected = !a
                     } else {
                         element.selectedIndex = vm.selectedIndex = index;
                         option.selected = true;
