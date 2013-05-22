@@ -1464,7 +1464,7 @@
             }
             watchView(text, scopes, data, function(val, elem) {
                 if (name === "css") {
-                    avalon(elem).css(data.args[0], val);
+                    avalon(elem).css(data.args.join("-"), val);
                 } else {
                     elem[name] = val;
                 }
