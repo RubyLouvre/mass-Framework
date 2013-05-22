@@ -208,12 +208,7 @@
                     range = node.parentNode;
                 }
                 if (isDoc || range === "window") { //如果是document|window参数
-                    //   if (isDoc) {
                     data.range = [0, 0];
-                    //   } else {
-                    //      data.range = "pageXOffset" in window ? [window.pageXOffset, window.pageYOffset] :
-                    //     [root[0].scrollLeft || document.body.scrollLeft, root[0].scrollTop || document.body.scrollTop];
-                    //  }
                     data.range[2] = data.range[0] + avalon(isDoc ? document : window).width();
                     data.range[3] = data.range[1] + avalon(isDoc ? document : window).height();
                 } else { //如果是元素节点(比如从parent参数转换地来),或者是CSS表达式,或者是mass对象

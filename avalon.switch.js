@@ -23,18 +23,26 @@
 
         var $element = avalon(element);
         var options = avalon.mix({}, defaults);
+        if (typeof opts === "object") {
+            for (var i in opts) {
+                if (i === "$id")
+                    continue;
+                options[i] = opts[i];
+            }
+        }
         avalon.mix(options, $element.data());
 
         var buttonClass = "ui-button ui-button-text-only ui-corner-left ui-state-active ui-state-default ui-widget";
         var buttonHTML = '<label  class="' + buttonClass + '" ms-click="changeState"><span class="ui-button-text" ms-html="leftText"></span></label>';
         var silderHTML = '<label ms-class-ui-state-disabled="disabled" class="ui-button ui-widget ui-button-text-only white-gradient" '
-                + ' ms-draggable data-axis="x" data-dragend="dragend" '
+                + ' ms-draggable data-axis="x" data-dragend="dragend" data-beforestart="beforestart" '
                 + ' ms-class-ui-corner-left="checked" '
                 + ' ms-class-ui-corner-right="!checked" '
                 + ' ms-css-left="sleft" '
                 + ' ms-css-width="swidth" style="position:absolute;cursor:move;top:1px;"><span class="ui-button-text">&nbsp;</span></label>';
-        var switchHTML = '<div class="ui-buttonset" style="position:relative;">' + buttonHTML +
+        var switchHTML = '<div class="ui-buttonset" style="position:relative;display:inline-block;_zoom:1;">' + buttonHTML +
                 buttonHTML.replace(/left/g, "right").replace("ui-state-active", "") + silderHTML + '</div>';
+
         $element.addClass("ui-helper-hidden-accessible");
         domParser.innerHTML = switchHTML;
 
@@ -49,6 +57,10 @@
             vm.checked = element.checked;
             vm.changeState = function() {
                 vm.checked = !vm.checked;
+            };
+            vm.beforestart = function(e, data) {
+                var o = avalon(switcher).offset();
+                data.containment = [o.left, o.top, o.left + switcher.offsetWidth, o.top + switcher.offsetHeight];
             };
             vm.$watch("checked", function(a) {
                 if (a) {
@@ -67,7 +79,7 @@
         });
         avalon.nextTick(function() {
             element.parentNode.insertBefore(switcher, element.previousSibling);
-            avalon.scan(element, model);
+            avalon.scan(switcher, model);
             avalon.nextTick(function() {
                 var a = model.checked;
                 model.checked = NaN;
@@ -77,3 +89,4 @@
     };
 
 })(self.avalon);
+

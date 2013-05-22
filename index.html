@@ -41,15 +41,19 @@
                 }
                 vm.radio = true;
                 vm.selectModel = ["bbb"];
-                vm.checkboxModel = ["aaa","bbb"]
-                
+                vm.checkboxModel = ["aaa", "bbb"]
+      
+                vm.background = ["red"]
+                vm.sbackground = "red"
                 vm.$watch("firstName", function(v, v2) {
                     window.JSON && console.log(JSON.stringify(vm.$json))
                 });
-
+                vm.$watch("background.changed", function(v) {
+                   vm.sbackground = vm.background + "";//将数组转换为字符串
+                });
 
             });
-           // model.checkboxModel.size
+            // model.checkboxModel.size
 //            setTimeout(function(){
 //                model.selectModel = ["333"]
 //                console.log(model.selectModel)
@@ -88,5 +92,13 @@
         <input ms-model="checkboxModel" type="checkbox" value="aaa" />
         <input ms-model="checkboxModel" type="checkbox" value="bbb" />
         <input ms-model="checkboxModel" type="checkbox" value="ccc" />
+        <div style="width:200px; height:50px" ms-css-background="sbackground">
+
+        </div>
+        <select ms-model="background">
+            <option value="red">红</option>
+            <option value="yellow">黄</option>
+            <option value="green">绿</option>
+        </select>
     </body>
 </html>
