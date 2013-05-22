@@ -121,14 +121,19 @@
                 vm.$watch("currentMonth", function(val) {
                     var d = vm.currentDate;
                     d.setMonth(val);
+                    console.log(getWeeks(d))
                     vm.currentWeeks = getWeeks(d);
+                    console.log( vm.currentWeeks)
                     vm.title = NaN;
                 });
 
                 vm.$watch("currentYear", function(val) {
                     var d = vm.currentDate;
+                       val = ~~val
                     d.setFullYear(val)
+                    
                     vm.currentWeeks = getWeeks(d);
+                  
                     vm.title = NaN;
                 });
                 //高亮当前选中的日期
@@ -178,10 +183,10 @@
                         <span class="ui-icon ui-icon-circle-triangle-e">Next</span></a>
                     <div class="ui-datepicker-title">
                         <select  ms-each-month="$months" ms-if="changeMonth" ms-model="currentMonth" >
-                            <option value="{{month}}" ms-selected="currentMonth == month">{{month+1}}月</option>
+                            <option ms-value="{{month}}" ms-selected="currentMonth == month">{{month+1}}月</option>
                         </select>
                         <select  ms-each-year="candidateYears" ms-if="changeYear" ms-model="currentYear" >
-                            <option value="{{year}}" ms-selected="currentYear == year">{{year}}年</option>
+                            <option ms-value="{{year}}" ms-selected="currentYear == year">{{year}}年</option>
                         </select>
                         {{title}}
                     </div>
