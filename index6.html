@@ -121,9 +121,7 @@
                 vm.$watch("currentMonth", function(val) {
                     var d = vm.currentDate;
                     d.setMonth(val);
-                    console.log(getWeeks(d))
                     vm.currentWeeks = getWeeks(d);
-                    console.log( vm.currentWeeks)
                     vm.title = NaN;
                 });
 
