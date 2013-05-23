@@ -5,7 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <script src="avalon.js" type="text/javascript"></script>
         <script>
-           avalon.define("simple", function(vm) {
+            avalon.define("simple", function(vm) {
                 vm.firstName = "司徒"
                 vm.lastName = "正美"
                 vm.fullName = {//一个包含set或get的对象会被当成PropertyDescriptor，
@@ -13,8 +13,12 @@
                         return this.firstName + " " + this.lastName;
                     }
                 }
+
+                vm.content = "<em>这是斜体</em>这是正常"
+
+
             });
-    
+
         </script>
     </head>
     <body ms-controller="simple">
@@ -22,6 +26,9 @@
         <p>Last name: <input ms-model="lastName"  /></p>
         <p>Hello, <input ms-value="fullName"></p>
         <div>{{firstName +" | "+ lastName  }}</div>
-    
+        <p ms-html="content"></p>
+        <p>{{content}}</p>
+        <div><b>不影响其他节点</b>{{content|html}}</div>
+
     </body>
 </html>
