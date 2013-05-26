@@ -13,18 +13,23 @@
                         return this.firstName + " " + this.lastName;
                     }
                 }
-
+                vm.toggle=false
                 vm.content = "<em>这是斜体</em>这是正常"
-
+                vm.numberCheck = function(e){
+                    console.log(e.which)
+                }
 
             });
 
         </script>
     </head>
     <body ms-controller="simple">
+        <input ms-keydown="numberCheck" />
+        <div ms-class-aaa="lastName" ms-if="toggle">111</div>
         <p>First name: <input ms-model="firstName" /></p>
         <p>Last name: <input ms-model="lastName"  /></p>
         <p>Hello, <input ms-value="fullName"></p>
+       
         <div>{{firstName +" | "+ lastName  }}</div>
         <p ms-html="content"></p>
         <p>{{content}}</p>

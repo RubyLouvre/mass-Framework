@@ -11,11 +11,9 @@
                 vm.textModel = "text";
                 vm.passwordModel = "password"
                 vm.radioModel = true;
-                vm.selectModel = ["bbb"];
+                vm.selectModel = "bbb";
                 vm.checkboxModel = ["aaa", "bbb"];
-                vm.$watch("selectModel.changed", function() {
-                    console.log(vm.selectModel)
-                })
+
                 vm.$watch("checkboxModel.length", function() {
                     console.log(vm.checkboxModel)
                 })
@@ -52,7 +50,7 @@
                 <option value="aaa" selected>aaa</option>
                 <option value="bbb">bbb</option>
                 <option value="ccc">ccc</option>
-            </select>
+            </select>{{ selectModel }}
             <input ms-model="checkboxModel" type="checkbox" value="aaa" />
             <input ms-model="checkboxModel" type="checkbox" value="bbb" />
             <input ms-model="checkboxModel" type="checkbox" value="ccc" />
