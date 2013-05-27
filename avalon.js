@@ -21,12 +21,11 @@
     var domParser = document.createElement("div");
     var documentFragment = DOC.createDocumentFragment();
     var DONT_ENUM = "propertyIsEnumerable,isPrototypeOf,hasOwnProperty,toLocaleString,toString,valueOf,constructor".split(",");
-
     function noop() {
     }
 
     function generateID() {
-        //http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+//http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
         return "avalon" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     }
     /*********************************************************************
@@ -35,7 +34,6 @@
     avalon = function(el) {
         return new avalon.init(el);
     };
-
     function mix(a, b) {
         var args = [].slice.call(arguments),
                 i = 1;
@@ -114,7 +112,11 @@
             if (W3C) {//addEventListener对return false不做处理，需要自己fix
                 el.addEventListener(type, callback, !!phase);
             } else {
-                el.attachEvent("on" + type, callback);
+                try {
+                    el.attachEvent("on" + type, callback);
+                } catch (e) {
+                    console.log(e + "")
+                }
             }
             return callback;
         },
@@ -124,7 +126,6 @@
             el.detachEvent("on" + type, fn || noop);
         }
     });
-
     function forEach(obj, fn) {
         if (obj) { //不能传个null, undefined进来
             var isArray = Array.isArray(obj) || avalon.type(obj) === "Object" && !obj.setTimeout && isFinite(obj.length) && obj[0],
@@ -147,7 +148,6 @@
         forEach(obj, fn);
     };
     avalon.each = forEach;
-
     function fireReady() {
         if (readyList) {
             for (var i = 0, fn; fn = readyList[i++]; ) {
@@ -310,7 +310,6 @@
             return get ? val : this;
         }
     });
-
     function parseData(val) {
         var _eval = false;
         if (rparse.test(val) || +val + "" === val) {
@@ -330,7 +329,6 @@
         background: "backgroundColor"
     };
     var cssNumber = avalon.oneObject("columnCount,fillOpacity,fontWeight,lineHeight,opacity,orphans,widows,zIndex,zoom");
-
     function cssName(name, host, camelCase) {
         if (cssMap[name]) {
             return cssMap[name];
@@ -664,7 +662,6 @@
             var queuedTasks = 0;
             var usedTicks = 0;
             var requestTick = void 0;
-
             function onTick() {
                 --pendingTicks;
                 if (++usedTicks >= maxPendingTicks) {
@@ -788,7 +785,6 @@
             }
         }
     };
-
     function updateViewModel(a, b, isArray) {
         if (isArray) {
             var an = a.length,
@@ -812,7 +808,6 @@
     }
     var systemOne = avalon.oneObject("$index,$remove,$first,$last");
     var watchOne = avalon.oneObject("$json,$skipArray,$watch,$unwatch,$fire,$events");
-
     function modelFactory(scope) {
         var skipArray = scope.$skipArray, //要忽略监控的属性名列表
                 model = {},
@@ -967,7 +962,6 @@
             "\tExecuteGlobal(code)",
             "End Function"
         ].join("\n"), "VBScript");
-
         function VBMediator(description, name, value) {
             var fn = description[name] && description[name].set;
             if (arguments.length === 3) {
@@ -1059,7 +1053,6 @@
         scanTag(elem, scopes);
     };
     var regbind = /\{\{[^}]*\}\}|\sms-/;
-
     function scanTag(elem, scopes) {
         scopes = scopes || [];
         var a = elem.getAttribute(prefix + "skip");
@@ -1104,7 +1097,6 @@
     //扫描元素节点中直属的文本节点，并进行抽取
     var regOpenTag = /([^{]*)\{\{/;
     var regCloseTag = /([^}]*)\}\}/;
-
     function scanText(textNode, scopes) {
         var bindings = extractTextBindings(textNode);
         if (bindings.length) {
@@ -1384,7 +1376,6 @@
     //visible binding相关
     var cacheDisplay = avalon.oneObject("a,abbr,b,span,strong,em,font,i,kbd", "inline");
     avalon.mix(cacheDisplay, avalon.oneObject("div,h1,h2,h3,h4,h5,h6,section,p", "block"));
-
     function parseDisplay(nodeName, val) {
         //用于取得此类标签的默认display值
         nodeName = nodeName.toLowerCase();
@@ -1741,7 +1732,6 @@
                     element.beforeChecked = element.checked = val;
                 }
             };
-
             function beforeChecked() {
                 element.beforeChecked = element.checked;
             }
@@ -1771,7 +1761,6 @@
     };
     modelBinding.SELECT = function(element, fn, scope, oldValue) {
         var god = avalon(element);
-
         function updateModel() {
             if (god.data("observe") !== false) {
                 var neo = god.val();
@@ -1970,7 +1959,6 @@
         }
         data.view = view;
         data.scopes = scopes;
-
         function updateListView(method, args, len) {
             var id = list.$id;
             var models = updateListView.$models;
@@ -2044,7 +2032,6 @@
         }
         updateListView("push", list, 0);
     };
-
     function findIndex(elem, index) { //寻找路标
         for (var node = elem.firstChild; node; node = node.nextSibling) {
             if (node.id === node.nodeValue + index) {
@@ -2422,189 +2409,122 @@
      **********************************************************************/
 //URL
 //URL#list
-//URL#detail/1001
+    //URL#detail/1001
 //URL#hash1
-//URL#hash2
-//http://weibo.com/jslouvre?topnav=1&wvr=5#!/jslouvre?topnav=1&wvr=5&page=2&pre_page=1&end_id=3582368327173022&end_msign=-1
-//http://weibo.com/jslouvre?wvr=5&wvr=5&topnav=1&page=2&pre_page=1&end_id=3582368327173022&end_msign=-1
+    //URL#hash2
+    //http://weibo.com/jslouvre?topnav=1&wvr=5#!/jslouvre?topnav=1&wvr=5&page=2&pre_page=1&end_id=3582368327173022&end_msign=-1
+    //http://weibo.com/jslouvre?wvr=5&wvr=5&topnav=1&page=2&pre_page=1&end_id=3582368327173022&end_msign=-1
     avalon.history = new function() {
-        this.location = window.location;
-        this.history = window.history;
-        var routeStripper = /^[#\/]|\s+$/g;
-        var rootStripper = /^\/+|\/+$/g;
-        // 去掉最后一个/
-        var trailingSlash = /\/$/;
         var oldIE = !"1" [0];
         var started = false;
         var self = this;
-        var checkUrl = (function() {
-            var current = self.getFragment();//有时等于getHash
-
-            if (current === self.fragment && self.iframe) {
-                current = self.getFragment(self.getHash(self.iframe));
+        var iframeWin, iframe, history_hash, timeoutID;
+        var last_hash = "#!" + getFragment();
+        var supportPushState = /[native code]/.test(history.pushState);
+        if (oldIE) {
+            var html = '<!doctype html><html><body>@</body></html>';
+            if (this.domain) {
+                html = html.replace("<body>", "<script>document.domain =" + self.domain + "</script><body>");
             }
-            if (current === self.fragment)
-                return false;
-
-            if (self.iframe)
-                self.navigate(current);
-            self.loadUrl() || self.loadUrl(self.getHash());
-        });
-
-        oldIE && avalon.ready(function() {
-            domParser.innerHTML = '<iframe src="javascript:0" tabindex="-1"  style="display:none"/>';
-            var iframe = domParser.removeChild(domParser.firstChild);
-            document.body.appendChild(iframe);
-            self.iframe = iframe.contentWindow;
-        });
-        mix(this, {
-            handlers: [],
-            getHash: function(window) {
-                //IE67取location.hash并不准
-                var match = (window || this).location.href.match(/#(.*)$/);
-                return match ? match[1] : '';
-            },
-            getFragment: function(fragment, forcePushState) {
-                if (fragment == null) {
-                    if (this._hasPushState || !this._wantsHashChange || forcePushState) {
-                        fragment = this.location.pathname;
-                        var root = this.root.replace(trailingSlash, '');
-                        if (!fragment.indexOf(root))
-                            fragment = fragment.substr(root.length);
-                    } else {
-                        fragment = this.getHash();
-                    }
+            avalon.ready(function() {
+                iframe = DOC.createElement("iframe");
+                iframe.tabIndex = -1;
+                iframe.style.display = "none"
+                iframe.src = "javascript:false";
+                document.body.appendChild(iframe);
+                var doc = iframe.contentDocument || iframe.contentWindow.document;
+                doc.write(html.replace("@", last_hash));
+                doc.close();
+                timeoutID = setInterval(poll, self.interval);
+            });
+        }
+        // IE6直接用location.hash取hash，可能会取少一部分内容
+        // 比如 http://www.cnblogs.com/rubylouvre#stream/xxxxx?lang=zh_c
+        // ie6 => location.hash = #stream/xxxxx
+        // 其他浏览器 => location.hash = #stream/xxxxx?lang=zh_c
+        // firefox 会自作多情对hash进行decodeURIComponent
+        // 又比如 http://www.cnblogs.com/rubylouvre/#!/home/q={%22thedate%22:%2220121010~20121010%22}
+        // firefox 15 => #!/home/q={"thedate":"20121010~20121010"}
+        // 其他浏览器 => #!/home/q={%22thedate%22:%2220121010~20121010%22}
+        function getHash(url) {//用于取得当前窗口或iframe窗口的hash值
+            url = url || DOC.URL;
+            return  url.slice(url.indexOf("#"));
+        }
+        function getHistory() {
+            return getHash(iframeWin.location);
+        }
+        function setHistory(hash, history_hash) {
+            if (hash !== history_hash) {//只有当新hash不等于iframe中的hash才重写
+                //用于产生历史
+                try {
+                    var iframeDoc = getDoc();
+                    iframeDoc.open();
+                    iframeDoc.write(html.replace("@", hash));
+                    iframeDoc.close();
+                } catch (e) {
+                    clearInterval(timeoutID)
                 }
-                return fragment.replace(routeStripper, '');
-            },
+            }
+        }
+        function getFragment() {
+            var href = location.href;
+            var index = href.indexOf(location.pathname.slice(1));
+            return href.slice(index);
+        }
+        function getDoc() {
+            return iframe.contentDocument || iframe.contentWindow.document;
+        }
+
+        function poll(e) {
+            if (iframe) {
+                var iframeDoc = getDoc(),
+                        hash = getHash();//取得主窗口中的hash
+                history_hash = iframeDoc.body.innerText;//取得现在iframe中的hash
+                if (hash !== last_hash) {//如果是主窗口的hash发生变化
+                    if (hash.indexOf("#!") !== 0) {
+                        hash = "#!" + getFragment();
+                        location.hash = hash;
+                    }
+                    avalon.log(hash+"!!!!!!!!!!!!!!!!!!");
+                    setHistory(last_hash = hash, history_hash);
+                } else if (history_hash !== last_hash) {//如果按下回退键，
+                    //  avalon.log("用户点了回退键,导致iframe中的hash发生变化" + history_hash);
+                    location.href = location.href.replace(/#.*/, '') + history_hash;
+                }
+            }
+        }
+        mix(this, {
+            interval: 35,
             start: function(options) {
                 if (started)
                     avalon.error("start已经触发过了");
                 started = true;
-                this.options = mix({}, {
-                    root: '/'
-                }, this.options, options);
-                this.root = this.options.root;
-                //options只少有hashChange， pushState， root
-                this._wantsHashChange = this.options.hashChange !== false; //默认不刷新页面,只改hash
-                this._wantsPushState = !!this.options.pushState; //想改地址,不刷新页面
-                this._hasPushState = !!(this.options.pushState && this.history && this.history.pushState);
-                var fragment = this.getFragment();
-                //使用pushState特性时，需要在服务器端对URL规则进行配置，否则用户在下一次访问该地址时，可能无法正确导航到当前页面。
-                //另外低于以下版本的浏览器是不支持该特性的：Chrome 5，Firefox 4.0，IE 10，Opera 11.5，Safari 5.0
-                this.root = ('/' + this.root + '/').replace(rootStripper, '/');
-                //HTTP请求里，不会带上#后面的部分,＃后面的所有字符，都会被浏览器当作位置标识符
-                //改变＃不会导致页面重新加载，但是会改变浏览器历史记录
-                if (oldIE && this._wantsHashChange) {
-                    this.navigate(fragment);
+                mix(this, options);
+                if (window.opera || window.VBArray || !supportPushState) {
+                    this.html5mode = false;
                 }
-
-
                 //如果我们想在改动URL时不刷新地址
-                if (this._hasPushState) { //如果支持pushState
-                    this.checkUrl = avalon.bind(window, 'popstate', checkUrl);
-                } else if (this._wantsHashChange && ('onhashchange' in window) && !oldIE) {
-                    this.checkUrl = avalon.bind(window, 'hashchange', checkUrl);
-                } else if (this._wantsHashChange) {
-                    this.intervalID = setInterval(checkUrl, this.interval);
+                // http://foo.com/bar?baz=23#bar
+                // http://foo.com/#!/bar?bar=23#bar
+                if (this.html5mode) { //如果支持pushState
+                    //http://caniuse.com/#search=pushstate
+                    window.addEventListener("popstate", this.checkUrl = function() {
+                        avalon.log(getFragment())
+                    });
+                } else if (window.opera || DOC.documentMode >= 8) {
+                    //http://caniuse.com/#search=pushstate
+                    this.checkUrl = avalon.bind(window, "hashchange", function() {
+                        avalon.log(getFragment())
+                    });
                 }
-                this.fragment = fragment;//取得最初的fragment与hash
-                var loc = this.location;
-                var atRoot = loc.pathname.replace(/[^\/]$/, '$&/') === this.root;
-             
-                // If we've started off with a route from a `pushState`-enabled browser,
-                // but we're currently in a browser that doesn't support it...
-                if (this._wantsHashChange && this._wantsPushState && !this._hasPushState && !atRoot) {
-                  
-                    this.fragment = this.getFragment(null, true);
-                    this.location.replace(this.root + this.location.search + '#' + this.fragment);
-                    // Return immediately as browser will do redirect to new url
-                    return true;
-                    // Or if we've started out with a hash-based route, but we're currently
-                    // in a browser where it could be `pushState`-based instead...
-                } else if (this._wantsPushState && this._hasPushState && atRoot && loc.hash) {
-                    this.fragment = this.getHash().replace(routeStripper, '');
-                    this.history.replaceState({}, document.title, this.root + this.fragment + loc.search);
-                }
-
-                if (!this.options.silent)
-                    return this.loadUrl();
             },
             stop: function() {
                 //停止事件监听或interval
                 avalon.unbind(window, "popstate", this.checkUrl).unbind(window, "hashchange", this.checkUrl)
-                clearInterval(this.intervalID);
+                clearInterval(timeoutID);
                 started = false;
-            },
-            route: function(route, callback) {
-                this.handlers.unshift({
-                    route: route,
-                    callback: callback
-                });
-            },
-            loadUrl: function(fragmentOverride) {
-                var fragment = this.fragment = this.getFragment(fragmentOverride);
-                var matched = this.handlers.some(function(handler) {
-                    if (handler.route.test(fragment)) {
-                        handler.callback(fragment);
-                        return true;
-                    }
-                });
-                return matched;
-            },
-            // Save a fragment into the hash history, or replace the URL state if the
-            // 'replace' option is passed. You are responsible for properly URL-encoding
-            // the fragment in advance.
-            //
-            // The options object can contain `trigger: true` if you wish to have the
-            // route callback be fired (not usually desirable), or `replace: true`, if
-            // you wish to modify the current URL without adding an entry to the history.
-            navigate: function(fragment, options) {
-                if (!started)
-                    return false;
-                if (!options || options === true)
-                    options = {
-                        trigger: options
-                    };
-                fragment = this.getFragment(fragment || '');
-                if (this.fragment === fragment)
-                    return;
-                this.fragment = fragment;
-                var url = this.root + fragment;
-                //html5Mode and $locationProvider.hashPrefix.
-                // If pushState is available, we use it to set the fragment as a real URL.
-                if (this._hasPushState) {
-                    this.history[options.replace ? 'replaceState' : 'pushState']({}, document.title, url);
-                    // If hash changes haven't been explicitly disabled, update the hash
-                    // fragment to store history.
-                } else if (this._wantsHashChange) {
-                    this._updateHash(this.location, fragment, options.replace);
-                    if (this.iframe && (fragment !== this.getFragment(this.getHash(this.iframe)))) {
-                        // Opening and closing the iframe tricks IE7 and earlier to push a
-                        // history entry on hash-tag change.  When replace is true, we don't
-                        // want this.
-                        if (!options.replace)
-                            this.iframe.document.open().close();
-                        this._updateHash(this.iframe.location, fragment, options.replace);
-                    }
-
-                    // If you've told us that you explicitly don't want fallback hashchange-
-                    // based history, then `navigate` becomes a page refresh.
-                } else {
-                    return this.location.assign(url);
-                }
-                if (options.trigger)
-                    return this.loadUrl(fragment);
-            },
-            _updateHash: function(location, fragment, replace) {
-                if (replace) { //replace不会产生历史
-                    var href = location.href.replace(/(javascript:|#).*$/, '');
-                    location.replace(href + '#' + fragment);
-                } else {
-                    location.hash = '#' + fragment;
-                }
             }
-        })
+        });
     }
     /*********************************************************************
      *                            Router                              *
@@ -2686,7 +2606,6 @@
         };
         Router.prototype._set = function(table, query, value) {
             var nextKey = query.shift();
-
             if (nextKey.length <= 0) {
                 throw new Error('Invalid query.');
             }
@@ -2707,7 +2626,6 @@
                 return this._set(nextTable, query, value);
             }
         };
-
         Router.prototype.add = function(method, path, value) {
             var ast = parse(path),
                     patterns = this._expandRules(ast);
