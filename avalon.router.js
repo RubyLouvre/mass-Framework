@@ -322,13 +322,16 @@ new function() {
             return result;
         }
     };
-    var callbacks = {};
-    var router = new Router();
+    var callbacks = {}, errback, router = new Router();
     avalon.Router = {
         extend: function(obj) {//定义所有路由规则
             if (typeof obj.routes === "object") {
                 for (var i in obj.routes) {
-                    router.add("GET", i, obj.routes[i]);
+                    if(i === "*error"){
+                        errback = obj.routes[i]
+                    }else{
+                        router.add("GET", i, obj.routes[i]);
+                    }
                 }
             }
             for (var i in obj) {
@@ -345,8 +348,8 @@ new function() {
                     return  callbacks[key].apply(match, match.args);
                 }
             }
-            if (typeof callbacks["*error"] === "function") {
-                callbacks["*error"](url);
+            if (typeof callbacks[errback] === "function") {
+                callbacks[errback](url);
             }
         }
     };
