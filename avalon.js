@@ -1945,12 +1945,15 @@
         var parent = data.element;
         var value = data.value;
         var array = parseExpr(value, scopes, data);
-        if (Array.isArray(array)) {
-            var list = array[0].apply(array[0], array[1]);
+        var list
+        if (typeof array == "object") {
+            list = array[0].apply(array[0], array[1]);
         }
-        if (!Array.isArray(list)) {
+
+        if (typeof list !== "object") {
             return list;
         }
+        console.log(typeof list)
         var view = documentFragment.cloneNode(false);
         var comment = DOC.createComment(list.$id);
         view.appendChild(comment);
@@ -2404,247 +2407,7 @@
         locate.SHORTMONTH = locate.MONTH;
         filters.date.locate = locate;
     };
-    /*********************************************************************
-     *                            History                              *
-     **********************************************************************/
-//URL
-//URL#list
-    //URL#detail/1001
-//URL#hash1
-    //URL#hash2
-    //http://weibo.com/jslouvre?topnav=1&wvr=5#!/jslouvre?topnav=1&wvr=5&page=2&pre_page=1&end_id=3582368327173022&end_msign=-1
-    //http://weibo.com/jslouvre?wvr=5&wvr=5&topnav=1&page=2&pre_page=1&end_id=3582368327173022&end_msign=-1
-    avalon.history = new function() {
-        var oldIE = !"1" [0];
-        var started = false;
-        var self = this;
-        var iframeWin, iframe, history_hash, timeoutID;
-        var last_hash = "#!" + getFragment();
-        var supportPushState = /[native code]/.test(history.pushState);
-        if (oldIE) {
-            var html = '<!doctype html><html><body>@</body></html>';
-            if (this.domain) {
-                html = html.replace("<body>", "<script>document.domain =" + self.domain + "</script><body>");
-            }
-            avalon.ready(function() {
-                iframe = DOC.createElement("iframe");
-                iframe.tabIndex = -1;
-                iframe.style.display = "none"
-                iframe.src = "javascript:false";
-                document.body.appendChild(iframe);
-                var doc = iframe.contentDocument || iframe.contentWindow.document;
-                doc.write(html.replace("@", last_hash));
-                doc.close();
-                timeoutID = setInterval(poll, self.interval);
-            });
-        }
-        // IE6直接用location.hash取hash，可能会取少一部分内容
-        // 比如 http://www.cnblogs.com/rubylouvre#stream/xxxxx?lang=zh_c
-        // ie6 => location.hash = #stream/xxxxx
-        // 其他浏览器 => location.hash = #stream/xxxxx?lang=zh_c
-        // firefox 会自作多情对hash进行decodeURIComponent
-        // 又比如 http://www.cnblogs.com/rubylouvre/#!/home/q={%22thedate%22:%2220121010~20121010%22}
-        // firefox 15 => #!/home/q={"thedate":"20121010~20121010"}
-        // 其他浏览器 => #!/home/q={%22thedate%22:%2220121010~20121010%22}
-        function getHash(url) {//用于取得当前窗口或iframe窗口的hash值
-            url = url || DOC.URL;
-            return  url.slice(url.indexOf("#"));
-        }
-        function getHistory() {
-            return getHash(iframeWin.location);
-        }
-        function setHistory(hash, history_hash) {
-            if (hash !== history_hash) {//只有当新hash不等于iframe中的hash才重写
-                //用于产生历史
-                try {
-                    var iframeDoc = getDoc();
-                    iframeDoc.open();
-                    iframeDoc.write(html.replace("@", hash));
-                    iframeDoc.close();
-                } catch (e) {
-                    clearInterval(timeoutID)
-                }
-            }
-        }
-        function getFragment() {
-            var href = location.href;
-            var index = href.indexOf(location.pathname.slice(1));
-            return href.slice(index);
-        }
-        function getDoc() {
-            return iframe.contentDocument || iframe.contentWindow.document;
-        }
-
-        function poll(e) {
-            if (iframe) {
-                var iframeDoc = getDoc(),
-                        hash = getHash();//取得主窗口中的hash
-                history_hash = iframeDoc.body.innerText;//取得现在iframe中的hash
-                if (hash !== last_hash) {//如果是主窗口的hash发生变化
-                    if (hash.indexOf("#!") !== 0) {
-                        hash = "#!" + getFragment();
-                        location.hash = hash;
-                    }
-                    avalon.log(hash+"!!!!!!!!!!!!!!!!!!");
-                    setHistory(last_hash = hash, history_hash);
-                } else if (history_hash !== last_hash) {//如果按下回退键，
-                    //  avalon.log("用户点了回退键,导致iframe中的hash发生变化" + history_hash);
-                    location.href = location.href.replace(/#.*/, '') + history_hash;
-                }
-            }
-        }
-        mix(this, {
-            interval: 35,
-            start: function(options) {
-                if (started)
-                    avalon.error("start已经触发过了");
-                started = true;
-                mix(this, options);
-                if (window.opera || window.VBArray || !supportPushState) {
-                    this.html5mode = false;
-                }
-                //如果我们想在改动URL时不刷新地址
-                // http://foo.com/bar?baz=23#bar
-                // http://foo.com/#!/bar?bar=23#bar
-                if (this.html5mode) { //如果支持pushState
-                    //http://caniuse.com/#search=pushstate
-                    window.addEventListener("popstate", this.checkUrl = function() {
-                        avalon.log(getFragment())
-                    });
-                } else if (window.opera || DOC.documentMode >= 8) {
-                    //http://caniuse.com/#search=pushstate
-                    this.checkUrl = avalon.bind(window, "hashchange", function() {
-                        avalon.log(getFragment())
-                    });
-                }
-            },
-            stop: function() {
-                //停止事件监听或interval
-                avalon.unbind(window, "popstate", this.checkUrl).unbind(window, "hashchange", this.checkUrl)
-                clearInterval(timeoutID);
-                started = false;
-            }
-        });
-    }
-    /*********************************************************************
-     *                            Router                              *
-     **********************************************************************/
-    new function() {
-        //表的结构：method+segments.length 普通字段
-        function _tokenize(pathStr) {
-            var stack = [''];
-            for (var i = 0; i < pathStr.length; i++) {
-                var chr = pathStr[i];
-                if (chr === '/') {//用于让后面的字符串相加
-                    stack.push('');
-                    continue;
-                } else if (chr === '(') {
-                    stack.push('(');
-                    stack.push('');
-                } else if (chr === ')') {
-                    stack.push(')');
-                    stack.push('');
-                } else {
-                    stack[stack.length - 1] += chr;
-                }
-            }
-            return stack.filter(function(str) {
-                return str.length !== 0;
-            });
-        }
-        ;
-        //将(  ) 转换为数组的两端,最后构成一个多维数组返回
-        function _parse(tokens) {
-            var smallAst = [];
-            var token;
-            while ((token = tokens.shift()) !== void 0) {
-                if (token.length <= 0) {
-                    continue;
-                }
-                switch (token) {
-                    case '(':
-                        smallAst.push(_parse(tokens));
-                        break;
-                    case ')':
-                        return smallAst;
-                    default:
-                        smallAst.push(token);
-                }
-            }
-            return smallAst;
-        }
-        var combine = function(list, func) {
-            var first = list.shift();
-            var second = list.shift();
-            if (second === undefined) {
-                return first;
-            }
-            var combination = first.map(function(val1) {
-                return second.map(function(val2) {
-                    return func(val1, val2);
-                });
-            }).reduce(function(val1, val2) {
-                return val1.concat(val2);
-            });
-            if (list.length === 0) {
-                return combination;
-            } else {
-                return combine([combination].concat(list), func);
-            }
-        };
-        function parse(rule) {
-            var tokens = _tokenize(rule);
-            var ast = _parse(tokens);
-            return ast;
-        }
-
-        function Router() {
-            this.routingTable = {};
-        }
-        Router.createRouter = function() {
-            return new Router;
-        };
-        Router.prototype._set = function(table, query, value) {
-            var nextKey = query.shift();
-            if (nextKey.length <= 0) {
-                throw new Error('Invalid query.');
-            }
-            if (nextKey[0] === ':') {//如果碰到参数
-                var n = nextKey.substring(1);
-                if (table.hasOwnProperty('^n') && table['^n'] !== n) {
-                    return false;
-                }
-                table['^n'] = n;
-                nextKey = '^v';
-            }
-            if (query.length === 0) {
-                table[nextKey] = value;
-                return true;
-            } else {
-                var nextTable = table.hasOwnProperty(nextKey) ?
-                        table[nextKey] : table[nextKey] = {};
-                return this._set(nextTable, query, value);
-            }
-        };
-        Router.prototype.add = function(method, path, value) {
-            var ast = parse(path),
-                    patterns = this._expandRules(ast);
-            if (patterns.length === 0) {
-                var query = [method, 0];
-                this._set(this.routingTable, query, value);
-            } else {
-                patterns.every(function(pattern) {
-                    var length = pattern.length,
-                            query = [method, length].concat(pattern);
-                    return this._set(this.routingTable, query, value);
-                }.bind(this));
-            }
-            return value
-        };
-    }
-
-
-
+ 
     avalon.ready(function() {
         avalon.scan(document.body);
     });
@@ -2666,4 +2429,4 @@
 //2013.5.21 v6.2 添加$json与多级监听
 //2013.5.22 0.6.3 fix getValueFunction bug; fix  avalon.bind return false bug;fix ms-css bug
 //2013.5.25 0.7 添加template绑定, 优化渲染速度,插入与移除节点的操作
-//黄轩
+//黄轩http://www.cnblogs.com/lcllao/archive/2012/09/30/2709187.html

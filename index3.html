@@ -12,7 +12,7 @@
             .ms-grid td a{color:red;font-family:Microsoft YaHei,Georgia, 'Times New Roman', Times, serif;}
             .ms-grid-pageLinks a { padding: 0.5em;display: inline-block;zoom:1; }
             .ms-grid-pageLinks a.selected { background: black; color: White; }
-            
+
         </style>
         <script src="avalon.js" type="text/javascript"></script>
 
@@ -20,70 +20,70 @@
 
         <script type="text/javascript">
 
-        
 
-                var grid = avalon.define("grid", function(scope) {
-                    scope.items = [
-                        {name: "Well-Travelled Kitten", sales: 352, price: 75.95},
-                        {name: "Speedy Coyote", sales: 89, price: 190.00},
-                        {name: "Furious Lizard", sales: 1052, price: 25.00},
-                        {name: "Indifferent Monkey", sales: 1, price: 99.95},
-                        {name: "Brooding Dragon", sales: 0, price: 6350},
-                        {name: "Ingenious Tadpole", sales: 39450, price: 0.35},
-                        {name: "Optimistic Snail", sales: 420, price: 1.50}
-                    ]
-                    scope.showItems = [];//当前页面要显示出来的items
-                    scope.pageIndex = 0; //当前页数
-                    scope.pageCount = 3; //每页显示多个item
-                    scope.pages = [];//装着所有页码,以零开始
-                    scope.getShowItems = function() {
-                        var i = scope.pageIndex, c = scope.pageCount;
-                        var array = scope.$json.items.slice(i * c, (i + 1) * c)
-                        scope.showItems = array;
-                    }
-                    scope.addItem = function() {
-                        var a = {name: "New item", sales: 0, price: 100};
-                        scope.items.push(a);
-                        scope.showItems.push(a);
-                        scope.getPages();
-                    };
-                    scope.removeItem = function(e) {
-                        e.preventDefault()
-                        var item = this.$scope.$remove();
-                        scope.items.remove(item);
-                        if (!scope.showItems.length) {
-                            if (Math.ceil(scope.items.length / scope.pageCount) === scope.pageIndex) {
-                                scope.pageIndex--;
-                            }
-                            scope.getShowItems();//如果删光了,尝试到items取
+
+            var grid = avalon.define("grid", function(scope) {
+                scope.items = [
+                    {name: "Well-Travelled Kitten", sales: 352, price: 75.95},
+                    {name: "Speedy Coyote", sales: 89, price: 190.00},
+                    {name: "Furious Lizard", sales: 1052, price: 25.00},
+                    {name: "Indifferent Monkey", sales: 1, price: 99.95},
+                    {name: "Brooding Dragon", sales: 0, price: 6350},
+                    {name: "Ingenious Tadpole", sales: 39450, price: 0.35},
+                    {name: "Optimistic Snail", sales: 420, price: 1.50}
+                ]
+                scope.showItems = [];//当前页面要显示出来的items
+                scope.pageIndex = 0; //当前页数
+                scope.pageCount = 3; //每页显示多个item
+                scope.pages = [];//装着所有页码,以零开始
+                scope.getShowItems = function() {
+                    var i = scope.pageIndex, c = scope.pageCount;
+                    var array = scope.$json.items.slice(i * c, (i + 1) * c)
+                    scope.showItems = array;
+                }
+                scope.addItem = function() {
+                    var a = {name: "New item", sales: 0, price: 100};
+                    scope.items.push(a);
+                    scope.showItems.push(a);
+                    scope.getPages();
+                };
+                scope.removeItem = function(e) {
+                    e.preventDefault()
+                    var item = this.$scope.$remove();
+                    scope.items.remove(item);
+                    if (!scope.showItems.length) {
+                        if (Math.ceil(scope.items.length / scope.pageCount) === scope.pageIndex) {
+                            scope.pageIndex--;
                         }
-                        scope.getPages();
+                        scope.getShowItems();//如果删光了,尝试到items取
+                    }
+                    scope.getPages();
 
-                    };
-                    scope.getPages = function() {
-                        var total = Math.ceil(scope.items.size() / scope.pageCount);
-                        scope.pages = avalon.range(total);//用法与python, underscorejs一致,生成一个整数数组
-                    }
-                    function compare(a, b) {
-                        return a.name < b.name ? -1 : 1;
-                    }
-                    scope.sortByName = function() {
-                        scope.items.sort(compare);
-                        scope.showItems.sort(compare);
-                    };
-                    scope.jumpToFirstPage = function() {
-                        scope.pageIndex = 0;
-                        scope.getShowItems();
-                    };
-                    scope.jumpPage = function(e) {
-                          e.preventDefault()
-                        scope.pageIndex = this.$scope.$index;
-                        scope.getShowItems();
-                    }
-                });
-                grid.getShowItems();
-                grid.getPages()
-            
+                };
+                scope.getPages = function() {
+                    var total = Math.ceil(scope.items.size() / scope.pageCount);
+                    scope.pages = avalon.range(total);//用法与python, underscorejs一致,生成一个整数数组
+                }
+                function compare(a, b) {
+                    return a.name < b.name ? -1 : 1;
+                }
+                scope.sortByName = function() {
+                    scope.items.sort(compare);
+                    scope.showItems.sort(compare);
+                };
+                scope.jumpToFirstPage = function() {
+                    scope.pageIndex = 0;
+                    scope.getShowItems();
+                };
+                scope.jumpPage = function(e) {
+                    e.preventDefault()
+                    scope.pageIndex = this.$scope.$index;
+                    scope.getShowItems();
+                }
+            });
+            grid.getShowItems();
+            grid.getPages()
+
         </script>
     </head>
     <body>
