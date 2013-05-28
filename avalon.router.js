@@ -76,7 +76,7 @@ avalon.history = new function() {
                     hash = "#!" + getFragment();
                     location.hash = hash;
                 }
-                avalon.Router.navigate(hash.slice(2));
+                avalon.Router.navigate(hash.split("#")[2]|| new Date-0);
                 setHistory(last_hash = hash, history_hash);
             } else if (history_hash !== last_hash) {//如果按下回退键，
                 //  avalon.log("用户点了回退键,导致iframe中的hash发生变化" + history_hash);
