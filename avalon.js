@@ -1707,6 +1707,7 @@
                 avalon.bind(element, event, updateModel);
             } else {
                 if (window.addEventListener) { //先执行W3C
+                    console.log("ddddddddd")
                     element.addEventListener("input", updateModel, false);
                 } else {
                     element.attachEvent("onpropertychange", updateModel);

@@ -18,7 +18,7 @@ avalon.history = new function() {
     var oldIE = !"1" [0];
     var started = false;
     var self = this;
-    var firstCheck
+    var firstCheck;
     var iframeWin, iframe, history_hash, timeoutID;
     var last_hash = "#!" + getFragment();
     var supportPushState = /[native code]/.test(history.pushState);
@@ -30,7 +30,7 @@ avalon.history = new function() {
         if (!iframe && oldIE) {
             iframe = document.createElement("iframe");
             iframe.tabIndex = -1;
-            iframe.style.display = "none"
+            iframe.style.display = "none";
             iframe.src = "javascript:false";
             (document.body || document.documentElement).appendChild(iframe);
             var doc = iframe.contentDocument || iframe.contentWindow.document;
