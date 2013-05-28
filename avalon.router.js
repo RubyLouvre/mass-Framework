@@ -89,7 +89,8 @@ avalon.history = new function() {
                 if (!firstCheck) {
                     firstCheck = true;
                 } else {
-                    avalon.Router.navigate(hash.split("#")[2] || "不存在");
+                    var path = hash.split("#")[2];
+                    avalon.Router.navigate(typeof path === "string" ? path : new Date-0);
                     setHistory(last_hash = hash, history_hash);
                 }
             } else if (history_hash !== last_hash) {//如果按下回退键，
