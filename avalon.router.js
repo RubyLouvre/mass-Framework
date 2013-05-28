@@ -18,6 +18,7 @@ avalon.history = new function() {
     var oldIE = !"1" [0];
     var started = false;
     var self = this;
+    var firstCheck
     var iframeWin, iframe, history_hash, timeoutID;
     var last_hash = "#!" + getFragment();
     var supportPushState = /[native code]/.test(history.pushState);
@@ -85,8 +86,12 @@ avalon.history = new function() {
                     hash = "#!" + getFragment();
                     location.hash = hash;
                 }
-                avalon.Router.navigate(hash.split("#")[2] || "不存在");
-                setHistory(last_hash = hash, history_hash);
+                if (!firstCheck) {
+                    firstCheck = true;
+                } else {
+                    avalon.Router.navigate(hash.split("#")[2] || "不存在");
+                    setHistory(last_hash = hash, history_hash);
+                }
             } else if (history_hash !== last_hash) {//如果按下回退键，
                 //  avalon.log("用户点了回退键,导致iframe中的hash发生变化" + history_hash);
                 location.href = location.href.replace(/#.*/, '') + history_hash;
@@ -107,7 +112,11 @@ avalon.history = new function() {
             //如果我们想在改动URL时不刷新地址
             // http://foo.com/bar?baz=23#bar
             // http://foo.com/#!/bar?bar=23#bar
+
             this.checkUrl = function() {
+                if (!firstCheck) {
+                    return firstCheck = true
+                }
                 var path = getHash(getFragment(), true);
                 avalon.Router.navigate(path)
             }
