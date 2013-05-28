@@ -3,6 +3,17 @@
  **********************************************************************/
 //暴露如下接口：avalon.history.start, avalon.history.stop, avalon.history.interval
 //avalon.Router.extend, avalon.Router.navigate
+if (![].reduce) {
+    Array.prototype.reduce = function(fn, lastResult, scope) {
+        if (this.length == 0)
+            return lastResult;
+        var i = lastResult !== undefined ? 0 : 1;
+        var result = lastResult !== undefined ? lastResult : this[0];
+        for (var n = this.length; i < n; i++)
+            result = fn.call(scope, result, this[i], i, this);
+        return result;
+    }
+}
 avalon.history = new function() {
     var oldIE = !"1" [0];
     var started = false;
@@ -15,18 +26,16 @@ avalon.history = new function() {
         html = html.replace("<body>", "<script>document.domain =" + this.domain + "</script><body>");
     }
     function createIframe() {
-        if (!iframe) {
-            if (oldIE) {
-                iframe = document.createElement("iframe");
-                iframe.tabIndex = -1;
-                iframe.style.display = "none"
-                iframe.src = "javascript:false";
-                (document.body || document.documentElement).appendChild(iframe);
-                var doc = iframe.contentDocument || iframe.contentWindow.document;
-                doc.write(html.replace("@", last_hash));
-                doc.close();
-                timeoutID = setInterval(poll, self.interval);
-            }
+        if (!iframe && oldIE) {
+            iframe = document.createElement("iframe");
+            iframe.tabIndex = -1;
+            iframe.style.display = "none"
+            iframe.src = "javascript:false";
+            (document.body || document.documentElement).appendChild(iframe);
+            var doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.write(html.replace("@", last_hash));
+            doc.close();
+            timeoutID = setInterval(poll, self.interval);
         }
     }
     // IE6直接用location.hash取hash，可能会取少一部分内容
@@ -76,7 +85,7 @@ avalon.history = new function() {
                     hash = "#!" + getFragment();
                     location.hash = hash;
                 }
-                avalon.Router.navigate(hash.split("#")[2]|| new Date-0);
+                avalon.Router.navigate(hash.split("#")[2] || "不存在");
                 setHistory(last_hash = hash, history_hash);
             } else if (history_hash !== last_hash) {//如果按下回退键，
                 //  avalon.log("用户点了回退键,导致iframe中的hash发生变化" + history_hash);
@@ -126,7 +135,7 @@ new function() {
     function _tokenize(pathStr) {
         var stack = [''];
         for (var i = 0; i < pathStr.length; i++) {
-            var chr = pathStr[i];
+            var chr = pathStr.charAt(i);
             if (chr === '/') {//用于让后面的字符串相加
                 stack.push('');
                 continue;
@@ -221,7 +230,7 @@ new function() {
             if (nextKey.length <= 0) {
                 avalon.error('构建失败');
             }
-            if (nextKey[0] === ':') {//如果碰到参数
+            if (nextKey.charAt && nextKey.charAt(0) === ':') {//如果碰到参数
                 var n = nextKey.substring(1);
                 if (table.hasOwnProperty('^n') && table['^n'] !== n) {
                     return false;
@@ -239,17 +248,20 @@ new function() {
             }
         },
         add: function(method, path, value) {
-            var ast = parse(path), //转换为抽象语法树
-                    patterns = this._expandRules(ast);//进行全排列，应对可选的fragment
+            var ast = parse(path); //转换为抽象语法树
+
+            var patterns = this._expandRules(ast);//进行全排列，应对可选的fragment
+
             if (patterns.length === 0) {
                 var query = [method, 0];
                 this._set(this.routingTable, query, value);
             } else {
+                var self = this
                 patterns.every(function(pattern) {
                     var length = pattern.length,
                             query = [method, length].concat(pattern);
-                    return this._set(this.routingTable, query, value);
-                }.bind(this));
+                    return self._set(self.routingTable, query, value);
+                });
             }
             return value;
         },
@@ -327,9 +339,9 @@ new function() {
         extend: function(obj) {//定义所有路由规则
             if (typeof obj.routes === "object") {
                 for (var i in obj.routes) {
-                    if(i === "*error"){
+                    if (i === "*error") {
                         errback = obj.routes[i]
-                    }else{
+                    } else {
                         router.add("GET", i, obj.routes[i]);
                     }
                 }
