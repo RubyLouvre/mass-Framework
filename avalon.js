@@ -263,7 +263,8 @@
         css: function(name, value) {
             var node = this[0];
             if (node && node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
-                var prop = /\_/.test(name) ? camelize(name) : name;
+                var prop = /[_-]/.test(name) ? camelize(name) : name;
+                console.log(prop+"!!!!!!!!")
                 name = cssName(prop) || prop;
                 if (arguments.length === 1) { //获取样式
                     var fn = cssHooks[prop + ":get"] || cssHooks["@:get"];
@@ -1496,6 +1497,7 @@
             }
             watchView(text, scopes, data, function(val, elem) {
                 if (name === "css") {
+                    console.log(data.args.join("-"))
                     avalon(elem).css(data.args.join("-"), val);
                 } else {
                     elem[name] = val;
@@ -1707,7 +1709,6 @@
                 avalon.bind(element, event, updateModel);
             } else {
                 if (window.addEventListener) { //先执行W3C
-                    console.log("ddddddddd")
                     element.addEventListener("input", updateModel, false);
                 } else {
                     element.attachEvent("onpropertychange", updateModel);
