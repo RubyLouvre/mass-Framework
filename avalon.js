@@ -115,7 +115,6 @@
                 try {
                     el.attachEvent("on" + type, callback);
                 } catch (e) {
-                    console.log(e + "")
                 }
             }
             return callback;
@@ -264,7 +263,6 @@
             var node = this[0];
             if (node && node.style) { //注意string经过call之后，变成String伪对象，不能简单用typeof来检测
                 var prop = /[_-]/.test(name) ? camelize(name) : name;
-                console.log(prop+"!!!!!!!!")
                 name = cssName(prop) || prop;
                 if (arguments.length === 1) { //获取样式
                     var fn = cssHooks[prop + ":get"] || cssHooks["@:get"];
@@ -1497,7 +1495,6 @@
             }
             watchView(text, scopes, data, function(val, elem) {
                 if (name === "css") {
-                    console.log(data.args.join("-"))
                     avalon(elem).css(data.args.join("-"), val);
                 } else {
                     elem[name] = val;
@@ -1955,7 +1952,6 @@
         if (typeof list !== "object") {
             return list;
         }
-        console.log(typeof list)
         var view = documentFragment.cloneNode(false);
         var comment = DOC.createComment(list.$id);
         view.appendChild(comment);
@@ -2402,7 +2398,7 @@
             medium: "yyyy-M-d ah:mm:ss",
             mediumDate: "yyyy-M-d",
             mediumTime: "ah:mm:ss",
-            short: "yy-M-d ah:mm",
+            "short": "yy-M-d ah:mm",
             shortDate: "yy-M-d",
             shortTime: "ah:mm"
         };
