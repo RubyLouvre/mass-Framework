@@ -2427,4 +2427,5 @@
 //2013.5.21 v6.2 添加$json与多级监听
 //2013.5.22 0.6.3 fix getValueFunction bug; fix  avalon.bind return false bug;fix ms-css bug
 //2013.5.25 0.7 添加template绑定, 优化渲染速度,插入与移除节点的操作
+//2013 6 2 3群月王 ms-visible bug
 //黄轩http://www.cnblogs.com/lcllao/archive/2012/09/30/2709187.html
