@@ -13,12 +13,17 @@
         while (el = element.firstChild) {
             fragment.appendChild(el);
         }
-        element.innerHTML = '<div class="ui-progressbar-value ui-widget-header ui-corner-left ui-corner-right" style="width:' + options.value + '%;"></div>';
+        element.innerHTML = '<div class="ui-progressbar-value ui-widget-header ui-corner-left ui-corner-right" ms-bind-value="updateValue" style="width:' + options.value + '%;"></div>';
         while (el = element.firstChild) {
             fragment.appendChild(el);
         }
         model = avalon.define(id, function(vm) {
             vm.value = options.value;
+            vm.updateValue = function(v){
+                if(isFinite(v)){
+                    this.style.width = v + "%"
+                }
+            }
         });
         avalon.nextTick(function() {
             element.appendChild(fragment);
@@ -27,3 +32,4 @@
         return model;
     }
 })(this.avalon);
+//6月2日 3群 上海-Jason
