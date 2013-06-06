@@ -373,6 +373,14 @@ new function() {
             if (typeof callbacks[errback] === "function") {
                 callbacks[errback](url);
             }
+        },
+        onDocumentReady:function(url){//default is location.hash.substring(1)
+            !(arguments.length)&&(url = location.hash.substring(1));
+            if (document.readyState === "complete") {
+                this.navigate(url);
+            }else{
+                setTimeout(arguments.callee,avalon.history.interval)
+            }
         }
     };
 
