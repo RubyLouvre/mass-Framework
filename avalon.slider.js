@@ -1,6 +1,5 @@
 (function(avalon) {
     //判定是否触摸界面
-    var isTouch = "ontouchend" in document;
     var defaults = {
         distance: 0,
         max: 100,
@@ -11,9 +10,9 @@
         value: 0,
         values: null
     }
+    var domParser = document.createElement("div");
 
-
-    avalon.ui["slider"] = function(element, id) {
+    avalon.ui["slider"] = function(element, id, opt, model) {
         var $element = avalon(element);
         var options = avalon.mix({}, defaults);
         avalon.mix(options, $element.data());
@@ -26,7 +25,6 @@
         var twohandlebars = oRange === true;
         //处理
         var value = options.value; //第几等份
-        var model; //ViewModel;
         if (oRange === "min" && values) {
             var value = values[0];
         } else if (oRange === "max" && values) {
@@ -40,12 +38,12 @@
             }
         }
 
-        var domParser = document.createElement("div");
+
         var handleHTML = '<a class="ui-slider-handle ui-state-default ui-corner-all"' +
                 ' ms-css-' + (isHorizontal ? 'left' : 'bottom') + '="{{percent}}%"' +
                 ' data-axis=' + (isHorizontal ? 'x' : 'y') +
                 ' data-containment="parent"' +
-                ' ms-drag="drag"' +
+                ' ms-draggable="drag"' +
                 ' data-movable="false"' +
                 ' data-dragstart="dragstart"' +
                 ' data-dragend="dragend"' +
@@ -59,11 +57,10 @@
                 ' ui-widget ui-widget-content ui-corner-all" ' +
                 ' ms-class-ui-state-disabled="disabled" >' +
                 (oRange ? rangeHTML : "") + (twohandlebars ? handleHTML.replace("percent", "percent0") +
-                handleHTML.replace("percent", "percent1") : handleHTML)
-        '</div>';
+                handleHTML.replace("percent", "percent1") : handleHTML) +
+                '</div>';
         domParser.innerHTML = sliderHTML;
-        var slider = domParser.firstChild;
-        var $slider = avalon(slider);
+        var slider = domParser.removeChild(domParser.firstChild);
         var a = slider.getElementsByTagName("a"), handlers = [];
         for (var i = 0, el; el = a[i++]; ) {
             handlers.push(el);
@@ -92,21 +89,21 @@
         }
         model = avalon.define(id, function(vm) {
             vm.disabled = element.disabled;
-            vm.percent = twohandlebars ? value2Percent(values[1] - values[0]) : value2Percent(value)
+            vm.percent = twohandlebars ? value2Percent(values[1] - values[0]) : value2Percent(value);
             vm.percent0 = twohandlebars ? value2Percent(values[0]) : 0;
             vm.percent1 = twohandlebars ? value2Percent(values[1]) : 0;
             vm.value = twohandlebars ? values.join() : value;
             vm.range = oRange;
             vm.values = values;
             vm.dragstart = function(event, data) {
-                Index = handlers.indexOf(data.el);
-                data.$el.addClass("ui-state-active");
+                Index = handlers.indexOf(data.element);
+                data.$element.addClass("ui-state-active");
                 data.range[2] += this.clientWidth;
                 data.range[3] += this.clientHeight;
                 pixelTotal = isHorizontal ? slider.offsetWidth : slider.offsetHeight;
             };
             vm.dragend = function(event, data) {
-                data.$el.removeClass("ui-state-active");
+                data.$element.removeClass("ui-state-active");
             };
             vm.drag = function(event, data) {
                 var prop = isHorizontal ? "left" : "top";
@@ -144,7 +141,7 @@
                     vm.percent = value2Percent(val);
                 }
             };
-			
+
         });
 
         avalon.scan(slider, model);

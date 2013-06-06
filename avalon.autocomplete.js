@@ -6,46 +6,40 @@
 
     avalon.ui.autocomplete = function(element, id, opts) {
         var $element = avalon(element),
-            flagKeyup = false,
-            tempValue = "",
-            model;
+                refreshList,
+                tempValue = "",
+                model;
         //处理配置
         var options = avalon.mix({}, defaults);
         avalon.mix(options, $element.data());
         var source = Array.isArray(opts) ? opts.sort() : [];
         var sourceList = document.createElement("div");
         sourceList.innerHTML = '<ul ms-important="' + id + '" class="ui-autocomplete ui-front ui-menu ui-widget ui-widget-content ui-corner-all" ms-each-presentation="matcher" ms-visible="show" >' +
-            '<li class="ui-menu-item" ><a  class="ui-corner-all" tabindex="-1" ms-hover="ui-state-focus" ms-class-ui-state-focus="matcher[selectedIndex] === presentation "  >{{presentation}}</a></li>' +
-            '</ul>';
+                '<li  class="ui-menu-item" ><a  class="ui-corner-all" tabindex="-1" ms-mouseover="get" ms-hover="ui-state-focus" ms-class-ui-state-focus="matcher[selectedIndex] === presentation "  >{{presentation}}</a></li>' +
+                '</ul>';
 
         sourceList = sourceList.firstChild;
         $element.bind("blur", function() {
-            model.value = tempValue; //还原
-            flagKeyup = model.show = false; //隐藏datalist
+            setTimeout(function() {
+                refreshList = model.show = false; //隐藏datalist
+            }, 250);
         });
+        avalon.bind(sourceList, "click", function() {
+            model.value = model.overvalue;
+        })
         $element.bind("keyup", function(e) {
             if (/\w/.test(String.fromCharCode(e.which))) { //如果是字母数字键
-                flagKeyup = false; //这是方便在datalist显示时,动态刷新datalist
+                refreshList = true; //这是方便在datalist显示时,动态刷新datalist
                 model.value = element.value; //触发$watch value回调
-            }
-        });
-
-        avalon.bind(document, "keyup", function(e) {
-            if (model.show) { //这是方便在datalist显示时,不刷新列表,但刷新input值
-                flagKeyup = true;
-                if (preventOne[e.which]) {
-                    e.preventDefault();
-                }
+            } else {
+                refreshList = false
                 switch (e.which) {
                     case 8:
-                        if (model.value === "") {
-                            flagKeyup = model.show = false;
-                        }
+                        refreshList = true;//回退键可以引发列表刷新
                         break;
                     case 13:
-                        // enter
                         tempValue = model.value;
-                        flagKeyup = model.show = false;
+                        refreshList = model.show = false;
                         break;
                     case 38:
                         // up arrow
@@ -56,6 +50,7 @@
                         var value = model.matcher[model.selectedIndex];
                         model.value = value === void 0 ? tempValue : value;
                         break
+
                     case 40:
                         // down arrow
                         ++model.selectedIndex;
@@ -66,16 +61,21 @@
                         model.value = value === void 0 ? tempValue : value;
                         break;
                 }
-
             }
+
         });
+
         model = avalon.define(id, function(vm) {
             vm.show = false;
             vm.selectedIndex = -1;
             vm.value = element.value;
             vm.matcher = [];
+            vm.overvalue = "";
+            vm.get = function() {
+                vm.overvalue = this.$scope.presentation
+            }
             vm.$watch("value", function(value) {
-                if (!flagKeyup) { //flagKeyup是控制datalist的刷新
+                if (refreshList !== false) { //flagKeyup是控制datalist的刷新
                     model.show = true;
                     tempValue = value;
                     var lower = [];
@@ -102,7 +102,6 @@
         });
         avalon.ready(function() {
             element.setAttribute("ms-model", "value");
-            avalon.log("avalon.autocomplete");
             document.body.appendChild(sourceList);
             adjustPosition();
             avalon.scan(element, model);

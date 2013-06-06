@@ -338,6 +338,7 @@ define("event", window.dispatchEvent ? ["node"] : ["event_fix"], function($) {
                 handle = ontype && cur[ontype];
                 if (handle && handle.apply && handle.apply(cur, data) === false) {
                     event.preventDefault();
+                    event.stopPropagation();
                 }
             }
             event.type = type;

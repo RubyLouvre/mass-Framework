@@ -31,27 +31,26 @@
         if (fake) {
             document.documentElement.removeChild(root);
         }
-    }
+    };
     if (window.Node && Node.prototype && !Node.prototype.contains) {
         Node.prototype.contains = function(arg) {
-            return !!(this.compareDocumentPosition(arg) & 16)
-        }
+            return !!(this.compareDocumentPosition(arg) & 16);
+        };
     }
-    var domParser = document.createElement("div")
-    var mask = '<div class="ui-widget-overlay ui-front"></div>'
-    domParser.innerHTML = mask;
-    mask = domParser.firstChild;
-    avalon.ui.dialog = function(element, id, opts) {
+    var domParser = document.createElement("div");
+    domParser.innerHTML = '<div class="ui-widget-overlay ui-front">&nbsp;</div>';
+    var overlay = domParser.firstChild;//全部dialog共用
+    avalon.ui.dialog = function(element, id, opts, model) {
         var $element = avalon(element);
         var options = avalon.mix({}, defaults);
         avalon.mix(options, $element.data());
+        options.toggle = !!options.autoOpen;
         if (!options.title) {
-            options.title = element.title;
+            options.title = element.title || "&nbsp;";
         }
         if (typeof opts === "function") {
             options.close = opts;
         }
-        ;
         if (typeof opts === "object") {
             for (var i in opts) {
                 if (i === "$id")
@@ -65,7 +64,7 @@
                 ' ms-visible="toggle"' +
                 ' ms-css-width="width"' +
                 ' ms-css-height="height"' +
-                '><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix" ms-drag="drag" data-movable="false">' +
+                '><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix" ms-draggable="drag" data-beforestart="beforestart" data-movable="false">' +
                 '<span class="ui-dialog-title" ms-html="title"></span>' +
                 '<button ms-ui="button" type="button" data-primary="ui-icon-closethick" class="ui-dialog-titlebar-close" data-text="false" ms-click="close">close</button></div>' +
                 '</div></div>';
@@ -92,20 +91,27 @@
             vm.height = options.height;
             vm.close = function() {
                 vm.toggle = false;
-            }
+            };
             vm.$watch("toggle", function(v) {
                 if (v === false) {
-                    overlayInstances--
-                    if (!overlayInstances) {
-                        mask.style.display = "none";
+                    avalon.Array.remove(overlayInstances, options);
+                    if (!overlayInstances.length) {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
                     }
-                }else{
+                } else {
                     resetCenter();
                 }
             });
             vm.drag = function(event, data) {
                 dialog.style.top = data.top + "px";
                 dialog.style.left = data.left + "px";
+            };
+            vm.beforestart = function(event, data) {
+                data.element = dialog;
+                data.$element = avalon(dialog);
+
             };
         });
         function keepFocus() {
@@ -147,9 +153,9 @@
             dialog.style.top = t + "px";
             keepFocus();
             if (options.modal) {
-                parent.insertBefore(mask, dialog);
-                mask.style.display = "block";
-                overlayInstances++
+                parent.insertBefore(overlay, dialog);
+                overlay.style.display = "block";
+                avalon.Array.ensure(overlayInstances, options)
             }
         }
         avalon.ready(function() {
@@ -163,11 +169,16 @@
             if (options.autoOpen) {
                 avalon.nextTick(resetCenter);
             }
-            avalon(document.body).bind("scroll", resetCenter);
-            avalon(window).bind("resize", resetCenter);
+            avalon(document.body).bind("scroll", function() {
+                options.autoOpen && resetCenter();
+            });
+            avalon(window).bind("resize", function() {
+                options.autoOpen && resetCenter();
+            });
         });
-        return model
+        return model;
     }
-    var overlayInstances = avalon.ui.dialog.overlayInstances = 0;
+    var overlayInstances = avalon.ui.dialog.overlayInstances = [];
 
 })(window.avalon);
+//http://www.slipjs.com/jz.html

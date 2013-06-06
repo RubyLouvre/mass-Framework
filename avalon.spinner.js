@@ -1,7 +1,7 @@
 (function(avalon) {
     var defaults = {
         value: 0,
-        min: 1<<31,
+        min: 1 << 31,
         max: Infinity,
         step: 1
     };
@@ -34,10 +34,8 @@
         element = span;//偷天换日
         $element = avalon(span);
         model = avalon.define(id, function(vm) {
-            vm.value = ~~options.value;
-             vm.step = ~~options.step;
-            vm.max = options.max;
             vm.min = options.min;
+            avalon.mix(vm, options );
             vm.addNumber = function(e) {
                 e.preventDefault();
                 vm.value += vm.step;
@@ -45,7 +43,6 @@
                     vm.value = vm.max;
                 }
             };
-           
             vm.reduceNumber = function(e) {
                 e.preventDefault();
                 vm.value -= vm.step;
@@ -60,5 +57,6 @@
             element.appendChild(fragment);
             avalon.scan(element, model);
         });
-    }
+        return model;
+    };
 })(this.avalon);
