@@ -373,6 +373,18 @@ new function() {
             if (typeof callbacks[errback] === "function") {
                 callbacks[errback](url);
             }
+        },
+        onDocumentReady:function(url){//default is location.hash.substring(1)
+            !(arguments.length)&&(url = location.hash.substring(1));
+            var self = this,
+                callee = arguments.callee;
+            if (document.readyState === "complete") {
+                this.navigate(url);
+            }else{
+                setTimeout(function(){
+                    callee.call(self,url);
+                },avalon.history.interval)
+            }
         }
     };
 
