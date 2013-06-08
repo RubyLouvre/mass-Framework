@@ -1831,6 +1831,9 @@
         var collection = list.map(convert);
         collection.$id = generateID();
         collection[subscribers] = [];
+        list = collection.map(function(el){
+            return el && el.$id ? el.$json || el;
+        })
         collection.$json = list;
         var dynamic = modelFactory({
             length: list.length
@@ -1855,9 +1858,13 @@
         "sort,reverse".replace(rword, function(method) {
             collection[method] = function() {
                 var ret = list[method].apply(list, arguments);
-                ret.forEach(function(el, i) {
+                for(var i = 0, n = list.length; i < n ; i++){
+                    var el = list[i];
                     collection.set(i, el);
-                });
+                }
+               // ret.forEach(function(el, i) {
+               //      collection.set(i, el);
+               //});
                 return this;
             };
         });
