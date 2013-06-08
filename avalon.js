@@ -1832,7 +1832,7 @@
         collection.$id = generateID();
         collection[subscribers] = [];
         list = collection.map(function(el){
-            return el && el.$id ? el.$json || el;
+            return el && el.$id ? el.$json : el;
         })
         collection.$json = list;
         var dynamic = modelFactory({
