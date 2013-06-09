@@ -784,7 +784,7 @@
             }
         }
     };
-    function updateViewModel(a, b, isArray) {
+    function updateViewModel(a, b, isArray,c) {
         if (isArray) {
             var an = a.length,
                     bn = b.length;
@@ -801,6 +801,7 @@
             for (var i in b) {
                 if (b.hasOwnProperty(i) && a.hasOwnProperty(i) && i !== "$id") {
                     a[i] = b[i];
+                    c[i] = b[i];
                 }
             }
         }
@@ -1475,8 +1476,11 @@
         },
         //控制元素显示或隐藏
         "visible": function(data, scopes) {
-            watchView(data.value, scopes, data, function(val, elem) {
-                elem.style.display = val ? parseDisplay(elem.tagName) : "none";
+            var elem = data.element;
+            var display = avalon(elem).css("display");
+            display = display === "none" ? parseDisplay(elem.tagName) : display;
+            watchView(data.value, scopes, data, function(val) {
+                elem.style.display = val ? display : "none";
             });
         },
         //这是一个字符串属性绑定的范本, 方便你在title, alt,  src, href添加插值表达式
@@ -1858,13 +1862,9 @@
         "sort,reverse".replace(rword, function(method) {
             collection[method] = function() {
                 var ret = list[method].apply(list, arguments);
-                for(var i = 0, n = list.length; i < n ; i++){
-                    var el = list[i];
-                    collection.set(i, el);
+                for(var i = 0; i < ret.length; i++){
+                   var el = ret[i];
                 }
-               // ret.forEach(function(el, i) {
-               //      collection.set(i, el);
-               //});
                 return this;
             };
         });
@@ -1898,9 +1898,10 @@
                     if (val.$json) {
                         val = val.$json;
                     }
-                    updateViewModel(this[index], val, Array.isArray(val));
+                    updateViewModel(this[index], val, Array.isArray(val), list[index]);
                 } else if (this[index] !== val) {
                     this[index] = val;
+
                     model && model.$fire(prop + ".changed");
                     notifySubscribers(this, "set", arguments);
                 }
