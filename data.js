@@ -4,19 +4,20 @@
 define("data", ["lang"], function($) {
     var owners = [],
         caches = [];
+        
     /**
      * 为目标对象指定一个缓存体
      * @param {Any} owner
      * @return {Object} 缓存体
      * @api private
      */
-
     function add(owner) {
         var index = owners.push(owner);
         return caches[index - 1] = {
             data: {}
         };
     }
+    
     /**
      * 为目标对象读写数据
      * @param {Any} owner
@@ -26,7 +27,6 @@ define("data", ["lang"], function($) {
      * @return {Any}
      * @api private
      */
-
     function innerData(owner, name, data, pvt) { //IE678不能为文本节点注释节点添加数据
         var index = owners.indexOf(owner);
         var table = index === -1 ? add(owner) : caches[index];
@@ -53,6 +53,7 @@ define("data", ["lang"], function($) {
             return table;
         }
     }
+    
     /**
      * 为目标对象移除数据
      * @param {Any} owner
@@ -61,7 +62,6 @@ define("data", ["lang"], function($) {
      * @return {Any}
      * @api private
      */
-
     function innerRemoveData(owner, name, pvt) {
         var index = owners.indexOf(owner);
         if(index > -1) {
