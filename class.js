@@ -50,7 +50,7 @@ define("class", ["lang"], function($) {
             var target = this;
             Object.keys(module).forEach(function(name) {
                 var fn = target[name], fn2 = module[name]
-                if (typeof fn === "funciton" && typeof fn2 === "function" && fnTest.test(fn2)) {
+                if (typeof fn === "function" && typeof fn2 === "function" && fnTest.test(fn2)) {
                     var __super = function() { //创建方法链
                         return fn.apply(this, arguments);
                     };
