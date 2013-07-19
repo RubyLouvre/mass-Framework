@@ -617,6 +617,13 @@ void function(global, DOC) {
         //现在除了safari外，我们都能直接通过getCurrentScript一步到位得到当前执行的script节点，
         //safari可通过onload+delay闭包组合解决
         id = modules[id] && modules[id].state >= 1 ? _id : getCurrentScript();
+        if (!modules[name] && _id ) {
+                modules[name] = {
+                    id: name,
+                    factory: factory,
+                    state: 1
+                }
+         }
         factory = args[1];
         factory.id = _id; //用于调试
         factory.delay = function(id) {
