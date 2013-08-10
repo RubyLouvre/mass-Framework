@@ -47,12 +47,12 @@ mass Framework
 <p style="color:red; font-weight: bold;">点击上面的ZIP按钮将框架下载回来，解压，运行里面的Sws.exe服务器。</p>
 <p>一个简单的例子</p>
 <pre>
-require("ready",function(){
+require("ready,node",function(){
 /*待到domReady完成，执行回调*/
    $.log("将日志打印到页面上",true)
 })
 </pre>
-<p>上面的代面相当于：</p>
+<p>上面的代码相当于：</p>
 <pre>
 require("ready,node",function(){
 /*待到domReady完成，并且在node.js模块加载完毕，执行回调*/
@@ -121,7 +121,7 @@ $(function(){
 node.exe combo
 </pre>
 
-<h3>JS文件的合并</h3>
+<h3>JS文件的压缩</h3>
 <p>使用compiler.jar( GCC，需要有JAVA运行环境)</p>
 <pre>
 java -jar compiler.jar --js mass_merge.js --js_output_file mass_min.js
