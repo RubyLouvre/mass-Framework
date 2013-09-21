@@ -88,15 +88,22 @@ define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], func
          * @return {Boolean}
          */
         isArrayLike: function(obj, includeString) { //是否包含字符串
-            var type = $.type(obj);
-            if (type === "Array" || type === "Arguments" || type === "NodeList" || includeString && type === "String") {
-                return true;
+             if(includeString && typeof obj === "string")
+                 return false
+             if (obj && typeof obj === "object") {
+                var n = obj.length
+                if (+n === n && !(n % 1) && n >= 0) { //检测length属性是否为非负整数
+                    try {
+                        if ({}.propertyIsEnumerable.call(obj, 'length') === false) { //如果是原生对象
+                            return Array.isArray(obj) || /^\s?function/.test(obj.item || obj.callee)
+                        }
+                        return true;
+                    } catch (e) { //IE的NodeList直接抛错
+                        return true
+                    }
+                }
             }
-            if (type === "Object") {
-                var i = obj.length;
-                return (i >= 0) && (i % 1 === 0) && obj.hasOwnProperty("0"); //非负整数
-            }
-            return false;
+            return false
         },
         isFunction: function(fn) {//为了性能起见,没有走$.type方法
             return "[object Function]" === tools.toString.call(fn)
