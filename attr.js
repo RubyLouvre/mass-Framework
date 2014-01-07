@@ -154,7 +154,7 @@ define("attr", !! this.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
            } : function(el, attr){//IE67
                var outer = el.outerHTML, part = outer.slice(0, outer.search(/\/?['"]?>(?![^<]*<['"])/));
 			  return new RegExp("\\s" + prop + "\\b", "i").test(part);
-       }，
+       },
        prop: function(node, name, value) {
             if($["@bind"] in node) {
                 if(node.nodeType === 1 && !$.isXML(node)) {
