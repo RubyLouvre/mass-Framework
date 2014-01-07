@@ -148,7 +148,14 @@ define("attr", !! this.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             "for": "htmlFor",
             "http-equiv": "httpEquiv"
         },
-        prop: function(node, name, value) {
+        //判定用户有没有显式定义某属性
+       hasAttr: document.documentElement.hasAttribute ? function(el, attr){
+            return el.hasAttribute(attr)
+           } : function(el, attr){//IE67
+               var outer = el.outerHTML, part = outer.slice(0, outer.search(/\/?['"]?>(?![^<]*<['"])/));
+			  return new RegExp("\\s" + prop + "\\b", "i").test(part);
+       }，
+       prop: function(node, name, value) {
             if($["@bind"] in node) {
                 if(node.nodeType === 1 && !$.isXML(node)) {
                     name = $.propMap[name.toLowerCase()] || name;
