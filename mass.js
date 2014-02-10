@@ -436,7 +436,7 @@ void function(global, DOC) {
             return true;
         }
     }
-
+    var rdeuce = /\/\w+\/\.\./
     function loadJSCSS(url, parent, ret, shim) {
         //1. 特别处理mass|ready标识符
         if (/^(mass|ready)$/.test(url)) {
@@ -460,12 +460,10 @@ void function(global, DOC) {
                 } else if (url.slice(0, 2) === "./") { //相对于兄弟路径
                     ret = parent + url.slice(1);
                 } else if (url.slice(0, 2) === "..") { //相对于父路径
-                    var arr = parent.replace(/\/$/, "").split("/");
-                    tmp = url.replace(/\.\.\//g, function() {
-                        arr.pop();
-                        return "";
-                    });
-                    ret = arr.join("/") + "/" + tmp;
+                    ret = parent + "/" + url
+                    while (rdeuce.test(ret)) {
+                        ret = ret.replace(rdeuce, "")
+                    }
                 } else if (tmp === "/") {
                     ret = parent + url;//相对于兄弟路径
                 } else {
