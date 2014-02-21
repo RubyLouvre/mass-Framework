@@ -1,4 +1,4 @@
-mass Framework
+huhaomass Framework
 ==================
 <h3>mass Framework的贡献者列表(排名不分先后)：</h3>
 <p>abcd(1群) ,Alucelx(1群)， <a href="http://stylechen.com/">带刀</a>(1群)，sapjax(2群) ,教主Franky(2群), 一三一四君(2B群), <a href="https://github.com/riophae">riophae</a>,<br/>
