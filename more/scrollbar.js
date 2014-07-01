@@ -1,24 +1,20 @@
 define("scrollbar", ["css"], function($) {
     function hasScroll(el, a) {
         //判定是否存在水平或垂直滚动条
-//If overflow is hidden, the element might have extra content, but the user wants to hide it
         if ($(el).css("overflow") === "hidden") {
-            return false;
+            return false
         }
-
-        var scroll = (a && a === "left") ? "scrollLeft" : "scrollTop",
-                has = false;
-
+        var scroll = (a && a === "x") ? "scrollLeft" : "scrollTop"
         if (el[ scroll ] > 0) {
-            return true;
+            return true
         }
-        // TODO: determine which cases actually cause this to happen
-        // if the element doesn't have the scroll set, see if it's possible to
-        // set the scroll
-        el[ scroll ] = 1;
-        has = (el[ scroll ] > 0);
-        el[ scroll ] = 0;
-        return has;
+        if (scroll === "scrollLeft") {
+          //  console.log(el.scrollWidth, el.clientWidth)
+            return el.scrollWidth > el.clientWidth //+ scrollbarHeight
+        } else {
+          //  console.log(el.scrollHeight, el.clientHeight)
+            return el.scrollHeight > el.clientHeight// + scrollbarHeight
+        }
     }
     $.fn.hasScroll = function() {
         //判定当前匹配的第一个元素是否存在滚动条
@@ -29,8 +25,8 @@ define("scrollbar", ["css"], function($) {
     (function () {
         var test = $('<div style="position: absolute; top: -10000px; left: -10000px; width: 100px; height: 100px; overflow: scroll;"></div>').appendTo("body");
         var node = test[0];
-        scrollbarHeight = node.scrollHeight - node.clientHeight;
-        scrollbarWidth = node.scrollWidth - node.clientWidth;
+        scrollbarHeight = node.offsetHeight - node.clientHeight;
+        scrollbarWidth = node.offsetWidth - node.clientWidth;
         test.remove();
     })();
     $.scrollbarWidth = function() {
