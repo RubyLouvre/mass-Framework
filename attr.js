@@ -153,7 +153,7 @@ define("attr", !! this.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             return el.hasAttribute(attr)
            } : function(el, attr){//IE67
                var outer = el.outerHTML, part = outer.slice(0, outer.search(/\/?['"]?>(?![^<]*<['"])/));
-			  return new RegExp("\\s" + prop + "\\b", "i").test(part);
+			  return new RegExp("\\s" + attr + "\\b", "i").test(part);
        },
        prop: function(node, name, value) {
             if($["@bind"] in node) {
