@@ -45,7 +45,7 @@ define("attr", !! this.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
             }
             return this;
         },
-        //如果不传入类名,则清空所有类名,允许同时删除多个类名
+        //如果不传入类名,则清空所有类名,允许同时删除多个类名。然后这个句话是我添加的。用于测试。
         removeClass: function(item) {
             if((item && typeof item === "string") || item === void 0) {
                 var classNames = (item || "").match(rnospaces),
