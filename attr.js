@@ -289,7 +289,7 @@ define("attr", !! this.getComputedStyle ? ["node"] : ["attr_fix"], function($) {
     //========================valHooks 的相关修正==========================
     var roption = /^<option(?:\s+\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*\s+value[\s=]/i
     var valHooks = {
-       "option:get": function(){
+       "option:get": function(node){
        //在IE11及W3C，如果没有指定value，那么node.value默认为node.text（存在trim作），
        //但IE9-10则是取innerHTML(没trim操作)
           if (node.hasAttribute) { 
