@@ -2,6 +2,8 @@ define("deltectZoom", function() {
     /* 设备检测
      *  继续探索一种不使用mediaQuery的方法，求推荐
      */
+     
+    //http://blog.sebastian-martens.de/2009/12/how-to-detect-the-browser-zoom-level-change-browser-zoo/
     var mediaQueryBinarySearch = function(property, unit, a, b, maxIter, epsilon) {
         var matchMedia;
         var head, style, div;
