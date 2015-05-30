@@ -702,7 +702,7 @@ define("lang", /native code/.test(Array.isArray) ? ["mass"] : ["lang_fix"], func
             return target;
         }
     });
-    $.Object("hasOwnerProperty,isPrototypeOf,propertyIsEnumerable");
+    $.Object("hasOwnProperty,isPrototypeOf,propertyIsEnumerable");
     return $
 });
 /**
