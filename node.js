@@ -57,15 +57,15 @@ define("node", ["support", "class", "data"]
                         var scope = context || doc;
                         expr = expr.trim();
                         if (expr.charAt(0) === "<" && expr.charAt(expr.length - 1) === ">" && expr.length >= 3) {
-                            nodes = $.parseHTML(expr, doc); //分支5: 动态生成新节点
+                            nodes = $.parseHTML(expr, doc); //分支4: 处理非空字符串，动态生成新节点
                             nodes = nodes.childNodes;
-                        } else if (rtag.test(expr)) { //分支6: getElementsByTagName
+                        } else if (rtag.test(expr)) { //分支5: 处理非空字符串，getElementsByTagName
                             nodes = scope[TAGS](expr);
-                        } else { //分支7：进入选择器模块
+                        } else { //分支6：处理非空字符串，进入选择器模块
                             nodes = $.query(expr, scope);
                         }
                         return $.Array.merge(this, nodes);
-                    } else { //分支8：处理数组，节点集合或者mass对象或window对象
+                    } else { //分支7：处理数组，节点集合或者mass对象或window对象
                         this.ownerDocument = getDoc(expr[0]);
                         $.Array.merge(this, $.isArrayLike(expr) ? expr : [expr]);
                         delete this.selector;
