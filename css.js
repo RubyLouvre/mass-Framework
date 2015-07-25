@@ -5,7 +5,7 @@ define("css", this.getComputedStyle ? ["node"] : ["css_fix"], function($) {
     var adapter = $.cssHooks || ($.cssHooks = {}),
             rrelNum = /^([\-+])=([\-+.\de]+)/,
             rnumnonpx = /^-?(?:\d*\.)?\d+(?!px)[^\d\s]+$/i,
-            cssTransform = $.cssName("transform"),
+            cssTransform = $.cssName("transform"),  
             cssBoxSizing = $.cssName("box-sizing"),
             cssPair = {
         Width: ['Left', 'Right'],
