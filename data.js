@@ -91,9 +91,9 @@ define("data", ["lang"], function($) {
            
             return owners.indexOf(owner) > -1;
         },
-
-        data: function(target, name, data) {
             //读写用户数据
+        data: function(target, name, data) {
+            
             return innerData(target, name, data);
         },
 
