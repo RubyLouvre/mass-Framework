@@ -86,19 +86,19 @@ define("data", ["lang"], function($) {
     }
     var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
     $.mix({
-
+        
+        //判定是否关联了数据 
         hasData: function(owner) {
-            //判定是否关联了数据 
             return owners.indexOf(owner) > -1;
         },
 
-        data: function(target, name, data) {
             //读写用户数据
+        data: function(target, name, data) {
             return innerData(target, name, data);
         },
 
-        _data: function(target, name, data) {
             //读写内部数据
+        _data: function(target, name, data) {
             return innerData(target, name, data, true);
         },
 
