@@ -7,7 +7,7 @@ define("data", ["lang"], function($) {
     /**
      * 为目标对象指定一个缓存体
      * @param {Any} owner
-     * @return {Object} 缓存体
+     * @return {Object} 缓存体aa
      * @api private
      */
 
