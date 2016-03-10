@@ -29,7 +29,7 @@ define(["mass", "$attr", "$spec"], function($) {
                         opt2 = $('#test-select', idoc).find("option").eq(1),
                         area = $('#foo textarea', idoc),
                         disabledTest = $("#test-20110810-disabled", idoc);
-                //开始测试
+                //开始测试..............
                 get(foo);
                 get(a);
                 get(img);
