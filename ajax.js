@@ -10,7 +10,7 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
             encode = encodeURIComponent,
             decode = decodeURIComponent,
             rheaders = /^(.*?):[ \t]*([^\r\n]*)\r?$/mg,
-            // IE的换行符不包含 \r
+            // IE的换行符不包含/text/ \r
             rlocalProtocol = /^(?:about|app|app-storage|.+-extension|file|res|widget):$/,
             rnoContent = /^(?:GET|HEAD)$/,
             rquery = /\?/,
