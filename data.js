@@ -86,34 +86,34 @@ define("data", ["lang"], function($) {
     }
     var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
     $.mix({
-
+        //判定是否关联了数据 
         hasData: function(owner) {
-            //判定是否关联了数据 
+            
             return owners.indexOf(owner) > -1;
         },
-
+        //读写用户数据
         data: function(target, name, data) {
-            //读写用户数据
+            
             return innerData(target, name, data);
         },
-
+        //读写内部数据
         _data: function(target, name, data) {
-            //读写内部数据
+            
             return innerData(target, name, data, true);
         },
-
+        //删除用户数据
         removeData: function(target, name) {
-            //删除用户数据
+            
             return innerRemoveData(target, name);
         },
-
+        //移除内部数据
         _removeData: function(target, name) {
-            //移除内部数据
+            
             return innerRemoveData(target, name, true);
         },
-
+        //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
         parseData: function(target, name, cache, value) {
-            //将HTML5 data-*的属性转换为更丰富有用的数据类型，并保存起来
+            
             var data, _eval, key = $.String.camelize(name);
             if(cache && (key in cache)) return cache[key];
             if(arguments.length !== 4) {
@@ -136,9 +136,9 @@ define("data", ["lang"], function($) {
             return data;
 
         },
-
+        //合并数据
         mergeData: function(cur, src) {
-            //合并数据
+            
             if($.hasData(cur)) {
                 var oldData = $._data(src),
                     curData = $._data(cur),
