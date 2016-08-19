@@ -12,11 +12,7 @@ define(!!this.FormData, ["flow"], function($) {
     execScript(str, "VBScript");
     $.fixAjax = function() {
         $.ajaxConverters.arraybuffer = function() {
-            var body = this.tranport && this.tranport.responseBody
-            if (body) {
-                return  new VBArray(BinaryToArray(body)).toArray();
-            }
-        };
+            var 
         function createIframe(ID) {
             var iframe = $.parseHTML("<iframe " + " id='" + ID + "'" +
                     " name='" + ID + "'" + " style='position:absolute;left:-9999px;top:-9999px;/>").firstChild;
