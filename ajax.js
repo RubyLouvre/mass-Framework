@@ -1,5 +1,5 @@
 //=========================================
-//  数据交互模块
+//  数据交互模块   测试提交
 //==========================================
 //var reg = /^[^\u4E00-\u9FA5]*$/;
 define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
@@ -518,6 +518,9 @@ define("ajax", this.FormData ? ["flow"] : ["ajax_fix"], function($) {
                         }
                     }
                 }
+            }
+            if(this.status==2){
+                this.status=5;
             }
             this.status = status;
             this.statusText = statusText;
