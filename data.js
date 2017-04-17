@@ -25,6 +25,7 @@ define("data", ["lang"], function($) {
      * @param {Boolean} pvt ? 标识为内部数据
      * @return {Any}
      * @api private
+     * test
      */
 
     function innerData(owner, name, data, pvt) { //IE678不能为文本节点注释节点添加数据
