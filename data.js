@@ -11,7 +11,7 @@ define("data", ["lang"], function($) {
      * @api private
      */
 
-    function add(owner) {
+    function add(owner) { 
         var index = owners.push(owner);
         return caches[index - 1] = {
             data: {}
