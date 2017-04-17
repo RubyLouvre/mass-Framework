@@ -49,7 +49,7 @@ mass Framework
 <pre>
 require("ready,node",function(){
 /*待到domReady完成，执行回调*/
-   $.log("将日志打印到页面上",true)
+   $.log("将日志打印到页面上",true) 
 })
 </pre>
 <p>上面的代码相当于：</p>
@@ -187,7 +187,7 @@ java -jar compiler.jar --js avalon.js --js_output_file avalon_min.js
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/23.jpg"/>
 <p>继续让你确认，没问题就继续点！</p>
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/24.jpg"/>
-<p>这样就同步成功！！！！！！</p>
+<p>这样就同步成功！！！！！</p>
 </fieldset>
 
 
