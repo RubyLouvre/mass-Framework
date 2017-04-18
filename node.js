@@ -310,7 +310,7 @@ define("node", ["support", "class", "data"]
                  * <pre><code>$.parseHTML("<img src=1 onerror=alert(22) />")</code></pre>
                  * @param {String} html 要转换为节点的字符串
                  * @param {Document} doc 可选
-                 * @return {FragmentDocument}
+                 * @return {FragmentDocument}//
                  */
                 parseHTML: function(html, doc) {
                     doc = doc || this.nodeType === 9 && this || document;
