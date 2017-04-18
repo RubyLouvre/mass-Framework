@@ -88,7 +88,7 @@ define("data", ["lang"], function($) {
     $.mix({
 
         hasData: function(owner) {
-            //判定是否关联了数据 
+            //判定是否关联了数据 test
             return owners.indexOf(owner) > -1;
         },
 
