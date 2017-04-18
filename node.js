@@ -716,6 +716,7 @@ define("node", ["support", "class", "data"]
             });
             return $;
         });
+        //修改。
 
 /**
  2011.7.11 dom["class"]改为dom["@class"]
