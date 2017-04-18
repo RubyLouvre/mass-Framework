@@ -8,7 +8,7 @@ define("query", ["mass"], function($) {
         isXML: function(el) {
             //http://www.cnblogs.com/rubylouvre/archive/2010/03/14/1685360.
             var doc = el.ownerDocument || el
-            return doc.createElement("p").nodeName === "p";
+            return doc.createElement("p").nodeName !== doc.createElement("P").nodeName;
         },
         contains: function(a, b, itself) {
             // 第一个节点是否包含第二个节点
