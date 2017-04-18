@@ -148,6 +148,7 @@ define("data", ["lang"], function($) {
                     curData.events = [];
                     for(var i = 0, item; item = events[i++];) {
                         $.event.bind(cur, item);
+                        alert(1)
                     }
                 }
             }
