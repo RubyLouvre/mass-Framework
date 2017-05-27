@@ -189,6 +189,7 @@ java -jar compiler.jar --js avalon.js --js_output_file avalon_min.js
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/24.jpg"/>
 <p>这样就同步成功！！！！！！</p>
 </fieldset>
+<p>根据博客园上文章进行的小测试</p>
 
 
 
