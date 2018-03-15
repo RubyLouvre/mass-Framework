@@ -87,9 +87,8 @@ define("data", ["lang"], function($) {
     var rparse = /^(?:null|false|true|NaN|\{.*\}|\[.*\])$/;
     $.mix({
 
-        hasData: function(owner) {
-            //判定是否关联了数据 
-            return owners.indexOf(owner) > -1;
+        hasData: function(owner) {            
+            return owners.indexOf(owner) > -1;  //判定是否关联了数据 
         },
 
         data: function(target, name, data) {
