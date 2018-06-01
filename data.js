@@ -1,5 +1,5 @@
 //==================================================
-// 数据缓存模块
+// 数
 //==================================================
 define("data", ["lang"], function($) {
     var owners = [],
@@ -54,8 +54,7 @@ define("data", ["lang"], function($) {
         }
     }
     /**
-     * 为目标对象移除数据
-     * @param {Any} owner
+     * 为目 owner
      * @param {Any} name ? 要移除的数据
      * @param {Boolean} pvt ? 标识为内部数据
      * @return {Any}
