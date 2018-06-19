@@ -21,7 +21,7 @@ define("data", ["lang"], function($) {
      * 为目标对象读写数据
      * @param {Any} owner
      * @param {Object|String} name ? 要处理的数据或数据包
-     * @param {Any} data ? 要写入的数据
+     * @param {Any} data ? 要写入的数据信息
      * @param {Boolean} pvt ? 标识为内部数据
      * @return {Any}
      * @api private
