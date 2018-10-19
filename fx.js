@@ -7,7 +7,7 @@ define("fx", ["css"], function($) {
         scroll: /scroll/i
     };
     var rfxnum = /^([+\-/*]=)?([\d+.\-]+)([a-z%]*)$/i;
-
+    //edit
     $.easing = { //缓动公式
         linear: function(pos) {
             return pos;
