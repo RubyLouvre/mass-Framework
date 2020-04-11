@@ -189,6 +189,6 @@ java -jar compiler.jar --js avalon.js --js_output_file avalon_min.js
 <img src="https://raw.github.com/RubyLouvre/mass-Framework/master/course/24.jpg"/>
 <p>这样就同步成功！！！！！！</p>
 </fieldset>
-
+这是一个pull requests请求
 
 
